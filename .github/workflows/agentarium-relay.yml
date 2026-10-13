@@ -4,6 +4,9 @@ on:
 permissions:
   contents: read
   issues: write
+concurrency:
+  group: agentarium-relay-001
+  cancel-in-progress: false
 jobs:
   cadence-identity-probe:
     if: github.event.repository.private == true && github.ref_name == 'feature/visual-stage-v0'
