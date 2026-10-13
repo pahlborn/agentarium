@@ -1,0 +1,37 @@
+name: Forge independent motion mocks
+on:
+  push:
+    branches: [feature/visual-stage-v0]
+    paths: ['.github/workflows/forge-mocks-v1.yml']
+permissions:
+  contents: read
+  issues: write
+jobs:
+  mock:
+    if: github.event.repository.private == true && github.ref_name == 'feature/visual-stage-v0'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        variant: [gewebe, partitur]
+    concurrency:
+      group: agentarium-forge-mock-v1-${{ matrix.variant }}
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Validate relay before paid call
+        run: |
+          python3 -m py_compile relay/claude_cli_diagnostics.py relay/forge_mock_once.py
+          python3 -m unittest -q relay/test_claude_cli_diagnostics.py
+      - run: npm install --global @anthropic-ai/claude-code
+      - run: claude --version
+      - name: One independent Forge mock handback
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python3 relay/forge_mock_once.py ${{ matrix.variant }}
