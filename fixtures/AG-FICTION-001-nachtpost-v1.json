@@ -1,0 +1,823 @@
+{
+  "schema": "agentarium.fiction-scenario.v1",
+  "scenario_id": "AG-FICTION-001",
+  "version": 1,
+  "title": "NACHTPOST – eine Stadt aus ungesendeten Briefen",
+  "mode": "FICTIONAL_DEMO",
+  "label": "Phantasieprojekt · fiktive Ereignisse · erfundene Demokosten",
+  "duration_seconds": 120,
+  "views": [
+    "gewebe",
+    "partitur"
+  ],
+  "authoring": {
+    "vision": "real Nova subagent /root/nova_visual_probe_001, AG-FICTION-001/NOVA V1",
+    "fixture": "Atlas",
+    "runtime_model": "unconfirmed"
+  },
+  "semantics": {
+    "ball": "responsibility per task; no global single-owner constraint across concurrent tasks",
+    "communication": "event links and caused_by; communication does not automatically transfer responsibility",
+    "handoff": "recipient becomes task owner only for kind handoff",
+    "artifact": "result returned, not independent acceptance",
+    "test_result": "fictional reported test outcome, not actual QA execution",
+    "costs": "actual usage fields null; synthetic_usage separately invented solely for visual comparison",
+    "completion": "no Peter product acceptance and no total-completion percentage"
+  },
+  "epics": [
+    {
+      "id": "EP-01",
+      "title": "Brief verwandeln",
+      "stories": [
+        {
+          "id": "US-01",
+          "title": "Brief als Lichtgebäude darstellen"
+        }
+      ]
+    },
+    {
+      "id": "EP-02",
+      "title": "Nachbarschaft bilden",
+      "stories": [
+        {
+          "id": "US-02",
+          "title": "Verwandte Briefe über abgeleitete Formen verbinden"
+        },
+        {
+          "id": "US-04",
+          "title": "Gemeinsamen Brief gestalten",
+          "introduced_by": "E20"
+        }
+      ]
+    },
+    {
+      "id": "EP-03",
+      "title": "Beitrag zurückziehen",
+      "stories": [
+        {
+          "id": "US-03",
+          "title": "Beitrag samt betroffenen Ableitungen zurücknehmen",
+          "criteria": [
+            "Herkunftsbeziehungen vollständig verfolgen",
+            "Keine rekonstruierbaren Textreste erhalten",
+            "Gemeinsame Rücknahme nach Peters fiktiver Entscheidung E24"
+          ],
+          "untested": [
+            "Unterbrochene Sitzungen"
+          ]
+        }
+      ]
+    }
+  ],
+  "events": [
+    {
+      "id": "E01",
+      "at_seconds": 0,
+      "task_id": "brief",
+      "actor": "peter",
+      "recipient": "atlas",
+      "kind": "request",
+      "title": "Gemeinsames Staunen, zurückziehbare Beiträge",
+      "caused_by": [],
+      "fictional": true,
+      "platform": "human",
+      "actual_model": null,
+      "actual_reasoning": null,
+      "cost_usd": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "synthetic_usage": null
+    },
+    {
+      "id": "E02",
+      "at_seconds": 3,
+      "task_id": "vision",
+      "actor": "atlas",
+      "recipient": "nova",
+      "kind": "handoff",
+      "title": "Visionstrang eröffnet",
+      "caused_by": [
+        "E01"
+      ],
+      "fictional": true,
+      "platform": "chatgpt",
+      "actual_model": null,
+      "actual_reasoning": null,
+      "cost_usd": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "synthetic_usage": null
+    },
+    {
+      "id": "E03",
+      "at_seconds": 3,
+      "task_id": "evidence",
+      "actor": "atlas",
+      "recipient": "scout",
+      "kind": "handoff",
+      "title": "Speicherung und Rücknahme untersuchen",
+      "caused_by": [
+        "E01"
+      ],
+      "fictional": true,
+      "platform": "chatgpt",
+      "actual_model": null,
+      "actual_reasoning": null,
+      "cost_usd": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "synthetic_usage": null
+    },
+    {
+      "id": "E04",
+      "at_seconds": 8,
+      "task_id": "vision",
+      "actor": "nova",
+      "recipient": "peter",
+      "kind": "question",
+      "title": "Darf eine Löschung eine sichtbare Lücke hinterlassen?",
+      "caused_by": [
+        "E02"
+      ],
+      "fictional": true,
+      "platform": "chatgpt",
+      "actual_model": null,
+      "actual_reasoning": null,
+      "cost_usd": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "synthetic_usage": null
+    },
+    {
+      "id": "E05",
+      "at_seconds": 10,
+      "task_id": "evidence",
+      "actor": "scout",
+      "recipient": "archibald",
+      "kind": "contribution",
+      "title": "Abgeleitete Formen brauchen Herkunftsbeziehungen",
+      "caused_by": [
+        "E03"
+      ],
+      "fictional": true,
+      "platform": "chatgpt",
+      "actual_model": null,
+      "actual_reasoning": null,
+      "cost_usd": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "synthetic_usage": {
+        "cost_usd": 0.03,
+        "label": "FREI ERFUNDENE DEMOKOSTEN; KEIN VERBRAUCHSNACHWEIS",
+        "tokens": null
+      }
+    },
+    {
+      "id": "E06",
+      "at_seconds": 13,
+      "task_id": "vision",
+      "actor": "peter",
+      "recipient": "nova",
+      "kind": "decision",
+      "title": "Leere Stellen erlaubt; rekonstruierbare Textreste verboten",
+      "caused_by": [
+        "E04"
+      ],
+      "fictional": true,
+      "platform": "human",
+      "actual_model": null,
+      "actual_reasoning": null,
+      "cost_usd": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "synthetic_usage": {
+        "cost_usd": 0.04,
+        "label": "FREI ERFUNDENE DEMOKOSTEN; KEIN VERBRAUCHSNACHWEIS",
+        "tokens": null
+      }
+    },
+    {
+      "id": "E07",
+      "at_seconds": 17,
+      "task_id": "spec",
+      "actor": "atlas",
+      "recipient": "archibald",
+      "kind": "handoff",
+      "title": "Konzept in drei Epics und Stories entfalten",
+      "caused_by": [
+        "E05",
+        "E06"
+      ],
+      "fictional": true,
+      "platform": "chatgpt",
+      "actual_model": null,
+      "actual_reasoning": null,
+      "cost_usd": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "synthetic_usage": null
+    },
+    {
+      "id": "E08",
+      "at_seconds": 22,
+      "task_id": "spec",
+      "actor": "archibald",
+      "recipient": "forge",
+      "kind": "artifact",
+      "title": "Epics und Stories V1 bereit",
+      "caused_by": [
+        "E07"
+      ],
+      "fictional": true,
+      "platform": "claude-code",
+      "actual_model": null,
+      "actual_reasoning": null,
+      "cost_usd": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "synthetic_usage": {
+        "cost_usd": 0.06,
+        "label": "FREI ERFUNDENE DEMOKOSTEN; KEIN VERBRAUCHSNACHWEIS",
+        "tokens": null
+      }
+    },
+    {
+      "id": "E09",
+      "at_seconds": 25,
+      "task_id": "build",
+      "actor": "atlas",
+      "recipient": "forge",
+      "kind": "handoff",
+      "title": "Gebäudegenerator unabhängig von offener Löschfrage bauen",
+      "caused_by": [
+        "E08"
+      ],
+      "fictional": true,
+      "platform": "chatgpt",
+      "actual_model": null,
+      "actual_reasoning": null,
+      "cost_usd": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "synthetic_usage": null
+    },
+    {
+      "id": "E10",
+      "at_seconds": 26,
+      "task_id": "review",
+      "actor": "atlas",
+      "recipient": "argus",
+      "kind": "handoff",
+      "title": "Rücknahme-Kriterien unabhängig prüfen",
+      "caused_by": [
+        "E08"
+      ],
+      "fictional": true,
+      "platform": "chatgpt",
+      "actual_model": null,
+      "actual_reasoning": null,
+      "cost_usd": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "synthetic_usage": null
+    },
+    {
+      "id": "E11",
+      "at_seconds": 32,
+      "task_id": "review",
+      "actor": "argus",
+      "recipient": "archibald",
+      "kind": "objection",
+      "title": "Eine verbliebene Brücke kann einen entfernten Ursprung verraten",
+      "caused_by": [
+        "E10",
+        "E05"
+      ],
+      "fictional": true,
+      "platform": "chatgpt",
+      "actual_model": null,
+      "actual_reasoning": null,
+      "cost_usd": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "synthetic_usage": {
+        "cost_usd": 0.04,
+        "label": "FREI ERFUNDENE DEMOKOSTEN; KEIN VERBRAUCHSNACHWEIS",
+        "tokens": null
+      }
+    },
+    {
+      "id": "E12",
+      "at_seconds": 36,
+      "task_id": "spec",
+      "actor": "archibald",
+      "recipient": "scout",
+      "kind": "question",
+      "title": "Welche gemeinsamen Ableitungen müssen zurückgenommen werden?",
+      "caused_by": [
+        "E11"
+      ],
+      "fictional": true,
+      "platform": "claude-code",
+      "actual_model": null,
+      "actual_reasoning": null,
+      "cost_usd": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "synthetic_usage": null
+    },
+    {
+      "id": "E13",
+      "at_seconds": 40,
+      "task_id": "build",
+      "actor": "forge",
+      "recipient": "sentinel",
+      "kind": "artifact",
+      "title": "Stadtteil V1 zur Prüfung bereit",
+      "caused_by": [
+        "E09"
+      ],
+      "fictional": true,
+      "platform": "claude-code",
+      "actual_model": null,
+      "actual_reasoning": null,
+      "cost_usd": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "synthetic_usage": {
+        "cost_usd": 0.12,
+        "label": "FREI ERFUNDENE DEMOKOSTEN; KEIN VERBRAUCHSNACHWEIS",
+        "tokens": null
+      }
+    },
+    {
+      "id": "E14",
+      "at_seconds": 42,
+      "task_id": "qa",
+      "actor": "atlas",
+      "recipient": "sentinel",
+      "kind": "handoff",
+      "title": "V1 gegen Story-Kriterien prüfen",
+      "caused_by": [
+        "E13"
+      ],
+      "fictional": true,
+      "platform": "chatgpt",
+      "actual_model": null,
+      "actual_reasoning": null,
+      "cost_usd": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "synthetic_usage": null
+    },
+    {
+      "id": "E15",
+      "at_seconds": 48,
+      "task_id": "qa",
+      "actor": "sentinel",
+      "recipient": "forge",
+      "kind": "defect",
+      "title": "Haus gelöscht, abgeleitete Brücke bleibt bestehen",
+      "caused_by": [
+        "E14",
+        "E11"
+      ],
+      "fictional": true,
+      "platform": "chatgpt",
+      "actual_model": null,
+      "actual_reasoning": null,
+      "cost_usd": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "synthetic_usage": {
+        "cost_usd": 0.03,
+        "label": "FREI ERFUNDENE DEMOKOSTEN; KEIN VERBRAUCHSNACHWEIS",
+        "tokens": null
+      }
+    },
+    {
+      "id": "E16",
+      "at_seconds": 50,
+      "task_id": "evidence",
+      "actor": "scout",
+      "recipient": "archibald",
+      "kind": "answer",
+      "title": "Veraltete Zuordnung und gemeinsame Ableitung betroffen",
+      "caused_by": [
+        "E12"
+      ],
+      "fictional": true,
+      "platform": "chatgpt",
+      "actual_model": null,
+      "actual_reasoning": null,
+      "cost_usd": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "synthetic_usage": {
+        "cost_usd": 0.02,
+        "label": "FREI ERFUNDENE DEMOKOSTEN; KEIN VERBRAUCHSNACHWEIS",
+        "tokens": null
+      }
+    },
+    {
+      "id": "E17",
+      "at_seconds": 53,
+      "task_id": "repair",
+      "actor": "atlas",
+      "recipient": "forge",
+      "kind": "handoff",
+      "title": "Herkunftskette reparieren; V1 bleibt nachvollziehbar",
+      "caused_by": [
+        "E15",
+        "E16"
+      ],
+      "fictional": true,
+      "platform": "chatgpt",
+      "actual_model": null,
+      "actual_reasoning": null,
+      "cost_usd": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "synthetic_usage": null
+    },
+    {
+      "id": "E18",
+      "at_seconds": 55,
+      "task_id": "vision",
+      "actor": "nova",
+      "recipient": "forge",
+      "kind": "proposal",
+      "title": "Lichtstege bei Rücknahme zerfallen lassen",
+      "caused_by": [
+        "E06",
+        "E15"
+      ],
+      "fictional": true,
+      "platform": "chatgpt",
+      "actual_model": null,
+      "actual_reasoning": null,
+      "cost_usd": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "synthetic_usage": {
+        "cost_usd": 0.03,
+        "label": "FREI ERFUNDENE DEMOKOSTEN; KEIN VERBRAUCHSNACHWEIS",
+        "tokens": null
+      }
+    },
+    {
+      "id": "E19",
+      "at_seconds": 59,
+      "task_id": "review",
+      "actor": "argus",
+      "recipient": "nova",
+      "kind": "objection",
+      "title": "Sichtbarer Zerfall ersetzt keine Entfernung gespeicherter Ableitungen",
+      "caused_by": [
+        "E18"
+      ],
+      "fictional": true,
+      "platform": "chatgpt",
+      "actual_model": null,
+      "actual_reasoning": null,
+      "cost_usd": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "synthetic_usage": {
+        "cost_usd": 0.02,
+        "label": "FREI ERFUNDENE DEMOKOSTEN; KEIN VERBRAUCHSNACHWEIS",
+        "tokens": null
+      }
+    },
+    {
+      "id": "E20",
+      "at_seconds": 60,
+      "task_id": "change",
+      "actor": "peter",
+      "recipient": "atlas",
+      "kind": "change_request",
+      "title": "Zwei Besucher sollen gemeinsam einen Brief gestalten können",
+      "caused_by": [
+        "E01"
+      ],
+      "fictional": true,
+      "platform": "human",
+      "actual_model": null,
+      "actual_reasoning": null,
+      "cost_usd": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "synthetic_usage": null
+    },
+    {
+      "id": "E21",
+      "at_seconds": 63,
+      "task_id": "process",
+      "actor": "atlas",
+      "recipient": "cadence",
+      "kind": "handoff",
+      "title": "Doppelte Korrekturarbeit durch zwei Löschbegriffe klären",
+      "caused_by": [
+        "E15",
+        "E16"
+      ],
+      "fictional": true,
+      "platform": "chatgpt",
+      "actual_model": null,
+      "actual_reasoning": null,
+      "cost_usd": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "synthetic_usage": null
+    },
+    {
+      "id": "E22",
+      "at_seconds": 66,
+      "task_id": "change",
+      "actor": "atlas",
+      "recipient": "peter",
+      "kind": "question",
+      "title": "Darf jeder Mitautor den gesamten gemeinsamen Beitrag zurückziehen?",
+      "caused_by": [
+        "E20",
+        "E11"
+      ],
+      "fictional": true,
+      "platform": "chatgpt",
+      "actual_model": null,
+      "actual_reasoning": null,
+      "cost_usd": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "synthetic_usage": null
+    },
+    {
+      "id": "E23",
+      "at_seconds": 69,
+      "task_id": "process",
+      "actor": "cadence",
+      "recipient": "archibald",
+      "kind": "recommendation",
+      "title": "Ein kanonisches Kriterium mit Verweisen auf beide Stories",
+      "caused_by": [
+        "E21"
+      ],
+      "fictional": true,
+      "platform": "claude-code",
+      "actual_model": null,
+      "actual_reasoning": null,
+      "cost_usd": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "synthetic_usage": {
+        "cost_usd": 0.02,
+        "label": "FREI ERFUNDENE DEMOKOSTEN; KEIN VERBRAUCHSNACHWEIS",
+        "tokens": null
+      }
+    },
+    {
+      "id": "E24",
+      "at_seconds": 73,
+      "task_id": "change",
+      "actor": "peter",
+      "recipient": "atlas",
+      "kind": "decision",
+      "title": "Jeder Mitautor darf den gemeinsamen Beitrag vollständig zurückziehen",
+      "caused_by": [
+        "E22"
+      ],
+      "fictional": true,
+      "platform": "human",
+      "actual_model": null,
+      "actual_reasoning": null,
+      "cost_usd": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "synthetic_usage": null
+    },
+    {
+      "id": "E25",
+      "at_seconds": 77,
+      "task_id": "spec",
+      "actor": "archibald",
+      "recipient": "forge",
+      "kind": "artifact",
+      "title": "Story-Kriterien V2 inklusive gemeinsamer Rücknahme",
+      "caused_by": [
+        "E23",
+        "E24",
+        "E16"
+      ],
+      "fictional": true,
+      "platform": "claude-code",
+      "actual_model": null,
+      "actual_reasoning": null,
+      "cost_usd": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "synthetic_usage": {
+        "cost_usd": 0.05,
+        "label": "FREI ERFUNDENE DEMOKOSTEN; KEIN VERBRAUCHSNACHWEIS",
+        "tokens": null
+      }
+    },
+    {
+      "id": "E26",
+      "at_seconds": 82,
+      "task_id": "repair",
+      "actor": "forge",
+      "recipient": "sentinel",
+      "kind": "artifact",
+      "title": "V2: Herkunftsreparatur und gemeinsamer Entwurf bereit",
+      "caused_by": [
+        "E17",
+        "E25",
+        "E19"
+      ],
+      "fictional": true,
+      "platform": "claude-code",
+      "actual_model": null,
+      "actual_reasoning": null,
+      "cost_usd": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "synthetic_usage": {
+        "cost_usd": 0.1,
+        "label": "FREI ERFUNDENE DEMOKOSTEN; KEIN VERBRAUCHSNACHWEIS",
+        "tokens": null
+      }
+    },
+    {
+      "id": "E27",
+      "at_seconds": 85,
+      "task_id": "qa",
+      "actor": "atlas",
+      "recipient": "sentinel",
+      "kind": "handoff",
+      "title": "V2 gezielt und mit relevanten Regressionen prüfen",
+      "caused_by": [
+        "E26"
+      ],
+      "fictional": true,
+      "platform": "chatgpt",
+      "actual_model": null,
+      "actual_reasoning": null,
+      "cost_usd": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "synthetic_usage": null
+    },
+    {
+      "id": "E28",
+      "at_seconds": 92,
+      "task_id": "qa",
+      "actor": "sentinel",
+      "recipient": "argus",
+      "kind": "test_result",
+      "title": "Gezielte Prüfungen bestanden; unterbrochene Sitzungen ungeprüft",
+      "caused_by": [
+        "E27"
+      ],
+      "fictional": true,
+      "platform": "chatgpt",
+      "actual_model": null,
+      "actual_reasoning": null,
+      "cost_usd": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "synthetic_usage": {
+        "cost_usd": 0.04,
+        "label": "FREI ERFUNDENE DEMOKOSTEN; KEIN VERBRAUCHSNACHWEIS",
+        "tokens": null
+      }
+    },
+    {
+      "id": "E29",
+      "at_seconds": 96,
+      "task_id": "review",
+      "actor": "argus",
+      "recipient": "atlas",
+      "kind": "review_result",
+      "title": "Rücknahmelogik nachvollziehbar; Erlebnisabnahme bleibt offen",
+      "caused_by": [
+        "E28",
+        "E11"
+      ],
+      "fictional": true,
+      "platform": "chatgpt",
+      "actual_model": null,
+      "actual_reasoning": null,
+      "cost_usd": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "synthetic_usage": {
+        "cost_usd": 0.03,
+        "label": "FREI ERFUNDENE DEMOKOSTEN; KEIN VERBRAUCHSNACHWEIS",
+        "tokens": null
+      }
+    },
+    {
+      "id": "E30",
+      "at_seconds": 100,
+      "task_id": "brief",
+      "actor": "atlas",
+      "recipient": "peter",
+      "kind": "handoff",
+      "title": "Ergebnis und verbleibende Grenzen zur Entscheidung",
+      "caused_by": [
+        "E29"
+      ],
+      "fictional": true,
+      "platform": "chatgpt",
+      "actual_model": null,
+      "actual_reasoning": null,
+      "cost_usd": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "synthetic_usage": null
+    },
+    {
+      "id": "E31",
+      "at_seconds": 105,
+      "task_id": "vision",
+      "actor": "nova",
+      "recipient": "atlas",
+      "kind": "question",
+      "title": "Können zurückbleibende Lücken einen öffentlichen Garten bilden?",
+      "caused_by": [
+        "E18",
+        "E29"
+      ],
+      "fictional": true,
+      "platform": "chatgpt",
+      "actual_model": null,
+      "actual_reasoning": null,
+      "cost_usd": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "synthetic_usage": null
+    },
+    {
+      "id": "E32",
+      "at_seconds": 108,
+      "task_id": "garden-evidence",
+      "actor": "atlas",
+      "recipient": "scout",
+      "kind": "handoff",
+      "title": "Neue Idee unabhängig auf verbleibende Informationen prüfen",
+      "caused_by": [
+        "E31"
+      ],
+      "fictional": true,
+      "platform": "chatgpt",
+      "actual_model": null,
+      "actual_reasoning": null,
+      "cost_usd": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "synthetic_usage": null
+    },
+    {
+      "id": "E33",
+      "at_seconds": 108,
+      "task_id": "garden-review",
+      "actor": "atlas",
+      "recipient": "argus",
+      "kind": "handoff",
+      "title": "Neue Gartenidee unabhängig hinterfragen",
+      "caused_by": [
+        "E31"
+      ],
+      "fictional": true,
+      "platform": "chatgpt",
+      "actual_model": null,
+      "actual_reasoning": null,
+      "cost_usd": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "synthetic_usage": null
+    },
+    {
+      "id": "E34",
+      "at_seconds": 120,
+      "task_id": "brief",
+      "actor": "atlas",
+      "recipient": null,
+      "kind": "open_state",
+      "title": "Kein Abschluss: Erlebnisabnahme, Gartenfrage und Sitzungsprüfung offen",
+      "caused_by": [
+        "E30",
+        "E32",
+        "E33"
+      ],
+      "fictional": true,
+      "platform": "chatgpt",
+      "actual_model": null,
+      "actual_reasoning": null,
+      "cost_usd": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "synthetic_usage": null
+    }
+  ]
+}
