@@ -1,0 +1,17 @@
+name: Agentarium Team Smoke — offline gate
+on:
+  push:
+    paths:
+      - '.github/workflows/team-smoke-offline.yml'
+permissions:
+  contents: read
+jobs:
+  verify-team-readiness:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 135979d5706977c84512f00bc412b5fae553fb02
+          persist-credentials: false
+      - run: python3 relay/test_team_smoke.py
