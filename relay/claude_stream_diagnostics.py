@@ -6,9 +6,10 @@ import os
 import selectors
 import subprocess
 import time
+from pathlib import Path
 from claude_cli_diagnostics import ClaudeCliFailure, diagnostic
 
-def run_stream(cmd, *, cwd, env, timeout, progress=None, progress_interval=60):
+def run_stream(cmd, *, cwd, env, timeout, progress=None, progress_interval=60, checkpoint_dir=None):
     started=time.monotonic()
     proc=subprocess.Popen(cmd,cwd=cwd,env=env,stdin=subprocess.DEVNULL,
                           stdout=subprocess.PIPE,stderr=subprocess.PIPE,start_new_session=True)
@@ -18,11 +19,34 @@ def run_stream(cmd, *, cwd, env, timeout, progress=None, progress_interval=60):
     chunks={'stdout':bytearray(),'stderr':bytearray()}
     buf=bytearray();result=None;counts=collections.Counter();first_byte=None;first_event=None;last_event=None;sent=started
     timed_out=False
+    partial=[]
+    checkpoint=Path(checkpoint_dir) if checkpoint_dir else None
+    if checkpoint:checkpoint.mkdir(parents=True,exist_ok=True)
+    def save_text(value):
+        if checkpoint:
+            temp=checkpoint/'assistant-text.tmp'
+            temp.write_text(value)
+            temp.replace(checkpoint/'assistant-text.txt')
+    def safe_terminal():
+        if not isinstance(result,dict):return None
+        safe={}
+        for key in ('total_cost_usd','duration_ms','duration_api_ms','num_turns'):
+            if isinstance(result.get(key),(int,float)):safe[key]=result[key]
+        safe['is_error']=result.get('is_error') is True
+        usage=result.get('modelUsage',{})
+        if isinstance(usage,dict):
+            safe['model_usage']={name:{k:v for k,v in values.items() if isinstance(v,(int,float))} for name,values in usage.items() if isinstance(name,str) and name.startswith('claude-') and len(name)<80 and isinstance(values,dict)}
+        sid=result.get('session_id')
+        if isinstance(sid,str) and len(sid)<=80 and all(c in '0123456789abcdef-' for c in sid.lower()):safe['session']=sid
+        return safe
     def evidence(kind):
         base=diagnostic(kind=kind,stdout=bytes(chunks['stdout']),stderr=bytes(chunks['stderr']),
                         elapsed_seconds=time.monotonic()-started,timeout_seconds=timeout,returncode=proc.poll())
         base['stream']={'first_byte_seconds':first_byte,'first_event_seconds':first_event,
                         'last_event_seconds':last_event,'event_counts':dict(counts)}
+        base['partial_text_chars']=sum(map(len,partial))
+        base['terminal_usage']=safe_terminal()
+        if checkpoint:(checkpoint/'execution-metadata.json').write_text(json.dumps(base,indent=2))
         return base
     try:
         while sel.get_map():
@@ -55,6 +79,18 @@ def run_stream(cmd, *, cwd, env, timeout, progress=None, progress_interval=60):
                     last_event=round(time.monotonic()-started,3)
                     if first_event is None:first_event=last_event
                     if kind=='result':result=item
+                    if kind=='stream_event':
+                        event=item.get('event',{})
+                        if isinstance(event,dict):
+                            delta=event.get('delta',{})
+                            if isinstance(delta,dict) and delta.get('type')=='text_delta' and isinstance(delta.get('text'),str):
+                                partial.append(delta['text']);save_text(''.join(partial))
+                    if kind=='assistant':
+                        message=item.get('message',{})
+                        content=message.get('content',[]) if isinstance(message,dict) else []
+                        texts=[b['text'] for b in content if isinstance(b,dict) and b.get('type')=='text' and isinstance(b.get('text'),str)] if isinstance(content,list) else []
+                        if texts:
+                            partial=[''.join(texts)];save_text(''.join(partial))
             if progress and time.monotonic()-sent>=progress_interval:
                 try:
                     progress({'elapsed_seconds':round(time.monotonic()-started,1),'first_byte_seconds':first_byte,
