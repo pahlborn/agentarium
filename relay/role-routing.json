@@ -41,13 +41,15 @@
     "archibald": {
       "platform": "claude-code",
       "technical_id": "spec-agent",
-      "state": "definition_imported_identity_test_pending",
+      "state": "identity_probe_passed_2026-10-13",
       "scope": [
         "specification"
       ],
       "definition_path": ".claude/agents/spec-agent.md",
       "probe_task": "AG-RELAY-002",
-      "probe_path": "relay/archibald_one_shot.py"
+      "probe_path": "relay/archibald_one_shot.py",
+      "evidence": "https://github.com/pahlborn/agentarium/actions/runs/38396268414",
+      "handback": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6145362275"
     },
     "forge": {
       "platform": "claude-code",
