@@ -1,0 +1,27 @@
+name: Agentarium Relay — Cadence identity test
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+  issues: write
+concurrency:
+  group: agentarium-relay-001
+  cancel-in-progress: false
+jobs:
+  cadence-identity-probe:
+    if: github.event.repository.private == true && github.ref_name == 'main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout pinned relay implementation
+        uses: actions/checkout@v4
+        with:
+          ref: bbb128975fb6bbf00f0aac027b8c8f589516473e
+          persist-credentials: false
+      - name: Install Claude Code CLI
+        run: npm install --global @anthropic-ai/claude-code
+      - name: Dispatch read-only Cadence identity probe once
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python3 relay/one_shot.py
