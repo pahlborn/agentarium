@@ -1,4 +1,4 @@
-name: Actual browser QA for Forge originals
+name: Browser QA with visible-scene evidence
 on:
   push:
     branches: [feature/visual-stage-v0]
@@ -16,9 +16,9 @@ jobs:
       - name: Install isolated QA browser
         run: |
           mkdir -p "$RUNNER_TEMP/browser-qa"
-          npm install --prefix "$RUNNER_TEMP/browser-qa" --no-save playwright@1.62.1
+          npm install --prefix "$RUNNER_TEMP/browser-qa" --no-save playwright@1.62.1 pngjs@7.0.0
           "$RUNNER_TEMP/browser-qa/node_modules/.bin/playwright" install --with-deps chromium
-      - name: Check originals in actual browser
+      - name: Diagnose original scene and controls in actual browser
         env:
           NODE_PATH: ${{ runner.temp }}/browser-qa/node_modules
         run: |
