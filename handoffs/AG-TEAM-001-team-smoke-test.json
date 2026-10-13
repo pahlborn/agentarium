@@ -1,0 +1,85 @@
+{
+  "schema": "agentarium.team-test.v1",
+  "task_id": "AG-TEAM-001",
+  "title": "Aufgabenball: nachweisbarer Durchlauf",
+  "state": "BLOCKED_CHATGPT_ROLE_RUNTIME",
+  "project": "pahlborn/agentarium",
+  "baseline_branch": "feature/visual-stage-v0",
+  "budget": {
+    "anthropic_eur_total_user_funded": 5,
+    "external_agent_calls_allowed": 0,
+    "comment": "No more paid runs until ChatGPT role identities are verified; existing API balance is not readable via GitHub."
+  },
+  "goal": "Show one bounded responsibility handoff with a visible ball, an audit event and a recovered state after reload, on an existing non-public prototype.",
+  "non_goals": [
+    "new platform migration",
+    "agent impersonation",
+    "public publishing",
+    "merge",
+    "new unreviewed dependencies"
+  ],
+  "routing": [
+    {
+      "role": "atlas",
+      "platform": "chatgpt",
+      "expected": "MA_REQUEST",
+      "status": "UNVERIFIED"
+    },
+    {
+      "role": "nova",
+      "platform": "chatgpt",
+      "expected": "NOVA_ACK + VISION_ALIGNMENT",
+      "status": "UNVERIFIED"
+    },
+    {
+      "role": "scout",
+      "platform": "chatgpt",
+      "expected": "RKA_ACK + SOURCE_CHECK",
+      "status": "UNVERIFIED"
+    },
+    {
+      "role": "archibald",
+      "platform": "claude-code",
+      "expected": "SA_ACK + SPEC",
+      "status": "IDENTITY_TESTED_ONLY"
+    },
+    {
+      "role": "forge",
+      "platform": "claude-code",
+      "expected": "CA_ACK + IMPLEMENTATION",
+      "status": "IDENTITY_TESTED_ONLY"
+    },
+    {
+      "role": "argus",
+      "platform": "chatgpt",
+      "expected": "RA_ACK + REVIEW",
+      "status": "UNVERIFIED"
+    },
+    {
+      "role": "sentinel",
+      "platform": "chatgpt",
+      "expected": "QA_ACK + QA_REPORT",
+      "status": "UNVERIFIED"
+    },
+    {
+      "role": "cadence",
+      "platform": "claude-code",
+      "expected": "PROCESS_REVIEW",
+      "status": "IDENTITY_TESTED_ONLY"
+    }
+  ],
+  "acceptance": [
+    "Each contribution must include technical role ID and invocation evidence or be marked NOT_EXECUTED.",
+    "Ball ownership is explicit and matches the event log.",
+    "No simulated answer may be recorded as a live agent response.",
+    "No implementation before approved scope and role readiness.",
+    "No merge or public release without Peter."
+  ],
+  "stop_conditions": [
+    "Any role identity mismatch",
+    "Unknown authorization or unavailable runtime",
+    "API credit exhaustion",
+    "After one failed handoff without automatic retries"
+  ],
+  "authorization": "Preparation and offline verification only; no implementation or API dispatch authorized."
+}
