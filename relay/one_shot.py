@@ -32,6 +32,27 @@ def fetch(path):
     item = api(API + "/contents/" + path + "?ref=" + BRANCH)
     return base64.b64decode(item["content"]).decode(), item["sha"]
 
+def classify_failure(message):
+    value = str(message).lower()
+    if any(x in value for x in ("credit balance", "insufficient credits", "billing_error", "add funds", "balance too low")):
+        return "CREDIT_EXHAUSTED"
+    if any(x in value for x in ("authentication_error", "invalid api key", "expired api key")):
+        return "KEY_INVALID_OR_EXPIRED"
+    return "EXECUTION_FAILED"
+
+def report_failure(category):
+    if category in ("CREDIT_EXHAUSTED", "KEY_INVALID_OR_EXPIRED"):
+        api(API + "/issues/2/comments", {"body": (
+            "## AG-RELAY-001 - RELAY_BLOCKED\nCategory: " + category +
+            "\nNo automatic retry; run: " + os.environ.get("GITHUB_RUN_ID", "manual")
+        )})
+
+def self_test():
+    assert classify_failure("Credit balance too low") == "CREDIT_EXHAUSTED"
+    assert classify_failure("invalid api key") == "KEY_INVALID_OR_EXPIRED"
+    assert classify_failure("syntax error") == "EXECUTION_FAILED"
+    print("SELF_TEST_OK")
+
 def main():
     repo = api(API)
     if repo.get("full_name") != REPO or repo.get("private") is not True:
@@ -63,7 +84,7 @@ def main():
         "description": "Cadence: read-only process review / identity probe",
         "prompt": definition,
         "tools": ["Read", "Glob", "Grep"],
-        "model": "opus"
+        "model": "haiku"
     }})
     cmd = [
         "claude", "--bare", "-p",
@@ -72,16 +93,20 @@ def main():
         "--agents", config, "--agent", "process-agent",
         "--permission-mode", "dontAsk", "--tools", "Read,Glob,Grep",
         "--disallowedTools", "Bash,Edit,Write,Agent,mcp__*",
-        "--max-turns", "2", "--max-budget-usd", "0.50",
+        "--model", "haiku", "--max-turns", "2", "--max-budget-usd", "0.15",
         "--no-session-persistence", "--output-format", "json"
     ]
     completed = subprocess.run(cmd, capture_output=True, text=True,
                                timeout=120, check=False)
     if completed.returncode:
-        raise RuntimeError("Claude CLI returned exit " + str(completed.returncode))
+        category = classify_failure(completed.stderr + completed.stdout)
+        report_failure(category)
+        raise RuntimeError("Claude CLI returned " + category)
     result = json.loads(completed.stdout)
     if result.get("is_error") or not str(result.get("result") or "").strip():
-        raise RuntimeError("Claude did not produce a valid handback")
+        category = classify_failure(json.dumps(result))
+        report_failure(category)
+        raise RuntimeError("Claude did not produce a valid handback: " + category)
     response = str(result["result"])[:3000]
     body = "\n".join([
         "## AG-RELAY-001 — LIVE_CLAUDE_RUNTIME_HANDOFF",
@@ -98,7 +123,7 @@ def main():
 
 if __name__ == "__main__":
     try:
-        main()
+        self_test() if "--self-test" in sys.argv else main()
     except Exception as exc:
         print("AGENTARIUM_RELAY_BLOCKED: " + str(exc), file=sys.stderr)
         sys.exit(1)
