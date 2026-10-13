@@ -8,7 +8,7 @@ import subprocess
 import time
 from claude_cli_diagnostics import ClaudeCliFailure, diagnostic
 
-def run_stream(cmd, *, cwd, env, timeout, progress=None):
+def run_stream(cmd, *, cwd, env, timeout, progress=None, progress_interval=60):
     started=time.monotonic()
     proc=subprocess.Popen(cmd,cwd=cwd,env=env,stdin=subprocess.DEVNULL,
                           stdout=subprocess.PIPE,stderr=subprocess.PIPE,start_new_session=True)
@@ -55,9 +55,12 @@ def run_stream(cmd, *, cwd, env, timeout, progress=None):
                     last_event=round(time.monotonic()-started,3)
                     if first_event is None:first_event=last_event
                     if kind=='result':result=item
-            if progress and time.monotonic()-sent>=60:
-                progress({'elapsed_seconds':round(time.monotonic()-started,1),'first_byte_seconds':first_byte,
-                          'last_event_seconds':last_event,'event_counts':dict(counts)})
+            if progress and time.monotonic()-sent>=progress_interval:
+                try:
+                    progress({'elapsed_seconds':round(time.monotonic()-started,1),'first_byte_seconds':first_byte,
+                              'last_event_seconds':last_event,'event_counts':dict(counts)})
+                except Exception:
+                    counts['telemetry_failure']+=1
                 sent=time.monotonic()
         if timed_out:
             proc.wait()
