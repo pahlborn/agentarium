@@ -1,0 +1,145 @@
+<div id="ag-motion-preview" class="viz-carousel" aria-label="Agentarium – bewegte Richtungsproben" data-previous-label="Zurück" data-next-label="Weiter">
+  <section data-variant="Gewebe" aria-label="Das lebende Gewebe">
+    <div class="ag-shell" data-scene="weave">
+      <header class="ag-head"><div><b>AGENTARIUM</b><span>See intelligence move. <em>Powered by BALL.</em></span></div><small>Demo · Beispieldaten</small></header>
+      <div class="ag-controls"><strong>Das lebende Gewebe</strong><label>Projekt <select data-control="project" aria-label="Projekt im Gewebe"><option value="A">Projekt A</option><option value="B">Projekt B</option></select></label><button data-control="context" aria-expanded="false">Kommunikation</button></div>
+      <div class="ag-stage"><canvas role="img" aria-label="Bewegtes Fadengewebe mit neun benannten Agentensignaturen und einem goldenen Verantwortungsball"></canvas><aside hidden><b>Kommunikation</b><ol></ol></aside></div>
+      <div class="ag-readout" aria-live="polite"></div>
+      <footer><button data-control="play">Pause</button><button data-control="step" aria-label="Nächstes Ereignis im Gewebe">Schritt →</button><label>Replay <input data-control="time" type="range" min="0" max="36" step="0.1" value="0" aria-label="Zeitposition im Gewebe"></label><output>00:00</output><span>Live-Demo</span></footer>
+    </div>
+  </section>
+  <section data-variant="Partitur" aria-label="Die lebende Partitur" hidden>
+    <div class="ag-shell" data-scene="score">
+      <header class="ag-head"><div><b>AGENTARIUM</b><span>See intelligence move. <em>Powered by BALL.</em></span></div><small>Demo · Beispieldaten</small></header>
+      <div class="ag-controls"><strong>Die lebende Partitur</strong><label>Projekt <select data-control="project" aria-label="Projekt in der Partitur"><option value="A">Projekt A</option><option value="B">Projekt B</option></select></label><button data-control="context" aria-expanded="false">Kommunikation</button></div>
+      <div class="ag-stage"><canvas role="img" aria-label="Neun Agentenspuren mit pulsierenden Arbeitsphasen, Ereignissen und zeitlichen Verantwortungsübergaben"></canvas><aside hidden><b>Kommunikation</b><ol></ol></aside></div>
+      <div class="ag-readout" aria-live="polite"></div>
+      <footer><button data-control="play">Abspielen</button><button data-control="step" aria-label="Nächstes Ereignis in der Partitur">Schritt →</button><label>Replay <input data-control="time" type="range" min="0" max="36" step="0.1" value="0" aria-label="Zeitposition in der Partitur"></label><output>00:00</output><span>Replay</span></footer>
+    </div>
+  </section>
+</div>
+<style>
+#ag-motion-preview{width:100%;color:#e9edf8;font:14px/1.5 system-ui,sans-serif}
+#ag-motion-preview .ag-shell{background:#060c1b;border:1px solid #26324b;border-radius:18px;overflow:hidden;min-width:0}
+#ag-motion-preview .ag-head{padding:19px 22px;display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid #1b2840}
+#ag-motion-preview .ag-head b{font-size:18px;font-weight:500;letter-spacing:.22em}
+#ag-motion-preview .ag-head span{display:block;color:#8da1bf;font-size:12px}.ag-head em{font-style:normal}
+#ag-motion-preview small{color:#d5b876;border:1px solid #6b5737;padding:4px 9px;border-radius:20px;white-space:nowrap;font-size:11px}
+#ag-motion-preview .ag-controls{padding:12px 18px;display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+#ag-motion-preview .ag-controls strong{font-weight:500;margin-right:auto}
+#ag-motion-preview button,#ag-motion-preview select{color:#dce6f6;background:#111d31;border:1px solid #314461;border-radius:8px;padding:8px 10px;font:inherit;min-height:36px}
+#ag-motion-preview button:focus-visible,#ag-motion-preview select:focus-visible,#ag-motion-preview input:focus-visible{outline:2px solid #70d6ff;outline-offset:3px}
+#ag-motion-preview button:hover{background:#1c304b}
+#ag-motion-preview label{color:#8da1bf;font-size:12px;display:flex;align-items:center;gap:7px}
+#ag-motion-preview .ag-stage{position:relative;background:radial-gradient(ellipse at 40% 50%,#121d36,#050a17 80%)}
+#ag-motion-preview canvas{width:100%;height:450px;display:block}
+#ag-motion-preview aside{position:absolute;right:12px;top:12px;bottom:12px;width:240px;background:#0b1327f5;border:1px solid #304461;border-radius:12px;padding:14px;overflow:auto;color:#c2d3ec;font-size:12px}
+#ag-motion-preview aside[hidden]{display:none}#ag-motion-preview aside b{font-weight:500;color:#ebf2ff}
+#ag-motion-preview ol{list-style:none;padding:0;margin:12px 0;display:grid;gap:12px}#ag-motion-preview li{border-left:2px solid #6557a3;padding-left:9px}#ag-motion-preview li small{display:block;border:0;padding:0;color:#98adcc;font-size:11px;white-space:normal}
+#ag-motion-preview .ag-readout{padding:10px 18px;border-top:1px solid #1e2c45;min-height:42px;color:#b9cde9;font-size:12px}
+#ag-motion-preview footer{padding:13px 18px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:#0b1425}
+#ag-motion-preview footer label{flex:1;min-width:150px}#ag-motion-preview input{width:100%;accent-color:#8ad8ff}#ag-motion-preview output{font-variant-numeric:tabular-nums;color:#cee2f5;font-size:12px}#ag-motion-preview footer span{color:#849bb9;font-size:11px}
+@media(max-width:580px){#ag-motion-preview .ag-head{padding:14px;flex-wrap:wrap}#ag-motion-preview .ag-head b{font-size:15px}#ag-motion-preview .ag-controls{padding:10px}#ag-motion-preview button,#ag-motion-preview select{min-height:44px}#ag-motion-preview canvas{height:440px}#ag-motion-preview aside{width:calc(100% - 24px)}#ag-motion-preview footer{padding:12px;gap:8px}#ag-motion-preview footer label{order:3;flex-basis:100%}}
+</style>
+<script>
+(()=>{
+  const root=document.getElementById('ag-motion-preview');
+  const names=['Peter','Atlas','Nova','Scout','Archibald','Forge','Argus','Sentinel','Cadence'];
+  const ids=names.map(s=>s.toLowerCase()),duration=36;
+  const entries=[
+    [0,'peter','peter','Auftrag',['peter']],
+    [2,'peter','atlas','Übergabe',['atlas']],
+    [5,'atlas','nova','Vision und Recherche',['nova','scout']],
+    [8,'nova','scout','Beiträge zusammenführen',['nova','scout']],
+    [11,'scout','archibald','Spezifikation',['archibald']],
+    [14,'archibald','argus','Widerspruch',['argus','forge']],
+    [18,'argus','atlas','Entscheidung vorbereiten',['atlas']],
+    [21,'atlas','forge','Entscheidung und Umsetzung',['forge']],
+    [25,'forge','sentinel','Prüfung',['sentinel']],
+    [28,'sentinel','argus','Review',['argus']],
+    [31,'argus','cadence','Lernen',['cadence']],
+    [33,'cadence','atlas','Ergebnis',['atlas']],
+    [35,'atlas','peter','Zur Sichtung',[]]
+  ];
+  const events=entries.map((e,i)=>({id:'demo-'+i,t:e[0],from:e[1],owner:e[2],label:e[3],active:e[4]}));
+  function deriveState(project,time){
+    const t=Math.max(0,Math.min(duration,Number(time)||0));
+    let index=0;events.forEach((e,i)=>{if(e.t<=t)index=i});
+    const event=events[index];
+    return{project:project==='B'?'B':'A',time:t,index,event,owner:event.owner,active:event.active,divergence:t>=14&&t<21,resolved:t>=21,transfer:index>0?Math.min(1,(t-event.t)/1.1):1};
+  }
+  function glyph(g,i,x,y,r,color){
+    g.save();g.translate(x,y);g.strokeStyle=color;g.lineWidth=1.25;g.shadowColor=color;g.shadowBlur=7;g.beginPath();
+    if(i===0){g.arc(0,0,r,0,Math.PI*2)}
+    else if(i===1){for(let j=0;j<3;j++){let q=r*(1-j*.23);g.moveTo(-q,0);g.lineTo(0,-q);g.lineTo(q,0);g.lineTo(0,q);g.closePath()}}
+    else if(i===2){for(let j=0;j<8;j++){let a=j*Math.PI/4;g.moveTo(0,0);g.lineTo(Math.cos(a)*r,Math.sin(a)*r)}}
+    else if(i===3){for(let j=0;j<3;j++){g.moveTo(r*(1-j*.27),0);g.arc(0,0,r*(1-j*.27),0,Math.PI*2)}}
+    else if(i===4){g.rect(-r,-r,r*2,r*2);g.moveTo(-r,0);g.lineTo(r,0);g.moveTo(0,-r);g.lineTo(0,r)}
+    else if(i===5){for(let j=0;j<=36;j++){let a=j*Math.PI/18;let px=Math.sin(a)*r,py=Math.sin(2*a)*r*.7;j?g.lineTo(px,py):g.moveTo(px,py)}}
+    else if(i===6){g.moveTo(0,-r);g.quadraticCurveTo(-r*1.8,0,0,r);g.moveTo(0,-r);g.quadraticCurveTo(r*1.8,0,0,r)}
+    else if(i===7){for(let j=0;j<=6;j++){let a=j*Math.PI/3;let px=Math.cos(a)*r,py=Math.sin(a)*r;j?g.lineTo(px,py):g.moveTo(px,py)}}
+    else {for(let j=0;j<=24;j++){let px=-r+j*r/12,py=Math.sin(j*Math.PI/12)*r*.55;j?g.lineTo(px,py):g.moveTo(px,py)}}
+    g.stroke();g.restore();
+  }
+  function point(a,b,p,bend=0){return{x:a.x+(b.x-a.x)*p,y:a.y+(b.y-a.y)*p+Math.sin(p*Math.PI)*bend}}
+  function ball(g,p){g.save();let grad=g.createRadialGradient(p.x,p.y,0,p.x,p.y,19);grad.addColorStop(0,'#fff1b9');grad.addColorStop(.25,'#efbb63');grad.addColorStop(1,'#efbb6300');g.fillStyle=grad;g.beginPath();g.arc(p.x,p.y,19,0,Math.PI*2);g.fill();g.fillStyle='#fff3c5';g.beginPath();g.arc(p.x,p.y,4.6,0,Math.PI*2);g.fill();g.restore()}
+  function make(shell){
+    const mode=shell.dataset.scene,canvas=shell.querySelector('canvas'),g=canvas.getContext('2d');
+    const playButton=shell.querySelector('[data-control=play]'),range=shell.querySelector('[data-control=time]'),projectSelect=shell.querySelector('[data-control=project]'),contextButton=shell.querySelector('[data-control=context]'),aside=shell.querySelector('aside'),readout=shell.querySelector('.ag-readout'),output=shell.querySelector('output'),modeText=shell.querySelector('footer span');
+    let time=0,project='A',playing=mode==='weave'&&!matchMedia('(prefers-reduced-motion: reduce)').matches,last=null,w=736,h=450,lastEvent=-1,lastProject='',drawCount=0;
+    function visible(){return !shell.closest('[hidden]')&&!document.hidden}
+    function positions(state){
+      if(mode==='score')return ids.map((_,i)=>({x:Math.min(105,w*.31)+(w-Math.min(105,w*.31)-24)*state.time/duration,y:36+i*(h-73)/8}));
+      const pts=w<540?[[.2,.17],[.52,.13],[.8,.2],[.23,.39],[.57,.36],[.82,.48],[.2,.66],[.53,.65],[.8,.79]]:[[.1,.7],[.26,.55],[.42,.25],[.47,.72],[.59,.47],[.76,.27],[.73,.68],[.88,.47],[.85,.84]];
+      return pts.map((p,i)=>({x:p[0]*w+Math.sin(time*.14+i)*4,y:p[1]*h+Math.cos(time*.13+i*.8)*6}));
+    }
+    function link(a,b,color,p=1){g.strokeStyle=color;g.lineWidth=1;g.beginPath();g.moveTo(a.x,a.y);g.bezierCurveTo(a.x+(b.x-a.x)*.4,a.y-40,b.x-(b.x-a.x)*.25,b.y+30,b.x,b.y);g.stroke();if(p<1){let q=point(a,b,p,-25);g.fillStyle='#a6e8ff';g.beginPath();g.arc(q.x,q.y,2.8,0,7);g.fill()}}
+    function draw(){
+      if(!g)return;drawCount++;const s=deriveState(project,time),p=positions(s),oi=ids.indexOf(s.owner);g.clearRect(0,0,w,h);g.save();g.font='12px system-ui';
+      if(mode==='weave'){
+        for(let i=0;i<70;i++){let x=(i*137.17)%w,y=(i*91.77)%h;g.fillStyle=i%6===0?'#8ca8cf70':'#45648c38';g.fillRect(x,y,1.1,1.1)}
+        g.globalCompositeOperation='lighter';
+        for(let band=0;band<3;band++)for(let k=0;k<14;k++){
+          let shift=k*2.5+band*26;g.beginPath();for(let j=0;j<=48;j++){let x=j*w/48;let y=h*.76-x/w*h*.43+Math.sin(x/w*6+time*.24+band)*27+Math.sin(x/w*14-time*.13+k*.075)*7+shift; j?g.lineTo(x,y):g.moveTo(x,y)}
+          g.strokeStyle=band===1?'#ae78ee28':'#65cafa22';g.lineWidth=.75;g.stroke();
+        }
+        for(let i=0;i<9;i++){let next=(i+1)%9;link(p[i],p[next],s.active.includes(ids[i])?'#9adfff66':'#546fad25',s.active.includes(ids[i])?(time*.32+i*.16)%1:1)}
+        if(s.divergence){link(p[6],{x:w*.53,y:h*.49},'#ef87bb77');link(p[5],{x:w*.54,y:h*.57},'#a387ef77')}
+        if(s.resolved){let c={x:w*.54,y:h*.51};g.strokeStyle='#efc87988';g.beginPath();g.arc(c.x,c.y,7+Math.sin(time*1.5)*2,0,7);g.stroke()}
+        g.globalCompositeOperation='source-over';
+      }else{
+        const start=Math.min(105,w*.31),end=w-22;
+        ids.forEach((id,i)=>{let y=p[i].y;g.strokeStyle='#2c41524d';g.beginPath();g.moveTo(start,y);g.lineTo(end,y);g.stroke();events.forEach(e=>{if(e.t>s.time||e.owner!==id)return;let x=start+(end-start)*e.t/duration;g.fillStyle=e.label.includes('Entscheidung')?'#f6c973':'#77bdd799';g.fillRect(x-2,y-3,5,6)});if(s.active.includes(id)){g.fillStyle='#83cfea'+Math.round(70+Math.sin(time*3+i)*40).toString(16).padStart(2,'0');g.fillRect(Math.max(start,p[i].x-24),y-3,24,6)}});
+        g.strokeStyle='#b0d2dd66';g.beginPath();g.moveTo(p[oi].x,15);g.lineTo(p[oi].x,h-18);g.stroke();
+        if(s.divergence){g.fillStyle='#ad57801a';let x=start+(end-start)*14/duration;g.fillRect(x,16,(end-start)*7/duration,h-32)}
+        if(s.resolved){let x=start+(end-start)*21/duration;g.strokeStyle='#e6c47999';g.beginPath();g.moveTo(x,16);g.lineTo(x,h-18);g.stroke()}
+      }
+      ids.forEach((id,i)=>{const active=s.active.includes(id),col=i===oi?'#e8c483':active?'#99dcfa':'#607da9';let x=mode==='score'?22:p[i].x,y=p[i].y;
+        if(active){g.strokeStyle='#a6dfff35';g.beginPath();g.arc(x,y,19+Math.sin(time*2+i)*2,0,7);g.stroke()}
+        glyph(g,i,x,y,mode==='score'?9:12,col);g.fillStyle=active||i===oi?'#d9e5f7':'#91a9c9';g.textAlign=mode==='score'?'left':'center';g.fillText(names[i],mode==='score'?39:x,mode==='score'?y+4:y+28);
+      });
+      let dest=p[oi],from=p[ids.indexOf(s.event.from)];
+      if(mode==='weave'){dest={x:dest.x+17,y:dest.y-17};from={x:from.x+17,y:from.y-17}}
+      if(s.transfer<1&&s.index>0){link(from,dest,'#e5bd7755');ball(g,point(from,dest,s.transfer,mode==='score'?-19:-25))}else ball(g,dest);
+      g.restore();
+    }
+    function update(){
+      const s=deriveState(project,time);range.value=String(time);output.textContent='00:'+String(Math.floor(time)).padStart(2,'0');playButton.textContent=playing?'Pause':'Abspielen';
+      if(lastEvent!==s.index||lastProject!==project){readout.textContent=`Projekt ${project} · ${s.event.label} · Verantwortung: ${names[ids.indexOf(s.owner)]}`;lastEvent=s.index;lastProject=project;aside.querySelector('ol').replaceChildren();events.slice(0,s.index+1).slice(-6).forEach(e=>{let li=document.createElement('li');li.textContent=e.label;let small=document.createElement('small');small.textContent=`${names[ids.indexOf(e.from)]} → ${names[ids.indexOf(e.owner)]} · Projekt ${project}`;li.append(small);aside.querySelector('ol').append(li)})}
+      draw();
+    }
+    function pause(){playing=false;last=null;modeText.textContent='Replay';update()}
+    function play(){if(time>=duration)time=0;playing=true;last=null;modeText.textContent='Live-Demo';update()}
+    function seek(value){time=Math.max(0,Math.min(duration,Number(value)||0));pause()}
+    function selectProject(value){project=value==='B'?'B':'A';projectSelect.value=project;time=0;pause()}
+    function resize(){let rect=canvas.getBoundingClientRect();w=Math.max(280,rect.width||736);h=rect.height||450;let d=Math.min(2,devicePixelRatio||1);canvas.width=Math.round(w*d);canvas.height=Math.round(h*d);if(g)g.setTransform(d,0,0,d,0,0);update()}
+    function tick(now){if(visible()&&playing){if(last!==null)time=Math.min(duration,time+Math.min(.05,Math.max(0,(now-last)/1000)));last=now;if(time>=duration)playing=false;update()}else last=null;requestAnimationFrame(tick)}
+    playButton.addEventListener('click',()=>playing?pause():play());range.addEventListener('input',e=>seek(e.target.value));projectSelect.addEventListener('change',e=>selectProject(e.target.value));shell.querySelector('[data-control=step]').addEventListener('click',()=>{let next=events.find(e=>e.t>time+.05);seek(next?next.t:duration)});
+    contextButton.addEventListener('click',()=>{aside.hidden=!aside.hidden;contextButton.setAttribute('aria-expanded',String(!aside.hidden))});
+    document.addEventListener('visibilitychange',()=>{last=null});new ResizeObserver(resize).observe(canvas);resize();requestAnimationFrame(tick);
+    return{deriveState,events,play,pause,seek,selectProject,getState:()=>({...deriveState(project,time),playing,drawCount}),draw};
+  }
+  const controllers=Array.from(root.querySelectorAll('.ag-shell')).map(make);
+  window.AgentariumMotionPreview={events,deriveState,controllers,duration};
+})();
+</script>
