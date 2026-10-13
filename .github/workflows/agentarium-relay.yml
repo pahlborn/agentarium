@@ -16,7 +16,7 @@ jobs:
       - name: Checkout pinned relay implementation
         uses: actions/checkout@v4
         with:
-          ref: bbb128975fb6bbf00f0aac027b8c8f589516473e
+          ref: 64a58b5b99dd31a2003f4e382f1442d9572c4791
           persist-credentials: false
       - name: Install Claude Code CLI
         run: npm install --global @anthropic-ai/claude-code
