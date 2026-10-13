@@ -1,0 +1,95 @@
+{
+  "envelope": "[AGENTARIUM:AG-NACHTPOST-003:QA:QA_REPORT:V1]",
+  "role": "Sentinel /root/sentinel_nachtpost_gewebe",
+  "baseline": "AG-NACHTPOST-001 acceptance.json v1 AC01–10",
+  "artifact": "/workspace/scratch/d750c8865a51/nachtpost/forge-gewebe.html",
+  "sha256": "1ccf70a99d27486b43c480a8667e759c351b4c748988a0a27089b298215f40fe",
+  "fixture_sha256": "a83886016cfaf312c0538ab86dbb6c72c3e056bd3204c0225cbb86aaafaf40ec",
+  "acceptance_sha256": "615e7eee6d6b9fdb8b794f0f3ca2abb0451362e34f53ae57e31f469fd53381fd",
+  "environment": {
+    "node": "v24.19.0",
+    "method": "Node VM, deterministic RAF and DOM/canvas test doubles; static source/CSS"
+  },
+  "started": "2026-10-13T20:27:17.920Z",
+  "duration_ms": 299,
+  "command": [
+    "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+    "/workspace/scratch/d750c8865a51/nachtpost/qa-gewebe.cjs",
+    "/workspace/scratch/d750c8865a51/nachtpost/forge-gewebe.html",
+    "/workspace/scratch/d750c8865a51/nachtpost/fixture.json",
+    "/workspace/scratch/d750c8865a51/nachtpost/acceptance.json"
+  ],
+  "retries": 0,
+  "results": [
+    {
+      "criterion": "AC-09",
+      "id": "identity-syntax",
+      "status": "passed"
+    },
+    {
+      "criterion": "AC-01",
+      "id": "fixture-semantics",
+      "status": "passed"
+    },
+    {
+      "criterion": "AC-06",
+      "id": "owners-and-parallel-every-timestamp",
+      "status": "passed"
+    },
+    {
+      "criterion": "AC-07",
+      "id": "cost-all-timestamps",
+      "status": "passed"
+    },
+    {
+      "criterion": "AC-02",
+      "id": "strict-next-and-end",
+      "status": "passed"
+    },
+    {
+      "criterion": "AC-02",
+      "id": "pause-seek-replay-boundaries",
+      "status": "passed"
+    },
+    {
+      "criterion": "AC-03",
+      "id": "hidden-freeze-playing-resume-no-jump",
+      "status": "passed"
+    },
+    {
+      "criterion": "AC-03",
+      "id": "hidden-paused-and-reduced-motion",
+      "status": "passed"
+    },
+    {
+      "criterion": "AC-02",
+      "id": "DOM-buttons-and-speed",
+      "status": "passed"
+    },
+    {
+      "criterion": "AC-05",
+      "id": "names-provider-model-role-selection-IDs",
+      "status": "passed"
+    },
+    {
+      "criterion": "AC-04",
+      "id": "dock-static-grid-mobile-stack",
+      "status": "passed"
+    },
+    {
+      "criterion": "AC-08",
+      "id": "no-network-storage-external-assets",
+      "status": "passed"
+    },
+    {
+      "criterion": "AC-10 / AC-04 / AC-06",
+      "id": "real-browser-visual-mobile-parallel",
+      "status": "not tested",
+      "evidence": "Chromium executable absent; canvas/DOM stubs do not establish pixel layout or artistic effect"
+    }
+  ],
+  "verdict": "PASS_WITH_LIMITS",
+  "integrity": "No application, baseline or fixture edits; only QA harness/report writes. No external side effects.",
+  "next_action": "Atlas/Argus exact artifact review; actual browser visual QA before visual acceptance",
+  "limits": "No genuine browser, mobile pixels, aesthetic evaluation, or real integrations tested."
+}
