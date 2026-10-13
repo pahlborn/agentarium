@@ -1,0 +1,28 @@
+{
+  "task_id": "AG-VISUAL-PROBE-001",
+  "source_version": 1,
+  "process_version": "AG-PROC-MODEL-001@0.2",
+  "goal": "One exploratory visual image for Agentarium Ensemble discussion; no product-code changes or final direction approval.",
+  "source": "vision/AG-VISION-001-v0.1.md",
+  "runtime_agent": "/root/nova_visual_probe_001",
+  "role": "Nova",
+  "technical_skill": "create-vision-with-nova",
+  "model_routing": {
+    "task_complexity": "F",
+    "risk": "low",
+    "target_platform": "chatgpt-work",
+    "role_model_constraint_or_default": "No fixed model entry in installed Nova SKILL.md; platform selection limits apply.",
+    "preferred_model_family": "Sol",
+    "requested_model": "gpt-6.1-sol",
+    "requested_reasoning": "medium",
+    "actual_model": "unconfirmed",
+    "actual_reasoning": "unconfirmed",
+    "model_evidence": "spawn_agent accepted requested arguments with fork_turns=none and returned canonical task identifier; no independent executed-model metadata returned.",
+    "override_authorization_and_reason": "Approved standalone model-policyV0.2; no fixed Nova model constraint inspected. Clean context to use explicitly selectable matching family.",
+    "budget_authorization": "Existing ChatGPT project vision work; no Anthropic API calls or model tests.",
+    "fallback_decision": "none"
+  },
+  "allowed": "read and one concise visual art-direction contribution",
+  "forbidden": "code/specification/repository mutation/approval",
+  "stop_condition": "one contribution"
+}
