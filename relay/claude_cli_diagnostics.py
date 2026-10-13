@@ -51,7 +51,9 @@ def matched_signals(message: str, *, timeout: bool = False) -> list[str]:
 def diagnostic(*, kind: str, stdout: str | bytes | None, stderr: str | bytes | None,
                elapsed_seconds: float, timeout_seconds: int, returncode: int | None) -> dict:
     out, err = _text(stdout), _text(stderr)
-    detail = classify_detail(err + "\n" + out, timeout=kind == "TIMEOUT")
+    detail = "SUCCESS" if kind == "SUCCESS" else classify_detail(
+        err + "\n" + out, timeout=kind == "TIMEOUT"
+    )
     return {
         "kind": kind,
         "detail": detail,
