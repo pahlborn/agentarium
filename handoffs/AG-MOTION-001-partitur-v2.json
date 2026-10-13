@@ -1,0 +1,27 @@
+{
+  "task_id": "AG-MOTION-001",
+  "version": 2,
+  "repository": "pahlborn/agentarium",
+  "base_commit": "044848ed2c28a2ed2d6a1b977b68bfa0059bdfc6",
+  "sender": "Atlas",
+  "recipient": "Forge/coding-agent",
+  "process_version": "AG-PROC-MODEL-001@0.2",
+  "authorization": "Peter requested two animated mocks. Original combined V1 stopped after failed handback (run38424807545/categoryEXECUTION_FAILED, elapsed~241s matching timeout; exact underlying cause not retained). New smaller distinct versioned assignments, no identical task retry, no modelupgrade, no merge/deploy.",
+  "model_routing": {
+    "class": "F",
+    "risk": "low",
+    "requested_model": "sonnet",
+    "requested_reasoning": "medium",
+    "actual_model": "unconfirmed",
+    "actual_reasoning": "unconfirmed",
+    "budget": "one bounded contribution pervariant, estimatedCLIcapUSD0.15 each, remainingcreditunknown, stopcreditfailure; no automatic retries/fallback"
+  },
+  "constraints": "Original coding-agent definition preserved. Return code only toAtlas; no tools/localwritesclaimed/agents/approval/newdependencies/network. Canvas2D native browser fragment. Fixed darkviolet/cyandesign,9 abstract glyphs namedPeter Atlas Nova Scout Archibald Forge Argus Sentinel Cadence. Clearlylabel Demo·Beispieldaten. Actualruntime reported onlyfromCLIusage. No personas/fakeagentdialogue.",
+  "ui": "ONE HTML fragment (no doctype/html/head/body), style + rootdiv uniqueag-variant + scriptIIFE selectingrootbygetElementById. Scoped productCSS fixed dark, systemfonttextmin11; canvas height420responsivewidth; 320px controlswrap,labelsgood. HeaderbrandAGENTARIUM/subtitlevariant. Controls nativePlay/Pause, Replayscrubrange (seekingpauses), two genericprojectoptions ProjektA/B, Kommunikationtogglecontextlabels. Animation viaRAF, at30secstop; Playafterend restarts. Defaultplayexceptreducedmotionpaused; ondocumenthidden no timejump; resizeObserveDPRmax2. Samefinitefixture events responsibilityPeter→Atlas→Nova→Scout→Archibald→Forge→Sentinel→Argus→Atlas→Peter; workphases someparallelNova/Scout, waitingquiet, decisionat20sec. deriveState(project,time) pure, onegoldBALLforowner orinterpolatedduringhandoff, actualcontextderivedfixture; pausedfreezesallmotion. No storage/fetch/interval/CDN. Expose window.AgentariumMocks[variant]={events,deriveState,controllers or getState,play,pause,seek,selectProject}. Frame0useful; communicationaccessible. GracefulCanvasnotavailablelabel withoutcrash.",
+  "output": "CA_MOCK_READY then JSON{\"html\":\"complete fragment JSONstring\",\"summary\":\"...\",\"limitations\":\"...\"}. MaximumHTML10000characters (keepcompact), no fullspec/research/verboseanalysis. Aim minimal but visuallyalive; outputonecandidate only andstop. Explicitrequest authoredfragment returned, no local edits claimed.",
+  "variant": "partitur",
+  "allowed_paths": [
+    "mocks/partitur-v1.html"
+  ],
+  "creative_brief": "Nova actualbrief:9 labeledhorizontalagentlanes, geometricnotations timedbyfixtureevents; movingquietplayhead, activepassagespulse andwaitingquiet. GoldBALLtravelscurvedhandoffarc betweenlanes duringhandoffthenrestsownerlane. White/cyanrhythmicblocks withgolddecisions, sparsevioletmatrix. Finitefixture30secreplay fromsametime/story. Distinctfromfree3dweave, no humans. Codeunder10000chars."
+}
