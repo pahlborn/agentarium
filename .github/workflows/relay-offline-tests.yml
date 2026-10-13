@@ -12,7 +12,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: 64a58b5b99dd31a2003f4e382f1442d9572c4791
+          ref: 9bb7ce6596a343a2697b0f1011e8bca9981a78af
           persist-credentials: false
       - name: Negative authorization tests without Claude API
-        run: python3 relay/one_shot.py --self-test
+        run: |
+          python3 relay/one_shot.py --self-test
+          python3 relay/test_role_routing.py
