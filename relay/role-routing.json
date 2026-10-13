@@ -41,10 +41,13 @@
     "archibald": {
       "platform": "claude-code",
       "technical_id": "spec-agent",
-      "state": "definition_external_runtime_unverified",
+      "state": "definition_imported_identity_test_pending",
       "scope": [
         "specification"
-      ]
+      ],
+      "definition_path": ".claude/agents/spec-agent.md",
+      "probe_task": "AG-RELAY-002",
+      "probe_path": "relay/archibald_one_shot.py"
     },
     "forge": {
       "platform": "claude-code",
