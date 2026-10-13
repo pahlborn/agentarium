@@ -54,6 +54,9 @@ def main():
             raise RuntimeError("Handoff field mismatch: " + key)
     if task.get("source_sha") and task["source_sha"] != sha:
         raise RuntimeError("Agent blob SHA mismatch")
+    existing = api(API + "/issues/2/comments?per_page=100")
+    if any("AG-RELAY-001 — LIVE_CLAUDE_RUNTIME_HANDOFF" in str(item.get("body", "")) for item in existing):
+        raise RuntimeError("Replay prevented: handback already recorded")
     if not os.environ.get("ANTHROPIC_API_KEY"):
         raise RuntimeError("Missing ANTHROPIC_API_KEY")
     config = json.dumps({"process-agent": {
