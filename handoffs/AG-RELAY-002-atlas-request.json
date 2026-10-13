@@ -1,0 +1,25 @@
+{
+  "schema": "agentarium.handoff.v0",
+  "task_id": "AG-RELAY-002",
+  "source": "Atlas",
+  "target_role": "Claude Relay",
+  "worker_role": "spec-agent",
+  "project": "pahlborn/agentarium",
+  "source_ref": "feature/visual-stage-v0",
+  "source_sha": "3d49a612a1b2ad8d353b2b5345053dca60d4c23c",
+  "request": "Read-only identity probe for Archibald/spec-agent. Do not specify, edit, publish or invoke other agents. Return ROLE_IDENTITY_ACK and stop.",
+  "return_target": "https://github.com/pahlborn/agentarium/issues/2",
+  "expected_reply": "ROLE_IDENTITY_ACK",
+  "allowed_actions": [
+    "read"
+  ],
+  "prohibited_actions": [
+    "push",
+    "merge",
+    "deploy",
+    "admin",
+    "modify_repository"
+  ],
+  "status": "AWAITING_RELAY",
+  "auto_execution": false
+}
