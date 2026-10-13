@@ -33,5 +33,15 @@ class Stream(unittest.TestCase):
     def test_unknown_type_not_leaked(self):
         r,e=self.call('import json; print(json.dumps({"type":"DO-NOT-EXPOSE"})); print(json.dumps({"type":"result","result":"x"}))')
         self.assertNotIn('DO-NOT-EXPOSE',json.dumps(e))
+    def test_telemetry_failure_does_not_kill_worker(self):
+        def fail(_):raise RuntimeError('DO-NOT-EXPOSE')
+        with tempfile.TemporaryDirectory() as d:
+            r,e=run_stream([sys.executable,'-u','-c','import json,time;print(json.dumps({"type":"system"}));time.sleep(.06);print(json.dumps({"type":"result","result":"done"}))'],cwd=d,env=dict(os.environ),timeout=2,progress=fail,progress_interval=.001)
+        self.assertEqual(r['result'],'done')
+        self.assertGreater(e['stream']['event_counts']['telemetry_failure'],0)
+        self.assertNotIn('DO-NOT-EXPOSE',json.dumps(e))
+    def test_output_limit(self):
+        with self.assertRaises(ClaudeCliFailure) as c:self.call('print("x"*4100000)')
+        self.assertEqual(c.exception.evidence['detail'],'OUTPUT_LIMIT')
 
 if __name__=='__main__':unittest.main()
