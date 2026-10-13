@@ -1,0 +1,90 @@
+{
+  "schema": "agentarium.handoff.v0",
+  "version": 1,
+  "sender": "Atlas/main-agent",
+  "recipient": "Forge/coding-agent",
+  "status": "AUTHORIZED",
+  "process_version": "AG-PROC-MODEL-001@0.2",
+  "authorization": {
+    "source": "Peter",
+    "text": "Dann lasse forge die Mocks ebenfalls erarbeiten. Danach vergleichen wir die 4 proben",
+    "timestamp": "2026-10-13T18:31:19+02:00"
+  },
+  "purpose": "Create an independent moving Agentarium mock for four-sample comparison.",
+  "base_commit": "8ff249145cea572abe8b09473f26e42e5c74a422",
+  "requested_model": "sonnet",
+  "requested_effort": "medium",
+  "budget_cap_usd": 0.25,
+  "max_turns": 1,
+  "allowed_actions": [
+    "return_one_self_contained_html_fragment_as_text"
+  ],
+  "prohibited_actions": [
+    "read_existing_preview_implementation",
+    "write_repository",
+    "dispatch_agents",
+    "network_access",
+    "merge",
+    "release",
+    "deploy"
+  ],
+  "shared_brief": {
+    "format": "One embeddable HTML fragment: one root div, scoped style, scoped script; no doctype/html/head/body.",
+    "story_seconds": 36,
+    "agents": [
+      "Peter",
+      "Atlas",
+      "Nova",
+      "Scout",
+      "Archibald",
+      "Argus",
+      "Forge",
+      "Sentinel",
+      "Cadence"
+    ],
+    "handoffs": [
+      "Peter→Atlas",
+      "Atlas→Nova",
+      "Atlas→Scout",
+      "Nova→Archibald",
+      "Scout→Archibald",
+      "Archibald→Argus",
+      "Argus→Atlas",
+      "Atlas→Forge",
+      "Forge→Sentinel",
+      "Sentinel→Argus",
+      "Argus→Cadence",
+      "Cadence→Atlas",
+      "Atlas→Peter"
+    ],
+    "semantics": [
+      "one gold responsibility BALL",
+      "parallel Nova/Scout work",
+      "visible divergence before a decision point",
+      "each agent has an abstract non-human glyph and label",
+      "weak ambient motion plus event-driven pulses",
+      "Demo · Beispieldaten label",
+      "event labels only; no invented agent quotes"
+    ],
+    "controls": [
+      "play/pause",
+      "step to next event",
+      "seek timeline",
+      "replay after end"
+    ],
+    "constraints": [
+      "Canvas2D or SVG",
+      "no remote assets",
+      "no APIs",
+      "no storage",
+      "responsive from 320px",
+      "prefers-reduced-motion starts paused",
+      "all JS isolated in an IIFE",
+      "maximum response 24000 characters"
+    ],
+    "output": "Return exactly one fenced html code block and no prose."
+  },
+  "task_id": "AG-MOCK-FORGE-001-PARTITUR",
+  "variant": "partitur",
+  "variant_brief": "Living score: nine horizontal notation lanes with a quiet moving time cursor. Concurrent work appears as simultaneous pulses; responsibility moves as one gold BALL along curved transfer arcs between lanes. A decision bar resolves visible divergence. Avoid people, robots, portraits and conventional project-management cards."
+}
