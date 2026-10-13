@@ -41,9 +41,14 @@ def main():
         raise RuntimeError("Wrong repository or branch")
     if api(API).get("private") is not True:
         raise RuntimeError("Private repository required")
-    comments = api(API + "/issues/2/comments?per_page=100")
-    if any(MARKER in c.get("body", "") for c in comments):
-        raise RuntimeError("Replay prevented: this task version already claimed")
+    page = 1
+    while True:
+        comments = api(API + "/issues/2/comments?per_page=100&page=" + str(page))
+        if any(MARKER in c.get("body", "") for c in comments):
+            raise RuntimeError("Replay prevented: this task version already claimed")
+        if len(comments) < 100:
+            break
+        page += 1
     if not os.environ.get("ANTHROPIC_API_KEY"):
         raise RuntimeError("Missing API key")
     source = subprocess.check_output(["git", "show", BASE + ":index.html"])
