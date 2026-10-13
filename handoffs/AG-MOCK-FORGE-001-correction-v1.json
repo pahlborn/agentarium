@@ -1,0 +1,57 @@
+{
+  "schema": "agentarium.handoff.v0",
+  "task_id": "AG-MOCK-FORGE-001-CORRECTION",
+  "version": 1,
+  "sender": "Atlas/main-agent",
+  "recipient": "Forge/coding-agent",
+  "status": "AUTHORIZED",
+  "process_version": "AG-PROC-MODEL-001@0.2",
+  "authorization": {
+    "source": "Peter",
+    "text": "Dann lasse forge die Mocks ebenfalls erarbeiten. Danach vergleichen wir die 4 proben",
+    "timestamp": "2026-10-13T18:31:19+02:00"
+  },
+  "purpose": "Correct two QA-confirmed lifecycle defects in Forge's two mock handbacks without redesign.",
+  "base_commit": "698094ccb9a7bbe954ec36201f810b2b6dafd73f",
+  "requested_model": "sonnet",
+  "requested_effort": "medium",
+  "budget_cap_usd": 0.08,
+  "max_turns": 1,
+  "allowed_actions": [
+    "return_three_replacement_javascript_snippets_as_json_text"
+  ],
+  "prohibited_actions": [
+    "redesign",
+    "write_repository",
+    "dispatch_agents",
+    "network_access",
+    "merge",
+    "release",
+    "deploy"
+  ],
+  "findings": [
+    {
+      "variant": "gewebe",
+      "defect": "When its containing section has hidden or document.hidden is true, simulated time advances to 36 before the card is viewed.",
+      "required": "loop must keep scheduling RAF but freeze time; reset last timestamp while hidden so resume causes no jump."
+    },
+    {
+      "variant": "gewebe",
+      "defect": "After seek to 36, pressing next event sets t to 0.4.",
+      "required": "step at/after final event must stay at D; replay remains the play-button behavior."
+    },
+    {
+      "variant": "partitur",
+      "defect": "When its containing section has hidden or document.hidden is true, simulated time advances to 36 before the card is viewed.",
+      "required": "frame must keep scheduling RAF but freeze time; reset last timestamp while hidden so resume causes no jump."
+    }
+  ],
+  "context": {
+    "gewebe_root_variable": "R",
+    "gewebe_loop_current": "function loop(ts){if(!playing){raf=0;return}var dt=Math.min(.1,(ts-last)/1000||0);last=ts;t+=dt;ph+=dt;if(t>=D){t=D;playing=false}draw();raf=playing?requestAnimationFrame(loop):0}",
+    "gewebe_step_current": "bs.onclick=function(){playing=false;var n=E.filter(function(e){return e.s>t+.05&&e.s!==3.5})[0];t=n?n.s+.4:.4;ph+=.5;draw()};",
+    "partitur_root_variable": "root",
+    "partitur_frame_current": "function frame(ts){var dt=last?(ts-last)/1000:0;last=ts;if(playing){t+=Math.min(dt,.1);if(t>=T){t=T;playing=false;}}draw(ts);ui();requestAnimationFrame(frame);}"
+  },
+  "output": "Return only valid JSON with exactly keys gewebe_loop, gewebe_step, partitur_frame. Each value must be the complete corrected one-line JavaScript function/assignment string. No Markdown or prose."
+}
