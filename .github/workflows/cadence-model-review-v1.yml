@@ -1,0 +1,29 @@
+name: Cadence AG-PROC-MODEL-001 consistency review
+on:
+  push:
+    branches: [feature/visual-stage-v0]
+    paths: ['.github/workflows/cadence-model-review-v1.yml']
+permissions:
+  contents: read
+  issues: write
+concurrency:
+  group: agentarium-proc-model-review-v1
+  cancel-in-progress: false
+jobs:
+  consistency-review:
+    if: github.event.repository.private == true && github.ref_name == 'feature/visual-stage-v0'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - run: python3 -m py_compile relay/cadence_model_review_once.py
+      - run: npm install --global @anthropic-ai/claude-code
+      - run: claude --version
+      - name: One substantive Cadence review, preserve default and no retry
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python3 relay/cadence_model_review_once.py
