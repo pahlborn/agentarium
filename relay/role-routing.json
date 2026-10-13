@@ -1,6 +1,6 @@
 {
   "schema": "agentarium.role-routing.v1",
-  "source": "Agentarium Rulebook & Process Manual V1.0 DRAFT (2026-10-12), handoff 2026-10-13",
+  "source": "Agentarium role allocation confirmed by project owner on 2026-10-13; technical IDs from Rulebook V1.0 DRAFT",
   "roles": {
     "atlas": {
       "platform": "chatgpt",
@@ -41,21 +41,35 @@
     "archibald": {
       "platform": "claude-code",
       "technical_id": "spec-agent",
-      "state": "definition_external_runtime_unverified"
+      "state": "definition_external_runtime_unverified",
+      "scope": [
+        "specification"
+      ]
     },
     "forge": {
       "platform": "claude-code",
       "technical_id": null,
-      "state": "independent_agent_definition_missing"
+      "state": "claude_code_coding_role_confirmed_by_owner_independent_agent_definition_unverified",
+      "aliases": [
+        "CA"
+      ],
+      "scope": [
+        "implementation"
+      ]
     },
     "cadence": {
       "platform": "claude-code",
       "technical_id": "process-agent",
       "state": "identity_probe_passed_2026-10-13",
-      "evidence": "https://github.com/pahlborn/agentarium/actions/runs/38394068230"
+      "evidence": "https://github.com/pahlborn/agentarium/actions/runs/38394068230",
+      "scope": [
+        "process_maintenance",
+        "process_improvement"
+      ]
     }
   },
   "routing_rules": [
+    "Binding platform assignment: Archibald, Forge/CA, Cadence use Claude Code; Atlas, Nova, Scout, Argus, Sentinel use ChatGPT.",
     "Never map ChatGPT skills to Claude agents without an explicit reviewed migration.",
     "A role name is not proof of a loaded agent.",
     "Dispatch requires technical id, platform, authorized tools and independent runtime evidence.",
