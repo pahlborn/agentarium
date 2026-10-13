@@ -7,6 +7,7 @@ from pathlib import Path
 import subprocess
 import tempfile
 from forge_one_shot import api, API, classify_failure
+from claude_cli_diagnostics import ClaudeCliFailure, run_json
 from team_task_once import reject_replay
 
 BASE = "044848ed2c28a2ed2d6a1b977b68bfa0059bdfc6"
@@ -44,21 +45,34 @@ def main():
     env.pop("GH_TOKEN",None)
     try:
         with tempfile.TemporaryDirectory(prefix="forge-motion-") as work:
-            done=subprocess.run(cmd,cwd=work,env=env,capture_output=True,text=True,timeout=180)
-        if done.returncode:
-            raise RuntimeError(classify_failure(done.stdout+done.stderr))
-        result=json.loads(done.stdout)
+            result, execution = run_json(cmd, cwd=work, env=env, timeout=180)
+        if not isinstance(result, dict):
+            raise ClaudeCliFailure(dict(execution, kind="INVALID_HANDOFF",
+                                        detail="INVALID_HANDOFF",
+                                        result_type=type(result).__name__))
         response=str(result.get("result","")).strip()
         if result.get("is_error") or not response or len(response)>60000:
-            raise RuntimeError(classify_failure(json.dumps(result)))
+            detail=classify_failure(json.dumps(result))
+            if detail == "EXECUTION_FAILED":
+                detail = "INVALID_HANDOFF"
+            raise ClaudeCliFailure(dict(
+                execution, kind="INVALID_HANDOFF", detail=detail,
+                is_error=bool(result.get("is_error")),
+                response_chars=len(response),
+                result_keys=sorted(str(key) for key in result),
+            ))
         usage=result.get("modelUsage",{})
         models=list(usage) if isinstance(usage,dict) else []
         actual=models[0] if len(models)==1 else "unconfirmed"
-        evidence={"requested_model":"sonnet","requested_reasoning":"medium","actual_model":actual,"actual_reasoning":"unconfirmed","model_evidence":{"source":"Claude CLI final JSON modelUsage keys" if models else "No runtime model usage metadata returned","models":models},"cost_usd":result.get("total_cost_usd","unconfirmed"),"session":result.get("session_id","unconfirmed"),"definition_blob":sha,"source_commit":BASE,"run":run_url,"stop_state":"CLI exited","response_sha256":hashlib.sha256(response.encode()).hexdigest()}
+        evidence={"requested_model":"sonnet","requested_reasoning":"medium","actual_model":actual,"actual_reasoning":"unconfirmed","model_evidence":{"source":"Claude CLI final JSON modelUsage keys" if models else "No runtime model usage metadata returned","models":models},"cost_usd":result.get("total_cost_usd","unconfirmed"),"session":result.get("session_id","unconfirmed"),"definition_blob":sha,"source_commit":BASE,"run":run_url,"stop_state":"CLI exited","execution":execution,"response_sha256":hashlib.sha256(response.encode()).hexdigest()}
         post("## AG-MOTION-001 "+VARIANT+" V2 — FORGE_RESULT / STOPPED\nRuntime evidence:\n```json\n"+json.dumps(evidence,ensure_ascii=False,indent=2)+"\n```\n\nUnchanged final Forge code handback; not acceptance:\n\n"+response)
+    except ClaudeCliFailure as exc:
+        category=exc.evidence["detail"]
+        post("## AG-MOTION-001 "+VARIANT+" V2 — BLOCKED / STOPPED\nCategory: "+category+"\nRun: "+run_url+"\nNo retry/upgrade or rule activation.\nDiagnostic evidence:\n```json\n"+json.dumps(exc.evidence,ensure_ascii=False,indent=2)+"\n```")
+        raise RuntimeError(category) from None
     except Exception as exc:
-        category=str(exc) if str(exc) in ("CREDIT_EXHAUSTED","KEY_INVALID_OR_EXPIRED","EXECUTION_FAILED") else classify_failure(str(exc))
-        post("## AG-MOTION-001 "+VARIANT+" V2 — BLOCKED / STOPPED\nCategory: "+category+"\nRun: "+run_url+"\nNo retry/upgrade or rule activation.")
+        category=classify_failure(str(exc))
+        post("## AG-MOTION-001 "+VARIANT+" V2 — RELAY_INTERNAL_ERROR / STOPPED\nCategory: "+category+"\nException type: "+type(exc).__name__+"\nRun: "+run_url+"\nNo retry/upgrade or rule activation.")
         raise RuntimeError(category) from None
 
 if __name__=="__main__":
