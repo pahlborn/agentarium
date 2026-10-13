@@ -1,0 +1,40 @@
+name: Archibald visual stories and initial tests
+on:
+  push:
+    branches: [feature/visual-stage-v0]
+    paths: ['.github/workflows/archibald-visual-spec-v1.yml']
+permissions:
+  contents: read
+  issues: write
+jobs:
+  spec:
+    if: github.event.repository.private == true && github.ref_name == 'feature/visual-stage-v0'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    concurrency:
+      group: agentarium-archibald-visual-004
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Offline relay checks
+        run: |
+          python3 -m py_compile relay/archibald_visual_spec_once.py relay/claude_stream_diagnostics.py
+          python3 -m unittest -q relay/test_claude_cli_diagnostics.py relay/test_nachtpost_replay.py relay/test_claude_stream_diagnostics.py
+      - run: npm install --global @anthropic-ai/claude-code
+      - run: claude --version
+      - name: Actual Archibald specification
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python3 relay/archibald_visual_spec_once.py
+      - name: Preserve specification output and usage
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: visual-004-archibald
+          path: spec-checkpoints/archibald/
+          if-no-files-found: warn
+          retention-days: 14
