@@ -18,13 +18,14 @@ jobs:
           mkdir -p "$RUNNER_TEMP/browser-qa"
           npm install --prefix "$RUNNER_TEMP/browser-qa" --no-save playwright@1.62.1 pngjs@7.0.0
           "$RUNNER_TEMP/browser-qa/node_modules/.bin/playwright" install --with-deps chromium
-      - name: Diagnose original scene and controls in actual browser
+      - name: Test recovered Forge revisions in actual browser
         env:
           NODE_PATH: ${{ runner.temp }}/browser-qa/node_modules
+          VISUAL004: '1'
         run: |
           status=0
-          node tests/nachtpost-003/browser-qa.cjs previews/AG-NACHTPOST-003-partitur-v1.html qa-browser/partitur || status=1
-          node tests/nachtpost-003/browser-qa.cjs previews/AG-NACHTPOST-003-gewebe-v1.html qa-browser/gewebe || status=1
+          node tests/nachtpost-003/browser-qa.cjs previews/AG-VISUAL-004-partitur-v1.html qa-browser/partitur || status=1
+          node tests/nachtpost-003/browser-qa.cjs previews/AG-VISUAL-004-gewebe-v1.html qa-browser/gewebe || status=1
           exit "$status"
       - if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
