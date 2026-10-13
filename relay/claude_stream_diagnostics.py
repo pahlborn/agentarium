@@ -7,9 +7,11 @@ import selectors
 import subprocess
 import time
 from pathlib import Path
-from claude_cli_diagnostics import ClaudeCliFailure, diagnostic
+from claude_cli_diagnostics import ClaudeCliFailure, diagnostic, classify_detail
 
 def run_stream(cmd, *, cwd, env, timeout, progress=None, progress_interval=60, checkpoint_dir=None):
+    checkpoint=Path(checkpoint_dir) if checkpoint_dir else None
+    if checkpoint:checkpoint.mkdir(parents=True,exist_ok=True)
     started=time.monotonic()
     proc=subprocess.Popen(cmd,cwd=cwd,env=env,stdin=subprocess.DEVNULL,
                           stdout=subprocess.PIPE,stderr=subprocess.PIPE,start_new_session=True)
@@ -20,8 +22,6 @@ def run_stream(cmd, *, cwd, env, timeout, progress=None, progress_interval=60, c
     buf=bytearray();result=None;counts=collections.Counter();first_byte=None;first_event=None;last_event=None;sent=started
     timed_out=False
     partial=[]
-    checkpoint=Path(checkpoint_dir) if checkpoint_dir else None
-    if checkpoint:checkpoint.mkdir(parents=True,exist_ok=True)
     def save_text(value):
         if checkpoint:
             temp=checkpoint/'assistant-text.tmp'
@@ -33,6 +33,9 @@ def run_stream(cmd, *, cwd, env, timeout, progress=None, progress_interval=60, c
         for key in ('total_cost_usd','duration_ms','duration_api_ms','num_turns'):
             if isinstance(result.get(key),(int,float)):safe[key]=result[key]
         safe['is_error']=result.get('is_error') is True
+        subtype=result.get('subtype')
+        if subtype in ('success','error_max_budget_usd','error_max_turns','error_during_execution','error_max_structured_output_retries'):
+            safe['subtype']=subtype
         usage=result.get('modelUsage',{})
         if isinstance(usage,dict):
             safe['model_usage']={name:{k:v for k,v in values.items() if isinstance(v,(int,float))} for name,values in usage.items() if isinstance(name,str) and name.startswith('claude-') and len(name)<80 and isinstance(values,dict)}
@@ -107,7 +110,16 @@ def run_stream(cmd, *, cwd, env, timeout, progress=None, progress_interval=60, c
                 item=json.loads(buf)
                 if isinstance(item,dict) and item.get('type')=='result':result=item
             except (ValueError,UnicodeDecodeError):counts['invalid_line']+=1
-        if proc.returncode:raise ClaudeCliFailure(evidence('CLI_EXIT'))
+        if proc.returncode:
+            ev=evidence('CLI_EXIT')
+            if isinstance(result,dict):
+                # Classify terminal errors rather than arbitrary streamed model text.
+                detail=classify_detail(json.dumps({k:result.get(k) for k in ('subtype','errors','error')},ensure_ascii=False))
+                if result.get('subtype')=='error_max_budget_usd':detail='BUDGET_EXCEEDED'
+                ev['detail']=detail
+                ev['signals']=[detail] if detail!='EXECUTION_FAILED' else []
+                if checkpoint:(checkpoint/'execution-metadata.json').write_text(json.dumps(ev,indent=2))
+            raise ClaudeCliFailure(ev)
         if not isinstance(result,dict):raise ClaudeCliFailure(evidence('INVALID_JSON'))
         return result,evidence('SUCCESS')
     finally:
