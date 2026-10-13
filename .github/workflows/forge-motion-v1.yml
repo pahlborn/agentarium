@@ -1,0 +1,29 @@
+name: Forge AG-MOTION-001 two living mockups
+on:
+  push:
+    branches: [feature/visual-stage-v0]
+    paths: ['.github/workflows/forge-motion-v1.yml']
+permissions:
+  contents: read
+  issues: write
+concurrency:
+  group: agentarium-motion-forge-v1
+  cancel-in-progress: false
+jobs:
+  motion-code:
+    if: github.event.repository.private == true && github.ref_name == 'feature/visual-stage-v0'
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - run: python3 -m py_compile relay/forge_motion_once.py
+      - run: npm install --global @anthropic-ai/claude-code
+      - run: claude --version
+      - name: One Forge implementation return, no automatic code publication
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python3 relay/forge_motion_once.py
