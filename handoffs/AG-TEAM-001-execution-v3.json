@@ -1,0 +1,271 @@
+{
+  "schema": "agentarium.execution-evidence.v1",
+  "task_id": "AG-TEAM-001",
+  "source_version": 3,
+  "date": "2026-10-13",
+  "repository": "pahlborn/agentarium",
+  "branch": "feature/visual-stage-v0",
+  "prior_baseline": "135979d5706977c84512f00bc412b5fae553fb02",
+  "prior_test_definition": {
+    "schema": "agentarium.team-test.v1",
+    "task_id": "AG-TEAM-001",
+    "title": "Aufgabenball: nachweisbarer Durchlauf",
+    "state": "BLOCKED_CHATGPT_ROLE_RUNTIME",
+    "project": "pahlborn/agentarium",
+    "baseline_branch": "feature/visual-stage-v0",
+    "budget": {
+      "anthropic_eur_total_user_funded": 5,
+      "external_agent_calls_allowed": 0,
+      "comment": "No more paid runs until ChatGPT role identities are verified; existing API balance is not readable via GitHub."
+    },
+    "goal": "Show one bounded responsibility handoff with a visible ball, an audit event and a recovered state after reload, on an existing non-public prototype.",
+    "non_goals": [
+      "new platform migration",
+      "agent impersonation",
+      "public publishing",
+      "merge",
+      "new unreviewed dependencies"
+    ],
+    "routing": [
+      {
+        "role": "atlas",
+        "platform": "chatgpt",
+        "expected": "MA_REQUEST",
+        "status": "UNVERIFIED"
+      },
+      {
+        "role": "nova",
+        "platform": "chatgpt",
+        "expected": "NOVA_ACK + VISION_ALIGNMENT",
+        "status": "UNVERIFIED"
+      },
+      {
+        "role": "scout",
+        "platform": "chatgpt",
+        "expected": "RKA_ACK + SOURCE_CHECK",
+        "status": "UNVERIFIED"
+      },
+      {
+        "role": "archibald",
+        "platform": "claude-code",
+        "expected": "SA_ACK + SPEC",
+        "status": "IDENTITY_TESTED_ONLY"
+      },
+      {
+        "role": "forge",
+        "platform": "claude-code",
+        "expected": "CA_ACK + IMPLEMENTATION",
+        "status": "IDENTITY_TESTED_ONLY"
+      },
+      {
+        "role": "argus",
+        "platform": "chatgpt",
+        "expected": "RA_ACK + REVIEW",
+        "status": "UNVERIFIED"
+      },
+      {
+        "role": "sentinel",
+        "platform": "chatgpt",
+        "expected": "QA_ACK + QA_REPORT",
+        "status": "UNVERIFIED"
+      },
+      {
+        "role": "cadence",
+        "platform": "claude-code",
+        "expected": "PROCESS_REVIEW",
+        "status": "IDENTITY_TESTED_ONLY"
+      }
+    ],
+    "acceptance": [
+      "Each contribution must include technical role ID and invocation evidence or be marked NOT_EXECUTED.",
+      "Ball ownership is explicit and matches the event log.",
+      "No simulated answer may be recorded as a live agent response.",
+      "No implementation before approved scope and role readiness.",
+      "No merge or public release without Peter."
+    ],
+    "stop_conditions": [
+      "Any role identity mismatch",
+      "Unknown authorization or unavailable runtime",
+      "API credit exhaustion",
+      "After one failed handoff without automatic retries"
+    ],
+    "authorization": "Preparation and offline verification only; no implementation or API dispatch authorized."
+  },
+  "authority": {
+    "source": "Peter's explicit AG-TEAM-001 instruction in this conversation, 2026-10-13",
+    "scope": "Bounded task with all eight actual roles, existing offline prototype and existing Actions/CLI/Issue transport. V2 contribution run and one V3 correctness correction.",
+    "preserved": [
+      "no architecture change",
+      "no new product dependencies",
+      "no automatic paid retry",
+      "no merge",
+      "no release",
+      "no public publication"
+    ],
+    "process_changes_activated": false
+  },
+  "outcome": "FUNCTIONAL_PASS_BROWSER_NOT_TESTED",
+  "product": {
+    "commit": "c90b3e6398ef2ef864bc1c05bfcceb04e1513c8d",
+    "path": "index.html",
+    "blob": "7747599b2ca18acea510db86e749087e91415f1f",
+    "sha256": "cd2fb8249f1313db1aa493256da4252ccd74e78c677f4bbe8a6bd3ec5aefcfe8",
+    "implementation": "Forge authored returned patches; Atlas verified unique replacements and published only on development branch. Final committed bytes equal independently tested file.",
+    "behavior": "Explicit local synthetic handoff, versioned localStorage audit state, same last committed owner restored after reload, no duplicate event, failed persistence leaves ownership unchanged;100-event capacity refusal is atomic.",
+    "live_agent_dispatch": false
+  },
+  "chatgpt_contributions": {
+    "atlas": {
+      "technical_id": "operate-as-atlas",
+      "runtime": "/root",
+      "assignment": "AG-TEAM-001 MA_REQUEST V2",
+      "result": "https://github.com/pahlborn/agentarium/pull/1#issuecomment-6146786501",
+      "contribution": "Refreshed exact baseline, verified four skill-backed subagents, routed separately permissioned Claude task sessions using existing transport, applied unique source replacements on development branch only, and arranged independent QA/correction. No merge/release.",
+      "stop_state": "consolidated"
+    },
+    "nova": {
+      "technical_id": "create-vision-with-nova",
+      "runtime": "/root/nova_team001",
+      "assignment": "AG-TEAM-001/NOVA V1",
+      "skill_resource": "skill://flora-user-skills/root/.codex/skills/remote-skills/skill-6acbad298bb8819184cb441c2845d5d6/SKILL.md",
+      "stop_state": "completed",
+      "contribution_excerpt": "NOVA_ACK · AG-TEAM-001/NOVA V1 · NOVA_READY\nSkill geladen: skill://flora-user-skills/root/.codex/skills/remote-skills/skill-6acbad298bb8819184cb441c2845d5d6/SKILL.md einschließlich Visionprofil.\nVISION_ALIGNMENT — gestalterische Urteile:\n1. Resonant: Der Ball liegt sichtbar beim aktuellen Verantwortlichen; Name und Aufgabenkennung machen seine Bedeutung eindeutig.\n2. Stretch: Der Übergabemoment verbindet bisherigen und neuen Verantwortlichen mit genau einem lesbaren Ereignis „A → B“. Die Bewegung erklärt den Verantwortungswechsel.\n3. Provokation: Nach Neuladen bleibt der Ball ruhig beim wiederhergestellten Verantwortlichen. Ein kurzer Hinweis „Verantwortung wiederhergestellt“ erklärt die Wiederaufnahme; keine erneute Übergabeanimation.\nFakten: Auftrag und Baseline 135979d5706977c84512f00bc412b5fae553fb02 wurden vorgegeben.\nUngeprüft: vorhandene Darstellung, Speicherung und bisheriger Nova-Beitrag.\nNur Beitrag an Atlas; keine Änderungen, Spezifikation oder Freigabe. Stop erreicht."
+    },
+    "scout": {
+      "technical_id": "build-research-knowledge",
+      "runtime": "/root/scout_team001",
+      "assignment": "AG-TEAM-001/SCOUT V1",
+      "skill_resource": "skill://flora-user-skills/root/.codex/skills/remote-skills/skill-6acb8c11bb188191914e1bdade9e423e/SKILL.md",
+      "stop_state": "completed",
+      "contribution_excerpt": "RKA_ACK — Scout/RKA executed separately; skill loaded plus source-policy and knowledge-schema.\nSOURCE_CHECK — baseline 135979d5706977c84512f00bc412b5fae553fb02, verified 2026-10-13:\n1. Confirmed: index.html, event-contract comment and setIndex(): V0 fields are {id,taskId,at,actor,kind,title,detail}; array order controls playback and actor controls displayed ball possession. There is no independently persisted responsibility state.\n2. Confirmed: index.html, initialization: index=0; events are embedded synthetic constants; no storage read/write exists. Reload therefore resets playback to the first event. Audit persistence/recovery is not implemented in this inspected artifact.\n3. Confirmed blocker: relay/{one_shot,archibald_one_shot,forge_one_shot}.py, validate_task() and main(), hardcode AG-RELAY-001/002/003, ROLE_IDENTITY_ACK, read-only actions and identity prompts. Current main workflows pin those respective implementations and expose no task input. They cannot execute arbitrary AG-TEAM-001 contributions as currently configured; existing workflow dispatch would repeat an identity pathway. No API call or mutation made.\nRKA_READY for this bounded source check; stopped."
+    },
+    "argus": {
+      "technical_id": "review-agent-argus",
+      "runtime": "/root/argus_team001",
+      "assignment": "AG-TEAM-001/ARGUS V1 + RELAY V2",
+      "skill_resource": "skill://flora-user-skills/root/.codex/skills/remote-skills/skill-6acc669a97d481919b531fd87dce0c35/SKILL.md",
+      "stop_state": "completed",
+      "contribution_excerpt": "RA_ACK / REVIEW FAIL at baseline135979d5706977c84512f00bc412b5fae553fb02: ownership equals selected synthetic actor; no actual handoff or durable audit. Require explicit previous/new owner, task ID, unique event ID and verified invocation references. Initialization resets reload; require same owner/audit restored without duplication, corrupt state explicit recovery outcome. Current Peter task supersedes old preparation-only gate. No writes, approval or runtime tests.\nRA_REVIEW V2: one confirmed relay blocker: first100 comment-only replay check can miss later claim. Scan all comment pages before claim. No additional blocker in inspected wrapper/helper: pinned blobs, no shell substitution, GH_TOKEN removed, no automatic code publication, stop on failure. Workflow/envelope not independently inspected. Blocker corrected and regression tested by Atlas before launch."
+    },
+    "sentinel": {
+      "technical_id": "qa-agent-sentinel",
+      "runtime": "/root/sentinel_team001",
+      "assignment": "AG-TEAM-001/SENTINEL V1 then QA V2/V3",
+      "skill_resource": "skill://flora-user-skills/root/.codex/skills/remote-skills/skill-6acc67ea0d1081919d33527f4cd15a8f/SKILL.md",
+      "responses": [
+        "QA_ACK + QA_REPORT V1 FAIL: selected event3 displays Forge; fresh VM resets index0/Peter; durable audit absent. Nodev24.19.0 one isolated pass; browser not tested.",
+        "QA_REPORT V2 FAIL:15 passed,3 failed. Source SHA2569b07eba5e6c9adae6f61f34a617acab05361c3231615734616184fe67eb616bd. Happy path atomic handoff/reload/no duplication/second continuity/storage failures/no navigation writes pass. Failures: fixture-id e1 accepted/dropped; first ancestry nova accepted instead of peter;100→101 writes state loader rejects next load. No product edits.",
+        "QA_REPORT V3 PASS_WITH_LIMITS:18 passed,0 failed. Corrected artifact SHA256cd2fb8249f1313db1aa493256da4252ccd74e78c677f4bbe8a6bd3ec5aefcfe8. All three original defects corrected; handoff/audit/reload/no duplicates/second continuity/invalid state/storage errors/no navigation-write/local labels pass. Nodev24.19.0 isolated VM; browser/mobile rendering not tested. No fixes or paid calls; stopped."
+      ],
+      "stop_state": "completed"
+    }
+  },
+  "claude_transport": {
+    "architecture": "Existing GitHub Actions→Claude CLI separate agent session→Issue #2 wrapper handback",
+    "task_envelope": "handoffs/AG-TEAM-001-task-v2.json",
+    "correction_envelope": "handoffs/AG-TEAM-001-correction-v3.json",
+    "runs": [
+      {
+        "id": "38406861688",
+        "result": "success",
+        "trigger_commit": "dbeeef71695146e9394bf62dc9a8b5556ca8ddc7"
+      },
+      {
+        "id": "38407711971",
+        "result": "success",
+        "trigger_commit": "5003b108fa41783297946bee6b104a5cdd5f8959"
+      }
+    ],
+    "responses": [
+      {
+        "comment_id": 6146884827,
+        "url": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6146884827",
+        "body": "## AG-TEAM-001-V2-TASK_RUN — HOST_RECEIVED\nTask AG-TEAM-001 V2; baseline `135979d5706977c84512f00bc412b5fae553fb02`; run https://github.com/pahlborn/agentarium/actions/runs/38406861688\nTask SHA256: `9a0ac7772e80a0e01e2086409110b4ec4c61fcd0ecb1ab0793882831897664a4`\nOne claimed run, up to three separate Claude sessions; no retries. No merge or deployment."
+      },
+      {
+        "comment_id": 6146885036,
+        "url": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6146885036",
+        "body": "## AG-TEAM-001 V2 — DISPATCH_READY\nRole: archibald / spec-agent\nDefinition blob: `3d49a612a1b2ad8d353b2b5345053dca60d4c23c`\nSource: `135979d5706977c84512f00bc412b5fae553fb02`\nEffective tools: none; exact source and evidence supplied inline. Separate CLI process. Run: https://github.com/pahlborn/agentarium/actions/runs/38406861688"
+      },
+      {
+        "comment_id": 6146888313,
+        "url": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6146888313",
+        "body": "## AG-TEAM-001 V2 — WORKER_STARTED / RESULT_READY / STOPPED\nRole: archibald / spec-agent\nClaude session: `f392a559-fb15-4ee6-861c-08fad4ef0a83`\nDefinition blob: `3d49a612a1b2ad8d353b2b5345053dca60d4c23c`\nSource: `135979d5706977c84512f00bc412b5fae553fb02`\nRun: https://github.com/pahlborn/agentarium/actions/runs/38406861688\nReported cost USD: 0.0017665250000000001\nResult SHA256: `f8cab27e0a3fd2d3bde7907131d05978c11a0773b1c6ef15f83972f1c61643f0`\nCLI exited successfully; tools disabled. Final response follows, not independent acceptance:\n\n[GT40:AG-TEAM-001:SA:SA_ACK:V2]\n\nAccepted on the inline baseline HTML and the cited Scout V1 and peer evidence. I did not read the repository in this turn, since this request provides the baseline inline.\n\n**Bounded acceptance points (SA contribution, not a full specification):**\n\n1. **Explicit local transfer:** A user-initiated control hands ownership from the current agent to a selected different agent. The transfer sets the displayed owner, appends one audit event of `kind: \"handoff\"` in the existing shape `{id,taskId,at,actor,kind,title,detail}`, and labels it as local synthetic demo state. It makes no network call and triggers no agent action.\n\n2. **Persistence and reload recovery:** The transfer and its audit event are saved to localStorage under one versioned key. On load, the page restores the owner, index, and appended event, so the A→B handoff stays visible without replay or re-animation. With no valid saved state, the page starts from the built-in Peter baseline.\n\n3. **Error and duplicate handling:** Malformed or schema-invalid saved data, unknown actors, and storage failures (quota, disabled storage) fall back to the built-in demo state with a visible notice. A restoration marker prevents duplicate audit events on repeated load or reload. Playback, scrubber, timeline, and the event schema remain unchanged.\n\nStopping here as requested."
+      },
+      {
+        "comment_id": 6146888527,
+        "url": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6146888527",
+        "body": "## AG-TEAM-001 V2 — DISPATCH_READY\nRole: forge / coding-agent\nDefinition blob: `0dcac59d22c27753f111fb1ad79f5a9be524052a`\nSource: `135979d5706977c84512f00bc412b5fae553fb02`\nEffective tools: none; exact source and evidence supplied inline. Separate CLI process. Run: https://github.com/pahlborn/agentarium/actions/runs/38406861688"
+      },
+      {
+        "comment_id": 6146913156,
+        "url": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6146913156",
+        "body": "## AG-TEAM-001 V2 — WORKER_STARTED / RESULT_READY / STOPPED\nRole: forge / coding-agent\nClaude session: `f2c3dcb5-0c8b-4283-96c4-973caec5676f`\nDefinition blob: `0dcac59d22c27753f111fb1ad79f5a9be524052a`\nSource: `135979d5706977c84512f00bc412b5fae553fb02`\nRun: https://github.com/pahlborn/agentarium/actions/runs/38406861688\nReported cost USD: 0.01029565\nResult SHA256: `3cd58f7742845a7acecd3f4569b138904e6286e0b16656177113f44e9e06bd6c`\nCLI exited successfully; tools disabled. Final response follows, not independent acceptance:\n\nCA_PATCH_READY\n{\"replacements\":[{\"old\":\"Weiter →</button></div></div>\",\"new\":\"Weiter →</button></div><div class='controls'><select id='target' aria-label='Ziel-Agent für lokale Übergabe'></select><button id='handoff' aria-label='Ball lokal übergeben'>⇄ Lokal übergeben</button><button id='reset' aria-label='Lokalen Zustand zurücksetzen'>Lokalen Zustand zurücksetzen</button></div><p class='note' id='status' role='status' aria-live='polite'></p></div>\"},{\"old\":\"let index=0,timer=null;const ownerById=new Map(people.map(p=>[p.id,p]));\",\"new\":\"let index=0,timer=null;const ownerById=new Map(people.map(p=>[p.id,p]));const ROLE_IDS=new Set(people.map(p=>p.id));const STORE_KEY='agentarium.handoff.v1';const FIXTURE_COUNT=demoEvents.length;\"},{\"old\":\"function pause(){\",\"new\":\"function setStatus(msg){$('status').textContent=msg}function validHandoff(h,prev){return !!h&&typeof h==='object'&&h.taskId==='AG-TEAM-001'&&h.kind==='handoff'&&typeof h.id==='string'&&h.id.length>0&&h.id.length<=80&&typeof h.at==='string'&&typeof h.title==='string'&&typeof h.detail==='string'&&ROLE_IDS.has(h.from)&&ROLE_IDS.has(h.to)&&h.from!==h.to&&h.actor===h.to&&(prev===null||h.from===prev)}function readStore(){let raw;try{raw=localStorage.getItem(STORE_KEY)}catch(e){return{err:'Speicher nicht verfügbar. Demo-Zustand aktiv, nichts wird gespeichert.'}}if(raw===null)return{list:[],index:null};let data;try{data=JSON.parse(raw)}catch(e){return{err:'Gespeicherter Zustand ist beschädigt. Demo-Zustand angezeigt; Zurücksetzen löscht ihn.'}}if(!data||typeof data!=='object'||data.v!==1||!Array.isArray(data.handoffs)||data.handoffs.length>100)return{err:'Gespeicherter Zustand hat unbekannte Version oder Format. Demo-Zustand angezeigt.'};let prev=null;const ids=new Set();for(const h of data.handoffs){if(!validHandoff(h,prev)||ids.has(h.id))return{err:'Gespeicherte Übergaben sind inkonsistent. Demo-Zustand angezeigt.'};ids.add(h.id);prev=h.to}if(!Number.isInteger(data.index)||data.index<0||data.index>=FIXTURE_COUNT+data.handoffs.length)return{err:'Gespeicherte Position ist ungültig. Demo-Zustand angezeigt.'};return{list:data.handoffs,index:data.index}}function restoreState(){const r=readStore();if(r.err){setStatus(r.err);return null}if(!r.list.length)return null;for(const h of r.list)if(!demoEvents.some(e=>e.id===h.id))demoEvents.push(h);$('scrub').max=demoEvents.length-1;setStatus('Wiederhergestellt: '+r.list.length+' lokale Übergabe(n) aus dem Speicher. Keine neue Übergabe, kein Live-Agent.');return r.index}function commitHandoff(){if(index!==demoEvents.length-1){setStatus('Übergabe nur am letzten Ereignis möglich. Zurücknavigieren schreibt kein Audit.');return}const from=demoEvents[index].actor,to=$('target').value;if(!ROLE_IDS.has(to)){setStatus('Bitte einen gültigen Ziel-Agenten wählen.');return}if(to===from){setStatus(ownerById.get(from).name+' hält den Ball bereits.');return}const ev={id:'h-'+Date.now().toString(36)+'-'+(demoEvents.length+1),taskId:'AG-TEAM-001',at:new Date().toISOString(),actor:to,kind:'handoff',title:'Lokale Übergabe',detail:ownerById.get(from).name+' → '+ownerById.get(to).name+'. Lokale synthetische Demo: kein Live-Agent-Auftrag, keine Netzwerkaktion.',from:from,to:to};const list=demoEvents.slice(FIXTURE_COUNT).concat(ev);try{localStorage.setItem(STORE_KEY,JSON.stringify({v:1,handoffs:list,index:FIXTURE_COUNT+list.length-1}))}catch(e){setStatus('Nicht gespeichert: Speicher nicht verfügbar. Keine Übergabe übernommen.');return}demoEvents.push(ev);$('scrub').max=demoEvents.length-1;pause();setIndex(demoEvents.length-1);setStatus('Übergabe gespeichert: '+ownerById.get(from).name+' → '+ownerById.get(to).name+' (lokal, kein Live-Agent).')}function resetState(){try{localStorage.removeItem(STORE_KEY)}catch(e){setStatus('Zurücksetzen nicht möglich: Speicher nicht verfügbar.');return}demoEvents.length=FIXTURE_COUNT;$('scrub').max=demoEvents.length-1;pause();setIndex(0);setStatus('Lokaler Zustand gelöscht. Demo ab Peter wiederhergestellt.')}function pause(){\"},{\"old\":\"pause()});setIndex(0);\",\"new\":\"pause()});for(const p of people){const o=document.createElement('option');o.value=p.id;o.textContent=p.name;$('target').append(o)}$('handoff').addEventListener('click',commitHandoff);$('reset').addEventListener('click',resetState);const ri=restoreState();setIndex(ri??0);\"}],\"summary\":\"Adds a visible local-only handoff control (target select, Lokal übergeben, reset button, status line). Commits an AG-TEAM-001 handoff event with id, taskId, from/to, at timestamp and V0 fields to localStorage key agentarium.handoff.v1 before any success message or in-memory append. On load it validates version, roles, field types, handoff continuity, id uniqueness and index bounds, then restores the audit trail once and shows the recovered owner. Seven fixtures and existing playback controls are kept; navigation and rendering do not write storage.\",\"limitations\":\"Not executed in a browser in this session, so verification is by inspection only. Handoffs are allowed only at the latest event to keep continuity valid. Corrupt stored data is kept with a notice until the next successful handoff or the reset button replaces it. Timestamps are ISO strings, not V0 clock strings. The target select lists all agents, including the current owner, which is rejected at commit time. This is a local synthetic demo transfer, not a live agent dispatch, and no GitHub or network action is performed.\"}"
+      },
+      {
+        "comment_id": 6146913349,
+        "url": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6146913349",
+        "body": "## AG-TEAM-001 V2 — DISPATCH_READY\nRole: cadence / process-agent\nDefinition blob: `d0ad187637d5201024f9fe2a31d47221178fcf6b`\nSource: `135979d5706977c84512f00bc412b5fae553fb02`\nEffective tools: none; exact source and evidence supplied inline. Separate CLI process. Run: https://github.com/pahlborn/agentarium/actions/runs/38406861688"
+      },
+      {
+        "comment_id": 6146915912,
+        "url": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6146915912",
+        "body": "## AG-TEAM-001 V2 — WORKER_STARTED / RESULT_READY / STOPPED\nRole: cadence / process-agent\nClaude session: `5332bdf9-8d09-4626-806d-191840387b9a`\nDefinition blob: `d0ad187637d5201024f9fe2a31d47221178fcf6b`\nSource: `135979d5706977c84512f00bc412b5fae553fb02`\nRun: https://github.com/pahlborn/agentarium/actions/runs/38406861688\nReported cost USD: 0.0016100250000000002\nResult SHA256: `2432eb3478ba298f3242f571eff37d8ee0dfbb324ae072a45ae64114b4524012`\nCLI exited successfully; tools disabled. Final response follows, not independent acceptance:\n\n```yaml\nrole: Cadence / process-agent\nclassification: process clarity friction (skill loaded vs. task executed); no defect confirmed\nurgency: batch\nconfirmed_observations:\n  - Four ChatGPT roles loaded their own skills; the old register wrongly showed them unavailable.\n  - Installed relays only support completed identity tasks, so the exact task version reuses Actions/CLI/Issue transport without rerunning identities.\n  - Archibald and Forge task-mode outputs were returned to Atlas; nothing auto-published.\nuncertainties:\n  - Whether relay-only transport will reduce or increase reruns is not yet observed.\naffected_roles: Atlas (coordination), Peter (authority), Cadence (register)\nproposal:\n  - 1. Record three separate states: identity loaded, transport delivered, task contribution returned. A loaded skill is never a completed check.\n  - 2. Reference completed checks by exact task version and evidence ID (for example, Scout baseline, Sentinel FAIL on event 3). Rerun only if the task version or the check's scope changed.\n  - 3. Record Peter's V2-only supersession of the JSON zero-dispatch rule in the register, so it is not read as general policy.\nexpected_benefit: fewer redundant reruns and less confusion about who has authority\nexpected_cost_and_delay: minimal, one register note\nalternatives_or_no_change: no change needed if Atlas already keeps these states distinct in practice\neffectiveness_check: in the next V2 cycle, count reruns of unchanged checks; none expected\ndecision_needed_from_peter_and_atlas: confirm the three-state recording and the V2-only supersession note\n```"
+      },
+      {
+        "comment_id": 6147005208,
+        "url": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6147005208",
+        "body": "## AG-TEAM-001-V3-TASK_RUN — HOST_RECEIVED\nTask AG-TEAM-001 V3; baseline `80e277cc912cc0e076471a584692f110ea26b941`; run https://github.com/pahlborn/agentarium/actions/runs/38407711971\nTask SHA256: `f6f97d6acb12da2aebfef56cdb425eaa0d76b0277912a0528bcae1ddf3cd7d3b`\nOne claimed run; bounded sessions: 1; no retries. No merge or deployment."
+      },
+      {
+        "comment_id": 6147005462,
+        "url": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6147005462",
+        "body": "## AG-TEAM-001 V3 — DISPATCH_READY\nRole: forge / coding-agent\nDefinition blob: `0dcac59d22c27753f111fb1ad79f5a9be524052a`\nSource: `80e277cc912cc0e076471a584692f110ea26b941`\nEffective tools: none; exact source and evidence supplied inline. Separate CLI process. Run: https://github.com/pahlborn/agentarium/actions/runs/38407711971"
+      },
+      {
+        "comment_id": 6147010463,
+        "url": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6147010463",
+        "body": "## AG-TEAM-001 V3 — WORKER_STARTED / RESULT_READY / STOPPED\nRole: forge / coding-agent\nClaude session: `48177660-49b8-483a-b522-0e9d3a9267c6`\nDefinition blob: `0dcac59d22c27753f111fb1ad79f5a9be524052a`\nSource: `80e277cc912cc0e076471a584692f110ea26b941`\nRun: https://github.com/pahlborn/agentarium/actions/runs/38407711971\nReported cost USD: 0.0025859\nResult SHA256: `bb57ba8131dac28646545b6444b95df3d492e02a5f8ea0adee71c3b250a5cf07`\nCLI exited successfully; tools disabled. Final response follows, not independent acceptance:\n\nCA_PATCH_READY\n\n```json\n{\"replacements\":[{\"old\":\"let prev=null;const ids=new Set();\",\"new\":\"let prev=demoEvents[demoEvents.length-1].actor;const ids=new Set(demoEvents.map(e=>e.id));\"},{\"old\":\"const list=demoEvents.slice(FIXTURE_COUNT).concat(ev);try{\",\"new\":\"const list=demoEvents.slice(FIXTURE_COUNT).concat(ev);if(list.length>100){setStatus('Limit erreicht: maximal 100 lokale Übergaben. Nichts wurde gespeichert; bitte zuerst lokal zurücksetzen.');return}try{\"}],\"summary\":\"Applies three confirmed Sentinel corrections in index.html only. (1) Saved-ID uniqueness validation is seeded with the built-in fixture IDs, so a saved handoff using a reserved ID such as e1 is rejected as inconsistent instead of being silently dropped during restore. (2) The ancestry chain for restored handoffs starts from the actor of the final built-in fixture event (peter), and each subsequent handoff must have from equal to the preceding handoff's to. (3) On commit, the 100-entry limit is checked after the new entry is built but before any localStorage write, before demoEvents is mutated, and before pause/setIndex updates the owner. When the limit is reached, a visible German status message is shown and nothing changes.\",\"limitations\":\"Patch text was produced from the supplied inline source; it has not been applied, executed, or tested by this agent. Each old substring was checked to occur exactly once in the supplied source. The fixes depend on demoEvents still containing only fixture events when readStore runs, which holds in the current restoreState flow. The 100-entry check is applied at commit time; the loader's existing >100 rejection remains unchanged. Independent retest by Sentinel and application by the permitted publisher are still required. No other behavior, dependencies, features, or architecture were changed.\"}\n```"
+      }
+    ],
+    "effective_tools": [],
+    "publisher": "Wrapper only publishes final responses to Issue #2; no worker GitHub edits. Product patches are applied by Atlas after review.",
+    "retry_count": 0,
+    "reported_cost_usd": 0.0162581,
+    "balance": "unknown; not readable through connector",
+    "cost_note": "CLI-reported estimates; not an invoice or remaining-balance guarantee. One V3 implementation correction after QA failure, not a repeated failed relay run."
+  },
+  "qa": {
+    "role": "Sentinel",
+    "runtime": "/root/sentinel_team001",
+    "version": 3,
+    "result": "PASS_WITH_LIMITS",
+    "passed": 18,
+    "failed": 0,
+    "node": "v24.19.0",
+    "method": "isolated Node VM and DOM/storage stubs; rendering replaced by stubs",
+    "artifact_sha256": "cd2fb8249f1313db1aa493256da4252ccd74e78c677f4bbe8a6bd3ec5aefcfe8",
+    "reproduce": "node tests/AG-TEAM-001-handoff.cjs",
+    "harness": "Sentinel's exact18 checks; Atlas added portable root-path default and nonzero exit on failure, reran all18 successfully. No criterion weakened.",
+    "browser_rendering": "NOT_TESTED",
+    "mobile_rendering": "NOT_TESTED",
+    "failed_history": {
+      "version": 2,
+      "passed": 15,
+      "failed": 3,
+      "sha256": "9b07eba5e6c9adae6f61f34a617acab05361c3231615734616184fe67eb616bd",
+      "findings": [
+        "fixture-ID collision",
+        "first ancestry unanchored",
+        "writer allowed101 entries but loader rejects101"
+      ],
+      "corrective_role": "Forge",
+      "correction_session": "48177660-49b8-483a-b522-0e9d3a9267c6"
+    }
+  },
+  "decisions_remaining": [
+    "Peter merge/release/publication decision",
+    "Real desktop/iPhone rendering evidence before full visual acceptance"
+  ],
+  "future_execution": "No automatic monitor, retry or standing paid budget activated; task claims prevent duplicate execution."
+}
