@@ -1,0 +1,24 @@
+{
+  "schema": "agentarium.handoff.v0",
+  "task_id": "AG-RELAY-001",
+  "source": "Atlas",
+  "target_role": "Claude Relay",
+  "worker_role": "process-agent",
+  "project": "pahlborn/agentarium",
+  "source_ref": "feature/visual-stage-v0",
+  "request": "Read-only activation probe only. Verify actual loaded technical identity and available tools for process-agent/Cadence; do not edit files or invoke other agents. Return one report.",
+  "return_target": "https://github.com/pahlborn/agentarium/issues/2",
+  "expected_reply": "ROLE_IDENTITY_ACK",
+  "allowed_actions": [
+    "read"
+  ],
+  "prohibited_actions": [
+    "push",
+    "merge",
+    "deploy",
+    "admin",
+    "modify_repository"
+  ],
+  "status": "AWAITING_RELAY",
+  "auto_execution": false
+}
