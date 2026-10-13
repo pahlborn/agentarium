@@ -34,6 +34,16 @@ def validate(task):
 def post(body):
     return api(API + "/issues/2/comments", {"body": body})
 
+def reject_replay(fetch=api):
+    page = 1
+    while True:
+        comments = fetch(API + "/issues/2/comments?per_page=100&page=" + str(page))
+        if any(MARKER in c.get("body", "") for c in comments):
+            raise RuntimeError("Replay prevented: this task version already claimed")
+        if len(comments) < 100:
+            return
+        page += 1
+
 def main():
     task = json.loads(Path("handoffs/AG-TEAM-001-task-v2.json").read_text())
     validate(task)
@@ -41,14 +51,7 @@ def main():
         raise RuntimeError("Wrong repository or branch")
     if api(API).get("private") is not True:
         raise RuntimeError("Private repository required")
-    page = 1
-    while True:
-        comments = api(API + "/issues/2/comments?per_page=100&page=" + str(page))
-        if any(MARKER in c.get("body", "") for c in comments):
-            raise RuntimeError("Replay prevented: this task version already claimed")
-        if len(comments) < 100:
-            break
-        page += 1
+    reject_replay()
     if not os.environ.get("ANTHROPIC_API_KEY"):
         raise RuntimeError("Missing API key")
     source = subprocess.check_output(["git", "show", BASE + ":index.html"])
@@ -121,6 +124,14 @@ def self_test():
             pass
         else:
             raise AssertionError(key)
+    pages = [[{"body":"unrelated"}]*100, [{"body":MARKER}]]
+    try:
+        reject_replay(lambda url: pages.pop(0))
+    except RuntimeError:
+        assert not pages
+    else:
+        raise AssertionError("Claim after page 1 was missed")
+    reject_replay(lambda url: [])
     print("SELF_TEST_OK — no model, no network")
 
 if __name__ == "__main__":
