@@ -1,0 +1,101 @@
+{
+  "envelope": "[AGENTARIUM:AG-VISUAL-004:QA:QA_REPORT:V1]",
+  "role": "Sentinel /root/sentinel_nachtpost_gewebe",
+  "baseline": "AG-VISUAL-004 spec V1 + testability addendum; inherited functional regressions",
+  "artifact": "nachtpost/visual004-gewebe.html",
+  "sha256": "81433293e2ad8fbdad5f065124e45616d729ddff38a0ef0566e0b58419c6c8c5",
+  "fixture_sha256": "a83886016cfaf312c0538ab86dbb6c72c3e056bd3204c0225cbb86aaafaf40ec",
+  "acceptance_sha256": "615e7eee6d6b9fdb8b794f0f3ca2abb0451362e34f53ae57e31f469fd53381fd",
+  "environment": {
+    "node": "v24.19.0",
+    "method": "Node VM, deterministic RAF and DOM/canvas test doubles; static source/CSS"
+  },
+  "started": "2026-10-13T21:25:53.707Z",
+  "duration_ms": 585,
+  "command": [
+    "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+    "/workspace/scratch/d750c8865a51/nachtpost/qa-visual004-gewebe.cjs",
+    "nachtpost/visual004-gewebe.html",
+    "nachtpost/fixture.json",
+    "nachtpost/acceptance.json"
+  ],
+  "retries": 0,
+  "results": [
+    {
+      "criterion": "AC-09",
+      "id": "identity-syntax",
+      "status": "passed"
+    },
+    {
+      "criterion": "AC-01",
+      "id": "fixture-semantics",
+      "status": "passed"
+    },
+    {
+      "criterion": "AC-06",
+      "id": "owners-and-parallel-every-timestamp",
+      "status": "passed"
+    },
+    {
+      "criterion": "AC-07",
+      "id": "cost-all-timestamps",
+      "status": "passed"
+    },
+    {
+      "criterion": "AC-02",
+      "id": "strict-next-and-end",
+      "status": "passed"
+    },
+    {
+      "criterion": "AC-02",
+      "id": "pause-seek-replay-boundaries",
+      "status": "passed"
+    },
+    {
+      "criterion": "AC-03",
+      "id": "hidden-freeze-playing-resume-no-jump",
+      "status": "passed"
+    },
+    {
+      "criterion": "AC-03",
+      "id": "hidden-paused-and-reduced-motion",
+      "status": "passed"
+    },
+    {
+      "criterion": "AC-02",
+      "id": "DOM-buttons-and-speed",
+      "status": "passed"
+    },
+    {
+      "criterion": "AC-05",
+      "id": "names-provider-model-role-selection-IDs",
+      "status": "passed"
+    },
+    {
+      "criterion": "AC-04",
+      "id": "dock-static-grid-mobile-stack",
+      "status": "passed"
+    },
+    {
+      "criterion": "AC-08",
+      "id": "no-network-storage-external-assets",
+      "status": "passed"
+    },
+    {
+      "criterion": "AC16/addendum",
+      "id": "seek-play-pause-transitions",
+      "status": "failed",
+      "evidence": "seek during play must pause at 59"
+    },
+    {
+      "criterion": "AC-10 / AC-04 / AC-06",
+      "id": "real-browser-visual-mobile-parallel",
+      "status": "not tested",
+      "evidence": "Chromium executable absent; canvas/DOM stubs do not establish pixel layout or artistic effect"
+    }
+  ],
+  "verdict": "FAIL",
+  "integrity": "No application, baseline or fixture edits; only QA harness/report writes. No external side effects.",
+  "next_action": "Atlas/Argus exact artifact review; actual browser visual QA before visual acceptance",
+  "limits": "No genuine browser, mobile pixels, aesthetic evaluation, or real integrations tested."
+}
