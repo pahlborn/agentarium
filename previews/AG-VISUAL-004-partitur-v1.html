@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NACHTPOST · Partitur</title>
+<style>
+:root{--ink:#f3ead3;--dim:#9aa0b8;--gold:#e7b84b;--vio:#b58bff}
+*{box-sizing:border-box}[hidden]{display:none!important}
+body{margin:0;min-height:100vh;color:var(--ink);font:14px/1.45 system-ui,"Segoe UI",sans-serif;background:radial-gradient(1100px 560px at 15% -10%,#1d1745 0,transparent 60%),radial-gradient(900px 500px at 100% 5%,#0b2358 0,transparent 55%),#06070c}
+.wrap{max-width:1560px;margin:0 auto;padding:18px clamp(12px,3vw,34px) 30px}
+.top{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;align-items:flex-end}
+.kicker{margin:0;color:var(--gold);letter-spacing:.18em;text-transform:uppercase;font-size:11px}
+h1{margin:2px 0;font:400 clamp(30px,5vw,58px)/1 Georgia,"Times New Roman",serif;letter-spacing:.22em}
+h1 span{font-style:italic;letter-spacing:.05em;font-size:.45em;color:var(--vio)}
+.sub{margin:0;color:var(--dim);font-size:12px}
+.stat{display:flex;gap:22px;text-align:right}.stat b{display:block;font:400 26px Georgia,serif;color:var(--gold)}.stat small{color:var(--dim);font-size:10px;letter-spacing:.1em;text-transform:uppercase}
+.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:16px 0 12px}
+button,.tg{font:inherit;color:var(--ink);background:rgba(255,255,255,.05);border:1px solid rgba(243,234,211,.25);border-radius:999px;padding:7px 14px;cursor:pointer}
+button:hover{background:rgba(255,255,255,.12)}button:disabled{opacity:.4;cursor:default}
+button[aria-pressed=true]{border-color:var(--gold);color:var(--gold)}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.tg{display:inline-flex;gap:6px;align-items:center}
+#seek{flex:1;min-width:180px;accent-color:var(--gold)}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:16px;align-items:start}
+.grid.nodock{grid-template-columns:minmax(0,1fr)}
+.stage{height:clamp(600px,76vh,780px);border:1px solid rgba(243,234,211,.12);border-radius:14px;background:linear-gradient(180deg,rgba(255,255,255,.025),rgba(0,0,0,.28))}
+canvas{width:100%;height:100%;display:block;cursor:pointer}
+.story{padding:14px 4px}.story .meta{margin:0;color:var(--gold);font-size:12px;letter-spacing:.08em}
+.story h2{margin:4px 0 6px;font:400 clamp(20px,2.4vw,30px)/1.2 Georgia,serif}
+.story p{margin:4px 0}.story .small{color:var(--dim);font-size:12px}
+.dock{border:1px solid rgba(243,234,211,.14);border-radius:14px;padding:16px;background:rgba(10,12,24,.72);position:sticky;top:10px}
+.dock h2{font:400 20px Georgia,serif;margin:0 0 10px}.dock h3{margin:14px 0 4px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--vio)}
+.dock dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:3px 10px;font-size:12px}.dock dt{color:var(--dim)}.dock dd{margin:0}
+.rg{display:flex;flex-wrap:wrap;gap:5px}.rg button{padding:3px 9px;font-size:12px}
+.note{color:var(--dim);font-size:11px;margin-top:14px}
+@media(max-width:860px){.grid{grid-template-columns:1fr}.dock{position:static}.stat{text-align:left}}
+</style></head><body><div class="wrap">
+<header class="top"><div><p class="kicker">Konzept · fiktive Demodaten</p><h1>NACHTPOST <span>Partitur</span></h1>
+<p class="sub">Eine Stadt aus ungesendeten Briefen · Erfundene Demokosten · actual models unbestätigt</p></div>
+<div class="stat"><div><b id="clock">0.0 s / 120 s</b><small>Zeit</small></div><div><b id="cost">$0.00</b><small>Erfundene Demokosten</small></div></div></header>
+<section class="controls" aria-label="Steuerung">
+<button id="play">Play</button><button id="next">Nächstes Ereignis</button><button id="replay">Replay</button>
+<input id="seek" type="range" min="0" max="120" step="0.1" value="0" aria-label="Zeitleiste in Sekunden">
+<span role="group" aria-label="Geschwindigkeit"><button class="sp" data-s="1" aria-pressed="true">1x</button> <button class="sp" data-s="2" aria-pressed="false">2x</button> <button class="sp" data-s="4" aria-pressed="false">4x</button></span>
+<label class="tg"><input type="checkbox" id="ids"> IDs</label>
+<button id="dk" aria-expanded="true" aria-controls="dock">Details ausblenden</button></section>
+<main id="grid" class="grid"><section><div class="stage" id="stage"><canvas id="cv" role="img" aria-label="Partitur mit neun Rollenspuren, Umgebungsspuren, Stadtsilhouette und Kostenverlauf. Detailansicht im Dock."></canvas></div>
+<div class="story" id="story" aria-live="polite"></div></section>
+<aside id="dock" class="dock" aria-label="Details"></aside></main></div>
+<script>
+(()=>{'use strict';
+const $=i=>document.getElementById(i),clamp=(v,a,b)=>Math.min(b,Math.max(a,v)),ease=k=>k*k*(3-2*k),GOLD='#e7b84b';
+const LBL='FREI ERFUNDENE DEMOKOSTEN; KEIN VERBRAUCHSNACHWEIS';
+const PF={human:'Mensch',chatgpt:'ChatGPT','claude-code':'Claude Code'},PV={human:'— (Mensch)',chatgpt:'OpenAI','claude-code':'Anthropic'};
+const RL={
+peter:{n:'Peter',pf:'human',col:'#f3ead3',s:'Siegeltor',w:'Unterschriftentisch: entscheidet und setzt Grenzen'},
+atlas:{n:'Atlas',pf:'chatgpt',col:'#5b8cff',s:'Weichennabe',w:'Stellwerk: leitet Übergaben und Wege'},
+nova:{n:'Nova',pf:'chatgpt',col:'#b58bff',s:'Prisma',w:'Lichtatelier: bricht Ideen in Farben'},
+scout:{n:'Scout',pf:'chatgpt',col:'#4fd1e0',s:'Linse',w:'Quellenfächer: sammelt und siebt Fragmente'},
+archibald:{n:'Archibald',pf:'claude-code',col:'#8a8cff',s:'Rasterplan',w:'Zeichensaal: entfaltet Pläne ins Raster'},
+forge:{n:'Forge',pf:'claude-code',col:'#ff8f7a',s:'Amboss',w:'Esse: schmiedet Bauteile'},
+argus:{n:'Argus',pf:'chatgpt',col:'#d9a5ff',s:'Auge',w:'Beobachtungsgalerie: stellt Einwände'},
+sentinel:{n:'Sentinel',pf:'chatgpt',col:'#6fe0b0',s:'Prüftor',w:'Prüfhalle: lässt Tore Probe laufen'},
+cadence:{n:'Cadence',pf:'claude-code',col:'#7fb3ff',s:'Taktgeber',w:'Taktwerk: ordnet Wiederholungen'}};
+const ROLES=Object.keys(RL),IX={};ROLES.forEach((r,i)=>IX[r]=i);
+const RAW=[
+['E01',0,'brief','peter','atlas','request','Gemeinsames Staunen, zurückziehbare Beiträge',[]],
+['E02',3,'vision','atlas','nova','handoff','Visionstrang eröffnet',['E01']],
+['E03',3,'evidence','atlas','scout','handoff','Speicherung und Rücknahme untersuchen',['E01']],
+['E04',8,'vision','nova','peter','question','Darf eine Löschung eine sichtbare Lücke hinterlassen?',['E02']],
+['E05',10,'evidence','scout','archibald','contribution','Abgeleitete Formen brauchen Herkunftsbeziehungen',['E03'],0.03],
+['E06',13,'vision','peter','nova','decision','Leere Stellen erlaubt; rekonstruierbare Textreste verboten',['E04'],0.04],
+['E07',17,'spec','atlas','archibald','handoff','Konzept in drei Epics und Stories entfalten',['E05','E06']],
+['E08',22,'spec','archibald','forge','artifact','Epics und Stories V1 bereit',['E07'],0.06],
+['E09',25,'build','atlas','forge','handoff','Gebäudegenerator unabhängig von offener Löschfrage bauen',['E08']],
+['E10',26,'review','atlas','argus','handoff','Rücknahme-Kriterien unabhängig prüfen',['E08']],
+['E11',32,'review','argus','archibald','objection','Eine verbliebene Brücke kann einen entfernten Ursprung verraten',['E10','E05'],0.04],
+['E12',36,'spec','archibald','scout','question','Welche gemeinsamen Ableitungen müssen zurückgenommen werden?',['E11']],
+['E13',40,'build','forge','sentinel','artifact','Stadtteil V1 zur Prüfung bereit',['E09'],0.12],
+['E14',42,'qa','atlas','sentinel','handoff','V1 gegen Story-Kriterien prüfen',['E13']],
+['E15',48,'qa','sentinel','forge','defect','Haus gelöscht, abgeleitete Brücke bleibt bestehen',['E14','E11'],0.03],
+['E16',50,'evidence','scout','archibald','answer','Veraltete Zuordnung und gemeinsame Ableitung betroffen',['E12'],0.02],
+['E17',53,'repair','atlas','forge','handoff','Herkunftskette reparieren; V1 bleibt nachvollziehbar',['E15','E16']],
+['E18',55,'vision','nova','forge','proposal','Lichtstege bei Rücknahme zerfallen lassen',['E06','E15'],0.03],
+['E19',59,'review','argus','nova','objection','Sichtbarer Zerfall ersetzt keine Entfernung gespeicherter Ableitungen',['E18'],0.02],
+['E20',60,'change','peter','atlas','change_request','Zwei Besucher sollen gemeinsam einen Brief gestalten können',['E01']],
+['E21',63,'process','atlas','cadence','handoff','Doppelte Korrekturarbeit durch zwei Löschbegriffe klären',['E15','E16']],
+['E22',66,'change','atlas','peter','question','Darf jeder Mitautor den gesamten gemeinsamen Beitrag zurückziehen?',['E20','E11']],
+['E23',69,'process','cadence','archibald','recommendation','Ein kanonisches Kriterium mit Verweisen auf beide Stories',['E21'],0.02],
+['E24',73,'change','peter','atlas','decision','Jeder Mitautor darf den gemeinsamen Beitrag vollständig zurückziehen',['E22']],
+['E25',77,'spec','archibald','forge','artifact','Story-Kriterien V2 inklusive gemeinsamer Rücknahme',['E23','E24','E16'],0.05],
+['E26',82,'repair','forge','sentinel','artifact','V2: Herkunftsreparatur und gemeinsamer Entwurf bereit',['E17','E25','E19'],0.1],
+['E27',85,'qa','atlas','sentinel','handoff','V2 gezielt und mit relevanten Regressionen prüfen',['E26']],
+['E28',92,'qa','sentinel','argus','test_result','Gezielte Prüfungen bestanden; unterbrochene Sitzungen ungeprüft',['E27'],0.04],
+['E29',96,'review','argus','atlas','review_result','Rücknahmelogik nachvollziehbar; Erlebnisabnahme bleibt offen',['E28','E11'],0.03],
+['E30',100,'brief','atlas','peter','handoff','Ergebnis und verbleibende Grenzen zur Entscheidung',['E29']],
+['E31',105,'vision','nova','atlas','question','Können zurückbleibende Lücken einen öffentlichen Garten bilden?',['E18','E29']],
+['E32',108,'garden-evidence','atlas','scout','handoff','Neue Idee unabhängig auf verbleibende Informationen prüfen',['E31']],
+['E33',108,'garden-review','atlas','argus','handoff','Neue Gartenidee unabhängig hinterfragen',['E31']],
+['E34',120,'brief','atlas',null,'open_state','Kein Abschluss: Erlebnisabnahme, Gartenfrage und Sitzungsprüfung offen',['E30','E32','E33']]];
+const events=RAW.map(r=>({id:r[0],at_seconds:r[1],task_id:r[2],actor:r[3],recipient:r[4],kind:r[5],title:r[6],caused_by:r[7],fictional:true,platform:RL[r[3]].pf,actual_model:null,actual_reasoning:null,cost_usd:null,input_tokens:null,output_tokens:null,synthetic_usage:r[8]==null?null:{cost_usd:r[8],label:LBL,tokens:null}}));
+const byId={};events.forEach(e=>byId[e.id]=e);
+const TK=[];events.forEach(e=>{if(!TK.includes(e.task_id))TK.push(e.task_id)});
+const cents=e=>e.synthetic_usage?Math.round(e.synthetic_usage.cost_usd*100):0;
+const cumR=(r,t)=>events.reduce((s,e)=>s+((r==null||e.actor===r)&&e.at_seconds<=t+1e-9?cents(e):0),0);
+const spans=events.map(e=>{const c=e.caused_by.map(i=>byId[i]).filter(x=>x.recipient===e.actor&&x.at_seconds<e.at_seconds).sort((a,b)=>a.at_seconds-b.at_seconds);
+const s=c.find(x=>x.task_id===e.task_id)||c[0];let a=s?s.at_seconds:e.at_seconds-2;a=Math.max(a,e.at_seconds-12,0);return{e,a,b:e.at_seconds}}).filter(s=>s.b>s.a);
+const BL=[['E05',38],['E08',62],['E13',100],['E16',48],['E25',72],['E26',92],['E29',56]];
+const ENV=['GitHub Werkhof','Claude-API-Kanal','Internet-Quellen','Werkzeug · optional'],ENVC=['#c9d3ff','#9aa6ff','#4fd1e0','#a0a8c0'];
+const envOf=e=>{const r=[];if(e.kind==='artifact'&&e.actor==='forge')r.push(0);if(e.platform==='claude-code')r.push(1);if(e.actor==='scout'||(e.recipient==='scout'&&e.kind==='handoff'))r.push(2);if(e.actor==='sentinel')r.push(3);return r};
+const EPS=[['EP-01','Brief verwandeln',['US-01 Brief als Lichtgebäude darstellen']],['EP-02','Nachbarschaft bilden',['US-02 Verwandte Briefe über abgeleitete Formen verbinden','US-04 Gemeinsamen Brief gestalten']],['EP-03','Beitrag zurückziehen',['US-03 Beitrag samt betroffenen Ableitungen zurücknehmen']]];
+const reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+const S={t:0,playing:!reduce,speed:1,ids:false,sel:null,role:null,dock:true,last:0,hov:null};
+let W=600,H=600,dirty=true,hits=[],geo=null,ukey='';
+const cv=$('cv'),cx=cv.getContext('2d');
+function owners(t){const o={},seg=[];events.forEach(e=>{if(e.at_seconds>t+1e-9)return;let n=o[e.task_id]==null?e.actor:null;if(e.kind==='handoff'&&e.recipient)n=e.recipient;if(n==null||o[e.task_id]===n)return;seg.forEach(s=>{if(s.task===e.task_id&&s.to==null)s.to=e.at_seconds});o[e.task_id]=n;seg.push({task:e.task_id,owner:n,from:e.at_seconds,to:null})});return{o,seg}}
+function selEv(){const p=S.sel&&byId[S.sel];if(p&&p.at_seconds<=S.t+1e-9)return p;let l=null;events.forEach(e=>{if(e.at_seconds<=S.t+1e-9)l=e});return l}
+function resize(){const r=cv.getBoundingClientRect(),d=Math.min(window.devicePixelRatio||1,2);W=Math.max(300,r.width);H=Math.max(480,r.height);cv.width=Math.round(W*d);cv.height=Math.round(H*d);cx.setTransform(d,0,0,d,0,0);dirty=true}
+function G(){const gut=W<600?64:110,x0=gut,x1=W-16,cityBot=Math.round(H*.2),y0=cityBot+24,rh=Math.floor(H*.42/9),tEnd=y0+9*rh,e0=tEnd+18,er=Math.floor(H*.15/4),eEnd=e0+4*er;
+return{gut,x0,x1,cityBot,y0,rh,tEnd,e0,er,eEnd,pT:eEnd+26,pB:H-14,X:t=>x0+(x1-x0)*t/120,ry:i=>y0+i*rh+rh*.42,ey:i=>e0+i*er+er*.5}}
+const ln=(a,b,c,d)=>{cx.beginPath();cx.moveTo(a,b);cx.lineTo(c,d);cx.stroke()};
+const tx=(s,x,y,z,c,w,al)=>{cx.font=(w||400)+' '+z+'px system-ui,sans-serif';cx.fillStyle=c;cx.textAlign=al||'left';cx.textBaseline='alphabetic';cx.fillText(s,x,y)};
+function sym(r,x,y,s,c){cx.strokeStyle=c;cx.fillStyle=c;cx.lineWidth=1.3;cx.beginPath();
+switch(r){
+case'peter':cx.arc(x,y+2,s*.7,Math.PI,0);cx.moveTo(x-s*.7,y+2);cx.lineTo(x-s*.7,y+s);cx.moveTo(x+s*.7,y+2);cx.lineTo(x+s*.7,y+s);break;
+case'atlas':for(let k=0;k<5;k++){const a=k*1.2566;cx.moveTo(x,y);cx.lineTo(x+Math.cos(a)*s,y+Math.sin(a)*s)}cx.moveTo(x+2,y);cx.arc(x,y,2,0,7);break;
+case'nova':cx.moveTo(x-s*.5,y+s*.7);cx.lineTo(x,y-s*.7);cx.lineTo(x+s*.5,y+s*.7);cx.closePath();cx.moveTo(x+s*.4,y);cx.lineTo(x+s*1.1,y-s*.4);cx.moveTo(x+s*.45,y+s*.3);cx.lineTo(x+s*1.1,y+s*.5);break;
+case'scout':cx.arc(x-1,y-1,s*.6,0,7);cx.moveTo(x+s*.4,y+s*.4);cx.lineTo(x+s,y+s);break;
+case'archibald':cx.rect(x-s*.8,y-s*.8,s*1.6,s*1.6);cx.moveTo(x,y-s*.8);cx.lineTo(x,y+s*.8);cx.moveTo(x-s*.8,y);cx.lineTo(x+s*.8,y);break;
+case'forge':cx.moveTo(x-s,y-3);cx.lineTo(x+s,y-3);cx.lineTo(x+s*.5,y);cx.lineTo(x+s*.4,y+s*.8);cx.lineTo(x-s*.4,y+s*.8);cx.lineTo(x-s*.5,y);cx.closePath();break;
+case'argus':cx.ellipse(x,y,s,s*.55,0,0,7);cx.moveTo(x+2,y);cx.arc(x,y,2,0,7);break;
+case'sentinel':cx.moveTo(x-s*.7,y-s*.8);cx.lineTo(x+s*.7,y-s*.8);cx.lineTo(x+s*.7,y+s*.1);cx.lineTo(x,y+s);cx.lineTo(x-s*.7,y+s*.1);cx.closePath();cx.moveTo(x-3,y);cx.lineTo(x-1,y+3);cx.lineTo(x+3,y-3);break;
+default:cx.moveTo(x-s*.7,y+s);cx.lineTo(x-s*.25,y-s);cx.lineTo(x+s*.25,y-s);cx.lineTo(x+s*.7,y+s);cx.closePath();cx.moveTo(x,y+s*.7);cx.lineTo(x+s*.5,y-s*.9)}
+cx.stroke()}
+function mark(k,x,y,c,r){cx.strokeStyle=c;cx.fillStyle=c;cx.lineWidth=1.3;cx.beginPath();
+const dia=q=>{cx.moveTo(x,y-q);cx.lineTo(x+q,y);cx.lineTo(x,y+q);cx.lineTo(x-q,y);cx.closePath()};
+switch(k){
+case'request':cx.arc(x,y,r,0,7);cx.stroke();break;
+case'handoff':cx.arc(x,y,r,0,7);cx.fill();cx.beginPath();cx.moveTo(x+r+1,y);cx.lineTo(x+r+6,y);cx.stroke();break;
+case'question':cx.arc(x,y,r,0,7);cx.stroke();cx.beginPath();cx.arc(x,y,1.4,0,7);cx.fill();break;
+case'decision':dia(r+1);cx.fill();break;
+case'proposal':dia(r+1);cx.stroke();break;
+case'recommendation':dia(r-.5);cx.stroke();break;
+case'artifact':cx.fillRect(x-r,y-r,2*r,2*r);break;
+case'test_result':cx.strokeRect(x-r,y-r,2*r,2*r);break;
+case'defect':cx.moveTo(x,y-r-1);cx.lineTo(x+r+1,y+r);cx.lineTo(x-r-1,y+r);cx.closePath();cx.fill();break;
+case'objection':cx.moveTo(x-r,y-r);cx.lineTo(x+r,y+r);cx.moveTo(x+r,y-r);cx.lineTo(x-r,y+r);cx.stroke();break;
+case'change_request':dia(r+3);cx.fill();break;
+case'answer':cx.arc(x,y,r,0,7);cx.fill();cx.beginPath();cx.arc(x,y,r+3,0,7);cx.stroke();break;
+case'review_result':cx.arc(x,y,r+1,0,7);cx.stroke();cx.beginPath();cx.moveTo(x-2,y);cx.lineTo(x,y+2);cx.lineTo(x+3,y-2);cx.stroke();break;
+case'open_state':cx.setLineDash([2,2]);cx.arc(x,y,r+1,0,7);cx.stroke();cx.setLineDash([]);break;
+default:cx.arc(x,y,r,0,7);cx.fill()}}
+function arcE(a,b,col,w,al,g){const xa=g.X(a.at_seconds),ya=g.ry(IX[a.actor]),xb=g.X(b.at_seconds),yb=g.ry(IX[b.actor]);cx.strokeStyle=col;cx.lineWidth=w;cx.globalAlpha=al;cx.beginPath();cx.moveTo(xa,ya);cx.bezierCurveTo(xa+(xb-xa)*.2,ya-(Math.abs(yb-ya)+12)*.35,xb-(xb-xa)*.2,yb-(Math.abs(yb-ya)+12)*.35-4,xb,yb);cx.stroke();cx.globalAlpha=1}
+function motif(sp,g,t){const e=sp.e,y=g.ry(IX[e.actor]),c=RL[e.actor].col,a=g.X(sp.a),b=g.X(Math.min(sp.b,t)),f=g.X(sp.b)-a||1,L=b-a,n=Math.max(2,Math.round(L/2));cx.save();cx.strokeStyle=c;cx.fillStyle=c;cx.lineWidth=1.2;cx.globalAlpha=.9;const wv=(ph,am,fr,d)=>{cx.beginPath();for(let i=0;i<=n;i++){const x=a+L*i/n,u=(x-a)/f,yy=y+Math.sin(u*Math.PI*fr+ph)*am*(d?1-u:1);i?cx.lineTo(x,yy):cx.moveTo(x,yy)}cx.stroke()};
+switch(e.actor){case'forge':for(let s=0;s<3;s++)wv(s*2.094,3.4,6);break;case'argus':wv(0,4,4);cx.strokeStyle='#ffe27a';wv(Math.PI,4,4);break;case'cadence':wv(0,4,7,1);cx.strokeStyle='#9dff8a';wv(Math.PI,4,7,1);break;case'sentinel':for(let x=a;x<=b;x+=4){cx.beginPath();cx.moveTo(x,y-4+((x-a)/4%2)*2);cx.lineTo(x,y+4);cx.stroke()}break;case'scout':for(let s=-1;s<=1;s++){cx.beginPath();cx.moveTo(a,y);cx.lineTo(b,y+s*4*Math.min(1,L/f));cx.stroke()}break;case'archibald':cx.beginPath();for(let i=0;i<=n;i++){const x=a+L*i/n,yy=y+2.5-(Math.floor((x-a)/7)%3)*2.5;i?cx.lineTo(x,yy):cx.moveTo(x,yy)}cx.stroke();break;case'nova':for(let s=-1;s<=1;s++){cx.strokeStyle=['#ff8fe0','#ffe27a','#5fe9ff'][s+1];cx.beginPath();cx.moveTo(a,y);cx.lineTo(b,y+s*3.5*Math.min(1,L/f));cx.stroke()}break;case'atlas':[-2,2].forEach(o=>ln(a,y+o,b,y+o));for(let x=a;x<=b;x+=6)ln(x,y-3,x,y+3);break;default:cx.setLineDash([5,3]);ln(a,y,b,y)}cx.restore()}
+function phases(g,t){const X=g.X,A=g.er*.2,y=k=>g.ey(k);cx.save();cx.lineWidth=1.2;
+if(t>3){const yc=y(0),b=Math.min(t,13);for(let s=-2;s<=2;s++){cx.strokeStyle=s===0?'#ffe9b0':'#4fd1e0';cx.globalAlpha=s===0?1:Math.abs(s)===1?.35:.6;cx.beginPath();for(let q=3,f=1;q<=b;q+=.25,f=0){const u=(q-3)/10;if(s%2&&u>.65)break;const yy=yc+Math.sin(Math.PI*u)*A*s;f?cx.moveTo(X(q),yy):cx.lineTo(X(q),yy)}cx.stroke()}cx.globalAlpha=1}
+if(t>25){const yc=y(1),b=Math.min(t,40);cx.strokeStyle='#ff8f7a';for(let s=0;s<3;s++){cx.beginPath();for(let q=25,f=1;q<=b;q+=.25,f=0){const u=(q-25)/15,yy=yc+Math.sin(u*Math.PI*6+s*2.094)*A*1.4*(.3+.7*u);f?cx.moveTo(X(q),yy):cx.lineTo(X(q),yy)}cx.stroke()}if(t>=40){cx.fillStyle='#ff8f7a';cx.fillRect(X(40)-3,yc-3,6,6)}}
+if(t>26){const yc=y(2),b=Math.min(t,36);[['#d9a5ff',1],['#ffe27a',-1]].forEach(p=>{cx.strokeStyle=p[0];cx.beginPath();for(let q=26,f=1;q<=b;q+=.25,f=0){const u=(q-26)/10,yy=yc+p[1]*Math.sin(u*Math.PI*3)*A*1.5;f?cx.moveTo(X(q),yy):cx.lineTo(X(q),yy)}cx.stroke()});if(t>=32){const x=X(32);cx.strokeStyle='#d9a5ff';ln(x-3,yc-3,x+3,yc+3);ln(x+3,yc-3,x-3,yc+3)}}
+{const yc=y(3),tk=(a,b,col)=>{if(t<=a)return;cx.strokeStyle=col;for(let q=a;q<=Math.min(t,b)+1e-9;q+=.75)ln(X(q),yc-A*1.4+((q-a)/.75%2)*A*.6,X(q),yc+A*1.4)};tk(42,48,'#6fe0b0');if(t>=48){const x=X(48);cx.strokeStyle='#ff6b6b';cx.lineWidth=1.8;cx.beginPath();cx.moveTo(x,yc-A*2);cx.lineTo(x+3,yc-A*.8);cx.lineTo(x-3,yc);cx.lineTo(x+3,yc+A*.8);cx.lineTo(x,yc+A*2);cx.stroke();cx.lineWidth=1.2}if(t>53){cx.strokeStyle=GOLD;for(let q=53;q<=Math.min(t,82)+1e-9;q+=2)ln(X(q)-2,yc-A,X(q)+2,yc+A)}if(t>=82){cx.strokeStyle=GOLD;cx.lineWidth=2;ln(X(82),yc,X(t),yc);cx.lineWidth=1.2}tk(85,92,'#6fe0b0');if(t>=92)tx('✓',X(92)+4,yc+4,10,'#6fe0b0',700)}cx.restore()}
+function draw(){
+const g=G(),t=S.t,X=g.X,ry=g.ry,ey=g.ey,vis=events.filter(e=>e.at_seconds<=t+1e-9),sel=selEv(),own=owners(t);geo=g;
+cx.clearRect(0,0,W,H);hits=[];cx.lineWidth=1;cx.setLineDash([]);
+for(let s=0;s<=120;s+=10){const x=X(s);cx.strokeStyle='rgba(243,234,211,.06)';ln(x,g.y0,x,g.eEnd);tx(String(s),x,g.tEnd+12,9,'rgba(243,234,211,.4)',400,'center')}
+/* city */
+const base=g.cityBot-4,sc=(g.cityBot-26)/110,bpos={};
+cx.strokeStyle='rgba(243,234,211,.25)';ln(g.x0,base,g.x1,base);
+tx('Briefstadt',10,base-4,11,'rgba(243,234,211,.55)',400);
+BL.forEach(([id,h])=>{const e=byId[id],k=ease(clamp((t-e.at_seconds)/3,0,1));if(k<=0)return;const w=Math.max(14,(g.x1-g.x0)*.03),x=X(e.at_seconds),hh=h*sc*k;bpos[id]={x,top:base-hh,w};
+cx.fillStyle=(id==='E13'||id==='E26')?'rgba(150,110,255,.18)':'rgba(80,130,255,.13)';cx.fillRect(x-w/2,base-hh,w,hh);
+cx.strokeStyle='rgba(243,234,211,.7)';cx.lineWidth=1;cx.strokeRect(x-w/2+.5,base-hh+.5,w-1,hh-1);
+for(let j=0;j*9+10<hh;j++)for(let i=0;i<2;i++)tx('NACHTPOST'[(j*2+i+id.charCodeAt(2))%9],x-w/2+3+i*(w/2-1),base-hh+9*j+10,7,'rgba(243,234,211,.38)',400)});
+if(t>=105){const k=ease(clamp((t-105)/3,0,1)),x=X(105),w=Math.max(14,(g.x1-g.x0)*.03),hh=34*sc*k;cx.setLineDash([3,3]);cx.strokeStyle='rgba(181,139,255,.8)';cx.strokeRect(x-w/2,base-hh,w,hh);cx.setLineDash([]);if(k>.9)tx('Garten?',x,base-hh-3,8,'#b58bff',400,'center')}
+if(bpos.E05&&bpos.E13){const a=bpos.E05,b=bpos.E13,my=Math.min(a.top,b.top)-14;cx.lineWidth=t>=48&&t<82?2:1.2;cx.strokeStyle=t>=48&&t<82?'#ff6b6b':t>=82?GOLD:'rgba(243,234,211,.6)';cx.setLineDash(t>=82?[4,3]:[]);cx.beginPath();cx.moveTo(a.x,a.top);cx.quadraticCurveTo((a.x+b.x)/2,my,b.x,b.top);cx.stroke();cx.setLineDash([]);
+tx(t>=48&&t<82?'Brücke · Defekt':t>=82?'Brücke · Reparatur gemeldet':'Brücke',(a.x+b.x)/2,my+2,8,t>=48&&t<82?'#ff8a8a':'rgba(243,234,211,.6)',400,'center')}
+const off={};vis.filter(e=>['objection','defect','test_result','review_result'].includes(e.kind)&&e.recipient!=='nova').forEach(e=>{
+const bid=BL.map(b=>b[0]).reverse().find(id=>byId[id].at_seconds<=e.at_seconds&&bpos[id]);if(!bid)return;const b=bpos[bid],n=off[bid]=(off[bid]||0)+1,x=b.x-b.w/2+4+(n-1)*9,y=b.top-8;
+const open=e.kind==='defect'&&t<82,fixed=e.kind==='defect'&&t>=82;cx.lineWidth=1.4;cx.strokeStyle=open?'#ff6b6b':'rgba(243,234,211,.9)';cx.setLineDash(fixed?[2,2]:[]);cx.beginPath();cx.arc(x,y,4,0,7);if(open){cx.fillStyle='rgba(255,107,107,.45)';cx.fill()}cx.stroke();cx.setLineDash([]);
+tx(open?'!':fixed?'↺':e.kind==='objection'?'?':'✓',x,y+3,8,open?'#fff':'#f3ead3',700,'center')});
+/* fragments */
+['E05','E16'].forEach(id=>{const e=byId[id],s=e.at_seconds-6,p=(t-s)/6,b=BL.find(x=>x[0]===id);if(p<=0||p>1||!b)return;const tx2=X(e.at_seconds),ty=base-b[1]*sc*.8;
+for(let k=0;k<9;k++){const q=clamp(p*1.15-k*.02,0,1),sx=X(s)+(k-4)*7,sy=ey(2),x=sx+(tx2-sx)*q+Math.sin(q*6+k)*5,y=sy+(ty-sy)*q,bad=k%3===1;let a=.85;if(bad)a=q<.5?.85:Math.max(0,.85-(q-.5)*3);else if(q>.9)a=Math.max(0,(1-q)*8);
+cx.globalAlpha=a;cx.fillStyle=bad?'#ff7a8a':'#ffe9b0';cx.fillRect(x-2,y-2,4,4);cx.globalAlpha=1}});
+/* tracks */
+ROLES.forEach((r,i)=>{const y=ry(i),c=RL[r].col;if(i%2){cx.fillStyle='rgba(255,255,255,.022)';cx.fillRect(4,g.y0+i*g.rh,W-8,g.rh)}
+cx.lineWidth=1;cx.strokeStyle='rgba(243,234,211,.14)';ln(g.x0,y,g.x1,y);cx.strokeStyle=c+'66';ln(g.x0,y,X(t),y);
+sym(r,16,y,7,c);const nx=W<600?30:34;if(S.role===r||S.hov===r){tx(RL[r].n,nx,y+1,W<600?11:13,GOLD,600);if(S.ids)tx(PF[RL[r].pf],nx,y+11,9,'#9aa0b8',400)}});
+spans.forEach(sp=>{if(sp.a>=t)return;motif(sp,g,t)});
+[[25,32,'forge','argus'],[36,40,'archibald','forge'],[108,120,'scout','argus']].forEach(p=>{if(t<=p[0])return;const x0=g.X(p[0]),x1=g.X(Math.min(t,p[1])),ya=ry(IX[p[2]]),yb=ry(IX[p[3]]),top=Math.min(ya,yb)-g.rh*.45;cx.fillStyle='rgba(231,184,75,.07)';cx.fillRect(x0,top,x1-x0,Math.abs(yb-ya)+g.rh*.9);cx.strokeStyle='rgba(231,184,75,.7)';cx.lineWidth=1.2;ln(x0,top,x0,Math.max(ya,yb)+g.rh*.45);tx('∥',x0+3,top+9,10,GOLD,700)});
+/* gold responsibility */
+own.seg.forEach(s=>{const lane=TK.indexOf(s.task)%3,y=ry(IX[s.owner])+8+lane*3.2,xa=X(s.from),xb=X(s.to==null?t:s.to);cx.strokeStyle=GOLD;cx.lineWidth=2;cx.globalAlpha=s.to==null?1:.5;ln(xa,y,xb,y);cx.globalAlpha=1;
+if(s.to==null){cx.fillStyle=GOLD;cx.beginPath();cx.arc(xb,y,3.4,0,7);cx.fill();cx.strokeStyle='#fff3c4';cx.lineWidth=.8;cx.stroke();
+const right=xb<g.x1-60;if(S.ids)tx(s.task.slice(0,9),right?xb+6+lane*0:xb-6,y+3+(lane-1)*0,8,GOLD,500,right?'left':'right')}});
+/* communication, question arcs, CR */
+vis.forEach(e=>{if(!e.recipient||e.recipient===e.actor)return;const x=X(e.at_seconds),ya=ry(IX[e.actor]),yb=ry(IX[e.recipient]),c=RL[e.actor].col;cx.strokeStyle=c+'88';cx.lineWidth=.8;cx.setLineDash([2,3]);cx.beginPath();cx.moveTo(x,ya);cx.quadraticCurveTo(x+12,(ya+yb)/2,x+16,yb);cx.stroke();cx.setLineDash([]);cx.fillStyle=c+'aa';cx.beginPath();cx.arc(x+16,yb,1.6,0,7);cx.fill()});
+vis.filter(e=>e.kind==='question').forEach(q=>vis.filter(c=>c.caused_by.includes(q.id)).forEach(c=>arcE(q,c,'#b58bff',1.3,.8,g)));
+const cr=vis.filter(e=>e.task_id==='change');if(cr.length>1){cx.strokeStyle='#ff5fb0';cx.lineWidth=1;cx.globalAlpha=.75;cx.setLineDash([6,3]);cx.beginPath();cr.forEach((e,j)=>j?cx.lineTo(X(e.at_seconds),ry(IX[e.actor])):cx.moveTo(X(e.at_seconds),ry(IX[e.actor])));cx.stroke();cx.setLineDash([]);cx.globalAlpha=1}
+/* marks */
+events.forEach(e=>{if(e.at_seconds>t+1e-9){cx.globalAlpha=.14;cx.fillStyle=RL[e.actor].col;cx.beginPath();cx.arc(X(e.at_seconds),ry(IX[e.actor]),1.6,0,7);cx.fill();cx.globalAlpha=1}});
+vis.forEach(e=>{const x=X(e.at_seconds),y=ry(IX[e.actor]),c=e.kind==='defect'?'#ff6b6b':e.kind==='change_request'?'#ff5fb0':RL[e.actor].col,age=t-e.at_seconds;
+if(age<1.6){cx.globalAlpha=.5*(1-age/1.6);cx.strokeStyle=c;cx.lineWidth=1;cx.beginPath();cx.arc(x,y,5+age*7,0,7);cx.stroke();cx.globalAlpha=1}
+mark(e.kind,x,y,c,4.2);hits.push({id:e.id,x,y});
+if(e.kind==='change_request')tx('CR',x+9,y-6,9,'#ff5fb0',700);
+if(S.ids)tx(e.id,x,y-8-(+e.id.slice(1)%2)*8,8,'rgba(243,234,211,.85)',500,'center')});
+if(sel){sel.caused_by.forEach(i=>arcE(byId[i],sel,'#f3ead3',1.5,.9,g));cx.strokeStyle='#f3ead3';cx.lineWidth=1.5;cx.beginPath();cx.arc(X(sel.at_seconds),ry(IX[sel.actor]),9,0,7);cx.stroke()}
+/* phasen */
+tx('Kausale Verwandlung: Fund → Bau → Einwand → Bruch → Naht',10,g.e0-6,9,'#9aa0b8',400);['Fund','Bau','Einwand','Bruch·Naht'].forEach((n,i)=>{const y=ey(i);cx.strokeStyle='rgba(243,234,211,.1)';cx.lineWidth=1;ln(g.x0,y,g.x1,y);tx(n,10,y+3,9,'rgba(200,205,225,.75)',400)});phases(g,t);
+/* cost */if(S.ids){const pw=g.pB-g.pT,Y=v=>g.pB-pw*v/63;
+tx(W<600?'Demokosten':'Erfundene Demokosten',10,g.pT+10,10,'rgba(200,205,225,.8)',400);tx('kumulativ, nach Rolle',10,g.pT+22,9,'#9aa0b8',400);
+cx.strokeStyle='rgba(243,234,211,.25)';ln(g.x0,g.pB,g.x1,g.pB);tx('$0',g.x0-4,g.pB,9,'#9aa0b8',400,'right');tx('$0.63',g.x0-4,g.pT+8,9,'#9aa0b8',400,'right');
+const ts=[0];events.forEach(e=>{if(cents(e)&&e.at_seconds<=t+1e-9&&!ts.includes(e.at_seconds))ts.push(e.at_seconds)});
+ROLES.forEach((r,k)=>{if(!cumR(r,t))return;const hi=u=>ROLES.slice(0,k+1).reduce((s,q)=>s+cumR(q,u),0),lo=u=>hi(u)-cumR(r,u),top=[],bot=[];
+ts.forEach((u,j)=>{const x=X(u);if(j){top.push([x,hi(ts[j-1])]);bot.push([x,lo(ts[j-1])])}top.push([x,hi(u)]);bot.push([x,lo(u)])});
+const L=ts[ts.length-1];top.push([X(t),hi(L)]);bot.push([X(t),lo(L)]);cx.beginPath();top.concat(bot.reverse()).forEach((p,j)=>j?cx.lineTo(p[0],Y(p[1])):cx.moveTo(p[0],Y(p[1])));cx.closePath();cx.fillStyle=RL[r].col+'88';cx.fill();cx.strokeStyle=RL[r].col;cx.lineWidth=.8;cx.stroke()});
+if(sel&&cents(sel)){const x=X(sel.at_seconds),y=Y(cumR(null,sel.at_seconds));cx.strokeStyle=GOLD;cx.lineWidth=1.5;cx.beginPath();cx.arc(x,y,4.5,0,7);cx.stroke()}
+}/* cursor */
+const xc=X(t);cx.strokeStyle='rgba(243,234,211,.75)';cx.lineWidth=1;ln(xc,g.y0-14,xc,g.pB);tx(t.toFixed(1)+' s',clamp(xc,g.x0+16,g.x1-16),g.y0-18,10,'#f3ead3',600,'center')}
+function ui(){
+const t=S.t,e=selEv(),own=owners(t),sl=$('seek');
+$('clock').textContent=t.toFixed(1)+' s / 120 s';$('cost').textContent='$'+(cumR(null,t)/100).toFixed(2);$('cost').parentNode.hidden=!S.ids;
+if(document.activeElement!==sl||S.playing)sl.value=t;sl.setAttribute('aria-valuetext',t.toFixed(1)+' Sekunden'+(S.ids?', erfundene Kosten $'+(cumR(null,t)/100).toFixed(2):''));
+$('play').textContent=S.playing?'Pause':'Play';$('play').disabled=t>=120;$('next').disabled=false;
+let la=null;events.forEach(x=>{if(x.at_seconds<=t+1e-9)la=x});const quiet=!S.sel&&la&&t-la.at_seconds>=3?Math.floor(t-la.at_seconds):0;
+const role=S.role||(e?e.actor:'atlas'),key=(e?e.id:'')+'|'+role+'|'+quiet+'|'+JSON.stringify(own.o)+(S.sel||'')+S.ids;
+if(key===ukey)return;ukey=key;
+const nm=i=>i?RL[i].n:'—',cs=e&&e.caused_by.length?e.caused_by.map(i=>(S.ids?byId[i].id+' ':'')+byId[i].title).join(' · '):'—';
+$('story').innerHTML=(e?'<p class="meta">'+(S.ids?e.id+' · ':'')+e.at_seconds+' s · '+e.kind+' · '+nm(e.actor)+' → '+nm(e.recipient)+'</p><h2>'+e.title+'</h2><p class="small">Ausgelöst durch: '+cs+'</p>':'')
++(quiet?'<p class="small">Stille · seit '+quiet+' s kein Ereignis. Verantwortung bleibt, wo sie liegt.</p>':'')
++'<p class="small">'+EPS.map(p=>p[0]+' '+p[1]+': '+p[2].filter(s=>t>=60||!s.startsWith('US-04')).join(' · ')).join(' &nbsp;|&nbsp; ')+(t>=60?' (US-04 eingeführt durch E20)':'')+'</p><p class="small">Reported, fiktiv: keine Agentenantworten simuliert, keine Produktabnahme durch Peter, kein Gesamtfortschritt.</p>';
+const R=RL[role],ob=Object.keys(own.o).filter(k=>own.o[k]===role);
+$('dock').innerHTML='<h2>Details</h2><div class="rg" role="group" aria-label="Rolle wählen">'+ROLES.map(r=>'<button data-r="'+r+'" aria-pressed="'+(r===role)+'">'+RL[r].n+'</button>').join('')+'</div>'
++'<h3>Rolle</h3><dl><dt>Name</dt><dd>'+R.n+'</dd>'+(S.ids?'<dt>Plattform</dt><dd>'+PF[R.pf]+'</dd><dt>Anbieter</dt><dd>'+PV[R.pf]+' (aus Plattform abgeleitet)</dd><dt>Modell</dt><dd>nicht vorhanden (unbestätigt)</dd>':'')+'<dt>Symbol</dt><dd>'+R.s+' · '+R.w+'</dd><dt>BALL jetzt</dt><dd>'+(ob.length?ob.join(', '):'keine Aufgabe')+'</dd>'+(S.ids?'<dt>Demokosten</dt><dd>$'+(cumR(role,t)/100).toFixed(2)+' erfunden ('+LBL+')</dd>':'')+'</dl>'
++(e?'<h3>Ereignis'+(S.ids?' '+e.id:'')+'</h3><dl><dt>Titel</dt><dd>'+e.title+'</dd><dt>Zeit</dt><dd>'+e.at_seconds+' s</dd><dt>Aufgabe</dt><dd>'+e.task_id+'</dd><dt>Art</dt><dd>'+e.kind+'</dd><dt>Von → an</dt><dd>'+nm(e.actor)+' → '+nm(e.recipient)+'</dd>'+(S.ids?'<dt>caused_by</dt><dd>'+(e.caused_by.join(', ')||'—')+'</dd><dt>Kosten</dt><dd>'+(e.synthetic_usage?'$'+e.synthetic_usage.cost_usd.toFixed(2)+' · '+LBL:'keine synthetic_usage')+'</dd><dt>Tokens (tatsächlich)</dt><dd>nicht vorhanden</dd><dt>Tatsächliche Kosten</dt><dd>nicht vorhanden</dd>':'')+'</dl>':'')
++'<p class="note">Konzept · fiktive Demodaten. Erfundene Demokosten; actual models unbestätigt. Keine Echtintegration.</p>'}
+function sync(){dirty=false;draw();ui()}
+function seek(s){S.t=clamp(+s||0,0,120);S.sel=null;if(S.t>=120)S.playing=false;S.last=0;sync();return S.t}
+function step(){let n=null;for(const e of events)if(e.at_seconds>S.t+1e-9){n=e.at_seconds;break}S.t=n==null?120:n;S.playing=false;S.sel=null;sync();return S.t}
+function pause(){S.playing=false;sync()}
+function play(){if(S.t<120){S.playing=true;S.sel=null;S.last=0}sync()}
+function replay(){S.t=0;S.sel=null;S.playing=true;S.last=0;sync()}
+function tick(now){requestAnimationFrame(tick);if(document.hidden){S.last=0;return}
+if(S.playing){if(S.last){S.t=Math.min(120,S.t+Math.min(.25,(now-S.last)/1000)*S.speed);if(S.t>=120){S.t=120;S.playing=false}dirty=true}S.last=now}else S.last=0;
+if(dirty)sync()}
+document.addEventListener('visibilitychange',()=>{S.last=0;dirty=true});
+$('play').onclick=()=>S.playing?pause():play();$('next').onclick=step;$('replay').onclick=replay;
+$('seek').oninput=e=>seek(e.target.value);
+document.querySelectorAll('.sp').forEach(b=>b.onclick=()=>{S.speed=+b.dataset.s;S.last=0;document.querySelectorAll('.sp').forEach(x=>x.setAttribute('aria-pressed',x===b))});
+$('ids').onchange=e=>{S.ids=e.target.checked;sync()};
+$('dk').onclick=()=>{S.dock=!S.dock;$('dock').hidden=!S.dock;$('grid').classList.toggle('nodock',!S.dock);$('dk').setAttribute('aria-expanded',S.dock);$('dk').textContent=S.dock?'Details ausblenden':'Details einblenden';resize();sync()};
+$('dock').onclick=e=>{const b=e.target.closest('[data-r]');if(b){S.role=b.dataset.r;ukey='';sync()}};
+cv.addEventListener('click',ev=>{const r=cv.getBoundingClientRect(),x=ev.clientX-r.left,y=ev.clientY-r.top;let best=null,bd=14;hits.forEach(h=>{const d=Math.hypot(h.x-x,h.y-y);if(d<=bd){bd=d;best=h}});
+if(best){S.sel=best.id;S.role=byId[best.id].actor}else if(geo&&x<geo.gut&&y>=geo.y0&&y<geo.tEnd){S.role=ROLES[clamp(Math.floor((y-geo.y0)/geo.rh),0,8)];S.sel=null}else return;
+if(!S.dock)$('dk').click();ukey='';sync()});
+if(window.ResizeObserver)new ResizeObserver(()=>{resize()}).observe($('stage'));$('ids').nextSibling.textContent=' Metadaten (IDs, Modell, Kosten)';cv.addEventListener('mousemove',ev=>{const r=cv.getBoundingClientRect(),x=ev.clientX-r.left,y=ev.clientY-r.top;let h=null,bd=14;hits.forEach(k=>{const d=Math.hypot(k.x-x,k.y-y);if(d<=bd){bd=d;h=byId[k.id].actor}});if(!h&&geo&&x<geo.gut&&y>=geo.y0&&y<geo.tEnd)h=ROLES[clamp(Math.floor((y-geo.y0)/geo.rh),0,8)];if(h!==S.hov){S.hov=h;dirty=true}});window.addEventListener('resize',resize);
+resize();sync();requestAnimationFrame(tick);
+window.AG_NACHTPOST={events,getState:()=>({time:S.t,playing:S.playing,cost:cumR(null,S.t)/100,ownerByTask:Object.assign({},owners(S.t).o),selected:(selEv()||{}).id||null}),seek,step,pause,play,replay};
+})();
+</script></body></html>
