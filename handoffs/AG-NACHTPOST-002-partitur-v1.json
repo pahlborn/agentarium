@@ -1,0 +1,33 @@
+{
+  "schema": "agentarium.handoff.v1",
+  "task_id": "AG-NACHTPOST-002-PARTITUR",
+  "version": 1,
+  "recipient": "Forge/coding-agent",
+  "status": "AUTHORIZED",
+  "base_commit": "1e812fb0e5f9f9f76a753bb57acbbdc2bb6111c2",
+  "variant": "partitur",
+  "budget_cap_usd": 0.4,
+  "requested_model": "sonnet",
+  "requested_effort": "medium",
+  "max_turns": 1,
+  "authorization": {
+    "source": "Peter",
+    "text": "Nein. Forge soll umsetzen, nicht du. Auch wenn es kostet. Allerdings möchte ich wissen warum der Abbruch kam",
+    "scope": "Two runnable private offline previews, existing relay; no merge/deploy; no automatic retry"
+  },
+  "team_context": "Peter asks every role to bring initiative, creativity and useful objections. Nova's creative direction is supplied. Return code for this clear bounded implementation; no claims about own testing.",
+  "requirements": "Build ONE self-contained runnable HTML document (doctype/head/body allowed), plain Canvas2D or SVG and JS, inline data/styles, no external assets, APIs, storage or dependencies. Return exactly one fenced html block, no prose, <=36000 characters. Use fictional_fixture EXACT event IDs/title/time/caused_by/synthetic_usage, 120s story. Do not simulate actual agent answers. Labels Konzept · fiktive Demodaten, Erfundene Demokosten; actual models unbestätigt. Controls play/pause, next event, replay, timeline seek, 1x/2x/4x, IDs toggle, contextual dock toggle, view role details on click. Dock occupies own grid column never overlays; mobile stacks below. Replay and pause deterministic; hidden page freezes no resume jump; reduced motion initially paused; end-step stays end, replay explicit. Names/platform visible for all nine roles; provider identity separate from model. Responsibility per task (multiple concurrent BALL seals), gold; communication thinner different style. Agent symbols reveal distinctive workworld/action, not people. GitHub Werkhof, Claude API channel, Internet source fan and optional tool stations shown as demo environment; no real integrations. Sources arrive then bad fragments fade and selected material forms building; role work windows derived from events not always activity. Local review on building, defect persistent until repair; show question and CR links. Cost stratification/step plot grows from synthetic_usage only, exact cumulative at timeline, selected event cost and tokens unknown. Story text context readable. Elegant spectacular premium dark UI; ample stage with hierarchical typography, not a card dashboard. Include test hook window.AG_NACHTPOST = {events, getState:()=>({time,playing,cost,ownerByTask}), seek(seconds), step(), pause(), play()}; adapt property names but keep this API. JS robust to resizing; accessible native controls. Own creativity and alternatives in visual treatment welcome within scope.",
+  "art_direction": "Architectural score across obsidian, ivory precise notation, cobalt/violet counterpoints and gold responsibility seals. Nine named tracks show overlapping work spans, questions and response arcs, event notations, change request side phrase, local review/repetition. Above tracks a delicate emerging letter-city silhouette. Environment tracks below. Timeline cursor reveals selected story moment; meaningful waiting silence. Radically different from web view.",
+  "failure_diagnosis": {
+    "prior_run": "38456137935",
+    "category": "LOCAL_RELAY_TIMEOUT",
+    "elapsed_seconds": 180.017,
+    "root_provider_cause": "unknown",
+    "corrective_changes": [
+      "stream metadata to distinguish activity",
+      "600-second finite deadline instead of180",
+      "estimated CLI cap USD0.40; no model upgrade"
+    ],
+    "automatic_retry": false
+  }
+}
