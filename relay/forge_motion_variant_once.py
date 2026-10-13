@@ -7,7 +7,7 @@ from pathlib import Path
 import subprocess
 import tempfile
 from forge_one_shot import api, API, classify_failure
-from claude_cli_diagnostics import ClaudeCliFailure, run_json
+from claude_cli_diagnostics import ClaudeCliFailure, run_json, validate_handback
 from team_task_once import reject_replay
 
 BASE = "044848ed2c28a2ed2d6a1b977b68bfa0059bdfc6"
@@ -46,21 +46,7 @@ def main():
     try:
         with tempfile.TemporaryDirectory(prefix="forge-motion-") as work:
             result, execution = run_json(cmd, cwd=work, env=env, timeout=180)
-        if not isinstance(result, dict):
-            raise ClaudeCliFailure(dict(execution, kind="INVALID_HANDOFF",
-                                        detail="INVALID_HANDOFF",
-                                        result_type=type(result).__name__))
-        response=str(result.get("result","")).strip()
-        if result.get("is_error") or not response or len(response)>60000:
-            detail=classify_failure(json.dumps(result))
-            if detail == "EXECUTION_FAILED":
-                detail = "INVALID_HANDOFF"
-            raise ClaudeCliFailure(dict(
-                execution, kind="INVALID_HANDOFF", detail=detail,
-                is_error=bool(result.get("is_error")),
-                response_chars=len(response),
-                result_keys=sorted(str(key) for key in result),
-            ))
+        response=validate_handback(result, execution)
         usage=result.get("modelUsage",{})
         models=list(usage) if isinstance(usage,dict) else []
         actual=models[0] if len(models)==1 else "unconfirmed"
