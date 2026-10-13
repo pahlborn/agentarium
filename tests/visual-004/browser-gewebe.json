@@ -1,0 +1,461 @@
+{
+  "artifact": "/home/runner/work/agentarium/agentarium/previews/AG-VISUAL-004-gewebe-v1.html",
+  "sha256": "81433293e2ad8fbdad5f065124e45616d729ddff38a0ef0566e0b58419c6c8c5",
+  "playwright": "1.62.1",
+  "cases": [
+    {
+      "viewport": {
+        "name": "desktop",
+        "width": 1440,
+        "height": 1000
+      },
+      "mode": "direct",
+      "status": "PASS",
+      "consoleErrors": [],
+      "networkAttempts": [],
+      "screenshots": [
+        "desktop-direct-108.png",
+        "desktop-direct-120.png"
+      ],
+      "initial": {
+        "time": 0,
+        "playing": false,
+        "cost": 0,
+        "ownerByTask": {
+          "brief": "peter"
+        },
+        "speed": 1,
+        "currentEvent": "E01"
+      },
+      "canvasBeforeStageCapture": {
+        "width": 1072,
+        "height": 656,
+        "alphaPixels": 703232
+      },
+      "canvasAfterStageCapture": {
+        "width": 1072,
+        "height": 656,
+        "alphaPixels": 703232
+      },
+      "visibleScene": {
+        "file": "desktop-direct-stage108.png",
+        "foregroundPixels": 98245,
+        "criterion": "more than 150 bright chromatic pixels; calibrated blank-scene safeguard only"
+      },
+      "pixels": {
+        "canvas": true,
+        "width": 1072,
+        "height": 656,
+        "paintedPixels": 703232
+      },
+      "layout": {
+        "scene": {
+          "x": 17,
+          "y": 87.578125,
+          "right": 1087,
+          "bottom": 742.140625
+        },
+        "dock": {
+          "x": 1104,
+          "y": 86.578125,
+          "right": 1424,
+          "bottom": 605.421875
+        },
+        "overlap": false,
+        "overflow": false,
+        "story": "01:48 · KONZEPT, FIKTIVE EREIGNISSE\n\nNeue Idee unabhängig auf verbleibende Informationen prüfen\n\nAtlas → Scout · Übergabe · Aufgabe: Garten-Evidenz · Ursache: 1 Ereignis(se)\n\nNeue Gartenidee unabhängig hinterfragen\n\nAtlas → Argus · Übergabe · Aufgabe: Garten-Review · Ursache: 1 Ereignis(se)"
+      },
+      "afterReplay": {
+        "time": 0.3498999999999999,
+        "playing": true,
+        "cost": 0,
+        "ownerByTask": {
+          "brief": "peter"
+        },
+        "speed": 1,
+        "currentEvent": "E01"
+      },
+      "endButtonDisabled": true,
+      "end": {
+        "time": 120,
+        "playing": false,
+        "cost": 0.63,
+        "ownerByTask": {
+          "brief": "peter",
+          "vision": "nova",
+          "evidence": "scout",
+          "spec": "archibald",
+          "build": "forge",
+          "review": "argus",
+          "qa": "sentinel",
+          "repair": "forge",
+          "change": "peter",
+          "process": "cadence",
+          "garden-evidence": "scout",
+          "garden-review": "argus"
+        },
+        "speed": 1,
+        "currentEvent": "E34"
+      },
+      "canvas59": [
+        {
+          "file": "desktop-direct-canvas59-0.png",
+          "sha256": "5e84b6642334e6253aad165418f66f188bfe0b514bdf95dddfdc67592eb9f961"
+        },
+        {
+          "file": "desktop-direct-canvas59-1.png",
+          "sha256": "5e84b6642334e6253aad165418f66f188bfe0b514bdf95dddfdc67592eb9f961"
+        },
+        {
+          "file": "desktop-direct-canvas59-2.png",
+          "sha256": "5e84b6642334e6253aad165418f66f188bfe0b514bdf95dddfdc67592eb9f961"
+        }
+      ],
+      "motionInterval": {
+        "from": 30,
+        "to": 39.96629999999982
+      }
+    },
+    {
+      "viewport": {
+        "name": "desktop",
+        "width": 1440,
+        "height": 1000
+      },
+      "mode": "sandbox-srcdoc",
+      "status": "PASS",
+      "consoleErrors": [],
+      "networkAttempts": [],
+      "screenshots": [
+        "desktop-sandbox-srcdoc-108.png",
+        "desktop-sandbox-srcdoc-120.png"
+      ],
+      "initial": {
+        "time": 0,
+        "playing": false,
+        "cost": 0,
+        "ownerByTask": {
+          "brief": "peter"
+        },
+        "speed": 1,
+        "currentEvent": "E01"
+      },
+      "canvasBeforeStageCapture": {
+        "width": 1072,
+        "height": 656,
+        "alphaPixels": 703232
+      },
+      "canvasAfterStageCapture": {
+        "width": 1072,
+        "height": 656,
+        "alphaPixels": 703232
+      },
+      "visibleScene": {
+        "file": "desktop-sandbox-srcdoc-stage108.png",
+        "foregroundPixels": 98245,
+        "criterion": "more than 150 bright chromatic pixels; calibrated blank-scene safeguard only"
+      },
+      "pixels": {
+        "canvas": true,
+        "width": 1072,
+        "height": 656,
+        "paintedPixels": 703232
+      },
+      "layout": {
+        "scene": {
+          "x": 17,
+          "y": 87.578125,
+          "right": 1087,
+          "bottom": 742.140625
+        },
+        "dock": {
+          "x": 1104,
+          "y": 86.578125,
+          "right": 1424,
+          "bottom": 605.421875
+        },
+        "overlap": false,
+        "overflow": false,
+        "story": "01:48 · KONZEPT, FIKTIVE EREIGNISSE\n\nNeue Idee unabhängig auf verbleibende Informationen prüfen\n\nAtlas → Scout · Übergabe · Aufgabe: Garten-Evidenz · Ursache: 1 Ereignis(se)\n\nNeue Gartenidee unabhängig hinterfragen\n\nAtlas → Argus · Übergabe · Aufgabe: Garten-Review · Ursache: 1 Ereignis(se)"
+      },
+      "afterReplay": {
+        "time": 0.30010000000000014,
+        "playing": true,
+        "cost": 0,
+        "ownerByTask": {
+          "brief": "peter"
+        },
+        "speed": 1,
+        "currentEvent": "E01"
+      },
+      "endButtonDisabled": true,
+      "end": {
+        "time": 120,
+        "playing": false,
+        "cost": 0.63,
+        "ownerByTask": {
+          "brief": "peter",
+          "vision": "nova",
+          "evidence": "scout",
+          "spec": "archibald",
+          "build": "forge",
+          "review": "argus",
+          "qa": "sentinel",
+          "repair": "forge",
+          "change": "peter",
+          "process": "cadence",
+          "garden-evidence": "scout",
+          "garden-review": "argus"
+        },
+        "speed": 1,
+        "currentEvent": "E34"
+      },
+      "canvas59": [
+        {
+          "file": "desktop-sandbox-srcdoc-canvas59-0.png",
+          "sha256": "5e84b6642334e6253aad165418f66f188bfe0b514bdf95dddfdc67592eb9f961"
+        },
+        {
+          "file": "desktop-sandbox-srcdoc-canvas59-1.png",
+          "sha256": "5e84b6642334e6253aad165418f66f188bfe0b514bdf95dddfdc67592eb9f961"
+        },
+        {
+          "file": "desktop-sandbox-srcdoc-canvas59-2.png",
+          "sha256": "5e84b6642334e6253aad165418f66f188bfe0b514bdf95dddfdc67592eb9f961"
+        }
+      ],
+      "motionInterval": {
+        "from": 30,
+        "to": 39.9496999999999
+      }
+    },
+    {
+      "viewport": {
+        "name": "mobile",
+        "width": 390,
+        "height": 844
+      },
+      "mode": "direct",
+      "status": "FAIL",
+      "consoleErrors": [],
+      "networkAttempts": [],
+      "screenshots": [
+        "mobile-direct-108.png"
+      ],
+      "initial": {
+        "time": 0,
+        "playing": false,
+        "cost": 0,
+        "ownerByTask": {
+          "brief": "peter"
+        },
+        "speed": 1,
+        "currentEvent": "E01"
+      },
+      "canvasBeforeStageCapture": {
+        "width": 358,
+        "height": 540,
+        "alphaPixels": 193320
+      },
+      "canvasAfterStageCapture": {
+        "width": 358,
+        "height": 540,
+        "alphaPixels": 193320
+      },
+      "visibleScene": {
+        "file": "mobile-direct-stage108.png",
+        "foregroundPixels": 28178,
+        "criterion": "more than 150 bright chromatic pixels; calibrated blank-scene safeguard only"
+      },
+      "pixels": {
+        "canvas": true,
+        "width": 358,
+        "height": 540,
+        "paintedPixels": 193320
+      },
+      "layout": {
+        "scene": {
+          "x": 17,
+          "y": 155.171875,
+          "right": 373,
+          "bottom": 693.328125
+        },
+        "dock": {
+          "x": 16,
+          "y": 1086.5625,
+          "right": 374,
+          "bottom": 1544.515625
+        },
+        "overlap": false,
+        "overflow": false,
+        "story": "01:48 · KONZEPT, FIKTIVE EREIGNISSE\n\nNeue Idee unabhängig auf verbleibende Informationen prüfen\n\nAtlas → Scout · Übergabe · Aufgabe: Garten-Evidenz · Ursache: 1 Ereignis(se)\n\nNeue Gartenidee unabhängig hinterfragen\n\nAtlas → Argus · Übergabe · Aufgabe: Garten-Review · Ursache: 1 Ereignis(se)"
+      },
+      "afterReplay": {
+        "time": 0.3333000000000001,
+        "playing": true,
+        "cost": 0,
+        "ownerByTask": {
+          "brief": "peter"
+        },
+        "speed": 1,
+        "currentEvent": "E01"
+      },
+      "endButtonDisabled": true,
+      "end": {
+        "time": 120,
+        "playing": false,
+        "cost": 0.63,
+        "ownerByTask": {
+          "brief": "peter",
+          "vision": "nova",
+          "evidence": "scout",
+          "spec": "archibald",
+          "build": "forge",
+          "review": "argus",
+          "qa": "sentinel",
+          "repair": "forge",
+          "change": "peter",
+          "process": "cadence",
+          "garden-evidence": "scout",
+          "garden-review": "argus"
+        },
+        "speed": 1,
+        "currentEvent": "E34"
+      },
+      "canvas59": [
+        {
+          "file": "mobile-direct-canvas59-0.png",
+          "sha256": "838c0447e37f158356b8907ba4fa6663088e65cc074b5dcf7e2d3ea00eb3dd4d"
+        },
+        {
+          "file": "mobile-direct-canvas59-1.png",
+          "sha256": "838c0447e37f158356b8907ba4fa6663088e65cc074b5dcf7e2d3ea00eb3dd4d"
+        },
+        {
+          "file": "mobile-direct-canvas59-2.png",
+          "sha256": "8fa97e7726d43605082ffdfe68d78ae2a8f192fc37fd0a294223081995711fea"
+        }
+      ],
+      "error": "T09 canvas differs at paused t59 across seek/reload"
+    },
+    {
+      "viewport": {
+        "name": "mobile",
+        "width": 390,
+        "height": 844
+      },
+      "mode": "sandbox-srcdoc",
+      "status": "PASS",
+      "consoleErrors": [],
+      "networkAttempts": [],
+      "screenshots": [
+        "mobile-sandbox-srcdoc-108.png",
+        "mobile-sandbox-srcdoc-120.png"
+      ],
+      "initial": {
+        "time": 0,
+        "playing": false,
+        "cost": 0,
+        "ownerByTask": {
+          "brief": "peter"
+        },
+        "speed": 1,
+        "currentEvent": "E01"
+      },
+      "canvasBeforeStageCapture": {
+        "width": 358,
+        "height": 540,
+        "alphaPixels": 193320
+      },
+      "canvasAfterStageCapture": {
+        "width": 358,
+        "height": 540,
+        "alphaPixels": 193320
+      },
+      "visibleScene": {
+        "file": "mobile-sandbox-srcdoc-stage108.png",
+        "foregroundPixels": 28368,
+        "criterion": "more than 150 bright chromatic pixels; calibrated blank-scene safeguard only"
+      },
+      "pixels": {
+        "canvas": true,
+        "width": 358,
+        "height": 540,
+        "paintedPixels": 193320
+      },
+      "layout": {
+        "scene": {
+          "x": 17,
+          "y": 155.171875,
+          "right": 373,
+          "bottom": 693.328125
+        },
+        "dock": {
+          "x": 16,
+          "y": 1086.5625,
+          "right": 374,
+          "bottom": 1544.515625
+        },
+        "overlap": false,
+        "overflow": false,
+        "story": "01:48 · KONZEPT, FIKTIVE EREIGNISSE\n\nNeue Idee unabhängig auf verbleibende Informationen prüfen\n\nAtlas → Scout · Übergabe · Aufgabe: Garten-Evidenz · Ursache: 1 Ereignis(se)\n\nNeue Gartenidee unabhängig hinterfragen\n\nAtlas → Argus · Übergabe · Aufgabe: Garten-Review · Ursache: 1 Ereignis(se)"
+      },
+      "afterReplay": {
+        "time": 0.36669999999999997,
+        "playing": true,
+        "cost": 0,
+        "ownerByTask": {
+          "brief": "peter"
+        },
+        "speed": 1,
+        "currentEvent": "E01"
+      },
+      "endButtonDisabled": true,
+      "end": {
+        "time": 120,
+        "playing": false,
+        "cost": 0.63,
+        "ownerByTask": {
+          "brief": "peter",
+          "vision": "nova",
+          "evidence": "scout",
+          "spec": "archibald",
+          "build": "forge",
+          "review": "argus",
+          "qa": "sentinel",
+          "repair": "forge",
+          "change": "peter",
+          "process": "cadence",
+          "garden-evidence": "scout",
+          "garden-review": "argus"
+        },
+        "speed": 1,
+        "currentEvent": "E34"
+      },
+      "canvas59": [
+        {
+          "file": "mobile-sandbox-srcdoc-canvas59-0.png",
+          "sha256": "838c0447e37f158356b8907ba4fa6663088e65cc074b5dcf7e2d3ea00eb3dd4d"
+        },
+        {
+          "file": "mobile-sandbox-srcdoc-canvas59-1.png",
+          "sha256": "838c0447e37f158356b8907ba4fa6663088e65cc074b5dcf7e2d3ea00eb3dd4d"
+        },
+        {
+          "file": "mobile-sandbox-srcdoc-canvas59-2.png",
+          "sha256": "838c0447e37f158356b8907ba4fa6663088e65cc074b5dcf7e2d3ea00eb3dd4d"
+        }
+      ],
+      "motionInterval": {
+        "from": 30,
+        "to": 39.9996999999995
+      }
+    }
+  ],
+  "limits": [
+    "Chromium mobile emulation is not real iPhone/Safari",
+    "Screenshots require human/Nova visual review; aesthetic acceptance not automated"
+  ],
+  "browser": "151.0.7922.34",
+  "status": "FAIL"
+}
