@@ -1,0 +1,185 @@
+{
+  "files": [
+    {
+      "variant": "gewebe",
+      "source_sha256": "81085042cfe3e89c763d97b1aadd7d9f46a6dfa9b319f63cc981e425d213c8c9",
+      "edits": [
+        {
+          "old": "#sk{flex:1;min-width:160px;accent-color:#8f6bff}",
+          "new": "#sk{flex:1 1 120px;min-width:0;max-width:100%;accent-color:#8f6bff}html,body{overflow-x:hidden}"
+        },
+        {
+          "old": "const S={t:0,playing:false,was:false,speed:1,ids:true,dock:true,sel:null};",
+          "new": "const S={t:0,playing:false,was:false,speed:1,ids:false,dock:true,sel:null,hov:null};"
+        },
+        {
+          "old": "WN[e.actor].push([s,e.at_seconds+1.5])",
+          "new": "if(e.kind!=='open_state')WN[e.actor].push([Math.max(s,e.at_seconds-10),e.at_seconds+1.5])"
+        },
+        {
+          "old": ".map(f=>({ta:f.t1,L:f.L,fr:f}))",
+          "new": ".map((f,k)=>({ta:26+k*1.5,L:f.L,fr:f}))"
+        },
+        {
+          "old": "PP=ROLES.map(r=>{const a=r[3]*Math.PI/180;return[W*.5+Math.cos(a)*W*.39,Hh*.38+Math.sin(a)*Hh*.27]})}",
+          "new": "PP=[[.1,.22],[.34,.1],[.82,.2],[.9,.5],[.74,.8],[.46,.88],[.68,.6],[.2,.7],[.08,.46]].map(q=>[W*q[0],Hh*q[1]])}"
+        },
+        {
+          "start": "function fabric(t){for(let j=0;j<16;j++){",
+          "end": "function stn(k,lab,col,on)",
+          "replacement": "const sm=(a,b,t)=>{const k=cl((t-a)/(b-a));return k*k*(3-2*k)};\nlet MS=[],MT=0,MA=0,MR=1,OP=0,OV=[0,0,0,0,1,0],TG=[0,0,1,0],TO=0;\nfunction srcs(t){const s=[],add=(i,w)=>{if(w>.01)s.push([PP[i][0],PP[i][1],w])};E.forEach(e=>{const a=t-e.at_seconds;if(a<0||a>3)return;const w=Math.min(1,a/.4)*(1-a/3);add(RI[e.actor],w);if(e.recipient)add(RI[e.recipient],.8*w);e.caused_by.forEach(id=>add(RI[E[+id.slice(1)-1].actor],.45*w))});ROLES.forEach((r,i)=>add(i,.55*act(r[0],t)));return s}\nfunction dsp(x,y,sg){const t=MT;let L=0,px=0,py=0;for(const q of MS){const ex=q[0]-x,ey=q[1]-y,g=Math.exp(-(ex*ex+ey*ey)/(2*MR*MR))*q[2];L+=g;px+=ex*g;py+=ey*g}let ox=0,oy=0;if(OP>.01){const s2=MR*MR*.5,gh=Math.exp(-((x-OV[0])**2+(y-OV[1])**2)/s2),gb=Math.exp(-((x-OV[2])**2+(y-OV[3])**2)/s2),f=(gb-gh)*OP*MR*.45;ox=OV[4]*f;oy=OV[5]*f;L+=OP*(gb+gh)*.8}const k=MA*(.45+.55*Math.min(1,L*1.5));let dx=k*(Math.sin(y*.0065+t*.55+Math.sin(x*.004-t*.18)*1.6)+.55*Math.sin((x*.5+y)*.0042-t*.38))+px*.2+ox;let dy=k*(Math.sin(x*.0055-t*.47+Math.sin(y*.005+t*.22)*1.4)+.5*Math.sin((x-y*.6)*.0038+t*.3))+py*.2+oy;let ts=0;if(TO>.01){const ax=x-TG[0],ay=y-TG[1],al=ax*TG[2]+ay*TG[3],pe=-ax*TG[3]+ay*TG[2],w=Math.exp(-pe*pe/(2*MR*MR*.6))*Math.exp(-al*al/(2*MR*MR*.2)),s=sg===undefined?Math.sign(al):sg;dx+=TG[2]*s*TO*MR*.32*w;dy+=TG[3]*s*TO*MR*.32*w;ts=w>.3?s:0}return[dx,dy,L,ts]}\nfunction fib(a,b,bd,q0,q1,col,w){c.strokeStyle=col;c.lineWidth=w;c.beginPath();const l=Math.hypot(b[0]-a[0],b[1]-a[1])||1;for(let i=0;i<=16;i++){const u=q0+(q1-q0)*i/16,o=Math.sin(Math.PI*u)*bd,x=a[0]+(b[0]-a[0])*u-(b[1]-a[1])/l*o,y=a[1]+(b[1]-a[1])*u+(b[0]-a[0])/l*o,d=dsp(x,y,0);i?c.lineTo(x+d[0]*.8,y+d[1]*.8):c.moveTo(x+d[0]*.8,y+d[1]*.8)}c.stroke()}\nfunction scoutFan(t){if(t<3||t>11)return;const s=PP[RI.scout],a=PP[RI.archibald],dx=s[0]-BX,dy=s[1]-BY,l=Math.hypot(dx,dy)||1,F=[cl(s[0]+dx/l*Hh*.45,14,W-14),cl(s[1]+dy/l*Hh*.45,14,Hh-14)],al=1-sm(10,10.8,t);c.save();c.lineCap='round';if(t<7){c.globalAlpha=.8;for(let k=0;k<4;k++)fib(s,F,(k-1.5)*U*.45,0,sm(3,7,t),'#5ff0d0',1.3)}else{const q=sm(7,9,t);for(let i=0;i<9;i++){const o=(i-4)/4,bad=i%3===1,e=[s[0]+o*U*1.6,s[1]+o*U*.9],qq=bad?Math.min(q,.55):q;c.globalAlpha=(bad?.3*(1-sm(8,9,t)):.8)*al;fib(F,e,o*U*2.2,0,qq,bad?'#8a84b0':i===4?'#fff3b0':'#5ff0d0',i===4?2:1.2)}if(t>9){c.globalAlpha=al;fib(s,a,U*.8,0,sm(9,10,t),'#fff3b0',2.4)}}c.restore()}\nfunction seam(t){if(t<48)return;const g=TG,px=-g[3],py=g[2],L=MR*.95,P=(s,sd,j)=>{const x=g[0]+px*s+g[2]*(sd*2+j),y=g[1]+py*s+g[3]*(sd*2+j),d=dsp(x,y,sd);return[x+d[0],y+d[1]]},jt=i=>(H(i*3.7)-.5)*MR*.12;c.save();c.lineJoin='round';c.lineCap='round';if(TO>.12){c.strokeStyle='rgba(255,111,155,'+Math.min(.95,TO)+')';c.lineWidth=1.7;[-1,1].forEach(sd=>{c.beginPath();for(let i=0;i<=14;i++){const q=P((i/14*2-1)*L,sd,jt(i));i?c.lineTo(q[0],q[1]):c.moveTo(q[0],q[1])}c.stroke()})}\nconst n=Math.round(sm(53,82,t)*14);c.strokeStyle='#ffc933';c.lineWidth=2.2;c.shadowColor='#ffc933';c.shadowBlur=t>=82?8:4;for(let i=0;i<n;i++){const s=(i/13*2-1)*L,a=P(s,-1,jt(i)),b=P(s,1,jt(i));c.beginPath();c.moveTo(a[0],a[1]);c.lineTo(b[0],b[1]);c.stroke()}if(t>=82){c.beginPath();for(let i=0;i<=14;i++){const q=P((i/14*2-1)*L,0,jt(i)*1.4);i?c.lineTo(q[0],q[1]):c.moveTo(q[0],q[1])}c.stroke()}c.shadowBlur=0;\nif(t>=85&&t<92){const ph=(t-85)/3.5,u=ph<1?ph:2-ph,q=P((u*2-1)*L,0,0);c.strokeStyle='#6fe3ff';c.lineWidth=2;c.beginPath();c.arc(q[0],q[1],7,0,7);c.stroke()}if(t>=92&&t<98){const q=P(0,0,0);tx('✓',q[0],q[1]-12,'bold '+(FS+4)+'px system-ui','#6fe3ff')}\nif(t>=63&&t<82){const am=(1-sm(63,69,t))*MR*.32,jc=[g[0]+g[2]*MR*1.8,g[1]+g[3]*MR*1.8];c.globalAlpha=1-sm(76,82,t);[0,1].forEach(k=>{c.strokeStyle=k?'#9dff8a':'#ffb36b';c.lineWidth=1.8;c.beginPath();for(let i=0;i<=16;i++){const s=(i/16*2-1)*L,w=Math.sin(i/16*Math.PI*5+k*Math.PI)*am,x=jc[0]+px*s+g[2]*w,y=jc[1]+py*s+g[3]*w,d=dsp(x,y,0);i?c.lineTo(x+d[0],y+d[1]):c.moveTo(x+d[0],y+d[1])}c.stroke()});c.globalAlpha=1}c.restore()}\nfunction fabric(t){MT=t;MA=Math.min(W,Hh)*.04;MR=U*3.4;MS=srcs(t);OP=sm(32,35,t)*(1-sm(46,48,t));const p4=hb(HS[DEF]),p5=hb(HS[DEF+1]),dl=Math.hypot(p5[0]-p4[0],p5[1]-p4[1])||1,ux=(p5[0]-p4[0])/dl,uy=(p5[1]-p4[1])/dl;OV=[p4[0],p4[1],p5[0],p5[1],ux,uy];TG=[(p4[0]+p5[0])/2,(p4[1]+p5[1])/2,ux,uy];TO=t<48?0:sm(48,50.5,t)*(1-.88*sm(55,82,t));\nconst cw=36,cols=Math.ceil(W/cw)+3,rows=Math.ceil(Hh/cw)+3,N=[];for(let j=0;j<rows;j++)for(let i=0;i<cols;i++){const n=i*31+j*17,x=(i-1)*cw+(H(n)-.5)*cw*.55,y=(j-1)*cw+(H(n+.5)-.5)*cw*.55,d=dsp(x,y);N.push([x+d[0],y+d[1],d[2],d[3]])}\nconst at=(i,j)=>N[j*cols+i],tr=(a,b)=>TO>.3&&a[3]*b[3]<0;\nfor(let j=0;j<rows-1;j++)for(let i=0;i<cols-1;i++){const a=at(i,j),b=at(i+1,j),d=at(i+1,j+1),e=at(i,j+1);if(tr(a,b)||tr(b,d)||tr(d,e)||tr(e,a)||tr(a,d)||tr(b,e))continue;const L=Math.min(1.2,(a[2]+b[2]+d[2]+e[2])/4);c.fillStyle=`rgba(${120+L*110|0},${100+L*70|0},255,${.03+((i+j)%2)*.025+L*.14})`;c.beginPath();c.moveTo(a[0],a[1]);c.lineTo(b[0],b[1]);c.lineTo(d[0],d[1]);c.lineTo(e[0],e[1]);c.closePath();c.fill()}\nconst fb=(a,b,s)=>{if(tr(a,b))return;const L=Math.min((a[2]+b[2])/2,1.5),M=Math.min(L,1),dx=b[0]-a[0],dy=b[1]-a[1],l=Math.hypot(dx,dy)||1,nx=-dy/l,ny=dx/l,sp=1.2+L*2.4;c.strokeStyle=`rgba(${160+M*90|0},${140+M*90|0},255,${.14+M*.5})`;c.lineWidth=.6+L*1.6;c.beginPath();for(let k=-1;k<=1;k++){const o=k*sp*(1+.45*Math.sin(s+k*2+t*.6));c.moveTo(a[0]+nx*o,a[1]+ny*o);c.lineTo(b[0]+nx*o,b[1]+ny*o)}c.stroke()};\nfor(let j=0;j<rows;j++)for(let i=0;i<cols;i++){if(i<cols-1)fb(at(i,j),at(i+1,j),i+j);if(j<rows-1)fb(at(i,j),at(i,j+1),i*2+j)}}\n"
+        },
+        {
+          "old": "const hpos=h=>[BX+((h.gx-1.5)-(h.gy-1))*U*1.15,BY+((h.gx-1.5)+(h.gy-1))*U*.58];",
+          "new": "const hb=h=>[BX+((h.gx-1.5)-(h.gy-1))*U*1.15,BY+((h.gx-1.5)+(h.gy-1))*U*.58],hpos=h=>{const b=hb(h),d=dsp(b[0],b[1],0);return[b[0]+d[0]*.8,b[1]+d[1]*.8]};"
+        },
+        {
+          "start": "if(W>520){const f=(FS-1)+'px system-ui';",
+          "end": "HD.forEach(h=>house(h,t));",
+          "replacement": "tx('Phantasieprojekt · fiktive Ereignisse · erfundene Demokosten',14,16,(FS-1)+'px system-ui','#b9b2e8','left');\n"
+        },
+        {
+          "old": "E.forEach(e=>{if(e.at_seconds>t+EP||!e.recipient||e.recipient===e.actor)return;",
+          "new": "E.forEach(e=>{if(e.at_seconds>t+EP||t-e.at_seconds>3.2||!e.recipient||e.recipient===e.actor)return;"
+        },
+        {
+          "start": "FR.forEach(f=>{if(t<f.t0)return;",
+          "end": "const as=AC[RI.sentinel],ag=AC[RI.argus];",
+          "replacement": "scoutFan(t);seam(t);"
+        },
+        {
+          "old": "tx(r[1]+' · '+PN[PL[r[0]]],x,ly,'600 '+FS+'px system-ui',a>.5?'#fff':'#cfc9ff');",
+          "new": "const foc=S.sel===r[0]||S.hov===r[0];if(foc)tx(r[1]+' · '+PN[PL[r[0]]],x,ly,'600 '+FS+'px system-ui','#fff');"
+        },
+        {
+          "old": "if(mine.length)tx(mine.map(k=>S.ids?k:TN[k]).join(' · '),x,ly+FS+3,",
+          "new": "if(foc&&mine.length)tx(mine.map(k=>S.ids?k:TN[k]).join(' · '),x,ly+FS+3,"
+        },
+        {
+          "old": "const x0=W*.06,w=W*.88,y1=Hh*.945,y0=Hh*.78,h=y1-y0,MAX=65,Y=v=>y1-v/MAX*h;",
+          "new": "if(S.ids)costs(st,sel,t)}function costs(st,sel,t){const x0=W*.06,w=W*.88,y1=Hh*.945,y0=Hh*.78,h=y1-y0,MAX=65,Y=v=>y1-v/MAX*h;"
+        },
+        {
+          "old": "$('tm').textContent=fmt(S.t)+' / '+fmt(DUR)+' · $'+(st.sum/100).toFixed(2);",
+          "new": "$('tm').textContent=fmt(S.t)+' / '+fmt(DUR)+(S.ids?' · $'+(st.sum/100).toFixed(2)+' (erfunden)':'');"
+        },
+        {
+          "old": "' · '+(e._c?'erfundene Kosten $'+(e._c/100).toFixed(2):'keine erfundenen Kosten')+' · Tokens: unbekannt</p>'",
+          "new": "(S.ids?' · '+(e._c?'erfundene Kosten $'+(e._c/100).toFixed(2)+' ('+LABEL+')':'keine erfundenen Kosten')+' · tatsächliche Tokens: nicht vorhanden':'')+'</p>'"
+        },
+        {
+          "old": "<dt>Plattform</dt><dd>'+PN[p]+'</dd><dt>Anbieter (aus Plattform abgeleitet)</dt><dd>'+PV[p]+'</dd><dt>Modell</dt><dd>unbestätigt</dd><dt>Denkaufwand</dt><dd>unbestätigt</dd>",
+          "new": "'+(S.ids?'<dt>Plattform</dt><dd>'+PN[p]+'</dd><dt>Anbieter (aus Plattform abgeleitet)</dt><dd>'+PV[p]+'</dd><dt>Modell</dt><dd>nicht vorhanden (unbestätigt)</dd><dt>Denkaufwand</dt><dd>nicht vorhanden</dd>':'')+'"
+        },
+        {
+          "old": "<dt>Erfundene Kosten</dt><dd>'+(e._c?'$'+(e._c/100).toFixed(2)+' (frei erfunden, kein Verbrauchsnachweis)':'keine')+'</dd><dt>Tokens</dt><dd>unbekannt</dd><dt>Tatsächliche Nutzung</dt><dd>nicht vorhanden</dd>",
+          "new": "'+(S.ids?'<dt>Erfundene Kosten</dt><dd>'+(e._c?'$'+(e._c/100).toFixed(2)+' ('+LABEL+')':'keine erfundenen Kosten')+'</dd><dt>Tokens (tatsächlich)</dt><dd>nicht vorhanden</dd><dt>Tatsächliche Kosten</dt><dd>nicht vorhanden</dd>':'')+'"
+        },
+        {
+          "old": "$('bi').onclick=()=>{S.ids=!S.ids;dirty=1};",
+          "new": "$('bi').textContent='Metadaten';$('bi').title='IDs, Anbieter, Modell, Kosten';$('bi').onclick=()=>{S.ids=!S.ids;dirty=1};"
+        },
+        {
+          "old": "new ResizeObserver(size).observe($('stage'));addEventListener('resize',size);",
+          "new": "new ResizeObserver(size).observe($('stage'));addEventListener('resize',size);cv.addEventListener('mousemove',ev=>{const b=cv.getBoundingClientRect(),x=ev.clientX-b.left,y=ev.clientY-b.top;let h=null;PP.forEach((p,i)=>{if(Math.hypot(p[0]-x,p[1]-y)<=NR*1.8)h=ROLES[i][0]});if(h!==S.hov){S.hov=h;dirty=1}});"
+        }
+      ]
+    },
+    {
+      "variant": "partitur",
+      "source_sha256": "c32812c1ec11c52716fb0da1c55502b8fa2926a22706dce12796db69710eeb1c",
+      "edits": [
+        {
+          "old": "const S={t:0,playing:!reduce,speed:1,ids:false,sel:null,role:null,dock:true,last:0};",
+          "new": "const S={t:0,playing:!reduce,speed:1,ids:false,sel:null,role:null,dock:true,last:0,hov:null};"
+        },
+        {
+          "old": "const gut=W<600?92:136,",
+          "new": "const gut=W<600?64:110,"
+        },
+        {
+          "old": "er=Math.floor(H*.1/4)",
+          "new": "er=Math.floor(H*.15/4)"
+        },
+        {
+          "old": "function draw(){",
+          "new": "function motif(sp,g,t){const e=sp.e,y=g.ry(IX[e.actor]),c=RL[e.actor].col,a=g.X(sp.a),b=g.X(Math.min(sp.b,t)),f=g.X(sp.b)-a||1,L=b-a,n=Math.max(2,Math.round(L/2));cx.save();cx.strokeStyle=c;cx.fillStyle=c;cx.lineWidth=1.2;cx.globalAlpha=.9;const wv=(ph,am,fr,d)=>{cx.beginPath();for(let i=0;i<=n;i++){const x=a+L*i/n,u=(x-a)/f,yy=y+Math.sin(u*Math.PI*fr+ph)*am*(d?1-u:1);i?cx.lineTo(x,yy):cx.moveTo(x,yy)}cx.stroke()};\nswitch(e.actor){case'forge':for(let s=0;s<3;s++)wv(s*2.094,3.4,6);break;case'argus':wv(0,4,4);cx.strokeStyle='#ffe27a';wv(Math.PI,4,4);break;case'cadence':wv(0,4,7,1);cx.strokeStyle='#9dff8a';wv(Math.PI,4,7,1);break;case'sentinel':for(let x=a;x<=b;x+=4){cx.beginPath();cx.moveTo(x,y-4+((x-a)/4%2)*2);cx.lineTo(x,y+4);cx.stroke()}break;case'scout':for(let s=-1;s<=1;s++){cx.beginPath();cx.moveTo(a,y);cx.lineTo(b,y+s*4*Math.min(1,L/f));cx.stroke()}break;case'archibald':cx.beginPath();for(let i=0;i<=n;i++){const x=a+L*i/n,yy=y+2.5-(Math.floor((x-a)/7)%3)*2.5;i?cx.lineTo(x,yy):cx.moveTo(x,yy)}cx.stroke();break;case'nova':for(let s=-1;s<=1;s++){cx.strokeStyle=['#ff8fe0','#ffe27a','#5fe9ff'][s+1];cx.beginPath();cx.moveTo(a,y);cx.lineTo(b,y+s*3.5*Math.min(1,L/f));cx.stroke()}break;case'atlas':[-2,2].forEach(o=>ln(a,y+o,b,y+o));for(let x=a;x<=b;x+=6)ln(x,y-3,x,y+3);break;default:cx.setLineDash([5,3]);ln(a,y,b,y)}cx.restore()}\nfunction phases(g,t){const X=g.X,A=g.er*.2,y=k=>g.ey(k);cx.save();cx.lineWidth=1.2;\nif(t>3){const yc=y(0),b=Math.min(t,13);for(let s=-2;s<=2;s++){cx.strokeStyle=s===0?'#ffe9b0':'#4fd1e0';cx.globalAlpha=s===0?1:Math.abs(s)===1?.35:.6;cx.beginPath();for(let q=3,f=1;q<=b;q+=.25,f=0){const u=(q-3)/10;if(s%2&&u>.65)break;const yy=yc+Math.sin(Math.PI*u)*A*s;f?cx.moveTo(X(q),yy):cx.lineTo(X(q),yy)}cx.stroke()}cx.globalAlpha=1}\nif(t>25){const yc=y(1),b=Math.min(t,40);cx.strokeStyle='#ff8f7a';for(let s=0;s<3;s++){cx.beginPath();for(let q=25,f=1;q<=b;q+=.25,f=0){const u=(q-25)/15,yy=yc+Math.sin(u*Math.PI*6+s*2.094)*A*1.4*(.3+.7*u);f?cx.moveTo(X(q),yy):cx.lineTo(X(q),yy)}cx.stroke()}if(t>=40){cx.fillStyle='#ff8f7a';cx.fillRect(X(40)-3,yc-3,6,6)}}\nif(t>26){const yc=y(2),b=Math.min(t,36);[['#d9a5ff',1],['#ffe27a',-1]].forEach(p=>{cx.strokeStyle=p[0];cx.beginPath();for(let q=26,f=1;q<=b;q+=.25,f=0){const u=(q-26)/10,yy=yc+p[1]*Math.sin(u*Math.PI*3)*A*1.5;f?cx.moveTo(X(q),yy):cx.lineTo(X(q),yy)}cx.stroke()});if(t>=32){const x=X(32);cx.strokeStyle='#d9a5ff';ln(x-3,yc-3,x+3,yc+3);ln(x+3,yc-3,x-3,yc+3)}}\n{const yc=y(3),tk=(a,b,col)=>{if(t<=a)return;cx.strokeStyle=col;for(let q=a;q<=Math.min(t,b)+1e-9;q+=.75)ln(X(q),yc-A*1.4+((q-a)/.75%2)*A*.6,X(q),yc+A*1.4)};tk(42,48,'#6fe0b0');if(t>=48){const x=X(48);cx.strokeStyle='#ff6b6b';cx.lineWidth=1.8;cx.beginPath();cx.moveTo(x,yc-A*2);cx.lineTo(x+3,yc-A*.8);cx.lineTo(x-3,yc);cx.lineTo(x+3,yc+A*.8);cx.lineTo(x,yc+A*2);cx.stroke();cx.lineWidth=1.2}if(t>53){cx.strokeStyle=GOLD;for(let q=53;q<=Math.min(t,82)+1e-9;q+=2)ln(X(q)-2,yc-A,X(q)+2,yc+A)}if(t>=82){cx.strokeStyle=GOLD;cx.lineWidth=2;ln(X(82),yc,X(t),yc);cx.lineWidth=1.2}tk(85,92,'#6fe0b0');if(t>=92)tx('✓',X(92)+4,yc+4,10,'#6fe0b0',700)}cx.restore()}\nfunction draw(){"
+        },
+        {
+          "old": "tx(RL[r].n,nx,y+1,W<600?11:13,S.role===r?GOLD:'#f3ead3',600);tx(PF[RL[r].pf],nx,y+11,9,'#9aa0b8',400)",
+          "new": "if(S.role===r||S.hov===r){tx(RL[r].n,nx,y+1,W<600?11:13,GOLD,600);if(S.ids)tx(PF[RL[r].pf],nx,y+11,9,'#9aa0b8',400)}"
+        },
+        {
+          "start": "spans.forEach(sp=>{if(sp.a>=t)return;",
+          "end": "/* gold responsibility */",
+          "replacement": "spans.forEach(sp=>{if(sp.a>=t)return;motif(sp,g,t)});\n[[25,32,'forge','argus'],[36,40,'archibald','forge'],[108,120,'scout','argus']].forEach(p=>{if(t<=p[0])return;const x0=g.X(p[0]),x1=g.X(Math.min(t,p[1])),ya=ry(IX[p[2]]),yb=ry(IX[p[3]]),top=Math.min(ya,yb)-g.rh*.45;cx.fillStyle='rgba(231,184,75,.07)';cx.fillRect(x0,top,x1-x0,Math.abs(yb-ya)+g.rh*.9);cx.strokeStyle='rgba(231,184,75,.7)';cx.lineWidth=1.2;ln(x0,top,x0,Math.max(ya,yb)+g.rh*.45);tx('∥',x0+3,top+9,10,GOLD,700)});\n"
+        },
+        {
+          "old": "const right=xb<g.x1-60;tx(s.task.slice(0,9),",
+          "new": "const right=xb<g.x1-60;if(S.ids)tx(s.task.slice(0,9),"
+        },
+        {
+          "start": "/* environment */",
+          "end": "const pw=g.pB-g.pT,Y=v=>",
+          "replacement": "/* phasen */\ntx('Kausale Verwandlung: Fund → Bau → Einwand → Bruch → Naht',10,g.e0-6,9,'#9aa0b8',400);['Fund','Bau','Einwand','Bruch·Naht'].forEach((n,i)=>{const y=ey(i);cx.strokeStyle='rgba(243,234,211,.1)';cx.lineWidth=1;ln(g.x0,y,g.x1,y);tx(n,10,y+3,9,'rgba(200,205,225,.75)',400)});phases(g,t);\n/* cost */if(S.ids){"
+        },
+        {
+          "old": "/* cursor */",
+          "new": "}/* cursor */"
+        },
+        {
+          "old": "$('cost').textContent='$'+(cumR(null,t)/100).toFixed(2);",
+          "new": "$('cost').textContent='$'+(cumR(null,t)/100).toFixed(2);$('cost').parentNode.hidden=!S.ids;"
+        },
+        {
+          "old": "' Sekunden, erfundene Kosten $'+(cumR(null,t)/100).toFixed(2)",
+          "new": "' Sekunden'+(S.ids?', erfundene Kosten $'+(cumR(null,t)/100).toFixed(2):'')"
+        },
+        {
+          "old": "+JSON.stringify(own.o)+(S.sel||'');",
+          "new": "+JSON.stringify(own.o)+(S.sel||'')+S.ids;"
+        },
+        {
+          "old": "+e.id+' · '+e.at_seconds+' s · '+e.kind+' · '+nm(e.actor)",
+          "new": "+(S.ids?e.id+' · ':'')+e.at_seconds+' s · '+e.kind+' · '+nm(e.actor)"
+        },
+        {
+          "old": "e.caused_by.map(i=>byId[i].id+' '+byId[i].title)",
+          "new": "e.caused_by.map(i=>(S.ids?byId[i].id+' ':'')+byId[i].title)"
+        },
+        {
+          "old": "<dt>Plattform</dt><dd>'+PF[R.pf]+'</dd><dt>Anbieter</dt><dd>'+PV[R.pf]+' (aus Plattform abgeleitet)</dd><dt>Modell</dt><dd>unbestätigt</dd>",
+          "new": "'+(S.ids?'<dt>Plattform</dt><dd>'+PF[R.pf]+'</dd><dt>Anbieter</dt><dd>'+PV[R.pf]+' (aus Plattform abgeleitet)</dd><dt>Modell</dt><dd>nicht vorhanden (unbestätigt)</dd>':'')+'"
+        },
+        {
+          "old": "<dt>Demokosten</dt><dd>$'+(cumR(role,t)/100).toFixed(2)+' erfunden</dd></dl>'",
+          "new": "'+(S.ids?'<dt>Demokosten</dt><dd>$'+(cumR(role,t)/100).toFixed(2)+' erfunden ('+LBL+')</dd>':'')+'</dl>'"
+        },
+        {
+          "old": "<h3>Ereignis '+e.id+'</h3>",
+          "new": "<h3>Ereignis'+(S.ids?' '+e.id:'')+'</h3>"
+        },
+        {
+          "old": "<dt>caused_by</dt><dd>'+(e.caused_by.join(', ')||'—')+'</dd><dt>Kosten</dt><dd>'+(e.synthetic_usage?'$'+e.synthetic_usage.cost_usd.toFixed(2)+' · '+LBL:'keine synthetic_usage')+'</dd><dt>Tokens</dt><dd>unbekannt</dd></dl>'",
+          "new": "'+(S.ids?'<dt>caused_by</dt><dd>'+(e.caused_by.join(', ')||'—')+'</dd><dt>Kosten</dt><dd>'+(e.synthetic_usage?'$'+e.synthetic_usage.cost_usd.toFixed(2)+' · '+LBL:'keine synthetic_usage')+'</dd><dt>Tokens (tatsächlich)</dt><dd>nicht vorhanden</dd><dt>Tatsächliche Kosten</dt><dd>nicht vorhanden</dd>':'')+'</dl>'"
+        },
+        {
+          "old": "if(window.ResizeObserver)new ResizeObserver(()=>{resize()}).observe($('stage'));",
+          "new": "if(window.ResizeObserver)new ResizeObserver(()=>{resize()}).observe($('stage'));$('ids').nextSibling.textContent=' Metadaten (IDs, Modell, Kosten)';cv.addEventListener('mousemove',ev=>{const r=cv.getBoundingClientRect(),x=ev.clientX-r.left,y=ev.clientY-r.top;let h=null,bd=14;hits.forEach(k=>{const d=Math.hypot(k.x-x,k.y-y);if(d<=bd){bd=d;h=byId[k.id].actor}});if(!h&&geo&&x<geo.gut&&y>=geo.y0&&y<geo.tEnd)h=ROLES[clamp(Math.floor((y-geo.y0)/geo.rh),0,8)];if(h!==S.hov){S.hov=h;dirty=true}});"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "Patch only; nothing was executed or rendered. No browser, pixel or VM evidence exists. AC16 and AC18 are untested; T01–T10 stay NOT_TESTED until real-browser evidence exists.",
+    "Gewebe: ambient swells are a pure function of replay time t (no random, no Date, no accumulated state). While paused the material is therefore still, and it moves only while t advances. Nova must judge whether the swells are broad and strong enough.",
+    "Gewebe: the Scout expedition now runs only t=3–11 (E03 outward, E05 fan, discards muted, selected find lands at Archibald per the OD2 fixture). The old fragment flight to t≈51 is removed.",
+    "Gewebe: the letter-house build timing is decoupled from the Scout fragments and now runs 26–38 s (Forge, E09–E13). Houses are decorative and not fixture events.",
+    "Gewebe: the baseline work window for open_state E34 is dropped and windows are capped at 10 s before each event, so t=114–119 carries no impulses. Previously Atlas was permanently active through E01.",
+    "Gewebe: tear, opposing pull and seam are placed at the connection between HS[4] and HS[5]. That placement is a design choice and not fixture data. The tear is torn quads and fibres plus pink edges, the seam is gold stitches from E17 to E26 plus a permanent gold line, and the Cadence jam is a braided pair that resolves at 63–69.",
+    "Role areas are repositioned irregularly and drawn as small glyphs on a gradient. The cost chart, IDs, provider and model are hidden by default behind the 'Metadaten' toggle. Null actual values read 'nicht vorhanden'. The fiction label is drawn on the canvas permanently. The old GitHub/API/Internet stations are removed.",
+    "Partitur: the lane motifs (braid, counterphrase, ostinato, fan, stairs, damping wave), the parallel-passage brackets E09/E10, E12/E13 and E32/E33 and the Fund/Bau/Einwand/Bruch·Naht strip replace the old environment lanes. The E32/E33 bracket spans 108–120 s, which is a design choice. The empty bottom area when costs are hidden has not been visually checked.",
+    "Both views: the cost graph and header cost are hidden by default. The gutter is narrowed and names appear only on focus, click or hover. The mobile 390×844 layout is untested. A safety rule html,body{overflow-x:hidden} was added to Gewebe and may mask a real overflow. The Gewebe dock is unchanged in layout, so AC13 relies on the existing grid and static mobile placement.",
+    "Regression risks (untested): the Gewebe cost chart is split into costs() and relies on shared globals. Safari is not covered. API hooks, hidden-freeze and reduced-motion logic are untouched."
+  ]
+}
