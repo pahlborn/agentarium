@@ -7,7 +7,7 @@ import unittest
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
-from claude_cli_diagnostics import ClaudeCliFailure, classify_detail, run_json, safe_excerpt
+from claude_cli_diagnostics import ClaudeCliFailure, classify_detail, diagnostic, run_json, validate_handback
 
 
 class DiagnosticTests(unittest.TestCase):
@@ -43,15 +43,29 @@ class DiagnosticTests(unittest.TestCase):
             self.run_script("print('not json')")
         self.assertEqual(caught.exception.evidence["kind"], "INVALID_JSON")
 
-    def test_secret_redaction(self):
-        excerpt = safe_excerpt("", "authentication_error api_key=sk-ant-abcdefghijklmnopqrstuvwxyz0123456789")
-        self.assertNotIn("abcdefghijklmnopqrstuvwxyz", excerpt)
-        self.assertIn("[REDACTED]", excerpt)
+    def test_diagnostic_never_contains_provider_output(self):
+        secret = "Authorization: Basic c2VjcmV0"
+        evidence = diagnostic(kind="CLI_EXIT", stdout="", stderr="error "+secret,
+                              elapsed_seconds=1, timeout_seconds=5, returncode=1)
+        self.assertNotIn(secret, json.dumps(evidence))
+        self.assertNotIn("c2VjcmV0", json.dumps(evidence))
 
     def test_known_categories(self):
         self.assertEqual(classify_detail("credit balance too low"), "CREDIT_EXHAUSTED")
         self.assertEqual(classify_detail("invalid api key"), "KEY_INVALID_OR_EXPIRED")
         self.assertEqual(classify_detail("rate limit reached"), "RATE_LIMITED")
+        self.assertEqual(classify_detail("error_max_budget_usd"), "BUDGET_EXCEEDED")
+
+    def test_null_handback_is_rejected(self):
+        with self.assertRaises(ClaudeCliFailure) as caught:
+            validate_handback({"result": None}, {"kind": "SUCCESS"})
+        self.assertEqual(caught.exception.evidence["detail"], "INVALID_HANDOFF")
+        self.assertEqual(caught.exception.evidence["response_type"], "NoneType")
+
+    def test_structured_budget_error_is_preserved(self):
+        with self.assertRaises(ClaudeCliFailure) as caught:
+            validate_handback({"is_error": True, "subtype": "error_max_budget_usd"}, {"kind": "SUCCESS"})
+        self.assertEqual(caught.exception.evidence["detail"], "BUDGET_EXCEEDED")
 
 
 if __name__ == "__main__":
