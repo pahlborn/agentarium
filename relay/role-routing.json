@@ -1,16 +1,16 @@
 {
   "schema": "agentarium.role-routing.v1",
-  "source": "Agentarium role allocation confirmed by project owner on 2026-10-13; technical IDs from Rulebook V1.0 DRAFT",
+  "source": "Verified bounded AG-TEAM-001 ChatGPT runs 2026-10-13; Claude historical identity evidence preserved, task-mode run 38406861688 pending. Availability is task-specific, not a permanently live session.",
   "roles": {
     "atlas": {
       "platform": "chatgpt",
-      "technical_id": "orchestrate-agent-work",
-      "state": "not_available_in_this_session"
+      "technical_id": "operate-as-atlas",
+      "state": "active_orchestrator_2026-10-13"
     },
     "nova": {
       "platform": "chatgpt",
       "technical_id": "create-vision-with-nova",
-      "state": "not_available_in_this_session",
+      "state": "task_contribution_completed_2026-10-13",
       "scope": [
         "vision",
         "experience",
@@ -21,22 +21,58 @@
         "merge",
         "publish",
         "approve_release"
-      ]
+      ],
+      "runtime_evidence": {
+        "task": "AG-TEAM-001",
+        "assignment_version": 1,
+        "agent": "/root/nova_team001",
+        "skill_resource": "skill://flora-user-skills/root/.codex/skills/remote-skills/skill-6acbad298bb8819184cb441c2845d5d6/SKILL.md",
+        "baseline": "135979d5706977c84512f00bc412b5fae553fb02",
+        "result": "https://github.com/pahlborn/agentarium/pull/1#issuecomment-6146786501",
+        "stop_state": "completed"
+      }
     },
     "scout": {
       "platform": "chatgpt",
       "technical_id": "build-research-knowledge",
-      "state": "not_available_in_this_session"
+      "state": "task_contribution_completed_2026-10-13",
+      "runtime_evidence": {
+        "task": "AG-TEAM-001",
+        "assignment_version": 1,
+        "agent": "/root/scout_team001",
+        "skill_resource": "skill://flora-user-skills/root/.codex/skills/remote-skills/skill-6acb8c11bb188191914e1bdade9e423e/SKILL.md",
+        "baseline": "135979d5706977c84512f00bc412b5fae553fb02",
+        "result": "https://github.com/pahlborn/agentarium/pull/1#issuecomment-6146786501",
+        "stop_state": "completed"
+      }
     },
     "argus": {
       "platform": "chatgpt",
       "technical_id": "review-agent-argus",
-      "state": "not_available_in_this_session"
+      "state": "task_contribution_completed_2026-10-13",
+      "runtime_evidence": {
+        "task": "AG-TEAM-001",
+        "assignment_version": 1,
+        "agent": "/root/argus_team001",
+        "skill_resource": "skill://flora-user-skills/root/.codex/skills/remote-skills/skill-6acc669a97d481919b531fd87dce0c35/SKILL.md",
+        "baseline": "135979d5706977c84512f00bc412b5fae553fb02",
+        "result": "https://github.com/pahlborn/agentarium/pull/1#issuecomment-6146786501",
+        "stop_state": "completed"
+      }
     },
     "sentinel": {
       "platform": "chatgpt",
       "technical_id": "qa-agent-sentinel",
-      "state": "not_available_in_this_session"
+      "state": "task_contribution_completed_2026-10-13",
+      "runtime_evidence": {
+        "task": "AG-TEAM-001",
+        "assignment_version": 1,
+        "agent": "/root/sentinel_team001",
+        "skill_resource": "skill://flora-user-skills/root/.codex/skills/remote-skills/skill-6acc67ea0d1081919d33527f4cd15a8f/SKILL.md",
+        "baseline": "135979d5706977c84512f00bc412b5fae553fb02",
+        "result": "https://github.com/pahlborn/agentarium/pull/1#issuecomment-6146786501",
+        "stop_state": "completed"
+      }
     },
     "archibald": {
       "platform": "claude-code",
