@@ -47,19 +47,7 @@ def report_failure(category):
             "\nNo automatic retry; run: " + os.environ.get("GITHUB_RUN_ID", "manual")
         )})
 
-def self_test():
-    assert classify_failure("Credit balance too low") == "CREDIT_EXHAUSTED"
-    assert classify_failure("invalid api key") == "KEY_INVALID_OR_EXPIRED"
-    assert classify_failure("syntax error") == "EXECUTION_FAILED"
-    print("SELF_TEST_OK")
-
-def main():
-    repo = api(API)
-    if repo.get("full_name") != REPO or repo.get("private") is not True:
-        raise RuntimeError("Fail closed: repo must be private")
-    raw_task, _ = fetch("handoffs/AG-RELAY-001-atlas-request.json")
-    task = json.loads(raw_task)
-    definition, sha = fetch(".claude/agents/process-agent.md")
+def validate_task(task, sha):
     required = {
         "schema": "agentarium.handoff.v0",
         "task_id": "AG-RELAY-001",
@@ -75,6 +63,36 @@ def main():
             raise RuntimeError("Handoff field mismatch: " + key)
     if task.get("source_sha") and task["source_sha"] != sha:
         raise RuntimeError("Agent blob SHA mismatch")
+
+def self_test():
+    assert classify_failure("Credit balance too low") == "CREDIT_EXHAUSTED"
+    assert classify_failure("invalid api key") == "KEY_INVALID_OR_EXPIRED"
+    assert classify_failure("syntax error") == "EXECUTION_FAILED"
+    valid = {"schema":"agentarium.handoff.v0", "task_id":"AG-RELAY-001",
+             "worker_role":"process-agent","status":"AWAITING_RELAY",
+             "expected_reply":"ROLE_IDENTITY_ACK","allowed_actions":["read"],
+             "auto_execution":False,"return_target":"https://github.com/pahlborn/agentarium/issues/2",
+             "source_sha":"known-agent-sha"}
+    validate_task(valid, "known-agent-sha")
+    for mutation in ({"worker_role":"forge"}, {"allowed_actions":["read","write"]},
+                     {"source_sha":"different-sha"}, {"auto_execution":True}):
+        changed = dict(valid, **mutation)
+        try:
+            validate_task(changed, "known-agent-sha")
+        except RuntimeError:
+            pass
+        else:
+            raise AssertionError("Authorization negative test failed: " + str(mutation))
+    print("SELF_TEST_OK: no model or external API used")
+
+def main():
+    repo = api(API)
+    if repo.get("full_name") != REPO or repo.get("private") is not True:
+        raise RuntimeError("Fail closed: repo must be private")
+    raw_task, _ = fetch("handoffs/AG-RELAY-001-atlas-request.json")
+    task = json.loads(raw_task)
+    definition, sha = fetch(".claude/agents/process-agent.md")
+    validate_task(task, sha)
     existing = api(API + "/issues/2/comments?per_page=100")
     if any("AG-RELAY-001 — LIVE_CLAUDE_RUNTIME_HANDOFF" in str(item.get("body", "")) for item in existing):
         raise RuntimeError("Replay prevented: handback already recorded")
