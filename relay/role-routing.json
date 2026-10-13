@@ -54,7 +54,7 @@
     "forge": {
       "platform": "claude-code",
       "technical_id": "coding-agent",
-      "state": "identity_probe_prepared_unverified",
+      "state": "identity_probe_passed_2026-10-13",
       "aliases": [
         "CA"
       ],
@@ -64,7 +64,10 @@
       "definition_path": ".claude/agents/coding-agent.md",
       "probe_task": "AG-RELAY-003",
       "probe_path": "relay/forge_one_shot.py",
-      "permissions": "identity_probe_read_only; future local edit/write requires separate authorized task"
+      "permissions": "identity_probe_read_only; future local edit/write requires separate authorized task",
+      "evidence": "https://github.com/pahlborn/agentarium/actions/runs/38396737845",
+      "handback": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6145433777",
+      "implementation_status": "not_authorized_or_tested"
     },
     "cadence": {
       "platform": "claude-code",
