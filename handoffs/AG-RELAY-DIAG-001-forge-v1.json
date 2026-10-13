@@ -1,0 +1,44 @@
+{
+  "schema": "agentarium.handoff.v0",
+  "task_id": "AG-RELAY-DIAG-001",
+  "version": 1,
+  "sender": "Atlas/main-agent",
+  "recipient": "Forge/coding-agent",
+  "status": "AUTHORIZED",
+  "process_version": "AG-PROC-MODEL-001@0.2",
+  "authorization": {
+    "source": "Peter",
+    "text": "Ok, dann gebe forge doch eine kleine Aufgabe zum Test",
+    "timestamp": "2026-10-13T18:23:24+02:00"
+  },
+  "purpose": "Prove one bounded Forge implementation handback through the hardened relay.",
+  "base_commit": "106dc05ab330401c0d4ec80768623926b7b66e8b",
+  "requested_model": "sonnet",
+  "requested_effort": "medium",
+  "budget_cap_usd": 0.12,
+  "max_turns": 1,
+  "allowed_actions": [
+    "return_code_and_assertions_as_text"
+  ],
+  "prohibited_actions": [
+    "write_repository",
+    "dispatch_agents",
+    "network_access",
+    "merge",
+    "release",
+    "deploy"
+  ],
+  "task": {
+    "language": "Python 3",
+    "instruction": "Implement public_failure_summary(evidence). Return a new dict containing only kind, detail, returncode, elapsed_seconds, timeout_seconds, stdout_bytes, stderr_bytes, stdout_sha256, stderr_sha256, and signals when those keys exist. Ignore every other key. Copy signals into a new list so callers cannot mutate the input through the result. Raise TypeError when evidence is not a dict. Keep the function under 20 nonblank lines.",
+    "acceptance": [
+      "Only the ten allowlisted keys can be returned.",
+      "signals is copied when it is a list.",
+      "Non-dict input raises TypeError.",
+      "Include exactly three plain assert examples.",
+      "Return only one Python fenced code block and no prose."
+    ]
+  },
+  "return_target": "https://github.com/pahlborn/agentarium/issues/2",
+  "auto_publish": false
+}
