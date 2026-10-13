@@ -1,0 +1,46 @@
+{
+  "schema": "agentarium.handoff.v0",
+  "task_id": "AG-PROC-REVIEW-001",
+  "version": 1,
+  "sender": "Atlas/main-agent",
+  "status": "AUTHORIZED",
+  "process_version": "AG-PROC-MODEL-001@0.2",
+  "authorization": {
+    "source": "Peter",
+    "text": "Ok, machen wir ein Prozess Review. War unser Prozess Agent beteiligt? Gibt es optimierungspotential bei Prozess und Regelwerk? Was sagt das Team, passen skills und Fähigkeiten oder wurde etwas vermisst? Bitte lasse keine simulierten Rückmeldungen zu.",
+    "timestamp": "2026-10-13T18:50:51+02:00"
+  },
+  "base_commit": "3a2dadb3680b8528aa194ac11c5300c25abf4115",
+  "evidence": [
+    "Cadence performed the earlier consistency review of AG-PROC-MODEL-001 and reported claude-opus-5-5 with USD 0.082876; Peter approved V0.2.",
+    "Cadence did not participate in the vision-to-mock execution or its correction loop before this review.",
+    "Three initial Forge mock runs failed without usable handback; relay diagnostics originally collapsed causes.",
+    "Atlas hardened diagnostics; Argus found and drove fixes for secret leakage, category loss, and null handback acceptance; offline CI passed.",
+    "A real small Forge task succeeded with claude-sonnet-5-5, USD 0.008448; function was correct but exact assertion-count format failed.",
+    "Two independent Forge mocks succeeded with claude-sonnet-5-5: USD 0.1460955 and USD 0.1285068.",
+    "Sentinel found lifecycle defects; one focused Forge correction cost USD 0.0176255; final QA PASS_WITH_LIMITS, 73 assertions; browser pixel behavior remains untested.",
+    "No merge, release, deployment or automatic direction choice occurred. Runtime model evidence distinguishes requested from actual; reasoning remained unconfirmed.",
+    "Argus now reports a confirmed replay regression: new wrappers scan only the first 100 Issue comments; persistent QA harnesses are missing."
+  ],
+  "rulebook_context": [
+    "Role separation: Atlas orchestrates; specialist produces; Argus reviews; Sentinel tests; Peter decides protected approvals.",
+    "Claims require technical evidence and limitations must remain explicit.",
+    "Implementation identity tests do not authorize implementation work.",
+    "AG-PROC-MODEL-001@0.2 selects per-task models by difficulty, risk, availability and cost while respecting profile defaults and recording requested versus actual runtime evidence.",
+    "No automatic retries/upgrades when balance or authorization is unknown."
+  ],
+  "output_contract": "Return a concise German process review. Separate observed evidence, rule consistency, decisions requiring Peter, and non-binding recommendations. Do not claim approval or facts not in the package.",
+  "recipient": "Cadence/process-agent",
+  "role": "process-agent",
+  "requested_model": "opus",
+  "requested_effort": "medium",
+  "budget_cap_usd": 0.25,
+  "max_turns": 1,
+  "questions": [
+    "Was Cadence materially involved before this review, and where was process-agent participation absent?",
+    "Does the observed workflow comply with Rulebook V1.1 principles and AG-PROC-MODEL-001@0.2?",
+    "Which process or rule changes are justified by evidence, and which would be overprocessing?",
+    "Did the process-agent profile fit, and what capability or artifact was missing?",
+    "Identify any change that requires Peter's explicit process approval."
+  ]
+}
