@@ -14,3 +14,10 @@ Use existing Issue #2 as source of truth. Connect a Claude-Code-capable runtime 
 
 ## Acceptance
 Atlas issues a task -> independent role executes -> verifiable handback arrives -> Atlas reads and validates it. Until then all agent connections remain **not connected**.
+
+## Credential provisioning (reported by repository owner, 2026-10-13)
+
+- Repository secret `ANTHROPIC_API_KEY` reportedly configured in GitHub Actions. Secret value is not stored in this repository.
+- Anthropic API key validity: 30 days from 2026-10-13; expected expiration on **2026-11-12**, subject to actual creation timestamp/provider expiry.
+- Secret usability not yet independently verified by an Actions run.
+- Repository confirmed private by GitHub API.
