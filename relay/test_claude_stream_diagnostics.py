@@ -43,5 +43,13 @@ class Stream(unittest.TestCase):
     def test_output_limit(self):
         with self.assertRaises(ClaudeCliFailure) as c:self.call('print("x"*4100000)')
         self.assertEqual(c.exception.evidence['detail'],'OUTPUT_LIMIT')
+    def test_checkpoint_and_error_usage_no_thinking(self):
+        with tempfile.TemporaryDirectory() as d:
+            code='import json,sys;print(json.dumps({"type":"stream_event","event":{"delta":{"type":"thinking_delta","thinking":"PRIVATE-THOUGHT"}}}));print(json.dumps({"type":"stream_event","event":{"delta":{"type":"text_delta","text":"<html>partial</html>"}}}));print(json.dumps({"type":"result","is_error":True,"result":"budget exceeded","total_cost_usd":0.5,"modelUsage":{"claude-test":{"inputTokens":10,"outputTokens":20}}}));sys.exit(1)'
+            with self.assertRaises(ClaudeCliFailure) as c:
+                run_stream([sys.executable,'-u','-c',code],cwd=d,env=dict(os.environ),timeout=2,checkpoint_dir=d)
+            self.assertEqual((Path(d)/'assistant-text.txt').read_text(),'<html>partial</html>')
+            self.assertEqual(c.exception.evidence['terminal_usage']['total_cost_usd'],.5)
+            self.assertNotIn('PRIVATE-THOUGHT',(Path(d)/'execution-metadata.json').read_text())
 
 if __name__=='__main__':unittest.main()
