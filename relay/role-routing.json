@@ -53,14 +53,18 @@
     },
     "forge": {
       "platform": "claude-code",
-      "technical_id": null,
-      "state": "claude_code_coding_role_confirmed_by_owner_independent_agent_definition_unverified",
+      "technical_id": "coding-agent",
+      "state": "identity_probe_prepared_unverified",
       "aliases": [
         "CA"
       ],
       "scope": [
         "implementation"
-      ]
+      ],
+      "definition_path": ".claude/agents/coding-agent.md",
+      "probe_task": "AG-RELAY-003",
+      "probe_path": "relay/forge_one_shot.py",
+      "permissions": "identity_probe_read_only; future local edit/write requires separate authorized task"
     },
     "cadence": {
       "platform": "claude-code",
