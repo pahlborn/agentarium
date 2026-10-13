@@ -1,0 +1,39 @@
+{
+  "schema": "agentarium.testability-addendum.v1",
+  "task": "AG-VISUAL-004",
+  "authors": {
+    "specification": "Real Archibald/spec-agent V1",
+    "testability": "Real Sentinel /root/sentinel_agentarium",
+    "clarifications": "Atlas within Peter-approved scope"
+  },
+  "status": "implementation_baseline",
+  "view_mapping": "AC01-09 material criteria apply to Gewebe. Partitur expresses the same causal phases temporally, not membranes. All shared functional criteria apply to both.",
+  "T01": {
+    "view": "Gewebe",
+    "interval_seconds": [
+      114,
+      119
+    ],
+    "duration_seconds": 5,
+    "expected": "continuous connected material deformation; no newly triggered event flashes in this event-free interval; existing work state/history may remain. Background motion is not evidence of actual agent work."
+  },
+  "impulses": {
+    "duration_seconds": 3,
+    "meaning": "short event notifications only; work phases and accumulated material changes separate"
+  },
+  "regressions": [
+    "exact34 events/120s",
+    "per-task responsibility changes only by defined handoff",
+    "synthetic cumulative costs0.63 labelled fiction",
+    "play/pause/scrub seek pauses; strictly next timestamp/end-step stays120/explicit replay/speed1x2x4x",
+    "hidden freeze, reset clock on return, preserve prior play state",
+    "reduced-motion starts paused",
+    "no external APIs/assets/storage"
+  ],
+  "T09": {
+    "procedure": "pause; seek to59; wait completed render; compare canvas only at fixed viewport,DPR,fonts. Repeat3times includingreload. Exclude UI/cursor/focus from pixel comparison."
+  },
+  "OD1": "Inline ChatGPT interactive preview is delivery surface; real Chromium allow-scripts/srcdoc test additionally required. File preview alone not accepted. Safari remains untested unless separately executed.",
+  "OD2": "Keep E05→Archibald fixture. Selected source meets Nova's design through Archibald transformation; no invented event.",
+  "visual_gate": "Actual screenshots/video must support Nova material/wirkung review; numerical geometry/VM tests cannot pass visual quality. Peter remains final direction/experience authority."
+}
