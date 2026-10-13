@@ -1,0 +1,23 @@
+name: Agentarium Relay — one-shot Cadence probe
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+  issues: write
+jobs:
+  cadence-identity-probe:
+    if: github.event.repository.private == true && github.ref_name == 'feature/visual-stage-v0'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout triggering commit
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install Claude Code CLI
+        run: npm install --global @anthropic-ai/claude-code
+      - name: Dispatch read-only Cadence identity probe once
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python3 relay/one_shot.py
