@@ -1,64 +1,89 @@
-# Agentarium – Modellwahl und Aufwandssteuerung
+# AG-PROC-MODEL-001 — Aufgabenabhängige Modellwahl
+Version: 0.2 APPROVED
+Stand: 2026-10-13
+Prozessverantwortliche: Peter und Atlas
+Status: eigenständige Prozessergänzung für neue Aufträge; freigegeben durch PROCESS_DECISION V1 am 2026-10-13T17:19:03+02:00
+Vorgänger: V0.1, Blob 060a28295398d54490eb061e724d85621001784c
+Exakte freigegebene Vorlage: governance/AG-PROC-MODEL-001-v0.2-proposed.md am Commit 9fc2dfcc4e9a5ab231545a5e2a849a962405078f
+Entscheidung: governance/decisions/AG-PROC-MODEL-001-PROCESS-DECISION-v1.md
+Bezug: Agentarium Rulebook V1.1 DRAFT, insbesondere §§1, 2.2, 3.1, 13.
 
-**Kennung:** AG-PROC-MODEL-001  
-**Version:** 0.1 (Vorschlag, zur Aufnahme ins zentrale Rulebook)  
-**Stand:** 2026-10-13  
-**Prozessverantwortliche:** Peter und Atlas  
-**Geltung:** ChatGPT Work und Claude Code, alle Agentarium-Fachaufträge  
-**Normativer Status:** Entwurf; keine stillschweigende Änderung bestehender Aufträge, Agentendefinitionen, Rechte oder Freigaben
+## 1. Ziel und unveränderte Grenzen
+Atlas wählt für jeden neuen Fachauftrag eine geeignete Modellfamilie und einen angemessenen Denkaufwand anhand von Schwierigkeit, Auswirkungsrisiko, belegter Verfügbarkeit und autorisiertem Kostenrahmen. Rollen, Werkzeuge, Berechtigungen, unabhängige Reviews und Peters Freigaben ändern sich dadurch nicht.
 
-## Ziel
+R (Routine): Luna/Haiku als Orientierung; F (Fachauftrag): Sol/Sonnet; K (kritisch): Astra/Opus. Diese Familien sind Orientierung, keine getestete Qualitätsgarantie, keine festen technischen IDs und kein Verfügbarkeitsnachweis. Die konkrete Wahl berücksichtigt die Aufgabe; weder ein günstiger noch ein teurer Aufruf ersetzt fachliche Prüfung.
 
-Atlas weist **nicht jedem Agenten dauerhaft ein Leistungsmodell zu**. Atlas bestimmt das Modell und den Denkaufwand für **den konkreten Auftrag**, abhängig von Komplexität, Auswirkungsrisiko, Verfügbarkeit, Kosten und gegebenenfalls der Nutzerfreigabe. Die fachliche Rolle und ihre erlaubten Werkzeuge werden dadurch nicht verändert.
+## 2. Vorrang und bestehende Modellvorgaben
+Plattformgrenzen, Peters konkrete Entscheidung und verbindliche auftrags-/rollenspezifische Vorgaben gehen einer Orientierung aus §1 vor.
 
-## Entscheidungsstufen (Orientierung, nicht unbesehen feste technische Modell-IDs)
+Vor jedem Aufruf unterscheidet Atlas:
+- verbindliche Modellvorgabe;
+- technischen Default der Rolle;
+- bevorzugte Modellfamilie für die Aufgabe;
+- explizit angefordertes Modell und Reasoning;
+- tatsächlich beobachtete Ausführung.
 
-| Klasse | Typische Aufgabe | ChatGPT-Work-Orientierung | Claude-Code-Orientierung |
-| --- | --- | --- | --- |
-| R – Routine | Status, knappe Identitätstests, formalisierte Klassifizierung | Luna | Haiku |
-| F – Fachauftrag | Vision, Recherche, Spezifikation, Implementierung, Review, QA | Sol | Sonnet |
-| K – Kritisch | Widersprüchliche Evidenz, kritische Architektur-/Sicherheitsfragen, schwerwiegende ungeklärte Befunde | Astra | Opus |
+Die Orientierung überschreibt weder bestehende Aufträge noch `model:`-/Reasoning-Einträge. Die aktuelle Claude-Basis bleibt `spec-agent: opus/high`, `coding-agent: sonnet/medium`, `process-agent: opus/medium`.
 
-- Konkrete Modellbezeichnungen, Reasoning-Stufen und ihre Steuerbarkeit sind **zur Laufzeit zu ermitteln**; die Tabelle ist keine Zusage, dass das Modell im aktuellen ChatGPT-Work- oder Claude-Code-Lauf angeboten wird.
-- Für **Atlas selbst** gilt Sol/Medium als bevorzugter Betriebswert, sofern im aktuellen Work-Auftrag verfügbar. Ansonsten eine verfügbare, geeignete Alternative mit dokumentierter Abweichung.
-- Aufrufe von Claude Code verwenden nur ausdrücklich zugelassene Mittel. Die vorhandenen Identitätstest-Relays sind **nicht** für unbegrenzte Fachaufträge freigegeben.
-- Bestehende `model:`-Einträge in Agentendefinitionen gelten bis zu einer separat geprüften Änderung als **wirksame technische Defaults**. Diese Regel ersetzt sie nicht automatisch.
+Eine auftragsbezogene Default-Abweichung ist nur zulässig, wenn Atlas Kompatibilität mit Rollenvertrag und Runtime geprüft, die Wahl einschließlich Abweichung begründet und die Autorisierungs-/Budgetgrundlage dokumentiert hat. Ein verbindliches Rollenmodell verlangt eine ausdrückliche Ausnahmeentscheidung; ein persistenter Default wird ausschließlich durch einen getrennt geprüften Änderungsauftrag geändert. Eine neue Prozessentscheidung ist keine automatische Agentendefinitionsänderung.
 
-## Verpflichtender Kurzcheck durch Atlas vor jedem Aufruf
+## 3. Runtime-Fähigkeit statt Modellversprechen
+Atlas prüft vor dem Start das tatsächlich verfügbare Aufrufschema. Ein Skill installiert kein Modell. Fehlende Auswahlmöglichkeit wird als `not_selectable` dokumentiert.
 
-1. **Schwierigkeit:** R, F oder K anhand der konkreten Aufgabe.
-2. **Risikoprofil:** Folgen einer falschen Antwort, erwartete unabhängige Prüfung und erforderliche Denkstufe.
-3. **Verfügbarkeit:** Ist das gewünschte Modell/Reasoning in der *tatsächlichen* Laufzeit technisch wählbar?
-4. **Budget:** Ist der Aufruf im vorhandenen Kostenrahmen? Bei Claude-API-Guthabenmangel oder unklarem Budget: stoppen, kein automatischer Retry/Upgrade.
-5. **Ausführung:** Gewähltes Modell und, soweit die Laufzeit ausweist, tatsächlich verwendetes Modell und Aufwand protokollieren. Nicht beobachtbare Angaben erhalten den Status `unconfirmed`, niemals einen geschätzten Modellnamen.
-6. **Abweichung:** Bei nicht verfügbarem Zielmodell eine passende, dokumentierte Alternative wählen oder fachlichen Auftrag stoppen. Bei höherem Kosten- oder Risikoniveau Freigabe einholen.
+In dieser Work-Laufzeit sind explizite Subagent-Modell-/Reasoning-Parameter ausschließlich bei `fork_turns=none` vorgesehen; vollständige History-Forks übernehmen die Runtime und akzeptieren keine solchen Overrides. Eine Umstellung des laufenden Atlas-Hauptchats ist hier nicht als Werkzeug verfügbar. Sol/Medium bleibt deshalb eine Präferenz, keine Behauptung über den Hauptchat.
 
-## Minimale Auftragsfelder
+Bei Claude Code muss ein erlaubter Aufruf eine gewünschte Auswahl technisch übergeben; YAML im Prompt ist allein kein Beleg, dass ein Default angewandt wurde. Vorhandene einmalige Identitäts- und Aufgaben-Relays werden nicht zu allgemeinen, unbegrenzten Ausführungskanälen erklärt.
 
+## 4. Nachweis pro Auftrag
 ```yaml
 model_routing:
   task_complexity: R | F | K
   risk: low | medium | high
-  target_platform: chatgpt-work | claude-code
+  target_platform:
+  role_model_constraint_or_default:
   preferred_model_family:
-  requested_model:  # optional; nur wenn nachweislich auswählbar
-  requested_reasoning: # optional
-  actual_model: # runtime evidence or unconfirmed
-  actual_reasoning: # runtime evidence or unconfirmed
+  requested_model: # expliziter Parameter oder inherited/not_selectable
+  requested_reasoning:
+  actual_model: # unabhängige Laufzeitangabe oder unconfirmed
+  actual_reasoning: # unabhängige Laufzeitangabe oder unconfirmed
   model_evidence:
-  budget_limit_or_authorization:
+  override_authorization_and_reason:
+  budget_authorization:
+  estimated_cost_limit:
+  reported_actual_cost:
   fallback_decision:
 ```
 
-## Abnahmeregel
+Aufrufparameter belegen die Anforderung, nicht automatisch die ausgeführte Variante. Ein Modellname aus dem Agententext oder ein Rollen-/Sessionname ist kein unabhängiger Modellnachweis. Runtime-Usage/Logs werden nur dann als Beleg übernommen, wenn sie die konkret benannte Sitzung und tatsächliche Modellnutzung nachvollziehbar ausweisen. Mehrere Modelle werden getrennt genannt; ein einzelnes `actual_model` wird nicht erfunden. Nicht ausgewiesener tatsächlicher Denkaufwand bleibt `unconfirmed`, auch bei explizitem Reasoning-Parameter. Vergangene Aufrufe werden nicht nachträglich umetikettiert.
 
-Eine kurze Routineantwort ist nicht automatisch schlechter, weil sie mit einem günstigen Modell erzeugt wurde. Ein Fachauftrag gilt auch bei teurem Modell nicht automatisch als geprüft. **Evidenz, unabhängiges Review und Freigaben bleiben eigenständige Gates.**
+## 5. Kosten, Verfügbarkeit und Stop
+Ein Aufruf braucht einen klaren autorisierten Kostenrahmen. Ohne Kostenautorisation oder bei nicht beurteilbarer zulässiger Kostengrenze stoppt der betroffene Aufruf.
 
-## Einführung
+Ein nicht lesbarer verbleibender Provider-Kontostand wird getrennt als unbekannt geführt. Er ersetzt keinen Budgetnachweis und begründet keine Verfügbarkeitsbehauptung. Ein ausdrücklich autorisierter, begrenzter Fachauftrag kann in diesem Rahmen ausgeführt werden; bei gemeldetem Guthabenmangel, Key-/Quota-Problem oder Budgetfehler endet er ohne automatischen Retry, Upgrade oder Modellwechsel.
 
-1. Peter und Atlas prüfen diesen Vorschlag als Prozessänderung.
-2. Nach Freigabe in das maßgebliche `Agentarium Rulebook & Process Manual` übernehmen und Prozessversion dokumentieren.
-3. Technische Claude-Modell-Defaults und ChatGPT-Aufrufparameter **separat** prüfen und gegebenenfalls anpassen.
-4. Neue Aufträge referenzieren die genehmigte Prozessversion; laufende Aufträge werden nicht rückwirkend umgestellt.
+CLI-Kostenlimits sind Schätzgrenzen und keine Garantie für die Rechnung. Atlas dokumentiert Kostenquelle und Grenzen. Keine bezahlten Modellproben allein zur Bestätigung einer Auswahl; bestehende Konfigurations-/Runtime-Belege und Metadaten regulärer Fachaufträge verwenden.
 
-**Quellen-/Statushinweis:** Bei Erstellung enthielten die Claude-Agentendefinitionen die Defaults `spec-agent: opus/high`, `coding-agent: sonnet/medium`, `process-agent: opus/medium`, während die erfolgreichen Identitätstest-Relays Haiku nutzten. Für die ChatGPT-Agents war im geprüften Rulebook V1.1 DRAFT keine verbindliche Modellwahl beschrieben. Dies ist ein vorgeschlagenes Routing, kein Nachweis aufrufbezogener Modellsteuerung.
+Fallbacks werden vorab mit Zweck, Kompatibilität und Kostenrahmen benannt. Ein Upgrade gegenüber dem bestehenden Rollen-Default, eine höhere Kosten-/Risikostufe oder ein Konflikt mit verbindlichen Vorgaben benötigt Peters Entscheidung. Ein nicht verfügbarer Beitrag ist keine Zustimmung; unabhängige Arbeit darf weiterlaufen.
+
+## 6. Einführung und Entscheidungsumfang
+Peter und Atlas entscheiden mit `PROCESS_DECISION` über diese exakte V0.2 und deren Einführung für neue Aufträge. Vor der Entscheidung bleibt der Status `proposed`.
+
+Eine Annahme dieser Ergänzung aktiviert nicht das gesamte noch als DRAFT geführte Rulebook V1.1. Der Bezug und die begrenzte Geltung werden im Prozessregister dokumentiert; eine spätere zentrale Rulebook-Revision erfolgt gesondert. Laufende Aufträge behalten ihre bisherige Baseline; ein Wechsel braucht eine ausdrückliche, nachvollziehbare Rebaselining-Entscheidung.
+
+Die dokumentierte technische Steuerbarkeit ist laufzeitspezifisch. Weder Modelldefaults noch Relay-Rechte werden mit dieser Aufnahme automatisch geändert.
+
+## 7. Delta V0.1 → V0.2
+- Vorrang von verbindlicher Vorgabe, technischem Default und Aufgabenpräferenz präzisiert; Override und persistente Änderung getrennt.
+- Nicht auswählbare Hauptchat-Modelle und Anforderungen der tatsächlichen Subagent-Runtime ausdrücklich behandelt.
+- Angefordert, ausgeführt und Reasoning-Nachweis getrennt; vergangene Calls nicht rückwirkend bestätigt.
+- Unlesbarer Kontostand, fehlende Budgetautorisation und tatsächlicher Guthabenfehler getrennt; Kostenschätzgrenzen kenntlich gemacht.
+- Begrenzte PROCESS_DECISION, neue Aufträge und nicht automatisch aktiviertes Rulebook DRAFT abgegrenzt.
+
+## 8. Prüfung und dokumentierte Entscheidung
+Cadence / process-agent prüfte V0.1 in einer getrennten Claude-Sitzung `71163eaf-469d-4194-9c90-1a8c27a51069`, Run `38420199480`. Ergebnis: drei notwendige Präzisierungen (Override-Hierarchie, Budgetautorisation gegenüber unbekanntem Saldo, Präferenz/Request gegenüber tatsächlicher Runtime); keine zusätzlichen Blocker. Diese Punkte sind in V0.2 eingearbeitet. Der terminale CADENCE_REPORT ist in Issue #2, Kommentar `6148789041`, unverändert dokumentiert. Er ist keine Prozessfreigabe.
+
+Unabhängige Runtime-Metadaten dieses einen Fachreviews: angefordert Opus/Medium, Modellnutzung laut CLI-JSON `claude-opus-5-5`, tatsächlicher Denkaufwand `unconfirmed`, CLI-gemeldete Kosten USD 0.082876. Kein Modellbenchmark, kein bezahlter Verfügbarkeitstest, kein Retry oder Fallback. Die Modellangabe ist auf diesen einen Lauf begrenzt.
+
+Cadences Vorschlag, die nächsten fünf Aufträge als Wirkungskontrolle anzusehen, ist eine optionale Empfehlung; keine Automation oder gesonderte Pflicht-Gate wurde aktiviert.
+
+Erteilte PROCESS_DECISION V1: Peter hat genau diese AG-PROC-MODEL-001 V0.2 als eigenständige Ergänzung für neue Aufträge angenommen, bei unveränderten Rollen-/Toolrechten und Modelldefaults. Die Übernahme einer zentralen Rulebook-Revision und die technische Erweiterung der vorhandenen Aufrufpfade bleiben getrennte Schritte.
