@@ -99,7 +99,7 @@ def main():
     if not os.environ.get("ANTHROPIC_API_KEY"):
         raise RuntimeError("Missing ANTHROPIC_API_KEY")
     config = json.dumps({"spec-agent": {
-        "description": "Archibald: read-only process review / identity probe",
+        "description": "Archibald: read-only specification agent / identity probe",
         "prompt": definition,
         "tools": ["Read", "Glob", "Grep"],
         "model": "haiku"
