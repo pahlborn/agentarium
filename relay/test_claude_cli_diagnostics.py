@@ -21,6 +21,7 @@ class DiagnosticTests(unittest.TestCase):
         result, evidence = self.run_script("import json; print(json.dumps({'result':'ok'}))")
         self.assertEqual(result["result"], "ok")
         self.assertEqual(evidence["kind"], "SUCCESS")
+        self.assertEqual(evidence["detail"], "SUCCESS")
         self.assertNotIn("safe_excerpt", evidence)
 
     def test_timeout_is_distinct(self):
