@@ -4,6 +4,7 @@ from pathlib import Path
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 sys.path.insert(0,str(Path(__file__).parent))
 sys.path.insert(0,str(Path(__file__).parent.parent/'relay-work'))
 from claude_stream_diagnostics import run_stream
@@ -51,5 +52,9 @@ class Stream(unittest.TestCase):
             self.assertEqual((Path(d)/'assistant-text.txt').read_text(),'<html>partial</html>')
             self.assertEqual(c.exception.evidence['terminal_usage']['total_cost_usd'],.5)
             self.assertNotIn('PRIVATE-THOUGHT',(Path(d)/'execution-metadata.json').read_text())
+    def test_checkpoint_failure_before_process_start(self):
+        with patch('claude_stream_diagnostics.Path.mkdir',side_effect=OSError('disk')),patch('claude_stream_diagnostics.subprocess.Popen') as popen:
+            with self.assertRaises(OSError):run_stream(['fake'],cwd='.',env={},timeout=1,checkpoint_dir='missing')
+            popen.assert_not_called()
 
 if __name__=='__main__':unittest.main()
