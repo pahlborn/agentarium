@@ -1,0 +1,64 @@
+{
+  "task_id": "AG-NACHTPOST-001",
+  "version": 1,
+  "status": "PREIMPLEMENTATION_QA_BASELINE",
+  "scope": "Two runnable offline HTML mocks; Gewebe AND Partitur; not raster images",
+  "fixture_ref": "fixtures/AG-FICTION-001-nachtpost-v1.json",
+  "source": "Peter runnable mocks request; Nova AG-VISUAL-003 creative directions",
+  "criteria": [
+    {
+      "id": "AC-01",
+      "description": "same exact34 fixture events and120 second deterministic story"
+    },
+    {
+      "id": "AC-02",
+      "description": "play/pause, seek, next event, end-step stays end, explicit replay, speed controls"
+    },
+    {
+      "id": "AC-03",
+      "description": "hidden page freeze/no resume jump; reduced-motion initial pause"
+    },
+    {
+      "id": "AC-04",
+      "description": "dock independent grid column; mobile stacked no scene overlay"
+    },
+    {
+      "id": "AC-05",
+      "description": "all nine names and roles; optional IDs, platform distinguishable, models explicitly unconfirmed"
+    },
+    {
+      "id": "AC-06",
+      "description": "per-task responsibility distinct from communication, parallel work visible"
+    },
+    {
+      "id": "AC-07",
+      "description": "synthetic cumulative costs only, total0.63USD, real usage/token unknown"
+    },
+    {
+      "id": "AC-08",
+      "description": "no network/storage/external assets/dependencies"
+    },
+    {
+      "id": "AC-09",
+      "description": "test hook supports deterministic state inspection"
+    },
+    {
+      "id": "AC-10",
+      "description": "Gewebe spatial workworlds; Partitur temporal overlapping roles; actual browser visual assessment separate"
+    }
+  ],
+  "evidence_requirements": "persist rerunnable QA harness, result and exact hashes; never claim missing browser checks",
+  "author": "Atlas",
+  "review": {
+    "agent": "/root/argus_team001",
+    "result": "PASS_WITH_LIMITS relay preflight only",
+    "reviewed_runner_sha256": "ce8d9ab7314dc9f4521e6bd70ca06ccdea664303ab980cff4d8432d11fb2fa46"
+  },
+  "budget": {
+    "estimated_cli_cap_per_variant_usd": 0.25,
+    "max_paid_calls": 2,
+    "auto_retry": false,
+    "remaining_balance": "unknown"
+  }
+}
+
