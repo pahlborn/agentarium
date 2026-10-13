@@ -1,0 +1,21 @@
+{
+  "schema": "agentarium.handoff.v1",
+  "task_id": "AG-NACHTPOST-001-GEWEBE",
+  "version": 1,
+  "recipient": "Forge/coding-agent",
+  "status": "AUTHORIZED",
+  "base_commit": "1e812fb0e5f9f9f76a753bb57acbbdc2bb6111c2",
+  "variant": "gewebe",
+  "budget_cap_usd": 0.25,
+  "requested_model": "sonnet",
+  "requested_effort": "medium",
+  "max_turns": 1,
+  "authorization": {
+    "source": "Peter",
+    "text": "Zwei mocks, lauffähig, mit deiner story, oder?",
+    "scope": "Two runnable private offline previews, existing relay; no merge/deploy; no automatic retry"
+  },
+  "team_context": "Peter asks every role to bring initiative, creativity and useful objections. Nova's creative direction is supplied. Return code for this clear bounded implementation; no claims about own testing.",
+  "requirements": "Build ONE self-contained runnable HTML document (doctype/head/body allowed), plain Canvas2D or SVG and JS, inline data/styles, no external assets, APIs, storage or dependencies. Return exactly one fenced html block, no prose, <=24000 characters. Use fictional_fixture EXACT event IDs/title/time/caused_by/synthetic_usage, 120s story. Do not simulate actual agent answers. Labels Konzept · fiktive Demodaten, Erfundene Demokosten; actual models unbestätigt. Controls play/pause, next event, replay, timeline seek, 1x/2x/4x, IDs toggle, contextual dock toggle, view role details on click. Dock occupies own grid column never overlays; mobile stacks below. Replay and pause deterministic; hidden page freezes no resume jump; reduced motion initially paused; end-step stays end, replay explicit. Names/platform visible for all nine roles; provider identity separate from model. Responsibility per task (multiple concurrent BALL seals), gold; communication thinner different style. Agent symbols reveal distinctive workworld/action, not people. GitHub Werkhof, Claude API channel, Internet source fan and optional tool stations shown as demo environment; no real integrations. Sources arrive then bad fragments fade and selected material forms building; role work windows derived from events not always activity. Local review on building, defect persistent until repair; show question and CR links. Cost stratification/step plot grows from synthetic_usage only, exact cumulative at timeline, selected event cost and tokens unknown. Story text context readable. Elegant spectacular premium dark UI; ample stage with hierarchical typography, not a card dashboard. Include test hook window.AG_NACHTPOST = {events, getState:()=>({time,playing,cost,ownerByTask}), seek(seconds), step(), pause(), play()}; adapt property names but keep this API. JS robust to resizing; accessible native controls. Own creativity and alternatives in visual treatment welcome within scope.",
+  "art_direction": "Luminous letter city grows across free flowing violet/cyan fabric in diagonal depth; agent workworlds spatially around shared structure. Atlas lattice, Nova prism garden, Scout expedition rings through source fragments, Archibald folding epic/story tiles, Forge braided assembly, Argus split counterlight, Sentinel hexagonal test frame, Cadence wave repairing transition. Curved threads show simultaneous cause/communication, no rigid sequence. Solution assembles over time; errors leave gaps and visible repair scars."
+}
