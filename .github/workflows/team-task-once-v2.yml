@@ -1,0 +1,33 @@
+name: Agentarium AG-TEAM-001 V2 one bounded task
+on:
+  push:
+    branches: [feature/visual-stage-v0]
+    paths: ['.github/workflows/team-task-once-v2.yml']
+permissions:
+  contents: read
+  issues: write
+concurrency:
+  group: agentarium-team-001-v2
+  cancel-in-progress: false
+jobs:
+  bounded-team-task:
+    if: github.event.repository.private == true && github.ref_name == 'feature/visual-stage-v0'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact triggering commit and immutable baseline
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Validate task wrapper offline
+        run: python3 relay/team_task_once.py --self-test
+      - name: Install existing Claude Code CLI dependency
+        run: npm install --global @anthropic-ai/claude-code
+      - name: Record CLI version without paid call
+        run: claude --version
+      - name: Execute bounded task once, stop on any failure
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python3 relay/team_task_once.py
