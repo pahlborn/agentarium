@@ -1,0 +1,40 @@
+name: Agentarium Relay — Forge identity test
+on:
+  push:
+    paths:
+      - '.github/workflows/forge-relay.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  issues: write
+concurrency:
+  group: agentarium-relay-003
+  cancel-in-progress: false
+jobs:
+  offline-authorization-check:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 040132bfcfc78a353e7e4215ed4d0d60e967eac0
+          persist-credentials: false
+      - name: Forge validation - no API cost
+        run: python3 relay/forge_one_shot.py --self-test
+  forge-identity-probe:
+    if: github.event_name == 'workflow_dispatch' && github.event.repository.private == true && github.ref_name == 'main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 040132bfcfc78a353e7e4215ed4d0d60e967eac0
+          persist-credentials: false
+      - name: Install Claude Code CLI
+        run: npm install --global @anthropic-ai/claude-code
+      - name: Run one read-only Forge identity probe
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python3 relay/forge_one_shot.py
