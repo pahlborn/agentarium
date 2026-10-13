@@ -1,0 +1,18 @@
+name: Agentarium Relay — offline authorization checks
+on:
+  push:
+    paths:
+      - '.github/workflows/relay-offline-tests.yml'
+permissions:
+  contents: read
+jobs:
+  validate-no-api:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 64a58b5b99dd31a2003f4e382f1442d9572c4791
+          persist-credentials: false
+      - name: Negative authorization tests without Claude API
+        run: python3 relay/one_shot.py --self-test
