@@ -1,0 +1,40 @@
+name: Agentarium Relay — Archibald identity test
+on:
+  push:
+    paths:
+      - '.github/workflows/archibald-relay.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  issues: write
+concurrency:
+  group: agentarium-relay-002
+  cancel-in-progress: false
+jobs:
+  offline-authorization-check:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 040fc5722004184cda96a22c58b37cc8feed9238
+          persist-credentials: false
+      - name: Archibald validation — no API cost
+        run: python3 relay/archibald_one_shot.py --self-test
+  archibald-identity-probe:
+    if: github.event_name == 'workflow_dispatch' && github.event.repository.private == true && github.ref_name == 'main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 040fc5722004184cda96a22c58b37cc8feed9238
+          persist-credentials: false
+      - name: Install Claude Code CLI
+        run: npm install --global @anthropic-ai/claude-code
+      - name: Run one read-only Archibald identity probe
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python3 relay/archibald_one_shot.py
