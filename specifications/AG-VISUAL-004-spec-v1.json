@@ -1,0 +1,198 @@
+{
+  "epic": {
+    "id": "AG-VISUAL-004-EPIC",
+    "version": 1,
+    "goal": "Revise both Agentarium mocks so the Gewebe view moves like a living organic network, fictional work is locally causal and readable, and the Partitur view tells the same story over time as an equal view.",
+    "scope": [
+      "Revise both existing mocks as equal alternatives",
+      "Gewebe material and motion",
+      "Event causality from the AG-FICTION-001 fixture",
+      "Partitur view",
+      "Focus and optional metadata",
+      "Deterministic replay",
+      "Mobile layout",
+      "Rendered delivery evidence"
+    ],
+    "non_goals": [
+      "Building the actual NACHTPOST product",
+      "Choosing a winning mock",
+      "Architecture, new dependencies, publication or merge",
+      "Displaying real agent activity, costs or models",
+      "Promising a particular artistic quality"
+    ]
+  },
+  "stories": [
+    {
+      "id": "S1",
+      "user_goal": "Peter sees the Gewebe as one continuous living material.",
+      "acceptance": [
+        "AC01 Thin membranes and multi-strand fibre bundles form one connected material. A static node diagram with flying points is NO-GO.",
+        "AC02 Broad, continuous swells deform membranes and bundles together while the camera stays fixed. Camera travel or uniform pulsing is not the only source of life.",
+        "AC03 Ambient motion and work impulses are visibly separate: waiting areas only drift slowly, distant areas stay calm, and the gold responsibility seals remain stable reference points."
+      ]
+    },
+    {
+      "id": "S2",
+      "user_goal": "Peter sees what each fictional event changes and where.",
+      "acceptance": [
+        "AC04 For a work event, fibres thicken locally at the actor, recipient and caused_by areas, and neighbouring surfaces are pulled in.",
+        "AC05 Parallel work is visible in the same frame (E09/E10, E12/E13, E32/E33), with no relay hand-off between them.",
+        "AC06 Scout expedition: E03 extends Scout's area outward and E05 brings back a fan of sources. Discarded finds stay muted and the selected find lands at the target. This activity is tied to the fixture times and ends with them.",
+        "AC07 Argus E11 creates opposing pull between the bridge and the withdrawable letter. Other areas keep working.",
+        "AC08 Break E15: the house disappears, the bridge remains and a visible tear appears.",
+        "AC09 Repair E17–E28: Forge changes the connection and Sentinel repeats the check. A permanent seam remains and the V1 state stays reachable through scrub or focus. Cadence (E21–E23) resolves the documented transition jam."
+      ]
+    },
+    {
+      "id": "S3",
+      "user_goal": "Peter reads roles and details calmly without being overloaded.",
+      "acceptance": [
+        "AC10 Argus review and Sentinel QA are visually distinct local acts. Only the agents involved react; there is no default whole-team meeting.",
+        "AC11 Names appear only on focus, hover or tap. There is no blanket of labels.",
+        "AC12 IDs, provider, model and costs are hidden by default and can be switched on. Null actual values show as 'nicht vorhanden', never as 0. Synthetic costs always carry their label. The fiction label is always visible.",
+        "AC13 The detail panel never covers the active Gewebe or Partitur area."
+      ]
+    },
+    {
+      "id": "S4",
+      "user_goal": "Peter follows the same story over time in the Partitur view.",
+      "acceptance": [
+        "AC14 The Partitur shows all 34 events in time order with parallel lanes, synchronised with the replay time, as an equal view rather than a legend.",
+        "AC15 The end state matches E34: open, with no completion percentage and no product acceptance."
+      ]
+    },
+    {
+      "id": "S5",
+      "user_goal": "Peter can rely on what is delivered.",
+      "acceptance": [
+        "AC16 Replay is deterministic: the same t after seek, scrub or reload gives an identical rendering state, including ambient motion.",
+        "AC17 In mobile portrait (example 390×844) there is no horizontal overflow, controls are reachable and AC13 still holds.",
+        "AC18 Evidence comes from the delivered file rendered in a real browser on the agreed delivery surface. A Node VM is functional evidence only. If no browser is available, the result is BLOCKED, not PASS."
+      ]
+    }
+  ],
+  "initial_tests": [
+    {
+      "id": "T01",
+      "criterion_ids": [
+        "AC01",
+        "AC02",
+        "AC03"
+      ],
+      "setup": "Real browser, desktop, both mocks",
+      "action": "Record 10s around a quiet stretch (e.g. t=114–120)",
+      "expected_observation": "Membranes and bundles deform together with a fixed camera. Seals stay stable. There are no work impulses.",
+      "evidence_type": "screen recording + frame comparison"
+    },
+    {
+      "id": "T02",
+      "criterion_ids": [
+        "AC04",
+        "AC05"
+      ],
+      "setup": "Seek to t=26–40",
+      "action": "Capture frames",
+      "expected_observation": "The build and review areas are active at the same time, other areas stay ambient only, and neighbouring surfaces are pulled in.",
+      "evidence_type": "screenshots with marked regions"
+    },
+    {
+      "id": "T03",
+      "criterion_ids": [
+        "AC06"
+      ],
+      "setup": "t=3–12",
+      "action": "Record",
+      "expected_observation": "Expedition out, return with a fan of sources, muted discards, selected find lands at the target. The motion stops after E05.",
+      "evidence_type": "screen recording"
+    },
+    {
+      "id": "T04",
+      "criterion_ids": [
+        "AC07",
+        "AC08"
+      ],
+      "setup": "t=30–50",
+      "action": "Record",
+      "expected_observation": "Opposing pull at E11 while other areas keep working. At E15 the house is gone and the bridge shows a tear.",
+      "evidence_type": "screen recording"
+    },
+    {
+      "id": "T05",
+      "criterion_ids": [
+        "AC09"
+      ],
+      "setup": "t=53–92, then scrub back to 45",
+      "action": "Compare",
+      "expected_observation": "The seam persists after E26. The V1 state can be reached. The Cadence resolution is visible.",
+      "evidence_type": "screenshots before/after"
+    },
+    {
+      "id": "T06",
+      "criterion_ids": [
+        "AC10",
+        "AC11"
+      ],
+      "setup": "t=48 and t=92",
+      "action": "Default view, then focus Sentinel and Argus",
+      "expected_observation": "No labels by default. A name appears on focus. QA and review look different. Uninvolved agents do not gather.",
+      "evidence_type": "screenshots"
+    },
+    {
+      "id": "T07",
+      "criterion_ids": [
+        "AC12",
+        "AC13"
+      ],
+      "setup": "Open the panel at E05 and E01",
+      "action": "Toggle metadata",
+      "expected_observation": "Values are hidden by default. Null shows 'nicht vorhanden'. The demo-cost label is present. The panel does not cover the active area.",
+      "evidence_type": "screenshots + DOM inspection"
+    },
+    {
+      "id": "T08",
+      "criterion_ids": [
+        "AC14",
+        "AC15"
+      ],
+      "setup": "Partitur view",
+      "action": "Play to 120",
+      "expected_observation": "34 events, parallel lanes in sync with the Gewebe, open end state, no percentage.",
+      "evidence_type": "screen recording"
+    },
+    {
+      "id": "T09",
+      "criterion_ids": [
+        "AC16"
+      ],
+      "setup": "Seek to t=59 three times, once after reload",
+      "action": "Pixel comparison",
+      "expected_observation": "The three captures are identical.",
+      "evidence_type": "rendering diff"
+    },
+    {
+      "id": "T10",
+      "criterion_ids": [
+        "AC17",
+        "AC18"
+      ],
+      "setup": "Real browser in mobile emulation plus the agreed delivery surface",
+      "action": "Open the delivered file",
+      "expected_observation": "The page renders, is not blank and has no overflow. If no browser is available, the result is BLOCKED.",
+      "evidence_type": "screenshots + surface log"
+    }
+  ],
+  "open_decisions": [
+    {
+      "id": "OD1",
+      "question": "Which delivery surface is binding for AC18: ChatGPT file preview (currently blank), inline preview, or standalone browser?",
+      "owner": "Peter/Atlas"
+    },
+    {
+      "id": "OD2",
+      "question": "Should the Scout find land at Archibald (fixture E05) or at Nova's draft (Nova's direction)? Until decided, the fixture applies and no event may be invented.",
+      "owner": "Peter/Nova"
+    }
+  ],
+  "implementation_handoff": "Forge alone implements both mocks against AC01–AC18 using the fictional fixture unchanged, with no new architecture or dependencies. The initial tests are examples only. Sentinel adds adversarial and regression cases independently. Observable proxies do not prove a fantastic result.",
+  "delivery_gate": "Delivery requires: Forge's rendered evidence per test on the surface agreed in OD1, then Sentinel's QA including its own cases, then Argus product review, then Nova's assessment of the visual effect, then Peter's decision. Any criterion marked NOT_TESTED or BLOCKED stays open and must not be counted as PASS."
+}
