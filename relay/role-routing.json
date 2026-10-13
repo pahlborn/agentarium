@@ -1,0 +1,64 @@
+{
+  "schema": "agentarium.role-routing.v1",
+  "source": "Agentarium Rulebook & Process Manual V1.0 DRAFT (2026-10-12), handoff 2026-10-13",
+  "roles": {
+    "atlas": {
+      "platform": "chatgpt",
+      "technical_id": "orchestrate-agent-work",
+      "state": "not_available_in_this_session"
+    },
+    "nova": {
+      "platform": "chatgpt",
+      "technical_id": "create-vision-with-nova",
+      "state": "not_available_in_this_session",
+      "scope": [
+        "vision",
+        "experience",
+        "vision_drift"
+      ],
+      "forbidden": [
+        "code",
+        "merge",
+        "publish",
+        "approve_release"
+      ]
+    },
+    "scout": {
+      "platform": "chatgpt",
+      "technical_id": "build-research-knowledge",
+      "state": "not_available_in_this_session"
+    },
+    "argus": {
+      "platform": "chatgpt",
+      "technical_id": "review-agent-argus",
+      "state": "not_available_in_this_session"
+    },
+    "sentinel": {
+      "platform": "chatgpt",
+      "technical_id": "qa-agent-sentinel",
+      "state": "not_available_in_this_session"
+    },
+    "archibald": {
+      "platform": "claude-code",
+      "technical_id": "spec-agent",
+      "state": "definition_external_runtime_unverified"
+    },
+    "forge": {
+      "platform": "claude-code",
+      "technical_id": null,
+      "state": "independent_agent_definition_missing"
+    },
+    "cadence": {
+      "platform": "claude-code",
+      "technical_id": "process-agent",
+      "state": "identity_probe_passed_2026-10-13",
+      "evidence": "https://github.com/pahlborn/agentarium/actions/runs/38394068230"
+    }
+  },
+  "routing_rules": [
+    "Never map ChatGPT skills to Claude agents without an explicit reviewed migration.",
+    "A role name is not proof of a loaded agent.",
+    "Dispatch requires technical id, platform, authorized tools and independent runtime evidence.",
+    "No merge or publication without Peter."
+  ]
+}
