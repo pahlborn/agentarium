@@ -1,0 +1,393 @@
+{
+  "artifact": "/home/runner/work/agentarium/agentarium/previews/AG-VISUAL-004-partitur-v1.html",
+  "sha256": "4934d930ba55c9d08370ada9af21616fc4e676bfa04006d320b5b9bb20b2d9aa",
+  "playwright": "1.62.1",
+  "cases": [
+    {
+      "viewport": {
+        "name": "desktop",
+        "width": 1440,
+        "height": 1000
+      },
+      "mode": "direct",
+      "status": "PASS",
+      "consoleErrors": [],
+      "networkAttempts": [],
+      "screenshots": [
+        "desktop-direct-108.png",
+        "desktop-direct-120.png"
+      ],
+      "initial": {
+        "time": 0,
+        "playing": false,
+        "cost": 0,
+        "ownerByTask": {
+          "brief": "peter"
+        },
+        "selected": "E01"
+      },
+      "pixels": {
+        "canvas": true,
+        "width": 1024,
+        "height": 758,
+        "paintedPixels": 204614
+      },
+      "layout": {
+        "scene": {
+          "x": 35,
+          "y": 178.625,
+          "right": 1059,
+          "bottom": 936.625
+        },
+        "dock": {
+          "x": 1076,
+          "y": 177.625,
+          "right": 1406,
+          "bottom": 663.390625
+        },
+        "overlap": false,
+        "overflow": false,
+        "story": "108 s · handoff · Atlas → Argus\n\nNeue Gartenidee unabhängig hinterfragen\n\nAusgelöst durch: Können zurückbleibende Lücken einen öffentlichen Garten bilden?\n\nEP-01 Brief verwandeln: US-01 Brief als Lichtgebäude darstellen  |  EP-02 Nachbarschaft bilden: US-02 Verwandte Briefe über abgeleitete Formen verbinden · US-04 Gemeinsamen Brief gestalten  |  EP-03 Beitrag zurückziehen: US-03 Beitrag samt betroffenen Ableitungen zurücknehmen (US-04 eingeführt durch E20)\n\nReported, fiktiv: keine Agentenantworten simuliert, keine Produktabnahme durch Peter, kein Gesamtfortschritt."
+      },
+      "afterReplay": {
+        "time": 0.3168000000000001,
+        "playing": true,
+        "cost": 0,
+        "ownerByTask": {
+          "brief": "peter"
+        },
+        "selected": "E01"
+      },
+      "endButtonDisabled": false,
+      "end": {
+        "time": 120,
+        "playing": false,
+        "cost": 0.63,
+        "ownerByTask": {
+          "brief": "peter",
+          "vision": "nova",
+          "evidence": "scout",
+          "spec": "archibald",
+          "build": "forge",
+          "review": "argus",
+          "qa": "sentinel",
+          "repair": "forge",
+          "change": "peter",
+          "process": "cadence",
+          "garden-evidence": "scout",
+          "garden-review": "argus"
+        },
+        "selected": "E34"
+      },
+      "canvas59": [
+        {
+          "file": "desktop-direct-canvas59-0.png",
+          "sha256": "813a5129502fc3771c5b6e253a3479ed2a9024e6c134c8fbb2e90c34dcf05690"
+        },
+        {
+          "file": "desktop-direct-canvas59-1.png",
+          "sha256": "813a5129502fc3771c5b6e253a3479ed2a9024e6c134c8fbb2e90c34dcf05690"
+        },
+        {
+          "file": "desktop-direct-canvas59-2.png",
+          "sha256": "813a5129502fc3771c5b6e253a3479ed2a9024e6c134c8fbb2e90c34dcf05690"
+        }
+      ],
+      "motionInterval": {
+        "from": 30,
+        "to": 39.98289999999972
+      }
+    },
+    {
+      "viewport": {
+        "name": "desktop",
+        "width": 1440,
+        "height": 1000
+      },
+      "mode": "sandbox-srcdoc",
+      "status": "PASS",
+      "consoleErrors": [],
+      "networkAttempts": [],
+      "screenshots": [
+        "desktop-sandbox-srcdoc-108.png",
+        "desktop-sandbox-srcdoc-120.png"
+      ],
+      "initial": {
+        "time": 0,
+        "playing": false,
+        "cost": 0,
+        "ownerByTask": {
+          "brief": "peter"
+        },
+        "selected": "E01"
+      },
+      "pixels": {
+        "canvas": true,
+        "width": 1024,
+        "height": 758,
+        "paintedPixels": 204614
+      },
+      "layout": {
+        "scene": {
+          "x": 35,
+          "y": 178.625,
+          "right": 1059,
+          "bottom": 936.625
+        },
+        "dock": {
+          "x": 1076,
+          "y": 177.625,
+          "right": 1406,
+          "bottom": 663.390625
+        },
+        "overlap": false,
+        "overflow": false,
+        "story": "108 s · handoff · Atlas → Argus\n\nNeue Gartenidee unabhängig hinterfragen\n\nAusgelöst durch: Können zurückbleibende Lücken einen öffentlichen Garten bilden?\n\nEP-01 Brief verwandeln: US-01 Brief als Lichtgebäude darstellen  |  EP-02 Nachbarschaft bilden: US-02 Verwandte Briefe über abgeleitete Formen verbinden · US-04 Gemeinsamen Brief gestalten  |  EP-03 Beitrag zurückziehen: US-03 Beitrag samt betroffenen Ableitungen zurücknehmen (US-04 eingeführt durch E20)\n\nReported, fiktiv: keine Agentenantworten simuliert, keine Produktabnahme durch Peter, kein Gesamtfortschritt."
+      },
+      "afterReplay": {
+        "time": 0.3333,
+        "playing": true,
+        "cost": 0,
+        "ownerByTask": {
+          "brief": "peter"
+        },
+        "selected": "E01"
+      },
+      "endButtonDisabled": false,
+      "end": {
+        "time": 120,
+        "playing": false,
+        "cost": 0.63,
+        "ownerByTask": {
+          "brief": "peter",
+          "vision": "nova",
+          "evidence": "scout",
+          "spec": "archibald",
+          "build": "forge",
+          "review": "argus",
+          "qa": "sentinel",
+          "repair": "forge",
+          "change": "peter",
+          "process": "cadence",
+          "garden-evidence": "scout",
+          "garden-review": "argus"
+        },
+        "selected": "E34"
+      },
+      "canvas59": [
+        {
+          "file": "desktop-sandbox-srcdoc-canvas59-0.png",
+          "sha256": "813a5129502fc3771c5b6e253a3479ed2a9024e6c134c8fbb2e90c34dcf05690"
+        },
+        {
+          "file": "desktop-sandbox-srcdoc-canvas59-1.png",
+          "sha256": "813a5129502fc3771c5b6e253a3479ed2a9024e6c134c8fbb2e90c34dcf05690"
+        },
+        {
+          "file": "desktop-sandbox-srcdoc-canvas59-2.png",
+          "sha256": "813a5129502fc3771c5b6e253a3479ed2a9024e6c134c8fbb2e90c34dcf05690"
+        }
+      ],
+      "motionInterval": {
+        "from": 30,
+        "to": 39.99959999999978
+      }
+    },
+    {
+      "viewport": {
+        "name": "mobile",
+        "width": 390,
+        "height": 844
+      },
+      "mode": "direct",
+      "status": "PASS",
+      "consoleErrors": [],
+      "networkAttempts": [],
+      "screenshots": [
+        "mobile-direct-108.png",
+        "mobile-direct-120.png"
+      ],
+      "initial": {
+        "time": 0,
+        "playing": false,
+        "cost": 0,
+        "ownerByTask": {
+          "brief": "peter"
+        },
+        "selected": "E01"
+      },
+      "pixels": {
+        "canvas": true,
+        "width": 364,
+        "height": 639,
+        "paintedPixels": 70489
+      },
+      "layout": {
+        "scene": {
+          "x": 13,
+          "y": 363.203125,
+          "right": 377,
+          "bottom": 1002.640625
+        },
+        "dock": {
+          "x": 12,
+          "y": 1284.9375,
+          "right": 378,
+          "bottom": 1706.984375
+        },
+        "overlap": false,
+        "overflow": false,
+        "story": "108 s · handoff · Atlas → Argus\n\nNeue Gartenidee unabhängig hinterfragen\n\nAusgelöst durch: Können zurückbleibende Lücken einen öffentlichen Garten bilden?\n\nEP-01 Brief verwandeln: US-01 Brief als Lichtgebäude darstellen  |  EP-02 Nachbarschaft bilden: US-02 Verwandte Briefe über abgeleitete Formen verbinden · US-04 Gemeinsamen Brief gestalten  |  EP-03 Beitrag zurückziehen: US-03 Beitrag samt betroffenen Ableitungen zurücknehmen (US-04 eingeführt durch E20)\n\nReported, fiktiv: keine Agentenantworten simuliert, keine Produktabnahme durch Peter, kein Gesamtfortschritt."
+      },
+      "afterReplay": {
+        "time": 0.35000000000000003,
+        "playing": true,
+        "cost": 0,
+        "ownerByTask": {
+          "brief": "peter"
+        },
+        "selected": "E01"
+      },
+      "endButtonDisabled": false,
+      "end": {
+        "time": 120,
+        "playing": false,
+        "cost": 0.63,
+        "ownerByTask": {
+          "brief": "peter",
+          "vision": "nova",
+          "evidence": "scout",
+          "spec": "archibald",
+          "build": "forge",
+          "review": "argus",
+          "qa": "sentinel",
+          "repair": "forge",
+          "change": "peter",
+          "process": "cadence",
+          "garden-evidence": "scout",
+          "garden-review": "argus"
+        },
+        "selected": "E34"
+      },
+      "canvas59": [
+        {
+          "file": "mobile-direct-canvas59-0.png",
+          "sha256": "8aea0cb08469d1b982b67af36603acd5651100152868d4b72f648df3ed7a5f6a"
+        },
+        {
+          "file": "mobile-direct-canvas59-1.png",
+          "sha256": "8aea0cb08469d1b982b67af36603acd5651100152868d4b72f648df3ed7a5f6a"
+        },
+        {
+          "file": "mobile-direct-canvas59-2.png",
+          "sha256": "8aea0cb08469d1b982b67af36603acd5651100152868d4b72f648df3ed7a5f6a"
+        }
+      ],
+      "motionInterval": {
+        "from": 30,
+        "to": 39.9995999999995
+      }
+    },
+    {
+      "viewport": {
+        "name": "mobile",
+        "width": 390,
+        "height": 844
+      },
+      "mode": "sandbox-srcdoc",
+      "status": "PASS",
+      "consoleErrors": [],
+      "networkAttempts": [],
+      "screenshots": [
+        "mobile-sandbox-srcdoc-108.png",
+        "mobile-sandbox-srcdoc-120.png"
+      ],
+      "initial": {
+        "time": 0,
+        "playing": false,
+        "cost": 0,
+        "ownerByTask": {
+          "brief": "peter"
+        },
+        "selected": "E01"
+      },
+      "pixels": {
+        "canvas": true,
+        "width": 364,
+        "height": 639,
+        "paintedPixels": 70489
+      },
+      "layout": {
+        "scene": {
+          "x": 13,
+          "y": 363.203125,
+          "right": 377,
+          "bottom": 1002.640625
+        },
+        "dock": {
+          "x": 12,
+          "y": 1284.9375,
+          "right": 378,
+          "bottom": 1706.984375
+        },
+        "overlap": false,
+        "overflow": false,
+        "story": "108 s · handoff · Atlas → Argus\n\nNeue Gartenidee unabhängig hinterfragen\n\nAusgelöst durch: Können zurückbleibende Lücken einen öffentlichen Garten bilden?\n\nEP-01 Brief verwandeln: US-01 Brief als Lichtgebäude darstellen  |  EP-02 Nachbarschaft bilden: US-02 Verwandte Briefe über abgeleitete Formen verbinden · US-04 Gemeinsamen Brief gestalten  |  EP-03 Beitrag zurückziehen: US-03 Beitrag samt betroffenen Ableitungen zurücknehmen (US-04 eingeführt durch E20)\n\nReported, fiktiv: keine Agentenantworten simuliert, keine Produktabnahme durch Peter, kein Gesamtfortschritt."
+      },
+      "afterReplay": {
+        "time": 0.3332,
+        "playing": true,
+        "cost": 0,
+        "ownerByTask": {
+          "brief": "peter"
+        },
+        "selected": "E01"
+      },
+      "endButtonDisabled": false,
+      "end": {
+        "time": 120,
+        "playing": false,
+        "cost": 0.63,
+        "ownerByTask": {
+          "brief": "peter",
+          "vision": "nova",
+          "evidence": "scout",
+          "spec": "archibald",
+          "build": "forge",
+          "review": "argus",
+          "qa": "sentinel",
+          "repair": "forge",
+          "change": "peter",
+          "process": "cadence",
+          "garden-evidence": "scout",
+          "garden-review": "argus"
+        },
+        "selected": "E34"
+      },
+      "canvas59": [
+        {
+          "file": "mobile-sandbox-srcdoc-canvas59-0.png",
+          "sha256": "8aea0cb08469d1b982b67af36603acd5651100152868d4b72f648df3ed7a5f6a"
+        },
+        {
+          "file": "mobile-sandbox-srcdoc-canvas59-1.png",
+          "sha256": "8aea0cb08469d1b982b67af36603acd5651100152868d4b72f648df3ed7a5f6a"
+        },
+        {
+          "file": "mobile-sandbox-srcdoc-canvas59-2.png",
+          "sha256": "8aea0cb08469d1b982b67af36603acd5651100152868d4b72f648df3ed7a5f6a"
+        }
+      ],
+      "motionInterval": {
+        "from": 30,
+        "to": 39.982899999999525
+      }
+    }
+  ],
+  "limits": [
+    "Chromium mobile emulation is not real iPhone/Safari",
+    "Screenshots require human/Nova visual review; aesthetic acceptance not automated"
+  ],
+  "browser": "151.0.7922.34",
+  "status": "PASS_WITH_LIMITS"
+}
