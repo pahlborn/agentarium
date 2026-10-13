@@ -1,0 +1,20 @@
+{
+  "task_id": "AG-TEAM-001",
+  "source_version": 3,
+  "repository": "pahlborn/agentarium",
+  "base_commit": "80e277cc912cc0e076471a584692f110ea26b941",
+  "branch": "feature/visual-stage-v0",
+  "allowed_paths": [
+    "index.html"
+  ],
+  "architecture_change": false,
+  "merge": false,
+  "publish": false,
+  "paid_calls_max": 1,
+  "auto_retry": false,
+  "authorization": "Peter's explicit 2026-10-13 task instruction authorizes this exact bounded offline task and minimal task-mode relay reuse after verified ChatGPT role readiness. No merge/release/deployment. Forge authored patch only; publisher Atlas applies verified patch on development branch, never automatically by relay.",
+  "evidence": "Sentinel QA V2 of Forge candidate SHA256 9b07eba5e6c9adae6f61f34a617acab05361c3231615734616184fe67eb616bd:15 PASS,3 FAIL. Confirmed: fixture-id collision h.id=e1 accepted then event silently dropped during restore; first from=nova instead of final fixture peter accepted; commit allows 101 audit entries although loader rejects >100, causing own state rejected next load. Happy path/atomic storage/no writes on navigation/malformed-state handling pass. Exact failed candidate now committed at 80e277cc912cc0e076471a584692f110ea26b941, index blob867c9d67d4d6d68d993ad5d680b37d84ccd5fdba. Only these three correctness corrections authorized within original scope. No new feature, no architecture, no identity rerun, no transport retry.",
+  "assignments": {
+    "forge": "TASK AG-TEAM-001/CA CORRECTION V3 from Atlas to Forge/coding-agent. Exact Peter USER_GO remains original bounded offline Aufgabenball task. Return CA_PATCH_READY followed by ONE JSON object {replacements:[{old:exact unique existing substring,new:replacement}],summary:...,limitations:...}. Allowed path index.html only; source supplied inline. Fix only three confirmed Sentinel failures: reserve built-in fixture IDs during saved-ID uniqueness validation (must reject e1 rather than silently drop); anchor first restored handoff from final built-in fixture actor (peter), subsequent ancestry from preceding handoff.to; enforce same100-entry limit before any storage mutation or owner update on commit, with clear visible limit notice. Preserve all other behavior, no new deps/features/architecture; no tools, no local edits claimed, Atlas permitted publisher applies patch on branch after independent retest. Each old matches exactly once; concise <1000words. Stop after one patch. Source below is exact current candidate, not original seven-events-only version."
+  }
+}
