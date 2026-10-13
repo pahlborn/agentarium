@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NACHTPOST · Gewebe (Konzept · fiktive Demodaten)</title>
+<style>
+:root{--bg:#07051a;--ink:#ece8ff;--mut:#9a95c4;--gold:#ffc933;--cy:#5fe9ff;--vi:#a07bff}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 system-ui,"Segoe UI",sans-serif}
+body{display:flex;flex-direction:column;min-height:100vh}
+header{padding:14px 20px 8px;display:flex;flex-wrap:wrap;gap:6px 18px;align-items:baseline}
+h1{margin:0;font:300 clamp(20px,3vw,32px)/1.1 Georgia,serif;letter-spacing:.16em;background:linear-gradient(90deg,#cbb8ff,#5fe9ff);-webkit-background-clip:text;background-clip:text;color:transparent}
+.tags{display:flex;flex-wrap:wrap;gap:6px}
+.tags span{font-size:12px;border:1px solid #3a3270;border-radius:99px;padding:2px 10px;color:#cfc9ff;background:#120d33}
+main{flex:1;display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:16px;padding:0 16px 16px;min-height:0}
+main.nodock{grid-template-columns:minmax(0,1fr)}
+main.nodock aside{display:none}
+.col{display:flex;flex-direction:column;min-width:0;gap:10px}
+#stage{position:relative;flex:1;min-height:440px;border-radius:20px;overflow:hidden;background:radial-gradient(120% 90% at 50% 30%,#1b1050 0,#0b0725 55%,#05030f 100%);border:1px solid #2c2564;box-shadow:0 20px 70px #0008,inset 0 0 80px #6a3dff18}
+canvas{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:pointer}
+#story{padding:4px 6px 0;min-height:88px}
+#story .t{margin:0;font:400 clamp(17px,2vw,22px)/1.3 Georgia,serif}
+#story .m{margin:2px 0 8px;color:var(--mut);font-size:13px}
+#story .h{margin:0 0 4px;color:var(--cy);font-size:12px;letter-spacing:.12em;text-transform:uppercase}
+.ctl{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+button{font:inherit;color:var(--ink);background:#17114a;border:1px solid #4a3f96;border-radius:10px;padding:7px 13px;cursor:pointer}
+button:hover:not(:disabled){background:#241a6e}
+button:disabled{opacity:.4;cursor:default}
+button[aria-pressed=true]{border-color:var(--cy);background:#13305a}
+button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+#sk{flex:1;min-width:160px;accent-color:#8f6bff}
+#tm{font-variant-numeric:tabular-nums;color:var(--mut);min-width:96px}
+.sp{display:flex;gap:4px}
+aside{background:linear-gradient(180deg,#120d33,#0b0826);border:1px solid #2c2564;border-radius:20px;padding:14px 16px;align-self:start;position:sticky;top:12px;max-height:calc(100vh - 24px);overflow:auto}
+aside h2{margin:0 0 6px;font:400 22px Georgia,serif}
+aside h3{margin:14px 0 4px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--cy)}
+dl{margin:0}dt{color:var(--mut);font-size:11px;letter-spacing:.06em;text-transform:uppercase;margin-top:7px}dd{margin:0}
+.mut{color:var(--mut)}
+.rl{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin:8px 0 10px}
+.rl button{padding:4px 2px;font-size:12px;border-radius:8px}
+@media(max-width:860px){main{grid-template-columns:minmax(0,1fr)}aside{position:static;max-height:none}#stage{min-height:64vh}}
+</style></head>
+<body>
+<header><h1>NACHTPOST – eine Stadt aus ungesendeten Briefen</h1>
+<div class="tags"><span>Konzept · fiktive Demodaten</span><span>Erfundene Demokosten</span><span>Modelle unbestätigt</span><span>Ansicht: Gewebe</span></div></header>
+<main id="mn">
+<section class="col">
+<div id="stage"><canvas id="cv" role="img" aria-label="Gewebe aus Fäden: neun Rollen, eine wachsende Briefstadt und ein Kostenverlauf. Details über die Rollenliste im Dock."></canvas></div>
+<div id="story" role="status" aria-live="polite" aria-atomic="true"></div>
+<div class="ctl" role="group" aria-label="Wiedergabe">
+<button id="bp" type="button">▶ Abspielen</button>
+<button id="bn" type="button">Nächstes Ereignis ⏭</button>
+<button id="br" type="button">↺ Neu abspielen</button>
+<label class="mut" for="sk">Zeitleiste</label><input id="sk" type="range" min="0" max="120" step="0.1" value="0">
+<span id="tm" aria-hidden="true"></span>
+<div class="sp" role="group" aria-label="Geschwindigkeit"><button type="button" data-s="1">1x</button><button type="button" data-s="2">2x</button><button type="button" data-s="4">4x</button></div>
+<button id="bi" type="button" aria-pressed="true">IDs</button>
+<button id="bd" type="button" aria-pressed="true" aria-controls="dk">Dock</button>
+</div>
+</section>
+<aside id="dk" aria-label="Kontext-Dock"><h3 style="margin-top:0">Rollen</h3><div class="rl" id="rl"></div><div id="dc"></div></aside>
+</main>
+<script>
+(()=>{
+const $=id=>document.getElementById(id),cl=(v,a=0,b=1)=>Math.max(a,Math.min(b,v)),H=n=>{const x=Math.sin(n*127.1+311.7)*43758.5453;return x-Math.floor(x)};
+const DUR=120,LABEL='FREI ERFUNDENE DEMOKOSTEN; KEIN VERBRAUCHSNACHWEIS';
+const PL={peter:'human',atlas:'chatgpt',nova:'chatgpt',scout:'chatgpt',archibald:'claude-code',forge:'claude-code',argus:'chatgpt',sentinel:'chatgpt',cadence:'claude-code'};
+const PN={human:'Mensch',chatgpt:'ChatGPT','claude-code':'Claude Code'};
+const PV={human:'— (Mensch)',chatgpt:'OpenAI (aus Plattform abgeleitet)','claude-code':'Anthropic (aus Plattform abgeleitet)'};
+const ROLES=[['peter','Peter','#f1ecff',-90,'Entscheidungstor: Fragen werden zu Leitplanken'],['atlas','Atlas','#8ab4ff',-50,'Gitter: Aufgaben ordnen, Verantwortung zuweisen'],['argus','Argus','#c58bff',-10,'Gegenlicht: unabhängig hinterfragen'],['sentinel','Sentinel','#6fe3ff',30,'Sechseckrahmen: Ergebnisse prüfen (fiktiv gemeldet)'],['forge','Forge','#ff7a59',70,'Geflecht: Bauteile verflechten'],['cadence','Cadence','#9dff8a',110,'Welle: Übergänge reparieren'],['archibald','Archibald','#ffb36b',150,'Faltkacheln: Epics und Stories entfalten'],['scout','Scout','#5ff0d0',190,'Expeditionsringe: Quellen erkunden'],['nova','Nova','#ff8fe0',230,'Prismengarten: Visionen brechen']];
+const RI={};ROLES.forEach((r,i)=>RI[r[0]]=i);
+const TN={brief:'Brief',vision:'Vision',evidence:'Evidenz',spec:'Spezifikation',build:'Bau',review:'Review',qa:'QA',repair:'Reparatur',change:'Änderung',process:'Prozess','garden-evidence':'Garten-Evidenz','garden-review':'Garten-Review'};
+const KL={request:'Anfrage',handoff:'Übergabe',question:'Frage',contribution:'Beitrag',decision:'Entscheidung',artifact:'Ergebnis',objection:'Einwand',defect:'Defekt',answer:'Antwort',proposal:'Vorschlag',change_request:'Änderungswunsch (CR)',recommendation:'Empfehlung',test_result:'Testergebnis (fiktiv gemeldet)',review_result:'Prüfergebnis',open_state:'Offener Zustand'};
+const D=[
+[1,0,'brief','peter','atlas','request','Gemeinsames Staunen, zurückziehbare Beiträge',[],0],
+[2,3,'vision','atlas','nova','handoff','Visionstrang eröffnet',[1],0],
+[3,3,'evidence','atlas','scout','handoff','Speicherung und Rücknahme untersuchen',[1],0],
+[4,8,'vision','nova','peter','question','Darf eine Löschung eine sichtbare Lücke hinterlassen?',[2],0],
+[5,10,'evidence','scout','archibald','contribution','Abgeleitete Formen brauchen Herkunftsbeziehungen',[3],3],
+[6,13,'vision','peter','nova','decision','Leere Stellen erlaubt; rekonstruierbare Textreste verboten',[4],4],
+[7,17,'spec','atlas','archibald','handoff','Konzept in drei Epics und Stories entfalten',[5,6],0],
+[8,22,'spec','archibald','forge','artifact','Epics und Stories V1 bereit',[7],6],
+[9,25,'build','atlas','forge','handoff','Gebäudegenerator unabhängig von offener Löschfrage bauen',[8],0],
+[10,26,'review','atlas','argus','handoff','Rücknahme-Kriterien unabhängig prüfen',[8],0],
+[11,32,'review','argus','archibald','objection','Eine verbliebene Brücke kann einen entfernten Ursprung verraten',[10,5],4],
+[12,36,'spec','archibald','scout','question','Welche gemeinsamen Ableitungen müssen zurückgenommen werden?',[11],0],
+[13,40,'build','forge','sentinel','artifact','Stadtteil V1 zur Prüfung bereit',[9],12],
+[14,42,'qa','atlas','sentinel','handoff','V1 gegen Story-Kriterien prüfen',[13],0],
+[15,48,'qa','sentinel','forge','defect','Haus gelöscht, abgeleitete Brücke bleibt bestehen',[14,11],3],
+[16,50,'evidence','scout','archibald','answer','Veraltete Zuordnung und gemeinsame Ableitung betroffen',[12],2],
+[17,53,'repair','atlas','forge','handoff','Herkunftskette reparieren; V1 bleibt nachvollziehbar',[15,16],0],
+[18,55,'vision','nova','forge','proposal','Lichtstege bei Rücknahme zerfallen lassen',[6,15],3],
+[19,59,'review','argus','nova','objection','Sichtbarer Zerfall ersetzt keine Entfernung gespeicherter Ableitungen',[18],2],
+[20,60,'change','peter','atlas','change_request','Zwei Besucher sollen gemeinsam einen Brief gestalten können',[1],0],
+[21,63,'process','atlas','cadence','handoff','Doppelte Korrekturarbeit durch zwei Löschbegriffe klären',[15,16],0],
+[22,66,'change','atlas','peter','question','Darf jeder Mitautor den gesamten gemeinsamen Beitrag zurückziehen?',[20,11],0],
+[23,69,'process','cadence','archibald','recommendation','Ein kanonisches Kriterium mit Verweisen auf beide Stories',[21],2],
+[24,73,'change','peter','atlas','decision','Jeder Mitautor darf den gemeinsamen Beitrag vollständig zurückziehen',[22],0],
+[25,77,'spec','archibald','forge','artifact','Story-Kriterien V2 inklusive gemeinsamer Rücknahme',[23,24,16],5],
+[26,82,'repair','forge','sentinel','artifact','V2: Herkunftsreparatur und gemeinsamer Entwurf bereit',[17,25,19],10],
+[27,85,'qa','atlas','sentinel','handoff','V2 gezielt und mit relevanten Regressionen prüfen',[26],0],
+[28,92,'qa','sentinel','argus','test_result','Gezielte Prüfungen bestanden; unterbrochene Sitzungen ungeprüft',[27],4],
+[29,96,'review','argus','atlas','review_result','Rücknahmelogik nachvollziehbar; Erlebnisabnahme bleibt offen',[28,11],3],
+[30,100,'brief','atlas','peter','handoff','Ergebnis und verbleibende Grenzen zur Entscheidung',[29],0],
+[31,105,'vision','nova','atlas','question','Können zurückbleibende Lücken einen öffentlichen Garten bilden?',[18,29],0],
+[32,108,'garden-evidence','atlas','scout','handoff','Neue Idee unabhängig auf verbleibende Informationen prüfen',[31],0],
+[33,108,'garden-review','atlas','argus','handoff','Neue Gartenidee unabhängig hinterfragen',[31],0],
+[34,120,'brief','atlas',null,'open_state','Kein Abschluss: Erlebnisabnahme, Gartenfrage und Sitzungsprüfung offen',[30,32,33],0]];
+const pid=n=>'E'+String(n).padStart(2,'0');
+const E=D.map(r=>({id:pid(r[0]),at_seconds:r[1],task_id:r[2],actor:r[3],recipient:r[4],kind:r[5],title:r[6],caused_by:r[7].map(pid),fictional:true,platform:PL[r[3]],actual_model:null,synthetic_usage:r[8]?{cost_usd:r[8]/100,label:LABEL,tokens:null}:null,_c:r[8]}));
+const EP=1e-9;
+function stateAt(t){const own={};let cur=-1,sum=0;E.forEach((e,i)=>{if(e.at_seconds<=t+EP){cur=i;sum+=e._c;if(!(e.task_id in own))own[e.task_id]=e.actor;if(e.kind==='handoff')own[e.task_id]=e.recipient}});return{own,cur,sum}}
+const WN={};ROLES.forEach(r=>WN[r[0]]=[]);
+E.forEach((e,i)=>{let s=e.at_seconds-3;for(let j=i-1;j>=0;j--)if(E[j].recipient===e.actor&&E[j].task_id===e.task_id){s=E[j].at_seconds;break}WN[e.actor].push([s,e.at_seconds+1.5])});
+function act(r,t){let m=0;WN[r].forEach(w=>{m=Math.max(m,cl(Math.min((t-w[0])/.6,(w[1]-t)/.6)))});return m}
+const FR=[];for(let i=0;i<14;i++)FR.push({i,t0:3+i*3.5,t1:6+i*3.5,bad:i%3===1,L:'NACHTPOSTBRIEF'[i]});
+const HS=FR.filter(f=>!f.bad).map(f=>({ta:f.t1,L:f.L,fr:f})).concat([{ta:40,L:'V',big:1},{ta:82,L:'&',big:0}]).sort((a,b)=>a.ta-b.ta);
+HS.forEach((h,n)=>{h.n=n;h.gx=n%4;h.gy=n>>2;h.hh=.8+H(n)*.9});
+const HD=HS.slice().sort((a,b)=>(a.gx+a.gy)-(b.gx+b.gy)||a.gx-b.gx),DEF=4;
+const ST=[['US-01','Brief als Lichtgebäude darstellen',22],['US-02','Verwandte Briefe über abgeleitete Formen verbinden',22],['US-03','Beitrag samt betroffenen Ableitungen zurücknehmen',22],['US-04','Gemeinsamen Brief gestalten',60]];
+const ENV={inet:[.06,.42],werk:[.88,.69],api:[.1,.17],t1:[.92,.08],t2:[.77,.7]};
+
+const S={t:0,playing:false,was:false,speed:1,ids:true,dock:true,sel:null};
+const rm=matchMedia('(prefers-reduced-motion: reduce)').matches;
+S.was=!rm;S.playing=!rm&&!document.hidden;
+let last=null,dirty=1,dk='',sk='';
+const cv=$('cv'),c=cv.getContext('2d');let W=0,Hh=0,dpr=1,PP=[],BX=0,BY=0,U=20,NR=20,FS=12;
+function size(){const b=$('stage').getBoundingClientRect();dpr=Math.min(2,devicePixelRatio||1);W=b.width;Hh=b.height;cv.width=Math.max(1,W*dpr|0);cv.height=Math.max(1,Hh*dpr|0);dirty=1}
+function lay(){U=Math.max(13,Math.min(W*.8,Hh*1.2)*.055);BX=W*.5;BY=Hh*.37;NR=Math.max(15,Math.min(W,Hh)*.036);FS=cl(W/80,10,13);PP=ROLES.map(r=>{const a=r[3]*Math.PI/180;return[W*.5+Math.cos(a)*W*.39,Hh*.38+Math.sin(a)*Hh*.27]})}
+const ep=k=>[W*ENV[k][0],Hh*ENV[k][1]];
+function tx(s,x,y,f,col,al='center',bl='middle'){c.font=f;c.fillStyle=col;c.textAlign=al;c.textBaseline=bl;c.fillText(s,x,y)}
+function hex(x,y,r,rot){c.beginPath();for(let i=0;i<6;i++){const a=rot+i*Math.PI/3;i?c.lineTo(x+r*Math.cos(a),y+r*Math.sin(a)):c.moveTo(x+r*Math.cos(a),y+r*Math.sin(a))}c.closePath();c.stroke()}
+function sym(k,x,y,r,a,p,col){
+c.save();c.translate(x,y);c.strokeStyle=col;c.fillStyle=col;c.lineWidth=1.6;c.globalAlpha=.4+.6*a;
+if(k==='atlas'){c.rotate(Math.PI/4);const s=r*.62;c.lineWidth=.9;for(let i=-2;i<=2;i++){c.beginPath();c.moveTo(i*s/2,-s);c.lineTo(i*s/2,s);c.moveTo(-s,i*s/2);c.lineTo(s,i*s/2);c.stroke()}for(let i=-2;i<=2;i++)for(let j=-2;j<=2;j++){c.beginPath();c.arc(i*s/2,j*s/2,1.2+1.8*a*(.5+.5*Math.sin(p*3+i+j)),0,7);c.fill()}}
+else if(k==='nova'){c.beginPath();c.moveTo(0,-r*.8);c.lineTo(r*.75,r*.55);c.lineTo(-r*.75,r*.55);c.closePath();c.stroke();c.beginPath();c.moveTo(-r*1.2,-r*.1+Math.sin(p)*2*a);c.lineTo(-r*.1,r*.05);c.stroke();['#ff8fe0','#ffe27a','#5fe9ff'].forEach((q,i)=>{c.strokeStyle=q;c.beginPath();c.moveTo(r*.1,r*.05);c.lineTo(r*(.9+.4*a),r*(-.25+i*.32)+Math.sin(p*2+i)*r*.1*a);c.stroke()})}
+else if(k==='scout'){for(let i=0;i<3;i++){c.save();c.rotate(p*(.5+i*.3)*(i%2?-1:1));c.setLineDash([3+i*2,4]);c.beginPath();c.arc(0,0,r*(.4+.3*i),0,7);c.stroke();c.restore()}c.beginPath();c.arc(r*.7*Math.cos(p*1.4),r*.7*Math.sin(p*1.4),2.6,0,7);c.fill()}
+else if(k==='archibald'){for(let i=0;i<3;i++){c.save();c.translate(0,(i-1)*r*.55);c.scale(1,.35+.65*Math.abs(Math.cos(p*1.2*(.3+a)+i*.9)));c.transform(1,0,-.45,1,0,0);c.fillStyle=col+'44';c.beginPath();c.rect(-r*.7,-r*.22,r*1.4,r*.44);c.fill();c.stroke();c.restore()}}
+else if(k==='forge'){for(let s=0;s<3;s++){c.beginPath();for(let i=0;i<=24;i++){const u=i/24*2-1,yy=Math.sin(u*Math.PI*1.5+p*(.4+2*a)+s*2.094)*r*.38;i?c.lineTo(u*r,yy):c.moveTo(u*r,yy)}c.stroke()}}
+else if(k==='argus'){const d=r*.14*(.3+a);c.beginPath();c.arc(-d,0,r*.8,Math.PI/2,Math.PI*1.5);c.stroke();c.strokeStyle='#ffe27a';c.beginPath();c.arc(d,0,r*.8,-Math.PI/2,Math.PI/2);c.stroke();c.strokeStyle=col;c.beginPath();c.moveTo(0,-r*.8);c.lineTo(0,r*.8);c.stroke()}
+else if(k==='sentinel'){hex(0,0,r*.85,p*.2*a);hex(0,0,r*.5,0);if(a>.5){c.beginPath();c.moveTo(-r*.25,0);c.lineTo(-r*.05,r*.2);c.lineTo(r*.3,-r*.2);c.stroke()}}
+else if(k==='cadence'){const am=r*.4*(.4+.6*a);[[-1,-.18],[.18,1]].forEach(sg=>{c.beginPath();for(let i=0;i<=12;i++){const u=sg[0]+(sg[1]-sg[0])*i/12,yy=Math.sin(u*6+p*2)*am;i?c.lineTo(u*r,yy):c.moveTo(u*r,yy)}c.stroke()});c.strokeStyle='#ffc933';c.beginPath();c.moveTo(-.18*r,Math.sin(-1.08+p*2)*am);c.lineTo(.18*r,Math.sin(1.08+p*2)*am);c.stroke()}
+else{c.beginPath();c.moveTo(-r*.6,r*.7);c.lineTo(-r*.6,-r*.1);c.arc(0,-r*.1,r*.6,Math.PI,0);c.lineTo(r*.6,r*.7);c.stroke();c.beginPath();c.arc(0,r*.1+Math.sin(p)*2*a,3+2*a,0,7);c.fill()}
+c.restore()}
+function fabric(t){for(let j=0;j<16;j++){c.beginPath();const o=j/16;for(let x=-20;x<=W+20;x+=24){const y=Hh*(.05+o*.95)+(x/W-.5)*Hh*.35*(j%2?1:-.6)+Math.sin(x*.008+j*1.3+t*.08)*Hh*.05;x<0?c.moveTo(x,y):c.lineTo(x,y)}c.strokeStyle=j%2?'rgba(160,123,255,.16)':'rgba(95,233,255,.11)';c.lineWidth=1+(j%3)*.5;c.stroke()}}
+function stn(k,lab,col,on){const[p,q]=ep(k);c.font=(FS-1)+'px system-ui';const w=c.measureText(lab).width+14,x=cl(p-w/2,4,W-w-4);c.save();c.globalAlpha=.5+.45*on;c.strokeStyle=col;c.fillStyle='rgba(10,8,34,.75)';c.lineWidth=1;c.beginPath();c.rect(x,q-9,w,18);c.fill();c.stroke();c.restore();tx(lab,x+7,q,(FS-1)+'px system-ui',col,'left')}
+function ctl(a,b,s){const mx=(a[0]+b[0])/2,my=(a[1]+b[1])/2,dx=b[0]-a[0],dy=b[1]-a[1],l=Math.hypot(dx,dy)||1,o=(s-.5)*.5*l;return[mx*.7+BX*.3-dy/l*o,my*.7+BY*.3+dx/l*o]}
+function qp(a,m,b,p){const q=1-p;return[q*q*a[0]+2*q*p*m[0]+p*p*b[0],q*q*a[1]+2*q*p*m[1]+p*p*b[1]]}
+function path(a,m,b,p0,p1){c.beginPath();for(let i=0;i<=20;i++){const q=qp(a,m,b,p0+(p1-p0)*i/20);i?c.lineTo(q[0],q[1]):c.moveTo(q[0],q[1])}}
+function badge(s,m,col){c.fillStyle='rgba(20,14,60,.92)';c.strokeStyle=col;c.lineWidth=1;c.beginPath();c.arc(m[0],m[1],9,0,7);c.fill();c.stroke();tx(s,m[0],m[1]+.5,'bold '+(FS-2)+'px system-ui',col)}
+const hpos=h=>[BX+((h.gx-1.5)-(h.gy-1))*U*1.15,BY+((h.gx-1.5)+(h.gy-1))*U*.58];
+function house(h,t){const g=cl((t-h.ta)/1.2);if(g<=0){h.tp=null;return}const e=g*(2-g),[x,y]=hpos(h),a=U*.55,b=U*.3,hh=h.hh*U*(h.big?1.5:1)*e;h.tp=[x,y-hh];
+const gap=h.n===DEF&&t>=48&&t<82,scar=h.n===DEF&&t>=82,hue=215+h.n*13;
+const P=[[x,y-hh-b],[x+a,y-hh],[x,y-hh+b],[x-a,y-hh]],Lf=[[x-a,y-hh],[x,y-hh+b],[x,y+b],[x-a,y]],Rt=[[x+a,y-hh],[x,y-hh+b],[x,y+b],[x+a,y]];
+const pth=f=>{c.beginPath();f.forEach((p,i)=>i?c.lineTo(p[0],p[1]):c.moveTo(p[0],p[1]));c.closePath()};
+c.save();
+if(gap){c.setLineDash([4,4]);c.strokeStyle='#ff6f9b';c.lineWidth=1.2;[P,Lf,Rt].forEach(f=>{pth(f);c.stroke()});c.setLineDash([]);tx('Defekt'+(S.ids?' · E15':''),x,y-hh-b-10,'bold '+FS+'px system-ui','#ff6f9b');c.restore();return}
+c.shadowColor=`hsla(${hue},90%,60%,.8)`;c.shadowBlur=12*e;
+[[Lf,.8,28],[Rt,.8,20],[P,.92,48]].forEach(q=>{pth(q[0]);c.fillStyle=`hsla(${hue},80%,${q[2]}%,${q[1]})`;c.fill();c.strokeStyle=`hsla(${hue},90%,75%,.7)`;c.lineWidth=1;c.stroke()});
+c.shadowBlur=0;tx(h.L,x,y-hh,'bold '+(U*.5)+'px Georgia,serif','#fff');
+if(scar){c.strokeStyle='#ffc933';c.lineWidth=2;c.beginPath();c.moveTo(x+a*.2,y-hh+b*.7);c.lineTo(x+a*.55,y-hh*.7);c.lineTo(x+a*.25,y-hh*.45);c.lineTo(x+a*.7,y-hh*.1);c.stroke()}
+c.restore()}
+function openQ(e,t){return e.kind==='question'&&!E.some(f=>f.at_seconds<=t+EP&&f.caused_by.includes(e.id)&&(f.kind==='answer'||f.kind==='decision'))}
+const X=(t,x0,w)=>x0+t/DUR*w;
+function draw(st){lay();const t=S.t;c.setTransform(dpr,0,0,dpr,0,0);c.clearRect(0,0,W,Hh);
+const AC=ROLES.map(r=>act(r[0],t));fabric(t);
+if(W>520){const f=(FS-1)+'px system-ui';tx('Gold dick = Verantwortung je Aufgabe (BALL-Siegel)',14,16,f,'#ffc933','left');tx('Dünne Fäden = Kommunikation, keine Übergabe',14,31,f,'#8ee8ff','left');tx('Demo-Umgebung · keine echten Integrationen',14,46,f,'#9a95c4','left')}
+const envs=[['inet','Internet-Quellenfächer','#5ff0d0',['scout']],['werk','GitHub Werkhof','#ff9a7a',['forge','sentinel']],['api','Claude API-Kanal','#ffb36b',['forge','archibald','cadence']],['t1','Werkzeug (optional)','#9a95c4',[]],['t2','Werkzeug (optional)','#9a95c4',[]]];
+envs.forEach(v=>{const on=Math.max(0,...v[3].map(r=>AC[RI[r]])),p=ep(v[0]);v[3].forEach(r=>{const a=AC[RI[r]];if(a>.05){c.save();c.setLineDash([3,5]);c.strokeStyle=v[2];c.globalAlpha=.5*a;c.lineWidth=1;c.beginPath();c.moveTo(p[0],p[1]);c.lineTo(PP[RI[r]][0],PP[RI[r]][1]);c.stroke();c.restore()}});stn(v[0],v[1],v[2],on)});
+const sc=PP[RI.scout],ip=ep('inet');for(let j=-2;j<=2;j++){c.strokeStyle=`rgba(95,240,208,${.07+.3*AC[RI.scout]})`;c.lineWidth=1;c.beginPath();c.moveTo(ip[0],ip[1]);c.lineTo(sc[0]+j*7,sc[1]+j*5);c.stroke()}
+c.save();c.strokeStyle='rgba(160,123,255,.25)';c.setLineDash([2,5]);c.beginPath();c.moveTo(BX,BY+U*.4-U*3);c.lineTo(BX+U*3.4,BY+U*.4);c.lineTo(BX,BY+U*.4+U*3);c.lineTo(BX-U*3.4,BY+U*.4);c.closePath();c.stroke();c.restore();
+HD.forEach(h=>house(h,t));
+HS.forEach((h,n)=>{const g=HS[n+1];if(!g||!h.tp||!g.tp)return;const a=h.tp,b=g.tp,m=[(a[0]+b[0])/2,(a[1]+b[1])/2-U*.7],bad=h.n===DEF||g.n===DEF;c.save();c.strokeStyle=bad?(t>=82?'#ffc933':t>=48?'#ff6f9b':'rgba(210,225,255,.45)'):'rgba(210,225,255,.35)';c.lineWidth=bad&&t>=48?1.8:1.2;path(a,m,b,0,1);c.stroke();c.restore()});
+FR.forEach(f=>{if(t<f.t0)return;const p=cl((t-f.t0)/3),pe=p*(2-p),h=HS.find(x=>x.fr===f),B=h?hpos(h):[BX+(H(f.i)-.5)*U*5,BY+(H(f.i+9)-.5)*U*2.2],q=qp(ip,sc,B,pe);let al=1;if(t>f.t1)al=1-(t-f.t1)/(f.bad?2.5:1);if(al<=0)return;c.save();c.globalAlpha=al;c.translate(q[0]+(f.bad&&p>=1?Math.sin(t*20+f.i)*1.5:0),q[1]);c.rotate((H(f.i)-.5)*.8);c.strokeStyle=f.bad?'#ff6f9b':'#8ff3ff';c.fillStyle='rgba(15,10,50,.8)';c.lineWidth=1;c.beginPath();c.rect(-8,-9,16,18);c.fill();c.stroke();tx(f.L,0,0,'bold 12px Georgia,serif',f.bad?'#ff6f9b':'#fff');if(f.bad&&p>=1){c.beginPath();c.moveTo(-8,-3);c.lineTo(8,3);c.stroke()}c.restore()});
+const as=AC[RI.sentinel],ag=AC[RI.argus];
+if(as>.02){c.save();c.globalAlpha=.7*as;c.strokeStyle=ROLES[RI.sentinel][2];c.lineWidth=2;hex(BX,BY+U*.2,U*3.8,t*.05);c.restore()}
+if(ag>.02){c.save();c.globalAlpha=.7*ag;c.lineWidth=2;const d=U*.25*ag;c.strokeStyle=ROLES[RI.argus][2];c.beginPath();c.arc(BX-d,BY+U*.2,U*3.3,Math.PI/2,Math.PI*1.5);c.stroke();c.strokeStyle='#ffe27a';c.beginPath();c.arc(BX+d,BY+U*.2,U*3.3,-Math.PI/2,Math.PI/2);c.stroke();c.restore()}
+if(as+ag>.3)tx('Lokale Prüfung am Gebäude',BX,BY-U*4.2,(FS)+'px system-ui','#cfe9ff');
+if(t>=105&&HS[DEF].tp){const p=HS[DEF].tp;c.save();c.setLineDash([3,4]);c.strokeStyle='#9dff8a';c.globalAlpha=.5+.3*Math.sin(t*2);c.beginPath();c.ellipse(p[0],p[1]+U*.5,U*1.2,U*1.4,0,0,7);c.stroke();c.restore();tx('Garten?',p[0],p[1]+U*2.2,(FS-1)+'px system-ui','#9dff8a')}
+if(t>=DUR-EP){c.save();c.strokeStyle='#cfc9ff';c.globalAlpha=.7;c.lineWidth=2;c.setLineDash([7,6]);c.beginPath();c.arc(BX,BY+U*.2,U*4.4,.35*Math.PI,1.75*Math.PI);c.stroke();c.restore();tx('Kein Abschluss · offen',BX,BY+U*4.9,FS+'px system-ui','#cfc9ff')}
+const sel=st.cur>=0?E[st.cur]:null;
+E.forEach(e=>{if(e.at_seconds>t+EP||!e.recipient||e.recipient===e.actor)return;const a=PP[RI[e.actor]],b=PP[RI[e.recipient]],age=t-e.at_seconds,m=ctl(a,b,H(+e.id.slice(1))),al=.08+.6*Math.max(0,1-age/12),p=Math.min(1,age/1.3),k=e.kind;
+c.save();c.lineWidth=1.1;c.strokeStyle=k==='question'?'#b79bff':(k==='objection'||k==='defect')?'#ff6f9b':'#5fe9ff';c.globalAlpha=al;if(k==='question')c.setLineDash([3,5]);else if(k==='change_request'||k==='proposal')c.setLineDash([8,3]);path(a,m,b,0,p);c.stroke();
+if(k==='handoff'&&age<1.8){c.setLineDash([]);c.strokeStyle='#ffc933';c.lineWidth=3.4;c.globalAlpha=1-age/1.8;c.shadowColor='#ffc933';c.shadowBlur=10;path(a,m,b,0,p);c.stroke()}c.restore();
+if(age<2.5){const q=qp(a,m,b,age/2.5);c.fillStyle='#fff';c.beginPath();c.arc(q[0],q[1],2.4,0,7);c.fill()}
+if(al>.2&&age>=1.3){const q=qp(a,m,b,.5);if(k==='question')badge('?',q,'#b79bff');if(k==='change_request')badge('CR',q,'#ffd9a0');if(S.ids&&age<6)tx(e.id,q[0],q[1]-12,(FS-2)+'px system-ui','#cfe9ff')}});
+if(sel){c.save();c.setLineDash([2,4]);c.strokeStyle='rgba(255,255,255,.4)';c.lineWidth=1;sel.caused_by.forEach(id=>{const ce=E.find(x=>x.id===id);if(!ce||ce.actor===sel.actor)return;const a=PP[RI[ce.actor]],b=PP[RI[sel.actor]];path(a,ctl(a,b,.8),b,0,1);c.stroke()});c.restore()}
+ROLES.forEach((r,i)=>{const[x,y]=PP[i],a=AC[i],col=r[2];
+const g=c.createRadialGradient(x,y,0,x,y,NR*2.2);g.addColorStop(0,col+(a>.5?'55':'22'));g.addColorStop(1,col+'00');c.fillStyle=g;c.beginPath();c.arc(x,y,NR*2.2,0,7);c.fill();
+sym(r[0],x,y,NR,a,t,col);
+const mine=Object.keys(st.own).filter(k=>st.own[k]===r[0]);
+mine.forEach((k,j)=>{c.save();c.strokeStyle='#ffc933';c.lineWidth=2.6;c.shadowColor='#ffc933';c.shadowBlur=8;c.beginPath();c.arc(x,y,NR*1.3+j*5,0,7);c.stroke();c.restore()});
+const ly=y+NR*1.3+mine.length*5+9;
+tx(r[1]+' · '+PN[PL[r[0]]],x,ly,'600 '+FS+'px system-ui',a>.5?'#fff':'#cfc9ff');
+if(mine.length)tx(mine.map(k=>S.ids?k:TN[k]).join(' · '),x,ly+FS+3,(FS-1)+'px system-ui','#ffc933');
+if(S.sel===r[0]){c.save();c.setLineDash([3,3]);c.strokeStyle='#fff';c.beginPath();c.arc(x,y,NR*1.3+mine.length*5+5,0,7);c.stroke();c.restore()}});
+E.forEach(e=>{if(e.at_seconds<=t+EP&&openQ(e,t)){const[x,y]=PP[RI[e.recipient]];badge('?',[x+NR*1.2,y-NR*1.2],'#b79bff');if(S.ids)tx(e.id,x+NR*1.2,y-NR*1.2-14,(FS-2)+'px system-ui','#b79bff')}});
+const ar=PP[RI.archibald],tw=Math.min(150,W*.15),th=FS+12,tx0=ar[0]+NR*1.8,ty0=ar[1]-th*1.5;let pp=null;
+ST.forEach((s,i)=>{const a=cl((t-s[2])/1);if(a<=0)return;const x=tx0-(1-a)*12,y=ty0+i*(th+4);c.save();c.globalAlpha=a;c.fillStyle='rgba(255,179,107,.14)';c.strokeStyle='#ffb36b';c.lineWidth=1;c.beginPath();c.rect(x,y,tw,th);c.fill();c.stroke();c.restore();
+const cr=s[0]==='US-04',idl=s[0]+(s[0]==='US-03'&&t>=77?' · V2':'')+(cr?' · CR'+(S.ids?' E20':''):'');tx(idl,x+4,y+th*.3,'bold '+(FS-2)+'px system-ui','#ffd9a0','left');c.font=(FS-2)+'px system-ui';c.fillStyle='#e9e2ff';c.textAlign='left';c.textBaseline='middle';c.fillText(s[1],x+4,y+th*.72,tw-8);if(cr)pp=[x+tw,y+th/2]});
+if(pp){const b=PP[RI.peter],m=ctl(pp,b,.6);c.save();c.setLineDash([2,4]);c.strokeStyle='rgba(255,217,160,.4)';path(pp,m,b,0,1);c.stroke();c.restore();badge('CR',qp(pp,m,b,.5),'#ffd9a0')}
+const x0=W*.06,w=W*.88,y1=Hh*.945,y0=Hh*.78,h=y1-y0,MAX=65,Y=v=>y1-v/MAX*h;
+c.strokeStyle='rgba(160,150,230,.35)';c.lineWidth=1;c.beginPath();c.moveTo(x0,y1);c.lineTo(x0+w,y1);c.stroke();c.save();c.setLineDash([2,5]);c.beginPath();c.moveTo(x0,y0);c.lineTo(x0+w,y0);c.stroke();c.restore();
+tx('Erfundene Demokosten · kumulativ, nach Rolle geschichtet',x0,y0-6,(FS-1)+'px system-ui','#9a95c4','left','bottom');tx('$'+(st.sum/100).toFixed(2)+' (erfunden)',x0+w,y0-6,'bold '+FS+'px system-ui','#fff','right','bottom');
+const ce=E.filter(e=>e._c&&e.at_seconds<=t+EP),rc=ROLES.map(()=>0),steps=[rc.slice()];ce.forEach(e=>{rc[RI[e.actor]]+=e._c;steps.push(rc.slice())});
+const T=[0].concat(ce.map(e=>e.at_seconds));
+ROLES.forEach((r,k)=>{if(steps[steps.length-1][k]===0)return;const val=(i,inc)=>{let s=0;for(let q=0;q<(inc?k+1:k);q++)s+=steps[i][q];return s};
+const pts=inc=>{const a=[[X(0,x0,w),Y(val(0,inc))]];for(let i=1;i<steps.length;i++)a.push([X(T[i],x0,w),Y(val(i-1,inc))],[X(T[i],x0,w),Y(val(i,inc))]);a.push([X(t,x0,w),Y(val(steps.length-1,inc))]);return a};
+const u=pts(true),l=pts(false).reverse();c.beginPath();u.concat(l).forEach((p,j)=>j?c.lineTo(p[0],p[1]):c.moveTo(p[0],p[1]));c.closePath();c.fillStyle=r[2]+'88';c.fill();c.beginPath();u.forEach((p,j)=>j?c.lineTo(p[0],p[1]):c.moveTo(p[0],p[1]));c.strokeStyle=r[2];c.lineWidth=1.2;c.stroke()});
+E.forEach(e=>{const x=X(e.at_seconds,x0,w);c.strokeStyle=e.at_seconds<=t+EP?'rgba(255,255,255,.6)':'rgba(255,255,255,.2)';c.beginPath();c.moveTo(x,y1);c.lineTo(x,y1+5);c.stroke()});
+const px=X(t,x0,w);c.strokeStyle='rgba(255,255,255,.55)';c.beginPath();c.moveTo(px,y0);c.lineTo(px,y1);c.stroke();
+if(sel&&sel._c){let s=0;for(let i=0;i<=st.cur;i++)s+=E[i]._c;const x=X(sel.at_seconds,x0,w),yy=Y(s);c.fillStyle='#fff';c.beginPath();c.arc(x,yy,4,0,7);c.fill();tx('+$'+(sel._c/100).toFixed(2)+(S.ids?' '+sel.id:''),x+6,yy-9,(FS-1)+'px system-ui','#fff','left')}}
+const fmt=t=>{const s=Math.floor(t+EP);return String(s/60|0).padStart(2,'0')+':'+String(s%60).padStart(2,'0')};
+function ui(st,AC){
+const bp=$('bp'),end=S.t>=DUR-EP;bp.textContent=S.playing?'⏸ Pause':'▶ Abspielen';bp.disabled=end&&!S.playing;$('bn').disabled=end;
+$('sk').value=S.t;$('tm').textContent=fmt(S.t)+' / '+fmt(DUR)+' · $'+(st.sum/100).toFixed(2);
+document.querySelectorAll('[data-s]').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.s===S.speed));
+$('bi').setAttribute('aria-pressed',S.ids);$('bd').setAttribute('aria-pressed',S.dock);$('mn').classList.toggle('nodock',!S.dock);
+const key=st.cur+'|'+S.ids;if(key!==sk){sk=key;let h='';
+if(st.cur<0)h='<p class="h">Start</p><p class="t">Noch kein Ereignis. Abspielen oder „Nächstes Ereignis“ wählen.</p>';
+else{const at=E[st.cur].at_seconds;h='<p class="h">'+fmt(at)+' · Konzept, fiktive Ereignisse</p>';E.filter(e=>e.at_seconds===at).forEach(e=>{h+='<p class="t">'+(S.ids?e.id+' · ':'')+e.title+'</p><p class="m">'+NM(e.actor)+' → '+(e.recipient?NM(e.recipient):'offen')+' · '+KL[e.kind]+' · Aufgabe: '+(S.ids?e.task_id:TN[e.task_id])+' · Ursache: '+(e.caused_by.length?(S.ids?e.caused_by.join(', '):e.caused_by.length+' Ereignis(se)'):'—')+' · '+(e._c?'erfundene Kosten $'+(e._c/100).toFixed(2):'keine erfundenen Kosten')+' · Tokens: unbekannt</p>'})}
+$('story').innerHTML=h}
+dockUI(st,AC)}
+function NM(r){return ROLES[RI[r]][1]}
+function dockUI(st,AC){const i=S.sel==null?-1:RI[S.sel],e=st.cur>=0?E[st.cur]:null;
+const key=[S.sel,st.cur,i>=0&&AC[i]>.5,JSON.stringify(st.own),S.ids].join('|');if(key===dk)return;dk=key;
+document.querySelectorAll('#rl button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.r===S.sel));
+let h='';
+if(i>=0){const r=ROLES[i],p=PL[r[0]],mine=Object.keys(st.own).filter(k=>st.own[k]===r[0]),last=E.slice().reverse().find(x=>x.at_seconds<=S.t+EP&&x.actor===r[0]);
+h+='<h2 style="color:'+r[2]+'">'+r[1]+'</h2><dl><dt>Plattform</dt><dd>'+PN[p]+'</dd><dt>Anbieter (aus Plattform abgeleitet)</dt><dd>'+PV[p]+'</dd><dt>Modell</dt><dd>unbestätigt</dd><dt>Denkaufwand</dt><dd>unbestätigt</dd><dt>Arbeitswelt (Symbol)</dt><dd>'+r[4]+'</dd><dt>Verantwortung (BALL, je Aufgabe)</dt><dd>'+(mine.length?mine.map(k=>S.ids?k:TN[k]).join(', '):'derzeit keine')+'</dd><dt>Arbeitsfenster</dt><dd>'+(AC[i]>.5?'aktiv (aus Ereignissen abgeleitet)':'ruhend')+'</dd><dt>Letzte Aktion</dt><dd>'+(last?(S.ids?last.id+' · ':'')+last.title:'noch keine')+'</dd></dl>'}
+else h+='<p class="mut">Rolle im Bild anklicken oder oben wählen. Alle Angaben sind Konzept · fiktive Demodaten.</p>';
+if(e)h+='<h3>Gewähltes Ereignis</h3><dl><dt>Ereignis</dt><dd>'+(S.ids?e.id+' · ':'')+e.title+'</dd><dt>Erfundene Kosten</dt><dd>'+(e._c?'$'+(e._c/100).toFixed(2)+' (frei erfunden, kein Verbrauchsnachweis)':'keine')+'</dd><dt>Tokens</dt><dd>unbekannt</dd><dt>Tatsächliche Nutzung</dt><dd>nicht vorhanden</dd></dl>';
+h+='<h3>Legende</h3><p class="mut">Gold dick: Verantwortung je Aufgabe, mehrere gleichzeitig möglich. Dünne Fäden: Kommunikation, überträgt Verantwortung nur bei Übergabe. Umgebung (GitHub Werkhof, Claude API-Kanal, Internet-Quellen) ist Demo, ohne echte Integration.</p>';
+$('dc').innerHTML=h}
+function render(){const st=stateAt(S.t),AC=ROLES.map(r=>act(r[0],S.t));draw(st);ui(st,AC)}
+function tick(ts){if(S.playing){if(last==null)last=ts;const dt=Math.min(.25,(ts-last)/1000);last=ts;S.t=Math.min(DUR,S.t+dt*S.speed);if(S.t>=DUR-EP){S.t=DUR;S.playing=false}dirty=1}else last=null;if(dirty){dirty=0;render()}requestAnimationFrame(tick)}
+function play(){if(S.t>=DUR-EP)return;S.playing=true;S.was=false;last=null;dirty=1}
+function pause(){S.playing=false;S.was=false;last=null;dirty=1}
+function seek(x){S.t=cl(+x||0,0,DUR);if(S.t>=DUR-EP){S.t=DUR;S.playing=false}last=null;dirty=1;return S.t}
+function step(){const n=E.find(e=>e.at_seconds>S.t+1e-6);S.playing=false;S.was=false;last=null;if(n)S.t=n.at_seconds;dirty=1;return n?E.filter(e=>e.at_seconds===n.at_seconds).map(e=>e.id):[]}
+function replay(){S.t=0;S.playing=true;S.was=false;last=null;dirty=1}
+$('bp').onclick=()=>S.playing?pause():play();$('bn').onclick=step;$('br').onclick=replay;
+$('sk').oninput=e=>seek(e.target.value);
+document.querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>{S.speed=+b.dataset.s;dirty=1});
+$('bi').onclick=()=>{S.ids=!S.ids;dirty=1};$('bd').onclick=()=>{S.dock=!S.dock;dirty=1;setTimeout(size,0)};
+ROLES.forEach(r=>{const b=document.createElement('button');b.type='button';b.dataset.r=r[0];b.textContent=r[1];b.style.borderColor=r[2]+'88';b.onclick=()=>{S.sel=r[0];dirty=1};$('rl').appendChild(b)});
+cv.addEventListener('click',ev=>{const b=cv.getBoundingClientRect(),x=ev.clientX-b.left,y=ev.clientY-b.top;let bi=-1,bd=1e9;PP.forEach((p,i)=>{const d=Math.hypot(p[0]-x,p[1]-y);if(d<bd){bd=d;bi=i}});if(bd<=NR*2.2){S.sel=ROLES[bi][0];S.dock=true;dirty=1;setTimeout(size,0)}});
+document.addEventListener('visibilitychange',()=>{if(document.hidden){S.was=S.playing||S.was;S.playing=false;last=null}else{if(S.was&&S.t<DUR-EP)S.playing=true;S.was=false;last=null;dirty=1}});
+new ResizeObserver(size).observe($('stage'));addEventListener('resize',size);
+window.AG_NACHTPOST={events:E,getState:()=>{const st=stateAt(S.t);return{time:S.t,playing:S.playing,cost:Math.round(st.sum)/100,ownerByTask:st.own,speed:S.speed,currentEvent:st.cur>=0?E[st.cur].id:null}},seek,step,pause,play,replay};
+size();requestAnimationFrame(tick);
+})();
+</script>
+</body></html>
