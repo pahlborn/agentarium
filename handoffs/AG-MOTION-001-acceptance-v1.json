@@ -1,0 +1,16 @@
+{
+  "task_id": "AG-MOTION-001",
+  "version": 1,
+  "target": "Forge code handback for mocks/AG-MOTION-001.html",
+  "acceptance": [
+    "Two distinct responsive animated variants Gewebe/Partitur, 9 identifiable abstract named roles, no person avatars.",
+    "All owner/activity/context derived from selected project's deterministic fixture protocol and current time; one owner marker, same protocol for Live-Demo/replay.",
+    "Play advances finite time, Pause freezes motion/time, replayseek pauses/restores deterministic state; last event stops and explicit play canrestart.",
+    "Project selection resets matching fixture/time/context; hidden carousel variant retains state and does not start just duevisibility; pagehidden doesnotjump.",
+    "Communication drawer toggles, relevant event context explicit Demo/Beispieldaten, no live connection/fakeagentdialogue.",
+    "Native accessible controls, initialrender/includedCanvas2D loop; supported width320/736/1024 withreasonablecleargeometry, DPRbounded; reducedmotiondefaultpaused.",
+    "No fetch/XHR/ws/storage/externaldependencies/intervals/APIpolling; fragmentnohtml/head/body; hostcarousel suppliednavigationnotreimplemented.",
+    "Test hook exposing deriveState andcontrollers supports reproducible logic/lifecycleverification; renderedbrowserappearance NOT_TESTED unless permittedbrowser environment supplied."
+  ],
+  "scope": "One focused independent test pass, distinguish runtime logic evidence from static inspection/browser evidence."
+}
