@@ -1,0 +1,25 @@
+name: Relay diagnostics tests
+on:
+  push:
+    branches: [feature/visual-stage-v0]
+    paths:
+      - '.github/workflows/relay-diagnostics-test.yml'
+      - 'relay/claude_cli_diagnostics.py'
+      - 'relay/test_claude_cli_diagnostics.py'
+      - 'relay/forge_motion_once.py'
+      - 'relay/forge_motion_variant_once.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  offline-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Compile relay modules
+        run: python3 -m py_compile relay/claude_cli_diagnostics.py relay/forge_motion_once.py relay/forge_motion_variant_once.py relay/test_claude_cli_diagnostics.py
+      - name: Run privacy-safe diagnostic tests
+        run: python3 -m unittest -v relay/test_claude_cli_diagnostics.py
