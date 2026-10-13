@@ -1,0 +1,33 @@
+name: Actual browser QA for Forge originals
+on:
+  push:
+    branches: [feature/visual-stage-v0]
+    paths: ['.github/workflows/nachtpost-browser-qa-v1.yml']
+permissions:
+  contents: read
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Install isolated QA browser
+        run: |
+          mkdir -p "$RUNNER_TEMP/browser-qa"
+          npm install --prefix "$RUNNER_TEMP/browser-qa" --no-save playwright@1.62.1
+          "$RUNNER_TEMP/browser-qa/node_modules/.bin/playwright" install --with-deps chromium
+      - name: Check originals in actual browser
+        env:
+          NODE_PATH: ${{ runner.temp }}/browser-qa/node_modules
+        run: |
+          status=0
+          node tests/nachtpost-003/browser-qa.cjs previews/AG-NACHTPOST-003-partitur-v1.html qa-browser/partitur || status=1
+          node tests/nachtpost-003/browser-qa.cjs previews/AG-NACHTPOST-003-gewebe-v1.html qa-browser/gewebe || status=1
+          exit "$status"
+      - if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: nachtpost-browser-evidence
+          path: qa-browser/
