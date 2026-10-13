@@ -1,6 +1,6 @@
 {
   "schema": "agentarium.role-routing.v1",
-  "source": "Verified bounded AG-TEAM-001 ChatGPT runs 2026-10-13; Claude historical identity evidence preserved, task-mode run 38406861688 pending. Availability is task-specific, not a permanently live session.",
+  "source": "Actual AG-TEAM-001 contributions verified 2026-10-13: four separate ChatGPT skill runs and three separate Claude task-mode sessions in run 38406861688. Task-version-specific authorization, no persistent live-session or merge/release claim.",
   "roles": {
     "atlas": {
       "platform": "chatgpt",
@@ -77,7 +77,7 @@
     "archibald": {
       "platform": "claude-code",
       "technical_id": "spec-agent",
-      "state": "identity_probe_passed_2026-10-13",
+      "state": "task_contribution_completed_2026-10-13",
       "scope": [
         "specification"
       ],
@@ -85,12 +85,24 @@
       "probe_task": "AG-RELAY-002",
       "probe_path": "relay/archibald_one_shot.py",
       "evidence": "https://github.com/pahlborn/agentarium/actions/runs/38396268414",
-      "handback": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6145362275"
+      "handback": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6145362275",
+      "task_evidence": {
+        "task": "AG-TEAM-001",
+        "source_version": 2,
+        "session": "f392a559-fb15-4ee6-861c-08fad4ef0a83",
+        "run": "38406861688",
+        "definition_blob": "3d49a612a1b2ad8d353b2b5345053dca60d4c23c",
+        "baseline": "135979d5706977c84512f00bc412b5fae553fb02",
+        "result": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6146888313",
+        "stop_state": "completed",
+        "effective_tools": [],
+        "implementation_status": "read_only_contribution"
+      }
     },
     "forge": {
       "platform": "claude-code",
       "technical_id": "coding-agent",
-      "state": "identity_probe_passed_2026-10-13",
+      "state": "task_contribution_completed_2026-10-13",
       "aliases": [
         "CA"
       ],
@@ -103,17 +115,48 @@
       "permissions": "identity_probe_read_only; future local edit/write requires separate authorized task",
       "evidence": "https://github.com/pahlborn/agentarium/actions/runs/38396737845",
       "handback": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6145433777",
-      "implementation_status": "not_authorized_or_tested"
+      "implementation_status": "patch_authored_integrated_18_QA_checks_pass_browser_not_tested",
+      "task_evidence": {
+        "task": "AG-TEAM-001",
+        "source_version": 2,
+        "session": "f2c3dcb5-0c8b-4283-96c4-973caec5676f",
+        "run": "38406861688",
+        "definition_blob": "0dcac59d22c27753f111fb1ad79f5a9be524052a",
+        "baseline": "135979d5706977c84512f00bc412b5fae553fb02",
+        "result": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6146913156",
+        "stop_state": "completed",
+        "effective_tools": [],
+        "implementation_status": "patch_authored_returned_not_auto_published",
+        "correction": {
+          "source_version": 3,
+          "session": "48177660-49b8-483a-b522-0e9d3a9267c6",
+          "run": "38407711971",
+          "result": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6147010463",
+          "stop_state": "completed"
+        }
+      }
     },
     "cadence": {
       "platform": "claude-code",
       "technical_id": "process-agent",
-      "state": "identity_probe_passed_2026-10-13",
+      "state": "task_contribution_completed_2026-10-13",
       "evidence": "https://github.com/pahlborn/agentarium/actions/runs/38394068230",
       "scope": [
         "process_maintenance",
         "process_improvement"
-      ]
+      ],
+      "task_evidence": {
+        "task": "AG-TEAM-001",
+        "source_version": 2,
+        "session": "5332bdf9-8d09-4626-806d-191840387b9a",
+        "run": "38406861688",
+        "definition_blob": "d0ad187637d5201024f9fe2a31d47221178fcf6b",
+        "baseline": "135979d5706977c84512f00bc412b5fae553fb02",
+        "result": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6146915912",
+        "stop_state": "completed",
+        "effective_tools": [],
+        "implementation_status": "read_only_contribution"
+      }
     }
   },
   "routing_rules": [
@@ -122,5 +165,15 @@
     "A role name is not proof of a loaded agent.",
     "Dispatch requires technical id, platform, authorized tools and independent runtime evidence.",
     "No merge or publication without Peter."
-  ]
+  ],
+  "task_result": {
+    "task": "AG-TEAM-001",
+    "source_version": 3,
+    "status": "FUNCTIONAL_PASS_BROWSER_NOT_TESTED",
+    "evidence_path": "handoffs/AG-TEAM-001-execution-v3.json",
+    "product_commit": "c90b3e6398ef2ef864bc1c05bfcceb04e1513c8d",
+    "paid_calls_completed": 4,
+    "reported_cost_usd": 0.0162581,
+    "future_auto_execution": false
+  }
 }
