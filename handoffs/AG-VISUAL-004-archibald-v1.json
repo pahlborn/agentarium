@@ -1,0 +1,20 @@
+{
+  "task_id": "AG-VISUAL-004-ARCHIBALD",
+  "version": 1,
+  "variant": "archibald",
+  "recipient": "Archibald/spec-agent",
+  "status": "AUTHORIZED",
+  "base_commit": "1e812fb0e5f9f9f76a753bb57acbbdc2bb6111c2",
+  "budget_cap_usd": 0.8319352,
+  "requested_model": "opus",
+  "requested_effort": "high",
+  "authorization": {
+    "source": "Peter",
+    "text": "Ok, so umsetzen bitte",
+    "scope": "Next revision of BOTH Agentarium mocks: genuine small specification, initial tests, independent testability, Forge only, delivery QA, product review, Nova effect review",
+    "budget": "Existing USD2 pool: known successful calls USD1.1680648, remaining USD0.8319352; prior failures remain unknown and separate. Stop if missing credit or insufficient remaining budget. No automatic retry."
+  },
+  "real_nova_contribution": "Fund: Scout kehrt mit Quellenfächer/Suchpassage zurück; Schund bleibt gedämpft, ausgewählter Fund trifft Novas Entwurf. Bau: Archibald entfaltet Bauteile/Teilphrasen, Forge baut Haus+Brücke; Recherche bleibt parallel. Gegenargument: Argus zeigt Abhängigkeit der Brücke vom zurückziehbaren Brief, andere Arbeit geht weiter. Bruch: Sentinel wiederholt Rücknahme; Haus verschwindet, Brücke bleibt. Reparatur: Forge verändert Verbindung/Phrase, Sentinel wiederholt, alte Fassung/Reparaturnaht nachvollziehbar; Cadence löst belegten Übergangsstau. Verantwortungssiegel ruhig, Namen bei Fokus; IDs/Provider/Kosten zuschaltbar. Keine Beschriftungsdecke. Gewebe räumlich, Partitur zeitlich; keine Staffel.",
+  "peer_evidence": "Real Sentinel/Argus audit: no genuine Archibald spec for last mocks, Atlas AC01-10 overfocus logic, browser NOT_TESTED, final product review omitted. Node VM results remain functional evidence only. Peter saw blank ChatGPT file preview; inline preview showed mocks but boring with unspecified further defects. Do not invent exact user defects.",
+  "role_task": "You are real Archibald/spec-agent, not Forge. Create concise implementation-ready Epic V1 for Agentarium visual revision, not actual NACHTPOST product. No full ceremony. Existing two outputs are equivalent alternatives, not selected winner. Follow Peter goal and actual Nova contribution. Return SA_ACK and one fenced JSON: {epic:{id,version,goal,scope,non_goals},stories:[max5 {id,user_goal,acceptance:[observable criterion IDs]}],initial_tests:[max10 {id,criterion_ids,setup,action,expected_observation,evidence_type}],open_decisions:[only actual necessary],implementation_handoff,delivery_gate}. Around800words max. Explicit tested delivery surface vs VM; actual rendered evidence required, missing browser=BLOCKED criterion not silently PASS. Include perceptible parallelism, Scout expedition processing vs decorative flow, specific failure/repair causality, local review role distinction, no default all-teammeeting, names onfocus, IDs/provider/model/costoptional, panelnooverlay, replay deterministic and mobile. Visual effect subjective should go Nova/Peter; define observable proxies not guaranteed fantastic score. Initial cases are examples; Sentinel independently adds adversarial/regression cases. Fixture is fictitious demo, not actual agent actions. No architecture/dependencies/publication/merge. All implementation by Forge. Stop after spec; no tools available, full bounded context provided."
+}
