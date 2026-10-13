@@ -1,0 +1,88 @@
+{
+  "task": "AG-NACHTPOST-003",
+  "artifact": "/workspace/scratch/d750c8865a51/nachtpost/forge-partitur.html",
+  "sha256": "b1e720ad06f98f724b946341680e6392b53ba66b30306a396df7611aaf2fc4ee",
+  "fixture_sha256": "a83886016cfaf312c0538ab86dbb6c72c3e056bd3204c0225cbb86aaafaf40ec",
+  "environment": "v24.19.0",
+  "coverage": "Node VM with controlled RAF, DOM/canvas test doubles; static CSS checks do not verify actual pixels",
+  "results": [
+    {
+      "id": "identity",
+      "status": "PASS"
+    },
+    {
+      "id": "syntax",
+      "status": "PASS"
+    },
+    {
+      "id": "fixture-semantic",
+      "status": "PASS"
+    },
+    {
+      "id": "network-storage-static",
+      "status": "PASS"
+    },
+    {
+      "id": "all-timestamps-owner-cost",
+      "status": "PASS"
+    },
+    {
+      "id": "strict-step",
+      "status": "PASS"
+    },
+    {
+      "id": "clamp-end-replay",
+      "status": "PASS"
+    },
+    {
+      "id": "play-pause-tick",
+      "status": "PASS"
+    },
+    {
+      "id": "hidden-playing-preserved-no-jump",
+      "status": "PASS"
+    },
+    {
+      "id": "hidden-paused-preserved",
+      "status": "PASS"
+    },
+    {
+      "id": "end-by-frame",
+      "status": "PASS"
+    },
+    {
+      "id": "reduced-motion-start-paused",
+      "status": "PASS"
+    },
+    {
+      "id": "DOM-controls",
+      "status": "PASS"
+    },
+    {
+      "id": "IDs-toggle-canvas",
+      "status": "PASS"
+    },
+    {
+      "id": "speed-controls",
+      "status": "PASS"
+    },
+    {
+      "id": "nine-role-labels",
+      "status": "PASS"
+    },
+    {
+      "id": "labels",
+      "status": "PASS"
+    },
+    {
+      "id": "dock-static-layout",
+      "status": "PASS"
+    },
+    {
+      "id": "browser-pixels-mobile-overlap",
+      "status": "NOT_TESTED",
+      "evidence": "executable-absent"
+    }
+  ],
+  "verdict": "PASS_WITH_LIMITS"
+}
