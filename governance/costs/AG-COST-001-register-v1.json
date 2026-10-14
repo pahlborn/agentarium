@@ -1,0 +1,402 @@
+{
+  "schema": "agentarium.requirement-cost-register.v1",
+  "version": 1,
+  "created_at": "2026-10-14T04:15:27.033Z",
+  "currency": "USD",
+  "scope": "Known NACHTPOST-003/VISUAL-004 calls plus explicit earlier failure gaps. This is not the full project bill.",
+  "user_instruction": {
+    "date": "2026-10-14",
+    "request": "Log all requirements and associated costs, including failed attempts; report consumed amounts after each task; develop experience-based forecasts.",
+    "reporting_effective": "Immediately; forecasts remain evidence-based and may be unavailable."
+  },
+  "requirements": [
+    {
+      "epic": "AG-VISUAL-004-EPIC",
+      "version": 1,
+      "story_id": "S1",
+      "criterion_id": "AC01",
+      "text": "AC01 Thin membranes and multi-strand fibre bundles form one connected material. A static node diagram with flying points is NO-GO.",
+      "source_ref": "specifications/AG-VISUAL-004-spec-v1.json",
+      "addendum_ref": "specifications/AG-VISUAL-004-testability-v1.json",
+      "associated_attempts": [
+        "AG-VISUAL-004-ARCHIBALD",
+        "AG-VISUAL-004-FORGE"
+      ],
+      "allocation": "Shared task cost, not individually separable"
+    },
+    {
+      "epic": "AG-VISUAL-004-EPIC",
+      "version": 1,
+      "story_id": "S1",
+      "criterion_id": "AC02",
+      "text": "AC02 Broad, continuous swells deform membranes and bundles together while the camera stays fixed. Camera travel or uniform pulsing is not the only source of life.",
+      "source_ref": "specifications/AG-VISUAL-004-spec-v1.json",
+      "addendum_ref": "specifications/AG-VISUAL-004-testability-v1.json",
+      "associated_attempts": [
+        "AG-VISUAL-004-ARCHIBALD",
+        "AG-VISUAL-004-FORGE"
+      ],
+      "allocation": "Shared task cost, not individually separable"
+    },
+    {
+      "epic": "AG-VISUAL-004-EPIC",
+      "version": 1,
+      "story_id": "S1",
+      "criterion_id": "AC03",
+      "text": "AC03 Ambient motion and work impulses are visibly separate: waiting areas only drift slowly, distant areas stay calm, and the gold responsibility seals remain stable reference points.",
+      "source_ref": "specifications/AG-VISUAL-004-spec-v1.json",
+      "addendum_ref": "specifications/AG-VISUAL-004-testability-v1.json",
+      "associated_attempts": [
+        "AG-VISUAL-004-ARCHIBALD",
+        "AG-VISUAL-004-FORGE"
+      ],
+      "allocation": "Shared task cost, not individually separable"
+    },
+    {
+      "epic": "AG-VISUAL-004-EPIC",
+      "version": 1,
+      "story_id": "S2",
+      "criterion_id": "AC04",
+      "text": "AC04 For a work event, fibres thicken locally at the actor, recipient and caused_by areas, and neighbouring surfaces are pulled in.",
+      "source_ref": "specifications/AG-VISUAL-004-spec-v1.json",
+      "addendum_ref": "specifications/AG-VISUAL-004-testability-v1.json",
+      "associated_attempts": [
+        "AG-VISUAL-004-ARCHIBALD",
+        "AG-VISUAL-004-FORGE"
+      ],
+      "allocation": "Shared task cost, not individually separable"
+    },
+    {
+      "epic": "AG-VISUAL-004-EPIC",
+      "version": 1,
+      "story_id": "S2",
+      "criterion_id": "AC05",
+      "text": "AC05 Parallel work is visible in the same frame (E09/E10, E12/E13, E32/E33), with no relay hand-off between them.",
+      "source_ref": "specifications/AG-VISUAL-004-spec-v1.json",
+      "addendum_ref": "specifications/AG-VISUAL-004-testability-v1.json",
+      "associated_attempts": [
+        "AG-VISUAL-004-ARCHIBALD",
+        "AG-VISUAL-004-FORGE"
+      ],
+      "allocation": "Shared task cost, not individually separable"
+    },
+    {
+      "epic": "AG-VISUAL-004-EPIC",
+      "version": 1,
+      "story_id": "S2",
+      "criterion_id": "AC06",
+      "text": "AC06 Scout expedition: E03 extends Scout's area outward and E05 brings back a fan of sources. Discarded finds stay muted and the selected find lands at the target. This activity is tied to the fixture times and ends with them.",
+      "source_ref": "specifications/AG-VISUAL-004-spec-v1.json",
+      "addendum_ref": "specifications/AG-VISUAL-004-testability-v1.json",
+      "associated_attempts": [
+        "AG-VISUAL-004-ARCHIBALD",
+        "AG-VISUAL-004-FORGE"
+      ],
+      "allocation": "Shared task cost, not individually separable"
+    },
+    {
+      "epic": "AG-VISUAL-004-EPIC",
+      "version": 1,
+      "story_id": "S2",
+      "criterion_id": "AC07",
+      "text": "AC07 Argus E11 creates opposing pull between the bridge and the withdrawable letter. Other areas keep working.",
+      "source_ref": "specifications/AG-VISUAL-004-spec-v1.json",
+      "addendum_ref": "specifications/AG-VISUAL-004-testability-v1.json",
+      "associated_attempts": [
+        "AG-VISUAL-004-ARCHIBALD",
+        "AG-VISUAL-004-FORGE"
+      ],
+      "allocation": "Shared task cost, not individually separable"
+    },
+    {
+      "epic": "AG-VISUAL-004-EPIC",
+      "version": 1,
+      "story_id": "S2",
+      "criterion_id": "AC08",
+      "text": "AC08 Break E15: the house disappears, the bridge remains and a visible tear appears.",
+      "source_ref": "specifications/AG-VISUAL-004-spec-v1.json",
+      "addendum_ref": "specifications/AG-VISUAL-004-testability-v1.json",
+      "associated_attempts": [
+        "AG-VISUAL-004-ARCHIBALD",
+        "AG-VISUAL-004-FORGE"
+      ],
+      "allocation": "Shared task cost, not individually separable"
+    },
+    {
+      "epic": "AG-VISUAL-004-EPIC",
+      "version": 1,
+      "story_id": "S2",
+      "criterion_id": "AC09",
+      "text": "AC09 Repair E17–E28: Forge changes the connection and Sentinel repeats the check. A permanent seam remains and the V1 state stays reachable through scrub or focus. Cadence (E21–E23) resolves the documented transition jam.",
+      "source_ref": "specifications/AG-VISUAL-004-spec-v1.json",
+      "addendum_ref": "specifications/AG-VISUAL-004-testability-v1.json",
+      "associated_attempts": [
+        "AG-VISUAL-004-ARCHIBALD",
+        "AG-VISUAL-004-FORGE"
+      ],
+      "allocation": "Shared task cost, not individually separable"
+    },
+    {
+      "epic": "AG-VISUAL-004-EPIC",
+      "version": 1,
+      "story_id": "S3",
+      "criterion_id": "AC10",
+      "text": "AC10 Argus review and Sentinel QA are visually distinct local acts. Only the agents involved react; there is no default whole-team meeting.",
+      "source_ref": "specifications/AG-VISUAL-004-spec-v1.json",
+      "addendum_ref": "specifications/AG-VISUAL-004-testability-v1.json",
+      "associated_attempts": [
+        "AG-VISUAL-004-ARCHIBALD",
+        "AG-VISUAL-004-FORGE"
+      ],
+      "allocation": "Shared task cost, not individually separable"
+    },
+    {
+      "epic": "AG-VISUAL-004-EPIC",
+      "version": 1,
+      "story_id": "S3",
+      "criterion_id": "AC11",
+      "text": "AC11 Names appear only on focus, hover or tap. There is no blanket of labels.",
+      "source_ref": "specifications/AG-VISUAL-004-spec-v1.json",
+      "addendum_ref": "specifications/AG-VISUAL-004-testability-v1.json",
+      "associated_attempts": [
+        "AG-VISUAL-004-ARCHIBALD",
+        "AG-VISUAL-004-FORGE"
+      ],
+      "allocation": "Shared task cost, not individually separable"
+    },
+    {
+      "epic": "AG-VISUAL-004-EPIC",
+      "version": 1,
+      "story_id": "S3",
+      "criterion_id": "AC12",
+      "text": "AC12 IDs, provider, model and costs are hidden by default and can be switched on. Null actual values show as 'nicht vorhanden', never as 0. Synthetic costs always carry their label. The fiction label is always visible.",
+      "source_ref": "specifications/AG-VISUAL-004-spec-v1.json",
+      "addendum_ref": "specifications/AG-VISUAL-004-testability-v1.json",
+      "associated_attempts": [
+        "AG-VISUAL-004-ARCHIBALD",
+        "AG-VISUAL-004-FORGE"
+      ],
+      "allocation": "Shared task cost, not individually separable"
+    },
+    {
+      "epic": "AG-VISUAL-004-EPIC",
+      "version": 1,
+      "story_id": "S3",
+      "criterion_id": "AC13",
+      "text": "AC13 The detail panel never covers the active Gewebe or Partitur area.",
+      "source_ref": "specifications/AG-VISUAL-004-spec-v1.json",
+      "addendum_ref": "specifications/AG-VISUAL-004-testability-v1.json",
+      "associated_attempts": [
+        "AG-VISUAL-004-ARCHIBALD",
+        "AG-VISUAL-004-FORGE"
+      ],
+      "allocation": "Shared task cost, not individually separable"
+    },
+    {
+      "epic": "AG-VISUAL-004-EPIC",
+      "version": 1,
+      "story_id": "S4",
+      "criterion_id": "AC14",
+      "text": "AC14 The Partitur shows all 34 events in time order with parallel lanes, synchronised with the replay time, as an equal view rather than a legend.",
+      "source_ref": "specifications/AG-VISUAL-004-spec-v1.json",
+      "addendum_ref": "specifications/AG-VISUAL-004-testability-v1.json",
+      "associated_attempts": [
+        "AG-VISUAL-004-ARCHIBALD",
+        "AG-VISUAL-004-FORGE"
+      ],
+      "allocation": "Shared task cost, not individually separable"
+    },
+    {
+      "epic": "AG-VISUAL-004-EPIC",
+      "version": 1,
+      "story_id": "S4",
+      "criterion_id": "AC15",
+      "text": "AC15 The end state matches E34: open, with no completion percentage and no product acceptance.",
+      "source_ref": "specifications/AG-VISUAL-004-spec-v1.json",
+      "addendum_ref": "specifications/AG-VISUAL-004-testability-v1.json",
+      "associated_attempts": [
+        "AG-VISUAL-004-ARCHIBALD",
+        "AG-VISUAL-004-FORGE"
+      ],
+      "allocation": "Shared task cost, not individually separable"
+    },
+    {
+      "epic": "AG-VISUAL-004-EPIC",
+      "version": 1,
+      "story_id": "S5",
+      "criterion_id": "AC16",
+      "text": "AC16 Replay is deterministic: the same t after seek, scrub or reload gives an identical rendering state, including ambient motion.",
+      "source_ref": "specifications/AG-VISUAL-004-spec-v1.json",
+      "addendum_ref": "specifications/AG-VISUAL-004-testability-v1.json",
+      "associated_attempts": [
+        "AG-VISUAL-004-ARCHIBALD",
+        "AG-VISUAL-004-FORGE"
+      ],
+      "allocation": "Shared task cost, not individually separable"
+    },
+    {
+      "epic": "AG-VISUAL-004-EPIC",
+      "version": 1,
+      "story_id": "S5",
+      "criterion_id": "AC17",
+      "text": "AC17 In mobile portrait (example 390×844) there is no horizontal overflow, controls are reachable and AC13 still holds.",
+      "source_ref": "specifications/AG-VISUAL-004-spec-v1.json",
+      "addendum_ref": "specifications/AG-VISUAL-004-testability-v1.json",
+      "associated_attempts": [
+        "AG-VISUAL-004-ARCHIBALD",
+        "AG-VISUAL-004-FORGE"
+      ],
+      "allocation": "Shared task cost, not individually separable"
+    },
+    {
+      "epic": "AG-VISUAL-004-EPIC",
+      "version": 1,
+      "story_id": "S5",
+      "criterion_id": "AC18",
+      "text": "AC18 Evidence comes from the delivered file rendered in a real browser on the agreed delivery surface. A Node VM is functional evidence only. If no browser is available, the result is BLOCKED, not PASS.",
+      "source_ref": "specifications/AG-VISUAL-004-spec-v1.json",
+      "addendum_ref": "specifications/AG-VISUAL-004-testability-v1.json",
+      "associated_attempts": [
+        "AG-VISUAL-004-ARCHIBALD",
+        "AG-VISUAL-004-FORGE"
+      ],
+      "allocation": "Shared task cost, not individually separable"
+    }
+  ],
+  "calls": [
+    {
+      "attempt_id": "AG-NACHTPOST-003-PARTITUR",
+      "session": "01f5361d-d8af-414b-9d41-a0a016a5adcc",
+      "role": "forge",
+      "actual_model": "claude-sonnet-5-5",
+      "reported_usage_cost_usd": 0.5502893,
+      "cost_source": "Claude CLI terminal runtime metadata; not independently reconciled provider invoice",
+      "status": "RESULT_RETURNED_QA_PENDING",
+      "run": "https://github.com/pahlborn/agentarium/actions/runs/38461500450",
+      "evidence_record_id": "AG-NACHTPOST-003-PARTITUR-RESULT",
+      "requirement_refs": [
+        "handoffs/AG-NACHTPOST-001-acceptance-v1.json",
+        "fixtures/AG-FICTION-001-nachtpost-v1.json"
+      ],
+      "cost_allocation": "Whole task attempt; no measurable per-criterion split"
+    },
+    {
+      "attempt_id": "AG-NACHTPOST-003-GEWEBE",
+      "session": "605bcf7d-ae4e-4a5e-88cc-bcbee2a87931",
+      "role": "forge",
+      "actual_model": "claude-sonnet-5-5",
+      "reported_usage_cost_usd": 0.6177755,
+      "cost_source": "Claude CLI terminal runtime metadata; not independently reconciled provider invoice",
+      "status": "RESULT_RETURNED_QA_PENDING",
+      "run": "https://github.com/pahlborn/agentarium/actions/runs/38461500450",
+      "evidence_record_id": "AG-NACHTPOST-003-GEWEBE-RESULT",
+      "requirement_refs": [
+        "handoffs/AG-NACHTPOST-001-acceptance-v1.json",
+        "fixtures/AG-FICTION-001-nachtpost-v1.json"
+      ],
+      "cost_allocation": "Whole task attempt; no measurable per-criterion split"
+    },
+    {
+      "attempt_id": "AG-VISUAL-004-ARCHIBALD",
+      "session": "29a10afb-8c99-40a5-baff-cbfbd1dae6b4",
+      "role": "archibald",
+      "actual_model": "claude-opus-5-5",
+      "reported_usage_cost_usd": 0.19280099999999997,
+      "cost_source": "Claude CLI terminal runtime metadata; not independently reconciled provider invoice",
+      "status": "SPECIFICATION_RETURNED_TESTABILITY_CLARIFIED",
+      "run": "https://github.com/pahlborn/agentarium/actions/runs/38468108026",
+      "evidence_record_id": "AG-VISUAL-004-ARCHIBALD-RESULT",
+      "requirement_refs": [
+        "specifications/AG-VISUAL-004-spec-v1.json",
+        "specifications/AG-VISUAL-004-testability-v1.json"
+      ],
+      "cost_allocation": "Whole task attempt; no measurable per-criterion split"
+    },
+    {
+      "attempt_id": "AG-VISUAL-004-FORGE",
+      "session": "826e7cc3-6958-455b-b9d5-df29b3d43539",
+      "role": "forge",
+      "actual_model": "claude-sonnet-5-5",
+      "reported_usage_cost_usd": 0.902198,
+      "cost_source": "Claude CLI terminal runtime metadata; not independently reconciled provider invoice",
+      "status": "BUDGET_STOP_COMPLETE_PATCH_RECOVERED_NOT_ACCEPTED",
+      "run": "https://github.com/pahlborn/agentarium/actions/runs/38468976827",
+      "evidence_record_id": "AG-VISUAL-004-FORGE-RECOVERED",
+      "requirement_refs": [
+        "specifications/AG-VISUAL-004-spec-v1.json",
+        "specifications/AG-VISUAL-004-testability-v1.json"
+      ],
+      "cost_allocation": "Whole task attempt; no measurable per-criterion split"
+    }
+  ],
+  "unknown_cost_attempts": [
+    {
+      "attempt_id": "AG-NACHTPOST-001-GEWEBE",
+      "reported_usage_cost_usd": null,
+      "reason": "No terminal usage returned; failed call may have incurred costs",
+      "run": "38456137935",
+      "evidence_ref": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6153675820",
+      "status": "LOCAL_RELAY_TIMEOUT"
+    },
+    {
+      "attempt_id": "AG-NACHTPOST-002-GEWEBE",
+      "reported_usage_cost_usd": null,
+      "reason": "Terminal CLI exits nonzero; exact cost not preserved in failure evidence",
+      "run": "38457565505",
+      "evidence_ref": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6153976527",
+      "status": "BUDGET_EXCEEDED_STOPPED"
+    }
+  ],
+  "totals": {
+    "known_usage_cost_usd": 2.2630638,
+    "scope": "Four distinct paid sessions only; aggregate QA records excluded to avoid double counting.",
+    "full_project_total_usd": null,
+    "unknown_costs_excluded": true,
+    "approved_pool_usd": 2,
+    "overrun_usd": 0.2630638
+  },
+  "other_costs": {
+    "chatgpt": "Subscription usage; per-agent monetary allocation unavailable here, not recorded as zero",
+    "github_actions": "Billable charge not retrieved, unknown",
+    "provider_credit_balance": "Unknown",
+    "this_update_anthropic_api_cost_usd": 0
+  },
+  "forecast": {
+    "status": "Insufficient homogeneous completed-task sample for reliable range",
+    "rule": "Compare same role/model/task type/context/output complexity; retain failed/restarted attempts, source tokens/cache/thinking and outcome; show n, date, observed range and confidence. Never convert a configured cap into a forecast.",
+    "current_observations_only": [
+      {
+        "attempt_id": "AG-NACHTPOST-003-PARTITUR",
+        "cost_usd": 0.5502893,
+        "status": "RESULT_RETURNED_QA_PENDING"
+      },
+      {
+        "attempt_id": "AG-NACHTPOST-003-GEWEBE",
+        "cost_usd": 0.6177755,
+        "status": "RESULT_RETURNED_QA_PENDING"
+      },
+      {
+        "attempt_id": "AG-VISUAL-004-ARCHIBALD",
+        "cost_usd": 0.19280099999999997,
+        "status": "SPECIFICATION_RETURNED_TESTABILITY_CLARIFIED"
+      },
+      {
+        "attempt_id": "AG-VISUAL-004-FORGE",
+        "cost_usd": 0.902198,
+        "status": "BUDGET_STOP_COMPLETE_PATCH_RECOVERED_NOT_ACCEPTED"
+      }
+    ]
+  },
+  "next_record_fields": [
+    "Exact request/spec version/hash",
+    "Task/attempt/parent requirement IDs",
+    "Role/provider/requested model and actual runtime model",
+    "Billing path API/subscription",
+    "Before-start forecast range or unavailable + comparison samples",
+    "Approved envelope separately from warning threshold",
+    "Runtime input/output/cache/thinking token metadata if provided",
+    "Reported final cost + source/invoice reconciliation status",
+    "Partial checkpoints, failure, retry and recovery costs",
+    "Acceptance outcome and cost per accepted deliverable (unknown if none accepted)"
+  ]
+}
