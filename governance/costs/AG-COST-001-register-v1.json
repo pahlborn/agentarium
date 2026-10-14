@@ -634,7 +634,7 @@
     "Acceptance outcome and cost per accepted deliverable (unknown if none accepted)",
     "Provider-reported input/output/cache-read/cache-write/thinking tokens for every agent, or explicit unavailable"
   ],
-  "updated_at": "2026-10-14T04:19:33.639Z",
+  "updated_at": "2026-10-14T04:41:33.432Z",
   "agent_token_coverage": [
     {
       "agent": "Atlas",
@@ -729,5 +729,13 @@
     "implementation_owner": "Forge",
     "implementation_blocker": "Paid implementation not started; existing authorization exhausted",
     "acceptance_test": "Given one missing agent/attempt cost, actual project total is absent; after complete scoped accounting it may appear with scope/cutoff."
+  },
+  "cost_work_status": {
+    "status": "PAUSED_BY_PETER",
+    "decision_at": "2026-10-14T06:40:38+02:00",
+    "scope": "Cost feature/visualization and further cost-work development",
+    "resume_condition": "Overall costs can be determined",
+    "historical_records": "Retained",
+    "runtime_spending_authorization": "No expansion; no new paid execution authorized by this pause"
   }
 }
