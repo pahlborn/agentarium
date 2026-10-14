@@ -1,6 +1,6 @@
 {
   "schema": "agentarium.requirement-cost-register.v1",
-  "version": 2,
+  "version": 3,
   "created_at": "2026-10-14T04:15:27.033Z",
   "currency": "USD",
   "scope": "Known NACHTPOST-003/VISUAL-004 calls plus explicit earlier failure gaps. This is not the full project bill.",
@@ -634,7 +634,7 @@
     "Acceptance outcome and cost per accepted deliverable (unknown if none accepted)",
     "Provider-reported input/output/cache-read/cache-write/thinking tokens for every agent, or explicit unavailable"
   ],
-  "updated_at": "2026-10-14T04:18:29.042Z",
+  "updated_at": "2026-10-14T04:19:33.639Z",
   "agent_token_coverage": [
     {
       "agent": "Atlas",
@@ -708,5 +708,26 @@
       "thinking_tokens"
     ],
     "historical_backfill": "All available structured cost/session evidence in the 76 current Issue #2 comments examined; older records without counters stay unavailable."
+  },
+  "product_cost_display_gate": {
+    "requirement_id": "AG-COST-UI-001",
+    "source": "Peter 2026-10-14: incomplete costs in Agentarium would be false information",
+    "status": "REQUIREMENT_RECORDED_NOT_IMPLEMENTED",
+    "default_visibility": "No actual numeric project total while coverage is incomplete",
+    "coverage": "Incomplete; ChatGPT counters/allocation unavailable, older paid attempts missing actual amounts, external charges not reconciled",
+    "allow_total_only_when": [
+      "Displayed cost scope explicitly defined",
+      "Every agent and attempt in that scope accounted for, including failed/restarted work",
+      "No unknown monetary contributions in that scope",
+      "Usage cost vs billed cash vs plan allocation distinguished",
+      "Costs supported by runtime/provider evidence and clear reporting cutoff"
+    ],
+    "missing_state": "Kosten noch nicht vollständig erfasst",
+    "unknown_is_neither_zero_nor_estimate": true,
+    "internal_register": "Partial evidence remains available for accounting/research; never promoted to complete product total",
+    "fictional_demo": "Existing mocks show labelled fictional costs; never substitute these for actual project usage",
+    "implementation_owner": "Forge",
+    "implementation_blocker": "Paid implementation not started; existing authorization exhausted",
+    "acceptance_test": "Given one missing agent/attempt cost, actual project total is absent; after complete scoped accounting it may appear with scope/cutoff."
   }
 }
