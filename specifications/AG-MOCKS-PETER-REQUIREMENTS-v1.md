@@ -1,7 +1,7 @@
 # Agentarium-Mocks – Peters Anforderungen, V1
 Stand: 2026-10-14
 Quelle: Peters Nachrichten im laufenden Projektchat bis einschließlich der Bitte um diese Zusammenfassung.
-Status: konsolidierte Nutzeranforderungen und offene Nutzerideen; keine neue Implementierungsfreigabe und keine vollständige Archibald-Spezifikation.
+Status: konsolidierte Nutzeranforderungen und offene Nutzerideen; beide bisherigen Mocks von Peter abgelehnt; Kostenstrang pausiert; keine neue Implementierungsfreigabe und keine vollständige Archibald-Spezifikation.
 Projekt: pahlborn/agentarium, feature/visual-stage-v0.
 Leitmotiv: „AGENTARIUM – See intelligence move. Powered by BALL“.
 
@@ -97,3 +97,11 @@ Diese Sammlung hält Peters Zielsetzungen, Präzisierungen und offene Ideen fest
 ## Tatsächliche Vollständigkeitsprüfung
 Argus (/root/argus_team001, review-agent-argus), MOCK-REQUIREMENTS RA_REVIEW V2: PASS_WITH_NOTES, keine wesentliche Auslassung im begrenzten Abgleich. Nutzerziele und Teamkonkretisierung sauber getrennt; Kostenregel korrekt priorisiert. Hinweis auf genaue Quellenanker oben aufgenommen. Keine Behauptung einer Produkterfüllung oder Abnahme.
 Zusätzliche Anthropic-API-Aufrufe für diese Zusammenstellung: keine; API-Zusatzverbrauch USD0. Verbrauch der ChatGPT-Agentsitzungen hier nicht als individuelle Token-/Geldwerte verfügbar.
+
+## Vorrangige Nutzerpräzisierung – 2026-10-14, 06:40 Europe/Berlin
+Quelle: Peters jüngste Originalnachricht im Projektchat.
+- Beide bisherigen Mocks gefallen Peter nicht mehr und sind nicht angenommen. Das bedeutet keine automatische Auswahl oder Aufgabe einer der beiden Richtungen.
+- Das Gewebe soll AUS DER KOMMUNIKATION entstehen. Dargestellte Kommunikationsereignisse müssen das Geflecht nachvollziehbar erzeugen und verändern. Hintergrund-Wabern ohne Zusammenhang mit der Kommunikation erfüllt die Idee nicht.
+- Konkrete Mechanismen, Gewichtung, Strukturaufbau und Verhalten des Geflechts sind noch zu entwerfen; keine neue technische Lösung allein aus diesem Satz festlegen.
+- Kostenfunktion, Kostenvisualisierung und weitere Ausarbeitung des Kostenstrangs vorerst pausieren. Wiederaufnahme erst, wenn die Gesamtkosten ermittelbar sind. Vorhandene Aufzeichnungen bleiben als Historie erhalten; diese Pause ist keine neue Kosten-/Implementierungsfreigabe.
+- Peter fragt nach der Entscheidungsverantwortung für Verhalten der Mocks. Verantwortungsmodell: Peter entscheidet Ziel/Abnahme; Nova entwickelt Erlebnisideen; Archibald spezifiziert Verhalten und Kriterien; Forge implementiert und entscheidet innerhalb des Auftrags technische Details; Atlas verantwortet konsolidierten Auftrag und Zieltreue. Review/QA ersetzen Peters Abnahme nicht.
