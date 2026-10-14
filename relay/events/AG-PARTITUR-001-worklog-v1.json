@@ -1,0 +1,298 @@
+{
+  "schema": "agentarium.observed-worklog.v1",
+  "task_id": "AG-PARTITUR-001",
+  "version": 1,
+  "mode": "OBSERVED_PROJECT_WORK",
+  "recorded_at": "2026-10-14T16:55:48.939Z",
+  "fictional": false,
+  "status": "PREPARATION_RETURNED_REFERENCE_PENDING",
+  "issue_ref": "https://github.com/pahlborn/agentarium/issues/5",
+  "result_ref": "vision/AG-PARTITUR-001-preparation-v1.md",
+  "coverage": {
+    "ordering": "Observed order of records/messages; handback may have been generated earlier than receipt",
+    "timestamps": "User-message times and issue creation known; exact agent-call/return times unavailable",
+    "durations": "Unavailable; no estimated bars",
+    "actual_models": "Unconfirmed",
+    "token_counters": "Unavailable",
+    "not_included": "No simulated implementation, review, QA or demo characters"
+  },
+  "event_contract_note": "Data-only capture; not claimed compatible with the as-yet unavailable new Agentarium event parser",
+  "semantics": {
+    "communication": "Explicit caused_by captures evidenced assignment/response links; time proximity is not causality",
+    "ball": "Task responsibility only; parent/link relationship alone does not transfer it",
+    "timing": "recorded_at is archival time, not occurred_at; null timing must remain visibly unknown",
+    "artifact": "Returned proposal/source contribution is not product acceptance",
+    "costs": "Paused feature, no cost display fields"
+  },
+  "events": [
+    {
+      "id": "P01",
+      "sequence": 1,
+      "task_id": "AG-PARTITUR-001",
+      "parent_task_id": null,
+      "actor": "peter",
+      "recipient": "atlas",
+      "kind": "request",
+      "title": "Partitur ins Backlog und parallel vorbereiten",
+      "caused_by": [],
+      "occurred_at": "2026-10-14T18:49:42+02:00",
+      "recorded_at": "2026-10-14T16:55:48.939Z",
+      "fictional": false,
+      "source_evidence": "Peter's user message and supplied message-time context",
+      "agent_id": null,
+      "platform": "human",
+      "actual_model": null,
+      "actual_reasoning": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "thinking_tokens": null,
+      "ownership_change": null,
+      "result_ref": null
+    },
+    {
+      "id": "P02",
+      "sequence": 2,
+      "task_id": "AG-PARTITUR-001",
+      "parent_task_id": null,
+      "actor": "atlas",
+      "recipient": "github",
+      "kind": "record",
+      "title": "Backlog Issue #5 angelegt",
+      "caused_by": [
+        "P01"
+      ],
+      "occurred_at": "2026-10-14T16:50:53Z",
+      "recorded_at": "2026-10-14T16:55:48.939Z",
+      "fictional": false,
+      "source_evidence": "GitHub create_issue response",
+      "agent_id": null,
+      "platform": "chatgpt",
+      "actual_model": null,
+      "actual_reasoning": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "thinking_tokens": null,
+      "ownership_change": null,
+      "result_ref": null
+    },
+    {
+      "id": "P03",
+      "sequence": 3,
+      "task_id": "AG-PARTITUR-001-NOVA",
+      "parent_task_id": "AG-PARTITUR-001",
+      "actor": "atlas",
+      "recipient": "nova",
+      "kind": "handoff",
+      "title": "Musische klare Verhaltensideen vorbereiten",
+      "caused_by": [
+        "P01",
+        "P02"
+      ],
+      "occurred_at": null,
+      "recorded_at": "2026-10-14T16:55:48.939Z",
+      "fictional": false,
+      "source_evidence": "Actual collaboration.followup_task to /root/nova_visual_probe_001",
+      "agent_id": "/root/nova_visual_probe_001",
+      "platform": "chatgpt",
+      "actual_model": null,
+      "actual_reasoning": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "thinking_tokens": null,
+      "ownership_change": {
+        "task_id": "AG-PARTITUR-001-NOVA",
+        "from": "atlas",
+        "to": "nova",
+        "scope": "bounded child task",
+        "basis": "Explicit specialist assignment"
+      },
+      "result_ref": null
+    },
+    {
+      "id": "P04",
+      "sequence": 4,
+      "task_id": "AG-PARTITUR-001-SCOUT",
+      "parent_task_id": "AG-PARTITUR-001",
+      "actor": "atlas",
+      "recipient": "scout",
+      "kind": "handoff",
+      "title": "Primärquellen für parallele kausale Kommunikation recherchieren",
+      "caused_by": [
+        "P01",
+        "P02"
+      ],
+      "occurred_at": null,
+      "recorded_at": "2026-10-14T16:55:48.939Z",
+      "fictional": false,
+      "source_evidence": "Actual collaboration.followup_task to /root/scout_process_review",
+      "agent_id": "/root/scout_process_review",
+      "platform": "chatgpt",
+      "actual_model": null,
+      "actual_reasoning": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "thinking_tokens": null,
+      "ownership_change": {
+        "task_id": "AG-PARTITUR-001-SCOUT",
+        "from": "atlas",
+        "to": "scout",
+        "scope": "bounded child task",
+        "basis": "Explicit specialist assignment"
+      },
+      "result_ref": null
+    },
+    {
+      "id": "P05",
+      "sequence": 5,
+      "task_id": "AG-PARTITUR-001-NOVA",
+      "parent_task_id": "AG-PARTITUR-001",
+      "actor": "nova",
+      "recipient": "atlas",
+      "kind": "artifact",
+      "title": "Drei Verhaltensideen und Referenzfrage zurückgegeben",
+      "caused_by": [
+        "P03"
+      ],
+      "occurred_at": null,
+      "recorded_at": "2026-10-14T16:55:48.939Z",
+      "fictional": false,
+      "source_evidence": "Actual NOVA_READY handback in this conversation",
+      "agent_id": "/root/nova_visual_probe_001",
+      "platform": "chatgpt",
+      "actual_model": null,
+      "actual_reasoning": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "thinking_tokens": null,
+      "ownership_change": null,
+      "result_ref": "vision/AG-PARTITUR-001-preparation-v1.md"
+    },
+    {
+      "id": "P06",
+      "sequence": 6,
+      "task_id": "AG-PARTITUR-001",
+      "parent_task_id": null,
+      "actor": "peter",
+      "recipient": "atlas",
+      "kind": "request",
+      "title": "Echte Arbeit für Partitur und Agentarium protokollieren",
+      "caused_by": [
+        "P01"
+      ],
+      "occurred_at": "2026-10-14T18:52:03+02:00",
+      "recorded_at": "2026-10-14T16:55:48.939Z",
+      "fictional": false,
+      "source_evidence": "Peter's user message and supplied message-time context",
+      "agent_id": null,
+      "platform": "human",
+      "actual_model": null,
+      "actual_reasoning": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "thinking_tokens": null,
+      "ownership_change": null,
+      "result_ref": null
+    },
+    {
+      "id": "P07",
+      "sequence": 7,
+      "task_id": "AG-PARTITUR-001-SCOUT",
+      "parent_task_id": "AG-PARTITUR-001",
+      "actor": "scout",
+      "recipient": "atlas",
+      "kind": "contribution",
+      "title": "Drei Primärquellen mit Transfer und Grenzen zurückgegeben",
+      "caused_by": [
+        "P04"
+      ],
+      "occurred_at": null,
+      "recorded_at": "2026-10-14T16:55:48.939Z",
+      "fictional": false,
+      "source_evidence": "Actual RKA_READY handback in this conversation",
+      "agent_id": "/root/scout_process_review",
+      "platform": "chatgpt",
+      "actual_model": null,
+      "actual_reasoning": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "thinking_tokens": null,
+      "ownership_change": null,
+      "result_ref": "vision/AG-PARTITUR-001-preparation-v1.md"
+    },
+    {
+      "id": "P08",
+      "sequence": 8,
+      "task_id": "AG-PARTITUR-001",
+      "parent_task_id": null,
+      "actor": "atlas",
+      "recipient": null,
+      "kind": "synthesis",
+      "title": "Ideen und Quellen zusammengeführt; Verantwortung von technischen Links getrennt",
+      "caused_by": [
+        "P05",
+        "P06",
+        "P07"
+      ],
+      "occurred_at": null,
+      "recorded_at": "2026-10-14T16:55:48.939Z",
+      "fictional": false,
+      "source_evidence": "This preparation document",
+      "agent_id": null,
+      "platform": "chatgpt",
+      "actual_model": null,
+      "actual_reasoning": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "thinking_tokens": null,
+      "ownership_change": null,
+      "result_ref": "vision/AG-PARTITUR-001-preparation-v1.md"
+    }
+  ],
+  "source_register": [
+    {
+      "id": "SRC-01",
+      "name": "OMG UML 2.5.1, Interactions",
+      "url": "https://www.omg.org/spec/UML/2.5.1/About-UML",
+      "finding": "Lifelines, Messages/Replies und Combined Fragments erlauben die Darstellung von Beteiligten, Kommunikation, Parallelität und Schleifen.",
+      "transfer": "Stabile Agentenstimmen, gerichtete Motivpaare und verbundene Review-Rückläuferschleifen.",
+      "limit": "Interaktionsordnung belegt nicht automatisch gemessene Dauer, musikalische Gewichtung oder fachliche Bedeutung.",
+      "verification": "Scout-Primärrecherche; Atlas bestätigte die normative Landingpage. PDF-Aufruf durch Atlas fehlgeschlagen; Kapitel nicht unabhängig nachgelesen."
+    },
+    {
+      "id": "SRC-02",
+      "name": "OpenTelemetry Traces",
+      "url": "https://opentelemetry.io/docs/concepts/signals/traces/",
+      "finding": "Spans enthalten u.a. Start-/Endzeit, Parent-ID, Ereignisse und Status; Span Links erlauben kausale Verknüpfung asynchroner Arbeit.",
+      "transfer": "Gemessene Arbeit als Dauer, einzelne Nachrichten als Anschläge, explizite Links zu auslösenden Vorgängen.",
+      "limit": "Nur instrumentierte Vorgänge sind abgedeckt; technische Links beweisen keine fachliche Begründung oder Aufgabenverantwortung.",
+      "verification": "Scout-Primärrecherche; Atlas las die Abschnitte Spans, Span Events und Span Links unabhängig."
+    },
+    {
+      "id": "SRC-03",
+      "name": "Liu et al., StoryFlow, IEEE TVCG 2013 / Microsoft Research",
+      "url": "https://www.microsoft.com/en-us/research/publication/storyflow-tracking-evolution-stories/",
+      "finding": "Storyline-Visualisierung dynamischer Beziehungen über Zeit mit Optimierung von Reihenfolge, Ausrichtung und Bündelung.",
+      "transfer": "Stabile Agentenspuren, episodische Bündelung zusammengehöriger Vorgänge bei höherer Ereignisdichte.",
+      "limit": "Richtung, Kausalität und Zuständigkeit müssen aus Protokolldaten kommen.",
+      "verification": "Scout-Originalforschung; Atlas öffnete die Original-Publikationsseite, kein unabhängiger vollständiger Paperreview."
+    }
+  ],
+  "returned_nova_ideas": [
+    {
+      "idea": "Unabhängige Stimmen, gemeinsame Bezugspunkte",
+      "description": "Arbeitsphrasen können gleichzeitig beginnen und unterschiedlich lang dauern. Ein gemeinsamer Akzent entsteht nur bei einem belegten Zusammenhang, z.B. einem Rechercheergebnis, das zwei Aufgaben verändert.",
+      "risk": "Gleichzeitigkeit allein darf keine Zusammenarbeit suggerieren."
+    },
+    {
+      "idea": "Frage und Antwort als wiedererkennbares Motiv",
+      "description": "Eine Frage bleibt als offenes Motiv sichtbar. Die dazugehörige Antwort greift es auf der antwortenden Stimme auf; ein zurückhaltender Bogen verbindet genau diese Ereignisse.",
+      "risk": "Beziehungen müssen unterscheidbar bleiben, ohne ein Meer individueller Symbole zu erzeugen."
+    },
+    {
+      "idea": "Review und Rückläufer als Gegenstimme und Wiederaufnahme",
+      "description": "Review bezieht sich auf den geprüften Beitrag. Defekt verweist auf seinen Ursprung, Reparatur nimmt das Motiv verändert wieder auf. Vorherige Fassung bleibt gedämpft nachvollziehbar.",
+      "risk": "Ein musikalischer Schluss darf weder ungeprüfte Teile noch Produktabnahme als abgeschlossen darstellen."
+    }
+  ],
+  "real_execution_only": true
+}
