@@ -1,6 +1,6 @@
 {
   "schema": "agentarium.requirement-cost-register.v1",
-  "version": 1,
+  "version": 2,
   "created_at": "2026-10-14T04:15:27.033Z",
   "currency": "USD",
   "scope": "Known NACHTPOST-003/VISUAL-004 calls plus explicit earlier failure gaps. This is not the full project bill.",
@@ -278,7 +278,31 @@
         "handoffs/AG-NACHTPOST-001-acceptance-v1.json",
         "fixtures/AG-FICTION-001-nachtpost-v1.json"
       ],
-      "cost_allocation": "Whole task attempt; no measurable per-criterion split"
+      "cost_allocation": "Whole task attempt; no measurable per-criterion split",
+      "token_usage": [
+        {
+          "actual_model": "claude-sonnet-5-5",
+          "input_tokens": 4,
+          "output_tokens": 52746,
+          "cache_read_input_tokens": 1038,
+          "cache_creation_input_tokens": 9087,
+          "thinking_tokens": 35246,
+          "provider_reported_model_cost_usd": 0.5502893,
+          "raw_usage": {
+            "inputTokens": 4,
+            "outputTokens": 52746,
+            "cacheReadInputTokens": 1038,
+            "cacheCreationInputTokens": 9087,
+            "webSearchRequests": 0,
+            "costUSD": 0.5502893,
+            "contextWindow": 1000000,
+            "maxOutputTokens": 128000,
+            "thinkingTokens": 35246
+          }
+        }
+      ],
+      "token_status": "PROVIDER_REPORTED",
+      "token_evidence_ref": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6154458959"
     },
     {
       "attempt_id": "AG-NACHTPOST-003-GEWEBE",
@@ -294,7 +318,31 @@
         "handoffs/AG-NACHTPOST-001-acceptance-v1.json",
         "fixtures/AG-FICTION-001-nachtpost-v1.json"
       ],
-      "cost_allocation": "Whole task attempt; no measurable per-criterion split"
+      "cost_allocation": "Whole task attempt; no measurable per-criterion split",
+      "token_usage": [
+        {
+          "actual_model": "claude-sonnet-5-5",
+          "input_tokens": 4,
+          "output_tokens": 59236,
+          "cache_read_input_tokens": 0,
+          "cache_creation_input_tokens": 10163,
+          "thinking_tokens": 39643,
+          "provider_reported_model_cost_usd": 0.6177755,
+          "raw_usage": {
+            "inputTokens": 4,
+            "outputTokens": 59236,
+            "cacheReadInputTokens": 0,
+            "cacheCreationInputTokens": 10163,
+            "webSearchRequests": 0,
+            "costUSD": 0.6177755,
+            "contextWindow": 1000000,
+            "maxOutputTokens": 128000,
+            "thinkingTokens": 39643
+          }
+        }
+      ],
+      "token_status": "PROVIDER_REPORTED",
+      "token_evidence_ref": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6154469562"
     },
     {
       "attempt_id": "AG-VISUAL-004-ARCHIBALD",
@@ -310,7 +358,31 @@
         "specifications/AG-VISUAL-004-spec-v1.json",
         "specifications/AG-VISUAL-004-testability-v1.json"
       ],
-      "cost_allocation": "Whole task attempt; no measurable per-criterion split"
+      "cost_allocation": "Whole task attempt; no measurable per-criterion split",
+      "token_usage": [
+        {
+          "actual_model": "claude-opus-5-5",
+          "input_tokens": 4,
+          "output_tokens": 6638,
+          "cache_read_input_tokens": 0,
+          "cache_creation_input_tokens": 12005,
+          "thinking_tokens": 3363,
+          "provider_reported_model_cost_usd": 0.19280099999999997,
+          "raw_usage": {
+            "inputTokens": 4,
+            "outputTokens": 6638,
+            "cacheReadInputTokens": 0,
+            "cacheCreationInputTokens": 12005,
+            "webSearchRequests": 0,
+            "costUSD": 0.19280099999999997,
+            "contextWindow": 1000000,
+            "maxOutputTokens": 128000,
+            "thinkingTokens": 3363
+          }
+        }
+      ],
+      "token_status": "PROVIDER_REPORTED",
+      "token_evidence_ref": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6155228186"
     },
     {
       "attempt_id": "AG-VISUAL-004-FORGE",
@@ -326,7 +398,167 @@
         "specifications/AG-VISUAL-004-spec-v1.json",
         "specifications/AG-VISUAL-004-testability-v1.json"
       ],
-      "cost_allocation": "Whole task attempt; no measurable per-criterion split"
+      "cost_allocation": "Whole task attempt; no measurable per-criterion split",
+      "token_usage": [
+        {
+          "actual_model": "claude-sonnet-5-5",
+          "input_tokens": 4,
+          "output_tokens": 77274,
+          "cache_read_input_tokens": 0,
+          "cache_creation_input_tokens": 51780,
+          "thinking_tokens": 64232,
+          "provider_reported_model_cost_usd": 0.902198,
+          "raw_usage": {
+            "inputTokens": 4,
+            "outputTokens": 77274,
+            "cacheReadInputTokens": 0,
+            "cacheCreationInputTokens": 51780,
+            "webSearchRequests": 0,
+            "costUSD": 0.902198,
+            "contextWindow": 1000000,
+            "maxOutputTokens": 128000,
+            "thinkingTokens": 64232
+          }
+        }
+      ],
+      "token_status": "PROVIDER_REPORTED",
+      "token_evidence_ref": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6155477716"
+    },
+    {
+      "attempt_id": "AG-PROC-MODEL-001",
+      "session": "71163eaf-469d-4194-9c90-1a8c27a51069",
+      "role": "cadence",
+      "actual_model": "claude-opus-5-5",
+      "reported_usage_cost_usd": 0.082876,
+      "cost_source": "Claude CLI runtime evidence in issue #2",
+      "status": "Historical reported result; acceptance not inferred",
+      "run": "https://github.com/pahlborn/agentarium/actions/runs/38420199480",
+      "requirement_refs": [
+        "source commit:a71e2ebfedb7ad241efd8d78cebfd72655d6521e"
+      ],
+      "cost_allocation": "Whole attempt; no per-criterion allocation",
+      "token_usage": [],
+      "token_status": "NOT_AVAILABLE_IN_PRESERVED_EVIDENCE",
+      "token_evidence_ref": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6148789041"
+    },
+    {
+      "attempt_id": "AG-RELAY-DIAG-001",
+      "session": "7c6f52f0-4e9a-46ff-8dd1-5621f27ddb10",
+      "role": "forge",
+      "actual_model": "claude-sonnet-5-5",
+      "reported_usage_cost_usd": 0.008448,
+      "cost_source": "Claude CLI runtime evidence in issue #2",
+      "status": "Historical reported result; acceptance not inferred",
+      "run": "https://github.com/pahlborn/agentarium/actions/runs/38430436187",
+      "requirement_refs": [
+        "source commit:106dc05ab330401c0d4ec80768623926b7b66e8b"
+      ],
+      "cost_allocation": "Whole attempt; no per-criterion allocation",
+      "token_usage": [],
+      "token_status": "NOT_AVAILABLE_IN_PRESERVED_EVIDENCE",
+      "token_evidence_ref": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6150187431"
+    },
+    {
+      "attempt_id": "AG-MOCK-FORGE-001-GEWEBE",
+      "session": "7636a21f-9658-4bac-a223-1a4d1970288c",
+      "role": "forge",
+      "actual_model": "claude-sonnet-5-5",
+      "reported_usage_cost_usd": 0.1460955,
+      "cost_source": "Claude CLI runtime evidence in issue #2",
+      "status": "Historical reported result; acceptance not inferred",
+      "run": "https://github.com/pahlborn/agentarium/actions/runs/38431559181",
+      "requirement_refs": [
+        "source commit:8ff249145cea572abe8b09473f26e42e5c74a422"
+      ],
+      "cost_allocation": "Whole attempt; no per-criterion allocation",
+      "token_usage": [],
+      "token_status": "NOT_AVAILABLE_IN_PRESERVED_EVIDENCE",
+      "token_evidence_ref": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6150369477"
+    },
+    {
+      "attempt_id": "AG-MOCK-FORGE-001-PARTITUR",
+      "session": "0107db87-93d3-438e-9acf-e0e728e95f16",
+      "role": "forge",
+      "actual_model": "claude-sonnet-5-5",
+      "reported_usage_cost_usd": 0.12850679999999998,
+      "cost_source": "Claude CLI runtime evidence in issue #2",
+      "status": "Historical reported result; acceptance not inferred",
+      "run": "https://github.com/pahlborn/agentarium/actions/runs/38431559181",
+      "requirement_refs": [
+        "source commit:8ff249145cea572abe8b09473f26e42e5c74a422"
+      ],
+      "cost_allocation": "Whole attempt; no per-criterion allocation",
+      "token_usage": [],
+      "token_status": "NOT_AVAILABLE_IN_PRESERVED_EVIDENCE",
+      "token_evidence_ref": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6150401561"
+    },
+    {
+      "attempt_id": "AG-MOCK-FORGE-001-CORRECTION",
+      "session": "a2a381de-3429-4c08-a72e-48c84531a794",
+      "role": "forge",
+      "actual_model": "claude-sonnet-5-5",
+      "reported_usage_cost_usd": 0.017625500000000002,
+      "cost_source": "Claude CLI runtime evidence in issue #2",
+      "status": "Historical reported result; acceptance not inferred",
+      "run": "https://github.com/pahlborn/agentarium/actions/runs/38432835942",
+      "requirement_refs": [
+        "source commit:698094ccb9a7bbe954ec36201f810b2b6dafd73f"
+      ],
+      "cost_allocation": "Whole attempt; no per-criterion allocation",
+      "token_usage": [],
+      "token_status": "NOT_AVAILABLE_IN_PRESERVED_EVIDENCE",
+      "token_evidence_ref": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6150511876"
+    },
+    {
+      "attempt_id": "AG-PROC-REVIEW-001",
+      "session": "724c22a4-0985-4f01-b9a2-92076e44e5fa",
+      "role": "archibald",
+      "actual_model": "claude-opus-5-5",
+      "reported_usage_cost_usd": 0.092406,
+      "cost_source": "Claude CLI runtime evidence in issue #2",
+      "status": "Historical reported result; acceptance not inferred",
+      "run": "https://github.com/pahlborn/agentarium/actions/runs/38434396686",
+      "requirement_refs": [
+        "source commit:3a2dadb3680b8528aa194ac11c5300c25abf4115"
+      ],
+      "cost_allocation": "Whole attempt; no per-criterion allocation",
+      "token_usage": [],
+      "token_status": "NOT_AVAILABLE_IN_PRESERVED_EVIDENCE",
+      "token_evidence_ref": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6150728851"
+    },
+    {
+      "attempt_id": "AG-PROC-REVIEW-001",
+      "session": "0bda9588-4877-4750-9e0a-8134b117c489",
+      "role": "forge",
+      "actual_model": "claude-sonnet-5-5",
+      "reported_usage_cost_usd": 0.025463000000000003,
+      "cost_source": "Claude CLI runtime evidence in issue #2",
+      "status": "Historical reported result; acceptance not inferred",
+      "run": "https://github.com/pahlborn/agentarium/actions/runs/38434396686",
+      "requirement_refs": [
+        "source commit:3a2dadb3680b8528aa194ac11c5300c25abf4115"
+      ],
+      "cost_allocation": "Whole attempt; no per-criterion allocation",
+      "token_usage": [],
+      "token_status": "NOT_AVAILABLE_IN_PRESERVED_EVIDENCE",
+      "token_evidence_ref": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6150740099"
+    },
+    {
+      "attempt_id": "AG-PROC-REVIEW-001",
+      "session": "9024fd9e-460d-4be7-9c58-3500292fd062",
+      "role": "cadence",
+      "actual_model": "claude-opus-5-5",
+      "reported_usage_cost_usd": 0.123781,
+      "cost_source": "Claude CLI runtime evidence in issue #2",
+      "status": "Historical reported result; acceptance not inferred",
+      "run": "https://github.com/pahlborn/agentarium/actions/runs/38434396686",
+      "requirement_refs": [
+        "source commit:3a2dadb3680b8528aa194ac11c5300c25abf4115"
+      ],
+      "cost_allocation": "Whole attempt; no per-criterion allocation",
+      "token_usage": [],
+      "token_status": "NOT_AVAILABLE_IN_PRESERVED_EVIDENCE",
+      "token_evidence_ref": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6150760833"
     }
   ],
   "unknown_cost_attempts": [
@@ -353,7 +585,9 @@
     "full_project_total_usd": null,
     "unknown_costs_excluded": true,
     "approved_pool_usd": 2,
-    "overrun_usd": 0.2630638
+    "overrun_usd": 0.2630638,
+    "historical_issue2_known_usage_cost_usd": 2.8882656,
+    "historical_issue2_scope": "Distinct sessions found in register + Issue #2. Excludes unknown failures and any older sessions without preserved monetary evidence; not full project bill."
   },
   "other_costs": {
     "chatgpt": "Subscription usage; per-agent monetary allocation unavailable here, not recorded as zero",
@@ -397,6 +631,82 @@
     "Runtime input/output/cache/thinking token metadata if provided",
     "Reported final cost + source/invoice reconciliation status",
     "Partial checkpoints, failure, retry and recovery costs",
-    "Acceptance outcome and cost per accepted deliverable (unknown if none accepted)"
-  ]
+    "Acceptance outcome and cost per accepted deliverable (unknown if none accepted)",
+    "Provider-reported input/output/cache-read/cache-write/thinking tokens for every agent, or explicit unavailable"
+  ],
+  "updated_at": "2026-10-14T04:18:29.042Z",
+  "agent_token_coverage": [
+    {
+      "agent": "Atlas",
+      "platform": "ChatGPT Work",
+      "token_status": "No token counters in accessible runtime/evidence",
+      "token_counts_if_unavailable": null,
+      "missing_is_not_zero": true
+    },
+    {
+      "agent": "Nova",
+      "platform": "ChatGPT Work",
+      "token_status": "No token counters in accessible runtime/evidence",
+      "token_counts_if_unavailable": null,
+      "missing_is_not_zero": true
+    },
+    {
+      "agent": "Scout",
+      "platform": "ChatGPT Work",
+      "token_status": "No token counters in accessible runtime/evidence",
+      "token_counts_if_unavailable": null,
+      "missing_is_not_zero": true
+    },
+    {
+      "agent": "Argus",
+      "platform": "ChatGPT Work",
+      "token_status": "No token counters in accessible runtime/evidence",
+      "token_counts_if_unavailable": null,
+      "missing_is_not_zero": true
+    },
+    {
+      "agent": "Sentinel",
+      "platform": "ChatGPT Work",
+      "token_status": "No token counters in accessible runtime/evidence",
+      "token_counts_if_unavailable": null,
+      "missing_is_not_zero": true
+    },
+    {
+      "agent": "Archibald",
+      "platform": "Claude Code",
+      "token_status": "Some sessions have runtime usage; historical gaps remain",
+      "token_counts_if_unavailable": null,
+      "missing_is_not_zero": true
+    },
+    {
+      "agent": "Forge",
+      "platform": "Claude Code",
+      "token_status": "Some sessions have runtime usage; historical gaps remain",
+      "token_counts_if_unavailable": null,
+      "missing_is_not_zero": true
+    },
+    {
+      "agent": "Cadence",
+      "platform": "Claude Code",
+      "token_status": "No token counters in accessible runtime/evidence",
+      "token_counts_if_unavailable": null,
+      "missing_is_not_zero": true
+    }
+  ],
+  "token_accounting": {
+    "units": "tokens",
+    "rule": "Preserve provider fields separately. Thinking is displayed separately as an output-related breakdown; do not add it again to outputTokens. Do not infer missing counters or derive tokens from money/text length.",
+    "all_agents_required": true,
+    "per_attempt": true,
+    "unknown": null,
+    "aggregate_scope": "Known counters only; no complete team token total can be calculated.",
+    "fields": [
+      "input_tokens",
+      "output_tokens",
+      "cache_read_input_tokens",
+      "cache_creation_input_tokens",
+      "thinking_tokens"
+    ],
+    "historical_backfill": "All available structured cost/session evidence in the 76 current Issue #2 comments examined; older records without counters stay unavailable."
+  }
 }
