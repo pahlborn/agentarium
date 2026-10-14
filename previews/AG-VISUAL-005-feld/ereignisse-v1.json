@@ -1,0 +1,459 @@
+{
+ "titel": "NACHTPOST – eine Stadt aus ungesendeten Briefen",
+ "dauer": 120,
+ "ereignisse": [
+  {
+   "id": "E01",
+   "t": 0,
+   "von": "peter",
+   "an": "atlas",
+   "art": "request",
+   "text": "Gemeinsames Staunen, zurückziehbare Beiträge",
+   "folgen": 3,
+   "gross": 1.0,
+   "kommando": "BEGINNE",
+   "tokens": {
+    "aus": 14802,
+    "denken": 10289,
+    "ein": 6,
+    "cache": 11510
+   },
+   "kosten": 0.2172,
+   "quelle": "geschaetzt"
+  },
+  {
+   "id": "E02",
+   "t": 3,
+   "von": "atlas",
+   "an": "nova",
+   "art": "handoff",
+   "text": "Visionstrang eröffnet",
+   "folgen": 1,
+   "gross": 0.744,
+   "dauer": 52,
+   "kommando": "ERÖFFNE",
+   "tokens": {
+    "aus": 79658,
+    "denken": 62448,
+    "ein": 7,
+    "cache": 27092
+   },
+   "kosten": 1.2111,
+   "quelle": "geschaetzt"
+  },
+  {
+   "id": "E03",
+   "t": 3,
+   "von": "atlas",
+   "an": "scout",
+   "art": "handoff",
+   "text": "Speicherung und Rücknahme untersuchen",
+   "folgen": 1,
+   "gross": 0.438,
+   "dauer": 7,
+   "kommando": "UNTERSUCHE",
+   "tokens": {
+    "aus": 7604,
+    "denken": 6037,
+    "ein": 4,
+    "cache": 5171
+   },
+   "kosten": 0.1161,
+   "quelle": "geschaetzt"
+  },
+  {
+   "id": "E04",
+   "t": 8,
+   "von": "nova",
+   "an": "peter",
+   "art": "question",
+   "text": "Darf eine Löschung eine sichtbare Lücke hinterlassen?",
+   "folgen": 1
+  },
+  {
+   "id": "E05",
+   "t": 10,
+   "von": "scout",
+   "an": "archibald",
+   "art": "contribution",
+   "text": "Abgeleitete Formen brauchen Herkunftsbeziehungen",
+   "folgen": 2
+  },
+  {
+   "id": "E06",
+   "t": 13,
+   "von": "peter",
+   "an": "nova",
+   "art": "decision",
+   "text": "Leere Stellen erlaubt; rekonstruierbare Textreste verboten",
+   "folgen": 2
+  },
+  {
+   "id": "E07",
+   "t": 17,
+   "von": "atlas",
+   "an": "archibald",
+   "art": "handoff",
+   "text": "Konzept in drei Epics und Stories entfalten",
+   "folgen": 1,
+   "gross": 0.41,
+   "dauer": 5,
+   "kommando": "ENTFALTE",
+   "tokens": {
+    "aus": 6657,
+    "denken": 4020,
+    "ein": 7,
+    "cache": 859
+   },
+   "kosten": 0.094,
+   "quelle": "geschaetzt"
+  },
+  {
+   "id": "E08",
+   "t": 22,
+   "von": "archibald",
+   "an": "forge",
+   "art": "artifact",
+   "text": "Epics und Stories V1 bereit",
+   "folgen": 2
+  },
+  {
+   "id": "E09",
+   "t": 25,
+   "von": "atlas",
+   "an": "forge",
+   "art": "handoff",
+   "text": "Gebäudegenerator unabhängig von offener Löschfrage bauen",
+   "folgen": 1,
+   "gross": 0.52,
+   "dauer": 15,
+   "kommando": "BAUE",
+   "tokens": {
+    "aus": 22552,
+    "denken": 15845,
+    "ein": 4,
+    "cache": 13481
+   },
+   "kosten": 0.3319,
+   "quelle": "geschaetzt"
+  },
+  {
+   "id": "E10",
+   "t": 26,
+   "von": "atlas",
+   "an": "argus",
+   "art": "handoff",
+   "text": "Rücknahme-Kriterien unabhängig prüfen",
+   "folgen": 1,
+   "gross": 0.78,
+   "dauer": 70,
+   "kommando": "PRÜFE",
+   "tokens": {
+    "aus": 63366,
+    "denken": 54445,
+    "ein": 8,
+    "cache": 45767
+   },
+   "kosten": 0.992,
+   "quelle": "geschaetzt"
+  },
+  {
+   "id": "E11",
+   "t": 32,
+   "von": "argus",
+   "an": "archibald",
+   "art": "objection",
+   "text": "Eine verbliebene Brücke kann einen entfernten Ursprung verraten",
+   "folgen": 4
+  },
+  {
+   "id": "E12",
+   "t": 36,
+   "von": "archibald",
+   "an": "scout",
+   "art": "question",
+   "text": "Welche gemeinsamen Ableitungen müssen zurückgenommen werden?",
+   "folgen": 1
+  },
+  {
+   "id": "E13",
+   "t": 40,
+   "von": "forge",
+   "an": "sentinel",
+   "art": "artifact",
+   "text": "Stadtteil V1 zur Prüfung bereit",
+   "folgen": 1
+  },
+  {
+   "id": "E14",
+   "t": 42,
+   "von": "atlas",
+   "an": "sentinel",
+   "art": "handoff",
+   "text": "V1 gegen Story-Kriterien prüfen",
+   "folgen": 1,
+   "gross": 0.735,
+   "dauer": 50,
+   "kommando": "PRÜFE",
+   "tokens": {
+    "aus": 40757,
+    "denken": 31714,
+    "ein": 8,
+    "cache": 11999
+   },
+   "kosten": 0.6182,
+   "quelle": "geschaetzt"
+  },
+  {
+   "id": "E15",
+   "t": 48,
+   "von": "sentinel",
+   "an": "forge",
+   "art": "defect",
+   "text": "Haus gelöscht, abgeleitete Brücke bleibt bestehen",
+   "folgen": 3
+  },
+  {
+   "id": "E16",
+   "t": 50,
+   "von": "scout",
+   "an": "archibald",
+   "art": "answer",
+   "text": "Veraltete Zuordnung und gemeinsame Ableitung betroffen",
+   "folgen": 3
+  },
+  {
+   "id": "E17",
+   "t": 53,
+   "von": "atlas",
+   "an": "forge",
+   "art": "handoff",
+   "text": "Herkunftskette reparieren; V1 bleibt nachvollziehbar",
+   "folgen": 1,
+   "gross": 0.622,
+   "dauer": 29,
+   "kommando": "REPARIERE",
+   "tokens": {
+    "aus": 24274,
+    "denken": 12390,
+    "ein": 8,
+    "cache": 18523
+   },
+   "kosten": 0.3292,
+   "quelle": "geschaetzt"
+  },
+  {
+   "id": "E18",
+   "t": 55,
+   "von": "nova",
+   "an": "forge",
+   "art": "proposal",
+   "text": "Lichtstege bei Rücknahme zerfallen lassen",
+   "folgen": 2
+  },
+  {
+   "id": "E19",
+   "t": 59,
+   "von": "argus",
+   "an": "nova",
+   "art": "objection",
+   "text": "Sichtbarer Zerfall ersetzt keine Entfernung gespeicherter Ableitungen",
+   "folgen": 1
+  },
+  {
+   "id": "E20",
+   "t": 60,
+   "von": "peter",
+   "an": "atlas",
+   "art": "change_request",
+   "text": "Zwei Besucher sollen gemeinsam einen Brief gestalten können",
+   "folgen": 1
+  },
+  {
+   "id": "E21",
+   "t": 63,
+   "von": "atlas",
+   "an": "cadence",
+   "art": "handoff",
+   "text": "Doppelte Korrekturarbeit durch zwei Löschbegriffe klären",
+   "folgen": 1,
+   "gross": 0.424,
+   "dauer": 6,
+   "kommando": "KLÄRE",
+   "tokens": {
+    "aus": 7153,
+    "denken": 6653,
+    "ein": 3,
+    "cache": 2071
+   },
+   "kosten": 0.115,
+   "quelle": "geschaetzt"
+  },
+  {
+   "id": "E22",
+   "t": 66,
+   "von": "atlas",
+   "an": "peter",
+   "art": "question",
+   "text": "Darf jeder Mitautor den gesamten gemeinsamen Beitrag zurückziehen?",
+   "folgen": 1
+  },
+  {
+   "id": "E23",
+   "t": 69,
+   "von": "cadence",
+   "an": "archibald",
+   "art": "recommendation",
+   "text": "Ein kanonisches Kriterium mit Verweisen auf beide Stories",
+   "folgen": 1
+  },
+  {
+   "id": "E24",
+   "t": 73,
+   "von": "peter",
+   "an": "atlas",
+   "art": "decision",
+   "text": "Jeder Mitautor darf den gemeinsamen Beitrag vollständig zurückziehen",
+   "folgen": 1
+  },
+  {
+   "id": "E25",
+   "t": 77,
+   "von": "archibald",
+   "an": "forge",
+   "art": "artifact",
+   "text": "Story-Kriterien V2 inklusive gemeinsamer Rücknahme",
+   "folgen": 1
+  },
+  {
+   "id": "E26",
+   "t": 82,
+   "von": "forge",
+   "an": "sentinel",
+   "art": "artifact",
+   "text": "V2: Herkunftsreparatur und gemeinsamer Entwurf bereit",
+   "folgen": 1
+  },
+  {
+   "id": "E27",
+   "t": 85,
+   "von": "atlas",
+   "an": "sentinel",
+   "art": "handoff",
+   "text": "V2 gezielt und mit relevanten Regressionen prüfen",
+   "folgen": 1,
+   "gross": 0.438,
+   "dauer": 7,
+   "kommando": "PRÜFE",
+   "tokens": {
+    "aus": 9472,
+    "denken": 5313,
+    "ein": 4,
+    "cache": 3668
+   },
+   "kosten": 0.1313,
+   "quelle": "geschaetzt"
+  },
+  {
+   "id": "E28",
+   "t": 92,
+   "von": "sentinel",
+   "an": "argus",
+   "art": "test_result",
+   "text": "Gezielte Prüfungen bestanden; unterbrochene Sitzungen ungeprüft",
+   "folgen": 1
+  },
+  {
+   "id": "E29",
+   "t": 96,
+   "von": "argus",
+   "an": "atlas",
+   "art": "review_result",
+   "text": "Rücknahmelogik nachvollziehbar; Erlebnisabnahme bleibt offen",
+   "folgen": 2
+  },
+  {
+   "id": "E30",
+   "t": 100,
+   "von": "atlas",
+   "an": "peter",
+   "art": "handoff",
+   "text": "Ergebnis und verbleibende Grenzen zur Entscheidung",
+   "folgen": 1,
+   "gross": 0.52,
+   "dauer": 15,
+   "kommando": "ÜBERNIMM",
+   "tokens": {
+    "aus": 23649,
+    "denken": 14502,
+    "ein": 4,
+    "cache": 9279
+   },
+   "kosten": 0.3353,
+   "quelle": "geschaetzt"
+  },
+  {
+   "id": "E31",
+   "t": 105,
+   "von": "nova",
+   "an": "atlas",
+   "art": "question",
+   "text": "Können zurückbleibende Lücken einen öffentlichen Garten bilden?",
+   "folgen": 2
+  },
+  {
+   "id": "E32",
+   "t": 108,
+   "von": "atlas",
+   "an": "scout",
+   "art": "handoff",
+   "text": "Neue Idee unabhängig auf verbleibende Informationen prüfen",
+   "folgen": 1,
+   "gross": 0.52,
+   "dauer": 15,
+   "kommando": "PRÜFE",
+   "tokens": {
+    "aus": 17624,
+    "denken": 13367,
+    "ein": 7,
+    "cache": 9556
+   },
+   "kosten": 0.2653,
+   "quelle": "geschaetzt"
+  },
+  {
+   "id": "E33",
+   "t": 108,
+   "von": "atlas",
+   "an": "argus",
+   "art": "handoff",
+   "text": "Neue Gartenidee unabhängig hinterfragen",
+   "folgen": 1,
+   "gross": 0.52,
+   "dauer": 15,
+   "kommando": "HINTERFRAGE",
+   "tokens": {
+    "aus": 14729,
+    "denken": 11908,
+    "ein": 6,
+    "cache": 8315
+   },
+   "kosten": 0.2261,
+   "quelle": "geschaetzt"
+  },
+  {
+   "id": "E34",
+   "t": 120,
+   "von": "atlas",
+   "an": null,
+   "art": "open_state",
+   "text": "Kein Abschluss: Erlebnisabnahme, Gartenfrage und Sitzungsprüfung offen",
+   "folgen": 0
+  }
+ ],
+ "projekt": "NACHTPOST V1",
+ "beschreibung": "Eine Stadt aus ungesendeten Briefen. Beiträge werden zu Lichtgebäuden und Nachbarschaften — und jeder Beitrag muss zurückziehbar bleiben. Die Spannung: Wie wächst etwas gemeinsam, wenn seine Ursprünge verschwinden dürfen?",
+ "umfang": 4,
+ "umfangText": "3 Epics · 4 Stories",
+ "ablage": "Repository"
+}

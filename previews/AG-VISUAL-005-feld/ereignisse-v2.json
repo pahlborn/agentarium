@@ -1,0 +1,869 @@
+{
+ "projekt": "NACHTPOST V2",
+ "titel": "Die Stadt, die sich gemeinsam verändert",
+ "beschreibung": "Sieben Arbeitsstränge, 21 Storyideen und vier Konfliktschleifen. Die zentrale Spannung: Wie kann etwas gemeinsam wachsen, wenn seine Ursprünge verschwinden dürfen? Abgeleitet aus eurem Konzeptpapier — Zeiten und Kausalität sind ein Vorschlag, kein Fixture.",
+ "dauer": 480,
+ "ereignisse": [
+  {
+   "id": "N001",
+   "t": 0,
+   "von": "peter",
+   "an": "atlas",
+   "art": "request",
+   "text": "Gemeinsames Wachsen bei zurückziehbaren Ursprüngen",
+   "folgen": 7,
+   "gross": 1.0,
+   "kommando": "BEGINNE",
+   "tokens": {
+    "aus": 19227,
+    "denken": 14641,
+    "ein": 5,
+    "cache": 16635
+   },
+   "kosten": 0.2897,
+   "quelle": "geschaetzt"
+  },
+  {
+   "id": "N002",
+   "t": 5,
+   "von": "atlas",
+   "an": "nova",
+   "art": "handoff",
+   "text": "Wachsende Häuser und stille Höfe vorschlagen",
+   "folgen": 1,
+   "gross": 0.602,
+   "dauer": 26,
+   "kommando": "VORSCHLAGE",
+   "tokens": {
+    "aus": 39693,
+    "denken": 28730,
+    "ein": 8,
+    "cache": 29976
+   },
+   "kosten": 0.5892,
+   "quelle": "geschaetzt"
+  },
+  {
+   "id": "N003",
+   "t": 8,
+   "von": "atlas",
+   "an": "forge",
+   "art": "handoff",
+   "text": "Zwei Lichtgebäudeformen parallel entwickeln",
+   "folgen": 1,
+   "gross": 0.705,
+   "dauer": 44,
+   "kommando": "ÜBERNIMM",
+   "tokens": {
+    "aus": 55471,
+    "denken": 42291,
+    "ein": 7,
+    "cache": 6125
+   },
+   "kosten": 0.8362,
+   "quelle": "geschaetzt"
+  },
+  {
+   "id": "N008",
+   "t": 14,
+   "von": "atlas",
+   "an": "scout",
+   "art": "handoff",
+   "text": "Herkunftsbeziehungen verwandter Beiträge untersuchen",
+   "folgen": 1,
+   "gross": 0.628,
+   "dauer": 30,
+   "kommando": "UNTERSUCHE",
+   "tokens": {
+    "aus": 28080,
+    "denken": 13325,
+    "ein": 7,
+    "cache": 5071
+   },
+   "kosten": 0.3748,
+   "quelle": "geschaetzt"
+  },
+  {
+   "id": "N009",
+   "t": 26,
+   "von": "scout",
+   "an": "atlas",
+   "art": "contribution",
+   "text": "Fundstück 1: Rezept ohne nachvollziehbare Grundlage",
+   "folgen": 1
+  },
+  {
+   "id": "N010",
+   "t": 29,
+   "von": "scout",
+   "an": "atlas",
+   "art": "open_state",
+   "text": "Fundstück 1 verworfen: keine Grundlage",
+   "folgen": 0
+  },
+  {
+   "id": "N004",
+   "t": 31,
+   "von": "nova",
+   "an": "archibald",
+   "art": "proposal",
+   "text": "Stille Höfe als ruhige Betrachtung",
+   "folgen": 2
+  },
+  {
+   "id": "N005",
+   "t": 34,
+   "von": "atlas",
+   "an": "archibald",
+   "art": "handoff",
+   "text": "Beobachtbare Unterschiede der Formen verlangen",
+   "folgen": 1,
+   "gross": 0.56,
+   "dauer": 20,
+   "kommando": "VERLANGE",
+   "tokens": {
+    "aus": 28859,
+    "denken": 16033,
+    "ein": 5,
+    "cache": 16453
+   },
+   "kosten": 0.3992,
+   "quelle": "geschaetzt"
+  },
+  {
+   "id": "N011",
+   "t": 44,
+   "von": "scout",
+   "an": "archibald",
+   "art": "contribution",
+   "text": "Fundstück 2: Herkunftsmodell für Ableitungen",
+   "folgen": 3
+  },
+  {
+   "id": "N012",
+   "t": 48,
+   "von": "atlas",
+   "an": "argus",
+   "art": "handoff",
+   "text": "Das Herkunftsmodell an Gegenbeispielen prüfen",
+   "folgen": 1,
+   "gross": 0.651,
+   "dauer": 34,
+   "kommando": "PRÜFE",
+   "tokens": {
+    "aus": 25654,
+    "denken": 24253,
+    "ein": 7,
+    "cache": 3480
+   },
+   "kosten": 0.4149,
+   "quelle": "geschaetzt"
+  },
+  {
+   "id": "N006",
+   "t": 54,
+   "von": "archibald",
+   "an": "forge",
+   "art": "artifact",
+   "text": "US-01/05/06: Formkriterien bereit",
+   "folgen": 2
+  },
+  {
+   "id": "N007",
+   "t": 56,
+   "von": "forge",
+   "an": "sentinel",
+   "art": "artifact",
+   "text": "Zwei Formen mit Ursprungsbezug",
+   "folgen": 1
+  },
+  {
+   "id": "N016",
+   "t": 60,
+   "von": "atlas",
+   "an": "argus",
+   "art": "handoff",
+   "text": "Verräterische Leerstellen nach Rücknahme hinterfragen",
+   "folgen": 1,
+   "gross": 0.615,
+   "dauer": 28,
+   "kommando": "HINTERFRAGE",
+   "tokens": {
+    "aus": 44043,
+    "denken": 21235,
+    "ein": 7,
+    "cache": 16244
+   },
+   "kosten": 0.5899,
+   "quelle": "geschaetzt"
+  },
+  {
+   "id": "N013",
+   "t": 82,
+   "von": "argus",
+   "an": "scout",
+   "art": "objection",
+   "text": "Gegenbeispiel: Regel trägt nicht überall",
+   "folgen": 3
+  },
+  {
+   "id": "N017",
+   "t": 88,
+   "von": "argus",
+   "an": "nova",
+   "art": "objection",
+   "text": "Sichtbarer Zerfall kann den Ursprung verraten",
+   "folgen": 4
+  },
+  {
+   "id": "N018",
+   "t": 92,
+   "von": "atlas",
+   "an": "nova",
+   "art": "handoff",
+   "text": "Die Zerfallsidee überarbeiten",
+   "folgen": 1,
+   "gross": 0.663,
+   "dauer": 36,
+   "kommando": "ÜBERARBEITE",
+   "tokens": {
+    "aus": 48963,
+    "denken": 33172,
+    "ein": 4,
+    "cache": 11578
+   },
+   "kosten": 0.7131,
+   "quelle": "geschaetzt"
+  },
+  {
+   "id": "N014",
+   "t": 96,
+   "von": "scout",
+   "an": "archibald",
+   "art": "answer",
+   "text": "Herkunftsmodell auf direkte Ableitungen eingegrenzt",
+   "folgen": 2
+  },
+  {
+   "id": "N031",
+   "t": 96,
+   "von": "peter",
+   "an": "atlas",
+   "art": "change_request",
+   "text": "CR-01: Gemeinsame Autorschaft aufnehmen",
+   "folgen": 3
+  },
+  {
+   "id": "N032",
+   "t": 100,
+   "von": "atlas",
+   "an": "archibald",
+   "art": "handoff",
+   "text": "Gemeinsame Autorschaft spezifizieren",
+   "folgen": 1,
+   "gross": 0.64,
+   "dauer": 32,
+   "kommando": "SPEZIFIZIERE",
+   "tokens": {
+    "aus": 42022,
+    "denken": 23322,
+    "ein": 7,
+    "cache": 12479
+   },
+   "kosten": 0.5812,
+   "quelle": "geschaetzt"
+  },
+  {
+   "id": "N015",
+   "t": 104,
+   "von": "scout",
+   "an": "atlas",
+   "art": "contribution",
+   "text": "Fundstück 3: nachvollziehbare Fallbeschreibung",
+   "folgen": 1
+  },
+  {
+   "id": "N022",
+   "t": 118,
+   "von": "atlas",
+   "an": "sentinel",
+   "art": "handoff",
+   "text": "Die verbleibende Brücke nachstellen",
+   "folgen": 1,
+   "gross": 0.628,
+   "dauer": 30,
+   "kommando": "NACHSTELLE",
+   "tokens": {
+    "aus": 32534,
+    "denken": 25737,
+    "ein": 6,
+    "cache": 5925
+   },
+   "kosten": 0.496,
+   "quelle": "geschaetzt"
+  },
+  {
+   "id": "N033",
+   "t": 126,
+   "von": "archibald",
+   "an": "peter",
+   "art": "question",
+   "text": "Darf ein Mitautor den ganzen Beitrag zurückziehen?",
+   "folgen": 2
+  },
+  {
+   "id": "N019",
+   "t": 128,
+   "von": "nova",
+   "an": "archibald",
+   "art": "proposal",
+   "text": "Zerfall ohne rekonstruierbare Reste",
+   "folgen": 2
+  },
+  {
+   "id": "N020",
+   "t": 132,
+   "von": "atlas",
+   "an": "archibald",
+   "art": "handoff",
+   "text": "Die veränderte Bedeutung prüfbar machen",
+   "folgen": 1,
+   "gross": 0.589,
+   "dauer": 24,
+   "kommando": "MACHE",
+   "tokens": {
+    "aus": 26132,
+    "denken": 23298,
+    "ein": 6,
+    "cache": 16921
+   },
+   "kosten": 0.4142,
+   "quelle": "geschaetzt"
+  },
+  {
+   "id": "N034",
+   "t": 140,
+   "von": "peter",
+   "an": "archibald",
+   "art": "decision",
+   "text": "Jeder Mitautor darf den gemeinsamen Beitrag zurückziehen",
+   "folgen": 2
+  },
+  {
+   "id": "N023",
+   "t": 148,
+   "von": "sentinel",
+   "an": "forge",
+   "art": "defect",
+   "text": "Haus gelöscht, abgeleitete Brücke bleibt stehen",
+   "folgen": 4
+  },
+  {
+   "id": "N024",
+   "t": 154,
+   "von": "forge",
+   "an": "atlas",
+   "art": "question",
+   "text": "Wie weit reichen abhängige Ableitungen?",
+   "folgen": 2
+  },
+  {
+   "id": "N021",
+   "t": 156,
+   "von": "archibald",
+   "an": "forge",
+   "art": "artifact",
+   "text": "US-03/09/10: Rücknahmekriterien V1",
+   "folgen": 2
+  },
+  {
+   "id": "N025",
+   "t": 166,
+   "von": "atlas",
+   "an": "forge",
+   "art": "decision",
+   "text": "Umfang: direkte Ableitungen, unabhängige Nachbarn bleiben",
+   "folgen": 2
+  },
+  {
+   "id": "N026",
+   "t": 170,
+   "von": "atlas",
+   "an": "forge",
+   "art": "handoff",
+   "text": "Die Herkunftskette reparieren",
+   "folgen": 1,
+   "gross": 0.685,
+   "dauer": 40,
+   "kommando": "REPARIERE",
+   "tokens": {
+    "aus": 38375,
+    "denken": 30886,
+    "ein": 3,
+    "cache": 27199
+   },
+   "kosten": 0.5883,
+   "quelle": "geschaetzt"
+  },
+  {
+   "id": "N035",
+   "t": 172,
+   "von": "archibald",
+   "an": "forge",
+   "art": "artifact",
+   "text": "US-04/11/12: Regeln gemeinsamer Autorschaft",
+   "folgen": 2
+  },
+  {
+   "id": "N036",
+   "t": 190,
+   "von": "peter",
+   "an": "atlas",
+   "art": "change_request",
+   "text": "CR-02: Wiederaufnahme nach Unterbrechung",
+   "folgen": 3
+  },
+  {
+   "id": "N037",
+   "t": 194,
+   "von": "atlas",
+   "an": "forge",
+   "art": "handoff",
+   "text": "Unterbrochene Entwürfe wiederaufnehmen",
+   "folgen": 1,
+   "gross": 0.674,
+   "dauer": 38,
+   "kommando": "WIEDERAUFNEHME",
+   "tokens": {
+    "aus": 41958,
+    "denken": 38271,
+    "ein": 8,
+    "cache": 11620
+   },
+   "kosten": 0.6702,
+   "quelle": "geschaetzt"
+  },
+  {
+   "id": "N027",
+   "t": 210,
+   "von": "forge",
+   "an": "sentinel",
+   "art": "artifact",
+   "text": "Herkunftsreparatur V2 bereit",
+   "folgen": 2
+  },
+  {
+   "id": "N028",
+   "t": 214,
+   "von": "atlas",
+   "an": "sentinel",
+   "art": "handoff",
+   "text": "Gezielt und mit relevanten Regressionen prüfen",
+   "folgen": 1,
+   "gross": 0.575,
+   "dauer": 22,
+   "kommando": "PRÜFE",
+   "tokens": {
+    "aus": 17288,
+    "denken": 14238,
+    "ein": 8,
+    "cache": 7483
+   },
+   "kosten": 0.267,
+   "quelle": "geschaetzt"
+  },
+  {
+   "id": "N038",
+   "t": 232,
+   "von": "forge",
+   "an": "atlas",
+   "art": "defect",
+   "text": "Alte Sitzung bringt zurückgezogenen Entwurf zurück",
+   "folgen": 4
+  },
+  {
+   "id": "N029",
+   "t": 236,
+   "von": "sentinel",
+   "an": "argus",
+   "art": "test_result",
+   "text": "Gezielte Prüfungen bestanden",
+   "folgen": 1
+  },
+  {
+   "id": "N039",
+   "t": 238,
+   "von": "atlas",
+   "an": "sentinel",
+   "art": "handoff",
+   "text": "Die Wiederholungsfolge nachstellen",
+   "folgen": 1,
+   "gross": 0.602,
+   "dauer": 26,
+   "kommando": "NACHSTELLE",
+   "tokens": {
+    "aus": 31018,
+    "denken": 18848,
+    "ein": 8,
+    "cache": 6006
+   },
+   "kosten": 0.4388,
+   "quelle": "geschaetzt"
+  },
+  {
+   "id": "N030",
+   "t": 244,
+   "von": "argus",
+   "an": "atlas",
+   "art": "review_result",
+   "text": "Herkunftsreparatur nachvollziehbar",
+   "folgen": 2
+  },
+  {
+   "id": "N046",
+   "t": 250,
+   "von": "atlas",
+   "an": "nova",
+   "art": "handoff",
+   "text": "Verständlichkeit der Rücknahme untersuchen",
+   "folgen": 1,
+   "gross": 0.651,
+   "dauer": 34,
+   "kommando": "UNTERSUCHE",
+   "tokens": {
+    "aus": 44623,
+    "denken": 26350,
+    "ein": 7,
+    "cache": 20719
+   },
+   "kosten": 0.6266,
+   "quelle": "geschaetzt"
+  },
+  {
+   "id": "N040",
+   "t": 264,
+   "von": "sentinel",
+   "an": "atlas",
+   "art": "artifact",
+   "text": "Reproduzierbare Unterbrechungs-/Rücknahmefolge",
+   "folgen": 2
+  },
+  {
+   "id": "N041",
+   "t": 270,
+   "von": "atlas",
+   "an": "peter",
+   "art": "open_state",
+   "text": "Gemeinschaftsfunktion blockiert; Konfliktregel offen",
+   "folgen": 0
+  },
+  {
+   "id": "N042",
+   "t": 276,
+   "von": "atlas",
+   "an": "cadence",
+   "art": "handoff",
+   "text": "Zwei Rücknahmebegriffe und doppelte Reparatur klären",
+   "folgen": 1,
+   "gross": 0.589,
+   "dauer": 24,
+   "kommando": "KLÄRE",
+   "tokens": {
+    "aus": 23892,
+    "denken": 11487,
+    "ein": 5,
+    "cache": 3882
+   },
+   "kosten": 0.3198,
+   "quelle": "geschaetzt"
+  },
+  {
+   "id": "N047",
+   "t": 284,
+   "von": "nova",
+   "an": "sentinel",
+   "art": "proposal",
+   "text": "Rücknahme ohne Textwand erlebbar",
+   "folgen": 2
+  },
+  {
+   "id": "N048",
+   "t": 290,
+   "von": "atlas",
+   "an": "sentinel",
+   "art": "handoff",
+   "text": "Verschwinden, Fehler und fehlende Verbindung unterscheiden",
+   "folgen": 1,
+   "gross": 0.615,
+   "dauer": 28,
+   "kommando": "UNTERSCHEIDE",
+   "tokens": {
+    "aus": 32813,
+    "denken": 17450,
+    "ein": 7,
+    "cache": 26419
+   },
+   "kosten": 0.4492,
+   "quelle": "geschaetzt"
+  },
+  {
+   "id": "N043",
+   "t": 300,
+   "von": "cadence",
+   "an": "archibald",
+   "art": "recommendation",
+   "text": "Ein kanonisches Kriterium mit Verweisen",
+   "folgen": 2
+  },
+  {
+   "id": "N044",
+   "t": 306,
+   "von": "atlas",
+   "an": "archibald",
+   "art": "handoff",
+   "text": "Die gemeinsamen Begriffe präzisieren",
+   "folgen": 1,
+   "gross": 0.575,
+   "dauer": 22,
+   "kommando": "PRÄZISIERE",
+   "tokens": {
+    "aus": 34001,
+    "denken": 22186,
+    "ein": 8,
+    "cache": 19399
+   },
+   "kosten": 0.4901,
+   "quelle": "geschaetzt"
+  },
+  {
+   "id": "N049",
+   "t": 318,
+   "von": "sentinel",
+   "an": "nova",
+   "art": "defect",
+   "text": "Drei Zustände sehen gleich aus",
+   "folgen": 3
+  },
+  {
+   "id": "N050",
+   "t": 324,
+   "von": "nova",
+   "an": "archibald",
+   "art": "question",
+   "text": "Reicht Farbe zur Unterscheidung?",
+   "folgen": 2
+  },
+  {
+   "id": "N045",
+   "t": 328,
+   "von": "archibald",
+   "an": "atlas",
+   "art": "artifact",
+   "text": "Begriffsklärung Rücknahme übernommen",
+   "folgen": 1
+  },
+  {
+   "id": "N051",
+   "t": 338,
+   "von": "archibald",
+   "an": "nova",
+   "art": "answer",
+   "text": "Nein — Bewegung und Dauer müssen unterscheiden",
+   "folgen": 2
+  },
+  {
+   "id": "N052",
+   "t": 344,
+   "von": "atlas",
+   "an": "forge",
+   "art": "handoff",
+   "text": "Die drei Zustände unterscheidbar bauen",
+   "folgen": 1,
+   "gross": 0.663,
+   "dauer": 36,
+   "kommando": "BAUE",
+   "tokens": {
+    "aus": 42066,
+    "denken": 19004,
+    "ein": 3,
+    "cache": 35765
+   },
+   "kosten": 0.5557,
+   "quelle": "geschaetzt"
+  },
+  {
+   "id": "N057",
+   "t": 350,
+   "von": "atlas",
+   "an": "nova",
+   "art": "handoff",
+   "text": "Die Gartenidee erneut öffnen",
+   "folgen": 1,
+   "gross": 0.602,
+   "dauer": 26,
+   "kommando": "ÖFFNE",
+   "tokens": {
+    "aus": 32725,
+    "denken": 27646,
+    "ein": 3,
+    "cache": 8283
+   },
+   "kosten": 0.5095,
+   "quelle": "geschaetzt"
+  },
+  {
+   "id": "N058",
+   "t": 376,
+   "von": "nova",
+   "an": "atlas",
+   "art": "proposal",
+   "text": "Garten aus unabhängigen neuen Beiträgen",
+   "folgen": 3
+  },
+  {
+   "id": "N053",
+   "t": 380,
+   "von": "forge",
+   "an": "sentinel",
+   "art": "artifact",
+   "text": "US-16/17/18: Unterscheidbare Zustände",
+   "folgen": 2
+  },
+  {
+   "id": "N059",
+   "t": 382,
+   "von": "atlas",
+   "an": "scout",
+   "art": "handoff",
+   "text": "Den Ursprung der Gartenformen hinterfragen",
+   "folgen": 1,
+   "gross": 0.628,
+   "dauer": 30,
+   "kommando": "HINTERFRAGE",
+   "tokens": {
+    "aus": 46963,
+    "denken": 22921,
+    "ein": 7,
+    "cache": 34836
+   },
+   "kosten": 0.6306,
+   "quelle": "geschaetzt"
+  },
+  {
+   "id": "N054",
+   "t": 384,
+   "von": "atlas",
+   "an": "sentinel",
+   "art": "handoff",
+   "text": "Die Unterscheidung gezielt prüfen",
+   "folgen": 1,
+   "gross": 0.56,
+   "dauer": 20,
+   "kommando": "PRÜFE",
+   "tokens": {
+    "aus": 24026,
+    "denken": 17948,
+    "ein": 7,
+    "cache": 9229
+   },
+   "kosten": 0.36,
+   "quelle": "geschaetzt"
+  },
+  {
+   "id": "N060",
+   "t": 386,
+   "von": "atlas",
+   "an": "argus",
+   "art": "handoff",
+   "text": "Die Aussagekraft verbliebener Formen hinterfragen",
+   "folgen": 1,
+   "gross": 0.628,
+   "dauer": 30,
+   "kommando": "HINTERFRAGE",
+   "tokens": {
+    "aus": 41071,
+    "denken": 34271,
+    "ein": 7,
+    "cache": 9766
+   },
+   "kosten": 0.6369,
+   "quelle": "geschaetzt"
+  },
+  {
+   "id": "N055",
+   "t": 404,
+   "von": "sentinel",
+   "an": "argus",
+   "art": "test_result",
+   "text": "Unterscheidung bestanden; Prüfgrenze benannt",
+   "folgen": 1
+  },
+  {
+   "id": "N056",
+   "t": 412,
+   "von": "argus",
+   "an": "atlas",
+   "art": "review_result",
+   "text": "Erlebnis nachvollziehbar; Abnahme offen",
+   "folgen": 2
+  },
+  {
+   "id": "N061",
+   "t": 412,
+   "von": "scout",
+   "an": "atlas",
+   "art": "objection",
+   "text": "Gartenform übernimmt Beziehungen eines entfernten Briefes",
+   "folgen": 2
+  },
+  {
+   "id": "N062",
+   "t": 416,
+   "von": "argus",
+   "an": "atlas",
+   "art": "objection",
+   "text": "Verbliebene Formen können Rücknahmelücken nutzen",
+   "folgen": 2
+  },
+  {
+   "id": "N063",
+   "t": 430,
+   "von": "atlas",
+   "an": "peter",
+   "art": "open_state",
+   "text": "Nutzung von Rücknahmelücken bleibt offen",
+   "folgen": 0
+  },
+  {
+   "id": "N064",
+   "t": 452,
+   "von": "atlas",
+   "an": "peter",
+   "art": "handoff",
+   "text": "Ergebnis und verbleibende Grenzen zur Entscheidung",
+   "folgen": 1,
+   "gross": 0.92,
+   "kommando": "ÜBERNIMM",
+   "tokens": {
+    "aus": 28293,
+    "denken": 14514,
+    "ein": 5,
+    "cache": 9498
+   },
+   "kosten": 0.3842,
+   "quelle": "geschaetzt"
+  },
+  {
+   "id": "N065",
+   "t": 470,
+   "von": "atlas",
+   "an": null,
+   "art": "open_state",
+   "text": "Kein Abschluss: Konfliktregel, Erlebnisabnahme und Gartenfrage offen",
+   "folgen": 0
+  }
+ ],
+ "umfang": 21,
+ "umfangText": "7 Stränge · 21 Storyideen",
+ "ablage": "Repository"
+}
