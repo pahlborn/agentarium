@@ -1,0 +1,187 @@
+{
+  "fall": "08",
+  "titel": "Nur-Lesen gegen erlaubte und unerlaubte Befehle",
+  "prueft": [
+    "§11 Berechtigungen",
+    "§12 Befehlskanal"
+  ],
+  "erwartung": [
+    {
+      "regel": "R-13",
+      "soll": "Ein abgelehnter Befehl traegt nebenwirkung=false und einen fehlercode. Kein fachliches Ereignis entsteht."
+    },
+    {
+      "regel": "R-14",
+      "soll": "Die Wandansicht hat rechte=[read]. Ihr Befehl wird mit fehlercode=recht_fehlt abgelehnt - serverseitig, nicht durch eine verborgene Schaltflaeche."
+    },
+    {
+      "regel": "R-15",
+      "soll": "Ein ausgefuehrter Befehl nennt folge_ereignisse und verknuepft so Befehl und Wirkung."
+    },
+    {
+      "regel": "R-15b",
+      "soll": "Dieselbe command_id zweimal gesendet fuehrt NICHT zu doppelter Ausfuehrung: die zweite Antwort ist doppelt_ignoriert mit nebenwirkung=false."
+    },
+    {
+      "regel": "R-23",
+      "soll": "stufe=empfangen ist KEIN Ausfuehrungsnachweis."
+    },
+    {
+      "regel": "R-32",
+      "soll": "Solange supported_actions leer ist, wird JEDE Aktion mit fehlercode nicht_unterstuetzt und nebenwirkung false abgelehnt. Eine Oberflaeche darf keine bedienbaren Steueraktionen anbieten. O1."
+    }
+  ],
+  "daten": {
+    "wandansicht": {
+      "rechte": [
+        "read"
+      ],
+      "anfrage": {
+        "schema": "agentarium.befehl.v2.1",
+        "richtung": "anfrage",
+        "command_id": "C-001",
+        "aktion": "blockade.aufloesen",
+        "project_id": "AG-NEU",
+        "run_id": "AG-NEU-R1",
+        "task_id": "AG-NEU-021",
+        "erwartete_revision": 3,
+        "gesendet": "2026-10-15T15:00:00Z"
+      },
+      "antwort": {
+        "schema": "agentarium.befehl.v2.1",
+        "richtung": "antwort",
+        "command_id": "C-001",
+        "stufe": "abgelehnt",
+        "grund": "Diese Ansicht besitzt nur das Recht read.",
+        "fehlercode": "recht_fehlt",
+        "nebenwirkung": false,
+        "gesendet": "2026-10-15T15:00:00.120Z"
+      },
+      "folge": "Kein fachliches Ereignis im Arbeitsstrom."
+    },
+    "berechtigte_ansicht": {
+      "rechte": [
+        "read",
+        "command"
+      ],
+      "ablauf": [
+        {
+          "antwort": {
+            "schema": "agentarium.befehl.v2.1",
+            "richtung": "antwort",
+            "command_id": "C-002",
+            "stufe": "empfangen",
+            "nebenwirkung": false,
+            "gesendet": "2026-10-15T15:02:00.090Z"
+          },
+          "soll": "empfangen ist kein Ausfuehrungsnachweis"
+        },
+        {
+          "antwort": {
+            "schema": "agentarium.befehl.v2.1",
+            "richtung": "antwort",
+            "command_id": "C-002",
+            "stufe": "angenommen",
+            "nebenwirkung": false,
+            "gesendet": "2026-10-15T15:02:00.300Z"
+          }
+        },
+        {
+          "antwort": {
+            "schema": "agentarium.befehl.v2.1",
+            "richtung": "antwort",
+            "command_id": "C-002",
+            "stufe": "ausgefuehrt",
+            "nebenwirkung": true,
+            "folge_ereignisse": [
+              "E620"
+            ],
+            "gesendet": "2026-10-15T15:02:02.400Z"
+          }
+        }
+      ],
+      "anfrage": {
+        "schema": "agentarium.befehl.v2.1",
+        "richtung": "anfrage",
+        "command_id": "C-002",
+        "aktion": "freigabe.erteilen",
+        "project_id": "AG-NEU",
+        "run_id": "AG-NEU-R1",
+        "task_id": "AG-NEU-021",
+        "erwartete_revision": 3,
+        "gesendet": "2026-10-15T15:02:00Z"
+      }
+    },
+    "wiederholung": {
+      "anfrage_erneut": {
+        "schema": "agentarium.befehl.v2.1",
+        "richtung": "anfrage",
+        "command_id": "C-002",
+        "aktion": "freigabe.erteilen",
+        "project_id": "AG-NEU",
+        "run_id": "AG-NEU-R1",
+        "task_id": "AG-NEU-021",
+        "erwartete_revision": 3,
+        "gesendet": "2026-10-15T15:02:09Z"
+      },
+      "antwort": {
+        "schema": "agentarium.befehl.v2.1",
+        "richtung": "antwort",
+        "command_id": "C-002",
+        "stufe": "abgelehnt",
+        "grund": "Diese command_id wurde bereits ausgefuehrt.",
+        "fehlercode": "doppelt_ignoriert",
+        "nebenwirkung": false,
+        "gesendet": "2026-10-15T15:02:09.080Z"
+      }
+    },
+    "veraltete_revision": {
+      "anfrage": {
+        "schema": "agentarium.befehl.v2.1",
+        "richtung": "anfrage",
+        "command_id": "C-003",
+        "aktion": "freigabe.erteilen",
+        "project_id": "AG-NEU",
+        "run_id": "AG-NEU-R1",
+        "task_id": "AG-NEU-021",
+        "erwartete_revision": 2,
+        "gesendet": "2026-10-15T15:03:00Z"
+      },
+      "antwort": {
+        "schema": "agentarium.befehl.v2.1",
+        "richtung": "antwort",
+        "command_id": "C-003",
+        "stufe": "abgelehnt",
+        "grund": "Erwartete Revision 2, tatsaechlich 4.",
+        "fehlercode": "revision_veraltet",
+        "nebenwirkung": false,
+        "gesendet": "2026-10-15T15:03:00.110Z"
+      }
+    },
+    "nicht_unterstuetzt": {
+      "grundlage": "O1 aus dem Team-Review: supported_actions ist []. Kein ausfuehrbarer integrierter Befehl ist nachgewiesen.",
+      "anfrage": {
+        "schema": "agentarium.befehl.v2.1",
+        "richtung": "anfrage",
+        "command_id": "C-004",
+        "aktion": "freigabe.erteilen",
+        "project_id": "AG-NEU",
+        "run_id": "AG-NEU-R1",
+        "task_id": "AG-NEU-021",
+        "erwartete_revision": 4,
+        "gesendet": "2026-10-15T15:10:00Z"
+      },
+      "antwort": {
+        "schema": "agentarium.befehl.v2.1",
+        "richtung": "antwort",
+        "command_id": "C-004",
+        "stufe": "abgelehnt",
+        "grund": "Diese Schnittstelle unterstuetzt keine ausfuehrbaren Aktionen; supported_actions ist leer.",
+        "fehlercode": "nicht_unterstuetzt",
+        "nebenwirkung": false,
+        "gesendet": "2026-10-15T15:10:00.100Z"
+      }
+    }
+  },
+  "uebernommen": "Fixture inhaltlich aus V2 (dort bestanden); serverseitige Durchsetzung bleibt NOT_TESTED."
+}

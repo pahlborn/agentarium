@@ -66,6 +66,13 @@ Zeile unten übereinstimmen. Das Verfahren ist aus
 | Gegenprobe | `tests/AG-VISUAL-005-vertrag-v2-gegenprobe.py` | V2 | 2026-10-15T19:24:00Z | `0f5ea4ddccc72054d854079f98401b8dedc8d827` |
 | Beispieldaten 01–09 | `fixtures/AG-VISUAL-005-beispiele-v2/` | V2 | 2026-10-15T19:24:00Z | je Datei in Vertrag V2 §11 |
 | Rückmeldung an Atlas (V2) | `handoffs/AG-VISUAL-005-INTERFACE-v2-rueckmeldung-v1.md` | Version 1 | 2026-10-15T19:42:00Z | `d91d3862f325553dedca8425c4c2a7bdda415c25` |
+| Korrektur V2.1 | `specifications/AG-VISUAL-005-schnittstelle-v2.1-korrektur.md` | Korrekturfassung 2.1 | 2026-10-15T20:05:00Z | `515954d3b57cd75046bc8e5e7f8563af4d0c1968` |
+| Schema V2.1 (eine Datei) | `specifications/AG-VISUAL-005-schemas-v2/vertrag-v2-1.schema.json` | agentarium.vertrag.v2.1 | 2026-10-15T20:05:00Z | `26ace42824abd989ad318081efd326299ec6853a` |
+| Referenz-Reducer | `tests/AG-VISUAL-005-referenz-reducer.py` | V2.1 | 2026-10-15T20:05:00Z | `03028c4882c77b30abdd164abef5490838a41f08` |
+| Prueflauf V2.1 | `tests/AG-VISUAL-005-vertrag-v2-1-pruefen.py` | V2.1 | 2026-10-15T20:05:00Z | `90ae4595d28f4f33174d26053791764fbad6d1be` |
+| Gegenprobe V2.1 | `tests/AG-VISUAL-005-vertrag-v2-1-gegenprobe.py` | V2.1 | 2026-10-15T20:05:00Z | `d5f75b11530fd37f3279846938c11c80f19ba69b` |
+| Rückmeldung an Atlas (V2.1) | `handoffs/AG-VISUAL-005-INTERFACE-v2-1-rueckmeldung-v1.md` | Version 1 | 2026-10-15T20:05:00Z | `bf5093cb31f4acd657127bcb1e6eaabfe0d9addf` |
+| Beispieldaten 01–10 (V2.1) | `fixtures/AG-VISUAL-005-beispiele-v2-1/` | V2.1 | 2026-10-15T20:05:00Z | je Datei im Korrekturpapier |
 
 Keines dieser Dokumente hat einen Vorgänger. Alle Papiere sind Fassung 1;
 das Feld ist die daraus gebaute Fassung 37.
@@ -108,6 +115,7 @@ verschwunden ist. Eine Fassung bekommt eine Nummer, wenn sich eine
 | 2026-10-15T19:24:00Z | Schnittstelle | **2** | Vertrag V2 nach Atlas' Korrekturauftrag `AG-VISUAL-005-INTERFACE-REREVIEW`. Zehn verbindliche Korrekturen umgesetzt: Katalogstrom getrennt, Projektanlage definiert, Live/Archiv aus dem Laufzustand (neun Zustände), SSE-Anmeldung ohne URL-Ticket, Keepalive und Herzschlag getrennt, `zeitachse` mit Ableitungsregel, Feldtabelle dreispaltig, `read`/`command` serverseitig, Kostenfeld sichtbar mit Statussatz. Dazu vier Schemas, neun Abnahmefälle, Prüflauf und Gegenprobe. |
 | 2026-10-15T19:24:00Z | Prüflauf, Gegenprobe | V2 | Antwort auf Sentinels `FAIL_TESTABILITY_ONLY`: 38 Formprüfungen, 59 Regelprüfungen, 21 von 21 absichtlichen Verletzungen erkannt. Abhängigkeitsfrei, weil zur Laufzeit nichts von außen geholt wird. |
 | 2026-10-15T19:35:00Z | Feld (gebaut) | Fassung 38 | Marke links, Lauf rechts. Peter: „Titel auf die linke Seite, Projektauswahl davon trennen und diese vermengen mit der Projektanzeige rechts oben." Rechts oben trugen vorher sechs Dinge in einem Block; jetzt links was gleich bleibt, rechts was gerade gilt, und die Projektanzeige **ist** die Auswahl. Nachgemessen auf 1194×834, 834×1194 und 1024×768, in Ruhe und beim Lesen jedes einzelnen Blocks. |
+| 2026-10-15T20:05:00Z | Schnittstelle | **2.1** | Gezielte Korrektur der fünf Defektgruppen B1–B5 aus dem unabhängigen Team-Review (Argus FAIL, Sentinel FAIL). Schwerster Einzelfehler: die Grenzprüfung der Wiederaufnahme lautete `cursor >= replay_grenze` statt `cursor + 1 >= replay_grenze` und verwarf damit den Rand des Puffers. Dazu: nichtleere Status- und Prüffelder, berechnete Revisionskette, versionsgebundener Done-Nachweis, typisierter Zustand am Cursor, Referenz-Reducer statt Fixture-Vergleich, quellenerhaltender Altlog-Adapter, `catalog.changed` entfernt, **eine** Kostendefinition für Schnappschuss und Archiv. Sentinels sieben Negativproben als Pflichtfälle übernommen. V2 bleibt unverändert als Prüfnachweis. |
 | 2026-10-15T18:47:30Z | Konzept, Schnittstelle | 1 | **Verlaufen, nicht abgelöst.** Peter: „Wir müssen das Konzept von vorne beginnen, wir haben uns schon verlaufen." Beide Fassungen bleiben liegen und sind weiter die Fassungen, auf die Atlas' Prüfung zeigt. Die Nachfolger entstehen nach `agentarium.observed-worklog.v1` und Atlas' Anweisung, nicht aus diesen Papieren heraus. |
 
 ---

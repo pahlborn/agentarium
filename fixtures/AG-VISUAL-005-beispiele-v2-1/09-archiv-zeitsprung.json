@@ -1,0 +1,266 @@
+{
+  "fall": "09",
+  "titel": "Archivwiedergabe: berechneter Zustand, Zeitsprung, keine Nebenwirkungen",
+  "prueft": [
+    "V2.1 §B3",
+    "V2.1 §B5"
+  ],
+  "grundlage": "Befund B3. In V2 verglich R16b zwei im Fixture EINGETRAGENE Zustaende -- beide konnten identisch falsch sein. Jetzt rechnet der Referenz-Reducer den Zustand aus den Ereignissen; die behaupteten Werte muessen damit uebereinstimmen. Archivereignisse folgen demselben kanonischen Schema wie der Strom, sodass [{}] abgelehnt wird.",
+  "erwartung": [
+    {
+      "regel": "R-29",
+      "soll": "Der Referenz-Reducer berechnet den Zustand nach Schritt 3 und nach Schritt 4; die behaupteten Zustaende muessen zeichengleich stimmen."
+    },
+    {
+      "regel": "R-16b",
+      "soll": "Zeitsprung auf Cursor 4 ergibt denselben BERECHNETEN Zustand wie vier Einzelschritte."
+    },
+    {
+      "regel": "R-16c",
+      "soll": "EINGESCHRAENKT, Befund B3: geprueft wird nur die KONSISTENZ der behaupteten Nullwerte. Das ist kein Nachweis der Nebenwirkungsfreiheit -- dafuer braeuchte es eine Laufzeitmessung, und die ist NOT_TESTED."
+    },
+    {
+      "regel": "R-33",
+      "soll": "Archivereignisse entsprechen dem kanonischen Arbeitsereignis. Ein leeres Objekt wird abgelehnt. Befund B3."
+    },
+    {
+      "regel": "R-11b",
+      "soll": "R4 setzt Done und nennt ART-01 v1; R3 belegt pass auf genau diese Version."
+    }
+  ],
+  "daten": {
+    "manifest": {
+      "schema": "agentarium.archivmanifest.v2.1",
+      "project_id": "AG-ALT",
+      "run_id": "AG-ALT-R1",
+      "archiv_version": "1",
+      "schema_fassung": "agentarium.observed-worklog.v1",
+      "zustand": "abgeschlossen",
+      "vollstaendig": true,
+      "herkunft": {
+        "mode": "OBSERVED_PROJECT_WORK",
+        "fictional": false,
+        "source_evidence": "relay/events/…"
+      },
+      "quellen": [
+        "relay/events/AG-REPORT-001-worklog-v1.json"
+      ],
+      "abdeckung": {
+        "ordering": "Vollstaendig belegt",
+        "timestamps": "Vollstaendig belegt",
+        "luecken": []
+      },
+      "zeitachse": "complete",
+      "wiedergabe": {
+        "nebenwirkungsfrei": true,
+        "zeitsprung": true,
+        "einzelschritt": true,
+        "deterministisch": true
+      },
+      "kosten": {
+        "sichtbar": true,
+        "erfassung": "unvollstaendig",
+        "daten": "synthetisch",
+        "status_text": "Kosten nicht vollständig ermittelbar.",
+        "ohne_angabe": 4
+      },
+      "ereignisse": [
+        {
+          "id": "R1",
+          "project_id": "AG-ALT",
+          "run_id": "AG-ALT-R1",
+          "task_id": "AG-ALT-001",
+          "actor": "peter",
+          "recipient": "atlas",
+          "kind": "request",
+          "title": "Auftrag",
+          "caused_by": [],
+          "occurred_at": "2026-10-14T09:00:00Z",
+          "recorded_at": "2026-10-14T09:00:01Z",
+          "fictional": false,
+          "work_item_type": "story",
+          "item_revision": 1,
+          "from": null,
+          "to": "offen",
+          "previous_transition_id": null
+        },
+        {
+          "id": "R2",
+          "project_id": "AG-ALT",
+          "run_id": "AG-ALT-R1",
+          "task_id": "AG-ALT-001",
+          "actor": "forge",
+          "kind": "artifact",
+          "title": "ART-01 v1",
+          "caused_by": [
+            "R1"
+          ],
+          "occurred_at": "2026-10-14T10:30:00Z",
+          "recorded_at": "2026-10-14T10:30:02Z",
+          "fictional": false,
+          "artifact_id": "ART-01",
+          "version": "v1"
+        },
+        {
+          "id": "R3",
+          "project_id": "AG-ALT",
+          "run_id": "AG-ALT-R1",
+          "task_id": "AG-ALT-001",
+          "actor": "argus",
+          "kind": "review_result",
+          "title": "ART-01 v1 geprueft",
+          "caused_by": [
+            "R2"
+          ],
+          "occurred_at": "2026-10-14T10:50:00Z",
+          "recorded_at": "2026-10-14T10:50:01Z",
+          "fictional": false,
+          "artifact_id": "ART-01",
+          "version": "v1",
+          "criteria_ref": "AG-PROC-REVIEW-001@v1",
+          "outcome": "pass"
+        },
+        {
+          "id": "R4",
+          "project_id": "AG-ALT",
+          "run_id": "AG-ALT-R1",
+          "task_id": "AG-ALT-001",
+          "actor": "atlas",
+          "kind": "status_change",
+          "title": "Auf Done",
+          "caused_by": [
+            "R3"
+          ],
+          "occurred_at": "2026-10-14T11:00:00Z",
+          "recorded_at": "2026-10-14T11:00:01Z",
+          "fictional": false,
+          "from": "offen",
+          "to": "done",
+          "item_revision": 2,
+          "previous_transition_id": "R1",
+          "artifact_id": "ART-01",
+          "version": "v1",
+          "criteria_ref": "AG-PROC-REVIEW-001@v1"
+        }
+      ]
+    },
+    "wiedergabe": {
+      "weg_a": {
+        "beschreibung": "Vier Einzelschritte",
+        "schritte": [
+          "R1",
+          "R2",
+          "R3",
+          "R4"
+        ],
+        "zustand_danach": {
+          "cursor": 4,
+          "aufgaben": [
+            {
+              "task_id": "AG-ALT-001",
+              "parent_task_id": null,
+              "work_item_type": "story",
+              "status": "done",
+              "item_revision": 2,
+              "letzte_transition_id": "R4",
+              "owner": null
+            }
+          ],
+          "artefakte": [
+            {
+              "artifact_id": "ART-01",
+              "version": "v1",
+              "supersedes": null,
+              "pruefungen": [
+                {
+                  "kind": "review_result",
+                  "criteria_ref": "AG-PROC-REVIEW-001@v1",
+                  "outcome": "pass",
+                  "event_id": "R3"
+                }
+              ]
+            }
+          ],
+          "blockaden": [],
+          "abdeckung": "complete"
+        }
+      },
+      "weg_b": {
+        "beschreibung": "Zeitsprung direkt auf Cursor 4",
+        "schritte": [
+          "sprung:4"
+        ],
+        "zustand_danach": {
+          "cursor": 4,
+          "aufgaben": [
+            {
+              "task_id": "AG-ALT-001",
+              "parent_task_id": null,
+              "work_item_type": "story",
+              "status": "done",
+              "item_revision": 2,
+              "letzte_transition_id": "R4",
+              "owner": null
+            }
+          ],
+          "artefakte": [
+            {
+              "artifact_id": "ART-01",
+              "version": "v1",
+              "supersedes": null,
+              "pruefungen": [
+                {
+                  "kind": "review_result",
+                  "criteria_ref": "AG-PROC-REVIEW-001@v1",
+                  "outcome": "pass",
+                  "event_id": "R3"
+                }
+              ]
+            }
+          ],
+          "blockaden": [],
+          "abdeckung": "complete"
+        }
+      },
+      "zwischenstand_cursor_3": {
+        "cursor": 3,
+        "aufgaben": [
+          {
+            "task_id": "AG-ALT-001",
+            "parent_task_id": null,
+            "work_item_type": "story",
+            "status": "offen",
+            "item_revision": 1,
+            "letzte_transition_id": "R1",
+            "owner": null
+          }
+        ],
+        "artefakte": [
+          {
+            "artifact_id": "ART-01",
+            "version": "v1",
+            "supersedes": null,
+            "pruefungen": [
+              {
+                "kind": "review_result",
+                "criteria_ref": "AG-PROC-REVIEW-001@v1",
+                "outcome": "pass",
+                "event_id": "R3"
+              }
+            ]
+          }
+        ],
+        "blockaden": [],
+        "abdeckung": "complete"
+      },
+      "nebenwirkungen_behauptet": {
+        "neue_fachereignisse": 0,
+        "befehle_ausgefuehrt": 0,
+        "agentenaufrufe": 0,
+        "api_aufrufe": 0,
+        "github_aktionen": 0
+      },
+      "nebenwirkungen_nachweis": "NOT_TESTED. Die Nullwerte sind behauptet, nicht gemessen; eine Messung braeuchte eine Laufzeitumgebung."
+    }
+  }
+}

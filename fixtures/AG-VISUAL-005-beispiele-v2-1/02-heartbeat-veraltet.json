@@ -1,0 +1,83 @@
+{
+  "fall": "02",
+  "titel": "Lebenszeichen im Takt, danach Veraltet-Zustand",
+  "prueft": [
+    "§5 Lebenszeichen"
+  ],
+  "erwartung": [
+    {
+      "regel": "R-03",
+      "soll": "Kein Lebenszeichen traegt stream_sequence oder eine Fachereignis-ID."
+    },
+    {
+      "regel": "R-04",
+      "soll": "veraltet gilt NACH 20 s. Bei genau 20,000 s noch frisch, bei 20,001 s veraltet. Exakter Rand, Befund Abnahmestand 02."
+    },
+    {
+      "regel": "R-04c",
+      "soll": "Der tatsaechliche Takt wird aus den Abstaenden der Lebenszeichen berechnet und muss 5 s betragen."
+    }
+  ],
+  "daten": {
+    "takt_sekunden": 5,
+    "veraltet_nach_sekunden": 20,
+    "lebenszeichen": [
+      {
+        "schema": "agentarium.strom.v2.1",
+        "stream": "lauf",
+        "stream_id": "AG-NEU/AG-NEU-R1",
+        "kind": "heartbeat",
+        "sent_at": "2026-10-15T14:05:00.000Z",
+        "last_sequence": 414
+      },
+      {
+        "schema": "agentarium.strom.v2.1",
+        "stream": "lauf",
+        "stream_id": "AG-NEU/AG-NEU-R1",
+        "kind": "heartbeat",
+        "sent_at": "2026-10-15T14:05:05.000Z",
+        "last_sequence": 414
+      },
+      {
+        "schema": "agentarium.strom.v2.1",
+        "stream": "lauf",
+        "stream_id": "AG-NEU/AG-NEU-R1",
+        "kind": "heartbeat",
+        "sent_at": "2026-10-15T14:05:10.000Z",
+        "last_sequence": 414
+      }
+    ],
+    "pruefzeitpunkte": [
+      {
+        "zeit": "2026-10-15T14:05:25.000Z",
+        "soll": "frisch",
+        "abstand_s": 15
+      },
+      {
+        "zeit": "2026-10-15T14:05:30.000Z",
+        "soll": "frisch",
+        "abstand_s": 20,
+        "bemerkung": "GENAU 20 s. Die Regel lautet: veraltet NACH 20 s, also > 20, nicht >=."
+      },
+      {
+        "zeit": "2026-10-15T14:05:30.001Z",
+        "soll": "veraltet",
+        "abstand_s": 20.001
+      },
+      {
+        "zeit": "2026-10-15T14:05:31.000Z",
+        "soll": "veraltet",
+        "abstand_s": 21
+      }
+    ],
+    "anzeige_veraltet": "Verbindung seit 21 s ohne Lebenszeichen",
+    "takt_pruefung": {
+      "soll_takt_s": 5,
+      "abstaende_s": [
+        5,
+        5
+      ],
+      "bemerkung": "Tatsaechlicher Takt aus den Abstaenden der Lebenszeichen nachgerechnet, nicht behauptet. Befund: Abnahmestand 02."
+    }
+  }
+}

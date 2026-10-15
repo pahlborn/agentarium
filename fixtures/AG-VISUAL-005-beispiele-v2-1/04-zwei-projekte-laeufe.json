@@ -1,0 +1,274 @@
+{
+  "fall": "04",
+  "titel": "Zwei Projekte, mehrere Laeufe, getrennte Sequenzraeume, Duplikate und Nachzuegler",
+  "prueft": [
+    "§2 Katalogstrom",
+    "§4 Sequenzraeume",
+    "§6 Projekt und Lauf"
+  ],
+  "erwartung": [
+    {
+      "regel": "R-02",
+      "soll": "Jeder Strom hat seinen EIGENEN Sequenzraum. Katalog 1,2,3,4; AG-NEU-R1 beginnt bei 1; AG-ALT-R2 beginnt bei 1. Gleiche Zahl in verschiedenen Stroemen ist kein Konflikt."
+    },
+    {
+      "regel": "R-07",
+      "soll": "Das Duplikat (AG-NEU-R1, stream_sequence 2, zweite Zustellung) wird verworfen, nicht zweimal verarbeitet."
+    },
+    {
+      "regel": "R-07b",
+      "soll": "Der Nachzuegler (AG-NEU-R1, stream_sequence 1, nach 2 zugestellt) wird verworfen; der Cursor geht nicht zurueck."
+    },
+    {
+      "regel": "R-17",
+      "soll": "AG-ALT-R1 ist abgeschlossen -> terminal -> ansicht archiv. AG-ALT-R2 ist aktiv -> live. Dasselbe Projekt, zwei Laeufe, zwei Ansichten."
+    },
+    {
+      "regel": "R-19",
+      "soll": "project.created traegt dieselbe project_id, die danach in jedem fachlichen Ereignis steht."
+    }
+  ],
+  "daten": {
+    "katalogstrom": {
+      "stream_id": "team/pahlborn",
+      "ereignisse": [
+        {
+          "schema": "agentarium.strom.v2.1",
+          "stream": "katalog",
+          "stream_id": "team/pahlborn",
+          "stream_sequence": 1,
+          "kind": "project.created",
+          "sent_at": "2026-10-15T09:00:00.000Z",
+          "payload": {
+            "project_id": "AG-NEU",
+            "name": "AG-NEU",
+            "titel": "Neues Vorhaben",
+            "beschreibung": null,
+            "created_at": "2026-10-15T08:59:58.000Z",
+            "herkunft": {
+              "mode": "OBSERVED_PROJECT_WORK",
+              "fictional": false,
+              "source_evidence": "relay/events/…"
+            }
+          }
+        },
+        {
+          "schema": "agentarium.strom.v2.1",
+          "stream": "katalog",
+          "stream_id": "team/pahlborn",
+          "stream_sequence": 2,
+          "kind": "run.started",
+          "sent_at": "2026-10-15T09:00:04.000Z",
+          "payload": {
+            "project_id": "AG-NEU",
+            "run_id": "AG-NEU-R1",
+            "zustand": "aktiv",
+            "zustand_vorher": "geplant",
+            "occurred_at": "2026-10-15T09:00:03.000Z",
+            "arbeitsstrom": "/agentarium/lauf/AG-NEU/AG-NEU-R1"
+          }
+        },
+        {
+          "schema": "agentarium.strom.v2.1",
+          "stream": "katalog",
+          "stream_id": "team/pahlborn",
+          "stream_sequence": 3,
+          "kind": "run.finished",
+          "sent_at": "2026-10-14T18:00:00.000Z",
+          "payload": {
+            "project_id": "AG-ALT",
+            "run_id": "AG-ALT-R1",
+            "zustand": "abgeschlossen",
+            "zustand_vorher": "aktiv",
+            "occurred_at": "2026-10-14T17:59:40.000Z",
+            "arbeitsstrom": null
+          }
+        },
+        {
+          "schema": "agentarium.strom.v2.1",
+          "stream": "katalog",
+          "stream_id": "team/pahlborn",
+          "stream_sequence": 4,
+          "kind": "run.started",
+          "sent_at": "2026-10-15T10:30:00.000Z",
+          "payload": {
+            "project_id": "AG-ALT",
+            "run_id": "AG-ALT-R2",
+            "zustand": "aktiv",
+            "zustand_vorher": "geplant",
+            "occurred_at": "2026-10-15T10:29:55.000Z",
+            "arbeitsstrom": "/agentarium/lauf/AG-ALT/AG-ALT-R2"
+          }
+        }
+      ]
+    },
+    "arbeitsstrom_AG_NEU_R1": {
+      "stream_id": "AG-NEU/AG-NEU-R1",
+      "zustellungen": [
+        {
+          "folge": 1,
+          "umschlag": {
+            "schema": "agentarium.strom.v2.1",
+            "stream": "lauf",
+            "stream_id": "AG-NEU/AG-NEU-R1",
+            "stream_sequence": 1,
+            "kind": "work.event",
+            "sent_at": "2026-10-15T09:00:10.000Z",
+            "payload": {
+              "id": "N1",
+              "project_id": "AG-NEU",
+              "run_id": "AG-NEU-R1",
+              "task_id": "AG-NEU-001",
+              "actor": "peter",
+              "recipient": "atlas",
+              "kind": "request",
+              "title": "Auftrag erteilt",
+              "caused_by": [],
+              "occurred_at": "2026-10-15T09:00:09.000Z",
+              "recorded_at": "2026-10-15T09:00:10.000Z",
+              "fictional": false
+            }
+          },
+          "soll": "verarbeiten"
+        },
+        {
+          "folge": 2,
+          "umschlag": {
+            "schema": "agentarium.strom.v2.1",
+            "stream": "lauf",
+            "stream_id": "AG-NEU/AG-NEU-R1",
+            "stream_sequence": 2,
+            "kind": "work.event",
+            "sent_at": "2026-10-15T09:01:00.000Z",
+            "payload": {
+              "id": "N2",
+              "project_id": "AG-NEU",
+              "run_id": "AG-NEU-R1",
+              "task_id": "AG-NEU-001",
+              "actor": "atlas",
+              "recipient": "forge",
+              "kind": "handoff",
+              "title": "Weitergabe",
+              "caused_by": [
+                "N1"
+              ],
+              "occurred_at": "2026-10-15T09:00:58.000Z",
+              "recorded_at": "2026-10-15T09:01:00.000Z",
+              "fictional": false
+            }
+          },
+          "soll": "verarbeiten"
+        },
+        {
+          "folge": 3,
+          "umschlag": {
+            "schema": "agentarium.strom.v2.1",
+            "stream": "lauf",
+            "stream_id": "AG-NEU/AG-NEU-R1",
+            "stream_sequence": 2,
+            "kind": "work.event",
+            "sent_at": "2026-10-15T09:01:00.000Z",
+            "payload": {
+              "id": "N2",
+              "project_id": "AG-NEU",
+              "run_id": "AG-NEU-R1",
+              "task_id": "AG-NEU-001",
+              "actor": "atlas",
+              "recipient": "forge",
+              "kind": "handoff",
+              "title": "Weitergabe",
+              "caused_by": [
+                "N1"
+              ],
+              "occurred_at": "2026-10-15T09:00:58.000Z",
+              "recorded_at": "2026-10-15T09:01:00.000Z",
+              "fictional": false
+            }
+          },
+          "soll": "verwerfen_duplikat"
+        },
+        {
+          "folge": 4,
+          "umschlag": {
+            "schema": "agentarium.strom.v2.1",
+            "stream": "lauf",
+            "stream_id": "AG-NEU/AG-NEU-R1",
+            "stream_sequence": 1,
+            "kind": "work.event",
+            "sent_at": "2026-10-15T09:00:10.000Z",
+            "payload": {
+              "id": "N1",
+              "project_id": "AG-NEU",
+              "run_id": "AG-NEU-R1",
+              "task_id": "AG-NEU-001",
+              "actor": "peter",
+              "recipient": "atlas",
+              "kind": "request",
+              "title": "Auftrag erteilt",
+              "caused_by": [],
+              "occurred_at": "2026-10-15T09:00:09.000Z",
+              "recorded_at": "2026-10-15T09:00:10.000Z",
+              "fictional": false
+            }
+          },
+          "soll": "verwerfen_nachzuegler"
+        }
+      ]
+    },
+    "arbeitsstrom_AG_ALT_R2": {
+      "stream_id": "AG-ALT/AG-ALT-R2",
+      "zustellungen": [
+        {
+          "folge": 1,
+          "umschlag": {
+            "schema": "agentarium.strom.v2.1",
+            "stream": "lauf",
+            "stream_id": "AG-ALT/AG-ALT-R2",
+            "stream_sequence": 1,
+            "kind": "work.event",
+            "sent_at": "2026-10-15T10:30:12.000Z",
+            "payload": {
+              "id": "A1",
+              "project_id": "AG-ALT",
+              "run_id": "AG-ALT-R2",
+              "task_id": "AG-ALT-044",
+              "actor": "nova",
+              "kind": "proposal",
+              "title": "Zweiter Lauf, erster Zug",
+              "caused_by": [],
+              "occurred_at": "2026-10-15T10:30:11.000Z",
+              "recorded_at": "2026-10-15T10:30:12.000Z",
+              "fictional": false,
+              "recipient": "atlas"
+            }
+          },
+          "soll": "verarbeiten"
+        }
+      ]
+    },
+    "laeufe_im_katalog": [
+      {
+        "project_id": "AG-ALT",
+        "run_id": "AG-ALT-R1",
+        "zustand": "abgeschlossen",
+        "terminal": true,
+        "ansicht": "archiv"
+      },
+      {
+        "project_id": "AG-ALT",
+        "run_id": "AG-ALT-R2",
+        "zustand": "aktiv",
+        "terminal": false,
+        "ansicht": "live"
+      },
+      {
+        "project_id": "AG-NEU",
+        "run_id": "AG-NEU-R1",
+        "zustand": "aktiv",
+        "terminal": false,
+        "ansicht": "live"
+      }
+    ]
+  },
+  "uebernommen": "Inhaltlich unveraendert aus V2 (dort bestanden). Nur Schemafassung, caused_by und Empfaenger nachgezogen."
+}

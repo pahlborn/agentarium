@@ -1,0 +1,141 @@
+{
+  "fall": "03",
+  "titel": "Wiederaufnahme: Grenzsemantik, ungueltige Cursor, auswertbarer SSE-Pfad",
+  "prueft": [
+    "V2.1 §B1"
+  ],
+  "grundlage": "Befund B1. In V2 lautete die Pruefung cursor >= replay_grenze. replay_grenze ist aber die NIEDRIGSTE lieferbare Sequenz, und fortgesetzt wird bei cursor+1. Bei Grenze 120 ist Cursor 119 fortsetzbar; V2 hat ihn verworfen.",
+  "erwartung": [
+    {
+      "regel": "R-06",
+      "soll": "fortsetzbar genau dann, wenn cursor+1 >= replay_grenze und cursor <= hoechste_sequenz."
+    },
+    {
+      "regel": "R-06c",
+      "soll": "Der GRENZFALL cursor 119 bei Grenze 120 ist fortsetzbar. Dies ist der Fehler aus V2."
+    },
+    {
+      "regel": "R-06d",
+      "soll": "cursor oberhalb hoechste_sequenz ergibt cursor_zu_hoch, nicht stilles Fortsetzen."
+    },
+    {
+      "regel": "R-06e",
+      "soll": "Eine ungueltige Last-Event-ID ergibt cursor_unbekannt mit neuem Schnappschuss."
+    },
+    {
+      "regel": "R-26",
+      "soll": "Auf dem EventSource-Pfad ist die Antwort 200 und der Grund kommt als auswertbares Ereignis strom.hinweis IM Strom. Ein 409 waere dort unauswertbar: ein Nicht-200-Status laesst die Verbindung scheitern, ohne dass der Anwendungscode den Koerper lesen kann."
+    },
+    {
+      "regel": "R-27",
+      "soll": "Der Betriebsrahmen steht VOR dem Verbindungsaufbau fest: er wird aus betrieb geholt, nicht aus der Stromantwort gelesen."
+    }
+  ],
+  "daten": {
+    "betrieb": {
+      "schema": "agentarium.betrieb.v2.1",
+      "rahmen": "cookie_gleicher_ursprung",
+      "katalogstrom": "/agentarium/katalog",
+      "resume_pruefung": "/agentarium/resume",
+      "heartbeat_takt_s": 5,
+      "veraltet_nach_s": 20
+    },
+    "faelle": [
+      {
+        "name": "grenzfall_fortsetzbar",
+        "antwort": {
+          "schema": "agentarium.resume.v2.1",
+          "stream_id": "AG-NEU/AG-NEU-R1",
+          "cursor": 119,
+          "replay_grenze": 120,
+          "hoechste_sequenz": 414,
+          "fortsetzbar": true,
+          "grund": "fortsetzbar",
+          "neuer_schnappschuss": null
+        },
+        "erste_folge": 120,
+        "bemerkung": "cursor+1 = 120 >= replay_grenze 120. In V2 verworfen."
+      },
+      {
+        "name": "klar_im_puffer",
+        "antwort": {
+          "schema": "agentarium.resume.v2.1",
+          "stream_id": "AG-NEU/AG-NEU-R1",
+          "cursor": 413,
+          "replay_grenze": 120,
+          "hoechste_sequenz": 414,
+          "fortsetzbar": true,
+          "grund": "fortsetzbar",
+          "neuer_schnappschuss": null
+        },
+        "erste_folge": 414
+      },
+      {
+        "name": "unter_der_grenze",
+        "antwort": {
+          "schema": "agentarium.resume.v2.1",
+          "stream_id": "AG-NEU/AG-NEU-R1",
+          "cursor": 118,
+          "replay_grenze": 120,
+          "hoechste_sequenz": 414,
+          "fortsetzbar": false,
+          "grund": "replay_grenze_unterschritten",
+          "neuer_schnappschuss": "/agentarium/lauf/AG-NEU/AG-NEU-R1/schnappschuss"
+        },
+        "bemerkung": "cursor+1 = 119 < 120."
+      },
+      {
+        "name": "cursor_zu_hoch",
+        "antwort": {
+          "schema": "agentarium.resume.v2.1",
+          "stream_id": "AG-NEU/AG-NEU-R1",
+          "cursor": 999,
+          "replay_grenze": 120,
+          "hoechste_sequenz": 414,
+          "fortsetzbar": false,
+          "grund": "cursor_zu_hoch",
+          "neuer_schnappschuss": "/agentarium/lauf/AG-NEU/AG-NEU-R1/schnappschuss"
+        }
+      },
+      {
+        "name": "ungueltige_id",
+        "roh_last_event_id": "abc",
+        "antwort": {
+          "schema": "agentarium.resume.v2.1",
+          "stream_id": "AG-NEU/AG-NEU-R1",
+          "cursor": 0,
+          "replay_grenze": 120,
+          "hoechste_sequenz": 414,
+          "fortsetzbar": false,
+          "grund": "cursor_unbekannt",
+          "neuer_schnappschuss": "/agentarium/lauf/AG-NEU/AG-NEU-R1/schnappschuss"
+        }
+      }
+    ],
+    "eventsource_pfad": {
+      "http_status": 200,
+      "bemerkung": "200, weil ein anderer Status die Verbindung scheitern laesst und der Koerper dem Anwendungscode nicht zugaenglich ist.",
+      "hinweis": {
+        "schema": "agentarium.strom.v2.1",
+        "stream": "lauf",
+        "stream_id": "AG-NEU/AG-NEU-R1",
+        "kind": "strom.hinweis",
+        "grund": "replay_grenze_unterschritten",
+        "replay_grenze": 120,
+        "hoechste_sequenz": 414,
+        "neuer_schnappschuss": "/agentarium/lauf/AG-NEU/AG-NEU-R1/schnappschuss",
+        "sent_at": "2026-10-15T14:09:00.000Z"
+      }
+    },
+    "fetch_pfad": {
+      "http_status": 409,
+      "koerper": {
+        "grund": "replay_grenze_unterschritten",
+        "replay_grenze": 120,
+        "hoechste_sequenz": 414,
+        "neuer_schnappschuss": "/agentarium/lauf/AG-NEU/AG-NEU-R1/schnappschuss"
+      },
+      "bemerkung": "Auf dem fetch-Pfad ist der Koerper lesbar, also ist 409 mit JSON zulaessig."
+    }
+  }
+}
