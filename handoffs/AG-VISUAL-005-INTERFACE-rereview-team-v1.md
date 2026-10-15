@@ -30,7 +30,7 @@ Erstelle den verbindlichen Schnittstellenvertrag V2. Die geprüften V1-Artefakte
 
 8. Nimm serverseitig durchgesetzte Berechtigungen read und command auf. Wand- und Präsentationsansichten sind nur lesend. Unerlaubte Befehle werden ohne fachliche Nebenwirkung abgelehnt.
 
-9. Kosten bleiben pausiert. Im Agentarium-Bild erscheinen keine Kostenwerte, Gesamtsumme oder leere Kostenkachel. Ein technischer Informationsbereich darf anzeigen: „Kostenanzeige pausiert – Gesamtkosten derzeit nicht vollständig ermittelbar.“
+9. Aktualisierte Entscheidung von Peter (15.10.2026, 21:01:52 Europe/Berlin): Das Kostenfeld bleibt sichtbar. Solange die Gesamtkosten nicht vollständig ermittelt werden können, zeigt es ausschließlich „Kosten nicht vollständig ermittelbar.“ Keine Beträge, Teilsummen, Gesamtsumme oder 0-€-Ersatzwerte. Erst bei vollständiger belegter Gesamterfassung werden Kosten ausgewiesen. Diese Entscheidung ersetzt die frühere Ausblendung des Kostenfelds.
 
 10. Liefere Prosa-Vertrag, maschinenprüfbare Schemas und zusammengehörige Beispieldaten für Einstiegssnapshot, Heartbeat/Stale, Reconnect und Replaygrenze, mehrere Projekte/Läufe, parallele Aufgaben und Artefaktversionen, Read-only, pausierte Kosten, Altlogs mit fehlenden Zeitpunkten sowie nebenwirkungsfreie Archivwiedergabe.
 
