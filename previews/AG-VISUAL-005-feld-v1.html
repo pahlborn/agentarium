@@ -273,9 +273,12 @@
     letter-spacing:.2em; text-transform:uppercase; color:#55637A;}
   /* Das Leitmotiv, wie es in AG-MOCK-COMPARE-001 steht. Klein, einmal, und
      es bleibt stehen — es ist der Name der Sache, keine Beschriftung. */
-  #agKopf em{display:block; font-style:normal; font-size:8.5px;
-    letter-spacing:.14em; text-transform:none; color:#4B5A72;
-    margin:1px 0 6px;}
+  /* 10,5 px statt 8,5 und etwas heller. Mit 8,5 war das Leitmotiv zwar
+     da, aber nicht zu lesen — eine Beschriftung, die man nicht lesen kann,
+     ist Dekoration. */
+  #agKopf em{display:block; font-style:normal; font-size:10.5px;
+    letter-spacing:.1em; text-transform:none; color:#5E6E86;
+    margin:3px 0 7px; line-height:1.4;}
   /* Diese Regel muss NACH der Breitenangabe des Kopfes stehen. Beim ersten
      Versuch stand sie weiter oben bei der Liste — gleiche Gewichtung, also
      gewann die spätere Zeile, und der Kopf blieb im Hochformat 330 breit.
@@ -339,9 +342,14 @@
   /* Der Stand der Arbeit, unten rechts über den Knöpfen. Keine Grafik,
      sondern Striche: Jeder Strich ist ein Stück Arbeit, und man kann sie
      zählen. Eine Kurve würde glätten, was gerade nicht glatt ist. */
+  /* `pointer-events:auto`, nicht `none`: Die Tafel soll beim Zeigen
+     aufhellen, und dafür muss sie den Zeiger überhaupt bemerken. Die Regel
+     weiter oben hatte das schon gesetzt — diese hier stand später im
+     Stylesheet und hat es bei gleicher Gewichtung wieder genommen. Genau
+     derselbe Fehler wie bei der Kopfbreite im Hochformat. */
   #agStand{position:fixed; right:max(14px,env(safe-area-inset-right));
     bottom:calc(max(14px,env(safe-area-inset-bottom)) + 54px);
-    z-index:4; pointer-events:none; text-align:right;}
+    z-index:4; pointer-events:auto; text-align:right;}
   .sZeile{display:flex; align-items:center; justify-content:flex-end;
     gap:7px; margin-bottom:5px;}
   .sZeile u{text-decoration:none; color:#55637A; order:1;
