@@ -2743,6 +2743,21 @@ SKRIPT = """
     });
   })();
 
+  /* Berühren hellt auf, wie Zeigen — nur hört es von selbst wieder auf.
+     Ohne das wäre die Regel am iPad, wo es kein Zeigen gibt, wirkungslos. */
+  (function () {
+    ['agKopf', 'agWerkName', 'agStand'].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      el.addEventListener('click', function (ev) {
+        ev.stopPropagation();
+        el.classList.add('lesen');
+        clearTimeout(el.__ab);
+        el.__ab = setTimeout(function () { el.classList.remove('lesen'); }, 6000);
+      });
+    });
+  })();
+
   document.getElementById('agVorn').addEventListener('click', function () {
     zurueckAufAnfang();
   });

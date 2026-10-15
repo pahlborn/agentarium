@@ -303,7 +303,7 @@ keine Überlagerung.
 
 | | |
 |---|---|
-| `AG-VISUAL-005-feld-v1.html` | SHA256 `0389a4164e93df72c9072e94e5b2ce35f3c7a2c8770be29d1811703ab95616e3` |
+| `AG-VISUAL-005-feld-v1.html` | SHA256 `65894844a87824a66bdf4e197f437a16e95a25e8cff81d543efb52e7d7bbb169` |
 | Läuft | eigenständig, offline, ohne Abruf nach außen |
 | Quellen | `AG-VISUAL-005-feld/` — `schicht.py` erzeugt die Darstellung, `resonanz-maschine.html` ist die Maschine darunter |
 
