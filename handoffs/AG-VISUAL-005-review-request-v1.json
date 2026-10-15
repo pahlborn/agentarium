@@ -1,0 +1,118 @@
+{
+  "schema": "agentarium.handoff.v0",
+  "task_id": "AG-VISUAL-005-REVIEW",
+  "version": 1,
+  "created": "2026-10-15T14:12:55Z",
+  "sender": "Peter + Claude-Code-Sitzung (keine dispatchte Agenteninstanz)",
+  "recipient": "Gegenstelle, Agenten nach deren Wahl",
+  "status": "REVIEW_REQUESTED",
+  "repository": "pahlborn/agentarium",
+  "branch": "claude/agentarium-visualisierung",
+  "authorization": {
+    "source": "Peter",
+    "text": "du kannst einen schnittstellenentwurf und das konzept erstellen, ich lasse es dann von den agents der gegenstelle pruefen.",
+    "scope": "Pruefung zweier Papiere. Keine Implementierung, kein Merge, keine Veroeffentlichung, keine Dateiaenderung im Repository.",
+    "limits": [
+      "Kein Merge und keine Veroeffentlichung ohne Peter.",
+      "specifications/AG-MOCKS-PETER-REQUIREMENTS-v1.md ist Peters Dokument und bleibt unveraendert.",
+      "Ein Rollenname ist kein Beweis einer geladenen Instanz; jeder Befund nennt seine Stelle."
+    ]
+  },
+  "zu_pruefen": [
+    {
+      "was": "Konzept",
+      "pfad": "concepts/AG-VISUAL-005-agentarium-konzept-v1.md",
+      "fassung": "Konzeptversion 1",
+      "blob": "d07fccdc18432b10fa2fbb904409f9d945ae7ff3"
+    },
+    {
+      "was": "Schnittstelle",
+      "pfad": "specifications/AG-VISUAL-005-schnittstelle-v1.md",
+      "fassung": "Schnittstellenversion 1",
+      "blob": "e2eacd2fefd977cbe1637a1bf7123fb77e8556db"
+    }
+  ],
+  "zum_nachlesen": [
+    {
+      "was": "Funktionsmatrix",
+      "pfad": "previews/AG-VISUAL-005-funktionsmatrix-v1.md",
+      "blob": "261c4658fc252c8727c1db120cdac806be3c204b"
+    },
+    {
+      "was": "Belege",
+      "pfad": "previews/AG-VISUAL-005-evidence-v1.md",
+      "blob": "aaf733814df1a1c07fd0687fd1434db7d82e6244"
+    },
+    {
+      "was": "Feld, lauffaehig, Fassung 37",
+      "pfad": "previews/AG-VISUAL-005-feld-v1.html",
+      "blob": "eb535284d226ee6d84467e1c44ec1ef981f2fb0d"
+    },
+    {
+      "was": "Fassungsregister",
+      "pfad": "previews/AG-VISUAL-005-fassungen.md"
+    }
+  ],
+  "identitaet": "Geprueft wird gegen den Blob-Hash, nicht gegen den Branch. Der Branch wird weiterbewegt; der Blob ist die Fassung, auf die eine Anmerkung zeigt. Nachzusehen mit 'git hash-object <pfad>'.",
+  "schwerpunkte": [
+    {
+      "nr": 1,
+      "stelle": "Schnittstelle §6",
+      "thema": "Lebenszeichen",
+      "frage": "Ist ein leeres Signal alle fuenf Sekunden machbar? Wenn nein, welcher Takt?",
+      "warum": "Ohne regelmaessiges Lebenszeichen ist 'das Projekt ruht' nicht von 'die Verbindung ist tot' zu unterscheiden. Beides sieht identisch aus. Einzige Stelle, an der eine Luecke die Darstellung irrefuehrend macht statt nur aermer."
+    },
+    {
+      "nr": 2,
+      "stelle": "Schnittstelle §1, §2, §5",
+      "thema": "Push und Schnappschuss",
+      "frage": "Ist SSE richtig, und ist ein Schnappschuss in dieser Form lieferbar?",
+      "warum": "Eine Browserseite hat keine Adresse und muss selbst oeffnen. Push allein laesst den Monitor leer: wer um 14 Uhr aufmacht, was um 9 Uhr begann, sieht '0 von 0'."
+    },
+    {
+      "nr": 3,
+      "stelle": "Schnittstelle §4.4",
+      "thema": "Bezugsfelder",
+      "frage": "Wie heissen aufgabe, erledigt, artefakt, version, prueft, antwortet_auf, ersetzt bei euch?",
+      "warum": "Die Namen sind von uns erfunden. Das Partitur-Arbeitsprotokoll fuehrt bereits Ereignis-IDs und Verweise. Gemessen: ohne diese Bezuege waren 33 % (V1) bzw. 60 % (V2) aller Zuordnungen mehrdeutig, bei der Review-Abnahme 100 %. Mit ihnen keine einzige Faustregel mehr noetig."
+    },
+    {
+      "nr": 4,
+      "stelle": "Schnittstelle §7",
+      "thema": "Folgenummer und Ringpuffer",
+      "frage": "Ist eine luekenlose Folgenummer je Projekt herstellbar, und ist ein Ringpuffer der letzten 500 Ereignisse bzw. einer Stunde zumutbar?",
+      "warum": "Daran erkennt das Feld Luecken, Doppelte und Nachzuegler ohne Absprache. Ohne Puffer kann ein kurzer Abriss nicht nachgeliefert werden."
+    }
+  ],
+  "fragen": {
+    "5": "Welcher der fuenf Grundsaetze (Konzept §3) ist der schwaechste, und warum?",
+    "6": "Ehrlicher Nenner (Konzept §4.4): die Fortschrittsleiste kann zurueckgehen, wenn neue Auftraege aufgehen. Zumutbar oder unbrauchbar? Wichtigste nichttechnische Frage.",
+    "7": "Fehlt ein sechster Stop-Grund? Heute: technisch, budget, abhaengigkeit, freigabe, mensch.",
+    "8": "Wann steht der Verbrauch eines Auftrags fest: bei der Lieferung oder erst ueber eine Abrechnung? Davon haengt ab, ob Kosten einem Auftrag zuzuordnen sind oder nur Summen je Rolle moeglich.",
+    "9": "Mehrere Projekte: ein Strom je Projekt oder einer fuer alle mit 'projekt' als Unterscheidung?"
+  },
+  "kostenregeln": {
+    "quelle": "AG-COST-UI-001, K07",
+    "regeln": [
+      "Fehlende Werte sind nicht null Tokens.",
+      "Bei Luecken keine numerische Gesamtsumme, sondern Status 'Kosten noch nicht vollstaendig erfasst'.",
+      "Laufende Auftraege zaehlen gegen die Vollstaendigkeit.",
+      "Abonnementnutzung darf nicht als Nullverbrauch dargestellt werden.",
+      "Fiktive Mockdaten sind keine tatsaechlichen Kosten.",
+      "Die Anzeige verschwindet trotzdem nicht: ein leeres Feld liest sich wie ein Fehler, ein benannter Status wie ein Status."
+    ]
+  },
+  "antwortformat": {
+    "befund": "[BEFUND-NN] <dokument> §<abschnitt> · blob <kurzhash> · <blocker|wichtig|anmerkung> / Befund / Belegt an / Vorschlag",
+    "abschluss": [
+      "Geprueft (Blobs mit Hash)",
+      "Nachgesehen (was tatsaechlich geoeffnet oder ausgefuehrt wurde)",
+      "Nicht geprueft (und warum)",
+      "Antworten 1-9, je ein Satz"
+    ],
+    "hinweis": "Der Abschnitt 'Nicht geprueft' ist Teil des Ergebnisses, kein Eingestaendnis."
+  },
+  "was_am_meisten_nuetzt": "Nicht die Zustimmung, sondern die Stelle, an der dieser Entwurf im Betrieb scheitern wird. Wird keine gefunden, bitte nennen, wonach gesucht wurde.",
+  "umfang": "Rueckmeldung von ein bis zwei Seiten. Keine Zeremonie, kein Epic, keine Teststrategie.",
+  "menschenlesbar": "handoffs/AG-VISUAL-005-review-request-v1.md"
+}

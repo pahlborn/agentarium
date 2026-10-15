@@ -1,6 +1,6 @@
 # AGENTARIUM – Schnittstelle des Feldes
 
-AG-VISUAL-005, Schnittstellenversion 1 · 2026-10-15
+AG-VISUAL-005, Schnittstellenversion 1 · 2026-10-15T14:12:55Z
 Projekt: pahlborn/agentarium · Branch: claude/agentarium-visualisierung
 Status: Entwurf zur Prüfung durch die Agenten der Gegenstelle. Keine
 Implementierungsfreigabe, keine Abnahme, nichts davon gebaut.
