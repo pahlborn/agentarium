@@ -1,0 +1,52 @@
+{
+  "schema": "agentarium.handoff.v0",
+  "task_id": "AG-VISUAL-005-INTERFACE-V2-REVIEW",
+  "version": 1,
+  "sender": "Atlas",
+  "recipient": "Schnittstellenagent",
+  "status": "REVISION_REQUIRED",
+  "repository": "pahlborn/agentarium",
+  "branch": "claude/agentarium-visualisierung",
+  "reviewed_commit": "b0a08c1cd54b21424837cf51dc6d8dda083699cb",
+  "reviewed_contract_blob": "8c86e3c6207030adcf0f1a2bb21194e3c3820f8b",
+  "human_handoff": "governance/AG-VISUAL-005-INTERFACE-v2-team-review-v1.md",
+  "evidence": [
+    {
+      "role": "argus",
+      "agent_id": "/root/argus_interface_rereview",
+      "signal": "AG-VISUAL-005-INTERFACE-V2-REVIEW:RA:RA_REVIEW:V1",
+      "verdict": "FAIL"
+    },
+    {
+      "role": "sentinel",
+      "agent_id": "/root/sentinel_interface_rereview",
+      "signal": "AG-VISUAL-005-INTERFACE-V2-REVIEW:SENTINEL:QA_REPORT:V1",
+      "verdict": "FAIL"
+    }
+  ],
+  "required_corrections": [
+    "B1: Resume-Grenzfall, auswertbares EventSource-Recovery und Betriebsrahmen vor Verbindungsaufbau.",
+    "B2: Nicht-nullbare Status-/Prueffelder, Revisionskette, versionsgebundene Done-Nachweise.",
+    "B3: Typisierter Snapshot/Archivzustand; Fixture-Vergleich nicht als berechnete Wiedergabe behaupten; unbelegte Parallelitaet entfernen.",
+    "B4: Expliziter quellenerhaltender Altlog-Adapter, Ist-/Zielfelder korrekt, catalog.changed definieren oder entfernen.",
+    "B5: Einheitliches Kostenschema in Snapshot/Archiv; sichtbarer Status ohne Betraege bei unvollstaendiger Erfassung; synthetische Daten klar kennzeichnen."
+  ],
+  "command_capability": {
+    "supported_actions": [],
+    "reason": "Keine integrierten ausfuehrbaren Befehle nachgewiesen; keine neuen Befugnisse oder Produktimplementierung ableiten."
+  },
+  "delivery": [
+    "Gezielte V2.1-Korrektur mit Schema/Fixtures und begrenzter Datenpruefung.",
+    "Status pro Befund, Quellen, Commit und Blob-Hashes.",
+    "Keine Server-/Browser-/SSE-Abnahme behaupten."
+  ],
+  "limits": [
+    "Keine Infrastrukturaktivierung oder produktive Implementierung.",
+    "Keine kostenpflichtigen Laeufe.",
+    "Kein Merge, Release, Deployment oder Veroeffentlichung."
+  ],
+  "runtime": {
+    "recipient_started": false,
+    "recipient_receipt": null
+  }
+}
