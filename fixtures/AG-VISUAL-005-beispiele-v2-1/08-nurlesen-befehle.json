@@ -15,20 +15,16 @@
       "soll": "Die Wandansicht hat rechte=[read]. Ihr Befehl wird mit fehlercode=recht_fehlt abgelehnt - serverseitig, nicht durch eine verborgene Schaltflaeche."
     },
     {
-      "regel": "R-15",
-      "soll": "Ein ausgefuehrter Befehl nennt folge_ereignisse und verknuepft so Befehl und Wirkung."
-    },
-    {
-      "regel": "R-15b",
-      "soll": "Dieselbe command_id zweimal gesendet fuehrt NICHT zu doppelter Ausfuehrung: die zweite Antwort ist doppelt_ignoriert mit nebenwirkung=false."
-    },
-    {
-      "regel": "R-23",
-      "soll": "stufe=empfangen ist KEIN Ausfuehrungsnachweis."
-    },
-    {
       "regel": "R-32",
       "soll": "Solange supported_actions leer ist, wird JEDE Aktion mit fehlercode nicht_unterstuetzt und nebenwirkung false abgelehnt. Eine Oberflaeche darf keine bedienbaren Steueraktionen anbieten. O1."
+    },
+    {
+      "regel": "R-35",
+      "soll": "supported_actions ist [] und steht maschinenlesbar da. R4."
+    },
+    {
+      "regel": "R-38",
+      "soll": "Kein Betriebsfixture enthaelt eine angenommene oder ausgefuehrte Aktion. Die generische Form steht getrennt als aktiviert=false. R4."
     }
   ],
   "daten": {
@@ -59,59 +55,6 @@
       },
       "folge": "Kein fachliches Ereignis im Arbeitsstrom."
     },
-    "berechtigte_ansicht": {
-      "rechte": [
-        "read",
-        "command"
-      ],
-      "ablauf": [
-        {
-          "antwort": {
-            "schema": "agentarium.befehl.v2.1",
-            "richtung": "antwort",
-            "command_id": "C-002",
-            "stufe": "empfangen",
-            "nebenwirkung": false,
-            "gesendet": "2026-10-15T15:02:00.090Z"
-          },
-          "soll": "empfangen ist kein Ausfuehrungsnachweis"
-        },
-        {
-          "antwort": {
-            "schema": "agentarium.befehl.v2.1",
-            "richtung": "antwort",
-            "command_id": "C-002",
-            "stufe": "angenommen",
-            "nebenwirkung": false,
-            "gesendet": "2026-10-15T15:02:00.300Z"
-          }
-        },
-        {
-          "antwort": {
-            "schema": "agentarium.befehl.v2.1",
-            "richtung": "antwort",
-            "command_id": "C-002",
-            "stufe": "ausgefuehrt",
-            "nebenwirkung": true,
-            "folge_ereignisse": [
-              "E620"
-            ],
-            "gesendet": "2026-10-15T15:02:02.400Z"
-          }
-        }
-      ],
-      "anfrage": {
-        "schema": "agentarium.befehl.v2.1",
-        "richtung": "anfrage",
-        "command_id": "C-002",
-        "aktion": "freigabe.erteilen",
-        "project_id": "AG-NEU",
-        "run_id": "AG-NEU-R1",
-        "task_id": "AG-NEU-021",
-        "erwartete_revision": 3,
-        "gesendet": "2026-10-15T15:02:00Z"
-      }
-    },
     "wiederholung": {
       "anfrage_erneut": {
         "schema": "agentarium.befehl.v2.1",
@@ -129,8 +72,8 @@
         "richtung": "antwort",
         "command_id": "C-002",
         "stufe": "abgelehnt",
-        "grund": "Diese command_id wurde bereits ausgefuehrt.",
-        "fehlercode": "doppelt_ignoriert",
+        "grund": "Diese Schnittstelle unterstuetzt keine ausfuehrbaren Aktionen; supported_actions ist leer.",
+        "fehlercode": "nicht_unterstuetzt",
         "nebenwirkung": false,
         "gesendet": "2026-10-15T15:02:09.080Z"
       }
@@ -181,6 +124,41 @@
         "nebenwirkung": false,
         "gesendet": "2026-10-15T15:10:00.100Z"
       }
+    },
+    "supported_actions": [],
+    "nicht_aktiviertes_beispiel": {
+      "grundlage": "R4: Zukuenftige generische Befehlsformen duerfen als NICHT AKTIVIERTES Schemabeispiel bestehen. Sie sind KEIN Nachweis unterstuetzter Befehle. Die frueher hier gezeigte erfolgreiche Ausfuehrung von freigabe.erteilen widersprach supported_actions = [] und ist entfernt.",
+      "aktiviert": false,
+      "anfrage": {
+        "schema": "agentarium.befehl.v2.1",
+        "richtung": "anfrage",
+        "command_id": "C-002",
+        "aktion": "freigabe.erteilen",
+        "project_id": "AG-NEU",
+        "run_id": "AG-NEU-R1",
+        "task_id": "AG-NEU-021",
+        "erwartete_revision": 3,
+        "gesendet": "2026-10-15T15:02:00Z"
+      },
+      "nur_schemaform": [
+        {
+          "schema": "agentarium.befehl.v2.1",
+          "richtung": "antwort",
+          "command_id": "C-002",
+          "stufe": "empfangen",
+          "nebenwirkung": false,
+          "gesendet": "2026-10-15T15:02:00.090Z"
+        },
+        {
+          "schema": "agentarium.befehl.v2.1",
+          "richtung": "antwort",
+          "command_id": "C-002",
+          "stufe": "angenommen",
+          "nebenwirkung": false,
+          "gesendet": "2026-10-15T15:02:00.300Z"
+        }
+      ],
+      "hinweis": "Selbst empfangen und angenommen werden heute nicht geliefert; dies zeigt allein die Form."
     }
   },
   "uebernommen": "Fixture inhaltlich aus V2 (dort bestanden); serverseitige Durchsetzung bleibt NOT_TESTED."

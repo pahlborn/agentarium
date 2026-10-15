@@ -95,6 +95,8 @@ def fall01():
           'Aufgabenzustand ohne Revision oder Transition (B3)')
     regel('R-24', all('pruefungen' in a and 'version' in a for a in zc['artefakte']),
           'Artefaktzustand ohne Version oder Pruefungen (B3)')
+    regel('R-39', zc['cursor'] == s['cursor'],
+          'innerer Cursor %r weicht vom aeusseren %r ab (R3)' % (zc['cursor'], s['cursor']))
 
 
 def fall02():
@@ -132,6 +134,8 @@ def fall03():
     form(d['betrieb'], 'betrieb', '03 Betriebsrahmen')
     regel('R-27', d['betrieb']['rahmen'] in ('cookie_gleicher_ursprung', 'header_fetch_streaming'),
           'Betriebsrahmen nicht vor der Verbindung festgelegt (B1)')
+    regel('R-35', d['betrieb'].get('supported_actions') == [],
+          'Betriebsdokument ohne maschinenlesbares supported_actions = [] (R4)')
     for f in d['faelle']:
         a = f['antwort']
         form(a, 'resume_antwort', '03 %s' % f['name'])
@@ -214,6 +218,16 @@ def fall05():
           'berechneter Zustand weicht vom behaupteten ab:\n     berechnet %s\n     behauptet %s'
           % (json.dumps(z, ensure_ascii=False, sort_keys=True),
              json.dumps(soll, ensure_ascii=False, sort_keys=True)))
+    w8 = [x for x in ev if x['id'] == 'W8'][0]
+    nw = [x for x in ev if x.get('kind') in ('review_result', 'test_result')
+          and RED.nachweisschluessel(x) == RED.nachweisschluessel(w8)
+          and x.get('outcome') == 'pass']
+    regel('R-36', len(nw) == 1 and w8.get('nachweis_ref') == nw[0]['id'],
+          'Done nennt nicht den Nachweis unter genau (task_id, artifact_id, version, '
+          'criteria_ref): %r' % (RED.nachweisschluessel(w8),))
+    regel('R-37', all(x['kind'] == 'status_change'
+                      for x in ev if x.get('item_revision') is not None),
+          'Zustandsfelder bei einer Art ausser status_change')
     paare = RED.ueberlappend(ev)
     regel('R-21', ('AG-NEU-031', 'AG-NEU-032') in paare,
           'kein Paar mit sich schneidenden Zeitfenstern gefunden (B3)')
@@ -264,8 +278,14 @@ def fall07():
                                        'output_tokens', 'thinking_tokens')),
           'flache Quellfelder des Altlogs fehlen (B4)')
     oc = p.get('ownership_change') or {}
-    regel('R-31', all(f in oc for f in ('task_id', 'scope', 'basis')),
-          'ownership_change verliert task_id, scope oder basis (B4)')
+    # R5 des V2.1-Reviews: KEINE pauschale Pflicht zu scope/basis. Gefordert ist,
+    # dass die effektive Zielaufgabe eindeutig ist. Vorhandene Quellangaben
+    # bleiben erhalten -- ihr Fehlen ist kein Datenverlust.
+    regel('R-31', RED.effektive_aufgabe(p) is not None and not RED.pruefe_ereignis(p),
+          'Verantwortungstransition ohne eindeutige effektive Zielaufgabe (R5)')
+    regel('R-31b', all(f in oc for f in ('scope', 'basis')),
+          'vorhandene Quellangaben scope/basis wurden entfernt - sie sind nicht '
+          'Pflicht, aber sie bleiben erhalten (B4/R5)')
     ad = d['adapter']
     regel('R-30', ad.get('verlustfrei') is True and len(ad.get('ablageebenen', [])) == 2,
           'Adaptervertrag nicht quellenerhaltend oder ohne beide Ablageebenen (B4)')
@@ -285,6 +305,17 @@ def fall08():
     regel('R-32', n['antwort']['fehlercode'] == 'nicht_unterstuetzt'
           and n['antwort']['nebenwirkung'] is False,
           'leere supported_actions fuehren nicht zu nicht_unterstuetzt (O1)')
+    regel('R-35', d.get('supported_actions') == [],
+          'supported_actions nicht maschinenlesbar [] (R4)')
+    bsp = d['nicht_aktiviertes_beispiel']
+    regel('R-38', bsp['aktiviert'] is False
+          and all(a['stufe'] not in ('ausgefuehrt',) for a in bsp['nur_schemaform']),
+          'Betriebsfixture enthaelt eine ausgefuehrte Aktion (R4)')
+    alle = json.dumps(d)
+    regel('R-38', '"ausgefuehrt"' not in alle,
+          'irgendwo im Fixture steht eine ausgefuehrte Aktion (R4)')
+    for a in bsp['nur_schemaform']:
+        form(a, 'befehl', '08 nicht aktiviert %s' % a['stufe'])
 
 
 # ----------------------------------------------------------------- B3
@@ -338,6 +369,26 @@ def negativ():
                 erkannt = bool(v)
         elif wogegen == 'done_nachweise':
             erkannt = bool(RED.done_nachweise(dat))
+        elif wogegen == 'reducer_zustand':
+            z, v = RED.reduziere(dat['ereignisse'])
+            erkannt = (z['aufgaben'] == dat['soll_aufgaben']
+                       and bool(v) == dat['soll_verstoss'])
+        elif wogegen == 'reducer_verstoss':
+            _, v = RED.reduziere(dat, cursor=p.get('cursor_start'))
+            erkannt = bool(v)
+        elif wogegen == 'supported_actions':
+            erkannt = (dat.get('supported_actions') != []) and p['soll_leer']
+        if p['muss'] == 'angenommen':
+            # R5: diese Probe MUSS bestehen. V2.1 hatte sie faelschlich erzwungen.
+            b = formfehler(dat, wogegen)
+            v = RED.pruefe_ereignis(dat)
+            erkannt = not b and not v
+            if not erkannt:
+                fehler.append('POSITIV %-38s wurde abgelehnt, muss aber bestehen: %s'
+                              % (name, '; '.join(b + v)))
+            else:
+                print('  %-40s angenommen  (V2: %s)' % (name, p['v2']))
+            continue
         if not erkannt:
             fehler.append('NEGATIV %-38s NICHT %s (V2: %s, Quelle %s)'
                           % (name, p['muss'], p['v2'], p['quelle']))
@@ -345,10 +396,61 @@ def negativ():
             print('  %-40s %s  (V2: %s)' % (name, p['muss'], p['v2']))
 
 
+# ----------------------------------------------------------------- R3
+def fall11():
+    d = lade('11-snapshot-plus-tail.json')['daten']
+    s = d['schnappschuss']
+    form(s, 'schnappschuss', '11 Schnappschuss')
+    zc = s['lauf']['zustand_am_cursor']
+    regel('R-39', zc['cursor'] == s['cursor'] == 103,
+          'innerer und aeusserer Cursor nicht gleich: %r / %r' % (zc['cursor'], s['cursor']))
+
+    def entpacke(umschlaege):
+        """stream_sequence steht im UMSCHLAG. Transportfolge und Fachidentitaet
+        sind verschiedene Groessen; sie wird hier fuer den Reducer eingesetzt,
+        statt im Fachereignis zu stehen. R3."""
+        aus = []
+        for u in umschlaege:
+            e = dict(u['payload'])
+            e['stream_sequence'] = u['stream_sequence']
+            aus.append(e)
+        return aus
+
+    for u in d['vollhistorie_umschlaege']:
+        form(u, 'umschlag', '11 Umschlag %s' % u['stream_sequence'])
+    voll_ev = entpacke(d['vollhistorie_umschlaege'])
+    letzte_seq = voll_ev[2]['stream_sequence']
+    regel('R-39', s['cursor'] == letzte_seq,
+          'Cursor %r ist keine stream_sequence (letzte im Schnappschuss: %r)'
+          % (s['cursor'], letzte_seq))
+
+    voll, v1 = RED.reduziere(voll_ev, cursor=100)
+    fort, v2 = RED.reduziere(entpacke(d['tail_umschlaege']),
+                             initial_state=zc, cursor=s['cursor'])
+    regel('R-40', not v1 and not v2, 'Verstoesse: %s' % '; '.join(v1 + v2))
+    regel('R-40', voll == fort,
+          'Vollhistorie weicht von Schnappschuss+Tail ab:\n     voll %s\n     fort %s'
+          % (json.dumps(voll, ensure_ascii=False, sort_keys=True),
+             json.dumps(fort, ensure_ascii=False, sort_keys=True)))
+    regel('R-40', voll == d['zustand_voll_soll'], 'behaupteter Vollzustand weicht ab')
+    regel('R-11b', not RED.done_nachweise(voll_ev),
+          'Done ohne Nachweis: %s' % '; '.join(RED.done_nachweise(voll_ev)))
+
+    zd, vd = RED.reduziere(entpacke(d['doppelt_im_tail']['tail_umschlaege']),
+                           initial_state=zc, cursor=s['cursor'])
+    regel('R-41', any('doppelt' in x for x in vd) and zd == fort,
+          'doppeltes Ereignis nicht erkannt oder Zustand veraendert: %s' % '; '.join(vd))
+    zl, vl = RED.reduziere(entpacke(d['luecke_im_tail']['tail_umschlaege']),
+                           initial_state=zc, cursor=s['cursor'])
+    regel('R-42', any('Luecke' in x for x in vl),
+          'Luecke im Tail nicht gemeldet: %s' % '; '.join(vl))
+
+
 def main():
-    print('Schnittstellenvertrag V2.1 — Prueflauf\n')
+    print('Schnittstellenvertrag V2.1.1 — Prueflauf\n')
     print('Negativproben:')
-    for f in (negativ, fall01, fall02, fall03, fall04, fall05, fall06, fall07, fall08, fall09):
+    for f in (negativ, fall01, fall02, fall03, fall04, fall05, fall06, fall07,
+              fall08, fall09, fall11):
         try:
             f()
         except Exception as e:
@@ -364,7 +466,7 @@ def main():
         for z in fehler:
             print('  ' + z)
         return 1
-    print('\nAlle Faelle 01-10 bestanden, alle Negativproben abgewiesen.')
+    print('\nAlle Faelle 01-11 bestanden, alle Proben wie verlangt behandelt.')
     print('NICHT geprueft: Server, SSE, Browser, serverseitige Rechte, '
           'Laufzeit-Nebenwirkungsfreiheit.')
     return 0

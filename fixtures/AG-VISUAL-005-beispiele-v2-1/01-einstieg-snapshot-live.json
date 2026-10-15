@@ -29,6 +29,10 @@
     {
       "regel": "R-25",
       "soll": "hoechste_sequenz ist vorhanden, damit ein Cursor oberhalb des Hoechstwerts erkennbar ist. Befund B1."
+    },
+    {
+      "regel": "R-36",
+      "soll": "Jeder Pruefungseintrag im Zustand nennt task_id -- der Nachweis haengt an der vollen Referenz. R2."
     }
   ],
   "daten": {
@@ -78,7 +82,8 @@
                   "kind": "review_result",
                   "criteria_ref": "AG-PROC-REVIEW-001@v1",
                   "outcome": "pass",
-                  "event_id": "E401"
+                  "event_id": "E401",
+                  "task_id": "AG-NEU-021"
                 }
               ]
             }
@@ -95,7 +100,8 @@
         "status_text": "Kosten nicht vollständig ermittelbar.",
         "ohne_angabe": 6
       },
-      "hoechste_sequenz": 414
+      "hoechste_sequenz": 414,
+      "supported_actions": []
     },
     "danach": [
       {

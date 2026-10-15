@@ -124,10 +124,15 @@
         "katalogstrom": { "$ref": "#/$defs/text_nichtleer" },
         "resume_pruefung": { "$ref": "#/$defs/text_nichtleer" },
         "heartbeat_takt_s": { "type": "integer", "minimum": 1 },
-        "veraltet_nach_s": { "type": "integer", "minimum": 1 }
+        "veraltet_nach_s": { "type": "integer", "minimum": 1 },
+        "supported_actions": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/text_nichtleer" },
+          "description": "R4 des V2.1-Reviews: maschinenlesbar, nicht nur in Prosa. AKTUELLES PROFIL IST []: Atlas' Team hat nachgesehen, kein ausfuehrbarer integrierter Befehl ist nachgewiesen. Eine Oberflaeche darf daraus keine bedienbare Steueraktion ableiten. Ein generisches Befehlsschema darf als NICHT AKTIVIERTES Beispiel bestehen; es ist kein Nachweis unterstuetzter Befehle."
+        }
       },
       "required": ["schema", "rahmen", "katalogstrom", "resume_pruefung",
-                   "heartbeat_takt_s", "veraltet_nach_s"],
+                   "heartbeat_takt_s", "veraltet_nach_s", "supported_actions"],
       "additionalProperties": false
     },
 
@@ -202,7 +207,7 @@
         "actor": { "$ref": "#/$defs/kennung" },
         "recipient": { "type": ["string", "null"] },
         "kind": { "$ref": "#/$defs/text_nichtleer" },
-        "title": { "type": "string" },
+        "title": { "$ref": "#/$defs/text_nichtleer" },
         "caused_by": { "type": "array", "items": { "type": "string" } },
         "occurred_at": { "oneOf": [{ "$ref": "#/$defs/zeitpunkt" }, { "type": "null" }] },
         "recorded_at": { "$ref": "#/$defs/zeitpunkt" },
@@ -210,14 +215,15 @@
         "source_evidence": { "type": ["string", "null"] },
         "ownership_change": {
           "type": ["object", "null"],
-          "description": "B4: task_id, scope und basis bleiben erhalten. Verantwortung wird nie aus Parent oder Empfaenger allein abgeleitet.",
+          "description": "R5 des V2.1-Reviews: Die effektive Zielaufgabe muss eindeutig aus ownership_change.task_id ODER task_id des Ereignisses hervorgehen; widersprechen sich beide, wird abgelehnt (geprueft im Reducer, da Felder verglichen werden muessen). scope und basis bleiben ERHALTEN, sind aber NICHT Pflicht -- optionale Quellangaben pauschal verpflichtend zu machen war kein Auftrag. Verantwortung folgt nie aus recipient oder parent_task_id allein.",
           "properties": {
             "from": { "type": ["string", "null"] },
-            "to": { "type": ["string", "null"] },
+            "to": { "$ref": "#/$defs/text_nichtleer" },
             "task_id": { "type": ["string", "null"] },
             "scope": { "type": ["string", "null"] },
             "basis": { "type": ["string", "null"] }
           },
+          "required": ["to"],
           "additionalProperties": false
         },
         "result_ref": { "type": ["string", "null"] },
@@ -244,6 +250,10 @@
         "from": { "type": ["string", "null"] },
         "to": { "type": ["string", "null"] },
         "scope_version": { "type": ["string", "null"] },
+        "nachweis_ref": {
+          "type": ["string", "null"],
+          "description": "R2 des V2.1-Reviews: die Ereignis-ID des massgeblichen Pruefnachweises. Genannt, muss sie der Pruefung unter genau (task_id, artifact_id, version, criteria_ref) entsprechen."
+        },
         "abweichung_autorisiert_durch": {
           "type": ["string", "null"],
           "description": "B2: Done ohne versionsgebundenen Erfuellungsnachweis ist nur mit ausdruecklich autorisierter Abweichung zulaessig. Hier steht, wer sie autorisiert hat."
@@ -256,15 +266,28 @@
       "additionalProperties": false,
       "allOf": [
         {
-          "$comment": "B2: nichtleere, ereignisabhaengige Varianten. In V2 erlaubte die Basis null, und das if/then forderte nur VORHANDENSEIN -- hollow_done und hollow_review wurden akzeptiert.",
+          "$comment": "R1 des V2.1-Reviews: NUR status_change darf Zustandsfelder tragen. Sentinels Probe original_noop_with_required_shell war ein formal vollstaendiges Ereignis unbekannter Art, das item_revision und to trug und damit an der Done-Pruefung vorbeikam. Der else-Zweig laesst diese Felder bei jeder anderen Art nicht durch.",
           "if": { "properties": { "kind": { "const": "status_change" } }, "required": ["kind"] },
+          "else": {
+            "properties": {
+              "item_revision": { "type": "null" },
+              "from": { "type": "null" },
+              "to": { "type": "null" },
+              "previous_transition_id": { "type": "null" },
+              "nachweis_ref": { "type": "null" }
+            }
+          },
           "then": {
             "properties": {
               "task_id": { "$ref": "#/$defs/text_nichtleer" },
-              "from": { "$ref": "#/$defs/text_nichtleer" },
+              "from": {
+                "type": ["string", "null"],
+                "$comment": "null NUR beim ersten Uebergang einer Aufgabe, erkennbar an previous_transition_id null. Der Reducer prueft das Paar; ein Schema kann zwei Felder nicht gegeneinander pruefen."
+              },
               "to": { "$ref": "#/$defs/text_nichtleer" },
               "item_revision": { "type": "integer", "minimum": 1 },
-              "previous_transition_id": { "type": ["string", "null"] }
+              "previous_transition_id": { "type": ["string", "null"] },
+              "nachweis_ref": { "type": ["string", "null"] }
             },
             "required": ["task_id", "from", "to", "item_revision", "previous_transition_id"]
           }
@@ -392,11 +415,13 @@
             "type": "object",
             "properties": {
               "kind": { "enum": ["review_result", "test_result"] },
+              "task_id": { "$ref": "#/$defs/text_nichtleer" },
               "criteria_ref": { "$ref": "#/$defs/text_nichtleer" },
               "outcome": { "enum": ["pass", "fail", "blocked", "not_tested", "partial"] },
               "event_id": { "$ref": "#/$defs/text_nichtleer" }
             },
-            "required": ["kind", "criteria_ref", "outcome", "event_id"],
+            "$comment": "R2 des V2.1-Reviews: task_id gehoert in den Schluessel des Nachweises. Ohne sie koennte ein Pass einer FREMDEN Aufgabe Done erlauben.",
+            "required": ["kind", "task_id", "criteria_ref", "outcome", "event_id"],
             "additionalProperties": false
           }
         }
@@ -442,6 +467,11 @@
         "hoechste_sequenz": { "type": "integer", "minimum": 0 },
         "rechte": { "type": "array", "items": { "enum": ["read", "command"] },
                     "minItems": 1, "uniqueItems": true, "contains": { "const": "read" } },
+        "supported_actions": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/text_nichtleer" },
+          "description": "R4: aktuelles Profil, heute []. Siehe $defs.betrieb."
+        },
         "projekte": { "type": "array", "items": { "$ref": "#/$defs/projektstand" } },
         "lauf": { "oneOf": [{ "$ref": "#/$defs/laufstand" }, { "type": "null" }] },
         "kosten": { "$ref": "#/$defs/kostenfeld" }

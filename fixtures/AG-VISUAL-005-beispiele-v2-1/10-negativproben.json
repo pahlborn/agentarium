@@ -4,7 +4,7 @@
   "prueft": [
     "V2.1 §B1-B5"
   ],
-  "grundlage": "Die ersten sieben sind die unabhaengigen Proben aus Sentinels Ausfuehrungsnachweis zum Team-Review. Fuenf wurden von V2 AKZEPTIERT, zwei Regeln erkannten ihren eigenen Fall nicht. Sie sind hier als Pflichtfaelle uebernommen, wie im Korrekturauftrag verlangt.",
+  "grundlage": "Die ersten sieben sind die unabhaengigen Proben aus Sentinels Ausfuehrungsnachweis zum Team-Review. Fuenf wurden von V2 AKZEPTIERT, zwei Regeln erkannten ihren eigenen Fall nicht. Sie sind hier als Pflichtfaelle uebernommen, wie im Korrekturauftrag verlangt. Die Proben 14-21 kommen aus dem V2.1-Team-Review: original_noop_with_required_shell und noop_state_pollution_schema wurden von V2.1 akzeptiert, ownership_change_without_task_scope_basis ebenfalls - letztere ist nach R5 aber KEIN Fehler, sondern wird als solche richtiggestellt.",
   "proben": [
     {
       "name": "minimal_work_event",
@@ -227,7 +227,15 @@
           "version": "v2",
           "criteria_ref": "c",
           "outcome": "fail",
-          "task_id": "T"
+          "task_id": "T",
+          "title": "done_ohne_pass Schritt 1",
+          "project_id": "x",
+          "run_id": "x",
+          "actor": "x",
+          "caused_by": [],
+          "occurred_at": null,
+          "recorded_at": "2026-10-15T10:00:00Z",
+          "fictional": false
         },
         {
           "id": "D2",
@@ -238,9 +246,18 @@
           "item_revision": 2,
           "previous_transition_id": "D0",
           "artifact_id": "A",
-          "version": "v2"
+          "version": "v2",
+          "title": "done_ohne_pass Schritt 2",
+          "project_id": "x",
+          "run_id": "x",
+          "actor": "x",
+          "caused_by": [],
+          "occurred_at": null,
+          "recorded_at": "2026-10-15T10:00:00Z",
+          "fictional": false
         }
-      ]
+      ],
+      "bemerkung": "Vollstaendige formale Huelle, damit die Probe wirklich die FACHREGEL prueft. Ohne Titel waere sie schon formal ungueltig gewesen und haette bestanden, ohne den Befund zu treffen."
     },
     {
       "name": "revisionskette_gebrochen",
@@ -257,7 +274,15 @@
           "from": null,
           "to": "offen",
           "item_revision": 1,
-          "previous_transition_id": null
+          "previous_transition_id": null,
+          "title": "revisionskette_gebrochen Schritt 1",
+          "project_id": "x",
+          "run_id": "x",
+          "actor": "x",
+          "caused_by": [],
+          "occurred_at": null,
+          "recorded_at": "2026-10-15T10:00:00Z",
+          "fictional": false
         },
         {
           "id": "K2",
@@ -266,9 +291,18 @@
           "from": "offen",
           "to": "done",
           "item_revision": 1,
-          "previous_transition_id": "FALSCH"
+          "previous_transition_id": "FALSCH",
+          "title": "revisionskette_gebrochen Schritt 2",
+          "project_id": "x",
+          "run_id": "x",
+          "actor": "x",
+          "caused_by": [],
+          "occurred_at": null,
+          "recorded_at": "2026-10-15T10:00:00Z",
+          "fictional": false
         }
-      ]
+      ],
+      "bemerkung": "Vollstaendige formale Huelle, damit die Probe wirklich die FACHREGEL prueft. Ohne Titel waere sie schon formal ungueltig gewesen und haette bestanden, ohne den Befund zu treffen."
     },
     {
       "name": "resume_grenze_off_by_one",
@@ -336,6 +370,449 @@
           "belegt": true
         }
       }
+    },
+    {
+      "name": "original_noop_with_required_shell",
+      "quelle": "Sentinel V2.1",
+      "v2": "ACCEPTED",
+      "muss": "abgelehnt",
+      "wogegen": "arbeitsereignis",
+      "warum": "R1. Der eigentliche Befund hinter minimal_work_event: ein inhaltsarmes Ereignis UNBEKANNTER Art mit vollstaendiger formaler Huelle, das Zustandsfelder traegt und so Done ohne Nachweis erzeugt. V2.1 schrieb Status bei jedem Ereignis mit item_revision und to, prueefte Done aber nur bei status_change.",
+      "daten": {
+        "id": "X1",
+        "project_id": "P",
+        "run_id": "P-R1",
+        "actor": "forge",
+        "kind": "noop",
+        "title": "sieht vollstaendig aus",
+        "caused_by": [],
+        "occurred_at": "2026-10-15T10:00:00Z",
+        "recorded_at": "2026-10-15T10:00:01Z",
+        "fictional": false,
+        "artifact_id": "A",
+        "version": "v1",
+        "task_id": "T",
+        "from": "offen",
+        "to": "done",
+        "item_revision": 1,
+        "previous_transition_id": null
+      }
+    },
+    {
+      "name": "noop_state_pollution_reducer",
+      "quelle": "Sentinel V2.1",
+      "v2": "ACCEPTED",
+      "muss": "erkannt",
+      "wogegen": "reducer_zustand",
+      "warum": "R1. Dasselbe Ereignis darf auch im Reducer keinen Zustand schreiben.",
+      "daten": {
+        "ereignisse": [
+          {
+            "id": "X1",
+            "project_id": "P",
+            "run_id": "P-R1",
+            "actor": "forge",
+            "kind": "noop",
+            "title": "sieht vollstaendig aus",
+            "caused_by": [],
+            "occurred_at": "2026-10-15T10:00:00Z",
+            "recorded_at": "2026-10-15T10:00:01Z",
+            "fictional": false,
+            "artifact_id": "A",
+            "version": "v1",
+            "task_id": "T",
+            "from": "offen",
+            "to": "done",
+            "item_revision": 1,
+            "previous_transition_id": null
+          }
+        ],
+        "soll_aufgaben": [],
+        "soll_verstoss": true
+      }
+    },
+    {
+      "name": "done_falsche_kriterienfassung",
+      "quelle": "Argus R2",
+      "v2": "ACCEPTED",
+      "muss": "erkannt",
+      "wogegen": "done_nachweise",
+      "warum": "R2. Genau der Fall aus Fixture 05: bestanden wurde unter AG-VISUAL-004-testability@v1, Done beruft sich auf AG-PROC-REVIEW-001@v1.",
+      "daten": [
+        {
+          "id": "C1",
+          "kind": "test_result",
+          "title": "bestanden",
+          "task_id": "T",
+          "artifact_id": "A",
+          "version": "v2",
+          "criteria_ref": "KRIT-A@v1",
+          "outcome": "pass",
+          "project_id": "x",
+          "run_id": "x",
+          "actor": "x",
+          "caused_by": [],
+          "occurred_at": null,
+          "recorded_at": "2026-10-15T10:00:00Z",
+          "fictional": false
+        },
+        {
+          "id": "C2",
+          "kind": "status_change",
+          "title": "Done",
+          "task_id": "T",
+          "from": "offen",
+          "to": "done",
+          "item_revision": 2,
+          "previous_transition_id": "C0",
+          "artifact_id": "A",
+          "version": "v2",
+          "criteria_ref": "KRIT-B@v1",
+          "project_id": "x",
+          "run_id": "x",
+          "actor": "x",
+          "caused_by": [],
+          "occurred_at": null,
+          "recorded_at": "2026-10-15T10:00:00Z",
+          "fictional": false
+        }
+      ],
+      "bemerkung": "Vollstaendige formale Huelle, damit die Probe wirklich die FACHREGEL prueft. Ohne Titel waere sie schon formal ungueltig gewesen und haette bestanden, ohne den Befund zu treffen."
+    },
+    {
+      "name": "done_fremde_aufgabe",
+      "quelle": "Argus R2",
+      "v2": "ACCEPTED",
+      "muss": "erkannt",
+      "wogegen": "done_nachweise",
+      "warum": "R2. Der Pass gehoert zu Aufgabe T-FREMD, Done betrifft T.",
+      "daten": [
+        {
+          "id": "F1",
+          "kind": "test_result",
+          "title": "bestanden",
+          "task_id": "T-FREMD",
+          "artifact_id": "A",
+          "version": "v1",
+          "criteria_ref": "KRIT@v1",
+          "outcome": "pass",
+          "project_id": "x",
+          "run_id": "x",
+          "actor": "x",
+          "caused_by": [],
+          "occurred_at": null,
+          "recorded_at": "2026-10-15T10:00:00Z",
+          "fictional": false
+        },
+        {
+          "id": "F2",
+          "kind": "status_change",
+          "title": "Done",
+          "task_id": "T",
+          "from": "offen",
+          "to": "done",
+          "item_revision": 2,
+          "previous_transition_id": "F0",
+          "artifact_id": "A",
+          "version": "v1",
+          "criteria_ref": "KRIT@v1",
+          "project_id": "x",
+          "run_id": "x",
+          "actor": "x",
+          "caused_by": [],
+          "occurred_at": null,
+          "recorded_at": "2026-10-15T10:00:00Z",
+          "fictional": false
+        }
+      ],
+      "bemerkung": "Vollstaendige formale Huelle, damit die Probe wirklich die FACHREGEL prueft. Ohne Titel waere sie schon formal ungueltig gewesen und haette bestanden, ohne den Befund zu treffen."
+    },
+    {
+      "name": "spaeteres_fail_sperrt_done",
+      "quelle": "Argus R2",
+      "v2": "nicht geprueft",
+      "muss": "erkannt",
+      "wogegen": "done_nachweise",
+      "warum": "R2. Ein spaeteres Fail auf dieselbe Nachweisreferenz sperrt Done, bis ein neuer gueltiger Nachweis vorliegt.",
+      "daten": [
+        {
+          "id": "L1",
+          "kind": "test_result",
+          "title": "bestanden",
+          "task_id": "T",
+          "artifact_id": "A",
+          "version": "v1",
+          "criteria_ref": "KRIT@v1",
+          "outcome": "pass",
+          "project_id": "x",
+          "run_id": "x",
+          "actor": "x",
+          "caused_by": [],
+          "occurred_at": null,
+          "recorded_at": "2026-10-15T10:00:00Z",
+          "fictional": false
+        },
+        {
+          "id": "L2",
+          "kind": "test_result",
+          "title": "doch nicht",
+          "task_id": "T",
+          "artifact_id": "A",
+          "version": "v1",
+          "criteria_ref": "KRIT@v1",
+          "outcome": "fail",
+          "project_id": "x",
+          "run_id": "x",
+          "actor": "x",
+          "caused_by": [],
+          "occurred_at": null,
+          "recorded_at": "2026-10-15T10:00:00Z",
+          "fictional": false
+        },
+        {
+          "id": "L3",
+          "kind": "status_change",
+          "title": "Done",
+          "task_id": "T",
+          "from": "offen",
+          "to": "done",
+          "item_revision": 2,
+          "previous_transition_id": "L0",
+          "artifact_id": "A",
+          "version": "v1",
+          "criteria_ref": "KRIT@v1",
+          "project_id": "x",
+          "run_id": "x",
+          "actor": "x",
+          "caused_by": [],
+          "occurred_at": null,
+          "recorded_at": "2026-10-15T10:00:00Z",
+          "fictional": false
+        }
+      ],
+      "bemerkung": "Vollstaendige formale Huelle, damit die Probe wirklich die FACHREGEL prueft. Ohne Titel waere sie schon formal ungueltig gewesen und haette bestanden, ohne den Befund zu treffen."
+    },
+    {
+      "name": "nachweis_ref_zeigt_falsch",
+      "quelle": "eigen zu R2",
+      "v2": "nicht geprueft",
+      "muss": "erkannt",
+      "wogegen": "done_nachweise",
+      "warum": "R2. Wird ein Nachweis ausdruecklich genannt, muss es der massgebliche sein.",
+      "daten": [
+        {
+          "id": "N1",
+          "kind": "test_result",
+          "title": "bestanden",
+          "task_id": "T",
+          "artifact_id": "A",
+          "version": "v1",
+          "criteria_ref": "KRIT@v1",
+          "outcome": "pass",
+          "project_id": "x",
+          "run_id": "x",
+          "actor": "x",
+          "caused_by": [],
+          "occurred_at": null,
+          "recorded_at": "2026-10-15T10:00:00Z",
+          "fictional": false
+        },
+        {
+          "id": "N2",
+          "kind": "status_change",
+          "title": "Done",
+          "task_id": "T",
+          "from": "offen",
+          "to": "done",
+          "item_revision": 2,
+          "previous_transition_id": "N0",
+          "artifact_id": "A",
+          "version": "v1",
+          "criteria_ref": "KRIT@v1",
+          "nachweis_ref": "IRGENDWAS",
+          "project_id": "x",
+          "run_id": "x",
+          "actor": "x",
+          "caused_by": [],
+          "occurred_at": null,
+          "recorded_at": "2026-10-15T10:00:00Z",
+          "fictional": false
+        }
+      ],
+      "bemerkung": "Vollstaendige formale Huelle, damit die Probe wirklich die FACHREGEL prueft. Ohne Titel waere sie schon formal ungueltig gewesen und haette bestanden, ohne den Befund zu treffen."
+    },
+    {
+      "name": "ownership_ohne_effektive_aufgabe",
+      "quelle": "Sentinel R5",
+      "v2": "ACCEPTED",
+      "muss": "erkannt",
+      "wogegen": "reducer_verstoss",
+      "warum": "R5. Nicht das Fehlen von scope/basis ist der Fehler - sondern eine Verantwortungstransition, deren Zielaufgabe sich nirgends ergibt.",
+      "daten": [
+        {
+          "id": "X1",
+          "project_id": "P",
+          "run_id": "P-R1",
+          "actor": "forge",
+          "kind": "handoff",
+          "title": "Uebergabe",
+          "caused_by": [],
+          "occurred_at": "2026-10-15T10:00:00Z",
+          "recorded_at": "2026-10-15T10:00:01Z",
+          "fictional": false,
+          "artifact_id": "A",
+          "version": "v1",
+          "recipient": "forge",
+          "task_id": null,
+          "ownership_change": {
+            "from": "atlas",
+            "to": "forge"
+          }
+        }
+      ]
+    },
+    {
+      "name": "ownership_widerspruechliche_aufgabe",
+      "quelle": "Atlas R5",
+      "v2": "nicht geprueft",
+      "muss": "erkannt",
+      "wogegen": "reducer_verstoss",
+      "warum": "R5. Widersprechen sich ownership_change.task_id und task_id des Ereignisses, wird abgelehnt.",
+      "daten": [
+        {
+          "id": "X1",
+          "project_id": "P",
+          "run_id": "P-R1",
+          "actor": "forge",
+          "kind": "handoff",
+          "title": "Uebergabe",
+          "caused_by": [],
+          "occurred_at": "2026-10-15T10:00:00Z",
+          "recorded_at": "2026-10-15T10:00:01Z",
+          "fictional": false,
+          "artifact_id": "A",
+          "version": "v1",
+          "recipient": "forge",
+          "task_id": "T-A",
+          "ownership_change": {
+            "from": "atlas",
+            "to": "forge",
+            "task_id": "T-B"
+          }
+        }
+      ]
+    },
+    {
+      "name": "ownership_ohne_scope_basis_ist_KEIN_fehler",
+      "quelle": "Atlas R5",
+      "v2": "ACCEPTED",
+      "muss": "angenommen",
+      "wogegen": "arbeitsereignis",
+      "warum": "R5 ausdruecklich: optionale Metadaten pauschal verpflichtend zu machen war kein Auftrag. Fehlendes scope/basis ist kein Beweis fuer Datenverlust. Diese Probe muss BESTEHEN - V2.1 hatte sie faelschlich als Pflicht erzwungen.",
+      "daten": {
+        "id": "X1",
+        "project_id": "P",
+        "run_id": "P-R1",
+        "actor": "forge",
+        "kind": "handoff",
+        "title": "Uebergabe",
+        "caused_by": [],
+        "occurred_at": "2026-10-15T10:00:00Z",
+        "recorded_at": "2026-10-15T10:00:01Z",
+        "fictional": false,
+        "artifact_id": "A",
+        "version": "v1",
+        "recipient": "forge",
+        "task_id": "T",
+        "ownership_change": {
+          "from": "atlas",
+          "to": "forge",
+          "task_id": "T"
+        }
+      }
+    },
+    {
+      "name": "betrieb_mit_aktionen",
+      "quelle": "Argus R4",
+      "v2": "Prosa-Widerspruch",
+      "muss": "erkannt",
+      "wogegen": "supported_actions",
+      "warum": "R4. supported_actions ist [] - ein Betriebsdokument, das Aktionen ausweist, widerspricht dem nachgewiesenen Stand.",
+      "daten": {
+        "schema": "agentarium.betrieb.v2.1",
+        "rahmen": "cookie_gleicher_ursprung",
+        "katalogstrom": "/k",
+        "resume_pruefung": "/r",
+        "heartbeat_takt_s": 5,
+        "veraltet_nach_s": 20,
+        "supported_actions": [
+          "freigabe.erteilen"
+        ]
+      },
+      "soll_leer": true
+    },
+    {
+      "name": "titel_leer",
+      "quelle": "Argus R1",
+      "v2": "ACCEPTED",
+      "muss": "abgelehnt",
+      "wogegen": "arbeitsereignis",
+      "warum": "R1 verlangt einen nichtleeren fachlichen Titel.",
+      "daten": {
+        "id": "X1",
+        "project_id": "P",
+        "run_id": "P-R1",
+        "actor": "forge",
+        "kind": "artifact",
+        "title": "",
+        "caused_by": [],
+        "occurred_at": "2026-10-15T10:00:00Z",
+        "recorded_at": "2026-10-15T10:00:01Z",
+        "fictional": false,
+        "artifact_id": "A",
+        "version": "v1"
+      }
+    },
+    {
+      "name": "tail_doppelt",
+      "quelle": "Argus R3",
+      "v2": "nicht geprueft",
+      "muss": "erkannt",
+      "wogegen": "reducer_verstoss",
+      "warum": "R3. Ein doppeltes Ereignis darf keine unbemerkte doppelte Zustandsaenderung erzeugen.",
+      "daten": [
+        {
+          "id": "T1",
+          "stream_sequence": 5,
+          "kind": "artifact",
+          "title": "a",
+          "actor": "x",
+          "project_id": "P",
+          "run_id": "R",
+          "caused_by": [],
+          "occurred_at": null,
+          "recorded_at": "2026-10-15T10:00:00Z",
+          "fictional": true,
+          "artifact_id": "A",
+          "version": "v1"
+        },
+        {
+          "id": "T1",
+          "stream_sequence": 5,
+          "kind": "artifact",
+          "title": "a",
+          "actor": "x",
+          "project_id": "P",
+          "run_id": "R",
+          "caused_by": [],
+          "occurred_at": null,
+          "recorded_at": "2026-10-15T10:00:00Z",
+          "fictional": true,
+          "artifact_id": "A",
+          "version": "v1"
+        }
+      ],
+      "cursor_start": 4
     }
   ]
 }

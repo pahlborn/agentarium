@@ -37,6 +37,14 @@
     {
       "regel": "R-29",
       "soll": "Der Referenz-Reducer rechnet zustand_am_cursor_soll aus den Ereignissen nach. Ein falsch behaupteter Zustand faellt damit auf. Befund B3."
+    },
+    {
+      "regel": "R-36",
+      "soll": "Der Done-Nachweis haengt an (task_id, artifact_id, version, criteria_ref). Ein Pass unter einer anderen Kriterienfassung oder fuer eine andere Aufgabe erlaubt Done NICHT. R2."
+    },
+    {
+      "regel": "R-37",
+      "soll": "Nur kind=status_change schreibt Status. W1 und W2 sind daher Statuswechsel, nicht Anfragen mit Zustandsfeldern. R1."
     }
   ],
   "daten": {
@@ -48,9 +56,8 @@
         "run_id": "AG-NEU-R1",
         "task_id": "AG-NEU-031",
         "actor": "atlas",
-        "recipient": "forge",
-        "kind": "request",
-        "title": "Aufgabe 031 eroeffnet",
+        "kind": "status_change",
+        "title": "Aufgabe 031 eroeffnet (Statuswechsel)",
         "caused_by": [],
         "occurred_at": "2026-10-15T11:00:00Z",
         "recorded_at": "2026-10-15T11:00:01Z",
@@ -67,9 +74,8 @@
         "run_id": "AG-NEU-R1",
         "task_id": "AG-NEU-032",
         "actor": "atlas",
-        "recipient": "nova",
-        "kind": "request",
-        "title": "Aufgabe 032 eroeffnet",
+        "kind": "status_change",
+        "title": "Aufgabe 032 eroeffnet (Statuswechsel)",
         "caused_by": [],
         "occurred_at": "2026-10-15T11:00:30Z",
         "recorded_at": "2026-10-15T11:00:31Z",
@@ -210,7 +216,8 @@
         "previous_transition_id": "W1",
         "artifact_id": "ART-11",
         "version": "v2",
-        "criteria_ref": "AG-PROC-REVIEW-001@v1"
+        "criteria_ref": "AG-VISUAL-004-testability@v1",
+        "nachweis_ref": "W7b"
       }
     ],
     "abgeleitet": {
@@ -220,7 +227,7 @@
       "nicht_done": [
         "AG-NEU-032"
       ],
-      "begruendung": "031 hat W8 (status_change, item_revision 2) UND einen versionsgebundenen Erfuellungsnachweis: W7b, outcome pass auf genau ART-11 v2. W7 (fail auf v2) allein haette Done nicht gedeckt -- das war der Befund B2 an V2."
+      "begruendung": "031 hat W8 (status_change, item_revision 2) und einen Nachweis unter GENAU (task_id AG-NEU-031, artifact_id ART-11, version v2, criteria_ref AG-VISUAL-004-testability@v1): das ist W7b mit outcome pass, von W8 als nachweis_ref genannt. Vorher nannte W8 AG-PROC-REVIEW-001@v1 - eine andere Kriterienfassung, unter der nie etwas bestanden hatte. Befund R2."
     },
     "zustand_am_cursor_soll": {
       "cursor": 9,
@@ -252,6 +259,7 @@
           "pruefungen": [
             {
               "kind": "review_result",
+              "task_id": "AG-NEU-031",
               "criteria_ref": "AG-PROC-REVIEW-001@v1",
               "outcome": "pass",
               "event_id": "W5"
@@ -265,12 +273,14 @@
           "pruefungen": [
             {
               "kind": "test_result",
+              "task_id": "AG-NEU-031",
               "criteria_ref": "AG-VISUAL-004-testability@v1",
               "outcome": "fail",
               "event_id": "W7"
             },
             {
               "kind": "test_result",
+              "task_id": "AG-NEU-031",
               "criteria_ref": "AG-VISUAL-004-testability@v1",
               "outcome": "pass",
               "event_id": "W7b"

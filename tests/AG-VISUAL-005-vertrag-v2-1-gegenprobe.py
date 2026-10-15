@@ -3,8 +3,9 @@
 
 Das Team-Review hat an V2 zwei Regeln gefunden, die ihren eigenen Fall nicht
 erkannten (R21, R16b). Eine Regel, die nicht fehlschlagen kann, ist eine
-Attrappe. Diese Gegenprobe verletzt jeden Befund B1-B5 absichtlich und
-verlangt, dass die zugehoerige Pruefung anspringt.
+Attrappe. Diese Gegenprobe verletzt jeden Befund B1-B5 und jede
+Restkorrektur R1-R5 absichtlich und verlangt, dass die zugehoerige
+Pruefung anspringt.
 
 Aufruf:  python3 tests/AG-VISUAL-005-vertrag-v2-1-gegenprobe.py
 """
@@ -93,6 +94,56 @@ V = [
   'O1','R-32','leere supported_actions nicht als nicht_unterstuetzt gemeldet'),
  ('08-nurlesen-befehle.json', ['daten','wandansicht','antwort','nebenwirkung'], True,
   'O1','FORM','abgelehnter Befehl mit Nebenwirkung'),
+ # ---- R1 Nur status_change schreibt Status
+ ('05-parallel-artefakte-review.json', ['daten','ereignisse',0,'kind'], 'noop',
+  'R1','FORM','Zustandsfelder an einer unbekannten Art (Sentinels noop-Fall)'),
+ ('05-parallel-artefakte-review.json', ['daten','ereignisse',2,'item_revision'], 7,
+  'R1','FORM','Zustandsfeld an kind=artifact durchgelassen'),
+ ('05-parallel-artefakte-review.json', ['daten','ereignisse',3,'title'], '',
+  'R1','FORM','fachlicher Titel leer'),
+ ('09-archiv-zeitsprung.json', ['daten','manifest','ereignisse',0,'kind'], 'noop',
+  'R1','FORM','Archivereignis: unbekannte Art mit Zustandsfeldern'),
+ # ---- R2 Nachweis an der vollen Referenz
+ ('05-parallel-artefakte-review.json', ['daten','ereignisse',8,'criteria_ref'],
+  'AG-PROC-REVIEW-001@v1',
+  'R2','R-11b','Done unter einer Kriterienfassung, unter der nie etwas bestand'),
+ ('05-parallel-artefakte-review.json', ['daten','ereignisse',7,'task_id'], 'T-FREMD',
+  'R2','R-11b','Pass gehoert zu einer fremden Aufgabe'),
+ ('05-parallel-artefakte-review.json', ['daten','ereignisse',8,'nachweis_ref'], 'W5',
+  'R2','R-11b','nachweis_ref zeigt auf die Pruefung der falschen Version'),
+ ('11-snapshot-plus-tail.json',
+  ['daten','vollhistorie_umschlaege',5,'payload','criteria_ref'], 'ANDERS@v1',
+  'R2','R-11b','Done im Tail unter anderer Kriterienfassung'),
+ # ---- R3 Schnappschuss plus Tail
+ ('11-snapshot-plus-tail.json', ['daten','schnappschuss','cursor'], 99,
+  'R3','R-39','aeusserer Cursor weicht vom inneren ab'),
+ ('11-snapshot-plus-tail.json',
+  ['daten','schnappschuss','lauf','zustand_am_cursor','aufgaben'], [],
+  'R3','R-40','Schnappschusszustand leer: Fortschreibung weicht von der Vollhistorie ab'),
+ ('11-snapshot-plus-tail.json',
+  ['daten','tail_umschlaege',0,'stream_sequence'], 110,
+  'R3','R-42','Sprung in der Transportfolge des Tails'),
+ ('11-snapshot-plus-tail.json', ['daten','zustand_voll_soll','cursor'], 999,
+  'R3','R-40','behaupteter Vollzustand mit falschem Cursor'),
+ # ---- R4 Befehlsprofil maschinenlesbar
+ ('03-resume-grenzfaelle.json', ['daten','betrieb','supported_actions'],
+  ['freigabe.erteilen'],
+  'R4','R-35','Betriebsdokument weist Aktionen aus, obwohl keine nachgewiesen sind'),
+ ('03-resume-grenzfaelle.json', ['daten','betrieb','supported_actions'], None,
+  'R4','FORM','supported_actions fehlt ganz'),
+ ('08-nurlesen-befehle.json',
+  ['daten','nicht_aktiviertes_beispiel','nur_schemaform',0,'stufe'], 'ausgefuehrt',
+  'R4','R-38','ausgefuehrte Aktion im Betriebsfixture'),
+ ('08-nurlesen-befehle.json', ['daten','nicht_aktiviertes_beispiel','aktiviert'], True,
+  'R4','R-38','generisches Beispiel als aktiviert ausgegeben'),
+ # ---- R5 Uebergabe gegen Quelltreue
+ ('07-altlog-ohne-zeitpunkte.json',
+  ['daten','manifest','ereignisse',0,'ownership_change'],
+  {'from': None, 'to': 'atlas', 'task_id': 'EINE-ANDERE'},
+  'R5','R-31','ownership_change widerspricht der task_id des Ereignisses'),
+ ('07-altlog-ohne-zeitpunkte.json',
+  ['daten','manifest','ereignisse',0,'ownership_change','scope'], None,
+  'R5','R-31b','vorhandene Quellangabe scope entfernt'),
 ]
 
 
@@ -124,7 +175,8 @@ def main():
             sys.stdout = _io.StringIO()
             try:
                 for fn in (m.negativ, m.fall01, m.fall02, m.fall03, m.fall04,
-                           m.fall05, m.fall06, m.fall07, m.fall08, m.fall09):
+                           m.fall05, m.fall06, m.fall07, m.fall08, m.fall09,
+                           m.fall11):
                     try:
                         fn()
                     except Exception as e:

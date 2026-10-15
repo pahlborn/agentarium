@@ -29,6 +29,10 @@
     {
       "regel": "R-27",
       "soll": "Der Betriebsrahmen steht VOR dem Verbindungsaufbau fest: er wird aus betrieb geholt, nicht aus der Stromantwort gelesen."
+    },
+    {
+      "regel": "R-35",
+      "soll": "Das Betriebsdokument nennt supported_actions maschinenlesbar. Aktuelles Profil ist []. R4."
     }
   ],
   "daten": {
@@ -38,7 +42,8 @@
       "katalogstrom": "/agentarium/katalog",
       "resume_pruefung": "/agentarium/resume",
       "heartbeat_takt_s": 5,
-      "veraltet_nach_s": 20
+      "veraltet_nach_s": 20,
+      "supported_actions": []
     },
     "faelle": [
       {

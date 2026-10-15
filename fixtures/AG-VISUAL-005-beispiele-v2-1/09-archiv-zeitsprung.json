@@ -26,6 +26,10 @@
     {
       "regel": "R-11b",
       "soll": "R4 setzt Done und nennt ART-01 v1; R3 belegt pass auf genau diese Version."
+    },
+    {
+      "regel": "R-37",
+      "soll": "R1 ist ein Statuswechsel, keine Anfrage mit Zustandsfeldern. Nur status_change schreibt Status. R1 des V2.1-Reviews."
     }
   ],
   "daten": {
@@ -71,9 +75,8 @@
           "run_id": "AG-ALT-R1",
           "task_id": "AG-ALT-001",
           "actor": "peter",
-          "recipient": "atlas",
-          "kind": "request",
-          "title": "Auftrag",
+          "kind": "status_change",
+          "title": "Auftrag eroeffnet (Statuswechsel)",
           "caused_by": [],
           "occurred_at": "2026-10-14T09:00:00Z",
           "recorded_at": "2026-10-14T09:00:01Z",
@@ -140,7 +143,8 @@
           "previous_transition_id": "R1",
           "artifact_id": "ART-01",
           "version": "v1",
-          "criteria_ref": "AG-PROC-REVIEW-001@v1"
+          "criteria_ref": "AG-PROC-REVIEW-001@v1",
+          "nachweis_ref": "R3"
         }
       ]
     },
@@ -174,6 +178,7 @@
               "pruefungen": [
                 {
                   "kind": "review_result",
+                  "task_id": "AG-ALT-001",
                   "criteria_ref": "AG-PROC-REVIEW-001@v1",
                   "outcome": "pass",
                   "event_id": "R3"
@@ -211,6 +216,7 @@
               "pruefungen": [
                 {
                   "kind": "review_result",
+                  "task_id": "AG-ALT-001",
                   "criteria_ref": "AG-PROC-REVIEW-001@v1",
                   "outcome": "pass",
                   "event_id": "R3"
@@ -243,6 +249,7 @@
             "pruefungen": [
               {
                 "kind": "review_result",
+                "task_id": "AG-ALT-001",
                 "criteria_ref": "AG-PROC-REVIEW-001@v1",
                 "outcome": "pass",
                 "event_id": "R3"
