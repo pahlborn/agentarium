@@ -4071,6 +4071,30 @@
     h += '<h4>Was die Darstellung raten musste</h4>' +
          '<p class="gFuss" id="agRaten"></p>';
 
+    /* Die Betriebsarten. Dies hier ist ein PROTOTYP: Er spielt ein
+       abgeschlossenes Stück und beginnt danach von vorn. Im Produktivbetrieb
+       gäbe es kein Ende und nichts, wohin zurück — und das ändert mehr als
+       die Knöpfe. Die ausführliche Fassung steht in
+       previews/AG-VISUAL-005-funktionsmatrix-v1.md. */
+    h += '<h4>Betriebsarten</h4>' +
+         '<p class="gSatz">Was hier läuft, ist ein <b>Prototyp</b>: ein ' +
+         'abgeschlossenes Stück mit bekanntem Ende, das danach von vorn ' +
+         'beginnt. Im <b>Produktivbetrieb</b> gibt es beides nicht.</p>' +
+         '<table>' +
+         zeile('Von vorn', 'fällt weg — es gäbe nichts, wohin zurück', '') +
+         zeile('Halt', 'hält die ANSICHT an, nicht das Projekt. Ereignisse ' +
+               'laufen weiter auf und holen beim Fortsetzen nach', '') +
+         zeile('Uhr', 'läuft ohne Deckel; heute endet sie bei der Dauer ' +
+               'des Stücks', '') +
+         zeile('Ausklang', 'bei Leerlauf statt am Ende der Liste, und ohne ' +
+               'Neubeginn', '') +
+         zeile('Flugdauer', 'muss aus Entfernung und Tempo kommen. Heute ' +
+               'sieht sie dem nächsten Zug des Empfängers VORAUS — das ' +
+               'ist live nicht möglich', '') +
+         zeile('Umfang', 'ändert sich im Lauf; der Balken braucht dann ' +
+               'einen wandernden Nenner', '') +
+         '</table>';
+
     h += '<p class="gFuss">Die Nachrichtenarten oben sind aus der ' +
          'Mappingtabelle erzeugt, aus der auch das Verhalten kommt — sie ' +
          'können nicht veralten. Alles darunter ist von Hand geschrieben.</p>';
