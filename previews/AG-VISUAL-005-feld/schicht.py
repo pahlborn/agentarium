@@ -214,7 +214,7 @@ SKRIPT = """
 
      Der Bauzeitpunkt kommt beim Bauen aus der Uhr. Von Hand gepflegte
      Datumsangaben sind nach der zweiten Änderung falsch. */
-  var FASSUNG = '35', GEBAUT = '__GEBAUT__';
+  var FASSUNG = '36', GEBAUT = '__GEBAUT__';
 
   var STUECKE = __STUECKE__;
   var stueckNr = 0;
@@ -947,15 +947,33 @@ SKRIPT = """
   }
 
   function hinlegen(ton, text, gearbeitet, artefakt, version, aufgabe) {
-    tisch.push({ ton: ton, text: text || '', t: 0, arbeit: gearbeitet || 0,
-                 artefakt: artefakt || '', version: version || '',
-                 aufgabe: aufgabe || '',
-                 w: Math.random() * 6.2832, beben: 0 });
+    var S0 = { ton: ton, text: text || '', t: 0, arbeit: gearbeitet || 0,
+               artefakt: artefakt || '', version: version || '',
+               aufgabe: aufgabe || '',
+               w: Math.random() * 6.2832, beben: 0 };
+    tisch.push(S0);
+
+    /* Ins Register. Trägt das Stück dieselbe Kennung ein zweites Mal, ist
+       die ältere Fassung ERSETZT — und genau das sieht man sonst nirgends:
+       eine v2 ist der Beweis, dass nachgearbeitet wurde. */
+    if (artefakt) {
+      for (var r0 = 0; r0 < register.length; r0++)
+        if (register[r0].kennung === artefakt && register[r0].zustand !== 'ersetzt')
+          register[r0].zustand = 'ersetzt';
+    }
+    var eintrag = { kennung: artefakt || '', version: version || '',
+                    ton: ton, zustand: 'prüfung', text: text || '',
+                    von: '', t: zeit };
+    S0.eintrag = eintrag;
+    register.push(eintrag);
+    while (register.length > 40) register.shift();
     /* Mehr als drei liest niemand mehr. Das älteste rutscht herunter —
        und es schreibt dabei nichts: Was nie angenommen wurde, hinterlässt
        nichts. Das ist dieselbe Regel wie überall. */
     while (tisch.length > TISCH_MAX) {
       var W2 = tisch.shift(), o2 = tischOrt(0);
+      if (W2.eintrag && W2.eintrag.zustand === 'prüfung')
+        W2.eintrag.zustand = 'verworfen';
       einsturz(o2[0], o2[1], W2.ton);
     }
   }
@@ -1024,6 +1042,7 @@ SKRIPT = """
       i = 0;
     }
     var S = tisch.splice(i, 1)[0];
+    if (S.eintrag) S.eintrag.zustand = 'angenommen';
     /* Abgenommen wird dort, wo auch geprüft wird: in der Mitte. */
     var o = [mx(), my()];
     produkt++;
@@ -1071,10 +1090,14 @@ SKRIPT = """
     if (standEl && (glanz > 0.25) !== standEl.classList.contains('fertig'))
       standEl.classList.toggle('fertig', glanz > 0.25);
 
-    var ganz = STUECK.umfang || 0,
-        teil = ganz ? Math.min(1, bausteine.length / ganz) : 0,
+    /* Eröffnet gegen abgeschlossen — dieselbe Einheit auf beiden Seiten.
+       Der Nenner wächst im Lauf, und das ist richtig so. */
+    var ganz = aufgabenAuf,
+        teil = ganz ? Math.min(1, aufgabenZu / ganz) : 0,
         schl = (STUECK.titel || STUECK.projekt || '') + '|' +
-               bausteine.length + '|' + ganz + '|' + (glanz > 0.25);
+               aufgabenZu + '|' + ganz + '|' + (glanz > 0.25) + '|' +
+               register.length + '|' +
+               register.map(function (r) { return r.zustand; }).join('');
 
     /* Kein `left` mehr. Diese Zeile stammte aus der Fassung, in der das
        Produkt unten in der Mitte stand — seit dem Umzug nach rechts oben
@@ -1087,13 +1110,32 @@ SKRIPT = """
 
     if (werkNameEl.__schl !== schl) {
       werkNameEl.__schl = schl;
+      /* Das Register: woraus das Produkt besteht. Die jüngsten zuerst,
+         höchstens sechs — mehr liest niemand im Vorbeigehen, und beim
+         Zeigen wächst der Block ohnehin. */
+      var reg = '', zuletzt = register.slice(-6).reverse();
+      if (zuletzt.length) {
+        reg = '<div class="wReg">';
+        zuletzt.forEach(function (r) {
+          reg += '<div class="wZeile z-' + r.zustand + '">' +
+                 '<u style="color:' + hex(r.ton) + '">' +
+                 (r.kennung || 'ohne Kennung') + '</u>' +
+                 (r.version ? '<i>' + r.version + '</i>' : '') +
+                 '<s>' + r.zustand + '</s></div>';
+        });
+        if (register.length > 6)
+          reg += '<div class="wMehr">und ' + (register.length - 6) +
+                 ' weitere</div>';
+        reg += '</div>';
+      }
+
       werkNameEl.innerHTML =
         '<div class="wBalken"><span style="width:' +
           (teil * 100).toFixed(1) + '%"></span></div>' +
         '<div class="wTitel">' + (STUECK.titel || STUECK.projekt || '') + '</div>' +
         '<div class="wOrt">' + (STUECK.ablage || 'extern') +
-          (ganz ? ' · ' + bausteine.length + ' von ' + ganz
-                : ' · ' + bausteine.length + ' angenommen') + '</div>';
+          (ganz ? ' · ' + aufgabenZu + ' von ' + ganz + ' Aufgaben'
+                : ' · noch keine Aufgabe') + '</div>' + reg;
     }
   }
 
@@ -1154,6 +1196,17 @@ SKRIPT = """
      null, hat die Darstellung nichts erfunden — dann tragen die Daten ihre
      Bezüge selbst. */
   var geraten = { auftrag: 0, abnahme: 0, gegen: 0, antwort: 0, gesamt: 0 };
+
+  /* DER EHRLICHE NENNER. Aufgaben, die eröffnet wurden, gegen Aufgaben, die
+     abgeschlossen wurden — beide Seiten in derselben Einheit, beide aus dem
+     laufenden Geschehen gezählt. Vorher stand im Balken „4 von 21": vier
+     Abnahmeereignisse gegen einundzwanzig Storyideen. */
+  var aufgabenAuf = 0, aufgabenZu = 0;
+
+  /* DAS REGISTER. Woraus das Produkt besteht: Kennung, Fassung, Zustand.
+     Es lebt von `artefakt` und `version` in den Daten; fehlen sie, steht
+     hier, dass es sie nicht gibt — erfunden wird nichts. */
+  var register = [];
   function ratVermerk(was) { geraten[was]++; geraten.gesamt++; }
   function ratNull() {
     geraten.auftrag = geraten.abnahme = geraten.gegen =
@@ -1278,6 +1331,7 @@ SKRIPT = """
     if (!nachName[name]) return;
     var S = arbeit[name];
     if (!S || S.aus) { S = arbeit[name] = { t: 0, liste: [] }; }
+    aufgabenAuf++;
     S.liste.push({
       auftrag: auftrag || '', kommando: kommando || '',
       modell: modell || MOTOR[nachName[name].platt] || '',
@@ -1315,6 +1369,7 @@ SKRIPT = """
       i = 0;
     }
     var L = S.liste.splice(i, 1)[0];
+    aufgabenZu++;
     stromErledigt(name);
     /* Auch ein Auftrag OHNE Kostenangabe wird gezählt — getrennt. Sonst
        ließe sich später nicht unterscheiden, ob nichts verbraucht wurde
@@ -2037,10 +2092,15 @@ SKRIPT = """
             reihe('prüfung', tisch.length, 'sTisch') +
             reihe('blockiert', blockiert, 'sStop') +
             reihe('fertig', bausteine.length, 'sFertig');
+    /* `umfang` bleibt sichtbar, aber als das, was es ist: eine Angabe aus
+       dem Konzept. Als Nenner des Fortschritts war sie falsch — die Zähler
+       waren Ereignisse, der Nenner Storyideen. */
     if (STUECK.umfang) {
-      h += '<div class="sUmfang">' + bausteine.length + ' von ' +
-           STUECK.umfang + ' · ' + (STUECK.umfangText || '') + '</div>';
+      h += '<div class="sUmfang">laut Konzept ' + STUECK.umfang +
+           (STUECK.umfangText ? ' · ' + STUECK.umfangText : '') + '</div>';
     }
+    h += '<div class="sUmfang">' + aufgabenZu + ' von ' + aufgabenAuf +
+         ' Aufgaben erledigt</div>';
     if (standEl.__h !== h) { standEl.__h = h; standEl.innerHTML = h; }
   }
 
@@ -2125,6 +2185,7 @@ SKRIPT = """
             for (var ns in stopper) delete stopper[ns];
             tisch.length = 0; derBall = null; baelle.length = 0;
             bausteine.length = 0; produkt = 0; werkEl.innerHTML = '';
+            register.length = 0; aufgabenAuf = 0; aufgabenZu = 0;
             ratNull();
             rufeEl.innerHTML = '';
           }
@@ -2153,6 +2214,8 @@ SKRIPT = """
     return { zeit: zeit, ausklang: ausklang, naechstes: naechstes,
              ereignisse: STUECK.ereignisse.length, dauer: STUECK.dauer,
              bausteine: bausteine.length, visionen: visionen,
+             aufgabenAuf: aufgabenAuf, aufgabenZu: aufgabenZu,
+             register: register.length,
              bandL: bandL(), bandR: bandR(), ringR: ringR(),
              geraten: geraten.gesamt, ratEinzeln: {
                auftrag: geraten.auftrag, abnahme: geraten.abnahme,
@@ -2750,6 +2813,7 @@ SKRIPT = """
     for (var n3 in erwartung) { weiterSagen(n3, 0); delete erwartung[n3]; }
     tisch.length = 0; derBall = null;
     bausteine.length = 0; produkt = 0; ratNull();
+    register.length = 0; aufgabenAuf = 0; aufgabenZu = 0;
     werkEl.innerHTML = ''; rufeEl.innerHTML = '';
     laeuftEl.innerHTML = ''; strom.length = 0;
     for (var vk in verbrauch) delete verbrauch[vk];

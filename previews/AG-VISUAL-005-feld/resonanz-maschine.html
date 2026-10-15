@@ -222,12 +222,9 @@
      nach dem Titel als zweites ansteuert. */
   /* Unter dem Kopf, mit einer Trennlinie dazwischen: Es gehört zusammen
      (das ist das Projekt, das ist sein Stand), aber es ist nicht dasselbe. */
-  #agWerkName{position:fixed; z-index:6; pointer-events:none;
-    right:max(14px,env(safe-area-inset-right));
-    top:calc(max(14px,env(safe-area-inset-top)) + 104px);
+  #agWerkName{position:static; width:100%; z-index:6;
     opacity:0; transition:opacity 1.2s ease;
-    width:min(32vw,320px); text-align:right; color:#AEBCD2;
-    padding-top:12px; border-top:1px solid rgba(150,170,200,.14);}
+    text-align:right; color:#AEBCD2;}
   #agWerkName.auf{opacity:.72;}
   #agWerkName.hell{opacity:1;}
   .wBalken{height:3px; border-radius:2px; overflow:hidden;
@@ -241,6 +238,25 @@
     overflow-wrap:anywhere;}
   .wOrt{margin-top:4px; font:400 8.5px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;
     letter-spacing:.24em; text-transform:uppercase; opacity:.6;}
+  /* DAS REGISTER: woraus das Produkt besteht. Kennung, Fassung, Zustand —
+     eine Fassung v2 ist der sichtbare Beweis einer Überarbeitung. */
+  .wReg{margin-top:9px; padding-top:8px;
+    border-top:1px solid rgba(150,170,200,.12);
+    font:400 9px/1.7 ui-monospace,SFMono-Regular,Menlo,monospace;
+    letter-spacing:.1em;}
+  .wZeile{display:flex; justify-content:flex-end; gap:7px; white-space:nowrap;}
+  .wZeile u{text-decoration:none; order:1;}
+  .wZeile i{font-style:normal; order:2; color:#8295B0; min-width:20px;}
+  .wZeile s{text-decoration:none; order:3; min-width:76px; text-align:right;
+    text-transform:uppercase; font-size:8px; letter-spacing:.16em;
+    color:#55637A;}
+  .wZeile.z-angenommen s{color:#E8D9A8;}
+  .wZeile.z-ersetzt{opacity:.45;}
+  .wZeile.z-ersetzt s{text-decoration:line-through;}
+  .wZeile.z-verworfen{opacity:.5;}
+  .wZeile.z-verworfen s{color:#A8707A;}
+  .wMehr{color:#55637A; font-size:8px; letter-spacing:.16em;
+    text-transform:uppercase; margin-top:3px;}
   /* Die Beschriftung einer Abnahme. Diese drei Zeilen hatte einer meiner
      Schnitte beim Umbau mitgenommen — danach hatte das Element gar keine
      Positionierung mehr und klebte in der linken oberen Ecke, über dem
@@ -270,9 +286,21 @@
      deshalb lesbar — man sucht einen Titel oben links. */
   /* Kopf und Produkt stehen übereinander rechts oben: wer das hier ist,
      und was dabei herauskommt. Links unten läuft mit, was geschieht. */
-  #agKopf{position:fixed; right:max(14px,env(safe-area-inset-right));
-    top:max(14px,env(safe-area-inset-top)); z-index:7; text-align:right;
-    width:min(32vw,320px);
+  /* EINE SPALTE STATT ZWEIER FESTER LAGEN.
+
+     Kopf und Produkt standen beide fest positioniert, das Produkt auf
+     einem Abstand von 104 Pixeln unter dem oberen Rand. Ein fester Abstand
+     ist hier das falsche Werkzeug: Die Kopfhöhe hängt vom Text und von der
+     Breite ab. Im Hochformat bricht das Leitmotiv um, der Kopf wird höher —
+     nachgemessen überlappten sich die beiden dort um zehn Pixel.
+
+     Jetzt stehen sie in einer Spalte untereinander, und das Produkt folgt
+     dem Kopf von selbst. Eine Klasse von Fehlern weniger. */
+  #agRechts{position:fixed; right:max(3px,calc(env(safe-area-inset-right) - 10px));
+    top:max(3px,calc(env(safe-area-inset-top) - 10px)); z-index:7;
+    display:flex; flex-direction:column; align-items:flex-end; gap:6px;
+    width:min(32vw,320px); pointer-events:none;}
+  #agKopf{position:static; width:100%; text-align:right;
     font:400 11px/1.7 ui-monospace,SFMono-Regular,Menlo,monospace;
     letter-spacing:.2em; text-transform:uppercase; color:#55637A;}
   /* Das Leitmotiv, wie es in AG-MOCK-COMPARE-001 steht. Klein, einmal, und
@@ -288,7 +316,7 @@
      gewann die spätere Zeile, und der Kopf blieb im Hochformat 330 breit.
      Nachgemessen: rechter Rand bei 344 statt 254. */
   @media (orientation:portrait){
-    #agKopf{width:min(40vw,260px);}
+    #agRechts{width:min(40vw,260px);}
   }
   #agKopf b{display:block; color:#AFC0D8; font-weight:400; font-size:13px;
     letter-spacing:.16em;}
@@ -309,8 +337,27 @@
      Die drei Ecken nehmen dafür Zeigerereignisse an. Das kostet dort das
      Mitrühren im Feld — ein kleiner Preis für eine Anzeige, die man lesen
      kann. */
+  /* EIN GRUND UNTER DEM VERGRÖSSERTEN BLOCK.
+
+     Peters Befund: „Wenn Titel und Zusatzdaten bei Mouseover vergrößert
+     werden, durchscheint der Hintergrund, also der Titel des Projektes.
+     Das ist ein wenig unruhig und hinderlich beim Lesen."
+
+     Stimmt — vergrößerte Schrift über einem bewegten Feld ist schlechter
+     lesbar als kleine. Die Polsterung liegt deshalb SCHON IM RUHEZUSTAND
+     an, nur ohne Grund; sonst sprängen die Blöcke beim Zeigen um. Beim
+     Zeigen kommt der dunkle Grund dazu, und die Blöcke stehen dann auf
+     etwas statt im Feld. */
   #agKopf, #agWerkName, #agStand{pointer-events:auto;
-    transition:opacity .3s ease, filter .3s ease, transform .3s ease;}
+    padding:11px 13px; border-radius:10px;
+    background:rgba(6,9,14,0); border:1px solid rgba(150,170,200,0);
+    transition:opacity .3s ease, filter .3s ease, transform .3s ease,
+               background .3s ease, border-color .3s ease;}
+  #agKopf:hover, #agKopf.lesen,
+  #agWerkName:hover, #agWerkName.lesen,
+  #agStand:hover, #agStand.lesen{
+    background:rgba(6,9,14,.93); border-color:rgba(150,170,200,.16);
+    -webkit-backdrop-filter:blur(3px); backdrop-filter:blur(3px);}
   #agKopf:hover, #agKopf.lesen,
   #agWerkName:hover, #agWerkName.lesen,
   #agStand:hover, #agStand.lesen{filter:brightness(1.85) saturate(1.1);}
@@ -369,8 +416,8 @@
      weiter oben hatte das schon gesetzt — diese hier stand später im
      Stylesheet und hat es bei gleicher Gewichtung wieder genommen. Genau
      derselbe Fehler wie bei der Kopfbreite im Hochformat. */
-  #agStand{position:fixed; right:max(14px,env(safe-area-inset-right));
-    bottom:calc(max(14px,env(safe-area-inset-bottom)) + 54px);
+  #agStand{position:fixed; right:max(3px,calc(env(safe-area-inset-right) - 10px));
+    bottom:calc(max(14px,env(safe-area-inset-bottom)) + 44px);
     z-index:4; pointer-events:auto; text-align:right;}
   .sZeile{display:flex; align-items:center; justify-content:flex-end;
     gap:7px; margin-bottom:5px;}
@@ -544,8 +591,8 @@
 <div id="agKostenEbene"></div>
 <div id="agStand"></div>
 <div id="agWerk"></div>
-<div id="agWerkName"></div>
-<div id="agKopf"><b>Agentarium</b><em title="BALL — Bio-Agent &amp; LLM Logistics">See intelligence move. Powered by BALL</em><i id="agProjekt"></i><span id="agUhr">00:00</span><small id="agFassung"></small></div>
+<div id="agRechts"><div id="agKopf"><b>Agentarium</b><em title="BALL — Bio-Agent &amp; LLM Logistics">See intelligence move. Powered by BALL</em><i id="agProjekt"></i><span id="agUhr">00:00</span><small id="agFassung"></small></div>
+<div id="agWerkName"></div></div>
 <div id="agWas"></div>
 <div id="agMotoren"></div>
 <div id="agTun"></div>

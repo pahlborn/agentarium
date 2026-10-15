@@ -240,7 +240,51 @@ Drei Versuche, es im Feld zu zeichnen — eine Spirale, eine Silhouette auf
 einem Boden, ein eingerahmter Ort außerhalb des Kreises — und alle drei
 verworfen. Jeder reparierte etwas und machte etwas Neues kaputt; der letzte
 lag unleserlich unter einem Knäuel Fäden, weil alles daran aus Teilchen
-gebaut war. Peters Entscheidung: nur Schrift und ein waagerechter
+gebaut war.
+
+Der Grund für das Scheitern war nicht die Form. **Das Produkt ist das
+einzige Ding in diesem Bild, das es woanders gibt.** Alles andere im
+Agentarium ist ein Ereignis — eine Übergabe, eine Prüfung, ein Stop; das
+passiert, und darum lässt es sich zeigen. Das Produkt passiert nicht, es
+liegt: im Repository, auf einem Server, in einer Datei. Die Daten enthalten
+nicht das Produkt, sondern Ereignisse ÜBER das Produkt.
+
+### Der Nenner war falsch, nicht ungenau
+
+Der Balken zeigte „4 von 21": vier ABNAHMEEREIGNISSE gegen einundzwanzig
+STORYIDEEN. Zwei verschiedene Einheiten. Peters eigener Satz dazu:
+„Fertig-Zähler steigen durch Ereignisse → Fortschritt entsteht aus
+tatsächlich erfüllten Aufgaben und Abnahmekriterien."
+
+Jetzt stehen auf beiden Seiten Aufgaben: eröffnete gegen abgeschlossene,
+beide aus dem laufenden Geschehen gezählt. Jede Ankunft eines Balls eröffnet
+eine, jede Lieferung schließt eine — das geht mit und ohne Aufgaben-IDs und
+im laufenden Betrieb, weil der Nenner mitwächst. Dass er wächst, ist die
+Wahrheit: Ein Projekt bekommt Arbeit dazu.
+
+`umfang` bleibt sichtbar, aber als das, was es ist: „laut Konzept 21 · 7
+Stränge · 21 Storyideen" — eine Angabe aus dem Papier, nicht der Stand der
+Arbeit.
+
+### Das Register
+
+Durch die Artefakt-Bezüge ist das Produkt aufzählbar: Kennung, Fassung,
+Zustand. Es zeigt etwas, das kein Zähler zeigen kann — **eine Fassung v2 ist
+der sichtbare Beweis einer Überarbeitung.**
+
+Gemessen im Browser:
+
+| | Aufgaben | Register | geraten |
+|---|---|---|---|
+| V1 bei t=110 | 9 von 13 | 4 Einträge, alle „ohne Kennung" | 2 |
+| V2 bei t=300 | 14 von 18 | ART-01 … ART-06, mit Fassung und Zustand | 0 |
+
+Wo die Daten keine Kennung liefern, steht „ohne Kennung" statt einer
+Erfindung. In meinen konstruierten V2-Daten kommt keine einzige
+Überarbeitung vor — acht Artefakte, alle v1. Das ist ein Mangel meiner
+Konstruktion, nicht der Wirklichkeit.
+
+Peters Entscheidung zur Form: nur Schrift und ein waagerechter
 Fortschrittsbalken, beides HTML. Was aus Schrift besteht, kann nicht
 fusseln.
 
@@ -312,7 +356,7 @@ keine Überlagerung.
 
 | | |
 |---|---|
-| `AG-VISUAL-005-feld-v1.html` | SHA256 `35dfac542b31ed04b5414775b37f2f2ca5055e542dde811ef747b5c6cd25606a` |
+| `AG-VISUAL-005-feld-v1.html` | SHA256 `db01772d854ddccab62a682558d1302207a6480ca787f9298810d51b7acca55c` |
 | Läuft | eigenständig, offline, ohne Abruf nach außen |
 | Quellen | `AG-VISUAL-005-feld/` — `schicht.py` erzeugt die Darstellung, `resonanz-maschine.html` ist die Maschine darunter |
 
