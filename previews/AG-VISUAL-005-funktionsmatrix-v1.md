@@ -49,6 +49,71 @@ ihm ansehen (etwa: „3 Ereignisse warten").
 
 ---
 
+## 2a. Historisch oder jetzt — und woran man es erkennt
+
+Peters Frage: „Von vorn" ist im Echtzeitbetrieb nicht erforderlich, in der
+retrospektiven Projektkontrolle schon. Wie erkennen und unterscheiden wir
+die historische Projektsicht vom Echtzeit-Monitoring?
+
+**Es gibt nur ein verlässliches Unterscheidungsmerkmal, und es ist nicht
+sichtbar:** Live heißt, es können noch Ereignisse kommen. Historisch heißt,
+die Menge ist geschlossen. Alles andere — ein Datum im Kopf, eine andere
+Farbe, das Wort „LIVE" — ist Beschriftung, die man auch hinschreiben kann,
+wenn sie nicht mehr stimmt.
+
+Daran hängt die eigentliche Gefahr, und sie ist dieselbe wie bei den
+Stop-Klassen: **Eine Live-Ansicht, deren Verbindung still gestorben ist,
+sieht genau aus wie ein ruhiges Projekt.** Niemand arbeitet, nichts kommt —
+das kann heißen „gerade ist Pause" oder „du siehst seit vierzig Minuten ein
+eingefrorenes Bild". Wer das verwechselt, wartet auf etwas, das nicht kommt.
+
+### 1. Der Kopf sagt es im Klartext
+
+| | Live | Archiv |
+|---|---|---|
+| Zeile im Kopf | `NACHTPOST · LIVE` | `NACHTPOST · 14. Okt., 09:12–11:40` |
+| Uhr | Uhrzeit, laufend | verstrichene Zeit im Stück |
+| Datenfeld | `modus: "live"` | `modus: "archiv"`, `aufgezeichnet` |
+
+### 2. Die Bedienung folgt dem Modus, nicht umgekehrt
+
+| | Live | Archiv |
+|---|---|---|
+| Von vorn | — | ✓ |
+| Schieber zum Spulen | — | ✓ |
+| Anhalten | ✓ mit Rückstandsanzeige („3 Ereignisse warten") | ✓ gewöhnliche Pause |
+| Tempo | — | ✓ raffen oder verlangsamen |
+
+Die Knöpfe werden **aus dem Modus abgeleitet**, nicht von Hand gesetzt.
+Sonst gibt es früher oder später eine Live-Ansicht mit einem „Von
+vorn"-Knopf, der nichts tut.
+
+### 3. Ein Puls, der an der Verbindung hängt — nicht an der Uhr
+
+In der Live-Ansicht schlägt ein Lebenszeichen, **solange der Strom bestätigt
+ist**. Hört es auf, schreibt das Feld nicht „nichts passiert", sondern:
+
+```
+Verbindung seit 40 s ohne Lebenszeichen
+```
+
+Das ist derselbe Gedanke wie bei den Stops: Der Unterschied zwischen *es ist
+ruhig* und *ich höre nichts mehr* muss im Bild stehen, nicht in der Annahme
+des Betrachters. Technisch braucht das von der Schnittstelle einen
+**regelmäßigen Herzschlag, auch wenn gerade nichts geschieht** — ein leeres
+Signal alle paar Sekunden. Ohne ihn ist der Unterschied nicht darstellbar,
+weil er in den Daten nicht vorkommt.
+
+Drei Zustände, die das Feld dann unterscheiden kann:
+
+| Zustand | was man sieht | was es heißt |
+|---|---|---|
+| verbunden, Ereignisse | das Feld arbeitet | alles normal |
+| verbunden, still | Rufbereitschaft, Puls schlägt | das Projekt ruht gerade |
+| **ohne Lebenszeichen** | Puls aus, Hinweis im Kopf | **die Ansicht ist alt, nicht das Projekt** |
+
+---
+
 ## 3. Der Ablauf im Produktivbetrieb
 
 Nach Peters Beschreibung:
@@ -170,6 +235,9 @@ Vorschläge, nicht gebaut. Geordnet danach, was ein Betrachter zuerst vermisst.
   tatsächlich führt. Ohne ein echtes Beispiel sind sie geraten.
 - Die Schnittstelle selbst: Push oder Abruf, Ereignis einzeln oder Stapel,
   Reihenfolge garantiert oder nicht, was bei Nachzüglern geschieht.
+- **Ein Herzschlag auf der Schnittstelle**, auch wenn nichts geschieht. Ohne
+  ihn lässt sich „ruhig" nicht von „abgerissen" unterscheiden (siehe 2a.3).
+  Gehört auf die Liste der Parameter.
 - Ob im Produktivbetrieb überhaupt ein Neubeginn vorkommt — oder ob das Feld
   einfach weiterläuft, bis jemand es schließt.
 - Das Produkt. Getrennt zu besprechen.
