@@ -52,7 +52,7 @@
     "heartbeat": "Empfangbares fluechtiges Heartbeat-Ereignis alle 5 Sekunden; stale nach 20 Sekunden; keine Persistierung oder Sequenzwirkung.",
     "timeline": "zeitachse complete|partial|none; bei partial und none sichtbare Schrittfolge ohne erfundene Dauern.",
     "access": "read und command serverseitig trennen; Wandansicht read-only.",
-    "costs": "Keine Kostenwerte, Summe oder leere Kostenkachel; technischer Status darf die pausierte Anzeige benennen.",
+    "costs": "Kostenfeld bleibt sichtbar. Bei unvollstaendiger Gesamterfassung ausschliesslich Status 'Kosten nicht vollständig ermittelbar.'; keine Betraege, Teilsummen, Gesamtsumme oder Null-Ersatzwerte. Kostenwerte erst bei vollstaendiger belegter Gesamterfassung.",
     "vocabulary": "Ist-Felder, additive AG-REPORT-001-Felder und neue V2-Vertragsfelder getrennt ausweisen; erledigt entfällt; run_id additiv."
   },
   "delivery": [
@@ -66,5 +66,13 @@
     "recipient_started": false,
     "recipient_receipt": null,
     "implementation_started": false
+  },
+  "updated": "2026-10-15T19:02:37Z",
+  "revision": 2,
+  "decision_update": {
+    "source": "Peter",
+    "decided_at": "2026-10-15T19:01:52Z",
+    "supersedes": "Bisherige Ausblendung des Kostenfelds.",
+    "independent_rereview": false
   }
 }
