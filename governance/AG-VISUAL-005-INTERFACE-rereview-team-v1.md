@@ -125,19 +125,15 @@ Eine Nur-Lesen-Berechtigung wird verbindlich aufgenommen.
 
 ### 9. Kosten
 
-Peters jüngere Entscheidung gilt:
+Peters korrigierte Entscheidung vom 15.10.2026, 21:01:52 Europe/Berlin, ersetzt die bisherige Vorgabe zur Ausblendung:
 
-- keine Kostenwerte;
-- keine Gesamtsumme;
-- keine leere Kostenkachel;
-- unbekannte Kosten niemals als null;
-- vorhandene Nachweise bleiben intern erhalten.
+- Das Kostenfeld bleibt sichtbar.
+- Solange die Gesamtkosten nicht vollständig ermittelt werden können, erscheinen keine Beträge, Teilsummen, Gesamtsummen oder 0-€-Ersatzwerte.
+- Das sichtbare Feld zeigt stattdessen: „Kosten nicht vollständig ermittelbar.“
+- Erst bei vollständiger, belegter Gesamterfassung werden Kosten ausgewiesen.
+- Vorhandene Verbrauchsnachweise bleiben erhalten; unbekannte Werte sind niemals null.
 
-Ein technischer Informationsbereich darf den Zustand mit folgendem Text benennen:
-
-„Kostenanzeige pausiert – Gesamtkosten derzeit nicht vollständig ermittelbar.“
-
-Dies ist keine Kostenanzeige im eigentlichen Agentarium-Bild.
+Diese Änderung stammt unmittelbar von Peter. Die oben genannten unabhängigen Reviews beziehen sich auf die zuvor geprüften Artefakte; eine erneute Teamprüfung dieser Produktentscheidung wurde nicht durchgeführt.
 
 ## Testbarkeitsurteil
 
@@ -148,7 +144,7 @@ Noch keiner der sieben bisherigen Sentinel-Abnahmefälle ist vollständig ausfü
 3. Reconnect innerhalb und außerhalb des Replaypuffers;
 4. zwei Projekte mit mehreren Läufen, getrennten Sequenzen, Duplikaten und Nachzüglern;
 5. parallele Aufgaben sowie exakt versionierte Artefakte, Reviews und QA;
-6. pausierte beziehungsweise unvollständige Kostenerfassung ohne irreführende Werte;
+6. sichtbares Kostenfeld mit Status bei unvollständiger Erfassung, ohne Beträge; Kostenwerte erst bei vollständiger belegter Erfassung;
 7. Altlogs mit fehlendem occurred_at ohne erfundene Zeiten oder Dauern;
 8. Nur-Lesen gegen erlaubte und unerlaubte Befehle;
 9. Archivwiedergabe und Zeitsprung ohne externe Nebenwirkung.
