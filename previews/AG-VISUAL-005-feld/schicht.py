@@ -2,6 +2,7 @@
 """Die Agentarium-Schicht. Sie erzeugt keine eigene Grafik: Sie bewegt
    dieselben Wirbel, die in Resonanz die Hand erzeugt. Ein Ball ist ein Kern,
    der unterwegs ist."""
+import datetime
 import io, json
 
 # Name, Farbe (0..1), Platz auf der Uhr, Abstand von der Mitte, Rolle,
@@ -203,6 +204,18 @@ SKRIPT = """
      zugleich die Probe aufs Exempel: Wenn dieselbe Maschine ohne eine
      einzige Änderung ein anderes Stück spielt, ist sie wirklich agnostisch
      und wartet nur noch auf echte Daten. */
+  /* DIE FASSUNG.
+
+     Sie ist DIESELBE Nummer wie die der veröffentlichten Seite — kein
+     zweiter Zähler, denn zwei liefen garantiert auseinander. Sie wird vor
+     jeder Veröffentlichung erhöht, und die Veröffentlichung meldet
+     anschließend ihre eigene Nummer zurück; gehen die beiden auseinander,
+     fällt es sofort auf.
+
+     Der Bauzeitpunkt kommt beim Bauen aus der Uhr. Von Hand gepflegte
+     Datumsangaben sind nach der zweiten Änderung falsch. */
+  var FASSUNG = '35', GEBAUT = '__GEBAUT__';
+
   var STUECKE = __STUECKE__;
   var stueckNr = 0;
   var STUECK = STUECKE[0];
@@ -1063,7 +1076,12 @@ SKRIPT = """
         schl = (STUECK.titel || STUECK.projekt || '') + '|' +
                bausteine.length + '|' + ganz + '|' + (glanz > 0.25);
 
-    werkNameEl.style.left = ((bandL() + bandR()) / 2) + 'px';
+    /* Kein `left` mehr. Diese Zeile stammte aus der Fassung, in der das
+       Produkt unten in der Mitte stand — seit dem Umzug nach rechts oben
+       setzte sie sich gegen das `right` der Stilregel durch (bei gesetzter
+       Breite gewinnt `left`), und der Block stand 259 Pixel zu weit links.
+       Gemessen, nicht vermutet: rechter Rand bei 921 statt 1180. Er sah
+       plausibel genug aus, dass es mir nicht auffiel. */
     werkNameEl.classList.add('auf');
     werkNameEl.classList.toggle('hell', glanz > 0.25);
 
@@ -2163,6 +2181,15 @@ SKRIPT = """
 
   function kopfSetzen() {
     projektEl.textContent = STUECK.projekt || '';
+    /* Beim Zeigen auf den Namen steht da, was BALL heißt und welche
+       Fassung läuft. Im Ruhezustand ist es weg — der Monitor soll das Feld
+       zeigen, nicht seine eigenen Angaben. */
+    var fe = document.getElementById('agFassung');
+    if (fe) fe.innerHTML =
+      'BALL — Bio-Agent &amp; LLM Logistics<br>' +
+      'Agentarium ist die sichtbare Welt des Teams; BALL die Orchestrierung ' +
+      'dahinter: Aufgaben, Zustände und Übergaben zwischen Mensch und ' +
+      'LLM-Agenten.<br><b>Fassung ' + FASSUNG + ' · gebaut ' + GEBAUT + '</b>';
     var h = '';
     if (STUECKE.length > 1) {
       h += '<ul class="wProjekte">';
@@ -2361,7 +2388,23 @@ SKRIPT = """
      ich geachtet hatte. */
   var legende = document.getElementById('agGesetz');
   (function legendeBauen() {
-    var h = '<p class="gSatz">Nur Beschlossenes <b>bleibt</b>. ' +
+    /* Der Name zuerst. „BALL" steht im Leitmotiv groß da und war im
+       ganzen Vorrat nirgends aufgelöst — siebenmal in den Anforderungen,
+       einmal im Team-Brief, zweimal in alten Mustern, immer ohne
+       Erklärung. Ein tragender Begriff, der nur in einem Gespräch lebt,
+       ist verloren, sobald das Gespräch vorbei ist. Peters Fassung vom
+       11. Oktober, wörtlich übernommen. */
+    var h = '<h4>Der Name</h4>' +
+            '<p class="gSatz"><b>BALL</b> — Bio-Agent &amp; LLM Logistics.</p>' +
+            '<table>' +
+            zeile('Agentarium', 'die sichtbare Welt des Teams', '') +
+            zeile('BALL', 'die Orchestrierung dahinter: Aufgaben, Zustände ' +
+                  'und Übergaben zwischen Mensch und LLM-Agenten', '') +
+            zeile('der Ball', 'die Frage, die man im Bild sieht: ' +
+                  '„Bei wem liegt gerade der Ball?"', '') +
+            '</table>' +
+            '<h4>Das Gesetz</h4>' +
+            '<p class="gSatz">Nur Beschlossenes <b>bleibt</b>. ' +
             'Verkehr <b>verblasst</b>. Offenes <b>hinterlässt nichts</b>. ' +
             'Verworfenes <b>stürzt ein</b>.</p>';
     ZUSTAND.forEach(function (Z) {
@@ -2832,8 +2875,12 @@ def bauen(quelle, ziel, stueck):
                for a in AGENTEN]
     if isinstance(stueck, dict):
         stueck = [stueck]
+    # Der Bauzeitpunkt kommt aus der Uhr, nicht aus einer gepflegten Zeile.
+    # Von Hand gepflegte Datumsangaben sind nach der zweiten Aenderung falsch.
+    gebaut = datetime.datetime.now(datetime.timezone.utc).strftime('%d.%m.%Y')
     sk = (SKRIPT.replace('__AGENTEN__', json.dumps(agenten))
                 .replace('__ARTEN__', json.dumps(ARTEN))
+                .replace('__GEBAUT__', gebaut)
                 .replace('__STUECKE__', json.dumps(stueck, ensure_ascii=False)))
     s = s.replace('</body>', sk + '\n</body>')
     io.open(ziel, 'w', encoding='utf-8').write(s)

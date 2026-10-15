@@ -1,6 +1,8 @@
 # AG-VISUAL-005 – Funktionsmatrix
 
 > AGENTARIUM – See intelligence move. Powered by BALL
+>
+> **BALL — Bio-Agent & LLM Logistics** (Peter, 11. Oktober 2026)
 
 Was das Feld heute kann, woraus es das nimmt, und was davon im Produktivbetrieb
 anders sein muss. Entwurf zur Besprechung; nichts davon ist freigegeben.

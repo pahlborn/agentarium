@@ -310,11 +310,29 @@
      Mitrühren im Feld — ein kleiner Preis für eine Anzeige, die man lesen
      kann. */
   #agKopf, #agWerkName, #agStand{pointer-events:auto;
-    transition:opacity .3s ease, filter .3s ease;}
+    transition:opacity .3s ease, filter .3s ease, transform .3s ease;}
   #agKopf:hover, #agKopf.lesen,
   #agWerkName:hover, #agWerkName.lesen,
   #agStand:hover, #agStand.lesen{filter:brightness(1.85) saturate(1.1);}
+  /* Und sie werden größer. Heller allein reicht für kleine Schrift nicht —
+     wer hinsieht, will lesen. Der Bezugspunkt ist die jeweilige ECKE,
+     damit die Blöcke nach INNEN wachsen und nicht über den Rand hinaus. */
+  #agKopf, #agWerkName{transform-origin:top right;}
+  #agStand{transform-origin:bottom right;}
+  #agKopf:hover, #agKopf.lesen,
+  #agWerkName:hover, #agWerkName.lesen,
+  #agStand:hover, #agStand.lesen{transform:scale(1.28);}
   #agWerkName:hover, #agWerkName.lesen{opacity:1;}
+  /* Die Auskunft zum Namen: nur beim Zeigen, sonst nimmt sie Platz weg,
+     den das Feld braucht. */
+  #agFassung{display:block; max-height:0; overflow:hidden; opacity:0;
+    transition:max-height .35s ease, opacity .35s ease, margin .35s ease;
+    font:400 10px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;
+    letter-spacing:.06em; text-transform:none; color:#6B7689;}
+  #agKopf:hover #agFassung, #agKopf.lesen #agFassung{
+    max-height:160px; opacity:1; margin-top:9px;}
+  #agFassung b{display:block; margin-top:6px; font-weight:400; color:#AFC0D8;
+    letter-spacing:.12em;}
   /* Welches Projekt gerade läuft — aus den Daten, nicht aus dem Code. */
   #agProjekt{display:block; font-style:normal; color:#8295B0; font-size:10px;
     letter-spacing:.22em; margin-bottom:2px;}
@@ -527,7 +545,7 @@
 <div id="agStand"></div>
 <div id="agWerk"></div>
 <div id="agWerkName"></div>
-<div id="agKopf"><b>Agentarium</b><em>See intelligence move. Powered by BALL</em><i id="agProjekt"></i><span id="agUhr">00:00</span></div>
+<div id="agKopf"><b>Agentarium</b><em title="BALL — Bio-Agent &amp; LLM Logistics">See intelligence move. Powered by BALL</em><i id="agProjekt"></i><span id="agUhr">00:00</span><small id="agFassung"></small></div>
 <div id="agWas"></div>
 <div id="agMotoren"></div>
 <div id="agTun"></div>

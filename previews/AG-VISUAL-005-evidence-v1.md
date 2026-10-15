@@ -1,6 +1,15 @@
 # AG-VISUAL-005 – Das Feld. Vorarbeit, keine Agentenlieferung.
 
 > AGENTARIUM – See intelligence move. Powered by BALL
+>
+> **BALL — Bio-Agent & LLM Logistics.** Agentarium ist die sichtbare Welt
+> des Teams; BALL die Orchestrierung dahinter: Aufgaben, Zustände und
+> Übergaben zwischen Mensch und LLM-Agenten. Der sichtbare Ball greift
+> zugleich die Frage auf: „Bei wem liegt gerade der Ball?"
+>
+> Peter, 11. Oktober 2026. Die Auflösung stand bis heute an keiner Stelle
+> im Vorrat — siebenmal BALL in den Anforderungen, einmal im Team-Brief,
+> zweimal in alten Mustern, nie erklärt.
 
 Eine Darstellung des Kommunikationsgeflechts: Wer wirft wem was zu, was davon
 bleibt, was verblasst, was spurlos verschwindet — und was am Ende fertig ist.
@@ -303,7 +312,7 @@ keine Überlagerung.
 
 | | |
 |---|---|
-| `AG-VISUAL-005-feld-v1.html` | SHA256 `ef47e1aa1204d4f2b77ff6b9a165521cd5bc0827f3c320c7a265e2c43001c06a` |
+| `AG-VISUAL-005-feld-v1.html` | SHA256 `35dfac542b31ed04b5414775b37f2f2ca5055e542dde811ef747b5c6cd25606a` |
 | Läuft | eigenständig, offline, ohne Abruf nach außen |
 | Quellen | `AG-VISUAL-005-feld/` — `schicht.py` erzeugt die Darstellung, `resonanz-maschine.html` ist die Maschine darunter |
 
