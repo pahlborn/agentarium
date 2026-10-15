@@ -236,15 +236,39 @@ SKRIPT = """
      Grund war die Enge zwischen Peter, Atlas und Cadence, und die bleibt
      behoben, weil Peter mit 1,28 Radien weiterhin deutlich außen steht.
      Beides sind einzelne Zahlen und in einer Zeile wieder umzustellen. */
-  var MITTE_VERSATZ = 0.115;      /* nach rechts, in Anteilen der Breite */
-  var RING_WEITE    = 0.355;
+  /* DAS FELD RICHTET SICH NACH DEM PLATZ, DEN ES HAT.
 
-  function mx() { return W() * (0.5 + MITTE_VERSATZ); }
-  function my() { return H() / 2; }
+     Vorher saß der Kreis bei einem festen Anteil der Breite und wusste
+     nichts davon, dass links eine Liste steht und rechts zwei Tafeln. Auf
+     einem breiten Schirm ging das gut, auf dem iPad überlagerte sich
+     beides — Peters Befund. Ein fester Anteil ist eben kein Maß für freien
+     Platz.
+
+     Also wird gerechnet: Links beginnt das Band hinter der Liste, rechts
+     endet es vor den Tafeln. In dieses Band passt ein Kreis vom Radius R,
+     und zwar genau dann, wenn 2,34 R hineingehen — 1,28 R für Peter, der
+     außerhalb steht, und 1,0 R für die andere Seite. Die Höhe deckelt
+     zusätzlich.
+
+     Die Liste ist im Hochformat schmaler als im Querformat; dieselbe Regel
+     steht in den Stilangaben, und beide müssen übereinstimmen. */
+  function listeBreite() {
+    return H() > W() ? Math.min(W() * 0.34, 240)
+                     : Math.min(W() * 0.42, 330);
+  }
+  function bandL() { return listeBreite() + 18; }
+  function bandR() { return W() - Math.min(W() * 0.20, 165); }
+  function ringR() {
+    var breit = bandR() - bandL();
+    return Math.max(56, Math.min(breit / 2.34, (H() * 0.44 - 48) / 0.92));
+  }
+
+  function mx() { return bandL() + ringR() * 1.28; }
+  function my() { return H() * 0.44; }
 
   function heimat(a) {
     var w = a.winkel * Math.PI / 180;
-    var R = Math.min(W(), H()) * RING_WEITE * (a.nah || 1);
+    var R = ringR() * (a.nah || 1);
     return [mx() + Math.cos(w) * R, my() + Math.sin(w) * R * 0.92];
   }
 
@@ -913,32 +937,27 @@ SKRIPT = """
      SILHOUETTE — und eine Silhouette erkennt man als Ding, auch wenn man
      nicht weiß, was es ist. Bei NACHTPOST, einer Stadt aus Lichtgebäuden,
      ist das keine Metapher, sondern die Sache selbst. */
-  /* KEIN GEZEICHNETES PRODUKT MEHR.
+  /* DAS PRODUKT IST SCHRIFT UND EIN BALKEN — SONST NICHTS.
 
-     Hier standen nacheinander drei Versuche: eine Spirale aus Bausteinen in
-     der Mitte, eine Silhouette auf einem Boden, und zuletzt ein
-     eingerahmter Ort außerhalb des Kreises, in den Novas Vorschläge einen
-     Umriss vorzeichneten. Jeder reparierte etwas und machte etwas Neues
-     kaputt; der letzte lag am Ende unleserlich unter einem Knäuel Fäden.
+     Peter, wörtlich: „Ich wollte nur die Schrift und einen einfachen
+     horizontalen Fortschrittsbalken."
 
-     Peters Entscheidung: „Belassen wir es doch bei dem eher nüchternen,
-     anwachsenden Balken." Der stand die ganze Zeit schon da — die Zeile
-     FERTIG im Stand der Arbeit, ein Strich je angenommenem Stück. Sie ist
-     nüchtern, sie wächst, sie zählt, und sie liegt dort, wo keine Fäden
-     hinkommen. Zwei Produkte nebeneinander waren eines zu viel.
+     Das ist zugleich die Antwort auf die Fäden, die dort immer wieder
+     standen: Umriss, Rahmen und Gebäude waren aus Fäden gebaut, also konnte
+     dort auch Fadenwerk stehenbleiben. Schrift und Balken sind HTML. Sie
+     können nicht fusseln, sie überlagern nichts, und sie sind auf jedem
+     Schirm lesbar.
 
-     Was von hier übrig bleibt, ist `bausteine`: die Liste der angenommenen
-     Stücke. Sie wird nicht mehr gezeichnet, nur noch gezählt. */
+     Was von der Ablage bleibt, ist `bausteine`: die Liste der angenommenen
+     Stücke. Sie wird gezählt, nicht gezeichnet. */
   var visionen = 0;
 
   function abnehmen() {
     if (!tisch.length) return;
     var S = tisch.shift();
-    /* Die Abnahme geschieht dort, wo auch geprüft wird: in der Mitte.
-       Das war vor dem Produkt so und ist es wieder. */
+    /* Abgenommen wird dort, wo auch geprüft wird: in der Mitte. */
     var o = [mx(), my()];
     produkt++;
-    /* Die Abnahme ist der einzige Augenblick, in dem die Mitte schreibt. */
     window.__feld.knoten(o[0], o[1], 0.80, S.ton, 4.0, 110, 1.6);
     window.__feld.austreiben(o[0], o[1], S.ton, 4, 0);
     bausteine.push({ ton: S.ton });
@@ -951,7 +970,7 @@ SKRIPT = """
       var e = document.createElement('div');
       e.className = 'agWerk';
       e.style.left = o[0] + 'px';
-      e.style.top = (o[1] + Math.min(W(), H()) * 0.055) + 'px';
+      e.style.top = (o[1] - Math.min(W(), H()) * 0.165) + 'px';
       /* Der Text hell und neutral, nur das Wort „angenommen" in der Farbe
          dessen, der es gemacht hat. Im ersten Versuch war alles in seiner
          Farbe — bei den dunkleren Tönen war es dann nicht zu lesen, und
@@ -964,19 +983,40 @@ SKRIPT = """
     }
   }
 
-  var werkEl = document.getElementById('agWerk');
+  var werkEl = document.getElementById('agWerk'),
+      werkNameEl = document.getElementById('agWerkName');
 
   var bausteine = [];
 
-  /* Zum Schluss erstrahlt das Fertige — aber als Balken, nicht als
-     Gebilde. Peters zwei Anweisungen treffen sich hier: „Das Produkt muss
-     leuchtend erstrahlen" und „belassen wir es bei dem nüchternen,
-     anwachsenden Balken". Also leuchtet der Balken. Mehr passiert nicht,
-     und das ist der Punkt. */
+  /* Der Balken füllt sich mit dem, was angenommen ist, gemessen am
+     Umfang aus den Daten (`umfang`). Fehlt der, zeigt er die bloße Zahl
+     und behauptet keine Vollständigkeit — ein Balken ohne bekanntes Ganzes
+     wäre eine Erfindung. */
   function produktSchritt(dt) {
     var glanz = ausklang ? Math.min(1, (26 - ausklang) / 9) : 0;
+
     if (standEl && (glanz > 0.25) !== standEl.classList.contains('fertig'))
       standEl.classList.toggle('fertig', glanz > 0.25);
+
+    var ganz = STUECK.umfang || 0,
+        teil = ganz ? Math.min(1, bausteine.length / ganz) : 0,
+        schl = (STUECK.titel || STUECK.projekt || '') + '|' +
+               bausteine.length + '|' + ganz + '|' + (glanz > 0.25);
+
+    werkNameEl.style.left = ((bandL() + bandR()) / 2) + 'px';
+    werkNameEl.classList.add('auf');
+    werkNameEl.classList.toggle('hell', glanz > 0.25);
+
+    if (werkNameEl.__schl !== schl) {
+      werkNameEl.__schl = schl;
+      werkNameEl.innerHTML =
+        '<div class="wBalken"><span style="width:' +
+          (teil * 100).toFixed(1) + '%"></span></div>' +
+        '<div class="wTitel">' + (STUECK.titel || STUECK.projekt || '') + '</div>' +
+        '<div class="wOrt">' + (STUECK.ablage || 'extern') +
+          (ganz ? ' · ' + bausteine.length + ' von ' + ganz
+                : ' · ' + bausteine.length + ' angenommen') + '</div>';
+    }
   }
 
   function tischSchritt(dt) {
@@ -1099,7 +1139,10 @@ SKRIPT = """
       quelle: (b && b.quelle) || '',
       w: Math.random() * 6.2832, t: 0, beginn: zeit
     });
-    if (S.liste.length > 4) S.liste.shift();   /* mehr liest niemand */
+    /* Alle Aufträge bleiben in der Liste. Vorher flog der älteste
+       hinaus, sobald mehr als vier offen waren — mitsamt seiner
+       Buchführung, lautlos. Gezeichnet werden trotzdem höchstens vier
+       Ringe; mehr liest niemand. */
   }
 
   /* Was beendet welchen Auftrag? Den ältesten offenen — wer liefert, wird
@@ -1248,7 +1291,17 @@ SKRIPT = """
     for (var name in arbeit) {
       var A = nachName[name], S = arbeit[name];
       S.t += dt;
-      if (S.t > 28 && !S.aus) { arbeitAus(name); }
+      /* Hier stand eine Deckelung auf 28 Sekunden. Sie ist weg, und zwar
+         gemessen: In V2 liegt die mittlere Auftragsdauer bei 40 Sekunden,
+         der längste gelieferte Auftrag bei 352. Der Deckel war also kein
+         Notfall-Riegel, sondern traf den Normalfall — und er maß `S.t`,
+         das Alter der SITZUNG, nicht das des Auftrags, riss also auch
+         frisch angekommene Aufträge mit. Schlimmer noch: Nach dem
+         Abräumen buchte die spätere Lieferung nichts mehr, weder Kosten
+         noch Eintrag. In V1 traf das vier Lieferungen, in V2 neun.
+         Ein Auftrag endet jetzt, wenn er geliefert wird, oder mit dem
+         Stück. Läuft er ewig, dann weil die Daten ihn nie abschließen —
+         und das soll man sehen, nicht wegräumen. */
       var staerke = 1;
       if (S.aus) {
         S.aus -= dt;
@@ -1264,7 +1317,7 @@ SKRIPT = """
       /* Ein Ring je offenem Auftrag, von innen nach außen. Jeder dreht
          etwas anders schnell — sonst sähen drei Ringe aus wie ein dicker,
          und man könnte sie nicht zählen. */
-      for (var q = 0; q < S.liste.length; q++) {
+      for (var q = 0; q < Math.min(S.liste.length, 4); q++) {
         var L = S.liste[q];
         L.t += dt;
         L.w += (1.1 - q * 0.17) * dt;
@@ -1555,6 +1608,13 @@ SKRIPT = """
     if (window.__abklingen) window.__abklingen(16);
     else if (window.console) console.error('__abklingen fehlt — Ausklang ohne Wirkung');
 
+    /* Ruhe ist nicht Dunkelheit. Solange der Ausklang läuft, hält ein Boden
+       unter der Wachheit das Fertige sichtbar, während die Wirbel selbst
+       auslaufen. Der Hahn sitzt in der Maschine; von hier aus wird er nur
+       gestellt. */
+    if (window.__wachHalten) window.__wachHalten(0.42, 26);
+    else if (window.console) console.error('__wachHalten fehlt — Ausklang dunkel');
+
     /* DER BALL GEHT HEIM. Peters Anweisung: „Der Ball liegt dann beim
        Auftraggeber." Er wird nicht gelöscht, er wird geworfen — wer die
        Aufgabe gegeben hat, bekommt sie zurück, und das soll man sehen.
@@ -1663,14 +1723,6 @@ SKRIPT = """
              sie liegt beim Auftraggeber. Das Bild endet also mit dreierlei:
              dunkles Feld, Ball bei Peter, leuchtendes Produkt. */
 
-          /* Ruhe ist nicht Dunkelheit. Das Feld hat eine Wachheit, die der
-             größten Wirbelstärke folgt und JEDES Teilchen dämpft — sinkt
-             sie auf null, kann auch das Produkt nicht mehr leuchten. Also
-             bleibt die Stärke oben und die Drehung geht aus: Beruhigung
-             kommt von `om`, nicht von `s`. Das ist dieselbe Lehre, die
-             schon einmal ein ganzes Bild verdunkelt hat. */
-          K.s = Math.max(K.s, 0.46);
-          K.om *= Math.pow(0.12, dt);
           if (ausklang <= 0) {                   /* von vorn */
             ausklang = 0; zeit = 0; naechstes = 0; visionen = 0;
             for (var nn2 in arbeit) delete arbeit[nn2];
@@ -1703,6 +1755,7 @@ SKRIPT = """
     return { zeit: zeit, ausklang: ausklang, naechstes: naechstes,
              ereignisse: STUECK.ereignisse.length, dauer: STUECK.dauer,
              bausteine: bausteine.length, visionen: visionen,
+             bandL: bandL(), bandR: bandR(), ringR: ringR(),
              ball: derBall ? derBall.bei : null,
              still: tunStill,
              arbeiten: (function () { var r = [];
@@ -1871,11 +1924,14 @@ SKRIPT = """
         'translate(-100%,');
       e.style.textAlign = 'right';
       e.style.left = Math.min(o[0] - 30, W() - 12) + 'px';
-    } else if (k.left < 10) {
+    } else if (k.left < bandL() - 12) {
+      /* Links ist nicht bei null zu Ende, sondern dort, wo die Liste
+         aufhört. Genau das war Peters zweiter Befund: Beschriftungen
+         liefen in die Liste hinein und beide waren unlesbar. */
       e.style.transform = e.style.transform.replace(/translate\([^,]+,/,
         'translate(0,');
       e.style.textAlign = 'left';
-      e.style.left = Math.max(o[0] + 30, 12) + 'px';
+      e.style.left = Math.max(o[0] + 30, bandL() - 10) + 'px';
     }
     var k2 = e.getBoundingClientRect();
     if (k2.bottom > H() - 8)
@@ -1993,6 +2049,14 @@ SKRIPT = """
       e.style.color = hex(a.farbe);
       e.textContent = a.name;
       e.__rolle = 0;
+      /* Das Schild ins Band klemmen. Peter steht mit 1,28 Radien genau auf
+         der linken Kante; sein Schild ist um seinen Platz ZENTRIERT und
+         ragte deshalb zur Hälfte in die Liste. Gemessen auf drei
+         Schirmgrößen, auf allen dreien derselbe Treffer.
+         Geklemmt wird das Schild, nicht der Kreis: Ein kleinerer Kreis
+         kostete auf jedem Gerät Platz, damit ein einziges Wort passt. Die
+         Fäden kommen weiterhin von seinem wirklichen Platz. */
+      e.__klemm = 1;
       e.style.pointerEvents = 'auto';
       (function (A, el) {
         var ort = function () { return heimat(A); };
@@ -2013,6 +2077,13 @@ SKRIPT = """
          teilt 4 beide Zeitpunkte. */
       e.style.animationDelay = (-((((12 - i * 1.6) % 4) + 4) % 4)).toFixed(2) + 's';
       ring.appendChild(e);
+      /* Nachmessen und hereinholen, erst wenn das Schild im Dokument steht
+         — vorher hat es keine Breite. */
+      var k = e.getBoundingClientRect(), halb = k.width / 2;
+      if (k.left < bandL() + 4)
+        e.style.left = (bandL() + halb + 4) + 'px';
+      else if (k.right > bandR() - 4)
+        e.style.left = (bandR() - halb - 4) + 'px';
     });
   }
 
@@ -2141,6 +2212,14 @@ SKRIPT = """
       if (e.__rolle === soll) continue;
       e.__rolle = soll;
       e.textContent = soll ? A.rolle : A.name;
+      /* Neu klemmen: „AUFTRAGGEBER" ist deutlich breiter als „PETER", also
+         passt eine Lage, die für das eine Wort stimmt, für das andere
+         nicht. Beim ersten Versuch wurde nur einmal beim Aufbau geklemmt —
+         und das Schild rutschte beim Umschlag wieder in die Liste. */
+      e.style.left = heimat(A)[0] + 'px';
+      var kk = e.getBoundingClientRect(), hb = kk.width / 2;
+      if (kk.left < bandL() + 4) e.style.left = (bandL() + hb + 4) + 'px';
+      else if (kk.right > bandR() - 4) e.style.left = (bandR() - hb - 4) + 'px';
       e.classList.remove('agGuss');
       void e.offsetWidth;                    /* Animation neu anstoßen */
       e.classList.add('agGuss');
@@ -2175,6 +2254,7 @@ SKRIPT = """
     document.getElementById('agKostenEbene').innerHTML = '';
     tunEl.innerHTML = ''; tunEl.__h = null; tunStill = 0;
     if (window.__abklingen) window.__abklingen(0);
+    if (window.__wachHalten) window.__wachHalten(0, 0);
     if (window.__flaecheLeeren) window.__flaecheLeeren();
   }
 

@@ -166,6 +166,13 @@
     overflow:hidden;
     -webkit-mask-image:linear-gradient(to bottom, transparent 0, #000 140px);
     mask-image:linear-gradient(to bottom, transparent 0, #000 140px);}
+  /* Im Hochformat ist die Liste schmaler, sonst bliebe für das Feld
+     kein Band übrig. Dieselbe Zahl steht in der Schicht (`listeBreite`);
+     gehen die beiden auseinander, rechnet das Feld mit einem Platz, den es
+     nicht hat. */
+  @media (orientation:portrait){
+    #agEcke{width:min(34vw,240px);}
+  }
   #agLaeuft{flex:0 0 auto;}
   #agTitel{flex:0 0 auto; margin-top:11px; padding-top:10px;
     border-top:1px solid rgba(150,170,200,.14);
@@ -195,9 +202,29 @@
   /* Die Beschriftung des Werks: leuchtet bei der Abnahme auf, verebbt
      wieder. Mittig gesetzt, denn dort wächst es. */
   #agWerk{position:fixed; inset:0; z-index:5; pointer-events:none;}
-  .agWerk span{display:block; color:#DCE5F3;
-    font:400 13px/1.4 -apple-system,system-ui,sans-serif;
-    text-shadow:0 0 16px rgba(0,0,0,.9), 0 0 5px rgba(0,0,0,.9);}
+  /* DAS PRODUKT: SCHRIFT UND EIN WAAGERECHTER BALKEN.
+
+     Es sitzt unten in der Mitte des freien Bandes, nicht im Feld. Damit
+     kann es nichts überlagern und von nichts überlagert werden — und es
+     besteht aus Schrift statt aus Fäden, also kann dort auch kein
+     Fadenwerk stehenbleiben. */
+  #agWerkName{position:fixed; z-index:6; pointer-events:none;
+    bottom:calc(max(14px,env(safe-area-inset-bottom)) + 10px);
+    transform:translate(-50%,0); opacity:0; transition:opacity 1.2s ease;
+    width:min(42vw,420px); text-align:center; color:#AEBCD2;}
+  #agWerkName.auf{opacity:.72;}
+  #agWerkName.hell{opacity:1;}
+  .wBalken{height:3px; border-radius:2px; overflow:hidden;
+    background:rgba(150,170,200,.17); margin-bottom:9px;}
+  .wBalken span{display:block; height:100%; background:#8FA3C0;
+    transition:width 1.4s ease, background 2s ease;}
+  #agWerkName.hell .wBalken span{background:#E8D9A8;
+    box-shadow:0 0 10px rgba(232,217,168,.75);}
+  .wTitel{font:400 10px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;
+    letter-spacing:.22em; text-transform:uppercase;
+    overflow-wrap:anywhere;}
+  .wOrt{margin-top:4px; font:400 8.5px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;
+    letter-spacing:.24em; text-transform:uppercase; opacity:.6;}
   .agWerk u{display:block; text-decoration:none; font-size:9px;
     letter-spacing:.3em; text-transform:uppercase; opacity:.7;
     font-family:ui-monospace,SFMono-Regular,Menlo,monospace; margin-bottom:3px;}
@@ -387,6 +414,7 @@
 <div id="agKostenEbene"></div>
 <div id="agStand"></div>
 <div id="agWerk"></div>
+<div id="agWerkName"></div>
 <div id="agKopf"><b>Agentarium</b><i id="agProjekt"></i><span id="agUhr">00:00</span></div>
 <div id="agWas"></div>
 <div id="agMotoren"></div>
@@ -1123,6 +1151,18 @@
      Beides ist verdient, nicht geschenkt: gerade heißt gerade, und Verweilen
      heißt wirklich anhalten. */
   var wach = 0;   /* wieviel Leben gerade im Feld ist, 0 bis 1 */
+  /* Ein Boden unter der Wachheit, für eine begrenzte Zeit. Die Schicht
+     darüber braucht ihn am Ende eines Stücks: Dort sollen die Wirbel
+     aufhören und das Fertige trotzdem leuchten. Ohne ihn ginge beides nur
+     zusammen, denn `wach` folgt der größten Wirbelstärke und multipliziert
+     die Deckkraft jedes Fadens.
+     Er sitzt hier und nicht in der Schicht, weil `wach` hier lebt — der
+     erste Versuch griff aus der Schicht auf einen Wirbel zu, den es dort
+     nicht gibt, und fror damit das ganze Stück ein. */
+  var wachBoden = 0, wachBodenZeit = 0;
+  window.__wachHalten = function (wert, sek) {
+    wachBoden = wert || 0; wachBodenZeit = sek || 0;
+  };
   var KX = 45, KY = 35, kzelle = new Int32Array(KX * KY);
 
   function kornRasterFuellen() {
@@ -1353,6 +1393,10 @@
     }
     var zielWach = Math.max(maxS, unten ? 0.8 : 0);
     wach += (zielWach - wach) * (zielWach > wach ? 2.4 : 0.45) * dt;
+    if (wachBodenZeit > 0) {
+      wachBodenZeit -= dt;
+      if (wach < wachBoden) wach = wachBoden;
+    }
     if (wach < 0.0015) wach = 0;
 
     schreibt = (maxS > STIMMUNG.schwelle || (1 && (linienWert > 0.34 || knotenAktiv))) ? 1 : 0;
