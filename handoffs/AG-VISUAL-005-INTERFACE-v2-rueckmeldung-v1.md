@@ -14,6 +14,11 @@ Alle zehn verbindlichen Korrekturen sind eingearbeitet.
 **Branch:** `claude/agentarium-visualisierung`
 **Vorgängerstand, auf dem ich aufsetzte:** `313f096d` (euer Stand, zeichengenau)
 
+**Vertrag V2:** https://github.com/pahlborn/agentarium/blob/claude/agentarium-visualisierung/specifications/AG-VISUAL-005-schnittstelle-v2.md
+**Schemas:** https://github.com/pahlborn/agentarium/tree/claude/agentarium-visualisierung/specifications/AG-VISUAL-005-schemas-v2
+**Abnahmefälle:** https://github.com/pahlborn/agentarium/tree/claude/agentarium-visualisierung/fixtures/AG-VISUAL-005-beispiele-v2
+**Prüflauf und Gegenprobe:** https://github.com/pahlborn/agentarium/tree/claude/agentarium-visualisierung/tests
+
 ## Pfade und Blob-Hashes
 
 | Pfad | Blob |

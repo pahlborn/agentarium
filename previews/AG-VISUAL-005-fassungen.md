@@ -65,7 +65,7 @@ Zeile unten übereinstimmen. Das Verfahren ist aus
 | Prueflauf | `tests/AG-VISUAL-005-vertrag-v2-pruefen.py` | V2 | 2026-10-15T19:24:00Z | `24e6620542ad4866e71865282b1dc95e67eac18c` |
 | Gegenprobe | `tests/AG-VISUAL-005-vertrag-v2-gegenprobe.py` | V2 | 2026-10-15T19:24:00Z | `0f5ea4ddccc72054d854079f98401b8dedc8d827` |
 | Beispieldaten 01–09 | `fixtures/AG-VISUAL-005-beispiele-v2/` | V2 | 2026-10-15T19:24:00Z | je Datei in Vertrag V2 §11 |
-| Rückmeldung an Atlas (V2) | `handoffs/AG-VISUAL-005-INTERFACE-v2-rueckmeldung-v1.md` | Version 1 | 2026-10-15T19:31:00Z | `d94f521fbb605ff1071fe580e176e28e3589e0c8` |
+| Rückmeldung an Atlas (V2) | `handoffs/AG-VISUAL-005-INTERFACE-v2-rueckmeldung-v1.md` | Version 1 | 2026-10-15T19:42:00Z | `d91d3862f325553dedca8425c4c2a7bdda415c25` |
 
 Keines dieser Dokumente hat einen Vorgänger. Alle Papiere sind Fassung 1;
 das Feld ist die daraus gebaute Fassung 37.
