@@ -159,11 +159,16 @@
      Schirm und verschwand oben im Nichts — eindrucksvoll, aber sie nahm
      dem Geschehen den Platz und war beim Vorbeisehen nicht zu fassen.
      Vier Einträge sind das, was man im Vorbeigehen liest. */
+  /* Unten links, der neueste Eintrag ganz unten — dort sucht das Auge
+     das Neueste. Höchstens vier; der älteste rückt oben hinaus und läuft
+     in der Maske aus, statt an einer Kante abzureißen. */
   #agEcke{position:fixed; left:max(14px,env(safe-area-inset-left));
-    top:calc(max(14px,env(safe-area-inset-top)) + 86px);
+    bottom:calc(max(14px,env(safe-area-inset-bottom)) + 10px);
     z-index:4; pointer-events:none; width:min(42vw,330px);
-    display:flex; flex-direction:column; justify-content:flex-start;
-    overflow:hidden; transition:opacity .45s ease;}
+    display:flex; flex-direction:column; justify-content:flex-end;
+    overflow:hidden; transition:opacity .45s ease;
+    -webkit-mask-image:linear-gradient(to bottom, transparent 0, #000 46px);
+    mask-image:linear-gradient(to bottom, transparent 0, #000 46px);}
   #agEcke.leise{opacity:0;}
   /* Im Hochformat ist die Liste schmaler, sonst bliebe für das Feld
      kein Band übrig. Dieselbe Zahl steht in der Schicht (`listeBreite`);
@@ -208,11 +213,14 @@
   /* Das Produkt steht rechts oben — dort, wo sonst der Kopf stand. Es
      ist das Ziel der ganzen Übung, also bekommt es die Ecke, die das Auge
      nach dem Titel als zweites ansteuert. */
+  /* Unter dem Kopf, mit einer Trennlinie dazwischen: Es gehört zusammen
+     (das ist das Projekt, das ist sein Stand), aber es ist nicht dasselbe. */
   #agWerkName{position:fixed; z-index:6; pointer-events:none;
     right:max(14px,env(safe-area-inset-right));
-    top:max(14px,env(safe-area-inset-top));
+    top:calc(max(14px,env(safe-area-inset-top)) + 104px);
     opacity:0; transition:opacity 1.2s ease;
-    width:min(30vw,300px); text-align:right; color:#AEBCD2;}
+    width:min(32vw,320px); text-align:right; color:#AEBCD2;
+    padding-top:12px; border-top:1px solid rgba(150,170,200,.14);}
   #agWerkName.auf{opacity:.72;}
   #agWerkName.hell{opacity:1;}
   .wBalken{height:3px; border-radius:2px; overflow:hidden;
@@ -253,9 +261,11 @@
     7%{opacity:1;transform:none;} 62%{opacity:1;} 100%{opacity:0;}}
   /* Der Kopf steht links oben: Name, Projekt, Uhr. Klassisch, und genau
      deshalb lesbar — man sucht einen Titel oben links. */
-  #agKopf{position:fixed; left:max(14px,env(safe-area-inset-left));
-    top:max(14px,env(safe-area-inset-top)); z-index:7; text-align:left;
-    width:min(42vw,330px);
+  /* Kopf und Produkt stehen übereinander rechts oben: wer das hier ist,
+     und was dabei herauskommt. Links unten läuft mit, was geschieht. */
+  #agKopf{position:fixed; right:max(14px,env(safe-area-inset-right));
+    top:max(14px,env(safe-area-inset-top)); z-index:7; text-align:right;
+    width:min(32vw,320px);
     font:400 11px/1.7 ui-monospace,SFMono-Regular,Menlo,monospace;
     letter-spacing:.2em; text-transform:uppercase; color:#55637A;}
   /* Das Leitmotiv, wie es in AG-MOCK-COMPARE-001 steht. Klein, einmal, und
@@ -268,7 +278,7 @@
      gewann die spätere Zeile, und der Kopf blieb im Hochformat 330 breit.
      Nachgemessen: rechter Rand bei 344 statt 254. */
   @media (orientation:portrait){
-    #agKopf{width:min(34vw,240px);}
+    #agKopf{width:min(40vw,260px);}
   }
   #agKopf b{display:block; color:#AFC0D8; font-weight:400; font-size:13px;
     letter-spacing:.16em;}
@@ -280,8 +290,8 @@
     border-bottom:1px dotted rgba(150,170,200,.35); padding-bottom:1px;}
   /* Die Kurzbeschreibung auf Antippen — auf einem iPad gibt es kein
      Darüberfahren, also kein Tooltip, sondern ein Blatt. */
-  #agWas{position:fixed; left:max(14px,env(safe-area-inset-left));
-    top:calc(max(14px,env(safe-area-inset-top)) + 86px); z-index:9;
+  #agWas{position:fixed; right:max(14px,env(safe-area-inset-right));
+    top:calc(max(14px,env(safe-area-inset-top)) + 92px); z-index:9;
     width:min(70vw,330px); padding:15px 17px; border-radius:10px;
     background:rgba(8,12,19,.95); border:1px solid rgba(150,170,200,.16);
     color:#C2CEE2; font:400 12.5px/1.5 -apple-system,system-ui,sans-serif;
@@ -371,6 +381,35 @@
      Beendigung dieser." Genau das muss dastehen, sonst liest sich die
      Pause als Stillstand. */
   #agTun{position:fixed; inset:0; z-index:6; pointer-events:none;}
+  /* Das Schild eines Stops. Es sitzt ÜBER dem Namen, während die
+     Arbeitsanzeige darunter sitzt — beides zugleich kommt vor (ein Agent
+     kann an einem Auftrag arbeiten und an einem anderen hängen). */
+  #agStoppSchilder{position:fixed; inset:0; z-index:7; pointer-events:none;}
+  .agStoppS{position:absolute; transform:translate(-50%,-100%);
+    pointer-events:auto; cursor:pointer; text-align:center; white-space:nowrap;
+    font:400 9px/1.35 ui-monospace,SFMono-Regular,Menlo,monospace;
+    letter-spacing:.2em; text-transform:uppercase;
+    -webkit-tap-highlight-color:transparent;}
+  .agStoppS::after{content:''; display:block; width:1px; height:9px;
+    margin:3px auto 0; background:currentColor; opacity:.5;}
+  .agStoppS b{display:block; font-weight:400; opacity:.65;
+    letter-spacing:.14em; text-transform:none;}
+  /* Der Grund, auf Zeigen oder Antippen. */
+  #agStopp{position:fixed; z-index:10; width:290px; padding:14px 16px;
+    border-radius:10px; background:rgba(8,12,19,.97);
+    border:1px solid rgba(150,170,200,.18);
+    font:400 12px/1.5 -apple-system,system-ui,sans-serif; color:#C8D4E6;
+    opacity:0; pointer-events:none; transition:opacity .2s ease;}
+  #agStopp.auf{opacity:1;}
+  #agStopp b{font-weight:500; font-size:11px; letter-spacing:.2em;
+    text-transform:uppercase;
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;}
+  #agStopp i{display:block; font-style:normal; color:#8295B0; font-size:10px;
+    letter-spacing:.16em; text-transform:uppercase; margin-top:3px;
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;}
+  #agStopp p{margin:10px 0 9px;}
+  #agStopp small{display:block; color:#8295B0; font-size:11px; line-height:1.45;
+    padding-top:9px; border-top:1px solid rgba(150,170,200,.14);}
   .agTut{position:absolute; transform:translate(-50%,0); white-space:nowrap;
     font:400 9px/1.3 ui-monospace,SFMono-Regular,Menlo,monospace;
     letter-spacing:.2em; text-transform:uppercase; text-align:center;
@@ -453,6 +492,8 @@
 <div id="agWas"></div>
 <div id="agMotoren"></div>
 <div id="agTun"></div>
+<div id="agStoppSchilder"></div>
+<div id="agStopp"></div>
 <div id="agTasten"><button id="agListe" type="button" class="an">Was geschieht</button><button id="agMotor" type="button">LLM &amp; Kosten</button>
 <button id="agLeg" type="button">Gesetz</button>
 <button id="agHalt" type="button">Halt</button>
@@ -1806,13 +1847,13 @@
      ==================================================================== */
 
   var AGENTEN = [{"name": "peter", "farbe": 0.11, "winkel": 180, "nah": 1.28, "rolle": "Auftraggeber", "platt": "mensch", "weise": "kreisen", "kennung": "", "bereich": [], "verbote": [], "auftrag": "Entscheidet. Ohne ihn wird nichts zusammengef\u00fchrt und nichts ver\u00f6ffentlicht."}, {"name": "nova", "farbe": 0.86, "winkel": 22.5, "nah": 1.0, "rolle": "Vision", "platt": "chatgpt", "weise": "erfinden", "kennung": "create-vision-with-nova", "bereich": ["vision", "experience", "vision_drift"], "verbote": ["code", "merge", "publish", "approve_release"], "auftrag": "Erlebnis und Vision entwickeln; eigene Vorschl\u00e4ge und R\u00fcckfragen erw\u00fcnscht."}, {"name": "atlas", "farbe": 0.15, "winkel": 67.5, "nah": 1.0, "rolle": "Orchestrator", "platt": "chatgpt", "weise": "kreisen", "kennung": "operate-as-atlas", "bereich": [], "verbote": [], "auftrag": "Koordiniert, aktiviert und motiviert. Routet Gegenfragen und gibt Antworten zur\u00fcck; offene Kl\u00e4rung wird nicht durch eine erfundene Antwort ersetzt."}, {"name": "cadence", "farbe": 0.6, "winkel": 112.5, "nah": 1.0, "rolle": "Prozess", "platt": "claude", "weise": "ordnen", "kennung": "process-agent", "bereich": ["process_maintenance", "process_improvement"], "verbote": [], "auftrag": "H\u00e4lt den Prozess instand und verbessert ihn; erkennt doppelte Arbeit."}, {"name": "scout", "farbe": 0.41, "winkel": 157.5, "nah": 1.0, "rolle": "Recherche", "platt": "chatgpt", "weise": "holen", "kennung": "build-research-knowledge", "bereich": [], "verbote": [], "auftrag": "Baut Wissen auf. Sortiert Fundst\u00fccke aus und revidiert Regeln an Gegenbeispielen."}, {"name": "forge", "farbe": 0.02, "winkel": 202.5, "nah": 1.0, "rolle": "Entwicklung", "platt": "claude", "weise": "bauen", "kennung": "coding-agent", "bereich": ["implementation"], "verbote": [], "auftrag": "Baut. Meldet technische Abh\u00e4ngigkeiten selbst, statt sie zu umgehen."}, {"name": "sentinel", "farbe": 0.34, "winkel": 247.5, "nah": 1.0, "rolle": "Qualit\u00e4t", "platt": "chatgpt", "weise": "takten", "kennung": "qa-agent-sentinel", "bereich": [], "verbote": [], "auftrag": "Stellt Fehler nach, pr\u00fcft Regressionen und benennt die Grenzen der Pr\u00fcfung."}, {"name": "archibald", "farbe": 0.5, "winkel": 292.5, "nah": 1.0, "rolle": "Spezifikation", "platt": "claude", "weise": "schaerfen", "kennung": "spec-agent", "bereich": ["specification"], "verbote": [], "auftrag": "Macht Anforderungen pr\u00fcfbar und verlangt unterscheidbare Ergebnisse."}, {"name": "argus", "farbe": 0.73, "winkel": 337.5, "nah": 1.0, "rolle": "Review", "platt": "chatgpt", "weise": "pruefen", "kennung": "review-agent-argus", "bereich": [], "verbote": [], "auftrag": "Hinterfragt aktiv, auch scheinbar Harmloses; liefert Gegenbeispiele statt Meinungen."}];
-  var ARTEN = {"request": {"abgabe": 0.0, "nachhall": 3.8, "gestalt": "sonne", "kraft": 0.95, "tempo": 0.55, "gross": 1.0, "was": "Peter wirft den goldenen Ball an"}, "handoff": {"abgabe": 0.0, "nachhall": 3.2, "gestalt": "sonne", "kraft": 0.72, "tempo": 0.85, "gross": 0.48, "was": "Ein St\u00fcck vom Ball wird abgeworfen"}, "answer": {"abgabe": 0.0, "nachhall": 3.0, "gestalt": "pfeil", "kraft": 0.62, "tempo": 1.2, "was": "Antwort auf eine R\u00fcckfrage"}, "contribution": {"abgabe": 0.0, "nachhall": 3.0, "gestalt": "wurf", "kraft": 0.62, "tempo": 1.0, "was": "Beitrag zur\u00fcckgegeben"}, "proposal": {"abgabe": 0.0, "nachhall": 3.6, "gestalt": "wurf", "kraft": 0.68, "tempo": 1.0, "was": "Vorschlag, noch nicht beschlossen"}, "recommendation": {"abgabe": 0.0, "nachhall": 3.6, "gestalt": "wurf", "kraft": 0.64, "tempo": 1.0, "was": "Empfehlung, noch nicht beschlossen"}, "question": {"abgabe": 0.0, "nachhall": 0.9, "gestalt": "pfeil", "kraft": 0.45, "tempo": 1.5, "was": "R\u00fcckfrage, noch unbeantwortet"}, "objection": {"abgabe": 0.0, "nachhall": 1.1, "gestalt": "gegen", "kraft": 0.85, "tempo": 1.5, "was": "Widerspruch aus dem Review"}, "change_request": {"abgabe": 0.0, "nachhall": 1.1, "gestalt": "gegen", "kraft": 0.7, "tempo": 1.3, "was": "\u00c4nderung verlangt"}, "defect": {"abgabe": 0.0, "nachhall": 0.8, "gestalt": "bersten", "kraft": 0.9, "tempo": 1.8, "was": "Fehler gefunden"}, "open_state": {"abgabe": 0.0, "nachhall": 0.9, "gestalt": "pfeil", "kraft": 0.38, "tempo": 0.6, "was": "etwas bleibt offen"}, "artifact": {"abgabe": 4.0, "nachhall": 2.6, "gestalt": "wurf", "kraft": 0.95, "tempo": 0.9, "was": "Ergebnis geliefert: Epics, Stories, Code"}, "decision": {"abgabe": 4.0, "nachhall": 2.6, "gestalt": "wurf", "kraft": 1.0, "tempo": 0.8, "was": "Peter entscheidet"}, "test_result": {"abgabe": 4.0, "nachhall": 2.4, "gestalt": "wurf", "kraft": 0.8, "tempo": 1.1, "was": "Pr\u00fcfung bestanden"}, "review_result": {"abgabe": 4.0, "nachhall": 2.4, "gestalt": "wurf", "kraft": 0.8, "tempo": 1.1, "was": "Review abgeschlossen"}};
+  var ARTEN = {"request": {"abgabe": 0.0, "nachhall": 3.8, "gestalt": "sonne", "kraft": 0.95, "tempo": 0.55, "gross": 1.0, "was": "Peter wirft den goldenen Ball an"}, "handoff": {"abgabe": 0.0, "nachhall": 3.2, "gestalt": "sonne", "kraft": 0.72, "tempo": 0.85, "gross": 0.48, "was": "Ein St\u00fcck vom Ball wird abgeworfen"}, "answer": {"abgabe": 0.0, "nachhall": 3.0, "gestalt": "pfeil", "kraft": 0.62, "tempo": 1.2, "was": "Antwort auf eine R\u00fcckfrage"}, "contribution": {"abgabe": 0.0, "nachhall": 3.0, "gestalt": "wurf", "kraft": 0.62, "tempo": 1.0, "was": "Beitrag zur\u00fcckgegeben"}, "proposal": {"abgabe": 0.0, "nachhall": 3.6, "gestalt": "wurf", "kraft": 0.68, "tempo": 1.0, "was": "Vorschlag, noch nicht beschlossen"}, "recommendation": {"abgabe": 0.0, "nachhall": 3.6, "gestalt": "wurf", "kraft": 0.64, "tempo": 1.0, "was": "Empfehlung, noch nicht beschlossen"}, "question": {"abgabe": 0.0, "nachhall": 0.9, "gestalt": "pfeil", "kraft": 0.45, "tempo": 1.5, "was": "R\u00fcckfrage, noch unbeantwortet"}, "objection": {"abgabe": 0.0, "nachhall": 1.1, "gestalt": "gegen", "kraft": 0.85, "tempo": 1.5, "was": "Widerspruch aus dem Review"}, "change_request": {"abgabe": 0.0, "nachhall": 1.1, "gestalt": "gegen", "kraft": 0.7, "tempo": 1.3, "was": "\u00c4nderung verlangt"}, "defect": {"abgabe": 0.0, "nachhall": 0.8, "gestalt": "bersten", "kraft": 0.9, "tempo": 1.8, "was": "Fehler gefunden"}, "open_state": {"abgabe": 0.0, "nachhall": 0.9, "gestalt": "pfeil", "kraft": 0.38, "tempo": 0.6, "was": "etwas bleibt offen"}, "stop": {"abgabe": 0.0, "nachhall": 0.0, "gestalt": "zustand", "kraft": 0.0, "tempo": 1.0, "was": "Ein Stop: der Betroffene kann nicht weiter"}, "resume": {"abgabe": 0.0, "nachhall": 0.0, "gestalt": "zustand", "kraft": 0.0, "tempo": 1.0, "was": "Der Stop ist aufgehoben"}, "artifact": {"abgabe": 4.0, "nachhall": 2.6, "gestalt": "wurf", "kraft": 0.95, "tempo": 0.9, "was": "Ergebnis geliefert: Epics, Stories, Code"}, "decision": {"abgabe": 4.0, "nachhall": 2.6, "gestalt": "wurf", "kraft": 1.0, "tempo": 0.8, "was": "Peter entscheidet"}, "test_result": {"abgabe": 4.0, "nachhall": 2.4, "gestalt": "wurf", "kraft": 0.8, "tempo": 1.1, "was": "Pr\u00fcfung bestanden"}, "review_result": {"abgabe": 4.0, "nachhall": 2.4, "gestalt": "wurf", "kraft": 0.8, "tempo": 1.1, "was": "Review abgeschlossen"}};
   /* Mehrere Stücke auf derselben Bühne. Das war von Anfang an die
      Aufgabe — „je nachdem umschaltbar auf Protokolldaten" —, und es ist
      zugleich die Probe aufs Exempel: Wenn dieselbe Maschine ohne eine
      einzige Änderung ein anderes Stück spielt, ist sie wirklich agnostisch
      und wartet nur noch auf echte Daten. */
-  var STUECKE = [{"titel": "NACHTPOST – eine Stadt aus ungesendeten Briefen", "dauer": 120, "ereignisse": [{"id": "E01", "t": 0, "von": "peter", "an": "atlas", "art": "request", "text": "Gemeinsames Staunen, zurückziehbare Beiträge", "folgen": 3, "gross": 1.0, "kommando": "BEGINNE", "tokens": {"aus": 14802, "denken": 10289, "ein": 6, "cache": 11510}, "kosten": 0.2172, "quelle": "geschaetzt"}, {"id": "E02", "t": 3, "von": "atlas", "an": "nova", "art": "handoff", "text": "Visionstrang eröffnet", "folgen": 1, "gross": 0.744, "dauer": 52, "kommando": "ERÖFFNE", "tokens": {"aus": 79658, "denken": 62448, "ein": 7, "cache": 27092}, "kosten": 1.2111, "quelle": "geschaetzt"}, {"id": "E03", "t": 3, "von": "atlas", "an": "scout", "art": "handoff", "text": "Speicherung und Rücknahme untersuchen", "folgen": 1, "gross": 0.438, "dauer": 7, "kommando": "UNTERSUCHE", "tokens": {"aus": 7604, "denken": 6037, "ein": 4, "cache": 5171}, "kosten": 0.1161, "quelle": "geschaetzt"}, {"id": "E04", "t": 8, "von": "nova", "an": "peter", "art": "question", "text": "Darf eine Löschung eine sichtbare Lücke hinterlassen?", "folgen": 1}, {"id": "E05", "t": 10, "von": "scout", "an": "archibald", "art": "contribution", "text": "Abgeleitete Formen brauchen Herkunftsbeziehungen", "folgen": 2}, {"id": "E06", "t": 13, "von": "peter", "an": "nova", "art": "decision", "text": "Leere Stellen erlaubt; rekonstruierbare Textreste verboten", "folgen": 2}, {"id": "E07", "t": 17, "von": "atlas", "an": "archibald", "art": "handoff", "text": "Konzept in drei Epics und Stories entfalten", "folgen": 1, "gross": 0.41, "dauer": 5, "kommando": "ENTFALTE", "tokens": {"aus": 6657, "denken": 4020, "ein": 7, "cache": 859}, "kosten": 0.094, "quelle": "geschaetzt"}, {"id": "E08", "t": 22, "von": "archibald", "an": "forge", "art": "artifact", "text": "Epics und Stories V1 bereit", "folgen": 2}, {"id": "E09", "t": 25, "von": "atlas", "an": "forge", "art": "handoff", "text": "Gebäudegenerator unabhängig von offener Löschfrage bauen", "folgen": 1, "gross": 0.52, "dauer": 15, "kommando": "BAUE", "tokens": {"aus": 22552, "denken": 15845, "ein": 4, "cache": 13481}, "kosten": 0.3319, "quelle": "geschaetzt"}, {"id": "E10", "t": 26, "von": "atlas", "an": "argus", "art": "handoff", "text": "Rücknahme-Kriterien unabhängig prüfen", "folgen": 1, "gross": 0.78, "dauer": 70, "kommando": "PRÜFE", "tokens": {"aus": 63366, "denken": 54445, "ein": 8, "cache": 45767}, "kosten": 0.992, "quelle": "geschaetzt"}, {"id": "E11", "t": 32, "von": "argus", "an": "archibald", "art": "objection", "text": "Eine verbliebene Brücke kann einen entfernten Ursprung verraten", "folgen": 4}, {"id": "E12", "t": 36, "von": "archibald", "an": "scout", "art": "question", "text": "Welche gemeinsamen Ableitungen müssen zurückgenommen werden?", "folgen": 1}, {"id": "E13", "t": 40, "von": "forge", "an": "sentinel", "art": "artifact", "text": "Stadtteil V1 zur Prüfung bereit", "folgen": 1}, {"id": "E14", "t": 42, "von": "atlas", "an": "sentinel", "art": "handoff", "text": "V1 gegen Story-Kriterien prüfen", "folgen": 1, "gross": 0.735, "dauer": 50, "kommando": "PRÜFE", "tokens": {"aus": 40757, "denken": 31714, "ein": 8, "cache": 11999}, "kosten": 0.6182, "quelle": "geschaetzt"}, {"id": "E15", "t": 48, "von": "sentinel", "an": "forge", "art": "defect", "text": "Haus gelöscht, abgeleitete Brücke bleibt bestehen", "folgen": 3}, {"id": "E16", "t": 50, "von": "scout", "an": "archibald", "art": "answer", "text": "Veraltete Zuordnung und gemeinsame Ableitung betroffen", "folgen": 3}, {"id": "E17", "t": 53, "von": "atlas", "an": "forge", "art": "handoff", "text": "Herkunftskette reparieren; V1 bleibt nachvollziehbar", "folgen": 1, "gross": 0.622, "dauer": 29, "kommando": "REPARIERE", "tokens": {"aus": 24274, "denken": 12390, "ein": 8, "cache": 18523}, "kosten": 0.3292, "quelle": "geschaetzt"}, {"id": "E18", "t": 55, "von": "nova", "an": "forge", "art": "proposal", "text": "Lichtstege bei Rücknahme zerfallen lassen", "folgen": 2}, {"id": "E19", "t": 59, "von": "argus", "an": "nova", "art": "objection", "text": "Sichtbarer Zerfall ersetzt keine Entfernung gespeicherter Ableitungen", "folgen": 1}, {"id": "E20", "t": 60, "von": "peter", "an": "atlas", "art": "change_request", "text": "Zwei Besucher sollen gemeinsam einen Brief gestalten können", "folgen": 1}, {"id": "E21", "t": 63, "von": "atlas", "an": "cadence", "art": "handoff", "text": "Doppelte Korrekturarbeit durch zwei Löschbegriffe klären", "folgen": 1, "gross": 0.424, "dauer": 6, "kommando": "KLÄRE", "tokens": {"aus": 7153, "denken": 6653, "ein": 3, "cache": 2071}, "kosten": 0.115, "quelle": "geschaetzt"}, {"id": "E22", "t": 66, "von": "atlas", "an": "peter", "art": "question", "text": "Darf jeder Mitautor den gesamten gemeinsamen Beitrag zurückziehen?", "folgen": 1}, {"id": "E23", "t": 69, "von": "cadence", "an": "archibald", "art": "recommendation", "text": "Ein kanonisches Kriterium mit Verweisen auf beide Stories", "folgen": 1}, {"id": "E24", "t": 73, "von": "peter", "an": "atlas", "art": "decision", "text": "Jeder Mitautor darf den gemeinsamen Beitrag vollständig zurückziehen", "folgen": 1}, {"id": "E25", "t": 77, "von": "archibald", "an": "forge", "art": "artifact", "text": "Story-Kriterien V2 inklusive gemeinsamer Rücknahme", "folgen": 1}, {"id": "E26", "t": 82, "von": "forge", "an": "sentinel", "art": "artifact", "text": "V2: Herkunftsreparatur und gemeinsamer Entwurf bereit", "folgen": 1}, {"id": "E27", "t": 85, "von": "atlas", "an": "sentinel", "art": "handoff", "text": "V2 gezielt und mit relevanten Regressionen prüfen", "folgen": 1, "gross": 0.438, "dauer": 7, "kommando": "PRÜFE", "tokens": {"aus": 9472, "denken": 5313, "ein": 4, "cache": 3668}, "kosten": 0.1313, "quelle": "geschaetzt"}, {"id": "E28", "t": 92, "von": "sentinel", "an": "argus", "art": "test_result", "text": "Gezielte Prüfungen bestanden; unterbrochene Sitzungen ungeprüft", "folgen": 1}, {"id": "E29", "t": 96, "von": "argus", "an": "atlas", "art": "review_result", "text": "Rücknahmelogik nachvollziehbar; Erlebnisabnahme bleibt offen", "folgen": 2}, {"id": "E30", "t": 100, "von": "atlas", "an": "peter", "art": "handoff", "text": "Ergebnis und verbleibende Grenzen zur Entscheidung", "folgen": 1, "gross": 0.52, "dauer": 15, "kommando": "ÜBERNIMM", "tokens": {"aus": 23649, "denken": 14502, "ein": 4, "cache": 9279}, "kosten": 0.3353, "quelle": "geschaetzt"}, {"id": "E31", "t": 105, "von": "nova", "an": "atlas", "art": "question", "text": "Können zurückbleibende Lücken einen öffentlichen Garten bilden?", "folgen": 2}, {"id": "E32", "t": 108, "von": "atlas", "an": "scout", "art": "handoff", "text": "Neue Idee unabhängig auf verbleibende Informationen prüfen", "folgen": 1, "gross": 0.52, "dauer": 15, "kommando": "PRÜFE", "tokens": {"aus": 17624, "denken": 13367, "ein": 7, "cache": 9556}, "kosten": 0.2653, "quelle": "geschaetzt"}, {"id": "E33", "t": 108, "von": "atlas", "an": "argus", "art": "handoff", "text": "Neue Gartenidee unabhängig hinterfragen", "folgen": 1, "gross": 0.52, "dauer": 15, "kommando": "HINTERFRAGE", "tokens": {"aus": 14729, "denken": 11908, "ein": 6, "cache": 8315}, "kosten": 0.2261, "quelle": "geschaetzt"}, {"id": "E34", "t": 120, "von": "atlas", "an": null, "art": "open_state", "text": "Kein Abschluss: Erlebnisabnahme, Gartenfrage und Sitzungsprüfung offen", "folgen": 0}], "projekt": "NACHTPOST V1", "beschreibung": "Eine Stadt aus ungesendeten Briefen. Beiträge werden zu Lichtgebäuden und Nachbarschaften — und jeder Beitrag muss zurückziehbar bleiben. Die Spannung: Wie wächst etwas gemeinsam, wenn seine Ursprünge verschwinden dürfen?", "umfang": 4, "umfangText": "3 Epics · 4 Stories", "ablage": "Repository"}, {"projekt": "NACHTPOST V2", "titel": "Die Stadt, die sich gemeinsam verändert", "beschreibung": "Sieben Arbeitsstränge, 21 Storyideen und vier Konfliktschleifen. Die zentrale Spannung: Wie kann etwas gemeinsam wachsen, wenn seine Ursprünge verschwinden dürfen? Abgeleitet aus eurem Konzeptpapier — Zeiten und Kausalität sind ein Vorschlag, kein Fixture.", "dauer": 480, "ereignisse": [{"id": "N001", "t": 0, "von": "peter", "an": "atlas", "art": "request", "text": "Gemeinsames Wachsen bei zurückziehbaren Ursprüngen", "folgen": 7, "gross": 1.0, "kommando": "BEGINNE", "tokens": {"aus": 19227, "denken": 14641, "ein": 5, "cache": 16635}, "kosten": 0.2897, "quelle": "geschaetzt"}, {"id": "N002", "t": 5, "von": "atlas", "an": "nova", "art": "handoff", "text": "Wachsende Häuser und stille Höfe vorschlagen", "folgen": 1, "gross": 0.602, "dauer": 26, "kommando": "VORSCHLAGE", "tokens": {"aus": 39693, "denken": 28730, "ein": 8, "cache": 29976}, "kosten": 0.5892, "quelle": "geschaetzt"}, {"id": "N003", "t": 8, "von": "atlas", "an": "forge", "art": "handoff", "text": "Zwei Lichtgebäudeformen parallel entwickeln", "folgen": 1, "gross": 0.705, "dauer": 44, "kommando": "ÜBERNIMM", "tokens": {"aus": 55471, "denken": 42291, "ein": 7, "cache": 6125}, "kosten": 0.8362, "quelle": "geschaetzt"}, {"id": "N008", "t": 14, "von": "atlas", "an": "scout", "art": "handoff", "text": "Herkunftsbeziehungen verwandter Beiträge untersuchen", "folgen": 1, "gross": 0.628, "dauer": 30, "kommando": "UNTERSUCHE", "tokens": {"aus": 28080, "denken": 13325, "ein": 7, "cache": 5071}, "kosten": 0.3748, "quelle": "geschaetzt"}, {"id": "N009", "t": 26, "von": "scout", "an": "atlas", "art": "contribution", "text": "Fundstück 1: Rezept ohne nachvollziehbare Grundlage", "folgen": 1}, {"id": "N010", "t": 29, "von": "scout", "an": "atlas", "art": "open_state", "text": "Fundstück 1 verworfen: keine Grundlage", "folgen": 0}, {"id": "N004", "t": 31, "von": "nova", "an": "archibald", "art": "proposal", "text": "Stille Höfe als ruhige Betrachtung", "folgen": 2}, {"id": "N005", "t": 34, "von": "atlas", "an": "archibald", "art": "handoff", "text": "Beobachtbare Unterschiede der Formen verlangen", "folgen": 1, "gross": 0.56, "dauer": 20, "kommando": "VERLANGE", "tokens": {"aus": 28859, "denken": 16033, "ein": 5, "cache": 16453}, "kosten": 0.3992, "quelle": "geschaetzt"}, {"id": "N011", "t": 44, "von": "scout", "an": "archibald", "art": "contribution", "text": "Fundstück 2: Herkunftsmodell für Ableitungen", "folgen": 3}, {"id": "N012", "t": 48, "von": "atlas", "an": "argus", "art": "handoff", "text": "Das Herkunftsmodell an Gegenbeispielen prüfen", "folgen": 1, "gross": 0.651, "dauer": 34, "kommando": "PRÜFE", "tokens": {"aus": 25654, "denken": 24253, "ein": 7, "cache": 3480}, "kosten": 0.4149, "quelle": "geschaetzt"}, {"id": "N006", "t": 54, "von": "archibald", "an": "forge", "art": "artifact", "text": "US-01/05/06: Formkriterien bereit", "folgen": 2}, {"id": "N007", "t": 56, "von": "forge", "an": "sentinel", "art": "artifact", "text": "Zwei Formen mit Ursprungsbezug", "folgen": 1}, {"id": "N016", "t": 60, "von": "atlas", "an": "argus", "art": "handoff", "text": "Verräterische Leerstellen nach Rücknahme hinterfragen", "folgen": 1, "gross": 0.615, "dauer": 28, "kommando": "HINTERFRAGE", "tokens": {"aus": 44043, "denken": 21235, "ein": 7, "cache": 16244}, "kosten": 0.5899, "quelle": "geschaetzt"}, {"id": "N013", "t": 82, "von": "argus", "an": "scout", "art": "objection", "text": "Gegenbeispiel: Regel trägt nicht überall", "folgen": 3}, {"id": "N017", "t": 88, "von": "argus", "an": "nova", "art": "objection", "text": "Sichtbarer Zerfall kann den Ursprung verraten", "folgen": 4}, {"id": "N018", "t": 92, "von": "atlas", "an": "nova", "art": "handoff", "text": "Die Zerfallsidee überarbeiten", "folgen": 1, "gross": 0.663, "dauer": 36, "kommando": "ÜBERARBEITE", "tokens": {"aus": 48963, "denken": 33172, "ein": 4, "cache": 11578}, "kosten": 0.7131, "quelle": "geschaetzt"}, {"id": "N014", "t": 96, "von": "scout", "an": "archibald", "art": "answer", "text": "Herkunftsmodell auf direkte Ableitungen eingegrenzt", "folgen": 2}, {"id": "N031", "t": 96, "von": "peter", "an": "atlas", "art": "change_request", "text": "CR-01: Gemeinsame Autorschaft aufnehmen", "folgen": 3}, {"id": "N032", "t": 100, "von": "atlas", "an": "archibald", "art": "handoff", "text": "Gemeinsame Autorschaft spezifizieren", "folgen": 1, "gross": 0.64, "dauer": 32, "kommando": "SPEZIFIZIERE", "tokens": {"aus": 42022, "denken": 23322, "ein": 7, "cache": 12479}, "kosten": 0.5812, "quelle": "geschaetzt"}, {"id": "N015", "t": 104, "von": "scout", "an": "atlas", "art": "contribution", "text": "Fundstück 3: nachvollziehbare Fallbeschreibung", "folgen": 1}, {"id": "N022", "t": 118, "von": "atlas", "an": "sentinel", "art": "handoff", "text": "Die verbleibende Brücke nachstellen", "folgen": 1, "gross": 0.628, "dauer": 30, "kommando": "NACHSTELLE", "tokens": {"aus": 32534, "denken": 25737, "ein": 6, "cache": 5925}, "kosten": 0.496, "quelle": "geschaetzt"}, {"id": "N033", "t": 126, "von": "archibald", "an": "peter", "art": "question", "text": "Darf ein Mitautor den ganzen Beitrag zurückziehen?", "folgen": 2}, {"id": "N019", "t": 128, "von": "nova", "an": "archibald", "art": "proposal", "text": "Zerfall ohne rekonstruierbare Reste", "folgen": 2}, {"id": "N020", "t": 132, "von": "atlas", "an": "archibald", "art": "handoff", "text": "Die veränderte Bedeutung prüfbar machen", "folgen": 1, "gross": 0.589, "dauer": 24, "kommando": "MACHE", "tokens": {"aus": 26132, "denken": 23298, "ein": 6, "cache": 16921}, "kosten": 0.4142, "quelle": "geschaetzt"}, {"id": "N034", "t": 140, "von": "peter", "an": "archibald", "art": "decision", "text": "Jeder Mitautor darf den gemeinsamen Beitrag zurückziehen", "folgen": 2}, {"id": "N023", "t": 148, "von": "sentinel", "an": "forge", "art": "defect", "text": "Haus gelöscht, abgeleitete Brücke bleibt stehen", "folgen": 4}, {"id": "N024", "t": 154, "von": "forge", "an": "atlas", "art": "question", "text": "Wie weit reichen abhängige Ableitungen?", "folgen": 2}, {"id": "N021", "t": 156, "von": "archibald", "an": "forge", "art": "artifact", "text": "US-03/09/10: Rücknahmekriterien V1", "folgen": 2}, {"id": "N025", "t": 166, "von": "atlas", "an": "forge", "art": "decision", "text": "Umfang: direkte Ableitungen, unabhängige Nachbarn bleiben", "folgen": 2}, {"id": "N026", "t": 170, "von": "atlas", "an": "forge", "art": "handoff", "text": "Die Herkunftskette reparieren", "folgen": 1, "gross": 0.685, "dauer": 40, "kommando": "REPARIERE", "tokens": {"aus": 38375, "denken": 30886, "ein": 3, "cache": 27199}, "kosten": 0.5883, "quelle": "geschaetzt"}, {"id": "N035", "t": 172, "von": "archibald", "an": "forge", "art": "artifact", "text": "US-04/11/12: Regeln gemeinsamer Autorschaft", "folgen": 2}, {"id": "N036", "t": 190, "von": "peter", "an": "atlas", "art": "change_request", "text": "CR-02: Wiederaufnahme nach Unterbrechung", "folgen": 3}, {"id": "N037", "t": 194, "von": "atlas", "an": "forge", "art": "handoff", "text": "Unterbrochene Entwürfe wiederaufnehmen", "folgen": 1, "gross": 0.674, "dauer": 38, "kommando": "WIEDERAUFNEHME", "tokens": {"aus": 41958, "denken": 38271, "ein": 8, "cache": 11620}, "kosten": 0.6702, "quelle": "geschaetzt"}, {"id": "N027", "t": 210, "von": "forge", "an": "sentinel", "art": "artifact", "text": "Herkunftsreparatur V2 bereit", "folgen": 2}, {"id": "N028", "t": 214, "von": "atlas", "an": "sentinel", "art": "handoff", "text": "Gezielt und mit relevanten Regressionen prüfen", "folgen": 1, "gross": 0.575, "dauer": 22, "kommando": "PRÜFE", "tokens": {"aus": 17288, "denken": 14238, "ein": 8, "cache": 7483}, "kosten": 0.267, "quelle": "geschaetzt"}, {"id": "N038", "t": 232, "von": "forge", "an": "atlas", "art": "defect", "text": "Alte Sitzung bringt zurückgezogenen Entwurf zurück", "folgen": 4}, {"id": "N029", "t": 236, "von": "sentinel", "an": "argus", "art": "test_result", "text": "Gezielte Prüfungen bestanden", "folgen": 1}, {"id": "N039", "t": 238, "von": "atlas", "an": "sentinel", "art": "handoff", "text": "Die Wiederholungsfolge nachstellen", "folgen": 1, "gross": 0.602, "dauer": 26, "kommando": "NACHSTELLE", "tokens": {"aus": 31018, "denken": 18848, "ein": 8, "cache": 6006}, "kosten": 0.4388, "quelle": "geschaetzt"}, {"id": "N030", "t": 244, "von": "argus", "an": "atlas", "art": "review_result", "text": "Herkunftsreparatur nachvollziehbar", "folgen": 2}, {"id": "N046", "t": 250, "von": "atlas", "an": "nova", "art": "handoff", "text": "Verständlichkeit der Rücknahme untersuchen", "folgen": 1, "gross": 0.651, "dauer": 34, "kommando": "UNTERSUCHE", "tokens": {"aus": 44623, "denken": 26350, "ein": 7, "cache": 20719}, "kosten": 0.6266, "quelle": "geschaetzt"}, {"id": "N040", "t": 264, "von": "sentinel", "an": "atlas", "art": "artifact", "text": "Reproduzierbare Unterbrechungs-/Rücknahmefolge", "folgen": 2}, {"id": "N041", "t": 270, "von": "atlas", "an": "peter", "art": "open_state", "text": "Gemeinschaftsfunktion blockiert; Konfliktregel offen", "folgen": 0}, {"id": "N042", "t": 276, "von": "atlas", "an": "cadence", "art": "handoff", "text": "Zwei Rücknahmebegriffe und doppelte Reparatur klären", "folgen": 1, "gross": 0.589, "dauer": 24, "kommando": "KLÄRE", "tokens": {"aus": 23892, "denken": 11487, "ein": 5, "cache": 3882}, "kosten": 0.3198, "quelle": "geschaetzt"}, {"id": "N047", "t": 284, "von": "nova", "an": "sentinel", "art": "proposal", "text": "Rücknahme ohne Textwand erlebbar", "folgen": 2}, {"id": "N048", "t": 290, "von": "atlas", "an": "sentinel", "art": "handoff", "text": "Verschwinden, Fehler und fehlende Verbindung unterscheiden", "folgen": 1, "gross": 0.615, "dauer": 28, "kommando": "UNTERSCHEIDE", "tokens": {"aus": 32813, "denken": 17450, "ein": 7, "cache": 26419}, "kosten": 0.4492, "quelle": "geschaetzt"}, {"id": "N043", "t": 300, "von": "cadence", "an": "archibald", "art": "recommendation", "text": "Ein kanonisches Kriterium mit Verweisen", "folgen": 2}, {"id": "N044", "t": 306, "von": "atlas", "an": "archibald", "art": "handoff", "text": "Die gemeinsamen Begriffe präzisieren", "folgen": 1, "gross": 0.575, "dauer": 22, "kommando": "PRÄZISIERE", "tokens": {"aus": 34001, "denken": 22186, "ein": 8, "cache": 19399}, "kosten": 0.4901, "quelle": "geschaetzt"}, {"id": "N049", "t": 318, "von": "sentinel", "an": "nova", "art": "defect", "text": "Drei Zustände sehen gleich aus", "folgen": 3}, {"id": "N050", "t": 324, "von": "nova", "an": "archibald", "art": "question", "text": "Reicht Farbe zur Unterscheidung?", "folgen": 2}, {"id": "N045", "t": 328, "von": "archibald", "an": "atlas", "art": "artifact", "text": "Begriffsklärung Rücknahme übernommen", "folgen": 1}, {"id": "N051", "t": 338, "von": "archibald", "an": "nova", "art": "answer", "text": "Nein — Bewegung und Dauer müssen unterscheiden", "folgen": 2}, {"id": "N052", "t": 344, "von": "atlas", "an": "forge", "art": "handoff", "text": "Die drei Zustände unterscheidbar bauen", "folgen": 1, "gross": 0.663, "dauer": 36, "kommando": "BAUE", "tokens": {"aus": 42066, "denken": 19004, "ein": 3, "cache": 35765}, "kosten": 0.5557, "quelle": "geschaetzt"}, {"id": "N057", "t": 350, "von": "atlas", "an": "nova", "art": "handoff", "text": "Die Gartenidee erneut öffnen", "folgen": 1, "gross": 0.602, "dauer": 26, "kommando": "ÖFFNE", "tokens": {"aus": 32725, "denken": 27646, "ein": 3, "cache": 8283}, "kosten": 0.5095, "quelle": "geschaetzt"}, {"id": "N058", "t": 376, "von": "nova", "an": "atlas", "art": "proposal", "text": "Garten aus unabhängigen neuen Beiträgen", "folgen": 3}, {"id": "N053", "t": 380, "von": "forge", "an": "sentinel", "art": "artifact", "text": "US-16/17/18: Unterscheidbare Zustände", "folgen": 2}, {"id": "N059", "t": 382, "von": "atlas", "an": "scout", "art": "handoff", "text": "Den Ursprung der Gartenformen hinterfragen", "folgen": 1, "gross": 0.628, "dauer": 30, "kommando": "HINTERFRAGE", "tokens": {"aus": 46963, "denken": 22921, "ein": 7, "cache": 34836}, "kosten": 0.6306, "quelle": "geschaetzt"}, {"id": "N054", "t": 384, "von": "atlas", "an": "sentinel", "art": "handoff", "text": "Die Unterscheidung gezielt prüfen", "folgen": 1, "gross": 0.56, "dauer": 20, "kommando": "PRÜFE", "tokens": {"aus": 24026, "denken": 17948, "ein": 7, "cache": 9229}, "kosten": 0.36, "quelle": "geschaetzt"}, {"id": "N060", "t": 386, "von": "atlas", "an": "argus", "art": "handoff", "text": "Die Aussagekraft verbliebener Formen hinterfragen", "folgen": 1, "gross": 0.628, "dauer": 30, "kommando": "HINTERFRAGE", "tokens": {"aus": 41071, "denken": 34271, "ein": 7, "cache": 9766}, "kosten": 0.6369, "quelle": "geschaetzt"}, {"id": "N055", "t": 404, "von": "sentinel", "an": "argus", "art": "test_result", "text": "Unterscheidung bestanden; Prüfgrenze benannt", "folgen": 1}, {"id": "N056", "t": 412, "von": "argus", "an": "atlas", "art": "review_result", "text": "Erlebnis nachvollziehbar; Abnahme offen", "folgen": 2}, {"id": "N061", "t": 412, "von": "scout", "an": "atlas", "art": "objection", "text": "Gartenform übernimmt Beziehungen eines entfernten Briefes", "folgen": 2}, {"id": "N062", "t": 416, "von": "argus", "an": "atlas", "art": "objection", "text": "Verbliebene Formen können Rücknahmelücken nutzen", "folgen": 2}, {"id": "N063", "t": 430, "von": "atlas", "an": "peter", "art": "open_state", "text": "Nutzung von Rücknahmelücken bleibt offen", "folgen": 0}, {"id": "N064", "t": 452, "von": "atlas", "an": "peter", "art": "handoff", "text": "Ergebnis und verbleibende Grenzen zur Entscheidung", "folgen": 1, "gross": 0.92, "kommando": "ÜBERNIMM", "tokens": {"aus": 28293, "denken": 14514, "ein": 5, "cache": 9498}, "kosten": 0.3842, "quelle": "geschaetzt"}, {"id": "N065", "t": 470, "von": "atlas", "an": null, "art": "open_state", "text": "Kein Abschluss: Konfliktregel, Erlebnisabnahme und Gartenfrage offen", "folgen": 0}], "umfang": 21, "umfangText": "7 Stränge · 21 Storyideen", "ablage": "Repository"}];
+  var STUECKE = [{"titel": "NACHTPOST – eine Stadt aus ungesendeten Briefen", "dauer": 120, "ereignisse": [{"id": "E01", "t": 0, "von": "peter", "an": "atlas", "art": "request", "text": "Gemeinsames Staunen, zurückziehbare Beiträge", "folgen": 3, "gross": 1.0, "kommando": "BEGINNE", "tokens": {"aus": 14802, "denken": 10289, "ein": 6, "cache": 11510}, "kosten": 0.2172, "quelle": "geschaetzt"}, {"id": "E02", "t": 3, "von": "atlas", "an": "nova", "art": "handoff", "text": "Visionstrang eröffnet", "folgen": 1, "gross": 0.744, "dauer": 52, "kommando": "ERÖFFNE", "tokens": {"aus": 79658, "denken": 62448, "ein": 7, "cache": 27092}, "kosten": 1.2111, "quelle": "geschaetzt"}, {"id": "E03", "t": 3, "von": "atlas", "an": "scout", "art": "handoff", "text": "Speicherung und Rücknahme untersuchen", "folgen": 1, "gross": 0.438, "dauer": 7, "kommando": "UNTERSUCHE", "tokens": {"aus": 7604, "denken": 6037, "ein": 4, "cache": 5171}, "kosten": 0.1161, "quelle": "geschaetzt"}, {"id": "E04", "t": 8, "von": "nova", "an": "peter", "art": "question", "text": "Darf eine Löschung eine sichtbare Lücke hinterlassen?", "folgen": 1}, {"id": "E05", "t": 10, "von": "scout", "an": "archibald", "art": "contribution", "text": "Abgeleitete Formen brauchen Herkunftsbeziehungen", "folgen": 2}, {"id": "E06", "t": 13, "von": "peter", "an": "nova", "art": "decision", "text": "Leere Stellen erlaubt; rekonstruierbare Textreste verboten", "folgen": 2}, {"id": "E07", "t": 17, "von": "atlas", "an": "archibald", "art": "handoff", "text": "Konzept in drei Epics und Stories entfalten", "folgen": 1, "gross": 0.41, "dauer": 5, "kommando": "ENTFALTE", "tokens": {"aus": 6657, "denken": 4020, "ein": 7, "cache": 859}, "kosten": 0.094, "quelle": "geschaetzt"}, {"id": "E08", "t": 22, "von": "archibald", "an": "forge", "art": "artifact", "text": "Epics und Stories V1 bereit", "folgen": 2}, {"id": "E09", "t": 25, "von": "atlas", "an": "forge", "art": "handoff", "text": "Gebäudegenerator unabhängig von offener Löschfrage bauen", "folgen": 1, "gross": 0.52, "dauer": 15, "kommando": "BAUE", "tokens": {"aus": 22552, "denken": 15845, "ein": 4, "cache": 13481}, "kosten": 0.3319, "quelle": "geschaetzt"}, {"id": "E10", "t": 26, "von": "atlas", "an": "argus", "art": "handoff", "text": "Rücknahme-Kriterien unabhängig prüfen", "folgen": 1, "gross": 0.78, "dauer": 70, "kommando": "PRÜFE", "tokens": {"aus": 63366, "denken": 54445, "ein": 8, "cache": 45767}, "kosten": 0.992, "quelle": "geschaetzt"}, {"id": "E11", "t": 32, "von": "argus", "an": "archibald", "art": "objection", "text": "Eine verbliebene Brücke kann einen entfernten Ursprung verraten", "folgen": 4}, {"id": "E12", "t": 36, "von": "archibald", "an": "scout", "art": "question", "text": "Welche gemeinsamen Ableitungen müssen zurückgenommen werden?", "folgen": 1}, {"id": "E13", "t": 40, "von": "forge", "an": "sentinel", "art": "artifact", "text": "Stadtteil V1 zur Prüfung bereit", "folgen": 1}, {"id": "E14", "t": 42, "von": "atlas", "an": "sentinel", "art": "handoff", "text": "V1 gegen Story-Kriterien prüfen", "folgen": 1, "gross": 0.735, "dauer": 50, "kommando": "PRÜFE", "tokens": {"aus": 40757, "denken": 31714, "ein": 8, "cache": 11999}, "kosten": 0.6182, "quelle": "geschaetzt"}, {"id": "E15", "t": 48, "von": "sentinel", "an": "forge", "art": "defect", "text": "Haus gelöscht, abgeleitete Brücke bleibt bestehen", "folgen": 3}, {"id": "E16", "t": 50, "von": "scout", "an": "archibald", "art": "answer", "text": "Veraltete Zuordnung und gemeinsame Ableitung betroffen", "folgen": 3}, {"id": "E17", "t": 53, "von": "atlas", "an": "forge", "art": "handoff", "text": "Herkunftskette reparieren; V1 bleibt nachvollziehbar", "folgen": 1, "gross": 0.622, "dauer": 29, "kommando": "REPARIERE", "tokens": {"aus": 24274, "denken": 12390, "ein": 8, "cache": 18523}, "kosten": 0.3292, "quelle": "geschaetzt"}, {"id": "E18", "t": 55, "von": "nova", "an": "forge", "art": "proposal", "text": "Lichtstege bei Rücknahme zerfallen lassen", "folgen": 2}, {"id": "E19", "t": 59, "von": "argus", "an": "nova", "art": "objection", "text": "Sichtbarer Zerfall ersetzt keine Entfernung gespeicherter Ableitungen", "folgen": 1}, {"id": "E20", "t": 60, "von": "peter", "an": "atlas", "art": "change_request", "text": "Zwei Besucher sollen gemeinsam einen Brief gestalten können", "folgen": 1}, {"id": "E21", "t": 63, "von": "atlas", "an": "cadence", "art": "handoff", "text": "Doppelte Korrekturarbeit durch zwei Löschbegriffe klären", "folgen": 1, "gross": 0.424, "dauer": 6, "kommando": "KLÄRE", "tokens": {"aus": 7153, "denken": 6653, "ein": 3, "cache": 2071}, "kosten": 0.115, "quelle": "geschaetzt"}, {"id": "DEMO-STOP-1", "t": 64, "von": "atlas", "an": "sentinel", "art": "stop", "klasse": "budget", "text": "Kanal zum Modell geschlossen: Guthaben des Prüfkontos aufgebraucht."}, {"id": "E22", "t": 66, "von": "atlas", "an": "peter", "art": "question", "text": "Darf jeder Mitautor den gesamten gemeinsamen Beitrag zurückziehen?", "folgen": 1}, {"id": "E23", "t": 69, "von": "cadence", "an": "archibald", "art": "recommendation", "text": "Ein kanonisches Kriterium mit Verweisen auf beide Stories", "folgen": 1}, {"id": "E24", "t": 73, "von": "peter", "an": "atlas", "art": "decision", "text": "Jeder Mitautor darf den gemeinsamen Beitrag vollständig zurückziehen", "folgen": 1}, {"id": "E25", "t": 77, "von": "archibald", "an": "forge", "art": "artifact", "text": "Story-Kriterien V2 inklusive gemeinsamer Rücknahme", "folgen": 1}, {"id": "E26", "t": 82, "von": "forge", "an": "sentinel", "art": "artifact", "text": "V2: Herkunftsreparatur und gemeinsamer Entwurf bereit", "folgen": 1}, {"id": "E27", "t": 85, "von": "atlas", "an": "sentinel", "art": "handoff", "text": "V2 gezielt und mit relevanten Regressionen prüfen", "folgen": 1, "gross": 0.438, "dauer": 7, "kommando": "PRÜFE", "tokens": {"aus": 9472, "denken": 5313, "ein": 4, "cache": 3668}, "kosten": 0.1313, "quelle": "geschaetzt"}, {"id": "DEMO-RES-1", "t": 88, "von": "peter", "an": "sentinel", "art": "resume", "text": "Guthaben nachgelegt, Kanal wieder offen."}, {"id": "E28", "t": 92, "von": "sentinel", "an": "argus", "art": "test_result", "text": "Gezielte Prüfungen bestanden; unterbrochene Sitzungen ungeprüft", "folgen": 1}, {"id": "E29", "t": 96, "von": "argus", "an": "atlas", "art": "review_result", "text": "Rücknahmelogik nachvollziehbar; Erlebnisabnahme bleibt offen", "folgen": 2}, {"id": "E30", "t": 100, "von": "atlas", "an": "peter", "art": "handoff", "text": "Ergebnis und verbleibende Grenzen zur Entscheidung", "folgen": 1, "gross": 0.52, "dauer": 15, "kommando": "ÜBERNIMM", "tokens": {"aus": 23649, "denken": 14502, "ein": 4, "cache": 9279}, "kosten": 0.3353, "quelle": "geschaetzt"}, {"id": "E31", "t": 105, "von": "nova", "an": "atlas", "art": "question", "text": "Können zurückbleibende Lücken einen öffentlichen Garten bilden?", "folgen": 2}, {"id": "E32", "t": 108, "von": "atlas", "an": "scout", "art": "handoff", "text": "Neue Idee unabhängig auf verbleibende Informationen prüfen", "folgen": 1, "gross": 0.52, "dauer": 15, "kommando": "PRÜFE", "tokens": {"aus": 17624, "denken": 13367, "ein": 7, "cache": 9556}, "kosten": 0.2653, "quelle": "geschaetzt"}, {"id": "E33", "t": 108, "von": "atlas", "an": "argus", "art": "handoff", "text": "Neue Gartenidee unabhängig hinterfragen", "folgen": 1, "gross": 0.52, "dauer": 15, "kommando": "HINTERFRAGE", "tokens": {"aus": 14729, "denken": 11908, "ein": 6, "cache": 8315}, "kosten": 0.2261, "quelle": "geschaetzt"}, {"id": "E34", "t": 120, "von": "atlas", "an": null, "art": "open_state", "text": "Kein Abschluss: Erlebnisabnahme, Gartenfrage und Sitzungsprüfung offen", "folgen": 0}], "projekt": "NACHTPOST V1", "beschreibung": "Eine Stadt aus ungesendeten Briefen. Beiträge werden zu Lichtgebäuden und Nachbarschaften — und jeder Beitrag muss zurückziehbar bleiben. Die Spannung: Wie wächst etwas gemeinsam, wenn seine Ursprünge verschwinden dürfen?", "umfang": 4, "umfangText": "3 Epics · 4 Stories", "ablage": "Repository"}, {"projekt": "NACHTPOST V2", "titel": "Die Stadt, die sich gemeinsam verändert", "beschreibung": "Sieben Arbeitsstränge, 21 Storyideen und vier Konfliktschleifen. Die zentrale Spannung: Wie kann etwas gemeinsam wachsen, wenn seine Ursprünge verschwinden dürfen? Abgeleitet aus eurem Konzeptpapier — Zeiten und Kausalität sind ein Vorschlag, kein Fixture.", "dauer": 480, "ereignisse": [{"id": "N001", "t": 0, "von": "peter", "an": "atlas", "art": "request", "text": "Gemeinsames Wachsen bei zurückziehbaren Ursprüngen", "folgen": 7, "gross": 1.0, "kommando": "BEGINNE", "tokens": {"aus": 19227, "denken": 14641, "ein": 5, "cache": 16635}, "kosten": 0.2897, "quelle": "geschaetzt"}, {"id": "N002", "t": 5, "von": "atlas", "an": "nova", "art": "handoff", "text": "Wachsende Häuser und stille Höfe vorschlagen", "folgen": 1, "gross": 0.602, "dauer": 26, "kommando": "VORSCHLAGE", "tokens": {"aus": 39693, "denken": 28730, "ein": 8, "cache": 29976}, "kosten": 0.5892, "quelle": "geschaetzt"}, {"id": "N003", "t": 8, "von": "atlas", "an": "forge", "art": "handoff", "text": "Zwei Lichtgebäudeformen parallel entwickeln", "folgen": 1, "gross": 0.705, "dauer": 44, "kommando": "ÜBERNIMM", "tokens": {"aus": 55471, "denken": 42291, "ein": 7, "cache": 6125}, "kosten": 0.8362, "quelle": "geschaetzt"}, {"id": "N008", "t": 14, "von": "atlas", "an": "scout", "art": "handoff", "text": "Herkunftsbeziehungen verwandter Beiträge untersuchen", "folgen": 1, "gross": 0.628, "dauer": 30, "kommando": "UNTERSUCHE", "tokens": {"aus": 28080, "denken": 13325, "ein": 7, "cache": 5071}, "kosten": 0.3748, "quelle": "geschaetzt"}, {"id": "N009", "t": 26, "von": "scout", "an": "atlas", "art": "contribution", "text": "Fundstück 1: Rezept ohne nachvollziehbare Grundlage", "folgen": 1}, {"id": "N010", "t": 29, "von": "scout", "an": "atlas", "art": "open_state", "text": "Fundstück 1 verworfen: keine Grundlage", "folgen": 0}, {"id": "N004", "t": 31, "von": "nova", "an": "archibald", "art": "proposal", "text": "Stille Höfe als ruhige Betrachtung", "folgen": 2}, {"id": "N005", "t": 34, "von": "atlas", "an": "archibald", "art": "handoff", "text": "Beobachtbare Unterschiede der Formen verlangen", "folgen": 1, "gross": 0.56, "dauer": 20, "kommando": "VERLANGE", "tokens": {"aus": 28859, "denken": 16033, "ein": 5, "cache": 16453}, "kosten": 0.3992, "quelle": "geschaetzt"}, {"id": "N011", "t": 44, "von": "scout", "an": "archibald", "art": "contribution", "text": "Fundstück 2: Herkunftsmodell für Ableitungen", "folgen": 3}, {"id": "N012", "t": 48, "von": "atlas", "an": "argus", "art": "handoff", "text": "Das Herkunftsmodell an Gegenbeispielen prüfen", "folgen": 1, "gross": 0.651, "dauer": 34, "kommando": "PRÜFE", "tokens": {"aus": 25654, "denken": 24253, "ein": 7, "cache": 3480}, "kosten": 0.4149, "quelle": "geschaetzt"}, {"id": "N006", "t": 54, "von": "archibald", "an": "forge", "art": "artifact", "text": "US-01/05/06: Formkriterien bereit", "folgen": 2}, {"id": "N007", "t": 56, "von": "forge", "an": "sentinel", "art": "artifact", "text": "Zwei Formen mit Ursprungsbezug", "folgen": 1}, {"id": "N016", "t": 60, "von": "atlas", "an": "argus", "art": "handoff", "text": "Verräterische Leerstellen nach Rücknahme hinterfragen", "folgen": 1, "gross": 0.615, "dauer": 28, "kommando": "HINTERFRAGE", "tokens": {"aus": 44043, "denken": 21235, "ein": 7, "cache": 16244}, "kosten": 0.5899, "quelle": "geschaetzt"}, {"id": "N013", "t": 82, "von": "argus", "an": "scout", "art": "objection", "text": "Gegenbeispiel: Regel trägt nicht überall", "folgen": 3}, {"id": "N017", "t": 88, "von": "argus", "an": "nova", "art": "objection", "text": "Sichtbarer Zerfall kann den Ursprung verraten", "folgen": 4}, {"id": "N018", "t": 92, "von": "atlas", "an": "nova", "art": "handoff", "text": "Die Zerfallsidee überarbeiten", "folgen": 1, "gross": 0.663, "dauer": 36, "kommando": "ÜBERARBEITE", "tokens": {"aus": 48963, "denken": 33172, "ein": 4, "cache": 11578}, "kosten": 0.7131, "quelle": "geschaetzt"}, {"id": "N014", "t": 96, "von": "scout", "an": "archibald", "art": "answer", "text": "Herkunftsmodell auf direkte Ableitungen eingegrenzt", "folgen": 2}, {"id": "N031", "t": 96, "von": "peter", "an": "atlas", "art": "change_request", "text": "CR-01: Gemeinsame Autorschaft aufnehmen", "folgen": 3}, {"id": "N032", "t": 100, "von": "atlas", "an": "archibald", "art": "handoff", "text": "Gemeinsame Autorschaft spezifizieren", "folgen": 1, "gross": 0.64, "dauer": 32, "kommando": "SPEZIFIZIERE", "tokens": {"aus": 42022, "denken": 23322, "ein": 7, "cache": 12479}, "kosten": 0.5812, "quelle": "geschaetzt"}, {"id": "N015", "t": 104, "von": "scout", "an": "atlas", "art": "contribution", "text": "Fundstück 3: nachvollziehbare Fallbeschreibung", "folgen": 1}, {"id": "N022", "t": 118, "von": "atlas", "an": "sentinel", "art": "handoff", "text": "Die verbleibende Brücke nachstellen", "folgen": 1, "gross": 0.628, "dauer": 30, "kommando": "NACHSTELLE", "tokens": {"aus": 32534, "denken": 25737, "ein": 6, "cache": 5925}, "kosten": 0.496, "quelle": "geschaetzt"}, {"id": "N033", "t": 126, "von": "archibald", "an": "peter", "art": "question", "text": "Darf ein Mitautor den ganzen Beitrag zurückziehen?", "folgen": 2}, {"id": "N019", "t": 128, "von": "nova", "an": "archibald", "art": "proposal", "text": "Zerfall ohne rekonstruierbare Reste", "folgen": 2}, {"id": "N020", "t": 132, "von": "atlas", "an": "archibald", "art": "handoff", "text": "Die veränderte Bedeutung prüfbar machen", "folgen": 1, "gross": 0.589, "dauer": 24, "kommando": "MACHE", "tokens": {"aus": 26132, "denken": 23298, "ein": 6, "cache": 16921}, "kosten": 0.4142, "quelle": "geschaetzt"}, {"id": "N034", "t": 140, "von": "peter", "an": "archibald", "art": "decision", "text": "Jeder Mitautor darf den gemeinsamen Beitrag zurückziehen", "folgen": 2}, {"id": "N023", "t": 148, "von": "sentinel", "an": "forge", "art": "defect", "text": "Haus gelöscht, abgeleitete Brücke bleibt stehen", "folgen": 4}, {"id": "N024", "t": 154, "von": "forge", "an": "atlas", "art": "question", "text": "Wie weit reichen abhängige Ableitungen?", "folgen": 2}, {"id": "N021", "t": 156, "von": "archibald", "an": "forge", "art": "artifact", "text": "US-03/09/10: Rücknahmekriterien V1", "folgen": 2}, {"id": "N025", "t": 166, "von": "atlas", "an": "forge", "art": "decision", "text": "Umfang: direkte Ableitungen, unabhängige Nachbarn bleiben", "folgen": 2}, {"id": "N026", "t": 170, "von": "atlas", "an": "forge", "art": "handoff", "text": "Die Herkunftskette reparieren", "folgen": 1, "gross": 0.685, "dauer": 40, "kommando": "REPARIERE", "tokens": {"aus": 38375, "denken": 30886, "ein": 3, "cache": 27199}, "kosten": 0.5883, "quelle": "geschaetzt"}, {"id": "N035", "t": 172, "von": "archibald", "an": "forge", "art": "artifact", "text": "US-04/11/12: Regeln gemeinsamer Autorschaft", "folgen": 2}, {"id": "N036", "t": 190, "von": "peter", "an": "atlas", "art": "change_request", "text": "CR-02: Wiederaufnahme nach Unterbrechung", "folgen": 3}, {"id": "N037", "t": 194, "von": "atlas", "an": "forge", "art": "handoff", "text": "Unterbrochene Entwürfe wiederaufnehmen", "folgen": 1, "gross": 0.674, "dauer": 38, "kommando": "WIEDERAUFNEHME", "tokens": {"aus": 41958, "denken": 38271, "ein": 8, "cache": 11620}, "kosten": 0.6702, "quelle": "geschaetzt"}, {"id": "DEMO-STOP-1", "t": 196, "von": "atlas", "an": "scout", "art": "stop", "klasse": "technisch", "text": "Scout antwortet nicht. Die Laufzeitumgebung wurde neu gestartet; der letzte Auftrag ist ohne Rückmeldung geblieben."}, {"id": "N027", "t": 210, "von": "forge", "an": "sentinel", "art": "artifact", "text": "Herkunftsreparatur V2 bereit", "folgen": 2}, {"id": "N028", "t": 214, "von": "atlas", "an": "sentinel", "art": "handoff", "text": "Gezielt und mit relevanten Regressionen prüfen", "folgen": 1, "gross": 0.575, "dauer": 22, "kommando": "PRÜFE", "tokens": {"aus": 17288, "denken": 14238, "ein": 8, "cache": 7483}, "kosten": 0.267, "quelle": "geschaetzt"}, {"id": "DEMO-RES-1", "t": 228, "von": "atlas", "an": "scout", "art": "resume", "text": "Scout ist wieder erreichbar."}, {"id": "N038", "t": 232, "von": "forge", "an": "atlas", "art": "defect", "text": "Alte Sitzung bringt zurückgezogenen Entwurf zurück", "folgen": 4}, {"id": "N029", "t": 236, "von": "sentinel", "an": "argus", "art": "test_result", "text": "Gezielte Prüfungen bestanden", "folgen": 1}, {"id": "N039", "t": 238, "von": "atlas", "an": "sentinel", "art": "handoff", "text": "Die Wiederholungsfolge nachstellen", "folgen": 1, "gross": 0.602, "dauer": 26, "kommando": "NACHSTELLE", "tokens": {"aus": 31018, "denken": 18848, "ein": 8, "cache": 6006}, "kosten": 0.4388, "quelle": "geschaetzt"}, {"id": "N030", "t": 244, "von": "argus", "an": "atlas", "art": "review_result", "text": "Herkunftsreparatur nachvollziehbar", "folgen": 2}, {"id": "N046", "t": 250, "von": "atlas", "an": "nova", "art": "handoff", "text": "Verständlichkeit der Rücknahme untersuchen", "folgen": 1, "gross": 0.651, "dauer": 34, "kommando": "UNTERSUCHE", "tokens": {"aus": 44623, "denken": 26350, "ein": 7, "cache": 20719}, "kosten": 0.6266, "quelle": "geschaetzt"}, {"id": "N040", "t": 264, "von": "sentinel", "an": "atlas", "art": "artifact", "text": "Reproduzierbare Unterbrechungs-/Rücknahmefolge", "folgen": 2}, {"id": "N041", "t": 270, "von": "atlas", "an": "peter", "art": "open_state", "text": "Gemeinschaftsfunktion blockiert; Konfliktregel offen", "folgen": 0}, {"id": "N042", "t": 276, "von": "atlas", "an": "cadence", "art": "handoff", "text": "Zwei Rücknahmebegriffe und doppelte Reparatur klären", "folgen": 1, "gross": 0.589, "dauer": 24, "kommando": "KLÄRE", "tokens": {"aus": 23892, "denken": 11487, "ein": 5, "cache": 3882}, "kosten": 0.3198, "quelle": "geschaetzt"}, {"id": "N047", "t": 284, "von": "nova", "an": "sentinel", "art": "proposal", "text": "Rücknahme ohne Textwand erlebbar", "folgen": 2}, {"id": "N048", "t": 290, "von": "atlas", "an": "sentinel", "art": "handoff", "text": "Verschwinden, Fehler und fehlende Verbindung unterscheiden", "folgen": 1, "gross": 0.615, "dauer": 28, "kommando": "UNTERSCHEIDE", "tokens": {"aus": 32813, "denken": 17450, "ein": 7, "cache": 26419}, "kosten": 0.4492, "quelle": "geschaetzt"}, {"id": "DEMO-STOP-2", "t": 296, "von": "atlas", "an": "nova", "art": "stop", "klasse": "budget", "text": "Kanal zum Modell geschlossen: Guthaben aufgebraucht. Es fließt nichts und es kostet nichts, solange er zu ist."}, {"id": "N043", "t": 300, "von": "cadence", "an": "archibald", "art": "recommendation", "text": "Ein kanonisches Kriterium mit Verweisen", "folgen": 2}, {"id": "N044", "t": 306, "von": "atlas", "an": "archibald", "art": "handoff", "text": "Die gemeinsamen Begriffe präzisieren", "folgen": 1, "gross": 0.575, "dauer": 22, "kommando": "PRÄZISIERE", "tokens": {"aus": 34001, "denken": 22186, "ein": 8, "cache": 19399}, "kosten": 0.4901, "quelle": "geschaetzt"}, {"id": "N049", "t": 318, "von": "sentinel", "an": "nova", "art": "defect", "text": "Drei Zustände sehen gleich aus", "folgen": 3}, {"id": "N050", "t": 324, "von": "nova", "an": "archibald", "art": "question", "text": "Reicht Farbe zur Unterscheidung?", "folgen": 2}, {"id": "N045", "t": 328, "von": "archibald", "an": "atlas", "art": "artifact", "text": "Begriffsklärung Rücknahme übernommen", "folgen": 1}, {"id": "N051", "t": 338, "von": "archibald", "an": "nova", "art": "answer", "text": "Nein — Bewegung und Dauer müssen unterscheiden", "folgen": 2}, {"id": "N052", "t": 344, "von": "atlas", "an": "forge", "art": "handoff", "text": "Die drei Zustände unterscheidbar bauen", "folgen": 1, "gross": 0.663, "dauer": 36, "kommando": "BAUE", "tokens": {"aus": 42066, "denken": 19004, "ein": 3, "cache": 35765}, "kosten": 0.5557, "quelle": "geschaetzt"}, {"id": "N057", "t": 350, "von": "atlas", "an": "nova", "art": "handoff", "text": "Die Gartenidee erneut öffnen", "folgen": 1, "gross": 0.602, "dauer": 26, "kommando": "ÖFFNE", "tokens": {"aus": 32725, "denken": 27646, "ein": 3, "cache": 8283}, "kosten": 0.5095, "quelle": "geschaetzt"}, {"id": "DEMO-RES-2", "t": 354, "von": "peter", "an": "nova", "art": "resume", "text": "Budget freigegeben, Kanal wieder offen."}, {"id": "N058", "t": 376, "von": "nova", "an": "atlas", "art": "proposal", "text": "Garten aus unabhängigen neuen Beiträgen", "folgen": 3}, {"id": "N053", "t": 380, "von": "forge", "an": "sentinel", "art": "artifact", "text": "US-16/17/18: Unterscheidbare Zustände", "folgen": 2}, {"id": "N059", "t": 382, "von": "atlas", "an": "scout", "art": "handoff", "text": "Den Ursprung der Gartenformen hinterfragen", "folgen": 1, "gross": 0.628, "dauer": 30, "kommando": "HINTERFRAGE", "tokens": {"aus": 46963, "denken": 22921, "ein": 7, "cache": 34836}, "kosten": 0.6306, "quelle": "geschaetzt"}, {"id": "N054", "t": 384, "von": "atlas", "an": "sentinel", "art": "handoff", "text": "Die Unterscheidung gezielt prüfen", "folgen": 1, "gross": 0.56, "dauer": 20, "kommando": "PRÜFE", "tokens": {"aus": 24026, "denken": 17948, "ein": 7, "cache": 9229}, "kosten": 0.36, "quelle": "geschaetzt"}, {"id": "N060", "t": 386, "von": "atlas", "an": "argus", "art": "handoff", "text": "Die Aussagekraft verbliebener Formen hinterfragen", "folgen": 1, "gross": 0.628, "dauer": 30, "kommando": "HINTERFRAGE", "tokens": {"aus": 41071, "denken": 34271, "ein": 7, "cache": 9766}, "kosten": 0.6369, "quelle": "geschaetzt"}, {"id": "N055", "t": 404, "von": "sentinel", "an": "argus", "art": "test_result", "text": "Unterscheidung bestanden; Prüfgrenze benannt", "folgen": 1}, {"id": "N056", "t": 412, "von": "argus", "an": "atlas", "art": "review_result", "text": "Erlebnis nachvollziehbar; Abnahme offen", "folgen": 2}, {"id": "N061", "t": 412, "von": "scout", "an": "atlas", "art": "objection", "text": "Gartenform übernimmt Beziehungen eines entfernten Briefes", "folgen": 2}, {"id": "N062", "t": 416, "von": "argus", "an": "atlas", "art": "objection", "text": "Verbliebene Formen können Rücknahmelücken nutzen", "folgen": 2}, {"id": "N063", "t": 430, "von": "atlas", "an": "peter", "art": "open_state", "text": "Nutzung von Rücknahmelücken bleibt offen", "folgen": 0}, {"id": "DEMO-STOP-3", "t": 438, "von": "argus", "an": "forge", "art": "stop", "klasse": "freigabe", "text": "Wartet auf Peters Entscheidung zur Rücknahme-Semantik. Ohne sie lässt sich der Umbau nicht abschließen."}, {"id": "N064", "t": 452, "von": "atlas", "an": "peter", "art": "handoff", "text": "Ergebnis und verbleibende Grenzen zur Entscheidung", "folgen": 1, "gross": 0.92, "kommando": "ÜBERNIMM", "tokens": {"aus": 28293, "denken": 14514, "ein": 5, "cache": 9498}, "kosten": 0.3842, "quelle": "geschaetzt"}, {"id": "N065", "t": 470, "von": "atlas", "an": null, "art": "open_state", "text": "Kein Abschluss: Konfliktregel, Erlebnisabnahme und Gartenfrage offen", "folgen": 0}], "umfang": 21, "umfangText": "7 Stränge · 21 Storyideen", "ablage": "Repository"}];
   var stueckNr = 0;
   var STUECK = STUECKE[0];
 
@@ -1875,9 +1916,10 @@
   }
   function bandL() { return listeBreite() + 18; }
   function bandR() {
-    /* Rechts stehen jetzt zwei Dinge übereinander: oben das Produkt, unten
-       der Stand der Arbeit. Beide brauchen dieselbe Spalte. */
-    return W() - Math.min(W() * 0.26, 235);
+    /* Rechts stehen drei Dinge übereinander: Kopf, Produkt, Stand der
+       Arbeit. Sie teilen sich eine Spalte, und die muss breit genug für
+       den längsten Projekttitel sein. */
+    return W() - Math.min(W() * 0.30, 340);
   }
   function ringR() {
     var breit = bandR() - bandL();
@@ -2694,11 +2736,44 @@
      steht bis zum Ausklang. Das ist nicht gebaut, das ist eure Lage. */
   var stopper = {};
 
-  function stopperAn(name, grund) {
+  /* Die Klassen eines Stops. Jede hat ein Wort, eine Farbe und einen Satz,
+     der sagt, was sie bedeutet — und was sie wieder auflöst. Die Farbe ist
+     nicht Geschmack: Eine fachliche Blockade löst sich durch eine Antwort,
+     ein technischer Ausfall nicht. Wer das verwechselt, wartet auf etwas,
+     das nicht kommt. */
+  var STOPPKLASSEN = {
+    technisch:     { wort: 'Technik',     farbe: '#C45C66',
+                     was: 'Der Agent antwortet nicht. Löst sich nicht durch Zuwarten im Projekt, sondern erst, wenn die Umgebung wieder läuft.' },
+    budget:        { wort: 'Kanal zu',    farbe: '#C9A227',
+                     was: 'Der Zugang zum Modell ist geschlossen — kein Guthaben, Grenze erreicht oder gesperrt. Es fließt nichts, und es kostet auch nichts.' },
+    abhaengigkeit: { wort: 'wartet',      farbe: '#8FA3C0',
+                     was: 'Wartet auf eine Antwort oder Zuarbeit aus dem Team.' },
+    freigabe:      { wort: 'Freigabe',    farbe: '#9A7FB8',
+                     was: 'Wartet auf eine Entscheidung, die ein Mensch treffen muss.' },
+    mensch:        { wort: 'Mensch',      farbe: '#D0B089',
+                     was: 'Wartet auf den Auftraggeber.' },
+    unbekannt:     { wort: 'Stop',        farbe: '#7F8FA8',
+                     was: 'Angehalten; die Daten nennen keinen Grund.' }
+  };
+
+  function stopperAn(name, grund, klasse) {
     if (!nachName[name]) return;
-    stopper[name] = { t: 0, w: Math.random() * 6.2832, grund: grund || '' };
+    var k = (klasse && STOPPKLASSEN[klasse]) ? klasse : 'unbekannt';
+    stopper[name] = { t: 0, w: Math.random() * 6.2832, grund: grund || '',
+                      klasse: k, seit: zeit };
   }
-  function stopperAus(name) { delete stopper[name]; }
+  function stopperAus(name) {
+    if (stopper[name]) delete stopper[name];
+    if (stoppEl.__wer === name) stoppWeg();
+  }
+
+  /* Die Farben der Klassen stehen als Hexwert da, weil sie im Text
+     auftauchen; die Maschine rechnet mit Farbtönen. Einmal umrechnen. */
+  var STOPPTON = { technisch: 0.98, budget: 0.115, abhaengigkeit: 0.60,
+                   freigabe: 0.76, mensch: 0.09, unbekannt: 0.58 };
+  function stoppTon(k) {
+    return STOPPTON[k] != null ? STOPPTON[k] : STOPPTON.unbekannt;
+  }
 
   function stopperSchritt(dt) {
     for (var name in stopper) {
@@ -2709,11 +2784,35 @@
       var takt = S.t % 1.15;
       if (takt < 0.17) S.w -= dt * 4.2;
       var r = Math.min(W(), H()) * 0.034;
+      /* Die Farbe kommt von der KLASSE, nicht vom Agenten. Ein Ausfall ist
+         keine Eigenschaft dessen, den er trifft. */
+      var ton = stoppTon(S.klasse);
       for (var k = 0; k < 4; k++) {
         var w = S.w + k * 1.5708;
         window.__feld.strang(q[0] + Math.cos(w) * r, q[1] + Math.sin(w) * r,
           Math.sin(w) * r * 0.5, -Math.cos(w) * r * 0.5,
-          0.14, 0.45 + 0.2 * Math.random(), A.farbe, 0);
+          0.14, 0.45 + 0.2 * Math.random(), ton, 0);
+      }
+      /* Technischer Ausfall: Der Platz flackert, statt gleichmäßig zu
+         stocken. Kanal zu: ein durchgestrichener Weg nach außen — es geht
+         nichts mehr hinaus. Beides unterscheidet sich schon aus dem
+         Augenwinkel von einem bloßen Warten. */
+      if (S.klasse === 'technisch' && Math.random() < 0.22) {
+        for (var f = 0; f < 5; f++) {
+          var wf = Math.random() * 6.2832, df = r * (0.3 + Math.random());
+          window.__feld.strang(q[0] + Math.cos(wf) * df, q[1] + Math.sin(wf) * df,
+            Math.cos(wf) * 80, Math.sin(wf) * 80,
+            0.26, 0.18 + 0.12 * Math.random(), ton, 0);
+        }
+      } else if (S.klasse === 'budget') {
+        var zm = Math.atan2(my() - q[1], mx() - q[0]);
+        for (var g = 0; g < 3; g++) {
+          var fg = (g - 1) * r * 0.55;
+          window.__feld.strang(
+            q[0] + Math.cos(zm + 1.5708) * fg, q[1] + Math.sin(zm + 1.5708) * fg,
+            Math.cos(zm) * 70, Math.sin(zm) * 70,
+            0.20, 0.5, ton, 0);
+        }
       }
     }
   }
@@ -2920,6 +3019,59 @@
      deutlicher steht es da — eine lange Wartezeit ist kein Fehler des
      Bildes, sie ist der Befund. */
   var tunEl = document.getElementById('agTun'), tunStill = 0;
+
+  /* Ein Schild am Platz des Blockierten: das Wort der Klasse, und
+     darunter die Dauer. Antippen zeigt den Grund — auf einem iPad gibt es
+     kein Zeigen mit der Maus, also muss beides gehen. */
+  var stoppSchildEl = document.getElementById('agStoppSchilder'),
+      stoppEl = document.getElementById('agStopp');
+
+  function stoppZeigen() {
+    var h = '';
+    for (var n in stopper) {
+      var S = stopper[n], A = nachName[n];
+      if (!A) continue;
+      var K = STOPPKLASSEN[S.klasse] || STOPPKLASSEN.unbekannt,
+          o = heimat(A), sek = Math.max(0, Math.round(zeit - S.seit));
+      h += '<div class="agStoppS" data-wer="' + n + '" style="left:' + o[0] +
+           'px;top:' + (o[1] - 34) + 'px;color:' + K.farbe + '">' +
+           K.wort + '<b>' + (sek < 60 ? sek + ' s'
+             : Math.floor(sek / 60) + ':' + ('0' + (sek % 60)).slice(-2) + ' min') +
+           '</b></div>';
+    }
+    if (h !== stoppSchildEl.__h) {
+      stoppSchildEl.__h = h;
+      stoppSchildEl.innerHTML = h;
+      Array.prototype.forEach.call(
+        stoppSchildEl.querySelectorAll('.agStoppS'), function (el) {
+          var n = el.getAttribute('data-wer');
+          el.addEventListener('mouseenter', function () { stoppGrund(n); });
+          el.addEventListener('mouseleave', stoppWeg);
+          el.addEventListener('click', function (ev) {
+            ev.stopPropagation();
+            if (stoppEl.__wer === n) stoppWeg(); else stoppGrund(n);
+          });
+        });
+    }
+  }
+
+  function stoppGrund(n) {
+    var S = stopper[n], A = nachName[n];
+    if (!S || !A) return;
+    var K = STOPPKLASSEN[S.klasse] || STOPPKLASSEN.unbekannt, o = heimat(A);
+    stoppEl.__wer = n;
+    stoppEl.innerHTML =
+      '<b style="color:' + K.farbe + '">' + K.wort + '</b>' +
+      '<i>' + A.name + ' · ' + A.rolle + '</i>' +
+      '<p>' + (S.grund || 'Die Daten nennen keinen Grund.') + '</p>' +
+      '<small>' + K.was + '</small>';
+    stoppEl.classList.add('auf');
+    var b = stoppEl.getBoundingClientRect();
+    stoppEl.style.left = Math.max(10, Math.min(W() - b.width - 10,
+                                               o[0] - b.width / 2)) + 'px';
+    stoppEl.style.top = Math.max(10, o[1] - b.height - 46) + 'px';
+  }
+  function stoppWeg() { stoppEl.classList.remove('auf'); stoppEl.__wer = null; }
 
   function tunZeigen(dt) {
     tunStill += dt;
@@ -3361,9 +3513,21 @@
         /* Wer fragt oder etwas offen lässt, ist ab jetzt blockiert. Wer
            eine Antwort oder eine Entscheidung BEKOMMT, ist es nicht mehr. */
         if (E.art === 'question' || E.art === 'open_state')
-          stopperAn(E.von, E.text);
+          stopperAn(E.von, E.text, E.klasse || 'abhaengigkeit');
         if (E.art === 'answer' || E.art === 'decision')
           stopperAus(E.an);
+        /* Ein ausdrücklicher Stop trifft den EMPFÄNGER — er ist der, der
+           nicht weiterkann. Ein `resume` hebt ihn auf. */
+        if (E.art === 'stop' || E.art === 'resume') {
+          if (E.art === 'stop') stopperAn(E.an || E.von, E.text, E.klasse);
+          else stopperAus(E.an || E.von);
+          /* Kein Flug: Ein Stop kommt nicht von einem Agenten zum anderen,
+             er trifft einen. In die Liste gehört er trotzdem — er ist das,
+             was gerade geschieht. */
+          stromZeile(E, ARTEN[E.art]);
+          tunStill = 0;
+          continue;
+        }
         wirf(E);
         tunStill = 0;        /* es ist etwas passiert — die Pause ist aus */
       }
@@ -3394,6 +3558,7 @@
     erwartungSchritt(dt);
     produktSchritt(dt);
     stopperSchritt(dt);
+    stoppZeigen();
     tunZeigen(dt);
     standZeigen();
     bereitschaft(dt);
@@ -3572,11 +3737,15 @@
        abgeschnitten. Also nach dem Setzen nachmessen und hereinholen; die
        Richtung bleibt, nur der Rand gewinnt. */
     var k = e.getBoundingClientRect();
-    if (k.right > W() - 10) {
+    /* Rechts ist nicht am Bildrand Schluss, sondern dort, wo die Spalte mit
+       Kopf, Produkt und Stand beginnt. Vorher stand hier `W() - 10`, und
+       eine Beschriftung von Archibald legte sich quer über den Produkttitel
+       — im Bild nachgesehen. */
+    if (k.right > bandR() + 10) {
       e.style.transform = e.style.transform.replace(/translate\([^,]+,/,
         'translate(-100%,');
       e.style.textAlign = 'right';
-      e.style.left = Math.min(o[0] - 30, W() - 12) + 'px';
+      e.style.left = Math.min(o[0] - 30, bandR() + 8) + 'px';
     } else if (k.left < bandL() - 12) {
       /* Links ist nicht bei null zu Ende, sondern dort, wo die Liste
          aufhört. Genau das war Peters zweiter Befund: Beschriftungen
@@ -3951,6 +4120,7 @@
     for (var vk in verbrauch) delete verbrauch[vk];
     document.getElementById('agKostenEbene').innerHTML = '';
     tunEl.innerHTML = ''; tunEl.__h = null; tunStill = 0;
+    stoppSchildEl.innerHTML = ''; stoppSchildEl.__h = null; stoppWeg();
     if (window.__abklingen) window.__abklingen(0);
     if (window.__wachHalten) window.__wachHalten(0, 0);
     if (window.__flaecheLeeren) window.__flaecheLeeren();

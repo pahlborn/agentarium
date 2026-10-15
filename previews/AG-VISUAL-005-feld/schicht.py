@@ -152,6 +152,14 @@ ARTEN = {
   'open_state':    dict(abgabe=0.0, nachhall=0.9,  gestalt='pfeil',   kraft=0.38, tempo=0.6,
                         was='etwas bleibt offen'),
 
+  # Ein Stop ist keine Nachricht, die fliegt - er ist ein Zustand, der
+  # eintritt. Deshalb eine eigene Gestalt: Er bekommt eine Zeile in der
+  # Liste und ein Schild am Platz, aber keinen Flug und keine Spur.
+  'stop':          dict(abgabe=0.0, nachhall=0.0,  gestalt='zustand', kraft=0.0, tempo=1.0,
+                        was='Ein Stop: der Betroffene kann nicht weiter'),
+  'resume':        dict(abgabe=0.0, nachhall=0.0,  gestalt='zustand', kraft=0.0, tempo=1.0,
+                        was='Der Stop ist aufgehoben'),
+
   'artifact':      dict(abgabe=4.0, nachhall=2.6,  gestalt='wurf',    kraft=0.95, tempo=0.9,
                         was='Ergebnis geliefert: Epics, Stories, Code'),
   'decision':      dict(abgabe=4.0, nachhall=2.6,  gestalt='wurf',    kraft=1.00, tempo=0.8,
@@ -258,9 +266,10 @@ SKRIPT = """
   }
   function bandL() { return listeBreite() + 18; }
   function bandR() {
-    /* Rechts stehen jetzt zwei Dinge übereinander: oben das Produkt, unten
-       der Stand der Arbeit. Beide brauchen dieselbe Spalte. */
-    return W() - Math.min(W() * 0.26, 235);
+    /* Rechts stehen drei Dinge übereinander: Kopf, Produkt, Stand der
+       Arbeit. Sie teilen sich eine Spalte, und die muss breit genug für
+       den längsten Projekttitel sein. */
+    return W() - Math.min(W() * 0.30, 340);
   }
   function ringR() {
     var breit = bandR() - bandL();
@@ -1077,11 +1086,44 @@ SKRIPT = """
      steht bis zum Ausklang. Das ist nicht gebaut, das ist eure Lage. */
   var stopper = {};
 
-  function stopperAn(name, grund) {
+  /* Die Klassen eines Stops. Jede hat ein Wort, eine Farbe und einen Satz,
+     der sagt, was sie bedeutet — und was sie wieder auflöst. Die Farbe ist
+     nicht Geschmack: Eine fachliche Blockade löst sich durch eine Antwort,
+     ein technischer Ausfall nicht. Wer das verwechselt, wartet auf etwas,
+     das nicht kommt. */
+  var STOPPKLASSEN = {
+    technisch:     { wort: 'Technik',     farbe: '#C45C66',
+                     was: 'Der Agent antwortet nicht. Löst sich nicht durch Zuwarten im Projekt, sondern erst, wenn die Umgebung wieder läuft.' },
+    budget:        { wort: 'Kanal zu',    farbe: '#C9A227',
+                     was: 'Der Zugang zum Modell ist geschlossen — kein Guthaben, Grenze erreicht oder gesperrt. Es fließt nichts, und es kostet auch nichts.' },
+    abhaengigkeit: { wort: 'wartet',      farbe: '#8FA3C0',
+                     was: 'Wartet auf eine Antwort oder Zuarbeit aus dem Team.' },
+    freigabe:      { wort: 'Freigabe',    farbe: '#9A7FB8',
+                     was: 'Wartet auf eine Entscheidung, die ein Mensch treffen muss.' },
+    mensch:        { wort: 'Mensch',      farbe: '#D0B089',
+                     was: 'Wartet auf den Auftraggeber.' },
+    unbekannt:     { wort: 'Stop',        farbe: '#7F8FA8',
+                     was: 'Angehalten; die Daten nennen keinen Grund.' }
+  };
+
+  function stopperAn(name, grund, klasse) {
     if (!nachName[name]) return;
-    stopper[name] = { t: 0, w: Math.random() * 6.2832, grund: grund || '' };
+    var k = (klasse && STOPPKLASSEN[klasse]) ? klasse : 'unbekannt';
+    stopper[name] = { t: 0, w: Math.random() * 6.2832, grund: grund || '',
+                      klasse: k, seit: zeit };
   }
-  function stopperAus(name) { delete stopper[name]; }
+  function stopperAus(name) {
+    if (stopper[name]) delete stopper[name];
+    if (stoppEl.__wer === name) stoppWeg();
+  }
+
+  /* Die Farben der Klassen stehen als Hexwert da, weil sie im Text
+     auftauchen; die Maschine rechnet mit Farbtönen. Einmal umrechnen. */
+  var STOPPTON = { technisch: 0.98, budget: 0.115, abhaengigkeit: 0.60,
+                   freigabe: 0.76, mensch: 0.09, unbekannt: 0.58 };
+  function stoppTon(k) {
+    return STOPPTON[k] != null ? STOPPTON[k] : STOPPTON.unbekannt;
+  }
 
   function stopperSchritt(dt) {
     for (var name in stopper) {
@@ -1092,11 +1134,35 @@ SKRIPT = """
       var takt = S.t % 1.15;
       if (takt < 0.17) S.w -= dt * 4.2;
       var r = Math.min(W(), H()) * 0.034;
+      /* Die Farbe kommt von der KLASSE, nicht vom Agenten. Ein Ausfall ist
+         keine Eigenschaft dessen, den er trifft. */
+      var ton = stoppTon(S.klasse);
       for (var k = 0; k < 4; k++) {
         var w = S.w + k * 1.5708;
         window.__feld.strang(q[0] + Math.cos(w) * r, q[1] + Math.sin(w) * r,
           Math.sin(w) * r * 0.5, -Math.cos(w) * r * 0.5,
-          0.14, 0.45 + 0.2 * Math.random(), A.farbe, 0);
+          0.14, 0.45 + 0.2 * Math.random(), ton, 0);
+      }
+      /* Technischer Ausfall: Der Platz flackert, statt gleichmäßig zu
+         stocken. Kanal zu: ein durchgestrichener Weg nach außen — es geht
+         nichts mehr hinaus. Beides unterscheidet sich schon aus dem
+         Augenwinkel von einem bloßen Warten. */
+      if (S.klasse === 'technisch' && Math.random() < 0.22) {
+        for (var f = 0; f < 5; f++) {
+          var wf = Math.random() * 6.2832, df = r * (0.3 + Math.random());
+          window.__feld.strang(q[0] + Math.cos(wf) * df, q[1] + Math.sin(wf) * df,
+            Math.cos(wf) * 80, Math.sin(wf) * 80,
+            0.26, 0.18 + 0.12 * Math.random(), ton, 0);
+        }
+      } else if (S.klasse === 'budget') {
+        var zm = Math.atan2(my() - q[1], mx() - q[0]);
+        for (var g = 0; g < 3; g++) {
+          var fg = (g - 1) * r * 0.55;
+          window.__feld.strang(
+            q[0] + Math.cos(zm + 1.5708) * fg, q[1] + Math.sin(zm + 1.5708) * fg,
+            Math.cos(zm) * 70, Math.sin(zm) * 70,
+            0.20, 0.5, ton, 0);
+        }
       }
     }
   }
@@ -1303,6 +1369,59 @@ SKRIPT = """
      deutlicher steht es da — eine lange Wartezeit ist kein Fehler des
      Bildes, sie ist der Befund. */
   var tunEl = document.getElementById('agTun'), tunStill = 0;
+
+  /* Ein Schild am Platz des Blockierten: das Wort der Klasse, und
+     darunter die Dauer. Antippen zeigt den Grund — auf einem iPad gibt es
+     kein Zeigen mit der Maus, also muss beides gehen. */
+  var stoppSchildEl = document.getElementById('agStoppSchilder'),
+      stoppEl = document.getElementById('agStopp');
+
+  function stoppZeigen() {
+    var h = '';
+    for (var n in stopper) {
+      var S = stopper[n], A = nachName[n];
+      if (!A) continue;
+      var K = STOPPKLASSEN[S.klasse] || STOPPKLASSEN.unbekannt,
+          o = heimat(A), sek = Math.max(0, Math.round(zeit - S.seit));
+      h += '<div class="agStoppS" data-wer="' + n + '" style="left:' + o[0] +
+           'px;top:' + (o[1] - 34) + 'px;color:' + K.farbe + '">' +
+           K.wort + '<b>' + (sek < 60 ? sek + ' s'
+             : Math.floor(sek / 60) + ':' + ('0' + (sek % 60)).slice(-2) + ' min') +
+           '</b></div>';
+    }
+    if (h !== stoppSchildEl.__h) {
+      stoppSchildEl.__h = h;
+      stoppSchildEl.innerHTML = h;
+      Array.prototype.forEach.call(
+        stoppSchildEl.querySelectorAll('.agStoppS'), function (el) {
+          var n = el.getAttribute('data-wer');
+          el.addEventListener('mouseenter', function () { stoppGrund(n); });
+          el.addEventListener('mouseleave', stoppWeg);
+          el.addEventListener('click', function (ev) {
+            ev.stopPropagation();
+            if (stoppEl.__wer === n) stoppWeg(); else stoppGrund(n);
+          });
+        });
+    }
+  }
+
+  function stoppGrund(n) {
+    var S = stopper[n], A = nachName[n];
+    if (!S || !A) return;
+    var K = STOPPKLASSEN[S.klasse] || STOPPKLASSEN.unbekannt, o = heimat(A);
+    stoppEl.__wer = n;
+    stoppEl.innerHTML =
+      '<b style="color:' + K.farbe + '">' + K.wort + '</b>' +
+      '<i>' + A.name + ' · ' + A.rolle + '</i>' +
+      '<p>' + (S.grund || 'Die Daten nennen keinen Grund.') + '</p>' +
+      '<small>' + K.was + '</small>';
+    stoppEl.classList.add('auf');
+    var b = stoppEl.getBoundingClientRect();
+    stoppEl.style.left = Math.max(10, Math.min(W() - b.width - 10,
+                                               o[0] - b.width / 2)) + 'px';
+    stoppEl.style.top = Math.max(10, o[1] - b.height - 46) + 'px';
+  }
+  function stoppWeg() { stoppEl.classList.remove('auf'); stoppEl.__wer = null; }
 
   function tunZeigen(dt) {
     tunStill += dt;
@@ -1744,9 +1863,21 @@ SKRIPT = """
         /* Wer fragt oder etwas offen lässt, ist ab jetzt blockiert. Wer
            eine Antwort oder eine Entscheidung BEKOMMT, ist es nicht mehr. */
         if (E.art === 'question' || E.art === 'open_state')
-          stopperAn(E.von, E.text);
+          stopperAn(E.von, E.text, E.klasse || 'abhaengigkeit');
         if (E.art === 'answer' || E.art === 'decision')
           stopperAus(E.an);
+        /* Ein ausdrücklicher Stop trifft den EMPFÄNGER — er ist der, der
+           nicht weiterkann. Ein `resume` hebt ihn auf. */
+        if (E.art === 'stop' || E.art === 'resume') {
+          if (E.art === 'stop') stopperAn(E.an || E.von, E.text, E.klasse);
+          else stopperAus(E.an || E.von);
+          /* Kein Flug: Ein Stop kommt nicht von einem Agenten zum anderen,
+             er trifft einen. In die Liste gehört er trotzdem — er ist das,
+             was gerade geschieht. */
+          stromZeile(E, ARTEN[E.art]);
+          tunStill = 0;
+          continue;
+        }
         wirf(E);
         tunStill = 0;        /* es ist etwas passiert — die Pause ist aus */
       }
@@ -1777,6 +1908,7 @@ SKRIPT = """
     erwartungSchritt(dt);
     produktSchritt(dt);
     stopperSchritt(dt);
+    stoppZeigen();
     tunZeigen(dt);
     standZeigen();
     bereitschaft(dt);
@@ -1955,11 +2087,15 @@ SKRIPT = """
        abgeschnitten. Also nach dem Setzen nachmessen und hereinholen; die
        Richtung bleibt, nur der Rand gewinnt. */
     var k = e.getBoundingClientRect();
-    if (k.right > W() - 10) {
+    /* Rechts ist nicht am Bildrand Schluss, sondern dort, wo die Spalte mit
+       Kopf, Produkt und Stand beginnt. Vorher stand hier `W() - 10`, und
+       eine Beschriftung von Archibald legte sich quer über den Produkttitel
+       — im Bild nachgesehen. */
+    if (k.right > bandR() + 10) {
       e.style.transform = e.style.transform.replace(/translate\([^,]+,/,
         'translate(-100%,');
       e.style.textAlign = 'right';
-      e.style.left = Math.min(o[0] - 30, W() - 12) + 'px';
+      e.style.left = Math.min(o[0] - 30, bandR() + 8) + 'px';
     } else if (k.left < bandL() - 12) {
       /* Links ist nicht bei null zu Ende, sondern dort, wo die Liste
          aufhört. Genau das war Peters zweiter Befund: Beschriftungen
@@ -2334,6 +2470,7 @@ SKRIPT = """
     for (var vk in verbrauch) delete verbrauch[vk];
     document.getElementById('agKostenEbene').innerHTML = '';
     tunEl.innerHTML = ''; tunEl.__h = null; tunStill = 0;
+    stoppSchildEl.innerHTML = ''; stoppSchildEl.__h = null; stoppWeg();
     if (window.__abklingen) window.__abklingen(0);
     if (window.__wachHalten) window.__wachHalten(0, 0);
     if (window.__flaecheLeeren) window.__flaecheLeeren();

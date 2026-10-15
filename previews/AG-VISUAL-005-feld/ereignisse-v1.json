@@ -290,6 +290,15 @@
    "quelle": "geschaetzt"
   },
   {
+   "id": "DEMO-STOP-1",
+   "t": 64,
+   "von": "atlas",
+   "an": "sentinel",
+   "art": "stop",
+   "klasse": "budget",
+   "text": "Kanal zum Modell geschlossen: Guthaben des Prüfkontos aufgebraucht."
+  },
+  {
    "id": "E22",
    "t": 66,
    "von": "atlas",
@@ -353,6 +362,14 @@
    },
    "kosten": 0.1313,
    "quelle": "geschaetzt"
+  },
+  {
+   "id": "DEMO-RES-1",
+   "t": 88,
+   "von": "peter",
+   "an": "sentinel",
+   "art": "resume",
+   "text": "Guthaben nachgelegt, Kanal wieder offen."
   },
   {
    "id": "E28",

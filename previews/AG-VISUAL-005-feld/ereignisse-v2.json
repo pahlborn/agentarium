@@ -444,6 +444,15 @@
    "quelle": "geschaetzt"
   },
   {
+   "id": "DEMO-STOP-1",
+   "t": 196,
+   "von": "atlas",
+   "an": "scout",
+   "art": "stop",
+   "klasse": "technisch",
+   "text": "Scout antwortet nicht. Die Laufzeitumgebung wurde neu gestartet; der letzte Auftrag ist ohne Rückmeldung geblieben."
+  },
+  {
    "id": "N027",
    "t": 210,
    "von": "forge",
@@ -471,6 +480,14 @@
    },
    "kosten": 0.267,
    "quelle": "geschaetzt"
+  },
+  {
+   "id": "DEMO-RES-1",
+   "t": 228,
+   "von": "atlas",
+   "an": "scout",
+   "art": "resume",
+   "text": "Scout ist wieder erreichbar."
   },
   {
    "id": "N038",
@@ -607,6 +624,15 @@
    "quelle": "geschaetzt"
   },
   {
+   "id": "DEMO-STOP-2",
+   "t": 296,
+   "von": "atlas",
+   "an": "nova",
+   "art": "stop",
+   "klasse": "budget",
+   "text": "Kanal zum Modell geschlossen: Guthaben aufgebraucht. Es fließt nichts und es kostet nichts, solange er zu ist."
+  },
+  {
    "id": "N043",
    "t": 300,
    "von": "cadence",
@@ -710,6 +736,14 @@
    },
    "kosten": 0.5095,
    "quelle": "geschaetzt"
+  },
+  {
+   "id": "DEMO-RES-2",
+   "t": 354,
+   "von": "peter",
+   "an": "nova",
+   "art": "resume",
+   "text": "Budget freigegeben, Kanal wieder offen."
   },
   {
    "id": "N058",
@@ -833,6 +867,15 @@
    "art": "open_state",
    "text": "Nutzung von Rücknahmelücken bleibt offen",
    "folgen": 0
+  },
+  {
+   "id": "DEMO-STOP-3",
+   "t": 438,
+   "von": "argus",
+   "an": "forge",
+   "art": "stop",
+   "klasse": "freigabe",
+   "text": "Wartet auf Peters Entscheidung zur Rücknahme-Semantik. Ohne sie lässt sich der Umbau nicht abschließen."
   },
   {
    "id": "N064",
