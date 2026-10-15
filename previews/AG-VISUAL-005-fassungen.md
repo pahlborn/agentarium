@@ -71,7 +71,7 @@ Zeile unten übereinstimmen. Das Verfahren ist aus
 | Referenz-Reducer | `tests/AG-VISUAL-005-referenz-reducer.py` | V2.1 | 2026-10-15T20:05:00Z | `03028c4882c77b30abdd164abef5490838a41f08` |
 | Prueflauf V2.1 | `tests/AG-VISUAL-005-vertrag-v2-1-pruefen.py` | V2.1 | 2026-10-15T20:05:00Z | `90ae4595d28f4f33174d26053791764fbad6d1be` |
 | Gegenprobe V2.1 | `tests/AG-VISUAL-005-vertrag-v2-1-gegenprobe.py` | V2.1 | 2026-10-15T20:05:00Z | `d5f75b11530fd37f3279846938c11c80f19ba69b` |
-| Rückmeldung an Atlas (V2.1) | `handoffs/AG-VISUAL-005-INTERFACE-v2-1-rueckmeldung-v1.md` | Version 1 | 2026-10-15T20:05:00Z | `bf5093cb31f4acd657127bcb1e6eaabfe0d9addf` |
+| Rückmeldung an Atlas (V2.1) | `handoffs/AG-VISUAL-005-INTERFACE-v2-1-rueckmeldung-v1.md` | Version 1 | 2026-10-15T20:05:00Z | `5550e8a55bc5268607f33eb7b363aaebfad580c4` |
 | Beispieldaten 01–10 (V2.1) | `fixtures/AG-VISUAL-005-beispiele-v2-1/` | V2.1 | 2026-10-15T20:05:00Z | je Datei im Korrekturpapier |
 
 Keines dieser Dokumente hat einen Vorgänger. Alle Papiere sind Fassung 1;

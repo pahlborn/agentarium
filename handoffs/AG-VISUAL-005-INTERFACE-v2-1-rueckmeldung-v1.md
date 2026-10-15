@@ -12,7 +12,7 @@ Defektgruppen B1–B5 sind korrigiert, Sentinels sieben unabhängige
 Negativproben sind als Pflichtfälle übernommen. Argus' und Sentinels `FAIL`
 waren beide berechtigt.
 
-**Commit:** `__COMMIT__`
+**Commit:** `8feefe2a98eca444b5352c9c9c3f0d52069304e2`
 **Branch:** `claude/agentarium-visualisierung`
 **Geprüfte Fassung:** V2, Blob `8c86e3c6207030adcf0f1a2bb21194e3c3820f8b` —
 unverändert liegen geblieben, damit eure Prüfung weiter darauf zeigt.
