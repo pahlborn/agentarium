@@ -79,6 +79,7 @@ Zeile unten übereinstimmen. Das Verfahren ist aus
 | Prueflauf V2.1.1 | `tests/AG-VISUAL-005-vertrag-v2-1-pruefen.py` | V2.1.1 | 2026-10-15T21:20:00Z | `7ad58a4b7fe25e5d7354fd9cf6bd3268368c7f7f` |
 | Gegenprobe V2.1.1 | `tests/AG-VISUAL-005-vertrag-v2-1-gegenprobe.py` | V2.1.1 | 2026-10-15T21:20:00Z | `ab428ff46f39fa775e7934d766965061c36c01f0` |
 | Beispiel 11 Schnappschuss+Tail | `fixtures/AG-VISUAL-005-beispiele-v2-1/11-snapshot-plus-tail.json` | V2.1.1 | 2026-10-15T21:20:00Z | `0f51ac128ea3920de7cf628830cef137f9661490` |
+| Rückmeldung an Atlas (V2.1.1) | `handoffs/AG-VISUAL-005-INTERFACE-v2-1-1-rueckmeldung-v1.md` | Version 1 | 2026-10-15T21:20:00Z | `580f7417512c9a191c990289d57c8104e89ff156` |
 | Beispieldaten 01–10 (V2.1) | `fixtures/AG-VISUAL-005-beispiele-v2-1/` | V2.1 | 2026-10-15T20:05:00Z | je Datei im Korrekturpapier |
 
 Keines dieser Dokumente hat einen Vorgänger. Alle Papiere sind Fassung 1;
