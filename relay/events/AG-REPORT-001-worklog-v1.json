@@ -1,0 +1,237 @@
+{
+  "schema": "agentarium.observed-worklog.v1",
+  "task_id": "AG-REPORT-001",
+  "version": 1,
+  "mode": "OBSERVED_PROJECT_WORK",
+  "recorded_at": "2026-10-15T08:50:25.118Z",
+  "fictional": false,
+  "status": "PREPARATION_RECORDED_IMPLEMENTATION_NOT_STARTED",
+  "issue_ref": "https://github.com/pahlborn/agentarium/issues/7",
+  "result_ref": "https://github.com/pahlborn/agentarium/blob/e1436b9ccbf8d8a9d045e65d82b23b05efcddd39/governance/AG-REPORT-001-minimal-worklog-v1.md",
+  "capture_scope": "Bounded research/preparation handoffs and persisted outputs in this conversation; reconstructed archival record, not a complete runtime trace",
+  "coverage": {
+    "ordering": "Observed dispatch/receipt/publication order; no claim of generation timing",
+    "timestamps": "User messages and issue creation known; other occurred_at unknown. recorded_at is archival time.",
+    "durations": "unavailable",
+    "models_and_tokens": "unavailable in this record; no estimates",
+    "costs": "No new paid Claude execution was dispatched. ChatGPT attributable cost unknown; cost feature remains paused.",
+    "report_metrics": "unavailable; no product story status transition dataset"
+  },
+  "semantics": {
+    "artifact": "Preparation document is not a delivered product feature or accepted story.",
+    "review": "Argus reviewed dispatch proposal V1; revisions incorporated by Atlas, not independently re-reviewed.",
+    "responsibility": "Explicit bounded assignments only; parent links alone transfer no BALL.",
+    "compatibility": "Existing observed-worklog.v1-shaped archival record; no verified rendering integration."
+  },
+  "events": [
+    {
+      "sequence": 1,
+      "parent_task_id": "AG-REPORT-001",
+      "occurred_at": "2026-10-15T06:35:15+02:00",
+      "recorded_at": "2026-10-15T08:50:25.118Z",
+      "fictional": false,
+      "id": "AG-REPORT-001-E01",
+      "task_id": "AG-REPORT-RESEARCH-001",
+      "actor": "peter",
+      "recipient": "atlas",
+      "kind": "request",
+      "title": "Agile Reportmethoden recherchieren und ein gemeinsames Lernboard vorbereiten",
+      "caused_by": [],
+      "source_evidence": "User message with supplied message timestamp"
+    },
+    {
+      "sequence": 2,
+      "parent_task_id": "AG-REPORT-001",
+      "occurred_at": null,
+      "recorded_at": "2026-10-15T08:50:25.118Z",
+      "fictional": false,
+      "id": "AG-REPORT-001-E02",
+      "task_id": "AG-REPORT-RESEARCH-001",
+      "actor": "atlas",
+      "recipient": "scout",
+      "kind": "handoff",
+      "title": "Begrenzte Primärrecherche zu agilen Reports",
+      "caused_by": [
+        "AG-REPORT-001-E01"
+      ],
+      "agent_id": "/root/scout_agile_reports",
+      "source_evidence": "Actual collaboration.spawn_agent, task scout_agile_reports",
+      "ownership_change": {
+        "from": "atlas",
+        "to": "scout",
+        "scope": "bounded research task"
+      }
+    },
+    {
+      "sequence": 3,
+      "parent_task_id": "AG-REPORT-001",
+      "occurred_at": null,
+      "recorded_at": "2026-10-15T08:50:25.118Z",
+      "fictional": false,
+      "id": "AG-REPORT-001-E03",
+      "task_id": "AG-REPORT-RESEARCH-001",
+      "actor": "scout",
+      "recipient": "atlas",
+      "kind": "contribution",
+      "title": "RKA_READY: Vergleich und Grenzen von Burnup/Burndown, Flow, Qualität und Retrospektiven",
+      "caused_by": [
+        "AG-REPORT-001-E02"
+      ],
+      "agent_id": "/root/scout_agile_reports",
+      "source_evidence": "Actual FINAL_ANSWER from /root/scout_agile_reports; findings/source register preserved in linked report document"
+    },
+    {
+      "sequence": 4,
+      "parent_task_id": null,
+      "occurred_at": "2026-10-15T10:46:11+02:00",
+      "recorded_at": "2026-10-15T08:50:25.118Z",
+      "fictional": false,
+      "id": "AG-REPORT-001-E04",
+      "task_id": "AG-REPORT-001",
+      "actor": "peter",
+      "recipient": "atlas",
+      "kind": "request",
+      "title": "Beginn bestätigt; gemeinsame Protokolldaten bei minimalem Aufwand und Kosten",
+      "caused_by": [
+        "AG-REPORT-001-E01",
+        "AG-REPORT-001-E03"
+      ],
+      "source_evidence": "User message with supplied message timestamp"
+    },
+    {
+      "sequence": 5,
+      "parent_task_id": null,
+      "occurred_at": null,
+      "recorded_at": "2026-10-15T08:50:25.118Z",
+      "fictional": false,
+      "id": "AG-REPORT-001-E05",
+      "task_id": "AG-REPORT-001",
+      "actor": "atlas",
+      "recipient": null,
+      "kind": "contribution",
+      "title": "Bestehendes Arbeitslog und dokumentierte Nova-Rückfrage geprüft",
+      "caused_by": [
+        "AG-REPORT-001-E04"
+      ],
+      "source_evidence": "Actual GitHub fetch_file reads at 4608ae0479e328c301cdb1bebd056e91a706664e",
+      "result_ref": "vision/AG-ENGAGEMENT-001-nova-dialogue-v1.md"
+    },
+    {
+      "sequence": 6,
+      "parent_task_id": "AG-REPORT-001",
+      "occurred_at": null,
+      "recorded_at": "2026-10-15T08:50:25.118Z",
+      "fictional": false,
+      "id": "AG-REPORT-001-E06",
+      "task_id": "AG-REPORT-001-REVIEW",
+      "actor": "atlas",
+      "recipient": "argus",
+      "kind": "handoff",
+      "title": "Datenminimum auf Nachvollziehbarkeit und Erfassungsaufwand prüfen",
+      "caused_by": [
+        "AG-REPORT-001-E04",
+        "AG-REPORT-001-E05"
+      ],
+      "agent_id": "/root/argus_reporting_minimum",
+      "source_evidence": "Actual collaboration.spawn_agent with AG-REPORT-001-REVIEW V1 proposal",
+      "ownership_change": {
+        "from": "atlas",
+        "to": "argus",
+        "scope": "bounded concept review"
+      }
+    },
+    {
+      "sequence": 7,
+      "parent_task_id": "AG-REPORT-001",
+      "occurred_at": null,
+      "recorded_at": "2026-10-15T08:50:25.118Z",
+      "fictional": false,
+      "id": "AG-REPORT-001-E07",
+      "task_id": "AG-REPORT-001-REVIEW",
+      "actor": "argus",
+      "recipient": "atlas",
+      "kind": "review_result",
+      "title": "PASS_WITH_NOTES: Duplikate/Reihenfolge, versionsgebundenes Done und kennzahlbezogene Abdeckung präzisieren",
+      "caused_by": [
+        "AG-REPORT-001-E06"
+      ],
+      "agent_id": "/root/argus_reporting_minimum",
+      "source_evidence": "Actual FINAL_ANSWER [Agentarium:AG-REPORT-001-REVIEW:RA:RA_REVIEW:V1]",
+      "review_scope": "Concept in dispatch V1 only; no repository/runtime check",
+      "findings": [
+        "R1 MAJOR: stable deduplication identity and per-item transition ordering",
+        "R2 MAJOR: explicit Done with exact artifact/criteria versions and reopen history",
+        "R3 MAJOR: batch coverage and complete/partial/unavailable per metric"
+      ],
+      "runtime_tests": "NOT_TESTED"
+    },
+    {
+      "sequence": 8,
+      "parent_task_id": null,
+      "occurred_at": "2026-10-15T08:48:23Z",
+      "recorded_at": "2026-10-15T08:50:25.118Z",
+      "fictional": false,
+      "id": "AG-REPORT-001-E08",
+      "task_id": "AG-REPORT-001",
+      "actor": "atlas",
+      "recipient": "github",
+      "kind": "record",
+      "title": "Arbeitsboard Issue #7 angelegt",
+      "caused_by": [
+        "AG-REPORT-001-E04",
+        "AG-REPORT-001-E07"
+      ],
+      "source_evidence": "GitHub create_issue response created_at",
+      "result_ref": "https://github.com/pahlborn/agentarium/issues/7"
+    },
+    {
+      "sequence": 9,
+      "parent_task_id": null,
+      "occurred_at": null,
+      "recorded_at": "2026-10-15T08:50:25.118Z",
+      "fictional": false,
+      "id": "AG-REPORT-001-E09",
+      "task_id": "AG-REPORT-001",
+      "actor": "atlas",
+      "recipient": "github",
+      "kind": "artifact",
+      "title": "Schlanken Datenvertrag mit Argus-Präzisierungen gespeichert; Umsetzung und Messungen offen",
+      "caused_by": [
+        "AG-REPORT-001-E03",
+        "AG-REPORT-001-E05",
+        "AG-REPORT-001-E07",
+        "AG-REPORT-001-E08"
+      ],
+      "source_evidence": "GitHub create_file response commit_sha e1436b9ccbf8d8a9d045e65d82b23b05efcddd39",
+      "result_ref": "https://github.com/pahlborn/agentarium/blob/e1436b9ccbf8d8a9d045e65d82b23b05efcddd39/governance/AG-REPORT-001-minimal-worklog-v1.md"
+    }
+  ],
+  "agent_sessions": [
+    {
+      "agent_id": "/root/scout_agile_reports",
+      "role": "scout",
+      "skill": "build-research-knowledge",
+      "task_id": "AG-REPORT-RESEARCH-001",
+      "observed_result": "RKA_READY",
+      "execution_state": "returned",
+      "actual_model": null
+    },
+    {
+      "agent_id": "/root/argus_reporting_minimum",
+      "role": "argus",
+      "skill": "review-agent-argus",
+      "task_id": "AG-REPORT-001-REVIEW",
+      "observed_result": "PASS_WITH_NOTES",
+      "execution_state": "returned",
+      "actual_model": null
+    }
+  ],
+  "not_executed": [
+    "Forge implementation",
+    "Cadence review",
+    "Sentinel QA",
+    "Collector/adapter runtime",
+    "Performance measurement",
+    "Automatic reports"
+  ]
+}
