@@ -185,6 +185,46 @@ nicht mit: `arbeitAn` liest sie vom Ball, und der trug sie nicht. Die
 Felder waren da, die Übergabe fehlte. Genau der Fall, vor dem Peters
 Schlusssatz warnt — und ohne diesen Zähler wäre er unbemerkt geblieben.
 
+## Der Ausklang
+
+Vorher war er ein Wecker: sechs Dinge im selben Bild und danach
+sechsundzwanzig Sekunden, in denen nichts mehr geschah. Jetzt ein Ablauf mit
+Reihenfolge, achtzehn Sekunden lang, nach Peters Vorgabe:
+
+```
+ 0 s  die Arbeit hoert auf
+ 2 s  der Tisch raeumt sich, das aelteste zuerst
+ 4 s  das Feld beginnt zu vergehen
+ 6 s  das Fertige leuchtet auf
+ 9 s  alle treten in Rufbereitschaft
+11 s  die Liste verblasst
+18 s  von vorn
+```
+
+Zwei Behauptungen sind dabei weggefallen.
+
+**Der Ball wird nicht mehr nach Hause geworfen.** In V1 heisst das letzte
+Ereignis woertlich „Kein Abschluss", in V2 bleiben sechs Aufgaben offen. Ihn
+trotzdem zurueckzuspielen haette eine Ablieferung behauptet, die nicht
+stattgefunden hat. Er liegt jetzt, wo die Daten ihn gelassen haben — in V1
+bei Peter, weil E30 ihn dorthin zurueckgibt, und das steht dann in den Daten
+und nicht in der Regie.
+
+**Die Stopper werden nicht mehr geloescht.** Was blockiert war, liegt im
+Rueckstand und bleibt sichtbar stehen; dass danach neu begonnen wird, ist
+genau das — sie werden aufgegriffen.
+
+Dazu ein Komet, der gelegentlich den Schirm kreuzt. Er gehoert keinem
+Agenten, traegt keine Nachricht und hinterlaesst nichts im Niederschlag — das
+Einzige im Stueck, das von ausserhalb der Sache kommt. Er saet ueber die
+zurueckgelegte Strecke statt einmal je Bild: Der erste Versuch ergab auf
+einem langsamen Rechner eine Punktreihe und auf einem schnellen einen
+dichten Strich, das Aussehen hing also an der Bildrate statt am Kometen.
+
+Nachgemessen: jede Stufe greift in der vorgesehenen Reihenfolge, der Ball
+bleibt liegen, beide Stopper stehen bis zum Schluss, die Liste verblasst,
+der Balken leuchtet, Neubeginn nach 20 s statt nach 29. Keine Fehler.
+
 ## Das Produkt
 
 Drei Versuche, es im Feld zu zeichnen — eine Spirale, eine Silhouette auf
@@ -263,7 +303,7 @@ keine Überlagerung.
 
 | | |
 |---|---|
-| `AG-VISUAL-005-feld-v1.html` | SHA256 `57e24336f3a3e0749c33d1a9b74f63c02b16c7babf273b0bbdb85f479de04624` |
+| `AG-VISUAL-005-feld-v1.html` | SHA256 `8294d0220e9b148ff52b72192fa161c8407c07db662a2d15c5d830c7d825e6ea` |
 | Läuft | eigenständig, offline, ohne Abruf nach außen |
 | Quellen | `AG-VISUAL-005-feld/` — `schicht.py` erzeugt die Darstellung, `resonanz-maschine.html` ist die Maschine darunter |
 

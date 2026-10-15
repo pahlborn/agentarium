@@ -174,6 +174,9 @@
     -webkit-mask-image:linear-gradient(to bottom, transparent 0, #000 46px);
     mask-image:linear-gradient(to bottom, transparent 0, #000 46px);}
   #agEcke.leise{opacity:0;}
+  /* Im Ausklang verblasst die Liste von selbst — langsamer als beim
+     Wegschalten, denn hier geht nichts aus, hier klingt etwas ab. */
+  #agEcke.ausklang{opacity:0; transition:opacity 4.5s ease;}
   /* Im Hochformat ist die Liste schmaler, sonst bliebe für das Feld
      kein Band übrig. Dieselbe Zahl steht in der Schicht (`listeBreite`);
      gehen die beiden auseinander, rechnet das Feld mit einem Platz, den es

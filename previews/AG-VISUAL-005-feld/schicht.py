@@ -1049,7 +1049,11 @@ SKRIPT = """
      und behauptet keine Vollständigkeit — ein Balken ohne bekanntes Ganzes
      wäre eine Erfindung. */
   function produktSchritt(dt) {
-    var glanz = ausklang ? Math.min(1, (26 - ausklang) / 9) : 0;
+    /* Das Fertige leuchtet erst ab der vierten Stufe auf, nicht ab der
+       ersten Sekunde — sonst strahlt es, während daneben noch gearbeitet
+       wird. Über fünf Sekunden, nicht über neun. */
+    var glanz = ausklang
+      ? Math.max(0, Math.min(1, (AUSKLANG_DAUER - ausklang - 6) / 5)) : 0;
 
     if (standEl && (glanz > 0.25) !== standEl.classList.contains('fertig'))
       standEl.classList.toggle('fertig', glanz > 0.25);
@@ -1375,6 +1379,79 @@ SKRIPT = """
      Resonanz von selbst Korn aussät und daraus Funken sprühen. Darüber
      wäre Bereitschaft kein Warten mehr, sondern Betrieb. */
   var bereitUhr = 0;
+  /* DER KOMET.
+
+     Peters Bild: „Ab und zu darf ein Komet den Bildschirm überqueren. Er
+     kommt aus dem Universum und kreuzt nur kurz unsere Bahn."
+
+     Er gehört keinem Agenten, trägt keine Nachricht und hinterlässt nichts
+     im Niederschlag — er ist das Einzige im Stück, das von außerhalb der
+     Sache kommt. Deshalb auch eine eigene Farbe, kühl und niemandem
+     zugeordnet, und eine Bahn, die nicht auf die Mitte zeigt: Er kreuzt,
+     er besucht nicht.
+
+     Sichtbar wird er allein durch Fahrt. Ein Strang wird als Linie von der
+     alten zur neuen Lage gezeichnet; wer schnell ist, zieht einen Strich.
+     Das ist derselbe Mechanismus, an dem ich mir einmal einen unsichtbaren
+     Rahmen gebaut habe, hier aber genau richtig. */
+  var kometen = [], kometUhr = 0;
+
+  function kometSaeen() {
+    var w = W(), h = H();
+    /* Von einer der vier Seiten herein, schräg, und wieder hinaus. */
+    var seite = Math.floor(Math.random() * 4),
+        x, y, gx, gy,
+        schnell = 260 + Math.random() * 220;
+    if (seite === 0) { x = -40; y = h * Math.random(); gx = 1; gy = Math.random() - 0.5; }
+    else if (seite === 1) { x = w + 40; y = h * Math.random(); gx = -1; gy = Math.random() - 0.5; }
+    else if (seite === 2) { x = w * Math.random(); y = -40; gx = Math.random() - 0.5; gy = 1; }
+    else { x = w * Math.random(); y = h + 40; gx = Math.random() - 0.5; gy = -1; }
+    var L = Math.hypot(gx, gy) || 1;
+    kometen.push({ x: x, y: y, vx: gx / L * schnell, vy: gy / L * schnell,
+                   t: 0, lebt: 2.2 + Math.random() * 1.6 });
+  }
+
+  function kometSchritt(dt) {
+    kometUhr -= dt;
+    if (kometUhr <= 0) { kometSaeen(); kometUhr = 3.5 + Math.random() * 5; }
+    for (var i = kometen.length - 1; i >= 0; i--) {
+      var K2 = kometen[i];
+      K2.t += dt;
+      K2.x += K2.vx * dt; K2.y += K2.vy * dt;
+      if (K2.t > K2.lebt || K2.x < -120 || K2.x > W() + 120 ||
+          K2.y < -120 || K2.y > H() + 120) { kometen.splice(i, 1); continue; }
+      /* Ein- und ausblenden, damit er nicht am Rand erscheint und
+         verschwindet, sondern auftaucht und vergeht. */
+      var f = Math.min(1, K2.t / 0.4, (K2.lebt - K2.t) / 0.7);
+      if (f <= 0) continue;
+      /* ÜBER DIE STRECKE SÄEN, NICHT JE BILD.
+
+         Der erste Versuch setzte Kopf und Schweif einmal pro Bild an der
+         aktuellen Lage ab. Auf dem Prüfrechner mit wenigen Bildern je
+         Sekunde wurde daraus eine Punktreihe mit Lücken — und auf einem
+         schnellen Gerät ein dichter Strich. Das Aussehen hing also an der
+         Bildrate, nicht am Kometen.
+
+         Jetzt wird die seit dem letzten Bild zurückgelegte Strecke
+         abgeschritten und alle paar Pixel ein Faden gesetzt. Damit sieht er
+         überall gleich aus. */
+      var sx2 = K2.x - K2.vx * dt, sy2 = K2.y - K2.vy * dt;
+      var str = Math.hypot(K2.x - sx2, K2.y - sy2);
+      var wie = Math.max(1, Math.min(40, Math.round(str / 7)));
+      for (var s2 = 0; s2 <= wie; s2++) {
+        var z2 = s2 / wie;
+        var hx2 = sx2 + (K2.x - sx2) * z2, hy2 = sy2 + (K2.y - sy2) * z2;
+        window.__feld.strang(
+          hx2 + (Math.random() - 0.5) * 5, hy2 + (Math.random() - 0.5) * 5,
+          K2.vx * 0.55, K2.vy * 0.55,
+          (0.14 + 0.18 * z2) * f, 0.45 + 0.3 * Math.random(), 0.55, 0);
+      }
+      /* Der Kopf, am vorderen Ende der Strecke. */
+      window.__feld.sonne(K2.x, K2.y, K2.vx * 0.3, K2.vy * 0.3,
+        Math.min(W(), H()) * 0.004, 0.62 * f, 0.55, 0, 4);
+    }
+  }
+
   function bereitschaft(dt) {
     bereitUhr += dt;
 
@@ -1407,7 +1484,10 @@ SKRIPT = """
       if (arbeit[A.name]) continue;
       var ph = bereitUhr * 0.85 + i * 0.7;
       var s = 0.5 + 0.5 * Math.sin(ph);
-      if (s < 0.58) continue;                 /* nur im Scheitel des Pulses */
+      /* Im Ausklang zeigen alle ihre Rufbereitschaft AKTIV: Der Puls läuft
+         weiter geöffnet statt nur im Scheitel, und er trägt mehr Licht. Das
+         Team wartet nicht ab, es steht bereit. */
+      if (s < (rufbereit ? 0.26 : 0.58)) continue;
       /* Drei Punkte auf einem winzigen Kreis statt einem: Ein einzelner
          Punkt im Scheitel eines Pulses war bei Cadence mit 0,01 gemessen —
          also nicht da. Die Hitze bleibt trotzdem unter 0,20, denn das ist
@@ -1418,7 +1498,8 @@ SKRIPT = """
         var w = bereitUhr * 0.45 + i + c * 2.0944;
         window.__feld.strang(q[0] + Math.cos(w) * r, q[1] + Math.sin(w) * r,
           -Math.sin(w) * r * 0.8, Math.cos(w) * r * 0.8,
-          0.085 + 0.095 * s, 0.9 + 0.4 * Math.random(), A.farbe, 0);
+          (rufbereit ? 0.125 : 0.085) + 0.095 * s,
+          0.9 + 0.4 * Math.random(), A.farbe, 0);
       }
     }
   }
@@ -1817,13 +1898,62 @@ SKRIPT = """
      von vorn beginnen. */
   var ausklang = 0;
 
+  /* Der Ablauf des Ausklangs. Jede Zeile feuert einmal, in dieser
+     Reihenfolge — vorher setzte alles im selben Bild ein, und danach
+     geschah sechsundzwanzig Sekunden lang nichts mehr. */
+  var AUSKLANG_DAUER = 18;
+  var AUSKLANG_PLAN = [
+    [0,  'arbeit'],   /* die Arbeit hört auf          */
+    [2,  'tisch'],    /* der Tisch räumt sich         */
+    [4,  'feld'],     /* das Feld beginnt zu vergehen */
+    [6,  'werk'],     /* das Fertige leuchtet auf     */
+    [9,  'ruf'],      /* alle treten in Rufbereitschaft */
+    [11, 'liste']     /* die Liste verblasst          */
+  ];
+  var ausklangStufe = 0, rufbereit = 0;
+
+  function ausklangStufen() {
+    var ver = AUSKLANG_DAUER - ausklang;
+    while (ausklangStufe < AUSKLANG_PLAN.length &&
+           ver >= AUSKLANG_PLAN[ausklangStufe][0]) {
+      var was = AUSKLANG_PLAN[ausklangStufe++][1];
+
+      if (was === 'arbeit') {
+        for (var n1 in arbeit) { var S1 = arbeit[n1]; if (!S1.aus) S1.aus = 2.4; }
+
+      } else if (was === 'tisch') {
+        /* Gestaffelt, nicht auf einmal: Das älteste geht zuerst zurück. */
+        for (var i1 = 0; i1 < tisch.length; i1++)
+          if (tisch[i1].zurueck == null) tisch[i1].zurueck = 2.5 + i1 * 1.2;
+
+      } else if (was === 'feld') {
+        /* Der Niederschlag vergeht. Das kann nur die Maschine; die Schicht
+           hier hat keinen Zugriff auf die Fläche. Laut werden, wenn der
+           Hahn fehlt — genau das ist einmal passiert, und die höfliche
+           Prüfung hat den Ausfall verschluckt. */
+        if (window.__abklingen) window.__abklingen(10);
+        else if (window.console) console.error('__abklingen fehlt');
+        /* Ruhe ist nicht Dunkelheit: Ein Boden unter der Wachheit hält das
+           Fertige sichtbar, während die Wirbel auslaufen. */
+        if (window.__wachHalten) window.__wachHalten(0.42, AUSKLANG_DAUER);
+        else if (window.console) console.error('__wachHalten fehlt');
+
+      } else if (was === 'ruf') {
+        rufbereit = 1;
+
+      } else if (was === 'liste') {
+        eckeEl.classList.add('ausklang');
+      }
+    }
+  }
+
   function ausklangBeginnen() {
     if (ausklang) return;
-    ausklang = 26;
-    for (var n in arbeit) { var S = arbeit[n]; if (!S.aus) S.aus = 2.4; }
-    for (var i = 0; i < tisch.length; i++)
-      if (tisch[i].zurueck == null) tisch[i].zurueck = 5.0;
-    for (var ns3 in stopper) delete stopper[ns3];
+    ausklang = AUSKLANG_DAUER;
+    ausklangStufe = 0; rufbereit = 0;
+    /* Die Stopper BLEIBEN. Was blockiert war, liegt im Rückstand — es
+       verschwindet nicht, nur weil das Stück zu Ende ist. Dass danach neu
+       begonnen wird, ist genau das: Sie werden aufgegriffen. */
     /* Der Niederschlag verblasst über sechzehn Sekunden statt für immer zu
        bleiben. Das kann nur die Maschine; die Schicht hier hat keinen
        Zugriff auf die Fläche. */
@@ -1842,22 +1972,18 @@ SKRIPT = """
     if (window.__wachHalten) window.__wachHalten(0.42, 26);
     else if (window.console) console.error('__wachHalten fehlt — Ausklang dunkel');
 
-    /* DER BALL GEHT HEIM. Peters Anweisung: „Der Ball liegt dann beim
-       Auftraggeber." Er wird nicht gelöscht, er wird geworfen — wer die
-       Aufgabe gegeben hat, bekommt sie zurück, und das soll man sehen.
-       Liegt er schon bei Peter, bleibt er einfach liegen. */
-    var heim = STUECK.ereignisse.length ? 'peter' : null;
-    if (derBall && derBall.bei !== heim && nachName[heim]) {
-      /* `derBall` bleibt beim Wurf noch stehen — nur dann startet das
-         Ding dort, wo der Ball liegt, statt am Namensschild. Erst danach
-         wird er abgeräumt, sonst lägen zwei da: der ruhende und der
-         fliegende. */
-      wirf({ von: derBall.bei, an: heim, art: 'handoff', t: zeit,
-             text: 'Aufgabe zurück zum Auftraggeber', gross: 0.92 });
-      derBall = null;
-    } else if (!derBall && nachName[heim]) {
-      derBall = { bei: heim, ursprung: heim, t: 0 };
-    }
+    /* DER BALL BLEIBT, WO ER IST.
+
+       Vorher wurde er am Ende zu Peter zurückgeworfen. Das war eine
+       Behauptung, die die Daten nicht decken: In V1 heißt das letzte
+       Ereignis wörtlich „Kein Abschluss", und in V2 bleiben sechs Aufgaben
+       offen. Ein Ball, der trotzdem heimkommt, erzählt von einer
+       Ablieferung, die nicht stattgefunden hat.
+
+       Er liegt jetzt dort, wo das Stück ihn gelassen hat — bei dem, der
+       zuletzt die Aufgabe hatte. Kommt er in den Daten zurück (in V1 ist
+       das E30, Atlas an Peter), liegt er bei Peter, und auch das steht dann
+       in den Daten und nicht in meiner Regie. */
   }
 
   /* ======================================================== DIE ARBEIT ==
@@ -1964,6 +2090,8 @@ SKRIPT = """
         if (!ausklang && zeit > STUECK.dauer + 3) ausklangBeginnen();
         if (ausklang) {
           ausklang -= dt;
+          ausklangStufen();
+          kometSchritt(dt);
           /* Der Ball bleibt jetzt liegen, statt sich aufzulösen. Vorher
              verschwand er in den letzten vier Sekunden — das war falsch:
              Eine erledigte Aufgabe ist nicht weg, sie ist ABGELIEFERT, und
@@ -1972,6 +2100,9 @@ SKRIPT = """
 
           if (ausklang <= 0) {                   /* von vorn */
             ausklang = 0; zeit = 0; naechstes = 0; visionen = 0;
+            ausklangStufe = 0; rufbereit = 0;
+            eckeEl.classList.remove('ausklang');
+            kometen.length = 0; kometUhr = 0;
             for (var nn2 in arbeit) delete arbeit[nn2];
             for (var ns in stopper) delete stopper[ns];
             tisch.length = 0; derBall = null; baelle.length = 0;
@@ -2068,6 +2199,7 @@ SKRIPT = """
   var uhr  = document.getElementById('agUhr'),
       ring = document.getElementById('agRing'),
       laeuftEl = document.getElementById('agLaeuft'),
+      eckeEl   = document.getElementById('agEcke'),
       rufeEl   = document.getElementById('agRufe');
 
   var ZUSTAND = [
