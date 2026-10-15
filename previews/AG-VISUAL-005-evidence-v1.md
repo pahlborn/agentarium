@@ -142,6 +142,49 @@ auf einem iPad kein Mouseover gibt.
 Zur Vorführung liegen erfundene Ereignisse mit dem Präfix `DEMO-` in beiden
 Datensätzen; sie gehören nicht zum abgeleiteten Fixture.
 
+## Durchgängige Bezüge — gemessen, was sie bringen
+
+Peters Befund: Im Feld-Szenario haben die Ereignisse eigene IDs, aber keine
+durchgängige Zuordnung zu Aufgabe, Ergebnis und geprüfter Version. Ohne die
+entscheidet die Darstellung nach Faustregeln. Gezählt wurde, wie oft dabei
+überhaupt etwas zu wählen war:
+
+| Entscheidung | Faustregel | V1 | V2 |
+|---|---|---|---|
+| Welcher Auftrag endet? | der älteste offene | 1 von 9 (11 %) | 8 von 19 (42 %) |
+| Welches Ergebnis nimmt das Review ab? | das älteste auf dem Tisch | 2 von 2 (**100 %**) | 4 von 4 (**100 %**) |
+| Worauf bezieht sich ein Widerspruch? | das neueste auf dem Tisch | 3 von 4 (75 %) | 9 von 9 (**100 %**) |
+| Welche Frage beantwortet die Antwort? | die des Empfängers | 0 von 3 | 0 von 3 |
+| **zusammen** | | **6 von 18 (33 %)** | **21 von 35 (60 %)** |
+
+Eingebaut sind deshalb sieben freiwillige Felder: `aufgabe`, `erledigt`,
+`artefakt`, `version`, `prueft`, `antwortet_auf`, `ersetzt`. Fehlt eines,
+gilt die bisherige Faustregel — bestehende Daten müssen nicht umgestellt
+werden. Und jede Faustregel, die greift, obwohl mehr als eine Möglichkeit
+offen stand, wird **gezählt**; die Zahl steht im „Gesetz" der laufenden
+Fassung. Damit ist Peters Schlusssatz — die IDs allein machen die
+Darstellung nicht zuverlässiger, entscheidend ist, dass die Abläufe sie
+verwenden — nachprüfbar statt Absichtserklärung.
+
+Gegenprobe im Browser, V2 mit konstruierten Bezügen (25 Aufgaben, 8
+Artefakte mit Fassungen, 19 ausdrückliche Abschlüsse, 13 Prüfbezüge, 3
+Antwortbezüge, 6 nie geschlossene Aufgaben):
+
+| | geraten |
+|---|---|
+| V1, ohne Bezüge, ganzes Stück | 2 |
+| V2, mit Bezügen, ganzes Stück | **0** |
+
+Die Bezüge in V2 sind **konstruiert, nicht erhoben**. V2 ist ohnehin eine
+Ableitung aus dem Konzeptpapier; die Struktur zeigt, was die Bezüge
+bewirken, und behauptet nicht, dass das echte System sie so liefert.
+
+Der erste Lauf zeigte 8 statt 0 — alle bei „welcher Auftrag endet", obwohl
+in den Daten für jede Lieferung ein `erledigt` stand. Die Aufgaben-ID flog
+nicht mit: `arbeitAn` liest sie vom Ball, und der trug sie nicht. Die
+Felder waren da, die Übergabe fehlte. Genau der Fall, vor dem Peters
+Schlusssatz warnt — und ohne diesen Zähler wäre er unbemerkt geblieben.
+
 ## Das Produkt
 
 Drei Versuche, es im Feld zu zeichnen — eine Spirale, eine Silhouette auf
@@ -220,7 +263,7 @@ keine Überlagerung.
 
 | | |
 |---|---|
-| `AG-VISUAL-005-feld-v1.html` | SHA256 `eec34e916e6c70b8e0239c3a49052c34c2a6c8acd2fd8f41e2a42d488bb457a2` |
+| `AG-VISUAL-005-feld-v1.html` | SHA256 `57e24336f3a3e0749c33d1a9b74f63c02b16c7babf273b0bbdb85f479de04624` |
 | Läuft | eigenständig, offline, ohne Abruf nach außen |
 | Quellen | `AG-VISUAL-005-feld/` — `schicht.py` erzeugt die Darstellung, `resonanz-maschine.html` ist die Maschine darunter |
 

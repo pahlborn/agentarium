@@ -407,7 +407,23 @@ SKRIPT = """
        sie wie bisher an den Platz des Empfängers; es gibt dann ja nichts,
        worauf sie sich beziehen könnten. */
     var aufTisch = (m.gestalt === 'gegen' || m.gestalt === 'bersten') && tisch.length;
-    if (aufTisch) z = tischOrt(tisch.length - 1);
+    var zielNr = tisch.length - 1;
+    if (aufTisch) {
+      /* Gegen WAS richtet sich der Widerspruch? Steht `prueft` oder
+         `ersetzt` in den Daten, gegen genau das. Sonst gegen das neueste
+         auf dem Tisch — in V2 ist das in hundert Prozent der Fälle eine
+         Rateentscheidung. */
+      var ziel = E.prueft || E.ersetzt || '';
+      var gefunden = -1;
+      if (ziel) {
+        for (var qt = 0; qt < tisch.length; qt++)
+          if (tisch[qt].artefakt === ziel) { gefunden = qt; break; }
+      }
+      if (gefunden < 0) {
+        if (tisch.length > 1) ratVermerk('gegen');
+      } else zielNr = gefunden;
+      z = tischOrt(zielNr);
+    }
 
     /* Ein Stück wird vom Ball abgeworfen, also startet es am Ball und nicht
        am Namensschild dessen, der es wirft. Das ist der sichtbare
@@ -436,13 +452,20 @@ SKRIPT = """
       modell: E.modell || '',
       tokens: E.tokens || null, kosten: E.kosten || 0,
       quelle: E.quelle || '',
+      /* Die Aufgaben-ID muss MITFLIEGEN. Ohne diese Zeile kam sie nie beim
+         Empfänger an: `arbeitAn` liest sie vom Ball, und der trug sie
+         nicht. Gemessen — in V2 mit vollständigen Bezügen blieben acht
+         Rateentscheidungen bei „welcher Auftrag endet" stehen, obwohl in
+         den Daten für jede ein `erledigt` stand. Die Felder waren da, die
+         Übergabe fehlte. */
+      aufgabe: E.aufgabe || '',
       ganz: (m.gestalt === 'sonne' && (E.gross != null ? E.gross : gross) > 0.85),
       gegen:   m.gestalt === 'gegen',
       wurf:    m.gestalt === 'wurf' || m.gestalt === 'sonne',
       bersten: m.gestalt === 'bersten',
       sonne:   m.gestalt === 'sonne',
       folgen: E.folgen || 1,
-      aufTisch: !!aufTisch,
+      aufTisch: !!aufTisch, zielNr: zielNr,
       quert: quert(E.von, E.an), durch: 0,
       /* Hereingeworfen oder zurückgegeben: beides quert den Spielfeldrand. */
       einwurf: (nachName[E.von] && nachName[E.von].nah > 1.1) ||
@@ -739,8 +762,10 @@ SKRIPT = """
 
       /* Ein Treffer auf dem Tisch lässt das Stück dort beben. */
       if (b.aufTisch && tisch.length) {
-        tisch[tisch.length - 1].beben = 1;
-        tisch[tisch.length - 1].zurueck = 5.0;
+        var tn = Math.min(b.zielNr != null ? b.zielNr : tisch.length - 1,
+                          tisch.length - 1);
+        tisch[tn].beben = 1;
+        tisch[tn].zurueck = 5.0;
         if (window.__funkeAn) window.__funkeAn(b.zx, b.zy, b.tonZ);
       }
 
@@ -908,8 +933,10 @@ SKRIPT = """
     return [mx() + Math.cos(w) * R, my() + Math.sin(w) * R * 0.9];
   }
 
-  function hinlegen(ton, text, gearbeitet) {
+  function hinlegen(ton, text, gearbeitet, artefakt, version, aufgabe) {
     tisch.push({ ton: ton, text: text || '', t: 0, arbeit: gearbeitet || 0,
+                 artefakt: artefakt || '', version: version || '',
+                 aufgabe: aufgabe || '',
                  w: Math.random() * 6.2832, beben: 0 });
     /* Mehr als drei liest niemand mehr. Das älteste rutscht herunter —
        und es schreibt dabei nichts: Was nie angenommen wurde, hinterlässt
@@ -965,9 +992,25 @@ SKRIPT = """
      Stücke. Sie wird gezählt, nicht gezeichnet. */
   var visionen = 0;
 
-  function abnehmen() {
+  function abnehmen(prueft, version) {
     if (!tisch.length) return;
-    var S = tisch.shift();
+    /* Sagt die Prüfung, WAS sie bewertet, wird genau das abgenommen — und
+       wenn die Daten auch eine Fassung nennen, muss sie stimmen. Sonst das
+       älteste, und das wird vermerkt. In beiden Stücken ist diese
+       Entscheidung zu hundert Prozent mehrdeutig. */
+    var i = -1;
+    if (prueft) {
+      for (var q = 0; q < tisch.length; q++)
+        if (tisch[q].artefakt === prueft &&
+            (!version || !tisch[q].version || tisch[q].version === version)) {
+          i = q; break;
+        }
+    }
+    if (i < 0) {
+      if (tisch.length > 1) ratVermerk('abnahme');
+      i = 0;
+    }
+    var S = tisch.splice(i, 1)[0];
     /* Abgenommen wird dort, wo auch geprüft wird: in der Mitte. */
     var o = [mx(), my()];
     produkt++;
@@ -1084,6 +1127,17 @@ SKRIPT = """
      Das letzte Ereignis des Stücks ist ein `open_state` von Atlas und
      heißt wörtlich „Kein Abschluss". Sein Stopper wird nie aufgelöst — er
      steht bis zum Ausklang. Das ist nicht gebaut, das ist eure Lage. */
+  /* WIE OFT WIRD GERATEN. Jede Faustregel, die greift, obwohl mehr als
+     eine Möglichkeit offen stand, wird hier gezählt. Steht die Zahl bei
+     null, hat die Darstellung nichts erfunden — dann tragen die Daten ihre
+     Bezüge selbst. */
+  var geraten = { auftrag: 0, abnahme: 0, gegen: 0, antwort: 0, gesamt: 0 };
+  function ratVermerk(was) { geraten[was]++; geraten.gesamt++; }
+  function ratNull() {
+    geraten.auftrag = geraten.abnahme = geraten.gegen =
+      geraten.antwort = geraten.gesamt = 0;
+  }
+
   var stopper = {};
 
   /* Die Klassen eines Stops. Jede hat ein Wort, eine Farbe und einen Satz,
@@ -1110,7 +1164,7 @@ SKRIPT = """
     if (!nachName[name]) return;
     var k = (klasse && STOPPKLASSEN[klasse]) ? klasse : 'unbekannt';
     stopper[name] = { t: 0, w: Math.random() * 6.2832, grund: grund || '',
-                      klasse: k, seit: zeit };
+                      klasse: k, seit: zeit, frage: arguments[3] || '' };
   }
   function stopperAus(name) {
     if (stopper[name]) delete stopper[name];
@@ -1207,6 +1261,10 @@ SKRIPT = """
       modell: modell || MOTOR[nachName[name].platt] || '',
       tokens: (b && b.tokens) || null, kosten: (b && b.kosten) || 0,
       quelle: (b && b.quelle) || '',
+      /* Die Aufgaben-ID, wenn die Daten eine mitbringen. Sie bleibt über
+         den ganzen Auftrag stabil und ist der Schlüssel, mit dem sich
+         später sagen lässt, WELCHE Arbeit endet. */
+      aufgabe: (b && b.aufgabe) || '',
       w: Math.random() * 6.2832, t: 0, beginn: zeit
     });
     /* Alle Aufträge bleiben in der Liste. Vorher flog der älteste
@@ -1218,10 +1276,23 @@ SKRIPT = """
   /* Was beendet welchen Auftrag? Den ältesten offenen — wer liefert, wird
      das los, was am längsten liegt. Erst wenn keiner mehr offen ist, hört
      die Arbeit ganz auf. */
-  function auftragFertig(name) {
+  function auftragFertig(name, aufgabe) {
     var S = arbeit[name];
     if (!S || S.aus) return;
-    var L = S.liste.shift();
+    /* Sagen die Daten, WELCHE Aufgabe erledigt ist, wird genau die
+       geschlossen — und die übrigen laufen sichtbar weiter. Sagen sie es
+       nicht, endet der älteste offene, und das wird als Rateentscheidung
+       vermerkt, sofern es überhaupt etwas zu wählen gab. */
+    var i = -1;
+    if (aufgabe) {
+      for (var q = 0; q < S.liste.length; q++)
+        if (S.liste[q].aufgabe === aufgabe) { i = q; break; }
+    }
+    if (i < 0) {
+      if (S.liste.length > 1) ratVermerk('auftrag');
+      i = 0;
+    }
+    var L = S.liste.splice(i, 1)[0];
     stromErledigt(name);
     /* Auch ein Auftrag OHNE Kostenangabe wird gezählt — getrennt. Sonst
        ließe sich später nicht unterscheiden, ob nichts verbraucht wurde
@@ -1848,7 +1919,7 @@ SKRIPT = """
            hatte. */
         var mE = ARTEN[E.art];
         if (mE && (mE.gestalt === 'wurf' || mE.gestalt === 'sonne'))
-          auftragFertig(E.von);
+          auftragFertig(E.von, E.erledigt || E.aufgabe);
         /* Ein geliefertes Ergebnis kommt auf den Tisch; eine bestandene
            Prüfung und ein abgeschlossenes Review nehmen das älteste ab. */
         if (E.art === 'artifact') {
@@ -1857,15 +1928,23 @@ SKRIPT = """
              Ballgröße bestimmt hat. */
           var AW = arbeit[E.von];
           hinlegen(nachName[E.von].farbe, E.text,
-                   (AW && AW.liste.length) ? (zeit - AW.liste[0].beginn) : 0);
+                   (AW && AW.liste.length) ? (zeit - AW.liste[0].beginn) : 0,
+                   E.artefakt, E.version, E.aufgabe);
         }
-        if (E.art === 'test_result' || E.art === 'review_result') abnehmen();
+        if (E.art === 'test_result' || E.art === 'review_result')
+          abnehmen(E.prueft, E.version);
         /* Wer fragt oder etwas offen lässt, ist ab jetzt blockiert. Wer
            eine Antwort oder eine Entscheidung BEKOMMT, ist es nicht mehr. */
         if (E.art === 'question' || E.art === 'open_state')
-          stopperAn(E.von, E.text, E.klasse || 'abhaengigkeit');
-        if (E.art === 'answer' || E.art === 'decision')
-          stopperAus(E.an);
+          stopperAn(E.von, E.text, E.klasse || 'abhaengigkeit', E.id);
+        if (E.art === 'answer' || E.art === 'decision') {
+          /* Beantwortet die Antwort eine BESTIMMTE Frage, wird auch nur
+             deren Blockade gelöst. Ohne `antwortet_auf` die des
+             Empfängers — bisher die einzige Möglichkeit. */
+          var zf = E.antwortet_auf || '';
+          var S2 = stopper[E.an];
+          if (!zf || !S2 || !S2.frage || S2.frage === zf) stopperAus(E.an);
+        }
         /* Ein ausdrücklicher Stop trifft den EMPFÄNGER — er ist der, der
            nicht weiterkann. Ein `resume` hebt ihn auf. */
         if (E.art === 'stop' || E.art === 'resume') {
@@ -1897,6 +1976,7 @@ SKRIPT = """
             for (var ns in stopper) delete stopper[ns];
             tisch.length = 0; derBall = null; baelle.length = 0;
             bausteine.length = 0; produkt = 0; werkEl.innerHTML = '';
+            ratNull();
             rufeEl.innerHTML = '';
           }
         }
@@ -1925,6 +2005,9 @@ SKRIPT = """
              ereignisse: STUECK.ereignisse.length, dauer: STUECK.dauer,
              bausteine: bausteine.length, visionen: visionen,
              bandL: bandL(), bandR: bandR(), ringR: ringR(),
+             geraten: geraten.gesamt, ratEinzeln: {
+               auftrag: geraten.auftrag, abnahme: geraten.abnahme,
+               gegen: geraten.gegen, antwort: geraten.antwort },
              ball: derBall ? derBall.bei : null,
              still: tunStill,
              arbeiten: (function () { var r = [];
@@ -2200,6 +2283,9 @@ SKRIPT = """
     });
     h += '</table>';
 
+    h += '<h4>Was die Darstellung raten musste</h4>' +
+         '<p class="gFuss" id="agRaten"></p>';
+
     h += '<p class="gFuss">Die Nachrichtenarten oben sind aus der ' +
          'Mappingtabelle erzeugt, aus der auch das Verhalten kommt — sie ' +
          'können nicht veralten. Alles darunter ist von Hand geschrieben.</p>';
@@ -2464,7 +2550,7 @@ SKRIPT = """
     for (var n2 in stopper) delete stopper[n2];
     for (var n3 in erwartung) { weiterSagen(n3, 0); delete erwartung[n3]; }
     tisch.length = 0; derBall = null;
-    bausteine.length = 0; produkt = 0;
+    bausteine.length = 0; produkt = 0; ratNull();
     werkEl.innerHTML = ''; rufeEl.innerHTML = '';
     laeuftEl.innerHTML = ''; strom.length = 0;
     for (var vk in verbrauch) delete verbrauch[vk];
@@ -2533,9 +2619,35 @@ SKRIPT = """
     motorEl.__h = null;
     motorenZeigen();
   });
+  /* Beim Öffnen frisch gerechnet: Wie oft hat eine Faustregel gegriffen,
+     obwohl mehr als eine Möglichkeit offen stand? Steht da null, tragen die
+     Daten ihre Bezüge selbst — dann ist nichts erfunden. */
+  function ratenZeigen() {
+    var e = document.getElementById('agRaten');
+    if (!e) return;
+    if (!geraten.gesamt) {
+      e.innerHTML = 'Bisher <b>kein einziges Mal</b>. Die Daten tragen ihre ' +
+        'Bezüge selbst — welche Aufgabe endet, welches Ergebnis geprüft wird ' +
+        'und worauf sich ein Widerspruch bezieht, steht darin.';
+      return;
+    }
+    var t = [];
+    if (geraten.auftrag) t.push(geraten.auftrag + '&times; welcher Auftrag endet');
+    if (geraten.abnahme) t.push(geraten.abnahme + '&times; welches Ergebnis abgenommen wird');
+    if (geraten.gegen) t.push(geraten.gegen + '&times; worauf sich ein Widerspruch bezieht');
+    if (geraten.antwort) t.push(geraten.antwort + '&times; welche Frage beantwortet wird');
+    e.innerHTML = '<b>' + geraten.gesamt + '&times;</b> seit Beginn des Stücks: ' +
+      t.join(' · ') + '. Gezählt wird nur, wenn überhaupt mehr als eine ' +
+      'Möglichkeit offen stand. Mit durchgängigen Aufgaben- und ' +
+      'Artefakt-Bezügen in den Daten (<i>aufgabe</i>, <i>erledigt</i>, ' +
+      '<i>artefakt</i>, <i>version</i>, <i>prueft</i>, <i>antwortet_auf</i>) ' +
+      'fiele diese Zahl auf null.';
+  }
+
   document.getElementById('agLeg').addEventListener('click', function () {
     tastenZeigen();
     var auf = legende.classList.toggle('auf');
+    if (auf) ratenZeigen();
     this.textContent = auf ? 'Zu' : 'Gesetz';
   });
 })();

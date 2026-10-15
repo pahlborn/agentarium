@@ -21,7 +21,8 @@
     "cache": 16635
    },
    "kosten": 0.2897,
-   "quelle": "geschaetzt"
+   "quelle": "geschaetzt",
+   "aufgabe": "AG-V2-001"
   },
   {
    "id": "N002",
@@ -41,7 +42,8 @@
     "cache": 29976
    },
    "kosten": 0.5892,
-   "quelle": "geschaetzt"
+   "quelle": "geschaetzt",
+   "aufgabe": "AG-V2-002"
   },
   {
    "id": "N003",
@@ -61,7 +63,8 @@
     "cache": 6125
    },
    "kosten": 0.8362,
-   "quelle": "geschaetzt"
+   "quelle": "geschaetzt",
+   "aufgabe": "AG-V2-003"
   },
   {
    "id": "N008",
@@ -81,7 +84,8 @@
     "cache": 5071
    },
    "kosten": 0.3748,
-   "quelle": "geschaetzt"
+   "quelle": "geschaetzt",
+   "aufgabe": "AG-V2-004"
   },
   {
    "id": "N009",
@@ -90,7 +94,9 @@
    "an": "atlas",
    "art": "contribution",
    "text": "Fundstück 1: Rezept ohne nachvollziehbare Grundlage",
-   "folgen": 1
+   "folgen": 1,
+   "aufgabe": "AG-V2-004",
+   "erledigt": "AG-V2-004"
   },
   {
    "id": "N010",
@@ -108,7 +114,9 @@
    "an": "archibald",
    "art": "proposal",
    "text": "Stille Höfe als ruhige Betrachtung",
-   "folgen": 2
+   "folgen": 2,
+   "aufgabe": "AG-V2-002",
+   "erledigt": "AG-V2-002"
   },
   {
    "id": "N005",
@@ -128,7 +136,8 @@
     "cache": 16453
    },
    "kosten": 0.3992,
-   "quelle": "geschaetzt"
+   "quelle": "geschaetzt",
+   "aufgabe": "AG-V2-005"
   },
   {
    "id": "N011",
@@ -157,7 +166,8 @@
     "cache": 3480
    },
    "kosten": 0.4149,
-   "quelle": "geschaetzt"
+   "quelle": "geschaetzt",
+   "aufgabe": "AG-V2-006"
   },
   {
    "id": "N006",
@@ -166,7 +176,11 @@
    "an": "forge",
    "art": "artifact",
    "text": "US-01/05/06: Formkriterien bereit",
-   "folgen": 2
+   "folgen": 2,
+   "aufgabe": "AG-V2-005",
+   "erledigt": "AG-V2-005",
+   "artefakt": "ART-01",
+   "version": "v1"
   },
   {
    "id": "N007",
@@ -175,7 +189,11 @@
    "an": "sentinel",
    "art": "artifact",
    "text": "Zwei Formen mit Ursprungsbezug",
-   "folgen": 1
+   "folgen": 1,
+   "aufgabe": "AG-V2-003",
+   "erledigt": "AG-V2-003",
+   "artefakt": "ART-02",
+   "version": "v1"
   },
   {
    "id": "N016",
@@ -195,7 +213,8 @@
     "cache": 16244
    },
    "kosten": 0.5899,
-   "quelle": "geschaetzt"
+   "quelle": "geschaetzt",
+   "aufgabe": "AG-V2-007"
   },
   {
    "id": "N013",
@@ -204,7 +223,8 @@
    "an": "scout",
    "art": "objection",
    "text": "Gegenbeispiel: Regel trägt nicht überall",
-   "folgen": 3
+   "folgen": 3,
+   "prueft": "ART-02"
   },
   {
    "id": "N017",
@@ -213,7 +233,8 @@
    "an": "nova",
    "art": "objection",
    "text": "Sichtbarer Zerfall kann den Ursprung verraten",
-   "folgen": 4
+   "folgen": 4,
+   "prueft": "ART-02"
   },
   {
    "id": "N018",
@@ -233,7 +254,8 @@
     "cache": 11578
    },
    "kosten": 0.7131,
-   "quelle": "geschaetzt"
+   "quelle": "geschaetzt",
+   "aufgabe": "AG-V2-008"
   },
   {
    "id": "N014",
@@ -251,7 +273,8 @@
    "an": "atlas",
    "art": "change_request",
    "text": "CR-01: Gemeinsame Autorschaft aufnehmen",
-   "folgen": 3
+   "folgen": 3,
+   "prueft": "ART-02"
   },
   {
    "id": "N032",
@@ -271,7 +294,8 @@
     "cache": 12479
    },
    "kosten": 0.5812,
-   "quelle": "geschaetzt"
+   "quelle": "geschaetzt",
+   "aufgabe": "AG-V2-009"
   },
   {
    "id": "N015",
@@ -300,7 +324,8 @@
     "cache": 5925
    },
    "kosten": 0.496,
-   "quelle": "geschaetzt"
+   "quelle": "geschaetzt",
+   "aufgabe": "AG-V2-010"
   },
   {
    "id": "N033",
@@ -318,7 +343,9 @@
    "an": "archibald",
    "art": "proposal",
    "text": "Zerfall ohne rekonstruierbare Reste",
-   "folgen": 2
+   "folgen": 2,
+   "aufgabe": "AG-V2-008",
+   "erledigt": "AG-V2-008"
   },
   {
    "id": "N020",
@@ -338,7 +365,8 @@
     "cache": 16921
    },
    "kosten": 0.4142,
-   "quelle": "geschaetzt"
+   "quelle": "geschaetzt",
+   "aufgabe": "AG-V2-011"
   },
   {
    "id": "N034",
@@ -347,7 +375,8 @@
    "an": "archibald",
    "art": "decision",
    "text": "Jeder Mitautor darf den gemeinsamen Beitrag zurückziehen",
-   "folgen": 2
+   "folgen": 2,
+   "antwortet_auf": "N033"
   },
   {
    "id": "N023",
@@ -356,7 +385,8 @@
    "an": "forge",
    "art": "defect",
    "text": "Haus gelöscht, abgeleitete Brücke bleibt stehen",
-   "folgen": 4
+   "folgen": 4,
+   "prueft": "ART-02"
   },
   {
    "id": "N024",
@@ -374,7 +404,11 @@
    "an": "forge",
    "art": "artifact",
    "text": "US-03/09/10: Rücknahmekriterien V1",
-   "folgen": 2
+   "folgen": 2,
+   "aufgabe": "AG-V2-009",
+   "erledigt": "AG-V2-009",
+   "artefakt": "ART-03",
+   "version": "v1"
   },
   {
    "id": "N025",
@@ -383,7 +417,10 @@
    "an": "forge",
    "art": "decision",
    "text": "Umfang: direkte Ableitungen, unabhängige Nachbarn bleiben",
-   "folgen": 2
+   "folgen": 2,
+   "aufgabe": "AG-V2-001",
+   "erledigt": "AG-V2-001",
+   "antwortet_auf": "N024"
   },
   {
    "id": "N026",
@@ -403,7 +440,8 @@
     "cache": 27199
    },
    "kosten": 0.5883,
-   "quelle": "geschaetzt"
+   "quelle": "geschaetzt",
+   "aufgabe": "AG-V2-012"
   },
   {
    "id": "N035",
@@ -412,7 +450,11 @@
    "an": "forge",
    "art": "artifact",
    "text": "US-04/11/12: Regeln gemeinsamer Autorschaft",
-   "folgen": 2
+   "folgen": 2,
+   "aufgabe": "AG-V2-011",
+   "erledigt": "AG-V2-011",
+   "artefakt": "ART-04",
+   "version": "v1"
   },
   {
    "id": "N036",
@@ -421,7 +463,8 @@
    "an": "atlas",
    "art": "change_request",
    "text": "CR-02: Wiederaufnahme nach Unterbrechung",
-   "folgen": 3
+   "folgen": 3,
+   "prueft": "ART-04"
   },
   {
    "id": "N037",
@@ -441,7 +484,8 @@
     "cache": 11620
    },
    "kosten": 0.6702,
-   "quelle": "geschaetzt"
+   "quelle": "geschaetzt",
+   "aufgabe": "AG-V2-013"
   },
   {
    "id": "DEMO-STOP-1",
@@ -459,7 +503,11 @@
    "an": "sentinel",
    "art": "artifact",
    "text": "Herkunftsreparatur V2 bereit",
-   "folgen": 2
+   "folgen": 2,
+   "aufgabe": "AG-V2-012",
+   "erledigt": "AG-V2-012",
+   "artefakt": "ART-05",
+   "version": "v1"
   },
   {
    "id": "N028",
@@ -479,7 +527,8 @@
     "cache": 7483
    },
    "kosten": 0.267,
-   "quelle": "geschaetzt"
+   "quelle": "geschaetzt",
+   "aufgabe": "AG-V2-014"
   },
   {
    "id": "DEMO-RES-1",
@@ -496,7 +545,8 @@
    "an": "atlas",
    "art": "defect",
    "text": "Alte Sitzung bringt zurückgezogenen Entwurf zurück",
-   "folgen": 4
+   "folgen": 4,
+   "prueft": "ART-05"
   },
   {
    "id": "N029",
@@ -505,7 +555,10 @@
    "an": "argus",
    "art": "test_result",
    "text": "Gezielte Prüfungen bestanden",
-   "folgen": 1
+   "folgen": 1,
+   "aufgabe": "AG-V2-010",
+   "erledigt": "AG-V2-010",
+   "prueft": "ART-05"
   },
   {
    "id": "N039",
@@ -525,7 +578,8 @@
     "cache": 6006
    },
    "kosten": 0.4388,
-   "quelle": "geschaetzt"
+   "quelle": "geschaetzt",
+   "aufgabe": "AG-V2-015"
   },
   {
    "id": "N030",
@@ -534,7 +588,10 @@
    "an": "atlas",
    "art": "review_result",
    "text": "Herkunftsreparatur nachvollziehbar",
-   "folgen": 2
+   "folgen": 2,
+   "aufgabe": "AG-V2-006",
+   "erledigt": "AG-V2-006",
+   "prueft": "ART-05"
   },
   {
    "id": "N046",
@@ -554,7 +611,8 @@
     "cache": 20719
    },
    "kosten": 0.6266,
-   "quelle": "geschaetzt"
+   "quelle": "geschaetzt",
+   "aufgabe": "AG-V2-016"
   },
   {
    "id": "N040",
@@ -563,7 +621,11 @@
    "an": "atlas",
    "art": "artifact",
    "text": "Reproduzierbare Unterbrechungs-/Rücknahmefolge",
-   "folgen": 2
+   "folgen": 2,
+   "aufgabe": "AG-V2-014",
+   "erledigt": "AG-V2-014",
+   "artefakt": "ART-06",
+   "version": "v1"
   },
   {
    "id": "N041",
@@ -592,7 +654,8 @@
     "cache": 3882
    },
    "kosten": 0.3198,
-   "quelle": "geschaetzt"
+   "quelle": "geschaetzt",
+   "aufgabe": "AG-V2-017"
   },
   {
    "id": "N047",
@@ -601,7 +664,9 @@
    "an": "sentinel",
    "art": "proposal",
    "text": "Rücknahme ohne Textwand erlebbar",
-   "folgen": 2
+   "folgen": 2,
+   "aufgabe": "AG-V2-016",
+   "erledigt": "AG-V2-016"
   },
   {
    "id": "N048",
@@ -621,7 +686,8 @@
     "cache": 26419
    },
    "kosten": 0.4492,
-   "quelle": "geschaetzt"
+   "quelle": "geschaetzt",
+   "aufgabe": "AG-V2-018"
   },
   {
    "id": "DEMO-STOP-2",
@@ -639,7 +705,9 @@
    "an": "archibald",
    "art": "recommendation",
    "text": "Ein kanonisches Kriterium mit Verweisen",
-   "folgen": 2
+   "folgen": 2,
+   "aufgabe": "AG-V2-017",
+   "erledigt": "AG-V2-017"
   },
   {
    "id": "N044",
@@ -659,7 +727,8 @@
     "cache": 19399
    },
    "kosten": 0.4901,
-   "quelle": "geschaetzt"
+   "quelle": "geschaetzt",
+   "aufgabe": "AG-V2-019"
   },
   {
    "id": "N049",
@@ -668,7 +737,8 @@
    "an": "nova",
    "art": "defect",
    "text": "Drei Zustände sehen gleich aus",
-   "folgen": 3
+   "folgen": 3,
+   "prueft": "ART-06"
   },
   {
    "id": "N050",
@@ -686,7 +756,11 @@
    "an": "atlas",
    "art": "artifact",
    "text": "Begriffsklärung Rücknahme übernommen",
-   "folgen": 1
+   "folgen": 1,
+   "aufgabe": "AG-V2-019",
+   "erledigt": "AG-V2-019",
+   "artefakt": "ART-07",
+   "version": "v1"
   },
   {
    "id": "N051",
@@ -695,7 +769,8 @@
    "an": "nova",
    "art": "answer",
    "text": "Nein — Bewegung und Dauer müssen unterscheiden",
-   "folgen": 2
+   "folgen": 2,
+   "antwortet_auf": "N050"
   },
   {
    "id": "N052",
@@ -715,7 +790,8 @@
     "cache": 35765
    },
    "kosten": 0.5557,
-   "quelle": "geschaetzt"
+   "quelle": "geschaetzt",
+   "aufgabe": "AG-V2-020"
   },
   {
    "id": "N057",
@@ -735,7 +811,8 @@
     "cache": 8283
    },
    "kosten": 0.5095,
-   "quelle": "geschaetzt"
+   "quelle": "geschaetzt",
+   "aufgabe": "AG-V2-021"
   },
   {
    "id": "DEMO-RES-2",
@@ -752,7 +829,9 @@
    "an": "atlas",
    "art": "proposal",
    "text": "Garten aus unabhängigen neuen Beiträgen",
-   "folgen": 3
+   "folgen": 3,
+   "aufgabe": "AG-V2-021",
+   "erledigt": "AG-V2-021"
   },
   {
    "id": "N053",
@@ -761,7 +840,11 @@
    "an": "sentinel",
    "art": "artifact",
    "text": "US-16/17/18: Unterscheidbare Zustände",
-   "folgen": 2
+   "folgen": 2,
+   "aufgabe": "AG-V2-013",
+   "erledigt": "AG-V2-013",
+   "artefakt": "ART-08",
+   "version": "v1"
   },
   {
    "id": "N059",
@@ -781,7 +864,8 @@
     "cache": 34836
    },
    "kosten": 0.6306,
-   "quelle": "geschaetzt"
+   "quelle": "geschaetzt",
+   "aufgabe": "AG-V2-022"
   },
   {
    "id": "N054",
@@ -801,7 +885,8 @@
     "cache": 9229
    },
    "kosten": 0.36,
-   "quelle": "geschaetzt"
+   "quelle": "geschaetzt",
+   "aufgabe": "AG-V2-023"
   },
   {
    "id": "N060",
@@ -821,7 +906,8 @@
     "cache": 9766
    },
    "kosten": 0.6369,
-   "quelle": "geschaetzt"
+   "quelle": "geschaetzt",
+   "aufgabe": "AG-V2-024"
   },
   {
    "id": "N055",
@@ -830,7 +916,10 @@
    "an": "argus",
    "art": "test_result",
    "text": "Unterscheidung bestanden; Prüfgrenze benannt",
-   "folgen": 1
+   "folgen": 1,
+   "aufgabe": "AG-V2-015",
+   "erledigt": "AG-V2-015",
+   "prueft": "ART-08"
   },
   {
    "id": "N056",
@@ -839,7 +928,10 @@
    "an": "atlas",
    "art": "review_result",
    "text": "Erlebnis nachvollziehbar; Abnahme offen",
-   "folgen": 2
+   "folgen": 2,
+   "aufgabe": "AG-V2-007",
+   "erledigt": "AG-V2-007",
+   "prueft": "ART-08"
   },
   {
    "id": "N061",
@@ -848,7 +940,8 @@
    "an": "atlas",
    "art": "objection",
    "text": "Gartenform übernimmt Beziehungen eines entfernten Briefes",
-   "folgen": 2
+   "folgen": 2,
+   "prueft": "ART-08"
   },
   {
    "id": "N062",
@@ -857,7 +950,8 @@
    "an": "atlas",
    "art": "objection",
    "text": "Verbliebene Formen können Rücknahmelücken nutzen",
-   "folgen": 2
+   "folgen": 2,
+   "prueft": "ART-08"
   },
   {
    "id": "N063",
@@ -894,7 +988,8 @@
     "cache": 9498
    },
    "kosten": 0.3842,
-   "quelle": "geschaetzt"
+   "quelle": "geschaetzt",
+   "aufgabe": "AG-V2-025"
   },
   {
    "id": "N065",
@@ -908,5 +1003,6 @@
  ],
  "umfang": 21,
  "umfangText": "7 Stränge · 21 Storyideen",
- "ablage": "Repository"
+ "ablage": "Repository",
+ "bezuege": "konstruiert — siehe previews/AG-VISUAL-005-evidence-v1.md"
 }
