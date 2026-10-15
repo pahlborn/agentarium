@@ -214,7 +214,7 @@ SKRIPT = """
 
      Der Bauzeitpunkt kommt beim Bauen aus der Uhr. Von Hand gepflegte
      Datumsangaben sind nach der zweiten Änderung falsch. */
-  var FASSUNG = '37', GEBAUT = '__GEBAUT__';
+  var FASSUNG = '38', GEBAUT = '__GEBAUT__';
 
   /* DIE BETRIEBSART. Sie kommt aus den Daten; fehlt sie, gilt `demo`.
      Alles, was sich zwischen Prototyp und Produktivbetrieb unterscheidet,
@@ -2284,6 +2284,7 @@ SKRIPT = """
      Ein Tippen klappt das Blatt auf: welche Stücke es gibt, welches läuft,
      und was es ist. Ein zweites Tippen schließt es wieder. */
   var projektEl = document.getElementById('agProjekt'),
+      kopfEl = document.getElementById('agKopf'),
       wasEl = document.getElementById('agWas');
 
   /* DIE KNÖPFE WERDEN AUS DEM MODUS ABGELEITET. Von Hand gesetzt gäbe es
@@ -2356,7 +2357,17 @@ SKRIPT = """
     projektEl.classList.add('fragbar');
   }
 
-  projektEl.addEventListener('click', function () {
+  /* ANZEIGE UND AUSWAHL SIND DASSELBE DING.
+
+     Vorher stand der Projektname im Kopf rechts oben UND oeffnete dort die
+     Auswahl, waehrend links die Marke lag; Peter: „Projektauswahl davon
+     trennen und diese vermengen mit der Projektanzeige rechts oben."
+
+     Der Zuhoerer haengt deshalb am ganzen Block, nicht am Namen: Was
+     anzeigt, welcher Lauf laeuft, ist auch das, womit man ihn wechselt.
+     GENAU EIN Zuhoerer — ein zweiter am Namen wuerde sich selbst aufheben,
+     weil der Klick nach oben durchlaeuft und zweimal umschaltete. */
+  kopfEl.addEventListener('click', function () {
     tastenZeigen();
     wasEl.classList.toggle('auf');
   });

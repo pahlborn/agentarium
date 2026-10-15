@@ -52,7 +52,7 @@ Zeile unten übereinstimmen. Das Verfahren ist aus
 | Schnittstelle | `specifications/AG-VISUAL-005-schnittstelle-v1.md` | Schnittstellenversion 1 | 2026-10-15T14:12:55Z | `e2eacd2fefd977cbe1637a1bf7123fb77e8556db` |
 | Funktionsmatrix | `previews/AG-VISUAL-005-funktionsmatrix-v1.md` | Matrixversion 1 | 2026-10-15T14:12:55Z | `261c4658fc252c8727c1db120cdac806be3c204b` |
 | Belege | `previews/AG-VISUAL-005-evidence-v1.md` | Belegversion 1 | 2026-10-15T14:12:55Z | `aaf733814df1a1c07fd0687fd1434db7d82e6244` |
-| Feld (gebaut) | `previews/AG-VISUAL-005-feld-v1.html` | Fassung 37 | 2026-10-15T12:02:00Z | `eb535284d226ee6d84467e1c44ec1ef981f2fb0d` |
+| Feld (gebaut) | `previews/AG-VISUAL-005-feld-v1.html` | Fassung 38 | 2026-10-15T19:35:00Z | `f3e01ffa32081a378422e6ace6b637133f72c401` |
 | Prüfauftrag | `handoffs/AG-VISUAL-005-review-request-v1.md` | Auftragsversion 1 | 2026-10-15T14:12:55Z | `3595028ea462cafb37ef3200a2677806fcc71d61` |
 | Prüfauftrag (maschinenlesbar) | `handoffs/AG-VISUAL-005-review-request-v1.json` | Auftragsversion 1 | 2026-10-15T14:12:55Z | `fb98f597c1f5e49bc97fc630aef56723fb6ca86b` |
 | Prüfung der Atlas-Anweisung | `governance/AG-VISUAL-005-INTERFACE-review-v1.md` | Prüfversion 1 | 2026-10-15T18:47:30Z | `994cb2f89ef2c47418d6b232e8696305e5ee46ae` |
@@ -107,6 +107,7 @@ verschwunden ist. Eine Fassung bekommt eine Nummer, wenn sich eine
 | 2026-10-15T18:47:30Z | Nachricht an Atlas | 1 | Kopierbare Kurzfassung der Prüfung zum Weitergeben durch Peter. |
 | 2026-10-15T19:24:00Z | Schnittstelle | **2** | Vertrag V2 nach Atlas' Korrekturauftrag `AG-VISUAL-005-INTERFACE-REREVIEW`. Zehn verbindliche Korrekturen umgesetzt: Katalogstrom getrennt, Projektanlage definiert, Live/Archiv aus dem Laufzustand (neun Zustände), SSE-Anmeldung ohne URL-Ticket, Keepalive und Herzschlag getrennt, `zeitachse` mit Ableitungsregel, Feldtabelle dreispaltig, `read`/`command` serverseitig, Kostenfeld sichtbar mit Statussatz. Dazu vier Schemas, neun Abnahmefälle, Prüflauf und Gegenprobe. |
 | 2026-10-15T19:24:00Z | Prüflauf, Gegenprobe | V2 | Antwort auf Sentinels `FAIL_TESTABILITY_ONLY`: 38 Formprüfungen, 59 Regelprüfungen, 21 von 21 absichtlichen Verletzungen erkannt. Abhängigkeitsfrei, weil zur Laufzeit nichts von außen geholt wird. |
+| 2026-10-15T19:35:00Z | Feld (gebaut) | Fassung 38 | Marke links, Lauf rechts. Peter: „Titel auf die linke Seite, Projektauswahl davon trennen und diese vermengen mit der Projektanzeige rechts oben." Rechts oben trugen vorher sechs Dinge in einem Block; jetzt links was gleich bleibt, rechts was gerade gilt, und die Projektanzeige **ist** die Auswahl. Nachgemessen auf 1194×834, 834×1194 und 1024×768, in Ruhe und beim Lesen jedes einzelnen Blocks. |
 | 2026-10-15T18:47:30Z | Konzept, Schnittstelle | 1 | **Verlaufen, nicht abgelöst.** Peter: „Wir müssen das Konzept von vorne beginnen, wir haben uns schon verlaufen." Beide Fassungen bleiben liegen und sind weiter die Fassungen, auf die Atlas' Prüfung zeigt. Die Nachfolger entstehen nach `agentarium.observed-worklog.v1` und Atlas' Anweisung, nicht aus diesen Papieren heraus. |
 
 ---

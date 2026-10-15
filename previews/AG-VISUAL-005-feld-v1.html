@@ -1,5 +1,9 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>Agentarium</title>
-<meta name="claude:viewport-fit-sides" content="cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Resonanz">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -299,14 +303,39 @@
   #agKopf{position:static; width:100%; text-align:right;
     font:400 11px/1.7 ui-monospace,SFMono-Regular,Menlo,monospace;
     letter-spacing:.2em; text-transform:uppercase; color:#55637A;}
+
+  /* DIE MARKE STEHT LINKS, DER LAUF RECHTS.
+
+     Vorher trug der Kopf rechts oben SECHS Dinge: Marke, Leitmotiv,
+     Projektname, Uhr, Fassung, darunter das Produkt. Peter: „Das ist
+     aktuell noch etwas unübersichtlich." Der Grund war nicht die Zahl,
+     sondern die Vermischung: Die Marke ändert sich nie, der Lauf ändert
+     sich dauernd. Zwei verschiedene Dinge in einem Block.
+
+     Jetzt: links, was immer gleich bleibt — rechts, was gerade gilt.
+     Links beginnt die Bahn erst bei bandL (348 im Querformat, 258 im
+     Hochformat), der Platz ist also frei. Beim Zeigen wächst der Block
+     nach rechts, deshalb ist er schmaler als der Raum: Hochformat 200
+     statt 240, sonst stieß er vergrößert in die Bahn. */
+  #agMarke{position:fixed; left:max(3px,calc(env(safe-area-inset-left) - 10px));
+    top:max(3px,calc(env(safe-area-inset-top) - 10px)); z-index:7;
+    width:min(28vw,250px); text-align:left;
+    font:400 11px/1.7 ui-monospace,SFMono-Regular,Menlo,monospace;
+    letter-spacing:.2em; text-transform:uppercase; color:#55637A;}
+  #agMarke b{display:block; color:#AFC0D8; font-weight:400; font-size:13px;
+    letter-spacing:.16em;}
+  #agMarke em{display:block; font-style:normal; font-size:10.5px;
+    letter-spacing:.1em; text-transform:none; color:#5E6E86;
+    margin:3px 0 0; line-height:1.4;}
+  @media (orientation:portrait){
+    #agMarke{width:min(34vw,190px);}
+  }
   /* Das Leitmotiv, wie es in AG-MOCK-COMPARE-001 steht. Klein, einmal, und
      es bleibt stehen — es ist der Name der Sache, keine Beschriftung. */
   /* 10,5 px statt 8,5 und etwas heller. Mit 8,5 war das Leitmotiv zwar
      da, aber nicht zu lesen — eine Beschriftung, die man nicht lesen kann,
      ist Dekoration. */
-  #agKopf em{display:block; font-style:normal; font-size:10.5px;
-    letter-spacing:.1em; text-transform:none; color:#5E6E86;
-    margin:3px 0 7px; line-height:1.4;}
+
   /* Diese Regel muss NACH der Breitenangabe des Kopfes stehen. Beim ersten
      Versuch stand sie weiter oben bei der Liste — gleiche Gewichtung, also
      gewann die spätere Zeile, und der Kopf blieb im Hochformat 330 breit.
@@ -314,8 +343,6 @@
   @media (orientation:portrait){
     #agRechts{width:min(40vw,260px);}
   }
-  #agKopf b{display:block; color:#AFC0D8; font-weight:400; font-size:13px;
-    letter-spacing:.16em;}
   #agUhr{color:#8295B0;}
 
   /* DUNKEL BLEIBEN, ABER LESBAR WERDEN.
@@ -344,16 +371,18 @@
      an, nur ohne Grund; sonst sprängen die Blöcke beim Zeigen um. Beim
      Zeigen kommt der dunkle Grund dazu, und die Blöcke stehen dann auf
      etwas statt im Feld. */
-  #agKopf, #agWerkName, #agStand{pointer-events:auto;
+  #agMarke, #agKopf, #agWerkName, #agStand{pointer-events:auto;
     padding:11px 13px; border-radius:10px;
     background:rgba(6,9,14,0); border:1px solid rgba(150,170,200,0);
     transition:opacity .3s ease, filter .3s ease, transform .3s ease,
                background .3s ease, border-color .3s ease;}
+  #agMarke:hover, #agMarke.lesen,
   #agKopf:hover, #agKopf.lesen,
   #agWerkName:hover, #agWerkName.lesen,
   #agStand:hover, #agStand.lesen{
     background:rgba(6,9,14,.93); border-color:rgba(150,170,200,.16);
     -webkit-backdrop-filter:blur(3px); backdrop-filter:blur(3px);}
+  #agMarke:hover, #agMarke.lesen,
   #agKopf:hover, #agKopf.lesen,
   #agWerkName:hover, #agWerkName.lesen,
   #agStand:hover, #agStand.lesen{filter:brightness(1.85) saturate(1.1);}
@@ -361,7 +390,20 @@
      wer hinsieht, will lesen. Der Bezugspunkt ist die jeweilige ECKE,
      damit die Blöcke nach INNEN wachsen und nicht über den Rand hinaus. */
   #agKopf, #agWerkName{transform-origin:top right;}
+  #agMarke{transform-origin:top left;}
+  /* Wer gelesen wird, liegt OBEN. Vergroessert waechst ein Block von seiner
+     Ecke nach innen und deckt dabei seinen Nachbarn teilweise zu — gemessen
+     im Querformat: Kopf reicht vergroessert bis 269 px hinunter, das Produkt
+     beginnt bei 92. Das ist kein Fehler, solange der gelesene Block
+     DECKEND und OBEN ist; er hat beim Lesen Grund und Unschaerfe. Ohne
+     diese Zeile entschied die Reihenfolge im Dokument, und das Produkt lag
+     ueber dem Text, den man gerade lesen wollte. */
+  #agMarke:hover, #agMarke.lesen,
+  #agKopf:hover, #agKopf.lesen,
+  #agWerkName:hover, #agWerkName.lesen,
+  #agStand:hover, #agStand.lesen{z-index:12;}
   #agStand{transform-origin:bottom right;}
+  #agMarke:hover, #agMarke.lesen,
   #agKopf:hover, #agKopf.lesen,
   #agWerkName:hover, #agWerkName.lesen,
   #agStand:hover, #agStand.lesen{transform:scale(1.28);}
@@ -372,7 +414,7 @@
     transition:max-height .35s ease, opacity .35s ease, margin .35s ease;
     font:400 10px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;
     letter-spacing:.06em; text-transform:none; color:#6B7689;}
-  #agKopf:hover #agFassung, #agKopf.lesen #agFassung{
+  #agMarke:hover #agFassung, #agMarke.lesen #agFassung{
     max-height:160px; opacity:1; margin-top:9px;}
   #agFassung b{display:block; margin-top:6px; font-weight:400; color:#AFC0D8;
     letter-spacing:.12em;}
@@ -384,7 +426,7 @@
   /* Die Kurzbeschreibung auf Antippen — auf einem iPad gibt es kein
      Darüberfahren, also kein Tooltip, sondern ein Blatt. */
   #agWas{position:fixed; right:max(14px,env(safe-area-inset-right));
-    top:calc(max(14px,env(safe-area-inset-top)) + 92px); z-index:9;
+    top:calc(max(14px,env(safe-area-inset-top)) + 58px); z-index:9;
     width:min(70vw,330px); padding:15px 17px; border-radius:10px;
     background:rgba(8,12,19,.95); border:1px solid rgba(150,170,200,.16);
     color:#C2CEE2; font:400 12.5px/1.5 -apple-system,system-ui,sans-serif;
@@ -598,6 +640,8 @@
   .agZeile u{text-decoration:none; font-size:10px; letter-spacing:.12em;
     text-transform:uppercase;}
 </style>
+</head>
+<body>
 <canvas id="feld"></canvas>
 
 <div id="agRing"></div>
@@ -607,7 +651,8 @@
 <div id="agKostenEbene"></div>
 <div id="agStand"></div>
 <div id="agWerk"></div>
-<div id="agRechts"><div id="agKopf"><b>Agentarium</b><em title="BALL — Bio-Agent &amp; LLM Logistics">See intelligence move. Powered by BALL</em><i id="agProjekt"></i><span id="agUhr">00:00</span><small id="agFassung"></small></div>
+<div id="agMarke"><b>Agentarium</b><em title="BALL — Bio-Agent &amp; LLM Logistics">See intelligence move. Powered by BALL</em><small id="agFassung"></small></div>
+<div id="agRechts"><div id="agKopf"><i id="agProjekt"></i><span id="agUhr">00:00</span></div>
 <div id="agWerkName"></div></div>
 <div id="agWas"></div>
 <div id="agMotoren"></div>
@@ -1984,7 +2029,7 @@
 
      Der Bauzeitpunkt kommt beim Bauen aus der Uhr. Von Hand gepflegte
      Datumsangaben sind nach der zweiten Änderung falsch. */
-  var FASSUNG = '37', GEBAUT = '15.10.2026';
+  var FASSUNG = '38', GEBAUT = '15.10.2026';
 
   /* DIE BETRIEBSART. Sie kommt aus den Daten; fehlt sie, gilt `demo`.
      Alles, was sich zwischen Prototyp und Produktivbetrieb unterscheidet,
@@ -4054,6 +4099,7 @@
      Ein Tippen klappt das Blatt auf: welche Stücke es gibt, welches läuft,
      und was es ist. Ein zweites Tippen schließt es wieder. */
   var projektEl = document.getElementById('agProjekt'),
+      kopfEl = document.getElementById('agKopf'),
       wasEl = document.getElementById('agWas');
 
   /* DIE KNÖPFE WERDEN AUS DEM MODUS ABGELEITET. Von Hand gesetzt gäbe es
@@ -4126,7 +4172,17 @@
     projektEl.classList.add('fragbar');
   }
 
-  projektEl.addEventListener('click', function () {
+  /* ANZEIGE UND AUSWAHL SIND DASSELBE DING.
+
+     Vorher stand der Projektname im Kopf rechts oben UND oeffnete dort die
+     Auswahl, waehrend links die Marke lag; Peter: „Projektauswahl davon
+     trennen und diese vermengen mit der Projektanzeige rechts oben."
+
+     Der Zuhoerer haengt deshalb am ganzen Block, nicht am Namen: Was
+     anzeigt, welcher Lauf laeuft, ist auch das, womit man ihn wechselt.
+     GENAU EIN Zuhoerer — ein zweiter am Namen wuerde sich selbst aufheben,
+     weil der Klick nach oben durchlaeuft und zweimal umschaltete. */
+  kopfEl.addEventListener('click', function () {
     tastenZeigen();
     wasEl.classList.toggle('auf');
   });
@@ -4803,3 +4859,5 @@
   });
 })();
 </script>
+</body>
+</html>
