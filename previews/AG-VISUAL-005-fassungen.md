@@ -55,6 +55,8 @@ Zeile unten übereinstimmen. Das Verfahren ist aus
 | Feld (gebaut) | `previews/AG-VISUAL-005-feld-v1.html` | Fassung 37 | 2026-10-15T12:02:00Z | `eb535284d226ee6d84467e1c44ec1ef981f2fb0d` |
 | Prüfauftrag | `handoffs/AG-VISUAL-005-review-request-v1.md` | Auftragsversion 1 | 2026-10-15T14:12:55Z | `3595028ea462cafb37ef3200a2677806fcc71d61` |
 | Prüfauftrag (maschinenlesbar) | `handoffs/AG-VISUAL-005-review-request-v1.json` | Auftragsversion 1 | 2026-10-15T14:12:55Z | `fb98f597c1f5e49bc97fc630aef56723fb6ca86b` |
+| Prüfung der Atlas-Anweisung | `governance/AG-VISUAL-005-INTERFACE-review-v1.md` | Prüfversion 1 | 2026-10-15T18:47:30Z | `994cb2f89ef2c47418d6b232e8696305e5ee46ae` |
+| Nachricht an Atlas | `handoffs/AG-VISUAL-005-INTERFACE-reply-v1.md` | Nachrichtenversion 1 | 2026-10-15T18:47:30Z | `56fed8bda3768d42043be28e7f1f94e91d6d781d` |
 
 Keines dieser Dokumente hat einen Vorgänger. Alle Papiere sind Fassung 1;
 das Feld ist die daraus gebaute Fassung 37.
@@ -92,10 +94,33 @@ verschwunden ist. Eine Fassung bekommt eine Nummer, wenn sich eine
 | 2026-10-15T14:01:01Z | Funktionsmatrix | 1 | Kopf nach Repository-Konvention ergänzt; Inhalt unverändert. |
 | 2026-10-15T14:01:01Z | Belege | 1 | Kopf nach Repository-Konvention ergänzt; Inhalt unverändert. |
 | 2026-10-15T14:12:55Z | alle vier | 1 | Zeitstempel von Tagesdatum auf ISO 8601 mit Uhrzeit umgestellt. **Peters Befund:** an einem Tag können mehrere Fassungen entstehen. Keine Nummernerhöhung, weil sich keine Aussage geändert hat — nur die Blobs, und die stehen oben neu. |
+| 2026-10-15T18:47:30Z | Prüfung der Atlas-Anweisung | 1 | Atlas hat gegen `a8d483a9` geprüft und `AG-VISUAL-005-INTERFACE` V1 zurückgegeben. Prüfung dieser Anweisung: zwei Befunde, vier Vorschläge, Rücknahme von sieben erfundenen Feldnamen. |
+| 2026-10-15T18:47:30Z | Nachricht an Atlas | 1 | Kopierbare Kurzfassung der Prüfung zum Weitergeben durch Peter. |
+| 2026-10-15T18:47:30Z | Konzept, Schnittstelle | 1 | **Verlaufen, nicht abgelöst.** Peter: „Wir müssen das Konzept von vorne beginnen, wir haben uns schon verlaufen." Beide Fassungen bleiben liegen und sind weiter die Fassungen, auf die Atlas' Prüfung zeigt. Die Nachfolger entstehen nach `agentarium.observed-worklog.v1` und Atlas' Anweisung, nicht aus diesen Papieren heraus. |
 
 ---
 
-## 5. Was nicht in diesem Register steht
+## 5. Verlaufene Fassungen
+
+Konzept 1 und Schnittstelle 1 sind **verlaufen**: Peter hat drei Befunde
+gegen ihr Modell erhoben — Betriebsarten als Wahl, fehlendes Gedächtnis,
+ein Strom auf eine Adresse, die es noch nicht gibt — und entschieden, das
+Konzept von vorne zu beginnen.
+
+Sie werden trotzdem **nicht gelöscht und nicht überschrieben**, und zwar aus
+einem harten Grund: Atlas' Prüfung zeigt mit Blob-Hash auf genau diese
+beiden Dateien. Verschwinden sie, zeigt seine Prüfung ins Leere. Eine
+verlaufene Fassung ist Teil der Geschichte, kein Versehen.
+
+Das Vokabular der Nachfolger ist `agentarium.observed-worklog.v1`
+(`governance/AG-REPORT-001-minimal-worklog-v1.md`,
+`relay/events/AG-PARTITUR-001-worklog-v1.json`, beide in
+`origin/feature/visual-stage-v0`) — nicht mehr die erfundenen Namen aus
+Schnittstelle 1.
+
+---
+
+## 6. Was nicht in diesem Register steht
 
 `specifications/AG-MOCKS-PETER-REQUIREMENTS-v1.md` ist **Peters Dokument**.
 Es wird hier nicht geführt und nicht verändert. Verweise darauf gehen in
