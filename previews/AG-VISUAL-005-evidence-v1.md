@@ -63,10 +63,16 @@ Alles im echten Browser (Chromium, Playwright), nicht geschätzt.
 - **V1 (120 s, 34 Ereignisse).** Vier Lücken ab sechs Sekunden, zusammen
   31 Sekunden = 26 % des Stücks. In **allen vieren** arbeitet jemand. Die
   Totzeit ist also keine Stille, sondern Wartezeit auf einen Arbeitenden.
-- **V2 (480 s, 65 Ereignisse).** 213 Stichproben über t=0 bis 425: jemand
-  arbeitet in 76 % der Zeit; Pausen über 4,5 Sekunden machen 43 % aus, und
-  in **81 %** davon arbeitet jemand. Das restliche Fünftel war zum Teil eine
-  Folge der Deckelung — siehe den eigenen Abschnitt weiter unten.
+- **V2 (480 s, 70 Ereignisse), vollständig durchgemessen.** 430
+  Stichproben über das ganze Stück, nach Entfernen der Deckelung: jemand
+  arbeitet in **97 %** der Zeit; Pausen über 4,5 Sekunden machen 46 % aus,
+  und in **96 %** davon arbeitet jemand. Längste Stille: 24,9 s.
+
+  Die frühere Zahl war 81 %, gemessen mit der 28-Sekunden-Deckelung. Das
+  „restliche Fünftel echte Leere" gab es nicht — es waren Agenten, die noch
+  arbeiteten und vom Deckel abgeräumt worden waren. Peters Annahme, hinter
+  jeder Pause stecke jemand, der arbeitet, trifft damit praktisch
+  vollständig zu; die 4 % sind der Schwanz nach dem letzten Ereignis.
 - V2 hat im Schnitt alle 7,4 Sekunden ein Ereignis, V1 alle 3,5. V2 ist zu
   drei Vierteln Warten. Das ist eine Eigenschaft der Daten, nicht der
   Darstellung.
@@ -112,6 +118,30 @@ Dieselbe stille Stelle gab es ein zweites Mal: `S.liste` warf den ältesten
 Auftrag weg, sobald mehr als vier offen waren, mitsamt seiner Buchführung.
 Jetzt bleiben alle in der Liste; gezeichnet werden höchstens vier Ringe.
 
+## Stops haben eine Klasse
+
+Bisher kannte das Feld eine Sorte Stop: „wartet auf eine Antwort", ausgelöst
+durch eine Frage, aufgelöst durch eine Antwort. Ein abgestürzter Agent und
+ein geschlossener Kanal sind etwas anderes — sie lösen sich nicht dadurch,
+dass jemand antwortet. Ein Stop trägt deshalb eine Klasse aus den Daten:
+
+```
+art:    stop | resume
+an:     wen es trifft
+klasse: technisch | budget | abhaengigkeit | freigabe | mensch
+text:   der Grund im Klartext
+```
+
+Fehlt die Klasse, gilt `unbekannt`, und das ist sichtbar. Die alten Auslöser
+(`question`, `open_state`) gelten weiter als `abhaengigkeit`, damit
+bestehende Daten nicht umgestellt werden müssen. Ein Schild über dem Platz
+nennt Klasse und Dauer; Zeigen oder Antippen öffnet den Grund samt der
+Erklärung, was die Klasse bedeutet und was sie auflöst — antippen, weil es
+auf einem iPad kein Mouseover gibt.
+
+Zur Vorführung liegen erfundene Ereignisse mit dem Präfix `DEMO-` in beiden
+Datensätzen; sie gehören nicht zum abgeleiteten Fixture.
+
 ## Das Produkt
 
 Drei Versuche, es im Feld zu zeichnen — eine Spirale, eine Silhouette auf
@@ -121,6 +151,36 @@ lag unleserlich unter einem Knäuel Fäden, weil alles daran aus Teilchen
 gebaut war. Peters Entscheidung: nur Schrift und ein waagerechter
 Fortschrittsbalken, beides HTML. Was aus Schrift besteht, kann nicht
 fusseln.
+
+## Eine Berichtigung: die Deckelung war nicht die Ursache der Strähnen
+
+Zwischendurch stand im Bild sehr viel stehendes Fadenwerk. Ich hatte die
+Ursache benannt — `abgabe` steuerte zwei Dinge zugleich, Niederschlag UND
+Wirbelstärke, und mit dem Sprung von 1,0 auf 4,0 war die Wirbelstärke still
+von 0,92 auf 2,42 mitgestiegen. Die Rechnung stimmt. Der Schluss daraus
+nicht.
+
+Nachgemessen, drei Bauten mit festgenageltem Zufallskeim, gemessen als
+Anteil sichtbarer Bildpunkte auf Schirmbildern (nicht mit `readPixels` —
+die Fläche läuft mit `preserveDrawingBuffer: false` und liefert nach dem
+Darstellen überall null; die erste Messung las deshalb ein volles Bild als
+dunkel):
+
+| | sichtbare Fläche | gegen A |
+|---|---|---|
+| A Produkt aus Teilchen, keine Deckelung | 6,3 % | — |
+| B ohne Teilchen-Produkt, keine Deckelung | 5,1 % | −19,0 % |
+| C ohne Teilchen-Produkt, mit Deckelung | 4,7 % | −25,7 % |
+
+**74 % des Rückgangs entfallen auf das Teilchen-Produkt, 26 % auf die
+Deckelung.** Die eigentliche Quelle der Strähnen war also der Umriss aus
+Fäden — rund hundert Saataufrufe je Bild für Boden, Rahmen und Gebäude —,
+nicht die Wirbelstärke. Die Deckelung bleibt richtig, weil zwei Bedeutungen
+in einer Zahl eine Falle sind; als Erklärung für das, was Peter gesehen hat,
+war sie zu drei Vierteln falsch.
+
+Die Lehre ist dieselbe wie bei der Einfrierung: Eine Rechnung, die stimmt,
+ist noch kein Beleg dafür, dass sie auch wirkt.
 
 ## Vier Befunde, die beim Bauen herausfielen
 
@@ -173,10 +233,7 @@ Gegenstand.
 ## Offen
 
 - Die letzten 12 % der V2-Messung (t=425 bis 480).
-- Die Haare vorher/nachher mit Zahlen statt mit Augenmaß. Die erste Messung
-  war unbrauchbar: Die Fläche läuft mit `preserveDrawingBuffer: false`, also
-  liest `readPixels` nach dem Darstellen überall null — auch mitten im
-  vollen Bild.
+- Die Länge des Ausklangs (29 Sekunden). Wird getrennt besprochen.
 - Die Länge des Ausklangs (29 Sekunden). Wird getrennt besprochen.
 - **K07 gegen die Kostenanzeige.** `AG-MOCK-COMPARE-001` hält fest: Bei
   unvollständiger Kostenbasis ist eine Kostenanzeige unerwünscht;
