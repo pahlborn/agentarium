@@ -158,14 +158,17 @@
      — da verschwand das NEUESTE, und das ist genau falsch herum.
      Die Maske oben lässt sie ins Nichts auslaufen statt an einer Kante
      abzureißen. */
+  /* Die Liste hängt unter dem Kopf und wächst nach UNTEN, höchstens vier
+     Einträge weit. Vorher lief sie von unten nach oben über den ganzen
+     Schirm und verschwand oben im Nichts — eindrucksvoll, aber sie nahm
+     dem Geschehen den Platz und war beim Vorbeisehen nicht zu fassen.
+     Vier Einträge sind das, was man im Vorbeigehen liest. */
   #agEcke{position:fixed; left:max(14px,env(safe-area-inset-left));
-    top:max(14px,env(safe-area-inset-top));
-    bottom:calc(max(14px,env(safe-area-inset-bottom)) + 54px);
+    top:calc(max(14px,env(safe-area-inset-top)) + 86px);
     z-index:4; pointer-events:none; width:min(42vw,330px);
-    display:flex; flex-direction:column; justify-content:flex-end;
-    overflow:hidden;
-    -webkit-mask-image:linear-gradient(to bottom, transparent 0, #000 140px);
-    mask-image:linear-gradient(to bottom, transparent 0, #000 140px);}
+    display:flex; flex-direction:column; justify-content:flex-start;
+    overflow:hidden; transition:opacity .45s ease;}
+  #agEcke.leise{opacity:0;}
   /* Im Hochformat ist die Liste schmaler, sonst bliebe für das Feld
      kein Band übrig. Dieselbe Zahl steht in der Schicht (`listeBreite`);
      gehen die beiden auseinander, rechnet das Feld mit einem Platz, den es
@@ -174,11 +177,9 @@
     #agEcke{width:min(34vw,240px);}
   }
   #agLaeuft{flex:0 0 auto;}
-  #agTitel{flex:0 0 auto; margin-top:11px; padding-top:10px;
-    border-top:1px solid rgba(150,170,200,.14);
-    font:400 10px/1 ui-monospace,SFMono-Regular,Menlo,monospace;
-    letter-spacing:.26em; text-transform:uppercase; color:#55637A;
-    transition:opacity .5s ease;}
+  /* Die Beschriftung „Was geschieht" ist jetzt ein Knopf unten rechts,
+     bei den anderen. Hier bleibt nichts stehen. */
+  #agTitel{display:none;}
   #agLaeuft{font:400 12px/1.45 -apple-system,system-ui,sans-serif;}
   .agAuf{margin-bottom:11px; transition:opacity .8s ease;}
   /* Ein offener Auftrag steht hell. Was geschehen ist, steht blass — die
@@ -208,10 +209,14 @@
      kann es nichts überlagern und von nichts überlagert werden — und es
      besteht aus Schrift statt aus Fäden, also kann dort auch kein
      Fadenwerk stehenbleiben. */
+  /* Das Produkt steht rechts oben — dort, wo sonst der Kopf stand. Es
+     ist das Ziel der ganzen Übung, also bekommt es die Ecke, die das Auge
+     nach dem Titel als zweites ansteuert. */
   #agWerkName{position:fixed; z-index:6; pointer-events:none;
-    bottom:calc(max(14px,env(safe-area-inset-bottom)) + 10px);
-    transform:translate(-50%,0); opacity:0; transition:opacity 1.2s ease;
-    width:min(42vw,420px); text-align:center; color:#AEBCD2;}
+    right:max(14px,env(safe-area-inset-right));
+    top:max(14px,env(safe-area-inset-top));
+    opacity:0; transition:opacity 1.2s ease;
+    width:min(30vw,300px); text-align:right; color:#AEBCD2;}
   #agWerkName.auf{opacity:.72;}
   #agWerkName.hell{opacity:1;}
   .wBalken{height:3px; border-radius:2px; overflow:hidden;
@@ -225,6 +230,15 @@
     overflow-wrap:anywhere;}
   .wOrt{margin-top:4px; font:400 8.5px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;
     letter-spacing:.24em; text-transform:uppercase; opacity:.6;}
+  /* Die Beschriftung einer Abnahme. Diese drei Zeilen hatte einer meiner
+     Schnitte beim Umbau mitgenommen — danach hatte das Element gar keine
+     Positionierung mehr und klebte in der linken oberen Ecke, über dem
+     Titel. Inline gesetzte `left`/`top` nützen nichts ohne `position`. */
+  .agWerk{position:absolute; transform:translate(-50%,0); width:270px;
+    text-align:center; animation:agWerkEin 8.6s ease forwards;}
+  .agWerk span{display:block; color:#DCE5F3;
+    font:400 13px/1.4 -apple-system,system-ui,sans-serif;
+    text-shadow:0 0 16px rgba(0,0,0,.9), 0 0 5px rgba(0,0,0,.9);}
   .agWerk u{display:block; text-decoration:none; font-size:9px;
     letter-spacing:.3em; text-transform:uppercase; opacity:.7;
     font-family:ui-monospace,SFMono-Regular,Menlo,monospace; margin-bottom:3px;}
@@ -241,10 +255,25 @@
   .agRuf span{color:#AEBCD2;}
   @keyframes agEin{0%{opacity:0;transform:translateY(5px);}
     7%{opacity:1;transform:none;} 62%{opacity:1;} 100%{opacity:0;}}
-  #agKopf{position:fixed; right:max(14px,env(safe-area-inset-right));
-    top:max(14px,env(safe-area-inset-top)); z-index:4; text-align:right;
+  /* Der Kopf steht links oben: Name, Projekt, Uhr. Klassisch, und genau
+     deshalb lesbar — man sucht einen Titel oben links. */
+  #agKopf{position:fixed; left:max(14px,env(safe-area-inset-left));
+    top:max(14px,env(safe-area-inset-top)); z-index:7; text-align:left;
+    width:min(42vw,330px);
     font:400 11px/1.7 ui-monospace,SFMono-Regular,Menlo,monospace;
     letter-spacing:.2em; text-transform:uppercase; color:#55637A;}
+  /* Das Leitmotiv, wie es in AG-MOCK-COMPARE-001 steht. Klein, einmal, und
+     es bleibt stehen — es ist der Name der Sache, keine Beschriftung. */
+  #agKopf em{display:block; font-style:normal; font-size:8.5px;
+    letter-spacing:.14em; text-transform:none; color:#4B5A72;
+    margin:1px 0 6px;}
+  /* Diese Regel muss NACH der Breitenangabe des Kopfes stehen. Beim ersten
+     Versuch stand sie weiter oben bei der Liste — gleiche Gewichtung, also
+     gewann die spätere Zeile, und der Kopf blieb im Hochformat 330 breit.
+     Nachgemessen: rechter Rand bei 344 statt 254. */
+  @media (orientation:portrait){
+    #agKopf{width:min(34vw,240px);}
+  }
   #agKopf b{display:block; color:#AFC0D8; font-weight:400; font-size:13px;
     letter-spacing:.16em;}
   #agUhr{color:#8295B0;}
@@ -255,8 +284,8 @@
     border-bottom:1px dotted rgba(150,170,200,.35); padding-bottom:1px;}
   /* Die Kurzbeschreibung auf Antippen — auf einem iPad gibt es kein
      Darüberfahren, also kein Tooltip, sondern ein Blatt. */
-  #agWas{position:fixed; right:max(14px,env(safe-area-inset-right));
-    top:calc(max(14px,env(safe-area-inset-top)) + 64px); z-index:8;
+  #agWas{position:fixed; left:max(14px,env(safe-area-inset-left));
+    top:calc(max(14px,env(safe-area-inset-top)) + 86px); z-index:9;
     width:min(70vw,330px); padding:15px 17px; border-radius:10px;
     background:rgba(8,12,19,.95); border:1px solid rgba(150,170,200,.16);
     color:#C2CEE2; font:400 12.5px/1.5 -apple-system,system-ui,sans-serif;
@@ -368,6 +397,17 @@
   .agMot em.luecke{opacity:.95; color:#C9A227;
     text-decoration:underline dotted; text-underline-offset:3px;}
   .agMot em.leer{opacity:.42; font-style:italic;}
+  .agKosten.nurZeit{opacity:.75;}
+  /* Der Status der Kostenbasis. Er steht unten in der Mitte des Bandes,
+     gut sichtbar, und er geht nicht weg — eine fehlende Anzeige liest man
+     als Fehler, eine beschriftete als Auskunft. */
+  .agBasis{position:absolute; left:50%; transform:translate(-50%,0);
+    bottom:max(14px,env(safe-area-inset-bottom));
+    font:400 9.5px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;
+    letter-spacing:.18em; text-transform:uppercase; white-space:nowrap;
+    color:#6B7689;}
+  .agBasis.luecke{color:#C9A227;
+    text-decoration:underline dotted; text-underline-offset:4px;}
   .agMot em s{display:block; text-decoration:none; opacity:.75;
     color:#C9A227; font-size:8.5px;}
   .agAuf i.agMotor{font-style:normal; color:#6B7689; font-size:9px;
@@ -408,18 +448,18 @@
 <canvas id="feld"></canvas>
 
 <div id="agRing"></div>
-<div id="agEcke"><div id="agLaeuft"></div><div id="agTitel">Was geschieht</div></div>
+<div id="agEcke"><div id="agLaeuft"></div></div>
 <div id="agRufe"></div>
 <div id="agSteck"></div>
 <div id="agKostenEbene"></div>
 <div id="agStand"></div>
 <div id="agWerk"></div>
 <div id="agWerkName"></div>
-<div id="agKopf"><b>Agentarium</b><i id="agProjekt"></i><span id="agUhr">00:00</span></div>
+<div id="agKopf"><b>Agentarium</b><em>See intelligence move. Powered by BALL</em><i id="agProjekt"></i><span id="agUhr">00:00</span></div>
 <div id="agWas"></div>
 <div id="agMotoren"></div>
 <div id="agTun"></div>
-<div id="agTasten"><button id="agMotor" type="button">LLM &amp; Kosten</button>
+<div id="agTasten"><button id="agListe" type="button" class="an">Was geschieht</button><button id="agMotor" type="button">LLM &amp; Kosten</button>
 <button id="agLeg" type="button">Gesetz</button>
 <button id="agHalt" type="button">Halt</button>
 <button id="agVorn" type="button">Von vorn</button></div>

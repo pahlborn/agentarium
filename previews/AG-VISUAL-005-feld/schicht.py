@@ -257,7 +257,11 @@ SKRIPT = """
                      : Math.min(W() * 0.42, 330);
   }
   function bandL() { return listeBreite() + 18; }
-  function bandR() { return W() - Math.min(W() * 0.20, 165); }
+  function bandR() {
+    /* Rechts stehen jetzt zwei Dinge übereinander: oben das Produkt, unten
+       der Stand der Arbeit. Beide brauchen dieselbe Spalte. */
+    return W() - Math.min(W() * 0.26, 235);
+  }
   function ringR() {
     var breit = bandR() - bandL();
     return Math.max(56, Math.min(breit / 2.34, (H() * 0.44 - 48) / 0.92));
@@ -1159,9 +1163,18 @@ SKRIPT = """
        des Teams: „Fehlende Werte sind nicht null Tokens." */
     if (L) {
       var V0 = verbrauch[name] || (verbrauch[name] =
-                 { kosten: 0, aus: 0, n: 0, ohne: 0, quelle: '' });
+                 { kosten: 0, aus: 0, n: 0, ohne: 0, zeit: 0, fertig: 0,
+                   quelle: '' });
       if (V0.ohne == null) V0.ohne = 0;
       if (!L.kosten) V0.ohne++;
+      /* WIE LANGE HAT ES GEDAUERT. Kein neues Datenfeld: Die Spanne liegt
+         zwischen dem Ereignis, das den Auftrag vergibt, und dem, mit dem
+         derselbe Agent liefert — beides `t`-Werte. `L.beginn` hielt den
+         Anfang schon fest, weil die Anzeige „arbeitet · 00:14" davon lebt;
+         bisher wurde die Zahl beim Erledigen weggeworfen. */
+      L.dauer = Math.max(0, zeit - (L.beginn || zeit));
+      V0.zeit = (V0.zeit || 0) + L.dauer;
+      V0.fertig = (V0.fertig || 0) + 1;
     }
     /* Erledigt heißt: jetzt steht fest, was es gekostet hat. Die Zahl
        erscheint am Platz des Agenten und verebbt — wie alles hier. */
@@ -1176,13 +1189,37 @@ SKRIPT = """
       e2.style.left = o2[0] + 'px';
       e2.style.top = (o2[1] - 17) + 'px';
       e2.style.color = hex(A2.farbe);
-      e2.textContent = (L.tokens ? (L.tokens.aus > 999
+      e2.textContent = mmss(L.dauer) + ' · ' +
+        (L.tokens ? (L.tokens.aus > 999
           ? (L.tokens.aus / 1000).toFixed(1) + 'k' : L.tokens.aus) + ' tok · ' : '') +
         'USD ' + L.kosten.toFixed(4);
       document.getElementById('agKostenEbene').appendChild(e2);
       setTimeout(function () { if (e2.parentNode) e2.remove(); }, 16000);
     }
+    else if (L) {
+      /* Ohne Kostenangabe trotzdem die Dauer. Sie hängt an keinem
+         übermittelten Wert, sondern an zwei Zeitstempeln — die gibt es
+         immer, wenn es das Ereignis gibt. */
+      var A3 = nachName[name], o3 = heimat(A3);
+      var e3 = document.createElement('div');
+      e3.className = 'agKosten nurZeit';
+      e3.style.left = o3[0] + 'px';
+      e3.style.top = (o3[1] - 17) + 'px';
+      e3.style.color = hex(A3.farbe);
+      e3.textContent = mmss(L.dauer) + ' · keine Kostenangabe';
+      document.getElementById('agKostenEbene').appendChild(e3);
+      setTimeout(function () { if (e3.parentNode) e3.remove(); }, 16000);
+    }
     if (!S.liste.length) arbeitAus(name);
+  }
+
+  /* Sekunden als mm:ss, aber unter einer Minute nur als Sekunden — „00:14"
+     liest sich bei kurzen Aufträgen wie eine Uhrzeit, „14 s" wie eine
+     Dauer. */
+  function mmss(sek) {
+    sek = Math.round(sek || 0);
+    if (sek < 60) return sek + ' s';
+    return Math.floor(sek / 60) + ':' + ('0' + (sek % 60)).slice(-2) + ' min';
   }
   var MOTOR = { chatgpt: 'ChatGPT', claude: 'Claude Code', mensch: 'Mensch' };
   /* Nicht wegschalten, sondern verklingen lassen. Ein Ring, der mitten im
@@ -1815,7 +1852,6 @@ SKRIPT = """
 
   var uhr  = document.getElementById('agUhr'),
       ring = document.getElementById('agRing'),
-      titelEl = document.getElementById('agTitel'),
       laeuftEl = document.getElementById('agLaeuft'),
       rufeEl   = document.getElementById('agRufe');
 
@@ -1871,10 +1907,10 @@ SKRIPT = """
          '<br><span>' + E.text + '</span>');
     laeuftEl.appendChild(e);
     strom.push(e);
-    /* Sechzehn reichen, um den Schirm von unten bis über den Rand zu
-       füllen; was darüber hinaus ist, sieht ohnehin niemand mehr. */
-    while (strom.length > 16) { var w = strom.shift(); if (w.parentNode) w.remove(); }
-    titelEl.style.opacity = 1;
+    /* Vier. Vorher waren es sechzehn, weil die Liste über den ganzen
+       Schirm lief; jetzt hängt sie unter dem Kopf und soll dort aufhören,
+       wo man im Vorbeigehen noch mitliest. Der älteste fällt oben weg. */
+    while (strom.length > 4) { var w = strom.shift(); if (w.parentNode) w.remove(); }
   }
 
   /* Wenn ein Auftrag erledigt ist, hört seine Zeile auf, hell zu sein. */
@@ -2144,9 +2180,22 @@ SKRIPT = """
               'USD ' + V.kosten.toFixed(4) +
               (V.aus ? ' · ' + (V.aus > 999 ? (V.aus / 1000).toFixed(1) + 'k'
                                             : V.aus) + ' tok' : '') +
-              (V.ohne ? '<s>+ ' + V.ohne + ' ohne Angabe</s>' : '') + '</em>';
+              '</em>' +
+              /* Die Zeit auf eine EIGENE Zeile. Zusammen in einer Zeile war
+                 die Angabe so breit, dass sich die Schilder benachbarter
+                 Agenten überlappten — im Bild nachgesehen, bei einem Radius
+                 von 261 Pixeln liegen die Plätze rund 200 auseinander, die
+                 Zeile war 330 breit. */
+              '<em>' + (V.fertig ? mmss(V.zeit) + ' in ' + V.fertig +
+                          (V.fertig === 1 ? ' Auftrag' : ' Aufträgen') : '') +
+              (V.ohne ? ' · ' + V.ohne + ' ohne Kostenangabe' : '') + '</em>';
       } else if (V && V.ohne) {
-        zus = '<em class="luecke">keine Angabe</em>';
+        /* Gearbeitet, aber nichts übermittelt. Die ZEIT gibt es trotzdem —
+           sie hängt an Zeitstempeln, nicht an einer Meldung. */
+        zus = '<em class="luecke">keine Kostenangabe' +
+              (V.fertig ? ' · ' + mmss(V.zeit) + ' in ' + V.fertig +
+                          (V.fertig === 1 ? ' Auftrag' : ' Aufträgen') : '') +
+              '</em>';
       } else {
         zus = '<em class="leer">noch kein Verbrauch</em>';
       }
@@ -2154,6 +2203,38 @@ SKRIPT = """
            '" style="left:' + o[0] + 'px;top:' + (o[1] + 18) + 'px;color:' +
            hex(A.farbe) + '">' + txt + zus + '</div>';
     });
+    /* DER STATUS DER KOSTENBASIS, und er verschwindet nicht.
+
+       K07 aus AG-MOCK-COMPARE-001 verlangt, eine unvollständige Basis nicht
+       wie eine vollständige aussehen zu lassen. Peter verlangt, sie
+       trotzdem zu zeigen: „Wir dürfen nur die Anzeige nicht verschwinden
+       lassen, sonst denkt man eher an einen Fehler."
+
+       Also bleibt sie und sagt, was sie ist — wörtlich die Formulierung aus
+       AG-COST-UI-001, mit der Zahl dazu. Gezählt wird aus den Daten des
+       laufenden Stücks, nicht geschätzt. */
+    var belegt = 0, gesamt = 0, laufen = 0;
+    for (var vn in verbrauch) {
+      belegt += verbrauch[vn].n || 0;
+      gesamt += (verbrauch[vn].n || 0) + (verbrauch[vn].ohne || 0);
+    }
+    /* Laufende Aufträge haben noch NICHTS gemeldet. Sie zählen deshalb
+       gegen die Vollständigkeit, nicht erst, wenn sie ohne Angabe enden.
+       Im ersten Versuch stand mitten im Stück „Kosten vollständig erfasst",
+       während vier Agenten noch arbeiteten — also genau die Zusicherung,
+       gegen die K07 geschrieben ist, nur eine Stunde zu früh. */
+    for (var an in arbeit)
+      if (!arbeit[an].aus) laufen += arbeit[an].liste.length;
+
+    var ganz = gesamt > 0 && belegt === gesamt && laufen === 0;
+    h += '<div class="agBasis' + (ganz ? '' : ' luecke') + '">' +
+         (gesamt === 0 && !laufen ? 'noch keine erledigten Aufträge'
+          : ganz ? 'Kosten vollständig erfasst · ' + belegt + ' Aufträge'
+          : 'Kosten noch nicht vollständig erfasst · ' + belegt + ' von ' +
+            gesamt + ' erledigt belegt' +
+            (laufen ? ' · ' + laufen + ' noch offen' : '')) +
+         '</div>';
+
     if (motorEl.__h !== h) { motorEl.__h = h; motorEl.innerHTML = h; }
   }
 
@@ -2268,6 +2349,20 @@ SKRIPT = """
     var h = document.getElementById('hinweis');
     if (h) h.style.opacity = '0';
   }, 12000);
+
+  /* „Was geschieht" ist ein Knopf wie die anderen: Er schaltet die Liste
+     ab und wieder an. Angeschaltet ist der Grundzustand — wer das Feld
+     nackt sehen will, schaltet sie weg. */
+  (function () {
+    var k = document.getElementById('agListe'),
+        ecke = document.getElementById('agEcke'), an = true;
+    k.addEventListener('click', function () {
+      tastenZeigen();
+      an = !an;
+      k.classList.toggle('an', an);
+      ecke.classList.toggle('leise', !an);
+    });
+  })();
 
   document.getElementById('agVorn').addEventListener('click', function () {
     zurueckAufAnfang();
