@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "agentarium.befehl.v2",
+  "title": "Befehlskanal V2",
+  "description": "Getrennt vom Ereignisstrom. Der Strom fuehrt keine Befehle aus. Befehle brauchen das Recht command ZUSAETZLICH zu read sowie die bestehenden fachlichen Freigaben; der Server setzt das durch. Eine Empfangsbestaetigung ist KEIN Ausfuehrungsnachweis.",
+  "oneOf": [{ "$ref": "#/$defs/anfrage" }, { "$ref": "#/$defs/antwort" }],
+  "$defs": {
+    "anfrage": {
+      "type": "object",
+      "properties": {
+        "schema": { "const": "agentarium.befehl.v2" },
+        "richtung": { "const": "anfrage" },
+        "command_id": { "type": "string", "minLength": 1, "description": "Eindeutig. Wiederholtes Senden derselben command_id fuehrt NICHT zu doppelter Ausfuehrung." },
+        "aktion": { "type": "string", "minLength": 1 },
+        "project_id": { "type": "string" },
+        "run_id": { "type": "string" },
+        "task_id": { "type": ["string", "null"] },
+        "erwartete_revision": { "type": ["integer", "null"], "minimum": 1, "description": "Erkennt veraltete Befehle: weicht die aktuelle Revision ab, wird abgelehnt." },
+        "gesendet": { "type": "string" }
+      },
+      "required": ["schema", "richtung", "command_id", "aktion", "project_id", "run_id", "gesendet"],
+      "additionalProperties": false
+    },
+    "antwort": {
+      "type": "object",
+      "properties": {
+        "schema": { "const": "agentarium.befehl.v2" },
+        "richtung": { "const": "antwort" },
+        "command_id": { "type": "string" },
+        "stufe": {
+          "enum": ["empfangen", "angenommen", "abgelehnt", "ausgefuehrt"],
+          "description": "Vier getrennte Rueckmeldungen. empfangen beweist keine Ausfuehrung."
+        },
+        "grund": { "type": ["string", "null"] },
+        "fehlercode": {
+          "enum": ["recht_fehlt", "zustand_unzulaessig", "revision_veraltet",
+                   "doppelt_ignoriert", "unbekannte_aktion", null]
+        },
+        "nebenwirkung": {
+          "type": "boolean",
+          "description": "Bei abgelehnt MUSS false stehen: ein unerlaubter Befehl wird ohne fachliche Nebenwirkung abgelehnt."
+        },
+        "folge_ereignisse": { "type": "array", "items": { "type": "string" }, "description": "IDs der Ereignisse, die dieser Befehl ausgeloest hat. Verknuepft Befehl und Wirkung." },
+        "gesendet": { "type": "string" }
+      },
+      "required": ["schema", "richtung", "command_id", "stufe", "nebenwirkung", "gesendet"],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": { "properties": { "stufe": { "const": "abgelehnt" } }, "required": ["stufe"] },
+          "then": { "properties": { "nebenwirkung": { "const": false } }, "required": ["fehlercode", "grund"] }
+        },
+        {
+          "if": { "properties": { "stufe": { "const": "ausgefuehrt" } }, "required": ["stufe"] },
+          "then": { "required": ["folge_ereignisse"] }
+        }
+      ]
+    }
+  }
+}

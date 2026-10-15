@@ -1,0 +1,62 @@
+{
+  "fall": "02",
+  "titel": "Lebenszeichen im Takt, danach Veraltet-Zustand",
+  "prueft": [
+    "§5 Lebenszeichen"
+  ],
+  "erwartung": [
+    {
+      "regel": "R-03",
+      "soll": "Kein Lebenszeichen traegt stream_sequence oder eine Fachereignis-ID."
+    },
+    {
+      "regel": "R-04",
+      "soll": "Nach 20 s ohne Empfang gilt die Ansicht als veraltet. Letztes Lebenszeichen 14:05:10, Pruefzeitpunkt 14:05:31 -> 21 s -> veraltet."
+    },
+    {
+      "regel": "R-04b",
+      "soll": "Beim Pruefzeitpunkt 14:05:28 (18 s) ist die Ansicht NICHT veraltet. Ruhe ist nicht Abriss."
+    }
+  ],
+  "daten": {
+    "takt_sekunden": 5,
+    "veraltet_nach_sekunden": 20,
+    "lebenszeichen": [
+      {
+        "schema": "agentarium.strom.v2",
+        "stream": "lauf",
+        "stream_id": "AG-NEU/AG-NEU-R1",
+        "kind": "heartbeat",
+        "sent_at": "2026-10-15T14:05:00.000Z",
+        "last_sequence": 414
+      },
+      {
+        "schema": "agentarium.strom.v2",
+        "stream": "lauf",
+        "stream_id": "AG-NEU/AG-NEU-R1",
+        "kind": "heartbeat",
+        "sent_at": "2026-10-15T14:05:05.000Z",
+        "last_sequence": 414
+      },
+      {
+        "schema": "agentarium.strom.v2",
+        "stream": "lauf",
+        "stream_id": "AG-NEU/AG-NEU-R1",
+        "kind": "heartbeat",
+        "sent_at": "2026-10-15T14:05:10.000Z",
+        "last_sequence": 414
+      }
+    ],
+    "pruefzeitpunkte": [
+      {
+        "zeit": "2026-10-15T14:05:28.000Z",
+        "soll": "frisch"
+      },
+      {
+        "zeit": "2026-10-15T14:05:31.000Z",
+        "soll": "veraltet"
+      }
+    ],
+    "anzeige_veraltet": "Verbindung seit 21 s ohne Lebenszeichen"
+  }
+}

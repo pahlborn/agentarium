@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "agentarium.archivmanifest.v2",
+  "title": "Archivmanifest V2",
+  "description": "Archiviert und wiedergegeben wird ein LAUF, nicht ein Projekt. Die Wiedergabe fuehrt keine Agenten, GitHub-Aktionen, API-Aufrufe oder alten Befehle erneut aus und erzeugt keine neuen fachlichen Projektereignisse.",
+  "type": "object",
+  "properties": {
+    "schema": { "const": "agentarium.archivmanifest.v2" },
+    "project_id": { "type": "string" },
+    "run_id": { "type": "string" },
+    "archiv_version": { "type": "string", "description": "Unveraenderlich." },
+    "schema_fassung": { "type": "string" },
+    "zustand": { "enum": ["abgeschlossen", "abgebrochen", "fehlgeschlagen"] },
+    "vollstaendig": { "type": "boolean", "description": "false = ausdruecklich unvollstaendiger Lauf." },
+    "herkunft": { "type": "object" },
+    "quellen": { "type": "array", "items": { "type": "string" } },
+    "abdeckung": {
+      "type": "object",
+      "properties": {
+        "ordering": { "type": "string" },
+        "timestamps": { "type": "string" },
+        "luecken": { "type": "array", "items": { "type": "string" } }
+      },
+      "required": ["ordering", "timestamps", "luecken"],
+      "additionalProperties": false
+    },
+    "zeitachse": {
+      "enum": ["complete", "partial", "none"],
+      "description": "ABLEITUNGSREGEL, objektiv und nachrechenbar: complete = jedes Ereignis innerhalb der angegebenen Abdeckung hat ein occurred_at ungleich null. partial = mindestens ein benoetigtes occurred_at fehlt, aber nicht alle. none = kein Ereignis hat ein occurred_at, oder die belegte Reihenfolge erlaubt keine Zeitachse. Bei partial und none wechselt die Darstellung in eine SICHTBAR BEZEICHNETE Schrittfolge; Dauer, Parallelitaet und aktive Arbeitszeit werden nicht behauptet. Auch bei complete belegen Zeitpunkte verstrichene Zeit, nicht aktive Arbeitsdauer."
+    },
+    "wiedergabe": {
+      "type": "object",
+      "properties": {
+        "nebenwirkungsfrei": { "const": true },
+        "zeitsprung": { "type": "boolean" },
+        "einzelschritt": { "type": "boolean" },
+        "deterministisch": { "const": true }
+      },
+      "required": ["nebenwirkungsfrei", "zeitsprung", "einzelschritt", "deterministisch"],
+      "additionalProperties": false
+    },
+    "kosten": { "type": "object" },
+    "ereignisse": { "type": "array", "items": { "type": "object" } }
+  },
+  "required": ["schema", "project_id", "run_id", "archiv_version", "schema_fassung",
+               "zustand", "vollstaendig", "herkunft", "abdeckung", "zeitachse",
+               "wiedergabe", "kosten", "ereignisse"],
+  "additionalProperties": false
+}

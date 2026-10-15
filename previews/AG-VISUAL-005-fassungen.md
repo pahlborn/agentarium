@@ -57,6 +57,14 @@ Zeile unten übereinstimmen. Das Verfahren ist aus
 | Prüfauftrag (maschinenlesbar) | `handoffs/AG-VISUAL-005-review-request-v1.json` | Auftragsversion 1 | 2026-10-15T14:12:55Z | `fb98f597c1f5e49bc97fc630aef56723fb6ca86b` |
 | Prüfung der Atlas-Anweisung | `governance/AG-VISUAL-005-INTERFACE-review-v1.md` | Prüfversion 1 | 2026-10-15T18:47:30Z | `994cb2f89ef2c47418d6b232e8696305e5ee46ae` |
 | Nachricht an Atlas | `handoffs/AG-VISUAL-005-INTERFACE-reply-v1.md` | Nachrichtenversion 1 | 2026-10-15T18:47:30Z | `56fed8bda3768d42043be28e7f1f94e91d6d781d` |
+| Schnittstelle V2 | `specifications/AG-VISUAL-005-schnittstelle-v2.md` | Schnittstellenversion 2 | 2026-10-15T19:24:00Z | `8c86e3c6207030adcf0f1a2bb21194e3c3820f8b` |
+| Schema Strom | `specifications/AG-VISUAL-005-schemas-v2/strom.schema.json` | agentarium.strom.v2 | 2026-10-15T19:24:00Z | `7814828bf35ae60ab1ea4429f8e5502fd1f2ab85` |
+| Schema Schnappschuss | `specifications/AG-VISUAL-005-schemas-v2/schnappschuss.schema.json` | agentarium.schnappschuss.v2 | 2026-10-15T19:24:00Z | `d5bcda382664adba0940ac2028b9d35ed1c5bd62` |
+| Schema Archivmanifest | `specifications/AG-VISUAL-005-schemas-v2/archivmanifest.schema.json` | agentarium.archivmanifest.v2 | 2026-10-15T19:24:00Z | `98fe469ca4e83176fc2a11f6a6532b92cea5f3a0` |
+| Schema Befehl | `specifications/AG-VISUAL-005-schemas-v2/befehl.schema.json` | agentarium.befehl.v2 | 2026-10-15T19:24:00Z | `79ce90a4c7b7f0e3f1cb10dfcdd602309bdcb223` |
+| Prueflauf | `tests/AG-VISUAL-005-vertrag-v2-pruefen.py` | V2 | 2026-10-15T19:24:00Z | `24e6620542ad4866e71865282b1dc95e67eac18c` |
+| Gegenprobe | `tests/AG-VISUAL-005-vertrag-v2-gegenprobe.py` | V2 | 2026-10-15T19:24:00Z | `0f5ea4ddccc72054d854079f98401b8dedc8d827` |
+| Beispieldaten 01–09 | `fixtures/AG-VISUAL-005-beispiele-v2/` | V2 | 2026-10-15T19:24:00Z | je Datei in Vertrag V2 §11 |
 
 Keines dieser Dokumente hat einen Vorgänger. Alle Papiere sind Fassung 1;
 das Feld ist die daraus gebaute Fassung 37.
@@ -96,6 +104,8 @@ verschwunden ist. Eine Fassung bekommt eine Nummer, wenn sich eine
 | 2026-10-15T14:12:55Z | alle vier | 1 | Zeitstempel von Tagesdatum auf ISO 8601 mit Uhrzeit umgestellt. **Peters Befund:** an einem Tag können mehrere Fassungen entstehen. Keine Nummernerhöhung, weil sich keine Aussage geändert hat — nur die Blobs, und die stehen oben neu. |
 | 2026-10-15T18:47:30Z | Prüfung der Atlas-Anweisung | 1 | Atlas hat gegen `a8d483a9` geprüft und `AG-VISUAL-005-INTERFACE` V1 zurückgegeben. Prüfung dieser Anweisung: zwei Befunde, vier Vorschläge, Rücknahme von sieben erfundenen Feldnamen. |
 | 2026-10-15T18:47:30Z | Nachricht an Atlas | 1 | Kopierbare Kurzfassung der Prüfung zum Weitergeben durch Peter. |
+| 2026-10-15T19:24:00Z | Schnittstelle | **2** | Vertrag V2 nach Atlas' Korrekturauftrag `AG-VISUAL-005-INTERFACE-REREVIEW`. Zehn verbindliche Korrekturen umgesetzt: Katalogstrom getrennt, Projektanlage definiert, Live/Archiv aus dem Laufzustand (neun Zustände), SSE-Anmeldung ohne URL-Ticket, Keepalive und Herzschlag getrennt, `zeitachse` mit Ableitungsregel, Feldtabelle dreispaltig, `read`/`command` serverseitig, Kostenfeld sichtbar mit Statussatz. Dazu vier Schemas, neun Abnahmefälle, Prüflauf und Gegenprobe. |
+| 2026-10-15T19:24:00Z | Prüflauf, Gegenprobe | V2 | Antwort auf Sentinels `FAIL_TESTABILITY_ONLY`: 38 Formprüfungen, 59 Regelprüfungen, 21 von 21 absichtlichen Verletzungen erkannt. Abhängigkeitsfrei, weil zur Laufzeit nichts von außen geholt wird. |
 | 2026-10-15T18:47:30Z | Konzept, Schnittstelle | 1 | **Verlaufen, nicht abgelöst.** Peter: „Wir müssen das Konzept von vorne beginnen, wir haben uns schon verlaufen." Beide Fassungen bleiben liegen und sind weiter die Fassungen, auf die Atlas' Prüfung zeigt. Die Nachfolger entstehen nach `agentarium.observed-worklog.v1` und Atlas' Anweisung, nicht aus diesen Papieren heraus. |
 
 ---
@@ -111,6 +121,15 @@ Sie werden trotzdem **nicht gelöscht und nicht überschrieben**, und zwar aus
 einem harten Grund: Atlas' Prüfung zeigt mit Blob-Hash auf genau diese
 beiden Dateien. Verschwinden sie, zeigt seine Prüfung ins Leere. Eine
 verlaufene Fassung ist Teil der Geschichte, kein Versehen.
+
+Konzept 1 wartet noch auf seinen Nachfolger. Die Schnittstelle hat ihn:
+Fassung 2 steht oben.
+
+**Peters Kostenentscheidung vom 15.10.2026, 21:01:52 Europe/Berlin** gilt ab
+Schnittstelle 2 und ersetzt die frühere Ausblendung: Das Kostenfeld bleibt
+sichtbar und zeigt bei unvollständiger Erfassung ausschließlich „Kosten
+nicht vollständig ermittelbar." — keine Beträge, keine Teilsummen, keine
+Null-Ersatzwerte.
 
 Das Vokabular der Nachfolger ist `agentarium.observed-worklog.v1`
 (`governance/AG-REPORT-001-minimal-worklog-v1.md`,
