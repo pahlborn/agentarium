@@ -214,7 +214,28 @@ SKRIPT = """
 
      Der Bauzeitpunkt kommt beim Bauen aus der Uhr. Von Hand gepflegte
      Datumsangaben sind nach der zweiten Änderung falsch. */
-  var FASSUNG = '36', GEBAUT = '__GEBAUT__';
+  var FASSUNG = '37', GEBAUT = '__GEBAUT__';
+
+  /* DIE BETRIEBSART. Sie kommt aus den Daten; fehlt sie, gilt `demo`.
+     Alles, was sich zwischen Prototyp und Produktivbetrieb unterscheidet,
+     hängt an dieser einen Stelle — Selbststart, Neubeginn, welche Knöpfe
+     es gibt, was die Uhr zeigt. */
+  var MODUS = 'demo';
+  var MODI = {
+    demo:   { wort: 'Demo',   start: 1, neu: 1, vorn: 1,
+              was: 'Spielt ein aufgezeichnetes Stück, beginnt danach von vorn.' },
+    archiv: { wort: 'Archiv', start: 0, neu: 0, vorn: 1,
+              was: 'Rückblick auf eine Aufzeichnung. Startet auf Knopfdruck, läuft einmal durch.' },
+    live:   { wort: 'Live',   start: 0, neu: 0, vorn: 0,
+              was: 'Wartet auf einen Strom von außen. Kein Selbststart, kein Neubeginn.' }
+  };
+  function modus() { return MODI[MODUS] || MODI.demo; }
+
+  /* Ist ein Strom angeschlossen? Heute nie — es gibt noch keine
+     Schnittstelle. Die Zeile steht trotzdem hier, weil alles, was von ihr
+     abhängt, schon jetzt richtig sein soll: Ein Knopf, der nichts tun kann,
+     wird nicht angezeigt. */
+  var verbunden = false;
 
   var STUECKE = __STUECKE__;
   var stueckNr = 0;
@@ -1648,6 +1669,21 @@ SKRIPT = """
   }
   function stoppWeg() { stoppEl.classList.remove('auf'); stoppEl.__wer = null; }
 
+  /* Im Live-Betrieb ohne angeschlossenen Strom sagt das Feld genau das.
+     Ein leeres Bild, das aussieht wie ein ruhiges Projekt, wäre die
+     gefährlichste Anzeige von allen — siehe Funktionsmatrix 2a.3. */
+  function liveHinweis() {
+    var e = document.getElementById('agLive');
+    if (!e) return;
+    var an = (MODUS === 'live');
+    e.classList.toggle('auf', an);
+    if (an) e.innerHTML =
+      '<b>Live — keine Verbindung</b>' +
+      '<span>Es ist kein Strom angeschlossen. Dieses Feld zeigt nicht ein ' +
+      'ruhiges Projekt, sondern gar keines. Sobald eine Schnittstelle ' +
+      'liefert, läuft es an; einen Selbststart gibt es hier nicht.</span>';
+  }
+
   function tunZeigen(dt) {
     tunStill += dt;
     var h = '', n;
@@ -2105,6 +2141,8 @@ SKRIPT = """
   }
 
   /* -------------------------------------------------------- Das Stück */
+  /* `laeuft` beginnt nur im Demo-Modus auf wahr. In allen anderen wartet
+     das Stück — im Archiv auf den Knopf, im Live-Betrieb auf Daten. */
   var zeit = 0, naechstes = 0, laeuft = true, tempo = 1;
 
   function schritt(dt) {
@@ -2176,6 +2214,10 @@ SKRIPT = """
              sie liegt beim Auftraggeber. Das Bild endet also mit dreierlei:
              dunkles Feld, Ball bei Peter, leuchtendes Produkt. */
 
+          /* Von vorn beginnt nur, wer von vorn beginnen darf. Im Archiv
+             und im Live-Betrieb bleibt das Bild stehen, wie es ist — dort
+             gäbe es nichts, wohin zurück. */
+          if (ausklang <= 0 && !modus().neu) { ausklang = 0.0001; laeuft = false; }
           if (ausklang <= 0) {                   /* von vorn */
             ausklang = 0; zeit = 0; naechstes = 0; visionen = 0;
             ausklangStufe = 0; rufbereit = 0;
@@ -2198,6 +2240,8 @@ SKRIPT = """
     erwartungSchritt(dt);
     produktSchritt(dt);
     stopperSchritt(dt);
+    liveHinweis();
+    knoepfeSetzen();
     stoppZeigen();
     tunZeigen(dt);
     standZeigen();
@@ -2242,6 +2286,40 @@ SKRIPT = """
   var projektEl = document.getElementById('agProjekt'),
       wasEl = document.getElementById('agWas');
 
+  /* DIE KNÖPFE WERDEN AUS DEM MODUS ABGELEITET. Von Hand gesetzt gäbe es
+     früher oder später eine Live-Ansicht mit einem „Von vorn"-Knopf, der
+     nichts tut — und das ist schlimmer als kein Knopf, weil es Vertrauen
+     kostet. */
+  function knoepfeSetzen() {
+    var M = modus();
+    var v = document.getElementById('agVorn');
+    if (v) v.style.display = M.vorn ? '' : 'none';
+    /* „Halt" braucht etwas, das läuft. Im Live-Betrieb ohne Verbindung
+       gibt es das nicht, also gibt es den Knopf auch nicht — dieselbe
+       Regel wie bei „Von vorn". Ein Knopf, der nichts tut, kostet mehr als
+       er nützt. */
+    var hl = document.getElementById('agHalt');
+    if (hl) {
+      var kann = (MODUS !== 'live') || verbunden;
+      hl.style.display = kann ? '' : 'none';
+      hl.textContent = laeuft ? (MODUS === 'live' ? 'Anhalten' : 'Halt')
+                              : (MODUS === 'archiv' && zeit === 0 ? 'Starten'
+                                                                  : 'Weiter');
+    }
+    document.body.setAttribute('data-modus', MODUS);
+  }
+
+  /* Umschalten. Der Modus gehört zum PROJEKT, also wird er dort gewählt,
+     wo man das Projekt wählt. */
+  function modusSetzen(m) {
+    if (!MODI[m]) return;
+    MODUS = m;
+    zurueckAufAnfang();
+    laeuft = !!modus().start;
+    kopfSetzen();
+    knoepfeSetzen();
+  }
+
   function kopfSetzen() {
     projektEl.textContent = STUECK.projekt || '';
     /* Beim Zeigen auf den Namen steht da, was BALL heißt und welche
@@ -2266,6 +2344,14 @@ SKRIPT = """
     if (STUECK.titel && STUECK.titel !== STUECK.projekt)
       h += '<p class="wTitel">' + STUECK.titel + '</p>';
     if (STUECK.beschreibung) h += '<p>' + STUECK.beschreibung + '</p>';
+
+    h += '<ul class="wModi">';
+    ['demo', 'archiv', 'live'].forEach(function (m) {
+      h += '<li' + (m === MODUS ? ' class="hier"' : '') + ' data-modus="' + m +
+           '">' + MODI[m].wort + '</li>';
+    });
+    h += '</ul><p class="wModusWas">' + modus().was + '</p>';
+
     wasEl.innerHTML = h;
     projektEl.classList.add('fragbar');
   }
@@ -2275,6 +2361,11 @@ SKRIPT = """
     wasEl.classList.toggle('auf');
   });
   wasEl.addEventListener('click', function (e) {
+    /* Die Betriebsart zuerst: Sie steht im selben Blatt wie die Projekte,
+       und ein Klick darauf soll das Blatt nicht schließen. */
+    var lm = e.target.closest ? e.target.closest('li[data-modus]') : null;
+    if (lm) { modusSetzen(lm.getAttribute('data-modus'));
+              wasEl.classList.add('auf'); return; }
     var li = e.target.closest ? e.target.closest('li[data-nr]') : null;
     if (li) {
       var nr = +li.getAttribute('data-nr');
@@ -2425,6 +2516,15 @@ SKRIPT = """
     return 'rgb(' + r.map(function (v) { return Math.round(90 + v * 165); }).join(',') + ')';
   }
   function uhrZeigen() {
+    /* Im Live-Betrieb läuft die Uhr der Wirklichkeit, ohne Deckel. In den
+       anderen Betriebsarten die Zeit des Stücks, und die endet mit ihm. */
+    if (MODUS === 'live') {
+      var d = new Date();
+      uhr.textContent = ('0' + d.getHours()).slice(-2) + ':' +
+                        ('0' + d.getMinutes()).slice(-2) + ':' +
+                        ('0' + d.getSeconds()).slice(-2);
+      return;
+    }
     var s = Math.floor(Math.min(zeit, STUECK.dauer));
     uhr.textContent = ('0' + Math.floor(s / 60)).slice(-2) + ':' + ('0' + (s % 60)).slice(-2);
   }
@@ -2803,7 +2903,7 @@ SKRIPT = """
 
   document.getElementById('agHalt').addEventListener('click', function () {
     laeuft = !laeuft;
-    this.textContent = laeuft ? 'Halt' : 'Weiter';
+    knoepfeSetzen();     /* die Aufschrift haengt am Modus, nicht am Knopf */
   });
   function zurueckAufAnfang() {
     zeit = 0; naechstes = 0; ausklang = 0; baelle.length = 0;
@@ -2825,7 +2925,10 @@ SKRIPT = """
     if (window.__flaecheLeeren) window.__flaecheLeeren();
   }
 
+  if (STUECK.modus && MODI[STUECK.modus]) MODUS = STUECK.modus;
+  laeuft = !!modus().start;
   kopfSetzen();
+  knoepfeSetzen();
 
   /* Der Hinweis „Du darfst mitrühren" stammt aus Resonanz, wo er den
      ganzen Zweck benennt. Hier ist das Mitrühren eine Zugabe, nicht die

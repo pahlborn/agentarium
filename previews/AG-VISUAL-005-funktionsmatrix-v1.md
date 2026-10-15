@@ -77,6 +77,19 @@ eingefrorenes Bild". Wer das verwechselt, wartet auf etwas, das nicht kommt.
 | Uhr | Uhrzeit, laufend | verstrichene Zeit im Stück |
 | Datenfeld | `modus: "live"` | `modus: "archiv"`, `aufgezeichnet` |
 
+> **Gebaut, Fassung 37.** Drei Betriebsarten stehen zur Wahl, im
+> Projektblatt (Projektname antippen). Nachgemessen:
+>
+> | | Zeit nach 2,5 s | Von vorn | Halt | Uhr |
+> |---|---|---|---|---|
+> | Demo | läuft (1,1 s) | sichtbar | „Halt" | Stückzeit |
+> | Archiv | 0, wartet | sichtbar | „Starten" | Stückzeit |
+> | Live | 0, wartet | **verborgen** | **verborgen** | 12:02:08 |
+>
+> Im Live-Betrieb ohne angeschlossenen Strom steht der Hinweis mitten im
+> Bild: „Es ist kein Strom angeschlossen. Dieses Feld zeigt nicht ein
+> ruhiges Projekt, sondern gar keines."
+
 ### 2. Die Bedienung folgt dem Modus, nicht umgekehrt
 
 | | Live | Archiv |
