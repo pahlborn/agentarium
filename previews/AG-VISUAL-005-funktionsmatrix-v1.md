@@ -1,4 +1,12 @@
-# AG-VISUAL-005 – Funktionsmatrix
+# AGENTARIUM – Funktionsmatrix des Feldes
+
+AG-VISUAL-005, Matrixversion 1 · 2026-10-15
+Projekt: pahlborn/agentarium · Branch: claude/agentarium-visualisierung
+Status: Entwurf zur Besprechung. Keine Freigabe.
+Vorgänger: keiner.
+Zugehöriges Konzept: `concepts/AG-VISUAL-005-agentarium-konzept-v1.md`.
+Zugehörige Schnittstelle: `specifications/AG-VISUAL-005-schnittstelle-v1.md`.
+Fassungsregister: `previews/AG-VISUAL-005-fassungen.md`.
 
 > AGENTARIUM – See intelligence move. Powered by BALL
 >

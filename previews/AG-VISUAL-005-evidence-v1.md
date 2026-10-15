@@ -1,4 +1,10 @@
-# AG-VISUAL-005 – Das Feld. Vorarbeit, keine Agentenlieferung.
+# AGENTARIUM – Das Feld. Vorarbeit, keine Agentenlieferung.
+
+AG-VISUAL-005, Belegversion 1 · 2026-10-15
+Projekt: pahlborn/agentarium · Branch: claude/agentarium-visualisierung
+Status: Belege und offene Punkte zum Feld. Keine Freigabe, keine Abnahme.
+Vorgänger: keiner.
+Fassungsregister: `previews/AG-VISUAL-005-fassungen.md`.
 
 > AGENTARIUM – See intelligence move. Powered by BALL
 >
