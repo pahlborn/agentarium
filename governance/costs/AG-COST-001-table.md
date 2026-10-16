@@ -25,6 +25,10 @@ Tokenfelder sind Providerangaben. Thinking separat ausgewiesen; nicht nochmals z
 | forge | AG-PROC-REVIEW-001 | 0bda9588 | nicht verfügbar | nicht verfügbar | nicht verfügbar | nicht verfügbar | nicht verfügbar | 0.0254630 | [Runtime](https://github.com/pahlborn/agentarium/issues/2#issuecomment-6150740099) |
 | cadence | AG-PROC-REVIEW-001 | 9024fd9e | nicht verfügbar | nicht verfügbar | nicht verfügbar | nicht verfügbar | nicht verfügbar | 0.1237810 | [Runtime](https://github.com/pahlborn/agentarium/issues/2#issuecomment-6150760833) |
 
+| forge | AG-VISUAL-005-K3-FORGE-FINAL-V1 | 1292d0c3 | 18 | 11131 | 141812 | 39559 | 2234 | 0.2244247 | [Runtime](https://github.com/pahlborn/agentarium/issues/2#issuecomment-6212103126) |
+
+K3-Versuch: CLI-Turngrenze erreicht; Patch erhalten, QA ausstehend. Kein automatischer zweiter API-Aufruf. Aktuelles Kostenfeld bleibt sichtbar und zeigt bei unvollständiger Erfassung ausschließlich „Kosten nicht vollständig ermittelbar.“
+
 ## ChatGPT – Erfassungslücken
 
 | Agent | Input | Output | Cache | Thinking | Individuelle Geldzuordnung |
@@ -46,4 +50,4 @@ Die Work-Laufzeit stellt hier keine belegten Tokenzähler pro Agent bereit. Abon
 
 Jeder neue Auftrag: genaue Anforderungsversion, Agent/Session, tatsächliches Modell, Billing-Pfad, Provider-Tokenfelder oder explizit nicht verfügbar, Kostenquelle, Abbruch-/Retry-Status und Ergebnis. Keine erfundene anteilige Kostenverteilung bei mehreren Anforderungen in einem Aufruf. Die Datenbasis liegt in [AG-COST-001-register-v1.json](AG-COST-001-register-v1.json).
 
-Diese Tabellenaktualisierung: keine neuen Anthropic-API-Aufrufe; API-Zusatzverbrauch USD0. ChatGPT/GitHub-Abrechnung hier nicht zugänglich.
+Aktualisierung 16.10.2026: Der reguläre K3-Codingaufruf oben ist neu erfasst. Keine zusätzlichen Modellaufrufe für die Buchführung. ChatGPT-/GitHub-Abrechnung bleibt unzugänglich; keine vollständige Gesamtsumme.
