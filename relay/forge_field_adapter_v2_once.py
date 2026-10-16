@@ -133,8 +133,15 @@ class CaptureProbe:
 def main():
     if os.environ.get("GITHUB_REPOSITORY") != "pahlborn/agentarium" or os.environ.get("GITHUB_REF_NAME") != BRANCH:
         raise RuntimeError("Wrong task context")
-    if api(API).get("private") is not True:
-        raise RuntimeError("Private repository required")
+    repo = api(API)
+    if (repo.get("full_name") != "pahlborn/agentarium"
+            or repo.get("visibility") != "public"
+            or repo.get("private") is not False):
+        raise RuntimeError("Exact authorized public repository required")
+    if (os.environ.get("GITHUB_REPOSITORY_OWNER_ID") != "277496791"
+            or os.environ.get("GITHUB_ACTOR_ID") != "277496791"
+            or os.environ.get("GITHUB_EVENT_NAME") != "push"):
+        raise RuntimeError("Unauthorized repository owner, actor or event")
     comments = []
     for page in range(1, 101):
         batch = api(API + "/issues/2/comments?per_page=100&page=" + str(page))
