@@ -1,7 +1,7 @@
 # AG-VISUAL-005-K3 – Bearbeiterentscheidung V1
 
 Datum: 2026-10-16. Entscheider: Atlas im von Peter delegierten Anbindungsumfang.
-Status: DECIDED / WORKFLOW_STARTED. Keine behauptete Worker-Abnahme.
+Status: WORKER_STOPPED / K3_FUNCTIONAL_PASS / INTEGRATION_BLOCKED_TEST_GAP.
 
 ## Entscheidung
 
@@ -33,3 +33,7 @@ Pilot AG-PILOT-001 startet erst nach bestandenem K3-Abschluss und geklärtem Bet
 ## Getrennter visueller Befund
 
 Der bisherige Feldverfasser meldet sieben Befunde bei fünfzehn Fenstermaßen und bearbeitet die Bildschirmdarstellung separat. Dies ist ein Selbstbericht, kein unabhängiger Browsernachweis von Atlas/Sentinel. K3 enthält keine Layoutänderung; Doppelbearbeitung vermeiden.
+
+## Laufabschluss und verbleibender Befund
+
+Forge endete mit error_max_turns; der Patch blieb erhalten. Argus meldet PASS_WITH_NOTES, Sentinel bestätigt K3 funktional (12/12 eigene Proben), sperrt jedoch Integration wegen maskierter K1-Rückfallprobe. Kein automatischer kostenpflichtiger Wiederholungsversuch. Detail und exakter Restauftrag: governance/AG-VISUAL-005-K3-forge-qa-v1.md, Befund AG-VISUAL-005-K3-QA-01. Tatsächlich gemeldete Laufkosten 0.2244247 USD. Pilot weiterhin gesperrt.
