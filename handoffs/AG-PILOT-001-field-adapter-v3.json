@@ -1,0 +1,68 @@
+{
+  "schema": "agentarium.handoff.v0",
+  "task_id": "AG-PILOT-001-FIELD-ADAPTER-V3",
+  "version": 3,
+  "sender": "Atlas",
+  "recipient": "Forge/coding-agent, separate field-integration session",
+  "status": "AUTHORIZED",
+  "repository": "pahlborn/agentarium",
+  "branch": "feature/ag-interface-k3-final",
+  "base_commit": "2b9c7150c20284103f00786dcaf34d0f2dc0f89b",
+  "field_input": {
+    "ref": "f741d59429dba6a74d1b5bbe10a8e7b76c2456e0",
+    "path": "previews/AG-VISUAL-005-feld/schicht.py",
+    "blob": "65dd50c836c306f971cfdbbe794d0994c0ba12a6"
+  },
+  "source_input": {
+    "accepted_commit": "9ef5262d2a61dfaf4a3d29d9af0b49bfabb72f24",
+    "recorder": "relay/activity_capture.py",
+    "local_api": "pilot/AG-PILOT-001/local_transport.py",
+    "route_component_commit": "2b9c7150c20284103f00786dcaf34d0f2dc0f89b"
+  },
+  "authorization": {
+    "source": "Peter",
+    "decided_at": "2026-10-16T18:43:29+02:00",
+    "scope": "One paid Forge completion without turn limit; public repository guard already authorized.",
+    "execution": {
+      "model": "sonnet",
+      "effort": "medium",
+      "turn_limit": null,
+      "technical_timeout_seconds": 900,
+      "automatic_retry": false,
+      "estimated_cost_usd": "0.20-0.40, not guaranteed"
+    }
+  },
+  "goal": "Complete only the missing opt-in local live activity receiver in the existing Agentarium field.",
+  "allowed_paths": [
+    "previews/AG-VISUAL-005-feld/schicht.py",
+    "previews/AG-VISUAL-005-feld/activity-input.js"
+  ],
+  "instructions": [
+    "Implement before explaining. Do not repeat README, local transport, source capture, specification or prior partial work.",
+    "Use the exact current field generator blob supplied by the host. Preserve layout, Gewebe, render engine, demo/archive behavior, positions and bauen(quelle,ziel,stueck) API.",
+    "Create non-empty activity-input.js as a small isolated same-origin /activity adapter, explicitly enabled only in live mode. Integrate it through the existing Python builder so the built field remains self-contained.",
+    "Render truthful per-agent/session/task activity on existing agent places: working_observed gets a short one-shot impulse for new evidence; waiting pauses; blocked warns; stopped shows outcome; unknown is visibly unknown. Provide reason/evidence/freshness via title or accessibility text without a new card layout.",
+    "Never call arbeitAn() or auftragFertig() from activity. Never fabricate messages, handoffs, artifacts, review, Done, flights or task counters. Concurrent sessions must not collapse into false idle.",
+    "Use remaining_valid_ms with performance.now for expiry independent of fetch success. Guard stale in-flight replies across mode changes; stop/clear fetch behavior when leaving live mode. Demo/archive must remain separate from observed live state.",
+    "Keep transport/source/coverage distinct. Costs remain exactly 'Kosten nicht vollständig ermittelbar.' with no numbers.",
+    "Useful anchors: verbunden238, live hint1777, schritt2229, window.__agStand2337, modusSetzen2409, ringZeichnen2783, rollenWechseln2998, bauen3177. Use Grep or Read offset/limit; do not read/rewrite the full156KB generator unnecessarily.",
+    "Expose a narrow deterministic adapter/state test hook. Keep canonical __agStand counts unchanged.",
+    "No tests are required from Forge and no browser claim. Return CA_IMPLEMENTED with exact files and known NOT_TESTED items only after both files contain the implementation."
+  ],
+  "non_goals": [
+    "new visual concept",
+    "server architecture",
+    "public endpoint",
+    "GitHub/provider calls in browser",
+    "dependency",
+    "task/reducer/schema changes",
+    "merge",
+    "release",
+    "deployment"
+  ],
+  "runtime": {
+    "worker_started": false,
+    "session_id": null
+  },
+  "stop_condition": "One actual coding session. No turn cap, 900s technical timeout, no automatic retry. Stop only at CA_IMPLEMENTED or one exact technical blocker."
+}
