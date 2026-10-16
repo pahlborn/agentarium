@@ -1,0 +1,58 @@
+{
+  "schema": "agentarium.activity-observations.v1",
+  "data_kind": "OBSERVED",
+  "capture": {
+    "method": "RETROSPECTIVE_FROM_PUBLISHED_RUNTIME_METADATA",
+    "clock": "observed_at is GitHub diagnostic comment publication time, not source execution event time or guaranteed original collector receive time",
+    "coverage": "Only actual Forge activity task samples and terminal failure. No other agents, waiting or continuous activity inferred.",
+    "source_run": "https://github.com/pahlborn/agentarium/actions/runs/38890028971",
+    "no_live_capture_claim": true
+  },
+  "observations": [
+    {
+      "id": "github-comment-6213911298",
+      "agent": "forge",
+      "session_id": "d9d5ef20-4dfb-496c-8174-441a90af03f4",
+      "task_id": "AG-PILOT-001-ACTIVITY-V1",
+      "observed_at": "2026-10-16T10:53:14Z",
+      "evidence_ref": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6213911298",
+      "signal": "stream_sample",
+      "elapsed_seconds": 60,
+      "last_event_seconds": 57.234,
+      "event_counts": {
+        "system": 47,
+        "stream_event": 161,
+        "assistant": 11,
+        "user": 7
+      }
+    },
+    {
+      "id": "github-comment-6213929651",
+      "agent": "forge",
+      "session_id": "d9d5ef20-4dfb-496c-8174-441a90af03f4",
+      "task_id": "AG-PILOT-001-ACTIVITY-V1",
+      "observed_at": "2026-10-16T10:54:15Z",
+      "evidence_ref": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6213929651",
+      "signal": "stream_sample",
+      "elapsed_seconds": 121,
+      "last_event_seconds": 120.809,
+      "event_counts": {
+        "system": 53,
+        "stream_event": 3498,
+        "assistant": 17,
+        "user": 11
+      }
+    },
+    {
+      "id": "github-comment-6213943285",
+      "agent": "forge",
+      "session_id": "d9d5ef20-4dfb-496c-8174-441a90af03f4",
+      "task_id": "AG-PILOT-001-ACTIVITY-V1",
+      "observed_at": "2026-10-16T10:54:59Z",
+      "evidence_ref": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6213943285",
+      "signal": "execution_stopped",
+      "outcome": "failed",
+      "reason": "CLI error_max_turns; partial patch preserved; no success handback"
+    }
+  ]
+}
