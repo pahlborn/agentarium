@@ -59,3 +59,6 @@ Kein Pilot-PASS aus Datenfixturetests ableiten.
 
 ## Aktualisierung nach K3/K1-Abschluss – 2026-10-16
 Referenz-/Prüfmittelblocker auf isoliertem Arbeitsbranch behoben und unabhängig verifiziert: da860fd19f38e9938ed201546f2a6e5b4cc765f8. Beide Prüfer bestanden; kein Merge, Deployment oder Pilotstart. Siehe governance/AG-VISUAL-005-K3-K1-abschluss-v1.md. Noch erforderlich: Einbindung des geprüften Stands, Betriebs-/Speicher-/Zugriffsnachweise und dauerhafte Diagnoseablage. PREPARED_BLOCKED bleibt zutreffend; nicht mehr wegen offener K3-Testkorrektur.
+
+## Lokaler Integrationsschritt – 2026-10-16
+Forge hat einen nur auf127.0.0.1 gestarteten Transportprototyp gebaut und gezielt korrigiert. Sentinel bestätigt18/18 Laufzeitproben am synthetischen Testaufbau. Arbeitscommit19463534defa6f9c6b48812eeebf56433fa28e89; Nachweise governance/AG-PILOT-001-local-abschluss-v2.md. Keine Bereitstellung und kein echter Pilot. Weiterhin fehlen Feldadapter, tatsächliche Runtimeproduzenten, Host/dauerhafte Speicherung/Rechte und finale Archivverpackung. Testserver wurden beendet.
