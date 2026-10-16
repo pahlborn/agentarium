@@ -53,7 +53,7 @@ Zeile unten übereinstimmen. Das Verfahren ist aus
 | Schnittstelle | `specifications/AG-VISUAL-005-schnittstelle-v1.md` | Schnittstellenversion 1 | 2026-10-15T14:12:55Z | `e2eacd2fefd977cbe1637a1bf7123fb77e8556db` |
 | Funktionsmatrix | `previews/AG-VISUAL-005-funktionsmatrix-v1.md` | Matrixversion 1 | 2026-10-15T14:12:55Z | `261c4658fc252c8727c1db120cdac806be3c204b` |
 | Belege | `previews/AG-VISUAL-005-evidence-v1.md` | Belegversion 1 | 2026-10-15T14:12:55Z | `aaf733814df1a1c07fd0687fd1434db7d82e6244` |
-| Feld (gebaut) | `previews/AG-VISUAL-005-feld-v1.html` | Fassung 41 | 2026-10-16T13:40:00Z | wird mit dem naechsten Commit nachgetragen |
+| Feld (gebaut) | `previews/AG-VISUAL-005-feld-v1.html` | Fassung 41 | 2026-10-16T13:40:00Z | `0cf72ad88e46c1d32a6048ae9978f60f02c043be` |
 | Prüfauftrag | `handoffs/AG-VISUAL-005-review-request-v1.md` | Auftragsversion 1 | 2026-10-15T14:12:55Z | `3595028ea462cafb37ef3200a2677806fcc71d61` |
 | Prüfauftrag (maschinenlesbar) | `handoffs/AG-VISUAL-005-review-request-v1.json` | Auftragsversion 1 | 2026-10-15T14:12:55Z | `fb98f597c1f5e49bc97fc630aef56723fb6ca86b` |
 | Prüfung der Atlas-Anweisung | `governance/AG-VISUAL-005-INTERFACE-review-v1.md` | Prüfversion 1 | 2026-10-15T18:47:30Z | `994cb2f89ef2c47418d6b232e8696305e5ee46ae` |
