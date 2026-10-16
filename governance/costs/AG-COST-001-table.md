@@ -26,6 +26,8 @@ Tokenfelder sind Providerangaben. Thinking separat ausgewiesen; nicht nochmals z
 | cadence | AG-PROC-REVIEW-001 | 9024fd9e | nicht verfügbar | nicht verfügbar | nicht verfügbar | nicht verfügbar | nicht verfügbar | 0.1237810 | [Runtime](https://github.com/pahlborn/agentarium/issues/2#issuecomment-6150760833) |
 | forge | AG-VISUAL-005-K3-FORGE-FINAL-V1 | 1292d0c3 | 18 | 11131 | 141812 | 39559 | 2234 | 0.2244247 | [Runtime](https://github.com/pahlborn/agentarium/issues/2#issuecomment-6212103126) |
 | forge | AG-VISUAL-005-K1-COUNTERPROBE-V1 | a307250d | 14 | 3013 | 91457 | 36893 | 262 | 0.1315362 | [Runtime](https://github.com/pahlborn/agentarium/issues/2#issuecomment-6213044280) |
+| forge | AG-PILOT-001-LOCAL-TRANSPORT-V1 | f0f7d565 | 16 | 10277 | 72913 | 23516 | 2824 | 0.1688833 | [Runtime](https://github.com/pahlborn/agentarium/issues/2#issuecomment-6213264341) |
+| forge | AG-PILOT-001-LOCAL-TRANSPORT-V2 | fdace86d | 10 | 6459 | 30310 | 24403 | 760 | 0.1286485 | [Runtime](https://github.com/pahlborn/agentarium/issues/2#issuecomment-6213328234) |
 
 K3-Versuch: CLI-Turngrenze erreicht; Patch erhalten und unabhängig geprüft. Der anschließende begrenzte K1-Testauftrag ist erfolgreich geliefert und durch Sentinel bestätigt: beide Prüfer grün, K1/K2/K3-Rückfälle erkannt. Liefercommit da860fd19f38e9938ed201546f2a6e5b4cc765f8. Kein Merge oder Deployment. Aktuelles Kostenfeld bleibt sichtbar und zeigt bei unvollständiger Erfassung ausschließlich „Kosten nicht vollständig ermittelbar.“
 
@@ -51,3 +53,5 @@ Die Work-Laufzeit stellt hier keine belegten Tokenzähler pro Agent bereit. Abon
 Jeder neue Auftrag: genaue Anforderungsversion, Agent/Session, tatsächliches Modell, Billing-Pfad, Provider-Tokenfelder oder explizit nicht verfügbar, Kostenquelle, Abbruch-/Retry-Status und Ergebnis. Keine erfundene anteilige Kostenverteilung bei mehreren Anforderungen in einem Aufruf. Die Datenbasis liegt in [AG-COST-001-register-v1.json](AG-COST-001-register-v1.json).
 
 Aktualisierung 16.10.2026: Der reguläre K3-Codingaufruf oben ist neu erfasst. Keine zusätzlichen Modellaufrufe für die Buchführung. ChatGPT-/GitHub-Abrechnung bleibt unzugänglich; keine vollständige Gesamtsumme.
+
+Lokaler Transport: V1 Worker erfolgreich, Runtime-QA FAIL14/18; V2 gezielt korrigiert, unabhängige Runtime-QA PASS18/18. Arbeitscommit19463534defa6f9c6b48812eeebf56433fa28e89; kein Merge/Deployment/echter Pilot. Beide Aufrufe0.2975318USD, kein Projektgesamtbetrag.
