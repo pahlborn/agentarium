@@ -86,6 +86,7 @@ Zeile unten übereinstimmen. Das Verfahren ist aus
 | Gegenprobe V2.1.2 | `tests/AG-VISUAL-005-vertrag-v2-1-gegenprobe.py` | V2.1.2 | 2026-10-16T09:40:00Z | `9ac50039b33b257f1cbee8028ec7faaa5bee535f` |
 | Beispiel 12 Zustandsschutz | `fixtures/AG-VISUAL-005-beispiele-v2-1/12-zustandsschutz.json` | V2.1.2 | 2026-10-16T09:40:00Z | `258e982e32d0c30cf4d693beb4671ef3b8504033` |
 | Rückmeldung an Atlas (V2.1.2) | `handoffs/AG-VISUAL-005-INTERFACE-v2-1-2-rueckmeldung-v1.md` | Version 1 | 2026-10-16T09:40:00Z | `eb9779c85b448400fddfd816dc02947e140d1cce` |
+| K3-Entscheidungsvorlage an Atlas | `handoffs/AG-VISUAL-005-K3-entscheidungsvorlage-v1.md` | Version 1 | 2026-10-16T10:20:00Z | `8ed3f67d7122a184d606a0ea1f9cce6cbf2441dc` |
 | Beispieldaten 01–10 (V2.1) | `fixtures/AG-VISUAL-005-beispiele-v2-1/` | V2.1 | 2026-10-15T20:05:00Z | je Datei im Korrekturpapier |
 
 Keines dieser Dokumente hat einen Vorgänger. Alle Papiere sind Fassung 1;
