@@ -1,0 +1,56 @@
+{
+  "schema": "agentarium.handoff.v0",
+  "task_id": "AG-VISUAL-005-K3-FORGE-FINAL-V1",
+  "version": 1,
+  "sender": "Atlas",
+  "recipient": "Forge/coding-agent",
+  "status": "AUTHORIZED",
+  "repository": "pahlborn/agentarium",
+  "base_commit": "e79530fe3aac82514639d2b65d64d976a7062316",
+  "branch": "feature/ag-interface-k3-final",
+  "worker_definition_blob": "0dcac59d22c27753f111fb1ad79f5a9be524052a",
+  "authorization": {
+    "source": "Peter delegated responsibility and staffing for the connection to Atlas; Atlas selects Forge 2026-10-16.",
+    "scope": "One bounded K3 code-fix handback. No merge, release, deployment, architecture changes or pilot start."
+  },
+  "goal": "Edit the allowed local files to block invalid Done in the authoritative reducer state BEFORE candidate adoption. Do not merely describe a fix.",
+  "allowed_paths": [
+    "tests/AG-VISUAL-005-referenz-reducer.py",
+    "tests/AG-VISUAL-005-vertrag-v2-1-pruefen.py",
+    "tests/AG-VISUAL-005-vertrag-v2-1-gegenprobe.py",
+    "fixtures/AG-VISUAL-005-beispiele-v2-1/12-zustandsschutz.json"
+  ],
+  "instructions": [
+    "Read the reference reducer and the relevant fall12/fixture12 before editing. Only these exact files may change.",
+    "In anwenden status_change: after form/chain validation but BEFORE adoption, validate Done proof against accepted artefakte[(artifact_id,version)]['pruefungen']. Use the FULL (task_id,artifact_id,version,criteria_ref), latest applicable outcome pass, correct nachweis_ref when given.",
+    "For invalid Done: advance received transport cursor according to existing K2 delivery rule, but retain the previous task state and return a rejection diagnostic. Do not add/create task state if no accepted previous task exists.",
+    "Keep ABWEICHUNG_AKTIV=False: free strings are not proof. Do not add auth infrastructure.",
+    "Read accepted proof data from initial_state as well as earlier accepted events, so snapshot+tail and full reduction agree.",
+    "Do not alter K1 candidate/chain checks, K2 buffer/replay, R4/R5, B1/B5 or scope/basis rules.",
+    "Invert the incorrect R45 expectation which currently REQUIRES Done despite missing proof. Require unchanged task status AND a diagnostic.",
+    "Update the smallest fixtures/negative checks needed. Include valid exact proof=>Done and no/fremd/wrong-criteria/later-fail/free-strings=>no Done. If previously invalid data is used as happy input elsewhere, do not weaken acceptance criteria; explain the precise blocker rather than broadening scope.",
+    "You cannot run commands: Bash/network/other agents are disabled. Return CA_IMPLEMENTED with changed files, exact behavior, and tests NOT_RUN_BY_FORGE. Independent Sentinel will execute the checks.",
+    "Only a patch is returned by the host wrapper. Do not publish to GitHub, create branches, merge or deploy. Stop after this one bounded task."
+  ],
+  "model_routing": {
+    "task_complexity": "F",
+    "risk": "medium",
+    "role_model_default": "sonnet/medium",
+    "requested_model": "sonnet",
+    "requested_reasoning": "medium",
+    "actual_model": null,
+    "actual_reasoning": "unconfirmed",
+    "override": false,
+    "budget_authorization": "One delegated bounded coding task; existing small API balance unknown. No paid availability probe or automatic retry.",
+    "cost_control": "One worker, at most eight role-default turns; no price-triggered mid-task cutoff. Actual CLI usage must be recorded.",
+    "estimated_cost_usd": null,
+    "fallback": "None; stop on insufficient credit/key/quota."
+  },
+  "return_target": "Private workflow artifact and issue #2 via publisher wrapper, never worker credentials.",
+  "runtime": {
+    "host_received": false,
+    "worker_started": false,
+    "session_id": null
+  },
+  "separate_findings": "Reported viewport findings (7 of 15 sizes) are owned by the existing field author, outside K3. No layout changes."
+}
