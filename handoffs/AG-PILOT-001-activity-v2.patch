@@ -1,0 +1,313 @@
+--- a/pilot/AG-PILOT-001/README.md
++++ b/pilot/AG-PILOT-001/README.md
+@@ -101,16 +101,42 @@
+ the fresh window => `working_observed`.
+ 
+ Acceptance cases (to be verified independently; Forge ran none):
+-1. Genuine delta: two samples, same agent/session/task, increased counter or `last_event_seconds`, recent event => working_observed.
++1. Genuine delta: two samples, same agent/session/task, increased `stream_event`/`assistant`/`user` counter, recent event => working_observed.
+ 2. Heartbeat/host receipt or unchanged samples => no work (stays unknown).
+ 3. Stale evidence (sample event age + observation age > fresh ms) => unknown, not waiting.
+ 4. Waiting/blocked only from explicit source signal with reason; silence => unknown.
+ 5. `execution_stopped` success => stopped, task is never set done; terminal for that session/task.
+ 
++V2 corrections (Forge ran no tests; independent QA required):
++
++- Roster (`activity.ROSTER`, canonical lowercase): atlas, nova, scout, archibald, forge, argus,
++  sentinel, cadence. Known names are matched case-insensitively and normalized to the canonical id
++  (no duplicate Forge/forge rows). Unknown names get their own row and never replace a default row.
++- Work evidence: only a positive delta of `stream_event`, `assistant` or `user` counters proves
++  `working_observed`. `system`, `progress_timer`, `telemetry_failure`, `invalid_line` and other
++  counters are ignored, and `last_event_seconds` changing alone is not proof (the wrapper also
++  updates it for metadata). First sample is a baseline; unchanged samples, heartbeat and host
++  receipt never renew work. A positive delta still needs a fresh source event. No inference of
++  thinking or continuous work.
++- Explicit waiting/blocked is authoritative until explicit `source_resumed` or terminal. If the hold
++  is stale the row is `unknown`; work accumulated while held is never used. `source_resumed` clears
++  the hold AND old work evidence: resume alone is not working, a later positive work delta is needed.
++  Terminal still absorbs later same-session progress.
++- Every row has `remaining_valid_ms`: 0 for unknown, null for stopped, otherwise the conservative
++  remaining freshness computed with the same `now` and event age as the state. It is a local display
++  validity only: no SLA, no capture guarantee, never renewed by transport.
++- Browser (LIVE): each response's `remaining_valid_ms` is tracked with `performance.now()`, reduced by
++  the request duration. A local timer turns expired nonterminal cards into `unknown` (dashed, no pulse),
++  even with Auto off or server unreachable. ARCHIVE is never aged by the client clock. Auto defaults
++  ON (2 s) in LIVE; ARCHIVE has it disabled. Repeating the same work evidence after an expiry or failed
++  request does not pulse again; only a changed evidence stamp does. Transport errors are shown apart
++  from source errors. Terminal `stopped` stays conclusive; no end is fabricated from a disconnect.
++- Browser binary NOT tested. Main Gewebe/Partitur and actual runtime hooks are still absent. The
++  existing 60 s sample cadence is not instantaneous. This is a local component only, no product success claim.
++
+ Honest limits: the existing relay cadence is 60 s, so short freshness values will flap; ChatGPT
+ activity hooks are absent; no automatic capture, no end-to-end guarantee. No LLM calls for
+-telemetry, no per-token/frame logs. The agent roster in `activity.ROSTER` must list all eight
+-agents (open item). Costs stay "Kosten nicht vollständig ermittelbar." with no numbers.
++telemetry, no per-token/frame logs. Costs stay "Kosten nicht vollständig ermittelbar." with no numbers.
+ 
+ ## Limits
+ 
+--- a/pilot/AG-PILOT-001/activity.html
++++ b/pilot/AG-PILOT-001/activity.html
+@@ -44,10 +44,13 @@
+   var params = new URLSearchParams(location.search);
+   var at = params.get('at');
+   var grid = document.getElementById('grid');
+-  var seen = null; // key -> evidence stamp; null until first load (baseline, no pulse)
++  var seen = null; // key -> last pulsed/seen work evidence stamp; null until first load (baseline, no pulse)
+   var timer = null;
++  var expiryTimer = null;
++  var current = []; // [{r: row, deadline: performance.now() ms or null, expired: bool}]
+   var auto = document.getElementById('auto');
+-  if (at) { auto.disabled = true; }
++  if (at) { auto.disabled = true; auto.checked = false; } else { auto.checked = true; }
++  var NONTERMINAL = { working_observed: 1, waiting: 1, blocked: 1 };
+ 
+   var LABELS = {
+     working_observed: ['▶', 'Arbeit beobachtet'],
+@@ -64,30 +67,68 @@
+     return e;
+   }
+ 
+-  function render(doc) {
+-    var next = {};
++  // Draw cards from `current`. Expired nonterminal rows are shown as unknown (local
++  // display validity only). `allowPulse` is true only for a freshly fetched response.
++  function draw(allowPulse) {
+     var first = seen === null;
++    var nextSeen = first ? {} : seen;
+     grid.textContent = '';
+-    doc.rows.forEach(function (r) {
+-      var known = Object.prototype.hasOwnProperty.call(LABELS, r.state);
+-      var lab = known ? LABELS[r.state] : LABELS.unknown;
++    current.forEach(function (item) {
++      var r = item.r;
++      var state = item.expired ? 'unknown' : r.state;
++      var known = Object.prototype.hasOwnProperty.call(LABELS, state);
++      var lab = known ? LABELS[state] : LABELS.unknown;
+       var key = r.agent + '|' + r.session_id + '|' + r.task_id;
+-      var stamp = r.state === 'working_observed' ? (r.last_evidence_at + '|' + r.evidence_ref) : '';
+-      next[key] = stamp;
+-      var cls = 'card ' + (known ? r.state : 'unknown') + (r.problem ? ' problem' : '');
+-      if (!first && !at && stamp && seen[key] !== stamp) { cls += ' pulse'; }
++      var stamp = (!item.expired && r.state === 'working_observed') ? (r.last_evidence_at + '|' + r.evidence_ref) : '';
++      var cls = 'card ' + (known ? state : 'unknown') + (!item.expired && r.problem ? ' problem' : '');
++      if (allowPulse && !first && !at && stamp && nextSeen[key] !== stamp) { cls += ' pulse'; }
++      if (allowPulse && stamp) { nextSeen[key] = stamp; }
+       var c = el('div', cls);
+       c.appendChild(el('div', 'name', r.agent));
+       c.appendChild(el('div', 'state', lab[0] + ' ' + lab[1] +
+-        (r.state === 'stopped' && r.outcome ? ' – ' + r.outcome : '') + (r.problem ? ' (Problem)' : '')));
+-      c.appendChild(el('div', 'meta', 'Grund: ' + r.reason));
++        (state === 'stopped' && r.outcome ? ' – ' + r.outcome : '') + (!item.expired && r.problem ? ' (Problem)' : '')));
++      c.appendChild(el('div', 'meta', 'Grund: ' + (item.expired
++        ? 'Lokale Anzeige-Gültigkeit abgelaufen (keine neue Antwort): unbekannt' : r.reason)));
+       c.appendChild(el('div', 'meta', 'Letzter Nachweis: ' + (r.last_evidence_at || 'keiner') +
+         (r.evidence_ref ? ' (' + r.evidence_ref + ')' : '')));
+       c.appendChild(el('div', 'meta', 'Session: ' + (r.session_id || '–') + ' · Task: ' + (r.task_id || '–')));
+       (r.diagnostics || []).forEach(function (d) { c.appendChild(el('div', 'meta err', d)); });
+       grid.appendChild(c);
+     });
+-    seen = next;
++    seen = nextSeen;
++  }
++
++  // Local expiry timer (monotone clock); independent of fetch success and Auto.
++  function checkExpiry() {
++    if (expiryTimer) { clearTimeout(expiryTimer); expiryTimer = null; }
++    if (at) { return; }
++    var now = performance.now();
++    var changed = false;
++    var nextDeadline = null;
++    current.forEach(function (item) {
++      if (item.deadline === null || item.expired) { return; }
++      if (item.deadline <= now) { item.expired = true; changed = true; }
++      else if (nextDeadline === null || item.deadline < nextDeadline) { nextDeadline = item.deadline; }
++    });
++    if (changed) { draw(false); }
++    if (nextDeadline !== null) {
++      expiryTimer = setTimeout(checkExpiry, Math.max(50, Math.min(nextDeadline - now, 1000)));
++    }
++  }
++
++  function render(doc, t0, t1) {
++    var dur = Math.max(0, t1 - t0);
++    current = doc.rows.map(function (r) {
++      var deadline = null;
++      if (!at && NONTERMINAL[r.state]) {
++        var rem = r.remaining_valid_ms;
++        // missing/invalid remaining => treated as already expired (conservative)
++        deadline = (typeof rem === 'number' && isFinite(rem) && rem >= 0) ? t0 + rem - dur : t0;
++      }
++      return { r: r, deadline: deadline, expired: false };
++    });
++    draw(true);
++    checkExpiry();
+     document.getElementById('coverage').textContent =
+       'Teilanbindung / nicht verbunden: ' + doc.coverage.note +
+       ' · Datenart: ' + (doc.data_kind || 'keine Quelle') +
+@@ -102,14 +143,18 @@
+ 
+   function load() {
+     var url = '/activity' + (at ? '?at=' + encodeURIComponent(at) : '');
++    var t0 = performance.now();
+     fetch(url, { cache: 'no-store' }).then(function (res) {
+       return res.json().then(function (j) { return { ok: res.ok, j: j }; });
+     }).then(function (x) {
++      var t1 = performance.now();
+       if (!x.ok) { throw new Error(x.j && x.j.error ? x.j.error : 'Fehler'); }
+-      render(x.j);
++      render(x.j, t0, t1);
+     }).catch(function (e) {
+-      document.getElementById('transport').textContent = 'Monitorabruf nicht erreichbar';
+-      document.getElementById('errors').textContent = String(e && e.message ? e.message : e);
++      // transport error stays separate from source errors; cards age via the local timer
++      document.getElementById('transport').textContent = 'Monitorabruf nicht erreichbar: ' +
++        String(e && e.message ? e.message : e);
++      checkExpiry();
+     });
+   }
+ 
+@@ -118,6 +163,7 @@
+     if (timer) { clearInterval(timer); timer = null; }
+     if (auto.checked && !at) { timer = setInterval(load, 2000); }
+   });
++  if (auto.checked && !at) { timer = setInterval(load, 2000); }
+   load();
+ }());
+ </script>
+--- a/pilot/AG-PILOT-001/activity.py
++++ b/pilot/AG-PILOT-001/activity.py
+@@ -32,10 +32,21 @@
+ SIGNALS = ('host_received', 'stream_sample', 'source_waiting', 'source_blocked',
+            'source_resumed', 'execution_stopped', 'transport_heartbeat')
+ OUTCOMES = ('success', 'failed', 'aborted')
+-# OPEN ITEM: Forge could not verify the full eight-agent roster from the allowed
+-# paths. Complete this tuple to the 8 agents. Agents seen in observations but
+-# missing here still get rows.
+-ROSTER = ('Atlas', 'Forge', 'Argus', 'Sentinel')
++# Complete eight-agent roster (canonical lowercase register keys). Known names are
++# matched case-insensitively and normalized to the canonical id. Unknown names keep
++# their own row and never replace a registered default row.
++ROSTER = ('atlas', 'nova', 'scout', 'archibald', 'forge', 'argus', 'sentinel', 'cadence')
++# Only a positive delta of these counters can prove work (never last_event_seconds
++# alone, never system/progress_timer/telemetry_failure/invalid_line/other counters).
++WORK_COUNTERS = ('stream_event', 'assistant', 'user')
++
++
++def _canon(name):
++    if isinstance(name, str):
++        low = name.strip().lower()
++        if low in ROSTER:
++            return low
++    return name
+ 
+ 
+ def parse_ts(value):
+@@ -79,7 +90,7 @@
+ def _validate(o):
+     if not isinstance(o, dict):
+         raise ValueError('Beobachtung ist kein Objekt')
+-    c = {'id': _text(o, 'id'), 'agent': _text(o, 'agent'),
++    c = {'id': _text(o, 'id'), 'agent': _canon(_text(o, 'agent')),
+          'session_id': _text(o, 'session_id'), 'task_id': _text(o, 'task_id')}
+     try:
+         c['at'] = parse_ts(o.get('observed_at'))
+@@ -104,6 +115,10 @@
+         c['elapsed'] = _num(o.get('elapsed_seconds'), 'elapsed_seconds')
+         if c['last'] > c['elapsed']:
+             raise ValueError('last_event_seconds > elapsed_seconds')
++        # event_counts are ints >= 0 (checked above, hence finite); times must be finite
++        for k in ('last', 'elapsed'):
++            if c[k] == float('inf'):
++                raise ValueError('%s nicht endlich' % k)
+     elif sig in ('source_waiting', 'source_blocked'):
+         c['reason'] = _text(o, 'reason')
+     elif sig == 'execution_stopped':
+@@ -134,13 +149,14 @@
+         delta = None
+         if prev is not None:
+             if c['elapsed'] < prev['elapsed'] or any(
+-                    c['counts'].get(k, 0) < v for k, v in prev['counts'].items()):
++                    c['counts'].get(k, 0) < prev['counts'].get(k, 0) for k in WORK_COUNTERS):
+                 rec['diag'].append('%s: Zaehler/Zeitbasis zurueckgesetzt, neue Basismessung' % c['id'])
+             else:
+-                inc = {k: v - prev['counts'].get(k, 0) for k, v in c['counts'].items()
+-                       if v > prev['counts'].get(k, 0)}
++                inc = {k: c['counts'][k] - prev['counts'].get(k, 0) for k in WORK_COUNTERS
++                       if k in c['counts'] and c['counts'][k] > prev['counts'].get(k, 0)}
+                 lev = c['last'] > prev['last']
+-                if inc or lev:
++                # last_event_seconds alone never proves work (metadata also updates it)
++                if inc:
+                     delta = {'counters': inc,
+                              'last_event_seconds': {'from': prev['last'], 'to': c['last']} if lev else None,
+                              'elapsed_seconds': {'from': prev['elapsed'], 'to': c['elapsed']}}
+@@ -154,7 +170,8 @@
+                        'reason': c['reason'], 'at': at, 'ref': c['ref']}
+         rec['evidence_at'], rec['ref'] = at, c['ref']
+     elif sig == 'source_resumed':
+-        rec['hold'] = None  # not work proof
++        rec['hold'] = None  # not work proof; also clears old work evidence
++        rec['work'] = None  # a subsequent positive work delta is required
+         rec['evidence_at'], rec['ref'] = at, c['ref']
+     elif sig == 'execution_stopped':
+         rec['terminal'] = {'outcome': c['outcome'], 'at': at, 'ref': c['ref']}
+@@ -165,7 +182,8 @@
+     r = {'agent': agent, 'session_id': sid, 'task_id': tid, 'state': 'unknown',
+          'reason': '', 'last_evidence_at': iso(rec['evidence_at']) if rec else None,
+          'evidence_ref': rec['ref'] if rec else None, 'delta': None, 'outcome': None,
+-         'problem': False, 'diagnostics': list(rec['diag']) if rec else []}
++         'problem': False, 'diagnostics': list(rec['diag']) if rec else [],
++         'remaining_valid_ms': 0}
+     if rec is None:
+         r['reason'] = 'Keine Quelle angebunden / keine Beobachtung'
+         return r
+@@ -173,28 +191,32 @@
+     if t:  # terminal conclusion, distinct from any stale active/waiting evidence
+         r.update(state='stopped', outcome=t['outcome'], problem=t['outcome'] != 'success',
+                  last_evidence_at=iso(t['at']), evidence_ref=t['ref'],
+-                 reason='Ausfuehrung beendet (%s); Aufgabe nicht als erledigt gesetzt' % t['outcome'])
++                 reason='Ausfuehrung beendet (%s); Aufgabe nicht als erledigt gesetzt' % t['outcome'],
++                 remaining_valid_ms=None)
+         return r
+-    if h:
++    if h:  # explicit hold is authoritative until source_resumed or terminal
+         age = (now - h['at']).total_seconds() * 1000
+         if age <= fresh_ms:
+             r.update(state=h['kind'], reason=h['reason'], last_evidence_at=iso(h['at']),
+-                     evidence_ref=h['ref'], problem=h['kind'] == 'blocked')
++                     evidence_ref=h['ref'], problem=h['kind'] == 'blocked',
++                     remaining_valid_ms=int(max(0, fresh_ms - age)))
+             return r
+         r['diagnostics'].append('%s-Signal aelter als %d ms: veraltet' % (h['kind'], fresh_ms))
++        r.update(last_evidence_at=iso(h['at']), evidence_ref=h['ref'],
++                 reason='Warte-/Blockiersignal veraltet: unbekannt')
++        return r
+     if w:
+         age = (now - w['at']).total_seconds() * 1000 + w['event_age'] * 1000
+         if age <= fresh_ms:
+             r.update(state='working_observed', delta=w['delta'], last_evidence_at=iso(w['at']),
+                      evidence_ref=w['ref'],
+-                     reason='Zaehlerfortschritt zwischen zwei Messungen, Quellereignis frisch')
++                     reason='Zaehlerfortschritt zwischen zwei Messungen, Quellereignis frisch',
++                     remaining_valid_ms=int(max(0, fresh_ms - age)))
+             return r
+         r.update(delta=w['delta'], last_evidence_at=iso(w['at']), evidence_ref=w['ref'],
+                  reason='Arbeitsnachweis veraltet (aelter als %d ms): unbekannt' % fresh_ms)
+         return r
+-    if h:
+-        r['reason'] = 'Warte-/Blockiersignal veraltet: unbekannt'
+-    elif rec['sample']:
++    if rec['sample']:
+         r['reason'] = 'Nur Basismessung oder unveraenderte Messung: kein Arbeitsnachweis'
+     elif rec['transport_at']:
+         r['reason'] = 'Nur Empfang/Transport belegt: kein Arbeitsnachweis'
+@@ -214,7 +236,7 @@
+             c = _validate(o)
+         except ValueError as exc:
+             a = o.get('agent') if isinstance(o, dict) else None
+-            a = a if isinstance(a, str) and a.strip() else '(unbekannt)'
++            a = _canon(a) if isinstance(a, str) and a.strip() else '(unbekannt)'
+             oid = o.get('id') if isinstance(o, dict) else None
+             agent_diag.setdefault(a, []).append('Beobachtung #%d (%s) verworfen: %s' % (i, oid, exc))
+             continue
