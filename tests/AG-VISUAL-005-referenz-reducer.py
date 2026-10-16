@@ -119,6 +119,42 @@ def pruefe_statuswechsel(e, aufgaben):
     return kandidat, b
 
 
+def pruefe_done(e, artefakte):
+    """K3: prueft den Done-Nachweis eines Statuswechsels gegen die bereits
+    UEBERNOMMENEN Pruefungen (initial_state und fruehere Ereignisse).
+    Gibt Beanstandungen zurueck; veraendert NICHTS. Nichtleer = Done nicht
+    uebernehmen."""
+    if (e.get('to') or '').lower() not in DONE_STATUS:
+        return []
+    eid = e.get('id')
+    if e.get('abweichung_autorisiert_durch') and e.get('abweichung_grund'):
+        if not ABWEICHUNG_AKTIV:
+            return ['%s: Abweichungsweg ist im aktuellen Profil DEAKTIVIERT - '
+                    'freie Zeichenketten sind kein Nachweis; Done nicht '
+                    'uebernommen, Aufgabe bleibt unveraendert' % eid]
+    k = nachweisschluessel(e)
+    if not all(k):
+        return ['%s: Done ohne vollstaendige Nachweisreferenz (task_id, '
+                'artifact_id, version, criteria_ref): %r - Done nicht '
+                'uebernommen' % (eid, k)]
+    art = artefakte.get((k[1], k[2]))
+    letzte = None
+    for p in (art or {}).get('pruefungen', []):
+        if p.get('task_id') == k[0] and p.get('criteria_ref') == k[3]:
+            letzte = p                    # spaeteste passende Pruefung gewinnt
+    if letzte is None:
+        return ['%s: Done fuer %s ohne akzeptierten Nachweis unter genau dieser '
+                'Referenz - Done nicht uebernommen' % (eid, k)]
+    if letzte.get('outcome') != 'pass':
+        return ['%s: Done fuer %s, letztes Ergebnis %r (%s) statt pass - Done '
+                'nicht uebernommen' % (eid, k, letzte.get('outcome'),
+                                       letzte.get('event_id'))]
+    if e.get('nachweis_ref') and e['nachweis_ref'] != letzte.get('event_id'):
+        return ['%s: nennt Nachweis %r, massgeblich ist aber %r - Done nicht '
+                'uebernommen' % (eid, e['nachweis_ref'], letzte.get('event_id'))]
+    return []
+
+
 def pruefe_ereignis(e):
     """Vorgelagerte Pruefung. Gibt Beanstandungen zurueck; eine nichtleere
     Liste heisst: dieses Ereignis veraendert den Zustand nicht."""
@@ -214,6 +250,9 @@ def reduziere(ereignisse, bis=None, initial_state=None, cursor=None):
             kandidat, vb = pruefe_statuswechsel(e, aufgaben)
             if vb:
                 return vb                 # K1: nichts uebernehmen
+            vd = pruefe_done(e, artefakte)
+            if vd:
+                return vd                 # K3: Done ohne Nachweis, nichts uebernehmen
             aufgaben[kandidat['task_id']] = kandidat
 
         if art == 'artifact':             # R5

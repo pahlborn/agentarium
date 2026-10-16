@@ -509,10 +509,42 @@ def fall12():
         b = RED.done_nachweise(f['ereignisse'])
         regel('R-45', bool(b) == f['soll_done_beanstandet'],
               '%s: freie Autorisierung schaltet Done frei (K3)' % f['name'])
-        z, _ = RED.reduziere(f['ereignisse'])
-        regel('R-45', any(a['status'] == 'done' for a in z['aufgaben']),
-              '%s: Vorbedingung der Probe stimmt nicht - der Statuswechsel '
-              'selbst ist gueltig, nur der NACHWEIS fehlt' % f['name'])
+        # K3 (autoritativer Reducer): Done ohne Nachweis wird NICHT uebernommen.
+        z, v = RED.reduziere(f['ereignisse'])
+        regel('R-45', all(a['status'] != 'done' for a in z['aufgaben']),
+              '%s: Done steht im Reducer-Zustand trotz fehlendem Nachweis (K3)'
+              % f['name'])
+        regel('R-45', [a['status'] for a in z['aufgaben']] == ['offen'],
+              '%s: Aufgabenstatus nicht unveraendert offen (K3): %r'
+              % (f['name'], [a['status'] for a in z['aufgaben']]))
+        regel('R-45', bool(v), '%s: keine Diagnose zur abgelehnten Done-Transition (K3)'
+              % f['name'])
+
+    # K3: gueltiger exakter Nachweis => Done; alles andere => kein Done.
+    for f in d['k3_done_faelle']:
+        z, v = RED.reduziere(f['ereignisse'])
+        st = [a['status'] for a in z['aufgaben']]
+        regel('R-47', st == [f['soll_status']],
+              '%s: Status %r statt %r (K3)' % (f['name'], st, [f['soll_status']]))
+        regel('R-47', bool(v) == f['soll_diagnose'],
+              '%s: Diagnose-Erwartung %r verfehlt (K3): %s'
+              % (f['name'], f['soll_diagnose'], '; '.join(v)))
+        regel('R-47', z['cursor'] == len(f['ereignisse']),
+              '%s: Cursor %r statt Verbrauchsstand %d (K3)'
+              % (f['name'], z['cursor'], len(f['ereignisse'])))
+
+    # K3: Nachweis aus initial_state; Snapshot+Tail und Volllauf stimmen ueberein.
+    for f in d['k3_snapshot_faelle']:
+        z, v = RED.reduziere(f['tail'], initial_state=f['initial_state'],
+                             cursor=f['initial_state']['cursor'])
+        st = [a['status'] for a in z['aufgaben']]
+        regel('R-48', st == [f['soll_status']],
+              '%s: Status %r statt %r (K3 Snapshot)' % (f['name'], st, [f['soll_status']]))
+        regel('R-48', bool(v) == f['soll_diagnose'],
+              '%s: Diagnose-Erwartung verfehlt (K3 Snapshot)' % f['name'])
+        regel('R-48', z['cursor'] == f['soll_cursor'],
+              '%s: Cursor %r statt %r (K3 Snapshot)' % (f['name'], z['cursor'],
+                                                       f['soll_cursor']))
 
 
 def main():
