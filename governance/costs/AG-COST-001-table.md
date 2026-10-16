@@ -28,6 +28,8 @@ Tokenfelder sind Providerangaben. Thinking separat ausgewiesen; nicht nochmals z
 | forge | AG-VISUAL-005-K1-COUNTERPROBE-V1 | a307250d | 14 | 3013 | 91457 | 36893 | 262 | 0.1315362 | [Runtime](https://github.com/pahlborn/agentarium/issues/2#issuecomment-6213044280) |
 | forge | AG-PILOT-001-LOCAL-TRANSPORT-V1 | f0f7d565 | 16 | 10277 | 72913 | 23516 | 2824 | 0.1688833 | [Runtime](https://github.com/pahlborn/agentarium/issues/2#issuecomment-6213264341) |
 | forge | AG-PILOT-001-LOCAL-TRANSPORT-V2 | fdace86d | 10 | 6459 | 30310 | 24403 | 760 | 0.1286485 | [Runtime](https://github.com/pahlborn/agentarium/issues/2#issuecomment-6213328234) |
+| forge | AG-PILOT-001-ACTIVITY-V1 | d9d5ef20 | 18 | 27697 | 105215 | 38732 | 6134 | 0.3843575 | [Runtime](https://github.com/pahlborn/agentarium/issues/2#issuecomment-6213943285) |
+| forge | AG-PILOT-001-ACTIVITY-V2 | 3ba53364 | 16 | 13026 | 86446 | 27953 | 2503 | 0.2088191 | [Runtime](https://github.com/pahlborn/agentarium/issues/2#issuecomment-6214054273) |
 
 K3-Versuch: CLI-Turngrenze erreicht; Patch erhalten und unabhängig geprüft. Der anschließende begrenzte K1-Testauftrag ist erfolgreich geliefert und durch Sentinel bestätigt: beide Prüfer grün, K1/K2/K3-Rückfälle erkannt. Liefercommit da860fd19f38e9938ed201546f2a6e5b4cc765f8. Kein Merge oder Deployment. Aktuelles Kostenfeld bleibt sichtbar und zeigt bei unvollständiger Erfassung ausschließlich „Kosten nicht vollständig ermittelbar.“
 
@@ -55,3 +57,5 @@ Jeder neue Auftrag: genaue Anforderungsversion, Agent/Session, tatsächliches Mo
 Aktualisierung 16.10.2026: Der reguläre K3-Codingaufruf oben ist neu erfasst. Keine zusätzlichen Modellaufrufe für die Buchführung. ChatGPT-/GitHub-Abrechnung bleibt unzugänglich; keine vollständige Gesamtsumme.
 
 Lokaler Transport: V1 Worker erfolgreich, Runtime-QA FAIL14/18; V2 gezielt korrigiert, unabhängige Runtime-QA PASS18/18. Arbeitscommit19463534defa6f9c6b48812eeebf56433fa28e89; kein Merge/Deployment/echter Pilot. Beide Aufrufe0.2975318USD, kein Projektgesamtbetrag.
+
+Aktivitätsmonitor: V1 an Turn-Grenze beendet, Patch erhalten, QA zunächst FAIL 11/14. V2 Worker erfolgreich, Aktivität 14/14 und Transport 18/18; redaktionelle README-Korrektur separat bestätigt. Browser-DOM nicht getestet. Beide Aufrufe zusammen 0.5931766 USD, kein Projektgesamtbetrag. Keine weitere Anthropic-Ausführung für die Dokukorrektur.
