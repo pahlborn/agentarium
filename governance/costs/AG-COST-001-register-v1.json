@@ -1,6 +1,6 @@
 {
   "schema": "agentarium.requirement-cost-register.v1",
-  "version": 4,
+  "version": 5,
   "created_at": "2026-10-14T04:15:27.033Z",
   "currency": "USD",
   "scope": "Known NACHTPOST-003/VISUAL-004 calls plus explicit earlier failure gaps. This is not the full project bill.",
@@ -581,7 +581,7 @@
       "actual_reasoning": "unconfirmed",
       "reported_usage_cost_usd": 0.22442469999999998,
       "cost_source": "Claude CLI terminal metadata even though error_max_turns; not reconciled with invoice",
-      "status": "TURN_LIMIT_PATCH_PRESERVED_QA_PENDING",
+      "status": "TURN_LIMIT_PATCH_PRESERVED_K3_PASS_INTEGRATION_BLOCKED_TEST_GAP",
       "run": "https://github.com/pahlborn/agentarium/actions/runs/38878383344",
       "evidence_ref": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6212103126",
       "requirement_refs": [
