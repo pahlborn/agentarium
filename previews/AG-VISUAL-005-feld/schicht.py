@@ -214,7 +214,7 @@ SKRIPT = """
 
      Der Bauzeitpunkt kommt beim Bauen aus der Uhr. Von Hand gepflegte
      Datumsangaben sind nach der zweiten Änderung falsch. */
-  var FASSUNG = '38', GEBAUT = '__GEBAUT__';
+  var FASSUNG = '39', GEBAUT = '__GEBAUT__';
 
   /* DIE BETRIEBSART. Sie kommt aus den Daten; fehlt sie, gilt `demo`.
      Alles, was sich zwischen Prototyp und Produktivbetrieb unterscheidet,
@@ -2331,7 +2331,7 @@ SKRIPT = """
       'BALL — Bio-Agent &amp; LLM Logistics<br>' +
       'Agentarium ist die sichtbare Welt des Teams; BALL die Orchestrierung ' +
       'dahinter: Aufgaben, Zustände und Übergaben zwischen Mensch und ' +
-      'LLM-Agenten.<br><b>Fassung ' + FASSUNG + ' · gebaut ' + GEBAUT + '</b>';
+      'LLM-Agenten.<br><b>Fassung ' + FASSUNG + ' &middot; ' + GEBAUT + '</b>';
     var h = '';
     if (STUECKE.length > 1) {
       h += '<ul class="wProjekte">';
@@ -3055,7 +3055,11 @@ def bauen(quelle, ziel, stueck):
         stueck = [stueck]
     # Der Bauzeitpunkt kommt aus der Uhr, nicht aus einer gepflegten Zeile.
     # Von Hand gepflegte Datumsangaben sind nach der zweiten Aenderung falsch.
-    gebaut = datetime.datetime.now(datetime.timezone.utc).strftime('%d.%m.%Y')
+    # EIN TAGESDATUM IST KEIN ZEITSTEMPEL.
+    # Peter, zuerst zu den Dokumenten, dann hier: an einem Tag entstehen
+    # mehrere Fassungen, und dann sagt das Datum nicht, welche man vor sich
+    # hat. ISO 8601 mit Uhrzeit und Zone, wie im Fassungsregister.
+    gebaut = datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%dT%H:%MZ')
     sk = (SKRIPT.replace('__AGENTEN__', json.dumps(agenten))
                 .replace('__ARTEN__', json.dumps(ARTEN))
                 .replace('__GEBAUT__', gebaut)
