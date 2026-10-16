@@ -1,0 +1,43 @@
+{
+  "schema": "agentarium.handoff.v0",
+  "task_id": "AG-VISUAL-005-K3-FINAL",
+  "version": 1,
+  "sender": "Atlas",
+  "recipient": "forge",
+  "platform": "claude-code",
+  "technical_agent": "coding-agent",
+  "status": "AWAITING_OWNER_DECISION",
+  "repository": "pahlborn/agentarium",
+  "base_commit": "d2ceca168cbd2f4cacaf2311412622d968e2edb4",
+  "proposed_branch": "feature/ag-interface-k3-final",
+  "review_ref": "governance/AG-VISUAL-005-INTERFACE-v2-1-2-team-review-v1.md",
+  "goal": "Unbelegtes Done darf nicht in den akzeptierten fachlichen Zustand gelangen.",
+  "scope": [
+    "Done-Acceptance vor Zustandsuebernahme anhand vollstaendiger Nachweisreferenz und akzeptiertem Nachweisstand.",
+    "Freie Autorisierungsstrings bleiben wirkungslos; normale gueltige Done-Uebergaenge bleiben moeglich.",
+    "Gleiche Entscheidung bei Snapshot+Tail und Vollhistorie.",
+    "Permanente Verwerfungsreferenz im Journal-/Snapshotvertrag klar von Zeitabdeckung trennen.",
+    "Fixture12 und gezielte Regression auf akzeptierten Zustand korrigieren."
+  ],
+  "non_goals": [
+    "Keine Vollspezifikation oder Volltestkampagne.",
+    "K1/K2 und R4/R5/B1/B5 nicht erneut umbauen.",
+    "Kein neuer Betriebshost, keine Infrastruktur, kein Pilotstart.",
+    "Kein Merge, Release, Deployment."
+  ],
+  "acceptance": [
+    "Ungueltiges Done: Empfangscursor nach dokumentierter Regel, fachlicher Zustand unveraendert, Verwerfung nachvollziehbar.",
+    "Gueltiges Done mit richtiger Aufgabe/Artefaktversion/Kriterien/Nachweis: akzeptiert.",
+    "Snapshot+Tail und Vollhistorie treffen identische Nachweisentscheidung."
+  ],
+  "pre_execution": [
+    "Peter entscheidet nach wiederholten Fehlkorrekturen ueber Bearbeiterwechsel.",
+    "Konkreten passenden Forge-Kanal/Permissions und Kostenrahmen vor Start nachweisen; altes Relay nicht umdeuten."
+  ],
+  "expected_result": "Commit, betroffene Pfade/Blob-Hashes, gezielte reproduzierbare Zustandsnachweise und Grenzen.",
+  "runtime": {
+    "host_received": false,
+    "worker_started": false,
+    "session_id": null
+  }
+}
