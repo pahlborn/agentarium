@@ -1,0 +1,49 @@
+{
+  "schema": "agentarium.handoff.v0",
+  "task_id": "AG-PILOT-001-SOURCE-HOOK-V1",
+  "version": 1,
+  "sender": "Atlas",
+  "recipient": "Forge/coding-agent",
+  "status": "AUTHORIZED",
+  "repository": "pahlborn/agentarium",
+  "branch": "feature/ag-interface-k3-final",
+  "base_commit": "22ee82b48239082eca89a533db4645a9dc16d523",
+  "allowed_paths": [
+    "relay/activity_capture.py",
+    "relay/claude_stream_diagnostics.py",
+    "pilot/AG-PILOT-001/SOURCE-CAPTURE.md"
+  ],
+  "authorization": {
+    "source": "Peter 2026-10-16 15:02 Europe/Berlin: start actual source and Agentarium integration.",
+    "scope": "One narrow capture implementation; no architecture change/merge/deploy/new paid service. Subsequent actual source proof uses next required Fachauftrag, not paid modeltest."
+  },
+  "goal": "IMPLEMENT automatic metadata-only activity capture for actual Claude CLI execution in existing run_stream, compatible with verified activity.py, without changing existing run_stream outcomes.",
+  "instructions": [
+    "Only3 allowed files: new relay/activity_capture.py; narrow optional hooks in claude_stream_diagnostics.py; short SOURCE-CAPTURE.md. No Bash/network/subagents/tests available, no broad refactor. Keep all legacy positional/keyword calls and return/exception behavior unchanged. Independent Sentinel runs existing diagnostics tests and fakeCLI cases.",
+    "New ActivityRecorder(path, *, agent, task_id, evidence_ref, sample_interval=2.0, max_observations=2000) or similarly documented exact interface. Output atomic JSON {schema:'agentarium.activity-observations.v1',data_kind:'OBSERVED',capture:{...partial...},observations:[...]} consumable by pilot/AG-PILOT-001/activity.py. Use real UTC observed_at at collection, monotone elapsed source clock separately. Default ordinary metadata only; no raw prompts/text/thinking/toolresults/secrets/token-per-event.",
+    "Add OPTIONAL activity_recorder=None parameter to run_stream. Notify recorder at successful Popen, parsed provider events, and final process outcome. Guard recorder exceptions: cannot stop/alter worker, legacy result/errors/checkpoints preserved, report recorder failure through sanitized metadata/counter rather than arbitrary exception text. Missing/unwritable activity file must not turn successful work into failure. No new dependencies or model/API/GitHub calls inside capture.",
+    "Never invent a provider session_id. Establish from validated actual provider system/result top-level session_id. Until known, capture unbound process metadata only, no canonical observation with fake/provisional session. Never silently change established identity. Single worker has fixed agent/task. Source running/processalive is NOT working. If no provider session ever established, retain explicit coverage gap instead of fabricating identity.",
+    "On actual session establishment record a stream_sample baseline with then-current actual allowed counters and last_event_seconds/elapsed_seconds (zero only when truly no relevant event has occurred yet). Count only observed assistant/user and semantic stream_event deltas (exclude ping/system/timer/rate/invalid telemetry). Do not retain any content. Need two actual snapshots for activity.py; first relevant progress can trigger first new snapshot promptly, then coalesce subsequent snapshots at configured interval, not tokenwise disk/network writes. Ensure in-memory counts update even when coalescing. Flush bounded final progress before terminal to preserve short sessions.",
+    "Each observation: stable id generated once, canonical agent (forge), actualsession/task, observed_at withUTCzone, evidence_ref, signal. stream_sample includes allowed event_counts, last_event_seconds of meaningful activity ONLY, elapsed_seconds. source_waiting/source_blocked NOT inferred from silence or toolcalls; no fake waiting. At terminal exactly one execution_stopped(success/failed/aborted) for establishedsession; timeout/output-limit/processfailure/errorresult preserve correct outcome, success never taskDone. Handle trailing result without newline and exceptions/partial result exactly like current diagnostics. Terminal absorbing; idempotent finalization.",
+    "Atomic bounded output: cap retained observations explicitly max_observations, mark truncation/count/coverage; preserve enough recent samples + terminal, never claim fullhistory after pruning. local2s sampling is configuration, not end-to-end latency guarantee/durable-store proof. Do not archive per token or commit GitHub per event. There is no automatic GitHub→browser live delivery yet; document this actual boundary.",
+    "Use simple recorder lifecycle methods and document exact calls so next task wrapper can instantiate recorder and pass into run_stream. SOURCE-CAPTURE.md include minimal wrapper integration example, actual identity rules, opt-in/default-no-capture, error handling, consumer compatibility, latency/delivery limits. Stop after code + short CA_IMPLEMENTED, TESTS_NOT_RUN_BY_FORGE. No testgeneration or unrelated UI/relay/workflow edits."
+  ],
+  "model_routing": {
+    "requested_model": "sonnet",
+    "requested_reasoning": "medium",
+    "actual_model": null,
+    "actual_reasoning": "unconfirmed",
+    "override": false,
+    "cost_control": "One bounded coding session; existing profile defaults, no price-triggered cutoff; preserve actual usage/partial patch; stop on insufficient credit, no automatic replay.",
+    "estimated_cost_usd": null
+  },
+  "dispatch_commit": "8da869b870c6208cf48d30f7bda051af11cf4bb0",
+  "runtime": {
+    "worker_received": true,
+    "worker_stopped": true,
+    "session_id": "bf2aa07d-a3cb-44f7-9d5e-9b032fa733fa",
+    "run": "https://github.com/pahlborn/agentarium/actions/runs/38905283794",
+    "result_ref": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6216191294",
+    "status": "WORKER_SUCCESS_QA_PENDING"
+  }
+}
