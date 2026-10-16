@@ -62,3 +62,6 @@ Referenz-/Prüfmittelblocker auf isoliertem Arbeitsbranch behoben und unabhängi
 
 ## Lokaler Integrationsschritt – 2026-10-16
 Forge hat einen nur auf127.0.0.1 gestarteten Transportprototyp gebaut und gezielt korrigiert. Sentinel bestätigt18/18 Laufzeitproben am synthetischen Testaufbau. Arbeitscommit19463534defa6f9c6b48812eeebf56433fa28e89; Nachweise governance/AG-PILOT-001-local-abschluss-v2.md. Keine Bereitstellung und kein echter Pilot. Weiterhin fehlen Feldadapter, tatsächliche Runtimeproduzenten, Host/dauerhafte Speicherung/Rechte und finale Archivverpackung. Testserver wurden beendet.
+
+## P10 – Tatsächliche Aktivität und sichtbare Probleme
+Verbindlich nach Peters Auftrag16.10.2026 12:41/12:48 Europe/Berlin. Quelle/Session/Task-spezifisch Aktivität beobachtet, explizites Warten, Blocker/Fehler, Ende und unbekannt/veraltet unterscheiden. Auftrag, Transportheartbeat oder Prozess-alive beweisen keine Arbeit. Kein unbelegtes Dauerarbeiten; veraltete Belege=>unknown, niemals automatischwaiting. Beendete Ausführung ist kein fachlichesDone. Quellen-/Transport-/Erfassungsstatus getrennt; Replay beurteilt Belegaktualität gegen Datenzeit. Details und fünf reproduzierbare Kriterien: specifications/AG-PILOT-001-activity-acceptance-v1.md. StatusNOT_TESTED_END_TO_END. Ohne durchgängigen Quell-/Monitorbeleg kein PilotPASS.
