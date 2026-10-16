@@ -440,17 +440,86 @@ def fall11():
                            initial_state=zc, cursor=s['cursor'])
     regel('R-41', any('doppelt' in x for x in vd) and zd == fort,
           'doppeltes Ereignis nicht erkannt oder Zustand veraendert: %s' % '; '.join(vd))
-    zl, vl = RED.reduziere(entpacke(d['luecke_im_tail']['tail_umschlaege']),
+    # K2: Es genuegt NICHT, die Luecke zu melden. Geprueft wird, dass das
+    # Ereignis hinter der Luecke nicht wirkt und den Cursor nicht setzt.
+    lu = d['luecke_im_tail']
+    zl, vl = RED.reduziere(entpacke(lu['tail_umschlaege']),
                            initial_state=zc, cursor=s['cursor'])
-    regel('R-42', any('Luecke' in x for x in vl),
-          'Luecke im Tail nicht gemeldet: %s' % '; '.join(vl))
+    regel('R-42', any('Luecke' in x for x in vl), 'Luecke nicht gemeldet')
+    regel('R-42', zl['cursor'] == lu['soll_cursor'],
+          'Cursor %r statt %r - eine Luecke darf die Fortschreibung sperren, '
+          'nicht ueberspringen (K2)' % (zl['cursor'], lu['soll_cursor']))
+    regel('R-42', zl == lu['soll_zustand'],
+          'Zustand hinter der Luecke weicht ab - die Wirkung des gepufferten '
+          'Ereignisses ist eingetreten (K2):\n     ist  %s\n     soll %s'
+          % (json.dumps(zl, ensure_ascii=False, sort_keys=True),
+             json.dumps(lu['soll_zustand'], ensure_ascii=False, sort_keys=True)))
+    regel('R-42', all(a['status'] != 'done' for a in zl['aufgaben']),
+          'hinter der Luecke steht done im Zustand (K2)')
+
+    # K2: Nachlieferung schliesst die Luecke, danach geordnete Fortsetzung.
+    na = d['nachlieferung']
+    zn, vn = RED.reduziere(entpacke(na['tail_umschlaege']),
+                           initial_state=zc, cursor=s['cursor'])
+    regel('R-43', zn['cursor'] == na['soll_cursor'],
+          'nach Nachlieferung Cursor %r statt %r (K2)' % (zn['cursor'], na['soll_cursor']))
+    regel('R-43', zn == na['soll_zustand'] == fort,
+          'nach Nachlieferung weicht der Zustand von der geordneten Zustellung ab (K2)')
+
+
+# ----------------------------------------------------------------- K1, K3
+def fall12():
+    d = lade('12-zustandsschutz.json')['daten']
+    bekannt = d['bekannter_zustand']
+
+    for f in d['k1_faelle']:
+        for e in f['ereignisse']:
+            form(e, 'arbeitsereignis', '12 %s/%s' % (f['name'], e['id']))
+        z, v = RED.reduziere(f['ereignisse'])
+        nr = 'R-44' if f['name'] == 'ungueltige_erste_transition' else 'R-28'
+        # Erst die Diagnose ...
+        regel(nr, bool(v) == f['soll_verstoss'],
+              '%s: Diagnose fehlt' % f['name'])
+        # ... und dann, worauf es ankommt: der FACHLICHE Zustand ist unberuehrt.
+        fach = {k: v for k, v in z.items() if k != 'cursor'}
+        regel(nr, fach == f['soll_fachzustand'],
+              '%s: FACHLICHER ZUSTAND veraendert, obwohl die Pruefung fiel (K1):\n'
+              '     ist  %s\n     soll %s'
+              % (f['name'],
+                 json.dumps(fach, ensure_ascii=False, sort_keys=True),
+                 json.dumps(f['soll_fachzustand'], ensure_ascii=False, sort_keys=True)))
+        # Der Cursor ist Verbrauchsstand, nicht Wirkungsbestaetigung: er zaehlt
+        # weiter, sonst stuende der Strom. Bei einer LUECKE gilt das Gegenteil
+        # (Fall 11, R-42). Die Abgrenzung steht im Fixture unter abgrenzung.
+        regel('R-46', z['cursor'] == f['soll_cursor_verbrauch'],
+              '%s: Cursor %r statt %r' % (f['name'], z['cursor'],
+                                          f['soll_cursor_verbrauch']))
+        if f['soll_kein_done']:
+            regel(nr, all(a['status'] != 'done' for a in z['aufgaben']),
+                  '%s: done steht im Zustand (K1)' % f['name'])
+        if f['name'] == 'ungueltige_erste_transition':
+            regel('R-44', z['aufgaben'] == [],
+                  'ungueltige erste Transition hat die Aufgabe angelegt (K1)')
+
+    regel('R-45', RED.ABWEICHUNG_AKTIV is False,
+          'der Abweichungsweg ist nicht deaktiviert (K3)')
+    regel('R-45', d['k3_profil']['abweichung_aktiv'] is False,
+          'das Profil weist den Abweichungsweg als aktiv aus (K3)')
+    for f in d['k3_faelle']:
+        b = RED.done_nachweise(f['ereignisse'])
+        regel('R-45', bool(b) == f['soll_done_beanstandet'],
+              '%s: freie Autorisierung schaltet Done frei (K3)' % f['name'])
+        z, _ = RED.reduziere(f['ereignisse'])
+        regel('R-45', any(a['status'] == 'done' for a in z['aufgaben']),
+              '%s: Vorbedingung der Probe stimmt nicht - der Statuswechsel '
+              'selbst ist gueltig, nur der NACHWEIS fehlt' % f['name'])
 
 
 def main():
-    print('Schnittstellenvertrag V2.1.1 — Prueflauf\n')
+    print('Schnittstellenvertrag V2.1.2 — Prueflauf\n')
     print('Negativproben:')
     for f in (negativ, fall01, fall02, fall03, fall04, fall05, fall06, fall07,
-              fall08, fall09, fall11):
+              fall08, fall09, fall11, fall12):
         try:
             f()
         except Exception as e:
@@ -466,7 +535,7 @@ def main():
         for z in fehler:
             print('  ' + z)
         return 1
-    print('\nAlle Faelle 01-11 bestanden, alle Proben wie verlangt behandelt.')
+    print('\nAlle Faelle 01-12 bestanden, alle Proben wie verlangt behandelt.')
     print('NICHT geprueft: Server, SSE, Browser, serverseitige Rechte, '
           'Laufzeit-Nebenwirkungsfreiheit.')
     return 0

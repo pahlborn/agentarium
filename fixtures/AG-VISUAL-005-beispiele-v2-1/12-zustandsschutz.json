@@ -1,0 +1,363 @@
+{
+  "fall": "12",
+  "titel": "Zustandsschutz: fehlerhafte Kette und freie Autorisierung veraendern nichts",
+  "prueft": [
+    "V2.1.2 K1",
+    "V2.1.2 K3"
+  ],
+  "grundlage": "Atlas in der Abschlusspruefung: Eine Beanstandung zu erkennen ist nicht gleichbedeutend damit, eine ungueltige Zustandsaenderung zu verhindern. Fassung 2 des Reducers meldete eine kaputte Revisionskette und ueberschrieb den Status trotzdem. Jede Probe hier vergleicht deshalb den ZUSTAND, nicht einen Fehlertext.",
+  "erwartung": [
+    {
+      "regel": "R-45",
+      "soll": "K3: abweichung_autorisiert_durch und abweichung_grund allein schalten KEIN Done frei. Der Ausnahmeweg ist im aktuellen Referenzprofil deaktiviert, weil es keinen maschinenpruefbaren Autorisierungsnachweis gibt."
+    },
+    {
+      "regel": "R-28",
+      "soll": "K1: Bei nicht steigender Revision oder falschem Vorgaenger ist der FACHLICHE Zustand zeichengleich dem bekannten - keine Anlage, kein Update, kein done. Zusaetzlich liegt eine Diagnose vor."
+    },
+    {
+      "regel": "R-44",
+      "soll": "K1: Eine ungueltige erste Transition legt die Aufgabe NICHT an."
+    },
+    {
+      "regel": "R-46",
+      "soll": "Der Cursor zaehlt fuer ein inhaltlich ungueltiges Ereignis weiter (Verbrauchsstand), damit der Strom nicht stehenbleibt - bei einer LUECKE dagegen nicht. Siehe abgrenzung."
+    }
+  ],
+  "daten": {
+    "bekannter_zustand": {
+      "cursor": 1,
+      "aufgaben": [
+        {
+          "task_id": "T-1",
+          "parent_task_id": null,
+          "work_item_type": null,
+          "status": "offen",
+          "item_revision": 1,
+          "letzte_transition_id": "A",
+          "owner": null
+        }
+      ],
+      "artefakte": [],
+      "blockaden": [],
+      "abdeckung": "complete"
+    },
+    "k1_faelle": [
+      {
+        "name": "revision_nicht_steigend",
+        "warum": "Revision 1 nach Revision 1. Fassung 2 meldete das und ueberschrieb den Status trotzdem - danach stand done im Zustand.",
+        "ereignisse": [
+          {
+            "id": "A",
+            "project_id": "AG-NEU",
+            "run_id": "AG-NEU-R1",
+            "task_id": "T-1",
+            "actor": "atlas",
+            "kind": "status_change",
+            "title": "Statuswechsel A",
+            "caused_by": [],
+            "occurred_at": "2026-10-16T09:00:00Z",
+            "recorded_at": "2026-10-16T09:00:01Z",
+            "fictional": false,
+            "from": null,
+            "to": "offen",
+            "item_revision": 1,
+            "previous_transition_id": null
+          },
+          {
+            "id": "B",
+            "project_id": "AG-NEU",
+            "run_id": "AG-NEU-R1",
+            "task_id": "T-1",
+            "actor": "atlas",
+            "kind": "status_change",
+            "title": "Statuswechsel B",
+            "caused_by": [],
+            "occurred_at": "2026-10-16T09:00:00Z",
+            "recorded_at": "2026-10-16T09:00:01Z",
+            "fictional": false,
+            "from": "offen",
+            "to": "done",
+            "item_revision": 1,
+            "previous_transition_id": "A"
+          }
+        ],
+        "soll_verstoss": true,
+        "soll_kein_done": true,
+        "soll_fachzustand": {
+          "aufgaben": [
+            {
+              "task_id": "T-1",
+              "parent_task_id": null,
+              "work_item_type": null,
+              "status": "offen",
+              "item_revision": 1,
+              "letzte_transition_id": "A",
+              "owner": null
+            }
+          ],
+          "artefakte": [],
+          "blockaden": [],
+          "abdeckung": "complete"
+        },
+        "soll_cursor_verbrauch": 2,
+        "bemerkung": "Verglichen wird der fachliche Zustand ohne Cursor; der Cursor ist Verbrauchsstand (siehe abgrenzung)."
+      },
+      {
+        "name": "falscher_vorgaenger",
+        "warum": "previous_transition_id zeigt ins Leere. Der Zustand darf sich nicht bewegen.",
+        "ereignisse": [
+          {
+            "id": "A",
+            "project_id": "AG-NEU",
+            "run_id": "AG-NEU-R1",
+            "task_id": "T-1",
+            "actor": "atlas",
+            "kind": "status_change",
+            "title": "Statuswechsel A",
+            "caused_by": [],
+            "occurred_at": "2026-10-16T09:00:00Z",
+            "recorded_at": "2026-10-16T09:00:01Z",
+            "fictional": false,
+            "from": null,
+            "to": "offen",
+            "item_revision": 1,
+            "previous_transition_id": null
+          },
+          {
+            "id": "B",
+            "project_id": "AG-NEU",
+            "run_id": "AG-NEU-R1",
+            "task_id": "T-1",
+            "actor": "atlas",
+            "kind": "status_change",
+            "title": "Statuswechsel B",
+            "caused_by": [],
+            "occurred_at": "2026-10-16T09:00:00Z",
+            "recorded_at": "2026-10-16T09:00:01Z",
+            "fictional": false,
+            "from": "offen",
+            "to": "done",
+            "item_revision": 2,
+            "previous_transition_id": "FALSCH"
+          }
+        ],
+        "soll_verstoss": true,
+        "soll_kein_done": true,
+        "soll_fachzustand": {
+          "aufgaben": [
+            {
+              "task_id": "T-1",
+              "parent_task_id": null,
+              "work_item_type": null,
+              "status": "offen",
+              "item_revision": 1,
+              "letzte_transition_id": "A",
+              "owner": null
+            }
+          ],
+          "artefakte": [],
+          "blockaden": [],
+          "abdeckung": "complete"
+        },
+        "soll_cursor_verbrauch": 2,
+        "bemerkung": "Verglichen wird der fachliche Zustand ohne Cursor; der Cursor ist Verbrauchsstand (siehe abgrenzung)."
+      },
+      {
+        "name": "vorgaenger_fehlt",
+        "warum": "previous_transition_id null, obwohl es einen Vorgaenger gibt.",
+        "ereignisse": [
+          {
+            "id": "A",
+            "project_id": "AG-NEU",
+            "run_id": "AG-NEU-R1",
+            "task_id": "T-1",
+            "actor": "atlas",
+            "kind": "status_change",
+            "title": "Statuswechsel A",
+            "caused_by": [],
+            "occurred_at": "2026-10-16T09:00:00Z",
+            "recorded_at": "2026-10-16T09:00:01Z",
+            "fictional": false,
+            "from": null,
+            "to": "offen",
+            "item_revision": 1,
+            "previous_transition_id": null
+          },
+          {
+            "id": "B",
+            "project_id": "AG-NEU",
+            "run_id": "AG-NEU-R1",
+            "task_id": "T-1",
+            "actor": "atlas",
+            "kind": "status_change",
+            "title": "Statuswechsel B",
+            "caused_by": [],
+            "occurred_at": "2026-10-16T09:00:00Z",
+            "recorded_at": "2026-10-16T09:00:01Z",
+            "fictional": false,
+            "from": "offen",
+            "to": "done",
+            "item_revision": 2,
+            "previous_transition_id": null
+          }
+        ],
+        "soll_verstoss": true,
+        "soll_kein_done": true,
+        "soll_fachzustand": {
+          "aufgaben": [
+            {
+              "task_id": "T-1",
+              "parent_task_id": null,
+              "work_item_type": null,
+              "status": "offen",
+              "item_revision": 1,
+              "letzte_transition_id": "A",
+              "owner": null
+            }
+          ],
+          "artefakte": [],
+          "blockaden": [],
+          "abdeckung": "complete"
+        },
+        "soll_cursor_verbrauch": 2,
+        "bemerkung": "Verglichen wird der fachliche Zustand ohne Cursor; der Cursor ist Verbrauchsstand (siehe abgrenzung)."
+      },
+      {
+        "name": "ungueltige_erste_transition",
+        "warum": "Eine erste Transition mit Vorgaenger ist ungueltig. Die Aufgabe darf nicht ANGELEGT werden.",
+        "ereignisse": [
+          {
+            "id": "D",
+            "project_id": "AG-NEU",
+            "run_id": "AG-NEU-R1",
+            "task_id": "T-1",
+            "actor": "atlas",
+            "kind": "status_change",
+            "title": "Statuswechsel D",
+            "caused_by": [],
+            "occurred_at": "2026-10-16T09:00:00Z",
+            "recorded_at": "2026-10-16T09:00:01Z",
+            "fictional": false,
+            "from": null,
+            "to": "offen",
+            "item_revision": 1,
+            "previous_transition_id": "IRGENDWAS"
+          }
+        ],
+        "soll_verstoss": true,
+        "soll_kein_done": true,
+        "soll_fachzustand": {
+          "aufgaben": [],
+          "artefakte": [],
+          "blockaden": [],
+          "abdeckung": "complete"
+        },
+        "soll_cursor_verbrauch": 1,
+        "bemerkung": "Verglichen wird der fachliche Zustand ohne Cursor; der Cursor ist Verbrauchsstand (siehe abgrenzung)."
+      }
+    ],
+    "k3_faelle": [
+      {
+        "name": "freie_autorisierung_ohne_nachweis",
+        "warum": "Zwei frei gesetzte Zeichenketten sind keine Autorisierung.",
+        "ereignisse": [
+          {
+            "id": "A",
+            "project_id": "AG-NEU",
+            "run_id": "AG-NEU-R1",
+            "task_id": "T-1",
+            "actor": "atlas",
+            "kind": "status_change",
+            "title": "Statuswechsel A",
+            "caused_by": [],
+            "occurred_at": "2026-10-16T09:00:00Z",
+            "recorded_at": "2026-10-16T09:00:01Z",
+            "fictional": false,
+            "from": null,
+            "to": "offen",
+            "item_revision": 1,
+            "previous_transition_id": null
+          },
+          {
+            "id": "E",
+            "project_id": "AG-NEU",
+            "run_id": "AG-NEU-R1",
+            "task_id": "T-1",
+            "actor": "atlas",
+            "kind": "status_change",
+            "title": "Statuswechsel E",
+            "caused_by": [],
+            "occurred_at": "2026-10-16T09:00:00Z",
+            "recorded_at": "2026-10-16T09:00:01Z",
+            "fictional": false,
+            "from": "offen",
+            "to": "done",
+            "item_revision": 2,
+            "previous_transition_id": "A",
+            "artifact_id": "ART-1",
+            "version": "v1",
+            "criteria_ref": "KRIT@v1",
+            "abweichung_autorisiert_durch": "Irgendwer",
+            "abweichung_grund": "weil es schnell gehen musste"
+          }
+        ],
+        "soll_done_beanstandet": true
+      },
+      {
+        "name": "freie_autorisierung_statt_fehlendem_nachweis",
+        "warum": "Auch ohne genannte Referenz darf die Abweichung nichts freischalten.",
+        "ereignisse": [
+          {
+            "id": "A",
+            "project_id": "AG-NEU",
+            "run_id": "AG-NEU-R1",
+            "task_id": "T-1",
+            "actor": "atlas",
+            "kind": "status_change",
+            "title": "Statuswechsel A",
+            "caused_by": [],
+            "occurred_at": "2026-10-16T09:00:00Z",
+            "recorded_at": "2026-10-16T09:00:01Z",
+            "fictional": false,
+            "from": null,
+            "to": "offen",
+            "item_revision": 1,
+            "previous_transition_id": null
+          },
+          {
+            "id": "F",
+            "project_id": "AG-NEU",
+            "run_id": "AG-NEU-R1",
+            "task_id": "T-1",
+            "actor": "atlas",
+            "kind": "status_change",
+            "title": "Statuswechsel F",
+            "caused_by": [],
+            "occurred_at": "2026-10-16T09:00:00Z",
+            "recorded_at": "2026-10-16T09:00:01Z",
+            "fictional": false,
+            "from": "offen",
+            "to": "done",
+            "item_revision": 2,
+            "previous_transition_id": "A",
+            "abweichung_autorisiert_durch": "Peter",
+            "abweichung_grund": "muendlich zugesagt"
+          }
+        ],
+        "soll_done_beanstandet": true
+      }
+    ],
+    "k3_profil": {
+      "abweichung_aktiv": false,
+      "begruendung": "Solange kein maschinenpruefbarer Autorisierungsnachweis definiert ist, bleibt der Weg abgeschaltet. Wird einer definiert, wird eine Pruefung eingehaengt - nicht ein Schalter umgelegt. Keine neue Authentifizierungs- oder Freigabeinfrastruktur."
+    },
+    "abgrenzung": {
+      "frage": "Darf der Cursor fuer ein inhaltlich ungueltiges Ereignis weiterzaehlen?",
+      "entscheidung": "Ja - und nur dafuer.",
+      "begruendung": "Der Cursor ist der VERBRAUCHSSTAND der Zustellung, nicht eine Bestaetigung der Wirkung. Ein inhaltlich ungueltiges Ereignis WURDE zugestellt; zaehlte man es nicht, stuende der Strom fuer immer, weil jedes folgende Ereignis als Luecke gaelte. Geschuetzt wird der FACHLICHE Zustand: Aufgaben, Artefakte, Blockaden, Abdeckung bleiben zeichengleich.",
+      "abgrenzung_K2": "Bei einer LUECKE ist es umgekehrt: dort fehlt die Zustellung, also darf der Cursor nicht springen. Fall 11 prueft das getrennt.",
+      "offen_fuer_atlas": "Falls ihr wollt, dass auch ein inhaltlich ungueltiges Ereignis den Cursor nicht weiterzaehlt, sagt es - dann braucht der Vertrag eine Regel, wie ein solcher Strom wieder in Gang kommt."
+    }
+  }
+}

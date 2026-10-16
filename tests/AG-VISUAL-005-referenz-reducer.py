@@ -5,6 +5,13 @@ PRUEFMITTEL, keine Produktimplementierung: rein, ohne Zustand ausserhalb der
 Rueckgabe, ohne Netz, ohne Ein- und Ausgabe. Keine Betriebs- oder
 Architekturentscheidung leitet sich daraus ab.
 
+Fassung 3 nach der Team-Abschlusspruefung (K1, K2, K3). Die Lehre, die
+sich dreimal wiederholt hat, in Atlas' Worten: "Eine Beanstandung zu
+erkennen ist nicht gleichbedeutend damit, eine ungueltige Zustandsaenderung
+zu verhindern." Fassung 2 meldete eine kaputte Revisionskette und
+ueberschrieb den Status trotzdem; sie meldete eine Sequenzluecke und setzte
+den Cursor trotzdem weiter. Beides ist jetzt gesperrt, nicht kommentiert.
+
 Fassung 2 nach dem V2.1-Team-Review (R1, R2, R3, R5). Die Luecke, die
 Sentinels Probe original_noop_with_required_shell gefunden hat:
 Fassung 1 schrieb den Status bei JEDEM Ereignis mit item_revision und to,
@@ -43,11 +50,31 @@ R9  abdeckung = complete, wenn jedes Ereignis occurred_at hat; unavailable,
     wenn keines; sonst partial.
 R10 Der Zustand kann auf einem initial_state mit echtem Stromcursor
     FORTGESCHRIEBEN werden. Der Cursor ist die stream_sequence des letzten
-    verarbeiteten Ereignisses, nicht die Anzahl der Eingaben.
+    LUECKENLOS BESTAETIGTEN Ereignisses, nicht die Anzahl der Eingaben.
+R11 **K1: Pruefen, dann uebernehmen.** Ein Statuswechsel wird vollstaendig
+    gegen den bekannten Zustand geprueft (Revision steigend, Vorgaenger
+    stimmt, erste Transition ohne Vorgaenger) und erst danach ATOMAR
+    uebernommen. Faellt eine Bedingung, bleibt die Aufgabe unveraendert und
+    wird auch nicht angelegt. Eine Fehlermeldung neben einem bereits
+    veraenderten Zustand erfuellt die Regel nicht.
+R12 **K2: Eine Sequenzluecke sperrt die Fortschreibung.** Ein Ereignis
+    hinter einer Luecke wirkt nicht und setzt den Cursor nicht weiter; es
+    wartet im Puffer. Kommt die fehlende Sequenz nach, wird der Puffer in
+    Reihenfolge abgearbeitet. Kein stilles Ueberspringen.
+R13 **K3: Der Abweichungsweg ist deaktiviert.** Solange kein
+    maschinenpruefbarer Autorisierungsnachweis existiert, schaltet die
+    bloße Kombination abweichung_autorisiert_durch + abweichung_grund KEIN
+    Done frei. Zwei frei gesetzte Zeichenketten sind keine Autorisierung.
 """
 import sys
 
 DONE_STATUS = {'done', 'abgenommen', 'fachlich_fertig', 'angenommen'}
+
+# K3: Im aktuellen Referenzprofil ist der Ausnahmeweg ABGESCHALTET. Es gibt
+# keinen maschinenpruefbaren Autorisierungsnachweis, und zwei frei gesetzte
+# Zeichenketten sind keiner. Wird einer definiert, wird hier eine Pruefung
+# eingehaengt -- nicht ein Schalter umgelegt.
+ABWEICHUNG_AKTIV = False
 ZUSTANDSFELDER = ('item_revision', 'from', 'to', 'previous_transition_id')
 PRUEFARTEN = ('review_result', 'test_result')
 
@@ -60,6 +87,36 @@ def leerer_zustand(cursor=0):
 def nachweisschluessel(e):
     """R6/R2 des Reviews: der Nachweis haengt an der VOLLEN Referenz."""
     return (e.get('task_id'), e.get('artifact_id'), e.get('version'), e.get('criteria_ref'))
+
+
+def pruefe_statuswechsel(e, aufgaben):
+    """K1: prueft einen Statuswechsel gegen den bekannten Zustand und gibt
+    (kandidat, beanstandungen) zurueck. Veraendert NICHTS. Nur wenn die
+    Beanstandungsliste leer ist, darf der Kandidat uebernommen werden."""
+    eid, t_ = e.get('id'), e['task_id']
+    b, a = [], aufgaben.get(t_)
+    if a is None:
+        if e.get('previous_transition_id') is not None:
+            b.append('%s: erste Transition von %s zeigt auf %s - Aufgabe wird '
+                     'NICHT angelegt' % (eid, t_, e['previous_transition_id']))
+        kandidat = {'task_id': t_, 'parent_task_id': e.get('parent_task_id'),
+                    'work_item_type': e.get('work_item_type'),
+                    'status': e['to'], 'item_revision': e['item_revision'],
+                    'letzte_transition_id': eid, 'owner': None}
+    else:
+        if e['item_revision'] <= a['item_revision']:
+            b.append('%s: Revision %s von %s nicht steigend (war %s) - Zustand '
+                     'bleibt unveraendert'
+                     % (eid, e['item_revision'], t_, a['item_revision']))
+        if e.get('previous_transition_id') != a['letzte_transition_id']:
+            b.append('%s: previous_transition_id %r von %s, erwartet %r - Zustand '
+                     'bleibt unveraendert'
+                     % (eid, e.get('previous_transition_id'), t_,
+                        a['letzte_transition_id']))
+        kandidat = dict(a)
+        kandidat.update(status=e['to'], item_revision=e['item_revision'],
+                        letzte_transition_id=eid)
+    return kandidat, b
 
 
 def pruefe_ereignis(e):
@@ -143,54 +200,21 @@ def reduziere(ereignisse, bis=None, initial_state=None, cursor=None):
     stand = cursor if cursor is not None else (
         initial_state.get('cursor') if initial_state else 0)
 
-    gesehen = set()
-    for e in folge:
-        eid = e.get('id')
-        seq = e.get('stream_sequence')
+    def anwenden(e):
+        """Wirkt EIN Ereignis auf den Zustand. Gibt Beanstandungen zurueck.
+        K1: Ein Statuswechsel wird vorher vollstaendig geprueft; faellt eine
+        Bedingung, bleibt die Aufgabe unveraendert und wird nicht angelegt."""
+        v = pruefe_ereignis(e)
+        if v:
+            return v                      # ungueltig: keine Zustandswirkung
+        eid, art = e.get('id'), e.get('kind')
+        v = []
 
-        # R10/R3 des Reviews: Doppeltes und Luecken fallen auf, bevor sie wirken.
-        if seq is not None:
-            if seq in gesehen or seq <= stand:
-                verstoesse.append('%s: stream_sequence %s doppelt oder veraltet '
-                                  '(Cursor %s)' % (eid, seq, stand))
-                continue
-            if seq != stand + 1:
-                verstoesse.append('%s: Luecke - stream_sequence %s nach Cursor %s'
-                                  % (eid, seq, stand))
-            gesehen.add(seq)
-            stand = seq
-        else:
-            stand += 1
-
-        b = pruefe_ereignis(e)
-        if b:
-            verstoesse.extend(b)
-            continue                      # ungueltig: keine Zustandswirkung
-
-        art = e.get('kind')
-
-        if art == 'status_change':        # R2: nur hier
-            t = e['task_id']
-            a = aufgaben.get(t)
-            if a is None:
-                if e.get('previous_transition_id') is not None:
-                    verstoesse.append('%s: erste Transition von %s zeigt auf %s'
-                                      % (eid, t, e['previous_transition_id']))
-                aufgaben[t] = {'task_id': t,
-                               'parent_task_id': e.get('parent_task_id'),
-                               'work_item_type': e.get('work_item_type'),
-                               'status': e['to'], 'item_revision': e['item_revision'],
-                               'letzte_transition_id': eid, 'owner': None}
-            else:
-                if e['item_revision'] <= a['item_revision']:
-                    verstoesse.append('%s: Revision %s von %s nicht steigend (war %s)'
-                                      % (eid, e['item_revision'], t, a['item_revision']))
-                if e.get('previous_transition_id') != a['letzte_transition_id']:
-                    verstoesse.append('%s: previous_transition_id %r von %s, erwartet %r'
-                                      % (eid, e.get('previous_transition_id'), t,
-                                         a['letzte_transition_id']))
-                a.update(status=e['to'], item_revision=e['item_revision'],
-                         letzte_transition_id=eid)
+        if art == 'status_change':        # R2, R11
+            kandidat, vb = pruefe_statuswechsel(e, aufgaben)
+            if vb:
+                return vb                 # K1: nichts uebernehmen
+            aufgaben[kandidat['task_id']] = kandidat
 
         if art == 'artifact':             # R5
             k = (e.get('artifact_id'), e.get('version'))
@@ -200,11 +224,11 @@ def reduziere(ereignisse, bis=None, initial_state=None, cursor=None):
 
         if art in PRUEFARTEN:             # R6
             k = (e.get('artifact_id'), e.get('version'))
-            a = artefakte.setdefault(k, {'artifact_id': k[0], 'version': k[1],
-                                         'supersedes': None, 'pruefungen': []})
-            a['pruefungen'].append({'kind': art, 'task_id': e.get('task_id'),
-                                    'criteria_ref': e.get('criteria_ref'),
-                                    'outcome': e.get('outcome'), 'event_id': eid})
+            art_ = artefakte.setdefault(k, {'artifact_id': k[0], 'version': k[1],
+                                            'supersedes': None, 'pruefungen': []})
+            art_['pruefungen'].append({'kind': art, 'task_id': e.get('task_id'),
+                                       'criteria_ref': e.get('criteria_ref'),
+                                       'outcome': e.get('outcome'), 'event_id': eid})
 
         if art == 'block':                # R7
             blockaden[e.get('block_id')] = {'block_id': e.get('block_id'),
@@ -215,23 +239,55 @@ def reduziere(ereignisse, bis=None, initial_state=None, cursor=None):
         if art == 'unblock':
             bl = blockaden.get(e.get('block_id'))
             if bl is None:
-                verstoesse.append('%s: unblock ohne offene Blockade %s'
-                                  % (eid, e.get('block_id')))
+                v.append('%s: unblock ohne offene Blockade %s' % (eid, e.get('block_id')))
             else:
                 bl['resolving_event_id'] = e.get('resolving_event_id') or eid
 
         oc = e.get('ownership_change')    # R8
         if oc:
-            t = effektive_aufgabe(e)
-            if t in aufgaben:
-                aufgaben[t]['owner'] = oc.get('to')
+            t_ = effektive_aufgabe(e)
+            if t_ in aufgaben:
+                aufgaben[t_]['owner'] = oc.get('to')
             else:
-                verstoesse.append('%s: Verantwortung fuer unbekannte Aufgabe %r'
-                                  % (eid, t))
+                v.append('%s: Verantwortung fuer unbekannte Aufgabe %r' % (eid, t_))
+        return v
 
-    zeiten = [e.get('occurred_at') for e in folge]
+    # ---- Zustellung: Reihenfolge, Duplikate, Luecken (R12/K2) ----
+    puffer, gesehen, gewirkt = {}, set(), []
+    for e in folge:
+        seq = e.get('stream_sequence')
+        if seq is None:
+            # Kein Transport im Spiel (Archiv, Altlog): Eingabefolge gilt.
+            verstoesse.extend(anwenden(e))
+            gewirkt.append(e)
+            stand += 1
+            continue
+        if seq in gesehen or seq <= stand:
+            verstoesse.append('%s: stream_sequence %s doppelt oder veraltet '
+                              '(Cursor %s) - verworfen' % (e.get('id'), seq, stand))
+            continue
+        if seq != stand + 1:
+            # K2: NICHT anwenden und den Cursor NICHT fortschreiben.
+            puffer[seq] = e
+            verstoesse.append('%s: Luecke - stream_sequence %s nach Cursor %s. '
+                              'Gepuffert, Cursor bleibt %s; es fehlt %s. Kein '
+                              'stilles Ueberspringen.'
+                              % (e.get('id'), seq, stand, stand, stand + 1))
+            continue
+        verstoesse.extend(anwenden(e))
+        gesehen.add(seq); gewirkt.append(e); stand = seq
+        # Nachlieferung schliesst die Luecke: Puffer geordnet abarbeiten.
+        while stand + 1 in puffer:
+            n = puffer.pop(stand + 1)
+            verstoesse.extend(anwenden(n))
+            gesehen.add(stand + 1); gewirkt.append(n); stand += 1
+    if puffer:
+        verstoesse.append('Cursor bleibt %s: %s wartet weiter im Puffer, es fehlt %s'
+                          % (stand, sorted(puffer), stand + 1))
+
+    zeiten = [e.get('occurred_at') for e in gewirkt]
     hat = [z for z in zeiten if z]
-    if initial_state and not folge:
+    if initial_state and not gewirkt:
         abdeckung = initial_state.get('abdeckung', 'unavailable')
     else:
         abdeckung = ('complete' if hat and len(hat) == len(zeiten)
@@ -267,7 +323,16 @@ def done_nachweise(ereignisse):
         if (e.get('to') or '').lower() not in DONE_STATUS:
             continue
         if e.get('abweichung_autorisiert_durch') and e.get('abweichung_grund'):
-            continue                      # eigener belegter Weg
+            if ABWEICHUNG_AKTIV:
+                continue
+            # K3: zwei frei gesetzte Zeichenketten sind keine Autorisierung.
+            beanstandet.append('%s: Abweichungsweg ist im aktuellen Profil '
+                               'DEAKTIVIERT - %r mit Grund %r ist kein '
+                               'maschinenpruefbarer Autorisierungsnachweis und '
+                               'schaltet kein Done frei'
+                               % (e.get('id'), e['abweichung_autorisiert_durch'],
+                                  e['abweichung_grund']))
+            continue
         k = nachweisschluessel(e)
         if not all(k):
             beanstandet.append('%s: Done ohne vollstaendige Nachweisreferenz '

@@ -144,6 +144,25 @@ V = [
  ('07-altlog-ohne-zeitpunkte.json',
   ['daten','manifest','ereignisse',0,'ownership_change','scope'], None,
   'R5','R-31b','vorhandene Quellangabe scope entfernt'),
+ # ---- K1/K2/K3: die Erwartungen selbst verbiegen
+ ('12-zustandsschutz.json',
+  ['daten','k1_faelle',0,'soll_fachzustand','aufgaben',0,'status'], 'done',
+  'K1','R-28','Soll-Fachzustand auf done gesetzt: der Vergleich muss anspringen'),
+ ('12-zustandsschutz.json', ['daten','k1_faelle',0,'soll_verstoss'], False,
+  'K1','R-28','Diagnose als nicht erwartet ausgegeben'),
+ ('12-zustandsschutz.json',
+  ['daten','k1_faelle',3,'soll_fachzustand','aufgaben'],
+  [{'task_id':'T-1','parent_task_id':None,'work_item_type':None,'status':'offen',
+    'item_revision':1,'letzte_transition_id':'D','owner':None}],
+  'K1','R-44','ungueltige erste Transition als angelegte Aufgabe erwartet'),
+ ('12-zustandsschutz.json', ['daten','k3_faelle',0,'soll_done_beanstandet'], False,
+  'K3','R-45','freie Autorisierung als zulaessig ausgegeben'),
+ ('12-zustandsschutz.json', ['daten','k3_profil','abweichung_aktiv'], True,
+  'K3','R-45','Profil weist den Abweichungsweg als aktiv aus'),
+ ('11-snapshot-plus-tail.json', ['daten','luecke_im_tail','soll_cursor'], 106,
+  'K2','R-42','Soll-Cursor hinter der Luecke auf 106 gesetzt'),
+ ('11-snapshot-plus-tail.json', ['daten','nachlieferung','soll_cursor'], 104,
+  'K2','R-43','Soll-Cursor nach Nachlieferung auf 104 gesetzt'),
 ]
 
 
@@ -154,6 +173,77 @@ def setze(obj, weg, wert):
         obj.pop(weg[-1], None)
     else:
         obj[weg[-1]] = wert
+
+
+def alle_faelle(m):
+    """Jede fall*-Funktion des Pruefers, aus dem Modul GELESEN statt von Hand
+    aufgezaehlt. Zweimal hat genau diese Handliste einen Fall vergessen --
+    fall11, dann fall12 -- und die zugehoerigen Mutationen liefen ins Leere.
+    Eine vergessene Pruefung ist schlimmer als eine fehlende: sie meldet
+    Erfolg."""
+    namen = sorted(n for n in dir(m) if n.startswith('fall'))
+    return [getattr(m, n) for n in namen]
+
+
+def rueckfall_proben():
+    """Der eigentliche Beweis fuer K1-K3.
+
+    Die Mutationen oben verbiegen Erwartungswerte in den Fixtures. Das zeigt,
+    dass verglichen wird -- aber nicht, dass ein RUECKFALL des Pruefmittels
+    auffaellt. Darum wird hier das geladene Reducer-Modul absichtlich auf das
+    alte Verhalten zurueckgedreht, und die zugehoerige Pruefung MUSS rot
+    werden. Atlas' Satz, zum Mitrechnen gemacht: Eine Beanstandung zu
+    erkennen ist nicht dasselbe wie eine ungueltige Aenderung zu verhindern.
+    """
+    ergebnisse = []
+
+    def lauf(patch, faelle):
+        m = modul(QUELLE)
+        patch(m.RED)
+        for fn in faelle:
+            try:
+                getattr(m, fn)()
+            except Exception as e:
+                m.fehler.append('ABBRUCH %s: %s' % (fn, e))
+        return m.fehler
+
+    # K1: Kandidatenpruefung ohne Wirkung -- wie Fassung 2, die meldete und
+    # trotzdem schrieb.
+    def k1(RED):
+        echt = RED.pruefe_statuswechsel
+        RED.pruefe_statuswechsel = lambda e, a: (echt(e, a)[0], [])
+    f = lauf(k1, ['fall12'])
+    ergebnisse.append(('K1', 'R-28',
+                       'Reducer schreibt trotz fehlerhafter Kette (Fassung 2)',
+                       any('R-28' in x or 'R-44' in x for x in f), f))
+
+    # K2: Luecke unsichtbar machen -- wie stilles Ueberspringen.
+    def k2(RED):
+        echt = RED.reduziere
+        def ohne_luecke(ereignisse, bis=None, initial_state=None, cursor=None):
+            ev = []
+            n = cursor
+            for e in (ereignisse if bis is None else ereignisse[:bis]):
+                e = dict(e)
+                if e.get('stream_sequence') is not None and n is not None:
+                    n += 1
+                    e['stream_sequence'] = n
+                ev.append(e)
+            return echt(ev, None, initial_state, cursor)
+        RED.reduziere = ohne_luecke
+    f = lauf(k2, ['fall11'])
+    ergebnisse.append(('K2', 'R-42',
+                       'Luecke stillschweigend uebersprungen',
+                       any('R-42' in x or 'R-43' in x for x in f), f))
+
+    # K3: Ausnahmeweg wieder einschalten.
+    def k3(RED):
+        RED.ABWEICHUNG_AKTIV = True
+    f = lauf(k3, ['fall12'])
+    ergebnisse.append(('K3', 'R-45',
+                       'freie Autorisierungsstrings schalten Done frei',
+                       any('R-45' in x for x in f), f))
+    return ergebnisse
 
 
 def main():
@@ -174,9 +264,7 @@ def main():
             alt = sys.stdout
             sys.stdout = _io.StringIO()
             try:
-                for fn in (m.negativ, m.fall01, m.fall02, m.fall03, m.fall04,
-                           m.fall05, m.fall06, m.fall07, m.fall08, m.fall09,
-                           m.fall11):
+                for fn in [m.negativ] + alle_faelle(m):
                     try:
                         fn()
                     except Exception as e:
@@ -197,14 +285,28 @@ def main():
             print('%-5s %-7s %-62s %s' % (befund, soll, was[:62], erg))
         finally:
             shutil.rmtree(tmp, ignore_errors=True)
+    print('\nRueckfallproben am Pruefmittel selbst:')
+    rf_fehlt = []
+    for befund, soll, was, rot, _ in rueckfall_proben():
+        print('  %-4s %-7s %-58s %s' % (befund, soll, was[:58],
+                                        'wird rot' if rot else 'BLEIBT GRUEN'))
+        if not rot:
+            rf_fehlt.append((befund, soll, was))
+
     print('\n%d von %d Verletzungen erkannt' % (treffer, len(V)), end='')
     print(', davon %d ueber eine andere Pruefung als benannt.' % ungenau if ungenau else '.')
-    if attrappen:
-        print('\n%d Pruefung(en) ohne Wirkung:' % len(attrappen))
-        for b, s, w in attrappen:
-            print('  %-5s %-7s %s' % (b, s, w))
+    if attrappen or rf_fehlt:
+        if attrappen:
+            print('\n%d Pruefung(en) ohne Wirkung:' % len(attrappen))
+            for b, s, w in attrappen:
+                print('  %-5s %-7s %s' % (b, s, w))
+        if rf_fehlt:
+            print('\n%d Rueckfall(e) blieben unentdeckt:' % len(rf_fehlt))
+            for b, s, w in rf_fehlt:
+                print('  %-5s %-7s %s' % (b, s, w))
         return 1
-    print('Jede gepruefte Regel kann fehlschlagen.')
+    print('Jede gepruefte Regel kann fehlschlagen, und ein Rueckfall des '
+          'Pruefmittels wird rot.')
     return 0
 
 
