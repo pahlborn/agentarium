@@ -214,7 +214,7 @@ SKRIPT = """
 
      Der Bauzeitpunkt kommt beim Bauen aus der Uhr. Von Hand gepflegte
      Datumsangaben sind nach der zweiten Änderung falsch. */
-  var FASSUNG = '42', GEBAUT = '__GEBAUT__';
+  var FASSUNG = '43', GEBAUT = '__GEBAUT__';
 
   /* DIE BETRIEBSART. Sie kommt aus den Daten; fehlt sie, gilt `demo`.
      Alles, was sich zwischen Prototyp und Produktivbetrieb unterscheidet,
@@ -3450,6 +3450,66 @@ SKRIPT = """
     window.addEventListener(n, tastenZeigen, { passive: true });
   });
   tastenZeigen();
+
+  /* ====================== DIE HELLIGKEIT ======================
+
+     Ein Wert, ein Regler, und er merkt sich seinen Stand im Geraet.
+
+     Warum nicht an der Maschine gedreht wird: Resonanz hat eine
+     Stellschraube dafuer (`uStaerke` im Schattenrechner), aber sie trifft
+     nur die Faeden. Die Schrift im Bild -- Namen, Meldungen, Schilder --
+     haengt nicht daran, und die ist der Grund, warum man ueberhaupt
+     heller stellen will. Ausserdem gilt: Resonanz bleibt Resonanz. Der
+     Filter liegt also ueber den Ebenen, nicht in der Maschine.
+
+     Gelesen wird in einem try: In einem privaten Fenster oder bei
+     gesperrten Seitendaten wirft schon der Zugriff. Dann steht der Regler
+     eben auf 100 und merkt sich nichts -- das ist kein Fehler, das ist
+     ein Gerät, das nichts behalten will. */
+  (function () {
+    var SCHUB = 'agentarium.hell',
+        reg = document.getElementById('agHell'),
+        wert = document.getElementById('agHellWert');
+    if (!reg) return;
+
+    function setzen(p, merken) {
+      p = Math.max(60, Math.min(190, Math.round(p)));
+      document.documentElement.style.setProperty('--agHell', (p / 100).toFixed(2));
+      /* Bei 100 keinen Filter: Ein Durchgang ueber das ganze Bild je Bild
+         ist nichts, was man fuer `brightness(1)` bezahlen sollte. */
+      document.body.classList.toggle('hellAn', p !== 100);
+      if (wert) wert.textContent = p + ' %';
+      if (reg.value !== String(p)) reg.value = String(p);
+      if (merken) {
+        try { localStorage.setItem(SCHUB, String(p)); } catch (e) {}
+      }
+    }
+
+    var gemerkt = 100;
+    try {
+      var g = parseInt(localStorage.getItem(SCHUB), 10);
+      if (g >= 60 && g <= 190) gemerkt = g;
+    } catch (e) {}
+    setzen(gemerkt, false);
+
+    reg.addEventListener('input', function () {
+      setzen(parseInt(reg.value, 10), true);
+      /* Beim Ziehen bleibt die Marke offen. Ohne das faellt sie nach
+         sechs Sekunden zu, waehrend der Finger noch auf dem Regler ist. */
+      var m = document.getElementById('agMarke');
+      if (m) {
+        m.classList.add('lesen');
+        clearTimeout(m.__ab);
+        m.__ab = setTimeout(function () { m.classList.remove('lesen'); }, 6000);
+      }
+    });
+    /* Der Regler verschluckt seine eigenen Zeigerereignisse: Sonst rührt
+       jedes Ziehen im Feld mit, und das Bild zuckt beim Einstellen. */
+    ['pointerdown', 'pointermove', 'pointerup', 'click', 'touchstart',
+     'touchmove'].forEach(function (n) {
+      reg.addEventListener(n, function (ev) { ev.stopPropagation(); });
+    });
+  })();
 
   document.getElementById('agMotor').addEventListener('click', function () {
     tastenZeigen();
