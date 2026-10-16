@@ -24,10 +24,10 @@ Tokenfelder sind Providerangaben. Thinking separat ausgewiesen; nicht nochmals z
 | archibald | AG-PROC-REVIEW-001 | 724c22a4 | nicht verfügbar | nicht verfügbar | nicht verfügbar | nicht verfügbar | nicht verfügbar | 0.0924060 | [Runtime](https://github.com/pahlborn/agentarium/issues/2#issuecomment-6150728851) |
 | forge | AG-PROC-REVIEW-001 | 0bda9588 | nicht verfügbar | nicht verfügbar | nicht verfügbar | nicht verfügbar | nicht verfügbar | 0.0254630 | [Runtime](https://github.com/pahlborn/agentarium/issues/2#issuecomment-6150740099) |
 | cadence | AG-PROC-REVIEW-001 | 9024fd9e | nicht verfügbar | nicht verfügbar | nicht verfügbar | nicht verfügbar | nicht verfügbar | 0.1237810 | [Runtime](https://github.com/pahlborn/agentarium/issues/2#issuecomment-6150760833) |
-
 | forge | AG-VISUAL-005-K3-FORGE-FINAL-V1 | 1292d0c3 | 18 | 11131 | 141812 | 39559 | 2234 | 0.2244247 | [Runtime](https://github.com/pahlborn/agentarium/issues/2#issuecomment-6212103126) |
+| forge | AG-VISUAL-005-K1-COUNTERPROBE-V1 | a307250d | 14 | 3013 | 91457 | 36893 | 262 | 0.1315362 | [Runtime](https://github.com/pahlborn/agentarium/issues/2#issuecomment-6213044280) |
 
-K3-Versuch: CLI-Turngrenze erreicht; Patch erhalten, QA ausstehend. Kein automatischer zweiter API-Aufruf. Aktuelles Kostenfeld bleibt sichtbar und zeigt bei unvollständiger Erfassung ausschließlich „Kosten nicht vollständig ermittelbar.“
+K3-Versuch: CLI-Turngrenze erreicht; Patch erhalten, K3 funktional bestätigt; ursprüngliche K1-Gegenprobe maskiert. Begrenzter Forge-Anschlussauftrag K1 erfolgreich geliefert, unabhängige QA läuft. Kein automatischer zweiter API-Aufruf. Aktuelles Kostenfeld bleibt sichtbar und zeigt bei unvollständiger Erfassung ausschließlich „Kosten nicht vollständig ermittelbar.“
 
 ## ChatGPT – Erfassungslücken
 
