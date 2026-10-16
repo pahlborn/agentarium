@@ -27,7 +27,7 @@ Tokenfelder sind Providerangaben. Thinking separat ausgewiesen; nicht nochmals z
 | forge | AG-VISUAL-005-K3-FORGE-FINAL-V1 | 1292d0c3 | 18 | 11131 | 141812 | 39559 | 2234 | 0.2244247 | [Runtime](https://github.com/pahlborn/agentarium/issues/2#issuecomment-6212103126) |
 | forge | AG-VISUAL-005-K1-COUNTERPROBE-V1 | a307250d | 14 | 3013 | 91457 | 36893 | 262 | 0.1315362 | [Runtime](https://github.com/pahlborn/agentarium/issues/2#issuecomment-6213044280) |
 
-K3-Versuch: CLI-Turngrenze erreicht; Patch erhalten, K3 funktional bestätigt; ursprüngliche K1-Gegenprobe maskiert. Begrenzter Forge-Anschlussauftrag K1 erfolgreich geliefert, unabhängige QA läuft. Kein automatischer zweiter API-Aufruf. Aktuelles Kostenfeld bleibt sichtbar und zeigt bei unvollständiger Erfassung ausschließlich „Kosten nicht vollständig ermittelbar.“
+K3-Versuch: CLI-Turngrenze erreicht; Patch erhalten und unabhängig geprüft. Der anschließende begrenzte K1-Testauftrag ist erfolgreich geliefert und durch Sentinel bestätigt: beide Prüfer grün, K1/K2/K3-Rückfälle erkannt. Liefercommit da860fd19f38e9938ed201546f2a6e5b4cc765f8. Kein Merge oder Deployment. Aktuelles Kostenfeld bleibt sichtbar und zeigt bei unvollständiger Erfassung ausschließlich „Kosten nicht vollständig ermittelbar.“
 
 ## ChatGPT – Erfassungslücken
 
