@@ -1,0 +1,162 @@
+--- a/pilot/AG-PILOT-001/README.md
++++ b/pilot/AG-PILOT-001/README.md
+@@ -14,26 +14,32 @@
+ 
+ ## Input
+ 
+-    {"snapshot": {"cursor": 0, "aufgaben": [], "artefakte": [], "blockaden": [],
+-                  "abdeckung": "unavailable"},
+-     "events": [
+-       {"id": "ev-1", "kind": "status_change", "title": "Start", "task_id": "T1",
+-        "from": null, "to": "in_arbeit", "item_revision": 1,
+-        "previous_transition_id": null, "stream_sequence": 1}
+-     ]}
++Canonical input is `{"snapshot": fixture.daten.schnappschuss, "events": fixture.daten.tail_umschlaege}`
++from `fixtures/AG-VISUAL-005-beispiele-v2-1/11-snapshot-plus-tail.json`. Build it:
+ 
+-**Caveat:** Forge had no file-listing access and could not read fixture01/fixture11.
+-This example is built from the reducer's input schema, not from fixture data;
+-replace it with the real fixture snapshot/events. Assumptions to verify: the snapshot
+-is the reducer's `initial_state` (optionally nested under `"state"`), and envelopes
+-are passed to the reducer flat, as stored. Optional `snapshot.costs` is passed through
+-unchanged; otherwise costs are `{"complete": false, "status_text": "Kosten nicht vollständig ermittelbar"}`.
++    python3 - <<'EOF'
++    import json
++    f = json.load(open('fixtures/AG-VISUAL-005-beispiele-v2-1/11-snapshot-plus-tail.json'))
++    d = f['daten']
++    json.dump({'snapshot': d['schnappschuss'], 'events': d['tail_umschlaege']},
++              open('/abs/path/probe.json', 'w'), ensure_ascii=False)
++    EOF
++
++Initial state is `snapshot.lauf.zustand_am_cursor`; it and `snapshot.cursor` must agree.
++Each envelope's `payload` is copied for the reducer with the envelope `stream_sequence`
++added; the raw envelope is kept unchanged for SSE and `/archive`. The reducer is unchanged.
++
++Costs: output is always the canonical `kosten` object (`sichtbar: true`,
++`erfassung: "unvollstaendig"`, `daten: "synthetisch"`, `status_text: "Kosten nicht vollständig ermittelbar."`).
++Supplied amounts or totals in `snapshot.kosten` are never passed through; `snapshot.kosten` must only be an object.
+ 
+ Rules: the snapshot is the pinned baseline; events need contiguous integer
+-`stream_sequence` from `snapshot.cursor + 1`; `project_id`/`run_id`, if present on
+-both snapshot and event, must match. The file is append-only: a malformed, gapped,
+-or rewritten update is rejected, the prior valid input is retained, and the error
+-appears in `/health` (`input_error`). The file is never written by the server.
++`stream_sequence` from `snapshot.cursor + 1`; envelope `stream`/`stream_id` must equal the
++snapshot's, and payload `project_id`/`run_id` must equal `snapshot.lauf`. The file is
++append-only: a malformed, gapped, duplicated, wrong-identity or rewritten update is rejected,
++the prior valid input is retained, and the error appears in `/health` (`input_error`).
++A semantically invalid event (e.g. Done without K3 proof) still advances the cursor, but the
++reducer keeps the old task state and reports its diagnostic. The file is never written by the server.
+ 
+ ## Endpoints (GET)
+ 
+@@ -55,10 +61,10 @@
+ 
+     python3 - <<'EOF'
+     import json; p='/abs/path/probe.json'; d=json.load(open(p))
+-    d['events'].append({"id":"ev-2","kind":"status_change","title":"Weiter","task_id":"T1",
+-      "from":"in_arbeit","to":"in_pruefung","item_revision":2,
+-      "previous_transition_id":"ev-1","stream_sequence":2})
+-    json.dump(d,open(p,'w'))
++    e = json.loads(json.dumps(d['events'][-1]))   # copy a canonical envelope, then adapt
++    e['stream_sequence'] += 1; e['payload']['id'] = 'S7'   # adapt payload fields as needed
++    d['events'].append(e)
++    json.dump(d,open(p,'w'),ensure_ascii=False)
+     EOF
+ 
+ ## Limits
+--- a/pilot/AG-PILOT-001/local_transport.py
++++ b/pilot/AG-PILOT-001/local_transport.py
+@@ -26,8 +26,6 @@
+ POLL_S = 0.25
+ LABEL = {'data_label': 'SYNTHETIC_LOCAL_TEST_PROBE', 'observed_real_work': False,
+          'production': False}
+-COSTS_DEFAULT = {'complete': False,
+-                 'status_text': 'Kosten nicht vollständig ermittelbar'}
+ 
+ REDUCER_PATH = (Path(__file__).resolve().parents[2] / 'tests'
+                 / 'AG-VISUAL-005-referenz-reducer.py')
+@@ -57,10 +55,23 @@
+             or not isinstance(doc.get('events'), list):
+         raise InputError('input must be {"snapshot": {...}, "events": [...]}')
+     snap = doc['snapshot']
+-    state0 = snap['state'] if isinstance(snap.get('state'), dict) else snap
+-    base = state0.get('cursor')
++    lauf = snap.get('lauf')
++    if not isinstance(lauf, dict):
++        raise InputError('snapshot.lauf missing or not an object')
++    state0 = lauf.get('zustand_am_cursor')
++    if not isinstance(state0, dict):
++        raise InputError('snapshot.lauf.zustand_am_cursor missing or not an object')
++    base = snap.get('cursor')
+     if not isinstance(base, int) or isinstance(base, bool) or base < 0:
+         raise InputError('snapshot has no integer cursor >= 0')
++    if state0.get('cursor') != base or isinstance(state0.get('cursor'), bool):
++        raise InputError('snapshot.cursor %r and zustand_am_cursor.cursor %r disagree'
++                         % (base, state0.get('cursor')))
++    pid, rid = lauf.get('project_id'), lauf.get('run_id')
++    if not isinstance(pid, str) or not pid or not isinstance(rid, str) or not rid:
++        raise InputError('snapshot.lauf.project_id/run_id missing')
++    if not isinstance(snap.get('kosten'), dict):
++        raise InputError('snapshot.kosten missing or not an object')
+     events = doc['events']
+     for i, e in enumerate(events):
+         if not isinstance(e, dict):
+@@ -72,11 +83,34 @@
+             raise InputError('events[%d]: stream_sequence %s, expected %s '
+                              '(gap, duplicate or reorder; not skipped)'
+                              % (i, seq, base + 1 + i))
+-        for key in ('project_id', 'run_id'):
+-            if key in e and key in snap and e[key] != snap[key]:
++        for key in ('stream', 'stream_id'):
++            if e.get(key) != snap.get(key):
+                 raise InputError('events[%d]: %s %r differs from snapshot %r'
+-                                 % (i, key, e[key], snap[key]))
++                                 % (i, key, e.get(key), snap.get(key)))
++        pl = e.get('payload')
++        if not isinstance(pl, dict):
++            raise InputError('events[%d]: payload missing or not an object' % i)
++        for key, want in (('project_id', pid), ('run_id', rid)):
++            if pl.get(key) != want:
++                raise InputError('events[%d]: payload %s %r differs from snapshot.lauf %r'
++                                 % (i, key, pl.get(key), want))
+     return snap, state0, base, events
++
++
++def reducer_events(events):
++    """COPIES of payloads with the envelope stream_sequence carried in; raw untouched."""
++    out = []
++    for e in events:
++        p = copy.deepcopy(e['payload'])
++        p['stream_sequence'] = e['stream_sequence']
++        out.append(p)
++    return out
++
++
++def canonical_kosten():
++    """Fixed incomplete-costs object; supplied amounts are never passed through."""
++    return {'sichtbar': True, 'erfassung': 'unvollstaendig', 'daten': 'synthetisch',
++            'status_text': 'Kosten nicht vollständig ermittelbar.'}
+ 
+ 
+ class Store:
+@@ -132,16 +166,15 @@
+ 
+ def derive(state0, base, events, cursor):
+     n = cursor - base
+-    state, diag = REDUCER.reduziere(events, bis=n, initial_state=copy.deepcopy(state0),
+-                                    cursor=base)
++    state, diag = REDUCER.reduziere(reducer_events(events), bis=n,
++                                    initial_state=copy.deepcopy(state0), cursor=base)
+     return state, diag
+ 
+ 
+ def snapshot_doc(snap, state0, base, events, cursor):
+     state, diag = derive(state0, base, events, cursor)
+-    costs = snap.get('costs') if isinstance(snap.get('costs'), dict) else COSTS_DEFAULT
+     return {'label': LABEL, 'cursor': state['cursor'], 'state': state,
+-            'costs': costs, 'diagnostics': diag}
++            'kosten': canonical_kosten(), 'diagnostics': diag}
+ 
+ 
+ def jdump(obj):
