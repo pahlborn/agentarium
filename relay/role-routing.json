@@ -1,0 +1,202 @@
+{
+  "schema": "agentarium.role-routing.v1",
+  "source": "Actual AG-TEAM-001 contributions verified 2026-10-13: four separate ChatGPT skill runs and three separate Claude task-mode sessions in run 38406861688. Task-version-specific authorization, no persistent live-session or merge/release claim.",
+  "roles": {
+    "atlas": {
+      "platform": "chatgpt",
+      "technical_id": "operate-as-atlas",
+      "state": "active_orchestrator_2026-10-13",
+      "accountability": "Product Owner and project-responsible orchestrator within Peter's customer mandate"
+    },
+    "nova": {
+      "platform": "chatgpt",
+      "technical_id": "create-vision-with-nova",
+      "state": "task_contribution_completed_2026-10-13",
+      "scope": [
+        "vision",
+        "experience",
+        "vision_drift"
+      ],
+      "forbidden": [
+        "code",
+        "merge",
+        "publish",
+        "approve_release"
+      ],
+      "runtime_evidence": {
+        "task": "AG-TEAM-001",
+        "assignment_version": 1,
+        "agent": "/root/nova_team001",
+        "skill_resource": "skill://flora-user-skills/root/.codex/skills/remote-skills/skill-6acbad298bb8819184cb441c2845d5d6/SKILL.md",
+        "baseline": "135979d5706977c84512f00bc412b5fae553fb02",
+        "result": "https://github.com/pahlborn/agentarium/pull/1#issuecomment-6146786501",
+        "stop_state": "completed"
+      }
+    },
+    "scout": {
+      "platform": "chatgpt",
+      "technical_id": "build-research-knowledge",
+      "state": "task_contribution_completed_2026-10-13",
+      "runtime_evidence": {
+        "task": "AG-TEAM-001",
+        "assignment_version": 1,
+        "agent": "/root/scout_team001",
+        "skill_resource": "skill://flora-user-skills/root/.codex/skills/remote-skills/skill-6acb8c11bb188191914e1bdade9e423e/SKILL.md",
+        "baseline": "135979d5706977c84512f00bc412b5fae553fb02",
+        "result": "https://github.com/pahlborn/agentarium/pull/1#issuecomment-6146786501",
+        "stop_state": "completed"
+      }
+    },
+    "argus": {
+      "platform": "chatgpt",
+      "technical_id": "review-agent-argus",
+      "state": "task_contribution_completed_2026-10-13",
+      "runtime_evidence": {
+        "task": "AG-TEAM-001",
+        "assignment_version": 1,
+        "agent": "/root/argus_team001",
+        "skill_resource": "skill://flora-user-skills/root/.codex/skills/remote-skills/skill-6acc669a97d481919b531fd87dce0c35/SKILL.md",
+        "baseline": "135979d5706977c84512f00bc412b5fae553fb02",
+        "result": "https://github.com/pahlborn/agentarium/pull/1#issuecomment-6146786501",
+        "stop_state": "completed"
+      }
+    },
+    "sentinel": {
+      "platform": "chatgpt",
+      "technical_id": "qa-agent-sentinel",
+      "state": "task_contribution_completed_2026-10-13",
+      "runtime_evidence": {
+        "task": "AG-TEAM-001",
+        "assignment_version": 1,
+        "agent": "/root/sentinel_team001",
+        "skill_resource": "skill://flora-user-skills/root/.codex/skills/remote-skills/skill-6acc67ea0d1081919d33527f4cd15a8f/SKILL.md",
+        "baseline": "135979d5706977c84512f00bc412b5fae553fb02",
+        "result": "https://github.com/pahlborn/agentarium/pull/1#issuecomment-6146786501",
+        "stop_state": "completed"
+      }
+    },
+    "archibald": {
+      "platform": "claude-code",
+      "technical_id": "spec-agent",
+      "state": "task_contribution_completed_2026-10-13",
+      "scope": [
+        "specification"
+      ],
+      "definition_path": ".claude/agents/spec-agent.md",
+      "probe_task": "AG-RELAY-002",
+      "probe_path": "relay/archibald_one_shot.py",
+      "evidence": "https://github.com/pahlborn/agentarium/actions/runs/38396268414",
+      "handback": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6145362275",
+      "task_evidence": {
+        "task": "AG-TEAM-001",
+        "source_version": 2,
+        "session": "f392a559-fb15-4ee6-861c-08fad4ef0a83",
+        "run": "38406861688",
+        "definition_blob": "3d49a612a1b2ad8d353b2b5345053dca60d4c23c",
+        "baseline": "135979d5706977c84512f00bc412b5fae553fb02",
+        "result": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6146888313",
+        "stop_state": "completed",
+        "effective_tools": [],
+        "implementation_status": "read_only_contribution"
+      }
+    },
+    "forge": {
+      "platform": "claude-code",
+      "technical_id": "coding-agent",
+      "state": "task_contribution_completed_2026-10-13",
+      "aliases": [
+        "CA"
+      ],
+      "scope": [
+        "architecture",
+        "feasibility",
+        "prototype",
+        "authorized_implementation"
+      ],
+      "definition_path": ".claude/agents/coding-agent.md",
+      "probe_task": "AG-RELAY-003",
+      "probe_path": "relay/forge_one_shot.py",
+      "permissions": "identity_probe_read_only; future local edit/write requires separate authorized task",
+      "evidence": "https://github.com/pahlborn/agentarium/actions/runs/38396737845",
+      "handback": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6145433777",
+      "implementation_status": "patch_authored_integrated_18_QA_checks_pass_browser_not_tested",
+      "task_evidence": {
+        "task": "AG-TEAM-001",
+        "source_version": 2,
+        "session": "f2c3dcb5-0c8b-4283-96c4-973caec5676f",
+        "run": "38406861688",
+        "definition_blob": "0dcac59d22c27753f111fb1ad79f5a9be524052a",
+        "baseline": "135979d5706977c84512f00bc412b5fae553fb02",
+        "result": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6146913156",
+        "stop_state": "completed",
+        "effective_tools": [],
+        "implementation_status": "patch_authored_returned_not_auto_published",
+        "correction": {
+          "source_version": 3,
+          "session": "48177660-49b8-483a-b522-0e9d3a9267c6",
+          "run": "38407711971",
+          "result": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6147010463",
+          "stop_state": "completed"
+        }
+      }
+    },
+    "cadence": {
+      "platform": "claude-code",
+      "technical_id": "process-agent",
+      "state": "task_contribution_completed_2026-10-13",
+      "evidence": "https://github.com/pahlborn/agentarium/actions/runs/38394068230",
+      "scope": [
+        "process_maintenance",
+        "process_improvement"
+      ],
+      "task_evidence": {
+        "task": "AG-TEAM-001",
+        "source_version": 2,
+        "session": "5332bdf9-8d09-4626-806d-191840387b9a",
+        "run": "38406861688",
+        "definition_blob": "d0ad187637d5201024f9fe2a31d47221178fcf6b",
+        "baseline": "135979d5706977c84512f00bc412b5fae553fb02",
+        "result": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6146915912",
+        "stop_state": "completed",
+        "effective_tools": [],
+        "implementation_status": "read_only_contribution"
+      }
+    }
+  },
+  "routing_rules": [
+    "Binding platform assignment: Archibald, Forge/CA, Cadence use Claude Code; Atlas, Nova, Scout, Argus, Sentinel use ChatGPT.",
+    "Never map ChatGPT skills to Claude agents without an explicit reviewed migration.",
+    "A role name is not proof of a loaded agent.",
+    "Dispatch requires technical id, platform, authorized tools and independent runtime evidence.",
+    "No merge or publication without Peter."
+  ],
+  "task_result": {
+    "task": "AG-TEAM-001",
+    "source_version": 3,
+    "status": "FUNCTIONAL_PASS_BROWSER_NOT_TESTED",
+    "evidence_path": "handoffs/AG-TEAM-001-execution-v3.json",
+    "product_commit": "c90b3e6398ef2ef864bc1c05bfcceb04e1513c8d",
+    "paid_calls_completed": 4,
+    "reported_cost_usd": 0.0162581,
+    "future_auto_execution": false
+  },
+  "governance_candidate": {
+    "version": "1.2",
+    "rulebook": "governance/agentarium-rulebook-v1.2.md",
+    "process": "governance/agentarium-process-v1.2.md",
+    "review": "governance/team-review-2026-10-16.md",
+    "runtime_status": "new_definitions_not_yet_loaded_or_verified",
+    "historical_evidence_note": "Existing role states/run evidence below are historical, not current reachability."
+  },
+  "customer_sponsor": {
+    "name": "Peter",
+    "not_role": "Product Owner",
+    "authority": [
+      "mandate",
+      "Epic_and_budget",
+      "material_changes",
+      "customer_acceptance",
+      "reserved_release_publication"
+    ]
+  }
+}
