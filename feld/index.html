@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#05070C">
 <style>
-  :root{ --grund:#05070C; }
+  :root{ --grund:#05070C; --agHell:1; }
   html,body{margin:0;padding:0;width:100%;height:100%;background:var(--grund);}
   html{overflow:hidden;overscroll-behavior:none;touch-action:none;}
   body{position:fixed;inset:0;overflow:hidden;overscroll-behavior:none;touch-action:none;}
@@ -425,6 +425,30 @@
   #agMarke:hover, #agMarke.lesen,
   #agKopf:hover, #agKopf.lesen,
   #agWerkName:hover, #agWerkName.lesen{filter:brightness(1.85) saturate(1.1);}
+
+  /* WO DIE HELLIGKEIT WIRKT.
+
+     Das Bild und die stillen Bloecke, nicht die Tafeln, die man zum Lesen
+     aufmacht -- die sind schon hell, und heller wuerde dort blenden.
+
+     Die Bloecke, die sich beim Lesen aufhellen, rechnen den Regler mit:
+     Sonst waere der Unterschied zwischen "steht da" und "wird gelesen"
+     bei hochgedrehtem Regler verschwunden, und genau der ist Absicht.
+
+     `body.hellAn` ist der Schalter: Steht der Regler auf 1, gibt es
+     ueberhaupt keinen Filter und damit auch keinen Durchgang auf der
+     Grafikkarte. */
+  body.hellAn #feld,
+  body.hellAn #agRing, body.hellAn #agRufe, body.hellAn #agWerk,
+  body.hellAn #agMotoren, body.hellAn #agTun,
+  body.hellAn #agStoppSchilder, body.hellAn #agKostenEbene,
+  body.hellAn #agEcke, body.hellAn #agTasten,
+  body.hellAn #agMarke, body.hellAn #agKopf, body.hellAn #agWerkName{
+    filter:brightness(var(--agHell));}
+  body.hellAn #agMarke:hover, body.hellAn #agMarke.lesen,
+  body.hellAn #agKopf:hover, body.hellAn #agKopf.lesen,
+  body.hellAn #agWerkName:hover, body.hellAn #agWerkName.lesen{
+    filter:brightness(calc(var(--agHell) * 1.85)) saturate(1.1);}
   /* Und sie werden größer. Heller allein reicht für kleine Schrift nicht —
      wer hinsieht, will lesen. Der Bezugspunkt ist die jeweilige ECKE,
      damit die Blöcke nach INNEN wachsen und nicht über den Rand hinaus. */
@@ -456,6 +480,34 @@
     max-height:160px; opacity:1; margin-top:9px;}
   #agFassung b{display:block; margin-top:5px; font-weight:400; color:#AFC0D8;
     letter-spacing:.1em; font-size:8.5px;}
+  /* DER HELLIGKEITSREGLER, UND ER IST LEISE.
+
+     Peter: "kannst du einen helligkeitsregler einbauen? er sollte aber
+     leise sein." Leise heisst hier: Er steht dort, wo ohnehin die Angaben
+     zur Sache stehen -- in der Marke, die sich beim Beruehren oeffnet --
+     und nicht als sechster Knopf unten. Ein Knopf waere eine Behauptung,
+     dass man ihn oft braucht. Man braucht ihn einmal je Gerät.
+
+     Er merkt sich seinen Wert im Geraet, nicht anderswo. */
+  #agRegler{display:block; max-height:0; overflow:hidden; opacity:0;
+    transition:max-height .35s ease, opacity .35s ease, margin .35s ease;}
+  #agMarke:hover #agRegler, #agMarke.lesen #agRegler{
+    max-height:60px; opacity:1; margin-top:10px;}
+  #agRegler u{display:block; text-decoration:none; color:#6B7689;
+    font-size:8px; letter-spacing:.2em; text-transform:uppercase;
+    margin-bottom:5px;}
+  #agRegler u i{font-style:normal; color:#AFC0D8; letter-spacing:.08em;}
+  #agHell{-webkit-appearance:none; appearance:none; width:100%; height:14px;
+    background:transparent; margin:0; cursor:pointer; display:block;}
+  #agHell::-webkit-slider-runnable-track{height:2px; border-radius:1px;
+    background:rgba(150,170,200,.26);}
+  #agHell::-moz-range-track{height:2px; border-radius:1px;
+    background:rgba(150,170,200,.26);}
+  #agHell::-webkit-slider-thumb{-webkit-appearance:none; appearance:none;
+    width:11px; height:11px; border-radius:6px; margin-top:-4.5px;
+    background:#AFC0D8; border:0;}
+  #agHell::-moz-range-thumb{width:11px; height:11px; border-radius:6px;
+    background:#AFC0D8; border:0;}
   /* Welches Projekt gerade läuft — aus den Daten, nicht aus dem Code. */
   #agProjekt{display:block; font-style:normal; color:#8295B0; font-size:10px;
     letter-spacing:.22em; margin-bottom:2px;}
@@ -752,7 +804,7 @@
 <div id="agSteck"></div>
 <div id="agKostenEbene"></div>
 <div id="agWerk"></div>
-<div id="agMarke"><b>Agentarium</b><em title="BALL — Bio-Agent &amp; LLM Logistics">See intelligence move. Powered by BALL</em><small id="agFassung"></small></div>
+<div id="agMarke"><b>Agentarium</b><em title="BALL — Bio-Agent &amp; LLM Logistics">See intelligence move. Powered by BALL</em><small id="agFassung"></small><label id="agRegler"><u>Helligkeit <i id="agHellWert">100 %</i></u><input id="agHell" type="range" min="60" max="190" step="2" value="100" aria-label="Helligkeit"></label></div>
 <div id="agRechts"><div id="agKopf"><i id="agProjekt"></i><span id="agUhr">00:00</span></div></div>
 <div id="agWerkName"></div>
 <div id="agWas"></div>
@@ -2130,7 +2182,7 @@
 
      Der Bauzeitpunkt kommt beim Bauen aus der Uhr. Von Hand gepflegte
      Datumsangaben sind nach der zweiten Änderung falsch. */
-  var FASSUNG = '42', GEBAUT = '2026-10-16T13:41Z';
+  var FASSUNG = '43', GEBAUT = '2026-10-16T14:12Z';
 
   /* DIE BETRIEBSART. Sie kommt aus den Daten; fehlt sie, gilt `demo`.
      Alles, was sich zwischen Prototyp und Produktivbetrieb unterscheidet,
@@ -5366,6 +5418,66 @@
     window.addEventListener(n, tastenZeigen, { passive: true });
   });
   tastenZeigen();
+
+  /* ====================== DIE HELLIGKEIT ======================
+
+     Ein Wert, ein Regler, und er merkt sich seinen Stand im Geraet.
+
+     Warum nicht an der Maschine gedreht wird: Resonanz hat eine
+     Stellschraube dafuer (`uStaerke` im Schattenrechner), aber sie trifft
+     nur die Faeden. Die Schrift im Bild -- Namen, Meldungen, Schilder --
+     haengt nicht daran, und die ist der Grund, warum man ueberhaupt
+     heller stellen will. Ausserdem gilt: Resonanz bleibt Resonanz. Der
+     Filter liegt also ueber den Ebenen, nicht in der Maschine.
+
+     Gelesen wird in einem try: In einem privaten Fenster oder bei
+     gesperrten Seitendaten wirft schon der Zugriff. Dann steht der Regler
+     eben auf 100 und merkt sich nichts -- das ist kein Fehler, das ist
+     ein Gerät, das nichts behalten will. */
+  (function () {
+    var SCHUB = 'agentarium.hell',
+        reg = document.getElementById('agHell'),
+        wert = document.getElementById('agHellWert');
+    if (!reg) return;
+
+    function setzen(p, merken) {
+      p = Math.max(60, Math.min(190, Math.round(p)));
+      document.documentElement.style.setProperty('--agHell', (p / 100).toFixed(2));
+      /* Bei 100 keinen Filter: Ein Durchgang ueber das ganze Bild je Bild
+         ist nichts, was man fuer `brightness(1)` bezahlen sollte. */
+      document.body.classList.toggle('hellAn', p !== 100);
+      if (wert) wert.textContent = p + ' %';
+      if (reg.value !== String(p)) reg.value = String(p);
+      if (merken) {
+        try { localStorage.setItem(SCHUB, String(p)); } catch (e) {}
+      }
+    }
+
+    var gemerkt = 100;
+    try {
+      var g = parseInt(localStorage.getItem(SCHUB), 10);
+      if (g >= 60 && g <= 190) gemerkt = g;
+    } catch (e) {}
+    setzen(gemerkt, false);
+
+    reg.addEventListener('input', function () {
+      setzen(parseInt(reg.value, 10), true);
+      /* Beim Ziehen bleibt die Marke offen. Ohne das faellt sie nach
+         sechs Sekunden zu, waehrend der Finger noch auf dem Regler ist. */
+      var m = document.getElementById('agMarke');
+      if (m) {
+        m.classList.add('lesen');
+        clearTimeout(m.__ab);
+        m.__ab = setTimeout(function () { m.classList.remove('lesen'); }, 6000);
+      }
+    });
+    /* Der Regler verschluckt seine eigenen Zeigerereignisse: Sonst rührt
+       jedes Ziehen im Feld mit, und das Bild zuckt beim Einstellen. */
+    ['pointerdown', 'pointermove', 'pointerup', 'click', 'touchstart',
+     'touchmove'].forEach(function (n) {
+      reg.addEventListener(n, function (ev) { ev.stopPropagation(); });
+    });
+  })();
 
   document.getElementById('agMotor').addEventListener('click', function () {
     tastenZeigen();
