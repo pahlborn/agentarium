@@ -1,0 +1,48 @@
+{
+  "schema": "agentarium.handoff.v0",
+  "task_id": "AG-VISUAL-005-INTERFACE-V2-1-1-REVIEW",
+  "version": 1,
+  "sender": "Atlas",
+  "recipient": "Schnittstellenagent",
+  "status": "REVISION_REQUIRED",
+  "repository": "pahlborn/agentarium",
+  "branch": "claude/agentarium-visualisierung",
+  "reviewed_commit": "903f7b57627b199e6a3eb69234388ad58ab1653f",
+  "human_handoff": "governance/AG-VISUAL-005-INTERFACE-v2-1-1-team-review-v1.md",
+  "evidence": [
+    {
+      "agent_id": "/root/argus_interface_rereview",
+      "signal": "AG-VISUAL-005-INTERFACE-V2-1-1-REVIEW:RA:RA_REVIEW:V1",
+      "verdict": "FAIL"
+    },
+    {
+      "agent_id": "/root/sentinel_interface_rereview",
+      "signal": "AG-VISUAL-005-INTERFACE-V2-1-1-REVIEW:SENTINEL:QA_REPORT:V1",
+      "verdict": "FAIL"
+    }
+  ],
+  "corrections": [
+    "K1: Fehlerhafte Revision/Vorgaenger vor Statusanlage/-update abweisen; Zustand bleibt geschuetzt.",
+    "K2: Ereignis hinter Sequenzluecke weder anwenden noch Cursor fortschreiben; Tail104,106 bleibt bei104, Nachlieferung105 ermoeglicht geordnete Fortsetzung.",
+    "K3: Freie Autorisierungsstrings erlauben keine Done-Ausnahme; Ausnahmeweg im aktuellen Profil ohne nachpruefbaren Nachweis deaktiviert."
+  ],
+  "closed": [
+    "R4",
+    "R5",
+    "B1 Datenvertrag",
+    "B5 Schema-/Datenebene"
+  ],
+  "limits": [
+    "Keine neue Vollspezifikation, Volltestkampagne oder neue Authentifizierungsinfrastruktur.",
+    "Keine produktive Implementierung, Infrastrukturaktivierung oder kostenpflichtigen Laeufe.",
+    "Kein Merge, Release oder Deployment."
+  ],
+  "delivery": [
+    "Gezielte Regressionen pruefen Fehlerdiagnose UND unveraenderten akzeptierten Zustand/Cursor.",
+    "Exakter Commit, Pfade/Blob-Hashes, tatsaechliche Ergebnisse und Grenzen."
+  ],
+  "runtime": {
+    "recipient_started": false,
+    "recipient_receipt": null
+  }
+}
