@@ -1,6 +1,6 @@
 {
   "schema": "agentarium.requirement-cost-register.v1",
-  "version": 8,
+  "version": 9,
   "created_at": "2026-10-14T04:15:27.033Z",
   "currency": "USD",
   "scope": "Known NACHTPOST-003/VISUAL-004 calls plus explicit earlier failure gaps. This is not the full project bill.",
@@ -671,7 +671,7 @@
       "actual_reasoning": "unconfirmed",
       "reported_usage_cost_usd": 0.16888330000000001,
       "cost_source": "Claude CLI terminal runtime; not invoice reconciled",
-      "status": "RESULT_RETURNED_LOCAL_RUNTIME_QA_PENDING",
+      "status": "SUCCESS_WORKER_RUNTIME_QA_FAIL_CANONICAL_INPUT",
       "run": "https://github.com/pahlborn/agentarium/actions/runs/38885877232",
       "evidence_ref": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6213264341",
       "requirement_refs": [
@@ -697,6 +697,50 @@
             "contextWindow": 1000000,
             "maxOutputTokens": 128000,
             "thinkingTokens": 2824,
+            "canonicalModel": "claude-sonnet-5-5",
+            "provider": "firstParty",
+            "costBasis": "list"
+          }
+        }
+      ]
+    },
+    {
+      "attempt_id": "AG-PILOT-001-LOCAL-TRANSPORT-V2",
+      "session": "fdace86d-8201-4d5c-b69a-5c54b85e6848",
+      "role": "forge",
+      "actual_model": "claude-sonnet-5-5",
+      "actual_reasoning": "unconfirmed",
+      "reported_usage_cost_usd": 0.1286485,
+      "cost_source": "Claude CLI terminal metadata, no invoice reconciliation",
+      "status": "CORRECTION_RETURNED_RUNTIME_QA_PENDING",
+      "run": "https://github.com/pahlborn/agentarium/actions/runs/38886371918",
+      "evidence_ref": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6213328234",
+      "requirement_refs": [
+        "AG-PILOT-001-LOCAL-F01",
+        "AG-PILOT-001-LOCAL-F02",
+        "AG-PILOT-001-LOCAL-F03",
+        "AG-PILOT-001-LOCAL-F04"
+      ],
+      "patch_sha256": "32786f83c193399da7876a5b7a0b9b87c1404df1eff966bdbdec98179be24e05",
+      "token_status": "PROVIDER_REPORTED",
+      "token_usage": [
+        {
+          "actual_model": "claude-sonnet-5-5",
+          "input_tokens": 10,
+          "output_tokens": 6459,
+          "cache_read_input_tokens": 30310,
+          "cache_creation_input_tokens": 24403,
+          "thinking_tokens": 760,
+          "raw_usage": {
+            "inputTokens": 10,
+            "outputTokens": 6459,
+            "cacheReadInputTokens": 30310,
+            "cacheCreationInputTokens": 24403,
+            "webSearchRequests": 0,
+            "costUSD": 0.1286485,
+            "contextWindow": 1000000,
+            "maxOutputTokens": 128000,
+            "thinkingTokens": 760,
             "canonicalModel": "claude-sonnet-5-5",
             "provider": "firstParty",
             "costBasis": "list"
@@ -735,7 +779,8 @@
     "historical_totals_note": "Existing numeric totals above retain their historical scope/cutoff; new K3 attempt is recorded separately, no complete project total is claimed.",
     "additional_k3_attempt_cost_usd": 0.22442469999999998,
     "additional_k1_counterprobe_cost_usd": 0.1315362,
-    "additional_pilot_local_cost_usd": 0.16888330000000001
+    "additional_pilot_local_cost_usd": 0.16888330000000001,
+    "additional_pilot_local_v2_cost_usd": 0.1286485
   },
   "other_costs": {
     "chatgpt": "Subscription usage; per-agent monetary allocation unavailable here, not recorded as zero",
