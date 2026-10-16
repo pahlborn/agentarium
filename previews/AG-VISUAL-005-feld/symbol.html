@@ -1,0 +1,27 @@
+<!doctype html><meta charset="utf-8">
+<style>
+ html,body{margin:0;padding:0;background:#05070C;}
+ svg{display:block;}
+</style>
+<svg id="s" width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <rect width="512" height="512" fill="#05070C"/>
+  <g id="ring"></g>
+  <circle cx="256" cy="256" r="26" fill="#F6E7B4"/>
+  <circle cx="256" cy="256" r="46" fill="none" stroke="#E8D9A8" stroke-opacity=".35" stroke-width="2"/>
+</svg>
+<script>
+/* Neun Plaetze auf einem flachgedrueckten Kreis -- dieselbe Ordnung wie im
+   Feld, in den Farben der Agenten. Keine Schrift: Ein Symbol, das auf
+   60 Pixeln noch lesbar sein muss, traegt keine Buchstaben. */
+var farben = ['#E9BF8E','#83AEE9','#CC9DE9','#A4D9C2','#D2BB92',
+              '#EC987C','#B4CDED','#9EC5C8','#C0C7F7'];
+var g = document.getElementById('ring'), R = 160;
+for (var i = 0; i < 9; i++) {
+  var w = -Math.PI / 2 + i * 2 * Math.PI / 9,
+      x = 256 + Math.cos(w) * R, y = 256 + Math.sin(w) * R * 0.92;
+  g.innerHTML += '<circle cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) +
+    '" r="20" fill="' + farben[i] + '" fill-opacity=".92"/>';
+  g.innerHTML += '<line x1="256" y1="256" x2="' + x.toFixed(1) + '" y2="' +
+    y.toFixed(1) + '" stroke="' + farben[i] + '" stroke-opacity=".16" stroke-width="3"/>';
+}
+</script>
