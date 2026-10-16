@@ -5,7 +5,7 @@
   "created": "2026-10-15T18:53:09Z",
   "sender": "Atlas",
   "recipient": "Schnittstellenagent",
-  "status": "READY_FOR_SPEC_REVISION",
+  "status": "REREVIEW_COMPLETED_SPECIFICATION_DELIVERED",
   "repository": "pahlborn/agentarium",
   "branch": "claude/agentarium-visualisierung",
   "source_commit": "54ab4785f993df7770c8dd35fd1a7d3749e20452",
@@ -63,16 +63,60 @@
     "Status je Punkt: spezifiziert, implementiert, getestet oder blockiert."
   ],
   "runtime": {
-    "recipient_started": false,
-    "recipient_receipt": null,
+    "recipient_started": true,
+    "recipient_receipt": {
+      "path": "handoffs/AG-VISUAL-005-INTERFACE-rereview-quittung-v1.md",
+      "blob": "139a71f0768f98234a13ff0332dcde74b856094b",
+      "received_at": "2026-10-16T16:30:00Z",
+      "worker_session_id": "session_01SvS2FzU7U5JmX6fr8JAfPo",
+      "environment_id": "env_01TvdjoYnYVEv6c3NDZNZPef",
+      "configured_model": "claude-opus-5",
+      "actual_model": "claude-opus-5",
+      "effort": "high",
+      "cli_version": "2.1.263",
+      "result": "SPECIFICATION_AND_DATA_TESTS_DELIVERED",
+      "exact_commits": {
+        "v2": "b0a08c1cd54b21424837cf51dc6d8dda083699cb",
+        "v2_1": "8feefe2a98eca444b5352c9c9c3f0d52069304e2",
+        "v2_1_1": "903f7b57627b199e6a3eb69234388ad58ab1653f",
+        "v2_1_2": "d2ceca168cbd2f4cacaf2311412622d968e2edb4"
+      }
+    },
     "implementation_started": false
   },
-  "updated": "2026-10-15T19:02:37Z",
-  "revision": 2,
+  "updated": "2026-10-16T16:30:00Z",
+  "revision": 3,
   "decision_update": {
     "source": "Peter",
     "decided_at": "2026-10-15T19:01:52Z",
     "supersedes": "Bisherige Ausblendung des Kostenfelds.",
     "independent_rereview": false
-  }
+  },
+  "verification": {
+    "rerun_at": "2026-10-16",
+    "v2": "38 Form, 59 Regeln, Fälle 01-09 bestanden; Gegenprobe 21/21",
+    "v2_1": "57 Form, 110 Regeln, 25 Negativproben, Fälle 01-12 bestanden; Gegenprobe 52/52",
+    "tested_scope": "Datenvertrag, Schemas, Beispieldaten und Gegenproben",
+    "not_tested": [
+      "Server",
+      "SSE",
+      "Browser",
+      "serverseitige Rechte",
+      "Laufzeit-Nebenwirkungsfreiheit"
+    ]
+  },
+  "cost_note": {
+    "attribution": "NOT_DETERMINABLE",
+    "reason": "Die gemeldete Sitzung umfasst mehrere Projekte; der Anteil dieses Auftrags ist nicht belastbar ermittelbar.",
+    "ui_rule": "Keine Kosten oder Token dieses Auftrags ausweisen."
+  },
+  "open_decisions": [
+    "O-1 Aktionen",
+    "O-2 Ursprung/Streaming",
+    "O-3 Replaygrenze",
+    "O-4 Kostenabschluss",
+    "O-5 parallele Läufe",
+    "O-6 catalog.changed",
+    "O-7 Partitur-Vertragsnutzung"
+  ]
 }
