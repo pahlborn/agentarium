@@ -1,7 +1,7 @@
 # AG-VISUAL-005-K3 – Bearbeiterentscheidung V1
 
 Datum: 2026-10-16. Entscheider: Atlas im von Peter delegierten Anbindungsumfang.
-Status: WORKER_STOPPED / K3_FUNCTIONAL_PASS / INTEGRATION_BLOCKED_TEST_GAP.
+Status: VERIFIED_ON_WORK_BRANCH; siehe Abschlussnachtrag.
 
 ## Entscheidung
 
@@ -37,3 +37,6 @@ Der bisherige Feldverfasser meldet sieben Befunde bei fünfzehn Fenstermaßen un
 ## Laufabschluss und verbleibender Befund
 
 Forge endete mit error_max_turns; der Patch blieb erhalten. Argus meldet PASS_WITH_NOTES, Sentinel bestätigt K3 funktional (12/12 eigene Proben), sperrt jedoch Integration wegen maskierter K1-Rückfallprobe. Kein automatischer kostenpflichtiger Wiederholungsversuch. Detail und exakter Restauftrag: governance/AG-VISUAL-005-K3-forge-qa-v1.md, Befund AG-VISUAL-005-K3-QA-01. Tatsächlich gemeldete Laufkosten 0.2244247 USD. Pilot weiterhin gesperrt.
+
+## Abschlussnachtrag 2026-10-16
+Der konkrete Restbefund AG-VISUAL-005-K3-QA-01 ist nach echtem Forge-Folgeauftrag und unabhängiger Sentinel-Prüfung geschlossen. Beide Prüfer Exit0; K1/K2/K3-Rückfälle erkannt. Geprüfter Arbeitscommit da860fd19f38e9938ed201546f2a6e5b4cc765f8. Kein Merge/Deployment. Maßgeblicher Abschluss: [AG-VISUAL-005-K3-K1-abschluss-v1.md](https://github.com/pahlborn/agentarium/blob/claude/agentarium-visualisierung/governance/AG-VISUAL-005-K3-K1-abschluss-v1.md). Vorstehender Bericht bleibt als Historie erhalten.
