@@ -1,0 +1,41 @@
+{
+  "schema": "agentarium.handoff.v0",
+  "task_id": "AG-PILOT-001-ACTIVITY-V2",
+  "version": 2,
+  "sender": "Atlas",
+  "recipient": "Forge/coding-agent",
+  "status": "AUTHORIZED",
+  "repository": "pahlborn/agentarium",
+  "branch": "feature/ag-interface-k3-final",
+  "base_commit": "19463534defa6f9c6b48812eeebf56433fa28e89",
+  "allowed_paths": [
+    "pilot/AG-PILOT-001/activity.py",
+    "pilot/AG-PILOT-001/activity.html",
+    "pilot/AG-PILOT-001/README.md"
+  ],
+  "authorization": {
+    "source": "Peter asked Atlas to continue evidence-based activity monitoring. First targeted corrective cycle after Sentinel V1 defects and Atlas fixing missing roster input.",
+    "scope": "One bounded correction; no deployment or automatic transport retry."
+  },
+  "goal": "Correct only independently confirmed truthfulness defects in preserved V1 activity component; keep transport/reducer unchanged.",
+  "instructions": [
+    "Host pre-applied original V1 patch. Edit only activity.py, activity.html, README. Keep local_transport.py and all task reducer/transport logic unchanged. No Bash/network/subagents/tests available; do not try. Minimal focused edits then concise CA_IMPLEMENTED, stop.",
+    "Sentinel actual V1:18/18 existing transport tests and HTTP activity/monitor/POST405 passed. Blockers: roster only4; arbitrary progress_timer count1->2 incorrectly working; HTML Auto unchecked and stale working cards never age without successful fetch. Browser binary unavailable, do not claim browser tested. Fix exactly below.",
+    "Atlas input correction: actual8register keys are atlas,nova,scout,archibald,forge,argus,sentinel,cadence. Set complete8ROSTER; canonical lowercase IDs, accept case-insensitive known display names and normalize to canonical to avoid duplicate Forge/forge rows. Unknown names must not replace any registered defaultunknown row. README list8 and noOPENITEM.",
+    "Only positive relevant counter delta in stream_event/assistant/user proves working_observed. Ignore system, progress_timer, telemetry_failure, invalid_line and arbitrary other counters for work. last_event_seconds change ALONE cannot prove work, since existing wrapper updates it for metadata too. Keep first sample baseline, unchanged samples/heartbeat/host do not renew work freshness. Validate relevant counters nonnegative finite; positive delta still needs fresh source event. Document this refinement: no inference of thinking/continuous work.",
+    "Explicit waiting/blocked is authoritative until explicit source_resumed or terminal. If hold stale, return unknown, never fall back to work accumulated while held. source_resumed clears hold AND old work evidence: resume alone notworking; require a subsequent positive workdelta. Terminal still absorbs later same-session progress. Do not let this change historical replay/session isolation.",
+    "Add remaining_valid_ms to every derived row:0 for unknown, null for terminalstopped, nonnegative remaining conservative freshness for working/waiting/blocked using the SAME now and sourceeventage already used by backend. This is local display validity, no SLA or source capture guarantee. Don't renew via transport. Avoid infinity/NaN in numeric fields.",
+    "Fix LIVE browser staleness independently of successful fetch/autorefresh: track each response's remaining_valid_ms with performance.now() (monotone clock), conservatively subtract request duration; short local timer expires nonterminal cards to unknown+reason/dashed?, stops pulse, even if Auto off or server unreachable. Do not use client wallclock to age ARCHIVE. Source errors/transport error remain visibly separate; no stale animation. LIVE Auto may defaultON every2s, ARCHIVE disabled; no additional network telemetry. Terminalstopped stays conclusive; no fabricated end from disconnect.",
+    "After an expiry or failed request, a repeated SAME working evidence must not retrigger a work pulse. Only new evidence stamp changes can pulse. Render textContent, keep all status labels/symbols/cost phrase intact. No new visual redesign, no costs amounts. README state browser binary nottested, mainGewebe/Partitur and actualruntimehooks still absent, existing60ssamplecadence not instantaneous. No productsuccess claim beyond local component."
+  ],
+  "model_routing": {
+    "requested_model": "sonnet",
+    "requested_reasoning": "medium",
+    "actual_model": null,
+    "actual_reasoning": "unconfirmed",
+    "override": false,
+    "cost_control": "One bounded coding session, same existing role-default eight turns, no price-triggered cutoff; preserve patch and actual usage. No paid availability probe/retry; stop on credit/key/quota failure.",
+    "estimated_cost_usd": null
+  },
+  "seed_patch_sha256": "ae90437d6be200bc139dee46164085e39697a46fa32387e56020c7af2f062a48"
+}
