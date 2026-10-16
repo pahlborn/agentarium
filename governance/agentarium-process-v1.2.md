@@ -19,3 +19,6 @@ Keep fields unknown rather than inventing data; omit irrelevant detail on small 
 
 ## Adoption check
 Check all changed skill files and references; preserve Claude tool/model/effort frontmatter; review contradictions once; run small adversarial behavior probes. These checks validate the update, not the whole product. After integration, a real new invocation per Claude role must show which definition was loaded. Until then record `definition_updated_runtime_unverified`. No paid runtime/CI/relay activation is authorized by this document.
+
+## Product-development integration
+For material product work use `product-development-practice-v1.md`: user/problem and benefit evidence → goal and ordered next slice → cheapest valid test of the critical assumption → usable delivery meeting applicable DoD → product feedback and backlog adaptation. Reuse these steps within the loop above; do not create a parallel process. Peter is product decision owner, Atlas coordinates, the team plans and shares success/failure, and Cadence supplies the agile-coach/Scrum-Master function through an actual invocation. Product review and process retrospective serve different questions. A milestone or evidenced process failure may trigger Cadence; each story does not need a new process gate.

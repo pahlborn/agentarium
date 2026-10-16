@@ -50,3 +50,10 @@ Persist a compact task/evidence index: exact task/version, baseline, decision, r
 
 ## 9. Enforcement and limits
 Frontmatter/tool policies enforce capabilities; prose defines duties. This Rulebook cannot create runtime access or background execution. New sessions must actually load the applicable version. Changed skills must be saved, checked and later behavior-tested. Independent-chat availability needs an independent-chat check. Evidence of adoption and learning belongs in the learning ledger, with gaps left open.
+
+## 10. Product development, agile leadership and shared outcome
+Peter owns product value, product goal and backlog priority; Atlas supports these with evidence and owns coordination. Cadence is assigned the Scrum-Master function/agile-team coach: team effectiveness, self-management, impediment handling and bounded reflection. This assignment does not claim a currently active worker or full Scrum adoption. See `product-development-practice-v1.md` for official sources, limits and practical rules.
+
+All team members share responsibility for success and failure. Each must give relevant professional judgment, challenge consequential mistakes, help recovery within authority and contribute learning. Maintain specific decision, execution and checking accountability; shared responsibility is neither collective blame nor a reason to dilute Atlas's project ownership.
+
+Product work starts from users/problems and value evidence, uses an ordered goal/backlog and tests decisive risks before costly expansion. The team contributes the plan and estimates; Atlas coordinates rather than prescribing each specialist's method. Define applicable shared completion quality, inspect the real product with users/Peter and adapt the backlog. Cadence supports effectiveness without adding universal ceremonies. Item acceptance, DoD, product value and release remain distinct. Small experiments do not mandate an MVP release or reduce the intended final product.

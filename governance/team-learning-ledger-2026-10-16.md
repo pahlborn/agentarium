@@ -13,3 +13,5 @@ This records changes, not claims of completed learning. Owner of coordination: A
 | Skill persistence confused with availability | Atlas, all role hosts | saved/loaded/runtime/effect separate | independent new-session load and behavior |
 
 No item is `verified_effective` merely because its wording changed. Each is `changed_candidate` until integration and observation. Personal skill persistence is tracked in the validation report; Claude frontmatter permissions remain unchanged. Existing safety and factual-source requirements are retained.
+
+Product-development addition: Atlas receives a source-backed practice reference; Cadence's contract gains the agile-coach/Scrum-Master function. All members share success/failure and mutual professional challenge, retaining named accountabilities. Status: written/validated, live adoption and observed effect pending. Test on the next material task: clear user/problem and goal, early decisive experiment, actual delivered result/feedback and bounded team learning.
