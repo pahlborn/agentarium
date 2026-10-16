@@ -1,0 +1,39 @@
+{
+  "schema": "agentarium.handoff.v0",
+  "task_id": "AG-PILOT-001-LOCAL-TRANSPORT-V2",
+  "version": 2,
+  "sender": "Atlas",
+  "recipient": "Forge/coding-agent",
+  "status": "AUTHORIZED",
+  "repository": "pahlborn/agentarium",
+  "branch": "feature/ag-interface-k3-final",
+  "base_commit": "da860fd19f38e9938ed201546f2a6e5b4cc765f8",
+  "allowed_paths": [
+    "pilot/AG-PILOT-001/local_transport.py",
+    "pilot/AG-PILOT-001/README.md"
+  ],
+  "authorization": {
+    "source": "Peter asked Atlas to continue integration; this is first targeted correction after independent runtime QA of V1.",
+    "scope": "One bounded correction session, same prototype only. No deployment or real pilot activation."
+  },
+  "goal": "Apply ONLY four independently reproduced canonical-input fixes to preserved V1 local probe. No service expansion.",
+  "instructions": [
+    "The host has applied V1 patch to your workspace. Edit just the 2 allowed files; do not rebuild from scratch. V1 real runtime QA: 14/18, 4 related blockers below. Keep successful loopback/GET-only/stream/resume/error handling behavior.",
+    "READ the actual fixture11 (`fixtures/AG-VISUAL-005-beispiele-v2-1/11-snapshot-plus-tail.json`): use {snapshot: fixture.daten.schnappschuss, events: fixture.daten.tail_umschlaege} as canonical input; do not invent a new flattened snapshot format. Canonical initial state is snapshot.lauf.zustand_am_cursor, cursor snapshot.cursor; validate they agree. Snapshot project/run IDs are snapshot.lauf.project_id/run_id. Validate shape and avoid silently defaulting to empty state.",
+    "Unwrap each canonical stream envelope payload into a COPY for reducer input, and carry envelope.stream_sequence into copied payload. Preserve raw envelope unchanged for SSE/archive. Reducer itself MUST remain unchanged. Check canonical envelopes match stream, stream_id, project/run identity from snapshot.lauf; IDs in payload. Wrong project/run must reject update and retain previous valid input.",
+    "V1 incorrectly returns state cursor106 with empty tasks/artifacts and '<ohne id>: fachlicher Titel leer' diagnostics. Correct expectation: /snapshot state equals full reference reduction of payload+sequence from same snapshot; /state at104/105/106 similarly. Semantic invalid Done must advance transport cursor but preserve old task state and expose actual K3 proof diagnostic.",
+    "Costs: read canonical snapshot.kosten. Output canonical kosten object visible:true, erfassung:unvollstaendig, exact status_text 'Kosten nicht vollständig ermittelbar.'; never pass supplied monetary totals/partials/zero through the local probe. Preserve provenance synthetisch and no fake completeness. Do not create competing costs field. README must use actual canonical fixture input instead of flat custom schema.",
+    "Update concise README input construction command exactly from fixture11 data; no generated fixture or schema changes. State limitations honestly. No extra endpoints/auth/storage/service features. No tests are executable with your tools; don't waste turns trying. Return concise CA_IMPLEMENTED/TESTS_NOT_RUN_BY_FORGE after fixes, then stop."
+  ],
+  "model_routing": {
+    "requested_model": "sonnet",
+    "requested_reasoning": "medium",
+    "actual_model": null,
+    "actual_reasoning": "unconfirmed",
+    "override": false,
+    "cost_control": "One bounded session; same eight-turn coding role default; preserve partial work/actual terminal usage; no price-triggered cutoff. No automatic retry; stop on insufficient credit.",
+    "estimated_cost_usd": null
+  },
+  "expected_result": "Patch in allowed paths; independent Sentinel runtime QA required; no deployment.",
+  "seed_patch_sha256": "439236f2a2079aa3a59f9ec4ac909bd4b68abf43ef7d478dc3ac56b325d980fe"
+}
