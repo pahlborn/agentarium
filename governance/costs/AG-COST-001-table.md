@@ -31,6 +31,9 @@ Tokenfelder sind Providerangaben. Thinking separat ausgewiesen; nicht nochmals z
 | forge | AG-PILOT-001-ACTIVITY-V1 | d9d5ef20 | 18 | 27697 | 105215 | 38732 | 6134 | 0.3843575 | [Runtime](https://github.com/pahlborn/agentarium/issues/2#issuecomment-6213943285) |
 | forge | AG-PILOT-001-ACTIVITY-V2 | 3ba53364 | 16 | 13026 | 86446 | 27953 | 2503 | 0.2088191 | [Runtime](https://github.com/pahlborn/agentarium/issues/2#issuecomment-6214054273) |
 
+| forge | AG-PILOT-001-SOURCE-HOOK-V1 | bf2aa07d | 16 | 20838 | 111997 | 34869 | 8202 | 0.3067842 | [Runtime](https://github.com/pahlborn/agentarium/issues/2#issuecomment-6216191294) |
+| forge | AG-PILOT-001-FIELD-ADAPTER-V1 | b7b2bb73 | 16 | 3097 | 59438 | 21732 | 635 | 0.0912758 | [Runtime](https://github.com/pahlborn/agentarium/issues/2#issuecomment-6216323172) |
+
 K3-Versuch: CLI-Turngrenze erreicht; Patch erhalten und unabhängig geprüft. Der anschließende begrenzte K1-Testauftrag ist erfolgreich geliefert und durch Sentinel bestätigt: beide Prüfer grün, K1/K2/K3-Rückfälle erkannt. Liefercommit da860fd19f38e9938ed201546f2a6e5b4cc765f8. Kein Merge oder Deployment. Aktuelles Kostenfeld bleibt sichtbar und zeigt bei unvollständiger Erfassung ausschließlich „Kosten nicht vollständig ermittelbar.“
 
 ## ChatGPT – Erfassungslücken
@@ -59,3 +62,5 @@ Aktualisierung 16.10.2026: Der reguläre K3-Codingaufruf oben ist neu erfasst. K
 Lokaler Transport: V1 Worker erfolgreich, Runtime-QA FAIL14/18; V2 gezielt korrigiert, unabhängige Runtime-QA PASS18/18. Arbeitscommit19463534defa6f9c6b48812eeebf56433fa28e89; kein Merge/Deployment/echter Pilot. Beide Aufrufe0.2975318USD, kein Projektgesamtbetrag.
 
 Aktivitätsmonitor: V1 an Turn-Grenze beendet, Patch erhalten, QA zunächst FAIL 11/14. V2 Worker erfolgreich, Aktivität 14/14 und Transport 18/18; redaktionelle README-Korrektur separat bestätigt. Browser-DOM nicht getestet. Beide Aufrufe zusammen 0.5931766 USD, kein Projektgesamtbetrag. Keine weitere Anthropic-Ausführung für die Dokukorrektur.
+
+Quellerfassung: Sentinel PASS (Stream9/9, Diagnostik8/8, Capture8/8). Feldadapter V1: CA_QUESTION, nur lokale /field-Route geliefert; unabhängige Teil-QA PASS (Transport18/18, Aktivität14/14, Route und echte Daten16/16), vollständige Feldanbindung INCOMPLETE. Diese zwei Claude-Aufrufe zusammen 0.3980600 USD; kein Projektgesamtbetrag. Feldadapter V2 wurde vom bestehenden Private-Repo-Guard übersprungen, keine Schritte/kein Modellaufruf. Keine geschätzte Nullbuchung für andere Kosten.

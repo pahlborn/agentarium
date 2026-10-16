@@ -1,6 +1,6 @@
 {
   "schema": "agentarium.requirement-cost-register.v1",
-  "version": 14,
+  "version": 15,
   "created_at": "2026-10-14T04:15:27.033Z",
   "currency": "USD",
   "scope": "Known NACHTPOST-003/VISUAL-004 calls plus explicit earlier failure gaps. This is not the full project bill.",
@@ -845,7 +845,7 @@
       "actual_reasoning": "unconfirmed",
       "reported_usage_cost_usd": 0.30678419999999995,
       "cost_source": "Claude CLI terminal runtime, not invoice reconciled",
-      "status": "SOURCE_HOOK_RETURNED_QA_PENDING",
+      "status": "SENTINEL_PASS_SOURCE_CAPTURE_COMPONENT",
       "run": "https://github.com/pahlborn/agentarium/actions/runs/38905283794",
       "evidence_ref": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6216191294",
       "requirement_refs": [
@@ -878,6 +878,48 @@
         }
       ],
       "signal_note": "execution.signals scanned generated stdout; BUDGET_EXCEEDED/RATE_LIMITED not treated as credit failure when terminal success/is_error false. No account balance inferred."
+    },
+    {
+      "attempt_id": "AG-PILOT-001-FIELD-ADAPTER-V1",
+      "session": "b7b2bb73-1510-49b8-9016-560fa910c2a6",
+      "role": "forge",
+      "actual_model": "claude-sonnet-5-5",
+      "actual_reasoning": "unconfirmed",
+      "reported_usage_cost_usd": 0.09127579999999999,
+      "cost_source": "Claude CLI terminal runtime, not invoice reconciled",
+      "status": "PARTIAL_CA_QUESTION_ROUTE_QA_PASS_FIELD_ADAPTER_MISSING",
+      "run": "https://github.com/pahlborn/agentarium/actions/runs/38906425847",
+      "evidence_ref": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6216323172",
+      "requirement_refs": [
+        "handoffs/AG-PILOT-001-field-adapter-v1.json"
+      ],
+      "patch_sha256": "3e40b5b245e8eb01d4c9e47a2b491b3a0cfd5e8ac68de5db7852ef7522979e33",
+      "token_status": "PROVIDER_REPORTED",
+      "token_usage": [
+        {
+          "actual_model": "claude-sonnet-5-5",
+          "input_tokens": 16,
+          "output_tokens": 3097,
+          "cache_read_input_tokens": 59438,
+          "cache_creation_input_tokens": 21732,
+          "thinking_tokens": 635,
+          "raw_usage": {
+            "inputTokens": 16,
+            "outputTokens": 3097,
+            "cacheReadInputTokens": 59438,
+            "cacheCreationInputTokens": 21732,
+            "webSearchRequests": 0,
+            "costUSD": 0.09127579999999999,
+            "contextWindow": 1000000,
+            "maxOutputTokens": 128000,
+            "thinkingTokens": 635,
+            "canonicalModel": "claude-sonnet-5-5",
+            "provider": "firstParty",
+            "costBasis": "list"
+          }
+        }
+      ],
+      "scope_note": "Only optional /field route and README; CA_QUESTION. Actual source capture/HTTP witness succeeded, field rendering not delivered."
     }
   ],
   "unknown_cost_attempts": [
@@ -914,7 +956,8 @@
     "additional_pilot_local_v2_cost_usd": 0.1286485,
     "additional_activity_v1_cost_usd": 0.3843575,
     "additional_activity_v2_cost_usd": 0.20881909999999998,
-    "additional_source_hook_v1_cost_usd": 0.30678419999999995
+    "additional_source_hook_v1_cost_usd": 0.30678419999999995,
+    "additional_field_adapter_v1_cost_usd": 0.09127579999999999
   },
   "other_costs": {
     "chatgpt": "Subscription usage; per-agent monetary allocation unavailable here, not recorded as zero",
@@ -1064,6 +1107,15 @@
     "scope": "Cost feature/visualization and further cost-work development",
     "resume_condition": "Overall costs can be determined",
     "historical_records": "Retained",
-    "runtime_spending_authorization": "No expansion; no new paid execution authorized by this pause"
+    "runtime_spending_authorization": "No expansion; no new paid execution authorized by this pause",
+    "last_execution": "FIELD_ADAPTER_V1_PARTIAL_V2_SKIPPED_PRIVATE_REPOSITORY_GUARD",
+    "skipped_field_adapter_v2": {
+      "run": "https://github.com/pahlborn/agentarium/actions/runs/38913485148",
+      "conclusion": "skipped",
+      "steps": [],
+      "anthropic_call_started": false,
+      "cost_amount": null,
+      "reason": "Repository now public; existing job requires private=true. No bypass."
+    }
   }
 }

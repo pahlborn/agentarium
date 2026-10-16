@@ -4,7 +4,7 @@
   "version": 1,
   "sender": "Atlas",
   "recipient": "Forge/coding-agent, separate field-integration session",
-  "status": "READY_AFTER_SOURCE_QA",
+  "status": "PARTIAL_QA_PASS_CONTINUATION_BLOCKED",
   "repository": "pahlborn/agentarium",
   "field_input": {
     "ref": "f741d59429dba6a74d1b5bbe10a8e7b76c2456e0",
@@ -36,8 +36,28 @@
     "Sentinel acceptance3cases from Argus: actual capturedsource positives reach right agent/session/task; only heartbeat/baseline/error/expiry do notwork orincrementdone; demo/archive/layout preserved and modecleanup safe. Existing browserbinary is unavailable, no install or pretendrenderPASS. Return code and exact NOT_TESTED notes. No testgeneration/unrelatedfixes."
   ],
   "runtime": {
-    "worker_started": false,
-    "session_id": null
+    "worker_started": true,
+    "session_id": "b7b2bb73-1510-49b8-9016-560fa910c2a6",
+    "run": "https://github.com/pahlborn/agentarium/actions/runs/38906425847",
+    "handback": "CA_QUESTION",
+    "delivered_paths": [
+      "pilot/AG-PILOT-001/README.md",
+      "pilot/AG-PILOT-001/local_transport.py"
+    ]
   },
-  "stop_condition": "Only dispatch after source capture QA accepted and task wrapper pinned to actual recorder API. One real field implementation session; sourcecapture instrumented on that real task, never a paid modelprobe."
+  "stop_condition": "Only dispatch after source capture QA accepted and task wrapper pinned to actual recorder API. One real field implementation session; sourcecapture instrumented on that real task, never a paid modelprobe.",
+  "qa": {
+    "agent": "/root/sentinel_field_adapter",
+    "partial_component": "PASS",
+    "whole_field_adapter": "INCOMPLETE",
+    "browser": "NOT_TESTED",
+    "report": "handoffs/AG-PILOT-001-source-field-status-v1.md"
+  },
+  "continuation": {
+    "task": "AG-PILOT-001-FIELD-ADAPTER-V2",
+    "dispatch": "7a9b442a18fe06ef2c161e40ed8bea87c7e7a4ef",
+    "run": "https://github.com/pahlborn/agentarium/actions/runs/38913485148",
+    "status": "SKIPPED_PRIVATE_REPOSITORY_GUARD",
+    "worker_started": false
+  }
 }

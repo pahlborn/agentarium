@@ -4,7 +4,7 @@
   "version": 1,
   "sender": "Atlas",
   "recipient": "Forge/coding-agent",
-  "status": "AUTHORIZED",
+  "status": "SOURCE_CAPTURE_COMPONENT_SENTINEL_PASS",
   "repository": "pahlborn/agentarium",
   "branch": "feature/ag-interface-k3-final",
   "base_commit": "22ee82b48239082eca89a533db4645a9dc16d523",
@@ -45,5 +45,14 @@
     "run": "https://github.com/pahlborn/agentarium/actions/runs/38905283794",
     "result_ref": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6216191294",
     "status": "WORKER_SUCCESS_QA_PENDING"
-  }
+  },
+  "qa": {
+    "agent": "/root/sentinel_interface_rereview",
+    "scope": "source capture component only",
+    "stream": "9/9",
+    "cli": "8/8",
+    "capture": "8/8",
+    "browser": "NOT_TESTED"
+  },
+  "accepted_work_commit": "9ef5262d2a61dfaf4a3d29d9af0b49bfabb72f24"
 }
