@@ -1,6 +1,6 @@
 {
   "schema": "agentarium.requirement-cost-register.v1",
-  "version": 7,
+  "version": 8,
   "created_at": "2026-10-14T04:15:27.033Z",
   "currency": "USD",
   "scope": "Known NACHTPOST-003/VISUAL-004 calls plus explicit earlier failure gaps. This is not the full project bill.",
@@ -661,6 +661,48 @@
       ],
       "acceptance_status": "VERIFIED_ON_WORK_BRANCH",
       "accepted_commit": "da860fd19f38e9938ed201546f2a6e5b4cc765f8"
+    },
+    {
+      "attempt_id": "AG-PILOT-001-LOCAL-TRANSPORT-V1",
+      "session": "f0f7d565-326a-423e-960a-2cec7efe0990",
+      "role": "forge",
+      "actual_model": "claude-sonnet-5-5",
+      "requested_model": "sonnet",
+      "actual_reasoning": "unconfirmed",
+      "reported_usage_cost_usd": 0.16888330000000001,
+      "cost_source": "Claude CLI terminal runtime; not invoice reconciled",
+      "status": "RESULT_RETURNED_LOCAL_RUNTIME_QA_PENDING",
+      "run": "https://github.com/pahlborn/agentarium/actions/runs/38885877232",
+      "evidence_ref": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6213264341",
+      "requirement_refs": [
+        "handoffs/AG-PILOT-001-local-transport-v1.json"
+      ],
+      "patch_sha256": "439236f2a2079aa3a59f9ec4ac909bd4b68abf43ef7d478dc3ac56b325d980fe",
+      "token_status": "PROVIDER_REPORTED",
+      "token_usage": [
+        {
+          "actual_model": "claude-sonnet-5-5",
+          "input_tokens": 16,
+          "output_tokens": 10277,
+          "cache_read_input_tokens": 72913,
+          "cache_creation_input_tokens": 23516,
+          "thinking_tokens": 2824,
+          "raw_usage": {
+            "inputTokens": 16,
+            "outputTokens": 10277,
+            "cacheReadInputTokens": 72913,
+            "cacheCreationInputTokens": 23516,
+            "webSearchRequests": 0,
+            "costUSD": 0.16888330000000001,
+            "contextWindow": 1000000,
+            "maxOutputTokens": 128000,
+            "thinkingTokens": 2824,
+            "canonicalModel": "claude-sonnet-5-5",
+            "provider": "firstParty",
+            "costBasis": "list"
+          }
+        }
+      ]
     }
   ],
   "unknown_cost_attempts": [
@@ -692,7 +734,8 @@
     "historical_issue2_scope": "Distinct sessions found in register + Issue #2. Excludes unknown failures and any older sessions without preserved monetary evidence; not full project bill.",
     "historical_totals_note": "Existing numeric totals above retain their historical scope/cutoff; new K3 attempt is recorded separately, no complete project total is claimed.",
     "additional_k3_attempt_cost_usd": 0.22442469999999998,
-    "additional_k1_counterprobe_cost_usd": 0.1315362
+    "additional_k1_counterprobe_cost_usd": 0.1315362,
+    "additional_pilot_local_cost_usd": 0.16888330000000001
   },
   "other_costs": {
     "chatgpt": "Subscription usage; per-agent monetary allocation unavailable here, not recorded as zero",
