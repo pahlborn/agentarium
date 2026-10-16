@@ -199,6 +199,7 @@ class Handler(BaseHTTPRequestHandler):
     store = None
     activity_path = None
     activity_fresh_ms = None
+    field_html = None  # optional single built field page served at /field
 
     def log_message(self, fmt, *args):  # silenced; never log payloads
         pass
@@ -240,6 +241,18 @@ class Handler(BaseHTTPRequestHandler):
                 body = MONITOR_HTML.read_bytes()
             except OSError:
                 return self._json(404, {'error': 'monitor page missing'})
+            self.send_response(200)
+            self.send_header('Content-Type', 'text/html; charset=utf-8')
+            self.send_header('Content-Length', str(len(body)))
+            self.send_header('Cache-Control', 'no-store')
+            self.end_headers()
+            self.wfile.write(body)
+            return
+        if url.path == '/field' and self.field_html is not None:
+            try:  # only the one file chosen at startup; no path from the request
+                body = Path(self.field_html).read_bytes()
+            except OSError:
+                return self._json(404, {'error': 'field page missing'})
             self.send_response(200)
             self.send_header('Content-Type', 'text/html; charset=utf-8')
             self.send_header('Content-Length', str(len(body)))
@@ -341,7 +354,14 @@ def main():
                     help='optional activity observations JSON (agentarium.activity-observations.v1)')
     ap.add_argument('--activity-fresh-ms', type=int, default=None,
                     help='freshness window in ms (test configuration; required with --activity-input)')
+    ap.add_argument('--field-html', default=None,
+                    help='optional explicit path to ONE built field HTML, served read-only at /field')
     args = ap.parse_args()
+    if args.field_html is not None:
+        fh = Path(args.field_html).resolve()
+        if not fh.is_file():
+            ap.error('--field-html is not a file')
+        Handler.field_html = str(fh)
     if not 0 <= args.port <= 65535:
         ap.error('port out of range')
     if args.activity_input is not None and (args.activity_fresh_ms is None

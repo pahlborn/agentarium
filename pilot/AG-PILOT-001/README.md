@@ -138,6 +138,15 @@ Honest limits: the existing relay cadence is 60 s, so short freshness values wil
 activity hooks are absent; no automatic capture, no end-to-end guarantee. No LLM calls for
 telemetry, no per-token/frame logs. Costs stay "Kosten nicht vollständig ermittelbar." with no numbers.
 
+## Field page route (optional, local only)
+
+    python3 pilot/AG-PILOT-001/local_transport.py --input /abs/probe.json --port 8765 \
+      --activity-input /abs/activity.json --activity-fresh-ms 90000 --field-html /abs/built-field.html
+
+`GET /field` serves exactly that one file (chosen at startup, read-only, no request-supplied path,
+still loopback only). Without `--field-html` there is no `/field` route. The field-side adapter
+(`activity-input.js` and the hook in `schicht.py`) is NOT part of this change yet; see handback.
+
 ## Limits
 
 No real producer hooks, no field adapter, no hosting, no LLM calls, no writes or commands.
