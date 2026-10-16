@@ -115,7 +115,7 @@
      sieht man kein Umspringen, sondern nur, dass beim Hellwerden etwas
      anderes dasteht. */
   .agName{position:absolute; transform:translate(-50%,-50%);
-    font:400 14px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+    font:400 var(--agNameGr,14px)/1 ui-monospace, SFMono-Regular, Menlo, monospace;
     letter-spacing:.2em; text-transform:uppercase;
     white-space:nowrap; opacity:.7;
     animation:agAtem 4s ease-in-out infinite;}
@@ -137,7 +137,11 @@
   /* Erstes Pult: Wer vorgezogen sitzt, steht auch etwas deutlicher da. */
   /* Wer außerhalb des Kreises steht, steht auch anders da: etwas größer
      und weiter gesperrt. Kein Abzeichen — nur ein anderer Ton. */
-  .agDraussen{font-size:15.5px; letter-spacing:.34em;}
+  .agDraussen{font-size:calc(var(--agNameGr,14px) * 1.11); letter-spacing:.34em;}
+  /* Die Rolle ist laenger als der Name und bekommt eine Stufe weniger,
+     damit zwei Nachbarn sich nicht decken. */
+  .agName.rolleDa{font-size:calc(var(--agNameGr,14px) * 0.86);
+    letter-spacing:.13em;}
   /* Der Umschlag Name <-> Rolle: Die Schrift läuft auseinander und wieder
      zusammen, als würde das Wort im Feld neu gegossen — kein Ausblenden. */
   @keyframes agGuss{
@@ -477,6 +481,44 @@
     font-family:ui-monospace,SFMono-Regular,Menlo,monospace;}
   #agWas .wTitel{margin:0 0 7px; color:#D6E0F0; font-size:13px;}
   #agWas p{margin:0;}
+  /* ========================== TELEFON ==========================
+     Unten ist auf einem Telefon kein Platz fuer drei Dinge nebeneinander.
+     Gemessen: Liste gegen Stand, Liste gegen Knoepfe, Stand gegen Knoepfe
+     -- auf allen drei Telefonhoehen. Also:
+
+       - der Stand unten rechts entfaellt. Er ist der Block, der den
+         Aufgabenzaehler ein zweites Mal zeigt; im Produkt steht er auch.
+       - die Liste rutscht UEBER die Knoepfe und wird schmaler.
+       - die rechte Spalte wird schmaler, damit keine Namen hineinragen.
+
+     Quer ist mehr Breite da, aber weniger Hoehe: dort bleibt der Stand,
+     nur die Liste muss hoeher und schmaler. */
+  /* Der Stand entfaellt auf JEDEM Telefon, nicht nur hochkant: Quer ist
+     die Hoehe das Problem, und Kopf, Produkt und Stand uebereinander
+     passen auf 375 Pixel Hoehe nicht -- gemessen, sie stiessen aneinander.
+     Dass gerade dieser Block weicht, ist kein Zufall: Er zeigt den
+     Aufgabenzaehler ein zweites Mal, und der steht auch im Produkt. */
+  body[data-gross^="telefon"] #agStand{display:none;}
+  body[data-gross="telefon-hoch"] #agEcke{
+    width:min(60vw,230px);
+    bottom:calc(max(14px,env(safe-area-inset-bottom)) + 52px);}
+  body[data-gross="telefon-hoch"] #agRechts{width:min(46vw,190px);}
+  body[data-gross="telefon-hoch"] #agMarke{width:min(40vw,140px);}
+  body[data-gross="telefon-quer"] #agEcke{
+    width:min(34vw,200px);
+    bottom:calc(max(14px,env(safe-area-inset-bottom)) + 48px);}
+  body[data-gross="telefon-quer"] #agRechts{width:min(24vw,180px);}
+  body[data-gross="telefon-quer"] #agMarke{width:min(20vw,140px);}
+  /* Beim Lesen nicht vergroessern, wo es keinen Platz dafuer gibt. */
+  body[data-gross^="telefon"] #agKopf:hover,
+  body[data-gross^="telefon"] #agKopf.lesen,
+  body[data-gross^="telefon"] #agWerkName:hover,
+  body[data-gross^="telefon"] #agWerkName.lesen,
+  body[data-gross^="telefon"] #agStand:hover,
+  body[data-gross^="telefon"] #agStand.lesen{transform:scale(1.06);}
+  body[data-gross^="telefon"] #agMarke:hover,
+  body[data-gross^="telefon"] #agMarke.lesen{transform:none;}
+
   /* Der Stand der Arbeit, unten rechts über den Knöpfen. Keine Grafik,
      sondern Striche: Jeder Strich ist ein Stück Arbeit, und man kann sie
      zählen. Eine Kurve würde glätten, was gerade nicht glatt ist. */

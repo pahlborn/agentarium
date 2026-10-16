@@ -214,7 +214,7 @@ SKRIPT = """
 
      Der Bauzeitpunkt kommt beim Bauen aus der Uhr. Von Hand gepflegte
      Datumsangaben sind nach der zweiten Änderung falsch. */
-  var FASSUNG = '39', GEBAUT = '__GEBAUT__';
+  var FASSUNG = '40', GEBAUT = '__GEBAUT__';
 
   /* DIE BETRIEBSART. Sie kommt aus den Daten; fehlt sie, gilt `demo`.
      Alles, was sich zwischen Prototyp und Produktivbetrieb unterscheidet,
@@ -294,24 +294,79 @@ SKRIPT = """
 
      Die Liste ist im Hochformat schmaler als im Querformat; dieselbe Regel
      steht in den Stilangaben, und beide müssen übereinstimmen. */
+  /* EIN TELEFON IST KEIN KLEINES IPAD.
+
+     Gemessen über fünfzehn Fenstermaße: iPad, MacBook, HD, iMac und
+     ultrabreit stehen sauber — kaputt waren nur die Telefone, und dort
+     zweierlei. Hoch stieß die Liste unten links gegen den Block unten
+     rechts und gegen die Knöpfe; quer ragten zwei Agentennamen in die
+     rechte Spalte. Der Grund ist derselbe: Die Aufteilung reserviert
+     links eine Listenspalte und rechts eine Textspalte, und auf 375
+     Pixeln bleibt dazwischen kein Band übrig. `Math.max(56, …)` hat das
+     verdeckt — der Boden gewann gegen das, was hineinpasst, und der Ring
+     wurde größer als sein Platz.
+
+     Also auf dem Telefon eine andere Aufteilung statt gequetschter
+     gleicher: Der Ring nimmt die ganze Breite und sitzt mittig, die
+     Liste rutscht nach unten über die Knöpfe, und der Stand unten rechts
+     entfällt — er ist ohnehin der Block, der den Aufgabenzähler ein
+     zweites Mal zeigt. */
+  function schmal() { return W() < 560; }                      /* Telefon hoch */
+  function flach()  { return H() < 460 && W() < 1000; }        /* Telefon quer */
+  function klein()  { return schmal() || flach(); }
+
   function listeBreite() {
+    if (klein()) return Math.min(W() * 0.60, 230);
     return H() > W() ? Math.min(W() * 0.34, 240)
                      : Math.min(W() * 0.42, 330);
   }
-  function bandL() { return listeBreite() + 18; }
+  function bandL() {
+    /* Quer steht die Marke oben links UND der Ring reicht bis an den
+       linken Rand -- gemessen lag "sentinel" unter der Marke. Auf dem
+       Schreibtisch haelt die Listenspalte diesen Platz frei; quer muss
+       das die Marke selbst tun. Hoch ist der Ring tief genug unten, da
+       genuegen 12 Pixel. */
+    if (flach()) return Math.min(W() * 0.22, 160);
+    return klein() ? 12 : listeBreite() + 18;
+  }
   function bandR() {
     /* Rechts stehen drei Dinge übereinander: Kopf, Produkt, Stand der
        Arbeit. Sie teilen sich eine Spalte, und die muss breit genug für
-       den längsten Projekttitel sein. */
+       den längsten Projekttitel sein. Auf dem Telefon gibt es diese
+       Spalte nicht — dort steht der Kopf über dem Feld, nicht daneben. */
+    if (schmal()) return W() - 12;
+    if (flach())  return W() - Math.min(W() * 0.24, 190);
     return W() - Math.min(W() * 0.30, 340);
   }
   function ringR() {
-    var breit = bandR() - bandL();
-    return Math.max(56, Math.min(breit / 2.34, (H() * 0.44 - 48) / 0.92));
+    var breit = bandR() - bandL(),
+        /* Der Ring ist flachgedrückt: `heimat` rechnet die Höhe mit
+           R * 0.92. Deshalb steht hier /0.92 — zweimal habe ich ihn beim
+           Messen als Kreis gerechnet und einen Fehler gemeldet, den es
+           nicht gab. */
+        /* Wieviel Luft der Kopf braucht, haengt davon ab, WO er steht.
+           Hoch sitzt er ueber dem Feld und braucht viel (150). Quer sitzt
+           er schmal am rechten Rand, und die Namen kommen ihm nur auf
+           halber Hoehe nahe -- dort genuegen 60. Erst stand hier fuer
+           beide 150, und der Ring schrumpfte quer auf 33 Pixel: neun
+           Namen auf einem Fingernagel. */
+        hoch = schmal() ? (H() * 0.48 - 150) / 0.92
+             : flach()  ? (H() * 0.50 - 60)  / 0.92
+                        : (H() * 0.44 - 48)  / 0.92,
+        passt = Math.min(breit / 2.34, hoch);
+    /* KEIN Boden, der den Platz sprengt. Vorher stand hier
+       Math.max(56, …): Auf 375 Pixeln passten 50, gesetzt wurden 56, und
+       der Ring lief aus seinem Band. Ein Mindestmaß darf nie gegen das
+       gewinnen, was hineinpasst. */
+    return Math.max(klein() ? 30 : 56, passt);
   }
 
-  function mx() { return bandL() + ringR() * 1.28; }
-  function my() { return H() * 0.44; }
+  function mx() {
+    return klein() ? (bandL() + bandR()) / 2 : bandL() + ringR() * 1.28;
+  }
+  function my() {
+    return schmal() ? H() * 0.48 : flach() ? H() * 0.50 : H() * 0.44;
+  }
 
   function heimat(a) {
     var w = a.winkel * Math.PI / 180;
@@ -2308,6 +2363,8 @@ SKRIPT = """
                                                                   : 'Weiter');
     }
     document.body.setAttribute('data-modus', MODUS);
+    document.body.setAttribute('data-gross',
+      schmal() ? 'telefon-hoch' : (flach() ? 'telefon-quer' : 'weit'));
   }
 
   /* Umschalten. Der Modus gehört zum PROJEKT, also wird er dort gewählt,
@@ -2449,7 +2506,8 @@ SKRIPT = """
     /* Vier. Vorher waren es sechzehn, weil die Liste über den ganzen
        Schirm lief; jetzt hängt sie unter dem Kopf und soll dort aufhören,
        wo man im Vorbeigehen noch mitliest. Der älteste fällt oben weg. */
-    while (strom.length > 4) { var w = strom.shift(); if (w.parentNode) w.remove(); }
+    var zeilen = klein() ? 2 : 4;
+    while (strom.length > zeilen) { var w = strom.shift(); if (w.parentNode) w.remove(); }
   }
 
   /* Wenn ein Auftrag erledigt ist, hört seine Zeile auf, hell zu sein. */
@@ -2672,6 +2730,17 @@ SKRIPT = """
 
   /* Die Namen am Ring — ruhig, und sie verschwinden nicht. */
   function ringZeichnen() {
+    /* DIE BESCHRIFTUNG HAENGT AM RING, NICHT AN EINER FESTEN ZAHL.
+
+     Gemessen mit einer Pruefung, die mir bis heute fehlte -- ob sich
+     Beschriftungen GEGENSEITIG decken: Auf dem iPad hochkant taten sie es
+     in 10 von 14 Stichproben, auf dem iPhone in 6 von 14, im Querformat
+     nie. Immer traf es die langen ROLLENWOERTER ("Spezifikation",
+     "Qualitaet"), nie die Namen -- hochkant ist der Ring kleiner, die
+     Woerter bleiben gleich lang. Die Woerter sind Peters Texte und
+     bleiben, also haengt jetzt die Schriftgroesse am Radius. */
+    var gr = Math.max(9, Math.min(14, ringR() / 13));
+    document.documentElement.style.setProperty('--agNameGr', gr.toFixed(2) + 'px');
     ring.innerHTML = '';
     AGENTEN.forEach(function (a, i) {
       var p = heimat(a), e = document.createElement('div');
@@ -2888,6 +2957,9 @@ SKRIPT = """
       if (e.__rolle === soll) continue;
       e.__rolle = soll;
       e.textContent = soll ? A.rolle : A.name;
+      /* Die Rolle ist das laengere Wort und bekommt deshalb eine Stufe
+         weniger. Nicht der Name wird kleiner -- der ist kurz. */
+      e.classList.toggle('rolleDa', !!soll);
       /* Neu klemmen: „AUFTRAGGEBER" ist deutlich breiter als „PETER", also
          passt eine Lage, die für das eine Wort stimmt, für das andere
          nicht. Beim ersten Versuch wurde nur einmal beim Aufbau geklemmt —
@@ -2910,7 +2982,13 @@ SKRIPT = """
   }
   window.__agRing = ringZeichnen;
   setTimeout(ringZeichnen, 60);
-  window.addEventListener('resize', function () { setTimeout(ringZeichnen, 120); });
+  /* Beim Drehen aendert sich die Aufteilung, nicht nur die Groesse: Aus
+     einem Telefon hoch wird ein Telefon quer. Also auch die Knoepfe und
+     das Groessenmerkmal am Koerper neu setzen -- vorher wurde nur der Ring
+     neu gezeichnet, und `data-gross` blieb auf dem Stand vom Start. */
+  window.addEventListener('resize', function () {
+    setTimeout(function () { ringZeichnen(); knoepfeSetzen(); }, 120);
+  });
 
   document.getElementById('agHalt').addEventListener('click', function () {
     laeuft = !laeuft;
