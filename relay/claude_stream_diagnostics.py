@@ -9,12 +9,19 @@ import time
 from pathlib import Path
 from claude_cli_diagnostics import ClaudeCliFailure, diagnostic, classify_detail
 
-def run_stream(cmd, *, cwd, env, timeout, progress=None, progress_interval=60, checkpoint_dir=None):
+def run_stream(cmd, *, cwd, env, timeout, progress=None, progress_interval=60, checkpoint_dir=None, activity_recorder=None):
     checkpoint=Path(checkpoint_dir) if checkpoint_dir else None
     if checkpoint:checkpoint.mkdir(parents=True,exist_ok=True)
     started=time.monotonic()
     proc=subprocess.Popen(cmd,cwd=cwd,env=env,stdin=subprocess.DEVNULL,
                           stdout=subprocess.PIPE,stderr=subprocess.PIPE,start_new_session=True)
+    rec_failures=[0];act_outcome=None
+    def notify(name,*args):
+        # Optional metadata-only capture; its failure never alters the worker run.
+        if activity_recorder is None:return
+        try:getattr(activity_recorder,name)(*args)
+        except Exception:rec_failures[0]+=1
+    notify('on_start')
     sel=selectors.DefaultSelector()
     sel.register(proc.stdout,selectors.EVENT_READ,'stdout')
     sel.register(proc.stderr,selectors.EVENT_READ,'stderr')
@@ -49,12 +56,13 @@ def run_stream(cmd, *, cwd, env, timeout, progress=None, progress_interval=60, c
                         'last_event_seconds':last_event,'event_counts':dict(counts)}
         base['partial_text_chars']=sum(map(len,partial))
         base['terminal_usage']=safe_terminal()
+        if rec_failures[0]:base['activity_capture_failures']=rec_failures[0]
         if checkpoint:(checkpoint/'execution-metadata.json').write_text(json.dumps(base,indent=2))
         return base
     try:
         while sel.get_map():
             if time.monotonic()-started>=timeout:
-                timed_out=True
+                timed_out=True;act_outcome='aborted'
                 os.killpg(proc.pid,9)
                 break
             for key,_ in sel.select(.2):
@@ -63,6 +71,7 @@ def run_stream(cmd, *, cwd, env, timeout, progress=None, progress_interval=60, c
                     sel.unregister(key.fileobj);continue
                 chunks[key.data].extend(data)
                 if sum(map(len,chunks.values()))>4_000_000:
+                    act_outcome='aborted'
                     os.killpg(proc.pid,9)
                     proc.wait()
                     raise ClaudeCliFailure(dict(evidence('CLI_EXIT'),detail='OUTPUT_LIMIT'))
@@ -81,6 +90,12 @@ def run_stream(cmd, *, cwd, env, timeout, progress=None, progress_interval=60, c
                     counts[kind]+=1
                     last_event=round(time.monotonic()-started,3)
                     if first_event is None:first_event=last_event
+                    if activity_recorder is not None:
+                        relevant=kind in ('assistant','user')
+                        if kind=='stream_event':
+                            ev=item.get('event');dl=ev.get('delta') if isinstance(ev,dict) else None
+                            relevant=isinstance(ev,dict) and ev.get('type')=='content_block_delta' and isinstance(dl,dict)
+                        notify('on_event',kind,relevant,item.get('session_id') if kind in ('system','result') else None)
                     if kind=='result':result=item
                     if kind=='stream_event':
                         event=item.get('event',{})
@@ -94,6 +109,7 @@ def run_stream(cmd, *, cwd, env, timeout, progress=None, progress_interval=60, c
                         texts=[b['text'] for b in content if isinstance(b,dict) and b.get('type')=='text' and isinstance(b.get('text'),str)] if isinstance(content,list) else []
                         if texts:
                             partial=[''.join(texts)];save_text(''.join(partial))
+            notify('on_tick')
             if progress and time.monotonic()-sent>=progress_interval:
                 try:
                     progress({'elapsed_seconds':round(time.monotonic()-started,1),'first_byte_seconds':first_byte,
@@ -108,9 +124,11 @@ def run_stream(cmd, *, cwd, env, timeout, progress=None, progress_interval=60, c
         if buf.strip():
             try:
                 item=json.loads(buf)
-                if isinstance(item,dict) and item.get('type')=='result':result=item
+                if isinstance(item,dict) and item.get('type')=='result':
+                    result=item;notify('on_event','result',False,item.get('session_id'))
             except (ValueError,UnicodeDecodeError):counts['invalid_line']+=1
         if proc.returncode:
+            act_outcome='failed'
             ev=evidence('CLI_EXIT')
             if isinstance(result,dict):
                 # Classify terminal errors rather than arbitrary streamed model text.
@@ -120,11 +138,17 @@ def run_stream(cmd, *, cwd, env, timeout, progress=None, progress_interval=60, c
                 ev['signals']=[detail] if detail!='EXECUTION_FAILED' else []
                 if checkpoint:(checkpoint/'execution-metadata.json').write_text(json.dumps(ev,indent=2))
             raise ClaudeCliFailure(ev)
-        if not isinstance(result,dict):raise ClaudeCliFailure(evidence('INVALID_JSON'))
+        if not isinstance(result,dict):
+            act_outcome='failed'
+            raise ClaudeCliFailure(evidence('INVALID_JSON'))
+        act_outcome='failed' if result.get('is_error') is True else 'success'
         return result,evidence('SUCCESS')
     finally:
-        if proc.poll() is None:
-            os.killpg(proc.pid,9);proc.wait()
-        sel.close()
-        proc.stdout.close();proc.stderr.close()
+        try:
+            if proc.poll() is None:
+                os.killpg(proc.pid,9);proc.wait()
+            sel.close()
+            proc.stdout.close();proc.stderr.close()
+        finally:
+            notify('on_finish',act_outcome or 'failed')
 
