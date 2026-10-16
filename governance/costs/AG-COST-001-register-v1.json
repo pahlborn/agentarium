@@ -1,6 +1,6 @@
 {
   "schema": "agentarium.requirement-cost-register.v1",
-  "version": 5,
+  "version": 6,
   "created_at": "2026-10-14T04:15:27.033Z",
   "currency": "USD",
   "scope": "Known NACHTPOST-003/VISUAL-004 calls plus explicit earlier failure gaps. This is not the full project bill.",
@@ -614,6 +614,49 @@
       ],
       "token_evidence_ref": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6212103126",
       "patch_sha256": "bb88fef8ca09ede0e28e91c2487a8c5dcb18d7141d3c2f6856e95df3dd02af45"
+    },
+    {
+      "attempt_id": "AG-VISUAL-005-K1-COUNTERPROBE-V1",
+      "session": "a307250d-4104-4843-9043-54903e526889",
+      "role": "forge",
+      "actual_model": "claude-sonnet-5-5",
+      "actual_reasoning": "unconfirmed",
+      "reported_usage_cost_usd": 0.1315362,
+      "cost_source": "Claude CLI runtime metadata, not invoice reconciled",
+      "status": "RESULT_RETURNED_QA_PENDING",
+      "run": "https://github.com/pahlborn/agentarium/actions/runs/38884452318",
+      "evidence_ref": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6213044280",
+      "requirement_refs": [
+        "AG-VISUAL-005-K3-QA-01",
+        "handoffs/AG-VISUAL-005-K1-counterprobe-v1.json"
+      ],
+      "patch_sha256": "a3adb15e673951f5a12c1c7b2c6d2e8459829b21a547d05927fd53b4beb1f6d7",
+      "token_status": "PROVIDER_REPORTED",
+      "token_usage": [
+        {
+          "actual_model": "claude-sonnet-5-5",
+          "input_tokens": 14,
+          "output_tokens": 3013,
+          "cache_read_input_tokens": 91457,
+          "cache_creation_input_tokens": 36893,
+          "thinking_tokens": 262,
+          "provider_reported_model_cost_usd": 0.1315362,
+          "raw_usage": {
+            "inputTokens": 14,
+            "outputTokens": 3013,
+            "cacheReadInputTokens": 91457,
+            "cacheCreationInputTokens": 36893,
+            "webSearchRequests": 0,
+            "costUSD": 0.1315362,
+            "contextWindow": 1000000,
+            "maxOutputTokens": 128000,
+            "thinkingTokens": 262,
+            "canonicalModel": "claude-sonnet-5-5",
+            "provider": "firstParty",
+            "costBasis": "list"
+          }
+        }
+      ]
     }
   ],
   "unknown_cost_attempts": [
@@ -644,7 +687,8 @@
     "historical_issue2_known_usage_cost_usd": 2.8882656,
     "historical_issue2_scope": "Distinct sessions found in register + Issue #2. Excludes unknown failures and any older sessions without preserved monetary evidence; not full project bill.",
     "historical_totals_note": "Existing numeric totals above retain their historical scope/cutoff; new K3 attempt is recorded separately, no complete project total is claimed.",
-    "additional_k3_attempt_cost_usd": 0.22442469999999998
+    "additional_k3_attempt_cost_usd": 0.22442469999999998,
+    "additional_k1_counterprobe_cost_usd": 0.1315362
   },
   "other_costs": {
     "chatgpt": "Subscription usage; per-agent monetary allocation unavailable here, not recorded as zero",
