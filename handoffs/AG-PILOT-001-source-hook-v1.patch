@@ -1,0 +1,423 @@
+--- a/pilot/AG-PILOT-001/SOURCE-CAPTURE.md
++++ b/pilot/AG-PILOT-001/SOURCE-CAPTURE.md
+@@ -0,0 +1,63 @@
++# AG-PILOT-001 source capture (Claude CLI run_stream)
++
++Status: implemented, **not tested by Forge** (TESTS_NOT_RUN_BY_FORGE).
++
++## Opt-in
++`run_stream(..., activity_recorder=None)`. Default: no capture, behavior, results,
++exceptions and checkpoints unchanged. Capture only happens if a wrapper passes a recorder.
++
++## Wrapper example
++```python
++from activity_capture import ActivityRecorder
++rec = ActivityRecorder('/path/activity.json', agent='forge', task_id='TASK-ID',
++                       evidence_ref='relay-run:TASK-ID', sample_interval=2.0, max_observations=2000)
++result, evidence = run_stream(cmd, cwd=cwd, env=env, timeout=600, activity_recorder=rec)
++```
++The constructor raises `ValueError` on bad arguments (wrapper bug, before any worker starts).
++Everything after that is guarded.
++
++## Recorder calls (made by run_stream)
++`on_start()` after successful Popen; `on_event(kind, relevant, session_id)` per parsed event
++(session_id only passed for `system`/`result`); `on_tick()` each loop pass; `on_finish(outcome)`
++exactly once in `finally`. Recorder exceptions are swallowed; run_stream counts them and, only
++if non-zero, adds `activity_capture_failures` (int) to evidence. No exception text is kept.
++
++## Identity rules
++- session_id is taken only from a validated top-level `session_id` (hex/dash, <=80) of a
++  provider `system` or `result` event. Never invented.
++- Before it is known: no observations, only unbound process metadata in `capture`.
++  If none ever appears: `coverage_gaps` contains `no_provider_session_established`.
++- A later different id never replaces the first; it increments `session_conflicts` and is listed as a gap.
++- Agent/task are fixed per recorder (agent lowercased, e.g. `forge`).
++
++## Observations
++- On session establishment: `stream_sample` baseline with current `assistant`/`user`/`stream_event`
++  counts; `last_event_seconds` = last relevant event (0 if none yet), `elapsed_seconds` = monotonic
++  seconds since `on_start`.
++- Counted: `assistant`, `user`, and `stream_event` with `event.type == content_block_delta`.
++  Not counted: ping, system, result, rate_limit, invalid lines.
++- First relevant progress after baseline writes a sample immediately; later ones are coalesced to
++  `sample_interval` (in-memory counts always update; `on_tick` flushes pending). A pending sample is
++  flushed before the terminal one.
++- Terminal: one `execution_stopped` for the established session. `success` = exit 0 with a result
++  and `is_error` not true; `failed` = non-zero exit, no result, error result, unexpected exception;
++  `aborted` = timeout or output limit. Success never means task done. Terminal is absorbing, idempotent.
++- No `source_waiting`/`source_blocked` is ever inferred. Process running is not "working".
++- `observed_at` = real UTC (ms, `Z`) at collection, clamped monotone; source clock is separate.
++
++## Bounds, errors
++- At most `max_observations`; the baseline is pinned, oldest middle samples are dropped, a slot is
++  reserved for the terminal. `capture.truncated`/`observations_dropped`/`history_complete` and a gap
++  entry report pruning.
++- File is rewritten atomically (tmp + replace) only per emitted observation, not per token.
++  Missing/unwritable path only increments `capture.failure_counters.write_failures`.
++- Content (prompts, text, thinking, tool results, secrets) is never seen or stored.
++
++## Consumer compatibility
++Output `{schema:'agentarium.activity-observations.v1', data_kind:'OBSERVED', capture, observations}`
++is read by `activity.load_observations` / `derive`. activity.py needs two samples to show
++`working_observed`.
++
++## Limits
++`sample_interval` is local configuration, not an end-to-end latency guarantee or durable store.
++There is **no automatic GitHub-to-browser live delivery** yet; the file is local to the worker host.
+--- a/relay/activity_capture.py
++++ b/relay/activity_capture.py
+@@ -0,0 +1,251 @@
++"""Opt-in, metadata-only activity capture for one Claude CLI worker run.
++
++Writes JSON consumable by pilot/AG-PILOT-001/activity.py
++(schema 'agentarium.activity-observations.v1', data_kind 'OBSERVED').
++
++Lifecycle (called by relay.claude_stream_diagnostics.run_stream, all guarded):
++
++    rec = ActivityRecorder(path, agent='forge', task_id=..., evidence_ref=...,
++                           sample_interval=2.0, max_observations=2000)
++    rec.on_start()                              # after successful Popen
++    rec.on_event(kind, relevant, session_id)    # per parsed provider event
++    rec.on_tick()                               # loop tick; flushes coalesced sample
++    rec.on_finish(outcome)                      # success | failed | aborted (idempotent)
++
++Only event type labels, counters, timings and a validated provider session_id are
++seen/retained. No prompt, text, thinking, tool result, secret or per-token record.
++Public methods never raise; failures only increment sanitized counters.
++"""
++import json
++import os
++import threading
++import time
++import uuid
++from datetime import datetime, timezone
++
++SCHEMA = 'agentarium.activity-observations.v1'
++OUTCOMES = ('success', 'failed', 'aborted')
++COUNTERS = ('assistant', 'user', 'stream_event')
++_SID_CHARS = '0123456789abcdef-'
++
++
++def valid_session_id(value):
++    return isinstance(value, str) and 0 < len(value) <= 80 and all(c in _SID_CHARS for c in value.lower())
++
++
++def _utc_now():
++    dt = datetime.now(timezone.utc)
++    return dt.replace(microsecond=dt.microsecond // 1000 * 1000)
++
++
++def _iso(dt):
++    return dt.isoformat(timespec='milliseconds').replace('+00:00', 'Z')
++
++
++def _guard(fn):
++    def wrapper(self, *args, **kwargs):
++        try:
++            with self._lock:
++                return fn(self, *args, **kwargs)
++        except Exception:
++            try:
++                self._errors += 1
++            except Exception:
++                pass
++            return None
++    wrapper.__name__ = fn.__name__
++    wrapper.__doc__ = fn.__doc__
++    return wrapper
++
++
++class ActivityRecorder:
++    def __init__(self, path, *, agent, task_id, evidence_ref, sample_interval=2.0, max_observations=2000):
++        if not isinstance(path, (str, os.PathLike)):
++            raise ValueError('path must be str or PathLike')
++        for name, val in (('agent', agent), ('task_id', task_id), ('evidence_ref', evidence_ref)):
++            if not isinstance(val, str) or not val.strip():
++                raise ValueError('%s must be non-empty text' % name)
++        if isinstance(sample_interval, bool) or not isinstance(sample_interval, (int, float)) or sample_interval < 0:
++            raise ValueError('sample_interval must be a number >= 0')
++        if isinstance(max_observations, bool) or not isinstance(max_observations, int) or max_observations < 3:
++            raise ValueError('max_observations must be an int >= 3')
++        self._path = os.fspath(path)
++        self._agent = agent.strip().lower()
++        self._task = task_id
++        self._ref = evidence_ref
++        self._interval = float(sample_interval)
++        self._max = max_observations
++        self._lock = threading.RLock()
++        self._token = uuid.uuid4().hex[:8]
++        self._seq = 0
++        self._obs = []
++        self._dropped = 0
++        self._counts = {k: 0 for k in COUNTERS}
++        self._last_rel = None
++        self._session = None
++        self._conflicts = 0
++        self._pending = False
++        self._first_sent = False
++        self._last_sample_mono = 0.0
++        self._last_at = None
++        self._t0 = None
++        self._started_at = None
++        self._finished_at = None
++        self._outcome = None
++        self._terminal = False
++        self._errors = 0
++        self._write_failures = 0
++
++    @property
++    def failures(self):
++        """Sanitized counters only (no exception text)."""
++        return {'capture_errors': self._errors, 'write_failures': self._write_failures}
++
++    # ---- lifecycle -------------------------------------------------------
++    @_guard
++    def on_start(self):
++        if self._t0 is not None:
++            return
++        self._t0 = time.monotonic()
++        self._started_at = _utc_now()
++        self._write()
++
++    @_guard
++    def on_event(self, kind, relevant=False, session_id=None):
++        if self._terminal or self._t0 is None:
++            return
++        el = self._elapsed()
++        relevant = relevant is True and kind in COUNTERS
++        if relevant:
++            self._counts[kind] += 1
++            self._last_rel = el
++            self._pending = True
++        if kind in ('system', 'result') and valid_session_id(session_id):
++            self._bind(session_id, el)
++        if relevant and self._session is not None:
++            if (not self._first_sent) or time.monotonic() - self._last_sample_mono >= self._interval:
++                self._first_sent = True
++                self._emit_sample(el)
++                self._write()
++
++    @_guard
++    def on_tick(self):
++        if self._terminal or self._t0 is None or self._session is None or not self._pending:
++            return
++        if time.monotonic() - self._last_sample_mono >= self._interval:
++            self._emit_sample(self._elapsed())
++            self._write()
++
++    @_guard
++    def on_finish(self, outcome='failed'):
++        if self._terminal or self._t0 is None:
++            return
++        if outcome not in OUTCOMES:
++            outcome = 'failed'
++        el = self._elapsed()
++        if self._session is not None:
++            if self._pending:
++                self._emit_sample(el)  # bounded final progress flush
++            obs = self._base('execution_stopped')
++            obs['outcome'] = outcome
++            self._append(obs, final=True)
++        self._terminal = True
++        self._outcome = outcome
++        self._finished_at = _utc_now()
++        self._write()
++
++    # ---- internals -------------------------------------------------------
++    def _elapsed(self):
++        return round(time.monotonic() - self._t0, 3)
++
++    def _bind(self, sid, el):
++        if self._session is None:
++            self._session = sid
++            self._emit_sample(el)  # baseline with then-current actual counters
++            self._write()
++        elif sid != self._session:
++            self._conflicts += 1  # never switch identity; make it visible
++            if self._conflicts == 1:
++                self._write()
++
++    def _base(self, signal):
++        at = _utc_now()
++        if self._last_at is not None and at < self._last_at:
++            at = self._last_at  # keep observed_at monotone
++        self._last_at = at
++        self._seq += 1
++        return {'id': 'obs-%s-%05d' % (self._token, self._seq), 'agent': self._agent,
++                'session_id': self._session, 'task_id': self._task,
++                'observed_at': _iso(at), 'evidence_ref': self._ref, 'signal': signal}
++
++    def _emit_sample(self, el):
++        obs = self._base('stream_sample')
++        last = self._last_rel if self._last_rel is not None else 0.0
++        obs['event_counts'] = dict(self._counts)
++        obs['last_event_seconds'] = min(last, el)
++        obs['elapsed_seconds'] = el
++        self._append(obs)
++        self._pending = False
++        self._last_sample_mono = time.monotonic()
++
++    def _append(self, obs, final=False):
++        # Pin the baseline (index 0); reserve one slot for the terminal observation.
++        limit = self._max if final else self._max - 1
++        while len(self._obs) >= limit and len(self._obs) > 1:
++            self._obs.pop(1)
++            self._dropped += 1
++        self._obs.append(obs)
++
++    def _document(self):
++        gaps = []
++        if self._session is None:
++            gaps.append('no_provider_session_established: unbound process metadata only')
++        if self._conflicts:
++            gaps.append('provider_session_conflict: later differing session ids ignored')
++        if self._dropped:
++            gaps.append('observations_pruned: history incomplete')
++        if self._write_failures or self._errors:
++            gaps.append('recorder_failures: file may be stale or incomplete')
++        return {
++            'schema': SCHEMA,
++            'data_kind': 'OBSERVED',
++            'capture': {
++                'collector': 'relay.activity_capture',
++                'mode': 'metadata_only',
++                'coverage': 'partial',
++                'agent': self._agent,
++                'task_id': self._task,
++                'session_established': self._session is not None,
++                'process_started_at': _iso(self._started_at) if self._started_at else None,
++                'process_finished_at': _iso(self._finished_at) if self._finished_at else None,
++                'process_outcome': self._outcome,
++                'sample_interval_seconds': self._interval,
++                'sample_interval_note': 'local configuration, not an end-to-end latency guarantee',
++                'max_observations': self._max,
++                'observations_dropped': self._dropped,
++                'truncated': self._dropped > 0,
++                'history_complete': self._dropped == 0,
++                'session_conflicts': self._conflicts,
++                'coverage_gaps': gaps,
++                'failure_counters': self.failures,
++                'delivery': 'local file only; no automatic GitHub-to-browser live delivery',
++            },
++            'observations': list(self._obs),
++        }
++
++    def _write(self):
++        tmp = self._path + '.tmp'
++        try:
++            parent = os.path.dirname(self._path)
++            if parent:
++                os.makedirs(parent, exist_ok=True)
++            with open(tmp, 'w', encoding='utf-8') as fh:
++                json.dump(self._document(), fh, separators=(',', ':'))
++                fh.flush()
++            os.replace(tmp, self._path)
++        except Exception:
++            self._write_failures += 1
++            try:
++                os.unlink(tmp)
++            except Exception:
++                pass
+--- a/relay/claude_stream_diagnostics.py
++++ b/relay/claude_stream_diagnostics.py
+@@ -9,12 +9,19 @@
+ from pathlib import Path
+ from claude_cli_diagnostics import ClaudeCliFailure, diagnostic, classify_detail
+ 
+-def run_stream(cmd, *, cwd, env, timeout, progress=None, progress_interval=60, checkpoint_dir=None):
++def run_stream(cmd, *, cwd, env, timeout, progress=None, progress_interval=60, checkpoint_dir=None, activity_recorder=None):
+     checkpoint=Path(checkpoint_dir) if checkpoint_dir else None
+     if checkpoint:checkpoint.mkdir(parents=True,exist_ok=True)
+     started=time.monotonic()
+     proc=subprocess.Popen(cmd,cwd=cwd,env=env,stdin=subprocess.DEVNULL,
+                           stdout=subprocess.PIPE,stderr=subprocess.PIPE,start_new_session=True)
++    rec_failures=[0];act_outcome=None
++    def notify(name,*args):
++        # Optional metadata-only capture; its failure never alters the worker run.
++        if activity_recorder is None:return
++        try:getattr(activity_recorder,name)(*args)
++        except Exception:rec_failures[0]+=1
++    notify('on_start')
+     sel=selectors.DefaultSelector()
+     sel.register(proc.stdout,selectors.EVENT_READ,'stdout')
+     sel.register(proc.stderr,selectors.EVENT_READ,'stderr')
+@@ -49,12 +56,13 @@
+                         'last_event_seconds':last_event,'event_counts':dict(counts)}
+         base['partial_text_chars']=sum(map(len,partial))
+         base['terminal_usage']=safe_terminal()
++        if rec_failures[0]:base['activity_capture_failures']=rec_failures[0]
+         if checkpoint:(checkpoint/'execution-metadata.json').write_text(json.dumps(base,indent=2))
+         return base
+     try:
+         while sel.get_map():
+             if time.monotonic()-started>=timeout:
+-                timed_out=True
++                timed_out=True;act_outcome='aborted'
+                 os.killpg(proc.pid,9)
+                 break
+             for key,_ in sel.select(.2):
+@@ -63,6 +71,7 @@
+                     sel.unregister(key.fileobj);continue
+                 chunks[key.data].extend(data)
+                 if sum(map(len,chunks.values()))>4_000_000:
++                    act_outcome='aborted'
+                     os.killpg(proc.pid,9)
+                     proc.wait()
+                     raise ClaudeCliFailure(dict(evidence('CLI_EXIT'),detail='OUTPUT_LIMIT'))
+@@ -81,6 +90,12 @@
+                     counts[kind]+=1
+                     last_event=round(time.monotonic()-started,3)
+                     if first_event is None:first_event=last_event
++                    if activity_recorder is not None:
++                        relevant=kind in ('assistant','user')
++                        if kind=='stream_event':
++                            ev=item.get('event');dl=ev.get('delta') if isinstance(ev,dict) else None
++                            relevant=isinstance(ev,dict) and ev.get('type')=='content_block_delta' and isinstance(dl,dict)
++                        notify('on_event',kind,relevant,item.get('session_id') if kind in ('system','result') else None)
+                     if kind=='result':result=item
+                     if kind=='stream_event':
+                         event=item.get('event',{})
+@@ -94,6 +109,7 @@
+                         texts=[b['text'] for b in content if isinstance(b,dict) and b.get('type')=='text' and isinstance(b.get('text'),str)] if isinstance(content,list) else []
+                         if texts:
+                             partial=[''.join(texts)];save_text(''.join(partial))
++            notify('on_tick')
+             if progress and time.monotonic()-sent>=progress_interval:
+                 try:
+                     progress({'elapsed_seconds':round(time.monotonic()-started,1),'first_byte_seconds':first_byte,
+@@ -108,9 +124,11 @@
+         if buf.strip():
+             try:
+                 item=json.loads(buf)
+-                if isinstance(item,dict) and item.get('type')=='result':result=item
++                if isinstance(item,dict) and item.get('type')=='result':
++                    result=item;notify('on_event','result',False,item.get('session_id'))
+             except (ValueError,UnicodeDecodeError):counts['invalid_line']+=1
+         if proc.returncode:
++            act_outcome='failed'
+             ev=evidence('CLI_EXIT')
+             if isinstance(result,dict):
+                 # Classify terminal errors rather than arbitrary streamed model text.
+@@ -120,11 +138,17 @@
+                 ev['signals']=[detail] if detail!='EXECUTION_FAILED' else []
+                 if checkpoint:(checkpoint/'execution-metadata.json').write_text(json.dumps(ev,indent=2))
+             raise ClaudeCliFailure(ev)
+-        if not isinstance(result,dict):raise ClaudeCliFailure(evidence('INVALID_JSON'))
++        if not isinstance(result,dict):
++            act_outcome='failed'
++            raise ClaudeCliFailure(evidence('INVALID_JSON'))
++        act_outcome='failed' if result.get('is_error') is True else 'success'
+         return result,evidence('SUCCESS')
+     finally:
+-        if proc.poll() is None:
+-            os.killpg(proc.pid,9);proc.wait()
+-        sel.close()
+-        proc.stdout.close();proc.stderr.close()
++        try:
++            if proc.poll() is None:
++                os.killpg(proc.pid,9);proc.wait()
++            sel.close()
++            proc.stdout.close();proc.stderr.close()
++        finally:
++            notify('on_finish',act_outcome or 'failed')
+ 
