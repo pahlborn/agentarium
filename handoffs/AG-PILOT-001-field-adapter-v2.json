@@ -19,7 +19,22 @@
   },
   "authorization": {
     "source": "Peter 2026-10-16 15:02 Europe/Berlin: implement actual source and field receiver; Atlas owns routing.",
-    "scope": "Existing-field local adapter only. No new visual concept, architecture, public endpoint, merge, release or deployment."
+    "scope": "Existing-field local adapter only. No new visual concept, architecture, public endpoint, merge, release or deployment.",
+    "public_repository": {
+      "decision_by": "Peter",
+      "decided_at": "2026-10-16T18:37:41+02:00",
+      "authorized": true,
+      "scope": "Allow this one bounded Forge V2 relay on the public pahlborn/agentarium repository.",
+      "safeguards": [
+        "exact repository and owner IDs",
+        "exact branch and push event",
+        "exact actor ID pahlborn",
+        "immutable task/base/profile checks",
+        "minimal GitHub permissions",
+        "no checkout credentials",
+        "no automatic retry"
+      ]
+    }
   },
   "goal": "Connect the EXISTING Agentarium field to the existing /activity API in opt-in local live mode, using one real captured Forge execution as source evidence; do not make a new mock.",
   "allowed_paths": [
@@ -42,7 +57,9 @@
   ],
   "runtime": {
     "worker_started": false,
-    "session_id": null
+    "session_id": null,
+    "previous_public_guard_run": "https://github.com/pahlborn/agentarium/actions/runs/38913485148",
+    "previous_public_guard_result": "SKIPPED_BEFORE_STEPS_NO_MODEL_CALL"
   },
   "stop_condition": "One actual field coding session, capture evidence is real. No merge/deploy/architecture changes or new paid services. Independent Sentinel before acceptance.",
   "base_commit": "9ef5262d2a61dfaf4a3d29d9af0b49bfabb72f24",
