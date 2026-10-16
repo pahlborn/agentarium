@@ -1,6 +1,6 @@
 {
   "schema": "agentarium.requirement-cost-register.v1",
-  "version": 3,
+  "version": 4,
   "created_at": "2026-10-14T04:15:27.033Z",
   "currency": "USD",
   "scope": "Known NACHTPOST-003/VISUAL-004 calls plus explicit earlier failure gaps. This is not the full project bill.",
@@ -261,6 +261,17 @@
         "AG-VISUAL-004-FORGE"
       ],
       "allocation": "Shared task cost, not individually separable"
+    },
+    {
+      "epic": "AG-VISUAL-005",
+      "version": "K3-FINAL-V1",
+      "criterion_id": "K3",
+      "text": "Done only after a valid accepted proof; invalid Done does not change the task state.",
+      "source_ref": "handoffs/AG-VISUAL-005-K3-forge-final-v1.json",
+      "associated_attempts": [
+        "AG-VISUAL-005-K3-FORGE-FINAL-V1"
+      ],
+      "allocation": "One coding attempt; independent ChatGPT review/QA amounts unavailable"
     }
   ],
   "calls": [
@@ -559,6 +570,50 @@
       "token_usage": [],
       "token_status": "NOT_AVAILABLE_IN_PRESERVED_EVIDENCE",
       "token_evidence_ref": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6150760833"
+    },
+    {
+      "attempt_id": "AG-VISUAL-005-K3-FORGE-FINAL-V1",
+      "session": "1292d0c3-75dc-492b-881c-75df1593ceb9",
+      "role": "forge",
+      "actual_model": "claude-sonnet-5-5",
+      "requested_model": "sonnet",
+      "requested_reasoning": "medium",
+      "actual_reasoning": "unconfirmed",
+      "reported_usage_cost_usd": 0.22442469999999998,
+      "cost_source": "Claude CLI terminal metadata even though error_max_turns; not reconciled with invoice",
+      "status": "TURN_LIMIT_PATCH_PRESERVED_QA_PENDING",
+      "run": "https://github.com/pahlborn/agentarium/actions/runs/38878383344",
+      "evidence_ref": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6212103126",
+      "requirement_refs": [
+        "handoffs/AG-VISUAL-005-K3-forge-final-v1.json",
+        "governance/AG-VISUAL-005-INTERFACE-v2-1-2-team-review-v1.md"
+      ],
+      "cost_allocation": "Whole bounded K3 attempt; no invented per-assertion allocation",
+      "token_status": "PROVIDER_REPORTED",
+      "token_usage": [
+        {
+          "actual_model": "claude-sonnet-5-5",
+          "input_tokens": 18,
+          "output_tokens": 11131,
+          "cache_read_input_tokens": 141812,
+          "cache_creation_input_tokens": 39559,
+          "thinking_tokens": 2234,
+          "provider_reported_model_cost_usd": 0.22442469999999998,
+          "raw_usage": {
+            "inputTokens": 18,
+            "outputTokens": 11131,
+            "cacheReadInputTokens": 141812,
+            "cacheCreationInputTokens": 39559,
+            "webSearchRequests": 0,
+            "costUSD": 0.22442469999999998,
+            "contextWindow": 1000000,
+            "maxOutputTokens": 128000,
+            "thinkingTokens": 2234
+          }
+        }
+      ],
+      "token_evidence_ref": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6212103126",
+      "patch_sha256": "bb88fef8ca09ede0e28e91c2487a8c5dcb18d7141d3c2f6856e95df3dd02af45"
     }
   ],
   "unknown_cost_attempts": [
@@ -587,7 +642,9 @@
     "approved_pool_usd": 2,
     "overrun_usd": 0.2630638,
     "historical_issue2_known_usage_cost_usd": 2.8882656,
-    "historical_issue2_scope": "Distinct sessions found in register + Issue #2. Excludes unknown failures and any older sessions without preserved monetary evidence; not full project bill."
+    "historical_issue2_scope": "Distinct sessions found in register + Issue #2. Excludes unknown failures and any older sessions without preserved monetary evidence; not full project bill.",
+    "historical_totals_note": "Existing numeric totals above retain their historical scope/cutoff; new K3 attempt is recorded separately, no complete project total is claimed.",
+    "additional_k3_attempt_cost_usd": 0.22442469999999998
   },
   "other_costs": {
     "chatgpt": "Subscription usage; per-agent monetary allocation unavailable here, not recorded as zero",
@@ -634,7 +691,7 @@
     "Acceptance outcome and cost per accepted deliverable (unknown if none accepted)",
     "Provider-reported input/output/cache-read/cache-write/thinking tokens for every agent, or explicit unavailable"
   ],
-  "updated_at": "2026-10-14T04:41:33.432Z",
+  "updated_at": "2026-10-16",
   "agent_token_coverage": [
     {
       "agent": "Atlas",
@@ -722,13 +779,14 @@
       "Usage cost vs billed cash vs plan allocation distinguished",
       "Costs supported by runtime/provider evidence and clear reporting cutoff"
     ],
-    "missing_state": "Kosten noch nicht vollständig erfasst",
+    "missing_state": "Kosten nicht vollständig ermittelbar.",
     "unknown_is_neither_zero_nor_estimate": true,
     "internal_register": "Partial evidence remains available for accounting/research; never promoted to complete product total",
     "fictional_demo": "Existing mocks show labelled fictional costs; never substitute these for actual project usage",
     "implementation_owner": "Forge",
     "implementation_blocker": "Paid implementation not started; existing authorization exhausted",
-    "acceptance_test": "Given one missing agent/attempt cost, actual project total is absent; after complete scoped accounting it may appear with scope/cutoff."
+    "acceptance_test": "Given one missing agent/attempt cost, actual project total is absent; after complete scoped accounting it may appear with scope/cutoff.",
+    "field_remains_visible": true
   },
   "cost_work_status": {
     "status": "PAUSED_BY_PETER",
