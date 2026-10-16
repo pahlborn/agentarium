@@ -1,6 +1,6 @@
 {
   "schema": "agentarium.requirement-cost-register.v1",
-  "version": 12,
+  "version": 13,
   "created_at": "2026-10-14T04:15:27.033Z",
   "currency": "USD",
   "scope": "Known NACHTPOST-003/VISUAL-004 calls plus explicit earlier failure gaps. This is not the full project bill.",
@@ -788,7 +788,8 @@
             "thinkingTokens": 6134
           }
         }
-      ]
+      ],
+      "followup_ref": "AG-PILOT-001-ACTIVITY-V2"
     },
     {
       "attempt_id": "AG-PILOT-001-ACTIVITY-V2",
@@ -798,7 +799,7 @@
       "actual_reasoning": "unconfirmed",
       "reported_usage_cost_usd": 0.20881909999999998,
       "cost_source": "Claude CLI terminal metadata; not invoice reconciled",
-      "status": "SUCCESS_WORKER_ACTIVITY_V2_QA_PENDING",
+      "status": "COMPONENT_QA_PASS_AFTER_EDITORIAL_DOC_FIX_BROWSER_NOT_TESTED",
       "run": "https://github.com/pahlborn/agentarium/actions/runs/38890845816",
       "evidence_ref": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6214054273",
       "requirement_refs": [
@@ -832,7 +833,9 @@
             "costBasis": "list"
           }
         }
-      ]
+      ],
+      "accepted_commit": "22ee82b48239082eca89a533db4645a9dc16d523",
+      "acceptance_scope": "Local state derivation and HTTP. Activity14/14, transport18/18; source JS expiry inspection. No browser/end-to-end/live coverage guarantee."
     }
   ],
   "unknown_cost_attempts": [
