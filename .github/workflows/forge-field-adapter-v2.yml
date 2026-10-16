@@ -1,0 +1,38 @@
+name: Forge existing field input and actual capture V2
+on:
+  push:
+    branches: [feature/ag-interface-k3-final]
+    paths: ['.github/workflows/forge-field-adapter-v2.yml']
+permissions:
+  contents: read
+  issues: write
+concurrency:
+  group: agentarium-forge-field-adapter-v2
+  cancel-in-progress: false
+jobs:
+  forge:
+    if: github.event.repository.private == true && github.ref_name == 'feature/ag-interface-k3-final'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Validate relay syntax without model calls
+        run: python3 -m py_compile relay/forge_field_adapter_v2_once.py relay/claude_stream_diagnostics.py relay/claude_cli_diagnostics.py
+      - name: Install existing Claude Code CLI dependency
+        run: npm install --global @anthropic-ai/claude-code
+      - name: One Forge coding session
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python3 relay/forge_field_adapter_v2_once.py
+      - name: Preserve unaccepted patch and actual usage
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: forge-field-adapter-v2-output
+          path: forge-field-adapter-v2-output/
+          if-no-files-found: warn
+          retention-days: 14
