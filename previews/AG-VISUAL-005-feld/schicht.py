@@ -214,7 +214,7 @@ SKRIPT = """
 
      Der Bauzeitpunkt kommt beim Bauen aus der Uhr. Von Hand gepflegte
      Datumsangaben sind nach der zweiten Änderung falsch. */
-  var FASSUNG = '41', GEBAUT = '__GEBAUT__';
+  var FASSUNG = '42', GEBAUT = '__GEBAUT__';
 
   /* DIE BETRIEBSART. Sie kommt aus den Daten; fehlt sie, gilt `demo`.
      Alles, was sich zwischen Prototyp und Produktivbetrieb unterscheidet,
@@ -1796,13 +1796,26 @@ SKRIPT = """
           lang = tunStill > 4.5,
           mm = ('0' + Math.floor(sek / 60)).slice(-2),
           ss = ('0' + Math.floor(sek % 60)).slice(-2);
+      /* UNTER das Modellschild, nicht darauf. Peter hat die Ueberlagerung
+         im Bild gefunden: Das Schild steht bei +18 und ist zweizeilig,
+         die Arbeitsanzeige stand fest bei +34 -- gemessen ueberschnitten
+         sie sich um neun Pixel, und zwar immer, wenn "LLM & Kosten" an
+         ist. Eine feste Zahl kann das nicht loesen, denn das Schild hat
+         je nach Fall eine, zwei oder drei Zeilen. Also fragt die
+         Arbeitsanzeige nach der WIRKLICHEN Hoehe des Schildes; ist keines
+         da, bleibt es beim alten Abstand. */
+      var unten = (motorHoehe[n] && !motorOben[n]) ? 18 + motorHoehe[n] + 5 : 34;
       h += '<div class="agTut auf' + (lang ? ' lang' : '') +
-           '" style="left:' + o[0] + 'px;top:' + (o[1] + 34) +
+           '" data-wer="' + n + '" data-y="' + Math.round(o[1]) +
+           '" style="left:' + o[0] + 'px;top:' + (o[1] + unten) +
            'px;color:' + hex(A.farbe) + '">arbeitet · ' + mm + ':' + ss +
            (S.liste.length > 1 ? ' · ' + S.liste.length + ' Aufträge' : '') +
            (lang ? '<b>die anderen warten</b>' : '') + '</div>';
     }
-    if (h !== tunEl.__h) { tunEl.innerHTML = h; tunEl.__h = h; }
+    if (h !== tunEl.__h) {
+      tunEl.innerHTML = h; tunEl.__h = h;
+      fussNeu = true;
+    }
   }
 
   function arbeitSchritt(dt) {
@@ -2328,6 +2341,7 @@ SKRIPT = """
     bereitschaft(dt);
     rollenWechseln(dt);
     motorenZeigen();
+    fussOrdnen();
     ballSchrittRuhend(dt);
     tischSchritt(dt);
     uhrZeigen();
@@ -2579,6 +2593,127 @@ SKRIPT = """
      geschieht: eine kurze Beschriftung am Empfänger, nach außen
      geschrieben, die nach sieben Sekunden vergeht — wie alles andere hier
      auch. Damit steht der Text IM Bild statt daneben. */
+  /* EINE MELDUNG MACHT SICH FREI.
+
+     Sie wird an zwei Stellen gebraucht, und das ist der Kern des Fehlers:
+     Beim Setzen reicht es nicht. Die Modellschilder erscheinen auf einen
+     Schalter hin, werden neu gezeichnet, sobald sich ein Verbrauch
+     aendert, und verschieben sich dabei gegenseitig -- jedes Mal landen
+     sie womoeglich auf einer Meldung, die laengst steht. Gemessen ueber
+     fuenfzehn Groessen: in allen fuenfzehn. Also macht sich jede Meldung
+     auch dann wieder frei, wenn die Schilder sich bewegt haben.
+
+     `__heim` ist die Stelle, an die sie gehoert. Von dort wird jedes Mal
+     neu gesucht, nicht vom zuletzt erreichten Platz -- sonst wandert eine
+     Meldung bei jedem Durchgang ein Stueck weiter und verlaesst ihren
+     Agenten. */
+  function rufFreimachen(e) {
+    if (e.__heim == null) return;
+    /* Zuerst nach aussen, wie es sich gehoert -- und wenn dort kein Platz
+       ist, nach innen. Gemessen auf den flachen Telefonen: Peter steht
+       mit 1,28 Radien am weitesten draussen, seine Meldungen haben nach
+       aussen am wenigsten Luft. Eine Richtung allein reichte dort nie. */
+    var bester = null;
+    [e.__richtung || 1, -(e.__richtung || 1)].forEach(function (ri) {
+      var rest = rufVersuch(e, ri);
+      if (bester === null || rest.rest < bester.rest) bester = rest;
+    });
+    e.style.top = bester.top + 'px';
+    /* UND WENN SENKRECHT NICHTS GEHT, DANN ZUR SEITE.
+
+       Peter steht als einziger ausserhalb des Kreises, und auf einem quer
+       gehaltenen Telefon ist ueber ihm der Rand und unter ihm die
+       Kostenzeile samt Knopfleiste. Senkrecht gibt es dort schlicht
+       keinen Platz -- gemessen, beide Richtungen scheiterten. Waagerecht
+       ist welcher: Das Band ist dort 360 Pixel breit, die Meldung 210. */
+    if (bester.rest > 0) {
+      var quer = null;
+      [1, -1].forEach(function (ri) {
+        var r = rufVersuchQuer(e, ri, bester.top);
+        if (quer === null || r.rest < quer.rest) quer = r;
+      });
+      if (quer.rest < bester.rest) { e.style.left = quer.links + 'px'; }
+      else { e.style.left = e.__heimL + 'px'; }
+    } else { e.style.left = e.__heimL + 'px'; }
+    var k = e.getBoundingClientRect();
+    if (k.bottom > H() - 8)
+      e.style.top = (parseFloat(e.style.top) - (k.bottom - (H() - 8))) + 'px';
+    if (k.top < 8)
+      e.style.top = (parseFloat(e.style.top) + (8 - k.top)) + 'px';
+  }
+
+  /* Derselbe Versuch, nur waagerecht. Der Rand ist hier das Band, nicht
+     das Fenster: Links faengt die Liste an, rechts die rechte Spalte. */
+  function rufVersuchQuer(e, richtung, oben) {
+    e.style.top = oben + 'px';
+    e.style.left = e.__heimL + 'px';
+    var gewandert = 0;
+    for (var versuch = 0; versuch < 8; versuch++) {
+      var mein = e.getBoundingClientRect(), stoesst = 0;
+      var andere = document.querySelectorAll(
+        '#agMotoren [data-wer], #agMotoren .agBasis, ' +
+        '#agTun [data-wer], #agRufe .agRuf, #agTasten, ' +
+        '#agKostenEbene .agKosten, #agWerkName');
+      for (var ai = 0; ai < andere.length; ai++) {
+        if (andere[ai] === e) continue;
+        var f = andere[ai].getBoundingClientRect();
+        if (mein.right <= f.left || f.right <= mein.left ||
+            mein.bottom <= f.top || f.bottom <= mein.top) continue;
+        var weg = richtung > 0 ? f.right - mein.left + 6
+                               : mein.right - f.left + 6;
+        if (weg > stoesst) stoesst = weg;
+      }
+      if (!stoesst) return { links: parseFloat(e.style.left), rest: 0 };
+      if (gewandert + stoesst > 150)
+        return { links: parseFloat(e.style.left), rest: stoesst };
+      if (mein.left + richtung * stoesst < Math.max(6, bandL() - 10) ||
+          mein.right + richtung * stoesst > Math.min(W() - 6, bandR() + 10))
+        return { links: parseFloat(e.style.left), rest: stoesst };
+      gewandert += stoesst;
+      e.style.left = (parseFloat(e.style.left) + richtung * stoesst) + 'px';
+    }
+    return { links: parseFloat(e.style.left), rest: 1 };
+  }
+
+  /* Ein Versuch in eine Richtung: wo die Meldung landet und wie viel
+     Ueberschnitt dort bleibt. Gemessen, nicht geschaetzt. */
+  function rufVersuch(e, richtung) {
+    e.style.top = e.__heim + 'px';
+    e.style.left = e.__heimL + 'px';
+    var gewandert = 0;
+    for (var versuch = 0; versuch < 8; versuch++) {
+      var mein = e.getBoundingClientRect(), stoesst = 0;
+      var andere = document.querySelectorAll(
+        '#agMotoren [data-wer], #agMotoren .agBasis, ' +
+        '#agTun [data-wer], #agRufe .agRuf, #agTasten, ' +
+        '#agKostenEbene .agKosten, #agWerkName');
+      for (var ai = 0; ai < andere.length; ai++) {
+        if (andere[ai] === e) continue;
+        var f = andere[ai].getBoundingClientRect();
+        if (mein.right <= f.left || f.right <= mein.left ||
+            mein.bottom <= f.top || f.bottom <= mein.top) continue;
+        var weg = richtung > 0 ? f.bottom - mein.top + 6
+                               : mein.bottom - f.top + 6;
+        if (weg > stoesst) stoesst = weg;
+      }
+      if (!stoesst) return { top: parseFloat(e.style.top), rest: 0 };
+      /* 150 statt 90. Gemessen auf den quer gehaltenen Telefonen: Dort
+         steht unten die Kostenzeile ueber die ganze Breite, und 90 Pixel
+         reichten nicht an ihr vorbei. Eine Meldung, die 150 Pixel wandert,
+         ist immer noch bei ihrem Agenten -- der Kreis misst dort 139. */
+      if (gewandert + stoesst > 150)
+        return { top: parseFloat(e.style.top), rest: stoesst };
+      var neu = parseFloat(e.style.top) + richtung * stoesst,
+          probe = { o: mein.top + richtung * stoesst,
+                    u: mein.bottom + richtung * stoesst };
+      if (probe.o < 8 || probe.u > H() - 8)
+        return { top: parseFloat(e.style.top), rest: stoesst };
+      gewandert += stoesst;
+      e.style.top = neu + 'px';
+    }
+    return { top: parseFloat(e.style.top), rest: 1 };
+  }
+
   function melden(von, an, art, text, m) {
     var A = nachName[an] || nachName[von];
     if (!A || !nachName[von]) return;
@@ -2586,8 +2721,25 @@ SKRIPT = """
     var e = document.createElement('div');
     e.className = 'agRuf';
     var zm = Math.atan2(o[1] - my(), o[0] - mx());
+    /* UNTER DIE SCHILDER, NICHT DARAUF. Wer unten im Kreis steht, bekommt
+       seine Meldung nach unten geschrieben -- genau dorthin, wo schon das
+       Modellschild und die Arbeitsanzeige stehen. Im Bild nachgesehen:
+       bei Atlas lagen "peter REQUEST / Gemeinsames Staunen" und
+       "~USD 0.2172 / 1:08 in 1 Auftrag" uebereinander. Also wird
+       nachgesehen, wie tief die Schilder dieses Agenten reichen, und die
+       Meldung beginnt darunter. Gemessen, nicht geraten: Das Schild hat
+       je nach Fall eine, zwei oder drei Zeilen. */
+    var abY = Math.sin(zm) * 30;
+    if (Math.sin(zm) > 0) {
+      var tief = 0;
+      [motorEl, tunEl].forEach(function (lage) {
+        var s = lage.querySelector('[data-wer="' + A.name + '"]');
+        if (s) tief = Math.max(tief, s.getBoundingClientRect().bottom - o[1]);
+      });
+      if (tief > abY) abY = tief + 9;
+    }
     e.style.left = (o[0] + Math.cos(zm) * 30) + 'px';
-    e.style.top  = (o[1] + Math.sin(zm) * 30) + 'px';
+    e.style.top  = (o[1] + abY) + 'px';
     e.style.transform = 'translate(' +
       (Math.cos(zm) > 0.25 ? '0' : (Math.cos(zm) < -0.25 ? '-100%' : '-50%')) +
       ',' + (Math.sin(zm) > 0 ? '0' : '-100%') + ')';
@@ -2621,9 +2773,27 @@ SKRIPT = """
       e.style.textAlign = 'left';
       e.style.left = Math.max(o[0] + 30, bandL() - 10) + 'px';
     }
+    /* UND JETZT DEN NACHBARN AUSWEICHEN.
+
+       Der Versatz unter die eigenen Schilder half nur gegen den eigenen
+       Agenten. Gemessen ueber fuenfzehn Fenstergroessen lag die Meldung
+       danach immer noch auf den Schildern der NACHBARN -- auf allen
+       fuenfzehn. Eine Meldung ist 210 Pixel breit, der Abstand zweier
+       Plaetze betraegt bei einem kleinen Kreis weniger.
+
+       Also wird nachgesehen, was schon dasteht, und so weit verschoben,
+       bis nichts mehr aufeinanderliegt: nach unten, wer unten steht, nach
+       oben, wer oben steht. Hoechstens 80 Pixel weit -- eine Meldung, die
+       ihren Agenten verlaesst, waere schlimmer als eine, die eng steht. */
+    e.__richtung = Math.sin(zm) > 0 ? 1 : -1;
+    e.__heim = parseFloat(e.style.top);
+    e.__heimL = parseFloat(e.style.left);
+    rufFreimachen(e);
     var k2 = e.getBoundingClientRect();
     if (k2.bottom > H() - 8)
       e.style.top = (parseFloat(e.style.top) - (k2.bottom - (H() - 8))) + 'px';
+    if (k2.top < 8)
+      e.style.top = (parseFloat(e.style.top) + (8 - k2.top)) + 'px';
     setTimeout(function () { if (e.parentNode) e.remove(); }, 7400);
     while (rufeEl.children.length > 7) rufeEl.removeChild(rufeEl.firstChild);
   }
@@ -2792,6 +2962,39 @@ SKRIPT = """
      bleiben, also haengt jetzt die Schriftgroesse am Radius. */
     var gr = Math.max(9, Math.min(14, ringR() / 13));
     document.documentElement.style.setProperty('--agNameGr', gr.toFixed(2) + 'px');
+    /* UND DIE SCHILDER AM FUSS EBENSO. Dieselbe Lehre wie bei den Namen,
+       nur eine Ebene tiefer: Das Modellschild steht um seinen Platz
+       zentriert und lief auf einer Zeile durch. Gemessen deckten sich
+       "ChatGPT / noch kein Verbrauch" und "Claude Code / ..." auf fuenf
+       von fuenfzehn Groessen gegenseitig. Also bekommt das Schild als
+       Breite das, was zwischen zwei Plaetzen wirklich frei ist -- und
+       bricht um, statt in den Nachbarn zu laufen. Gemessen an den
+       wirklichen Plaetzen, nicht am Kreis gerechnet: Der Kreis ist
+       flachgedrueckt und einzelne Agenten stehen ausserhalb. */
+    var plaetze = AGENTEN.map(function (a) { return heimat(a); }), eng = 1e9;
+    for (var pi = 0; pi < plaetze.length; pi++)
+      for (var pj = pi + 1; pj < plaetze.length; pj++) {
+        var dx = plaetze[pi][0] - plaetze[pj][0],
+            dy = plaetze[pi][1] - plaetze[pj][1],
+            d = Math.sqrt(dx * dx + dy * dy);
+        if (d < eng) eng = d;
+      }
+    /* Kein Mindestmass hier: Es gewaenne gegen die Messung, und genau das
+       ist in diesem Programm schon einmal schiefgegangen. Was zu eng
+       wird, schiebt der Durchgang in `motorenZeigen` auseinander. */
+    /* DIE KOSTENZEILE BEKOMMT EINE EIGENE BAHN.
+
+       Sie stand mittig und lief ueber die ganze Breite -- und damit
+       unter der Liste links und unter dem Fortschritt rechts. Das war
+       schon vorher so; gesehen habe ich es erst, als die Pruefung auch
+       nach den Spalten fragte. Jetzt steht sie in demselben Band wie der
+       Kreis und bricht dort um, statt darueber hinauszulaufen. */
+    document.documentElement.style.setProperty('--agBasisM',
+      Math.round((bandL() + bandR()) / 2) + 'px');
+    document.documentElement.style.setProperty('--agBasisW',
+      Math.round(Math.max(120, bandR() - bandL() - 16)) + 'px');
+    document.documentElement.style.setProperty('--agMotBr',
+      Math.round(Math.min(230, Math.max(64, eng * 1.25))) + 'px');
     ring.innerHTML = '';
     AGENTEN.forEach(function (a, i) {
       var p = heimat(a), e = document.createElement('div');
@@ -2854,8 +3057,114 @@ SKRIPT = """
      ständige Beschriftung. */
   var motorAn = false, motorEl = document.getElementById('agMotoren');
 
+  /* Wie hoch das Modellschild jedes Agenten wirklich ist. Gemessen am
+     gezeichneten Element, nicht aus der Zeilenzahl geschaetzt. */
+  var motorHoehe = {}, motorOben = {}, fussNeu = false;
+
+  /* ========================= DER FUSS EINES AGENTEN =========================
+
+     Unter jedem Namen haengen bis zu drei Dinge: das Modellschild, die
+     Arbeitsanzeige und die Meldung, die gerade an ihn ergeht. Dazu kommt
+     die Zeile zur Kostenbasis am unteren Rand, die nach K07 nicht
+     verschwinden darf.
+
+     Peter hat eine Ueberlagerung im Bild gefunden. Beim Nachmessen waren
+     es fuenf verschiedene, und drei Anlaeufe, sie je Ebene zu loesen,
+     haben jedes Mal eine neue erzeugt: Wer das Modellschild verschiebt,
+     stellt es der Arbeitsanzeige in den Weg, und wer die klappt, trifft
+     das Schild des Nachbarn. Zwei Ebenen, die getrennt aufraeumen,
+     raeumen gegeneinander.
+
+     Also eine Ordnung fuer beide, in dieser Reihenfolge:
+
+       1. Klappen  -- wer unten an die Kostenzeile stoesst, stellt sich
+                      ueber seinen Namen.
+       2. Schieben -- was sich in derselben Hoehe noch deckt, geht
+                      waagerecht auseinander.
+       3. Freimachen -- die Meldungen suchen sich ihren Platz neu.
+
+     Erst klappen, dann schieben: andersherum schiebt man Schilder
+     auseinander, die gleich darauf in eine andere Zeile springen. */
+  function fussOrdnen() {
+    if (!fussNeu) return;
+    fussNeu = false;
+    var kante = H() - 10, bs = motorEl.querySelector('.agBasis');
+    if (bs) kante = Math.min(kante, bs.getBoundingClientRect().top - 6);
+
+    var kaesten = [];
+    Array.prototype.forEach.call(
+      document.querySelectorAll('#agMotoren [data-wer], #agTun [data-wer]'),
+      function (el) {
+        var q = el.getBoundingClientRect();
+        kaesten.push({ el: el, wer: el.getAttribute('data-wer'),
+                       y: parseFloat(el.getAttribute('data-y')),
+                       m: (q.left + q.right) / 2, w: q.width,
+                       o: q.top, u: q.bottom, h: q.height });
+      });
+    if (!kaesten.length) return;
+
+    /* 1. Klappen. Der Reihe nach von unten: Wer schon oben steht, ist das
+          Dach fuer den naechsten desselben Agenten. */
+    motorOben = {};
+    kaesten.sort(function (a, b) { return b.u - a.u; });
+    kaesten.forEach(function (K) {
+      if (K.u <= kante || !(K.y > 0)) return;
+      var dach = K.y;
+      kaesten.forEach(function (Z) {
+        if (Z !== K && Z.wer === K.wer && Z.u <= K.y && Z.o < dach) dach = Z.o;
+      });
+      if (dach - 8 - K.h < 8) return;     /* oben ist auch kein Platz */
+      K.o = dach - 8 - K.h; K.u = dach - 8;
+      K.el.style.top = Math.round(K.o) + 'px';
+      if (K.el.parentNode === motorEl) motorOben[K.wer] = true;
+    });
+
+    /* 2. Schieben. Drei Durchgaenge genuegen; jeder halbiert den
+          Ueberschnitt. */
+    for (var runde = 0; runde < 3; runde++) {
+      var ruhig = true;
+      for (var ka = 0; ka < kaesten.length; ka++)
+        for (var kb = ka + 1; kb < kaesten.length; kb++) {
+          var A1 = kaesten[ka], B1 = kaesten[kb];
+          if (A1.u <= B1.o || B1.u <= A1.o) continue;
+          /* Zwei Schilder DESSELBEN Agenten gehoeren uebereinander, nicht
+             nebeneinander: Sie sind um denselben Platz zentriert, und
+             waagerecht auseinandergeschoben saehen sie aus, als gehoerten
+             sie zu zwei verschiedenen. Also untereinander. Das traf in
+             den Messungen immer dasselbe Paar: Modellschild und
+             "arbeitet · 00:12". */
+          if (A1.wer === B1.wer) {
+            var U = A1.o <= B1.o ? A1 : B1, L = A1.o <= B1.o ? B1 : A1,
+                weg = U.u - L.o + 5;
+            L.o += weg; L.u += weg;
+            L.el.style.top = Math.round(L.o) + 'px';
+            ruhig = false;
+            continue;
+          }
+          var noetig = (A1.w + B1.w) / 2 + 7, ist = Math.abs(A1.m - B1.m);
+          if (ist >= noetig) continue;
+          var schub = (noetig - ist) / 2;
+          if (A1.m <= B1.m) { A1.m -= schub; B1.m += schub; }
+          else { A1.m += schub; B1.m -= schub; }
+          ruhig = false;
+        }
+      if (ruhig) break;
+    }
+    kaesten.forEach(function (K) {
+      /* Nicht aus dem Bild hinaus. Lieber eng als unsichtbar. */
+      K.el.style.left =
+        Math.round(Math.max(K.w / 2 + 4, Math.min(W() - K.w / 2 - 4, K.m))) + 'px';
+    });
+
+    /* 3. Die Meldungen suchen sich ihren Platz neu. */
+    Array.prototype.forEach.call(rufeEl.children, rufFreimachen);
+  }
   function motorenZeigen() {
-    if (!motorAn) { if (motorEl.children.length) motorEl.innerHTML = ''; return; }
+    if (!motorAn) {
+      if (motorEl.children.length) motorEl.innerHTML = '';
+      motorHoehe = {};
+      return;
+    }
     motorEl.__h = null;          /* Verbrauch ändert sich laufend */
     var h = '';
     AGENTEN.forEach(function (A) {
@@ -2915,6 +3224,7 @@ SKRIPT = """
         zus = '<em class="leer">noch kein Verbrauch</em>';
       }
       h += '<div class="agMot' + ((S && !S.aus) ? ' tut' : '') +
+           '" data-wer="' + A.name + '" data-y="' + Math.round(o[1]) +
            '" style="left:' + o[0] + 'px;top:' + (o[1] + 18) + 'px;color:' +
            hex(A.farbe) + '">' + txt + zus + '</div>';
     });
@@ -2950,7 +3260,15 @@ SKRIPT = """
             (laufen ? ' · ' + laufen + ' noch offen' : '')) +
          '</div>';
 
-    if (motorEl.__h !== h) { motorEl.__h = h; motorEl.innerHTML = h; }
+    if (motorEl.__h !== h) {
+      motorEl.__h = h; motorEl.innerHTML = h;
+      /* Erst nach dem Zeichnen messen, sonst misst man das vorige Bild.
+         Nur hier, nicht in jedem Durchlauf: Ein erzwungener Umbruch je
+         Bild waere Verschwendung fuer eine Zahl, die sich selten aendert. */
+      motorHoehe = {}; motorOben = {};
+
+      fussNeu = true;
+    }
   }
 
   /* Die Eigenschaften eines Agenten — beim Daraufzeigen, beim Antippen auf

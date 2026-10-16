@@ -226,9 +226,20 @@
      nach dem Titel als zweites ansteuert. */
   /* Unter dem Kopf, mit einer Trennlinie dazwischen: Es gehört zusammen
      (das ist das Projekt, das ist sein Stand), aber es ist nicht dasselbe. */
-  #agWerkName{position:static; width:100%; z-index:6;
+  /* DER FORTSCHRITT STEHT UNTEN RECHTS. Peter: "koennen wir bitte den
+     block mit projektfortschritt nach rechts unten setzen". Oben bleibt
+     damit nur, WELCHES Projekt laeuft -- unten steht, WIE WEIT es ist.
+     Der Abstand nach unten haengt an der gemessenen Hoehe der
+     Knopfleiste, nicht an einer Zahl: Auf dem Telefon bricht sie um. */
+  #agWerkName{position:fixed;
+    right:max(3px,calc(env(safe-area-inset-right) - 10px));
+    bottom:calc(max(14px,env(safe-area-inset-bottom)) + var(--agTastenH,44px) + 12px);
+    width:min(32vw,320px); z-index:6;
     opacity:0; transition:opacity 1.2s ease;
     text-align:right; color:#AEBCD2;}
+  @media (orientation:portrait){
+    #agWerkName{width:min(40vw,260px);}
+  }
   #agWerkName.auf{opacity:.72;}
   #agWerkName.hell{opacity:1;}
   .wBalken{height:3px; border-radius:2px; overflow:hidden;
@@ -417,7 +428,8 @@
   /* Und sie werden größer. Heller allein reicht für kleine Schrift nicht —
      wer hinsieht, will lesen. Der Bezugspunkt ist die jeweilige ECKE,
      damit die Blöcke nach INNEN wachsen und nicht über den Rand hinaus. */
-  #agKopf, #agWerkName{transform-origin:top right;}
+  #agKopf{transform-origin:top right;}
+  #agWerkName{transform-origin:bottom right;}
   #agMarke{transform-origin:top left;}
   /* Wer gelesen wird, liegt OBEN. Vergroessert waechst ein Block von seiner
      Ecke nach innen und deckt dabei seinen Nachbarn teilweise zu — gemessen
@@ -520,8 +532,16 @@
      passen auf 375 Pixel Hoehe nicht -- gemessen, sie stiessen aneinander.
      Dass gerade dieser Block weicht, ist kein Zufall: Er zeigt den
      Aufgabenzaehler ein zweites Mal, und der steht auch im Produkt. */
+  /* Gemessen nach dem Umzug: Liste links und Fortschritt rechts stiessen
+     hochkant aneinander (375 Pixel, 225 + 150 + Raender). Beide schmaler,
+     statt einen von beiden zu opfern. */
+  /* Gemessen auf 375 Pixeln: 14 + 187 Liste + 178 Fortschritt = 379,
+     also sieben Pixel Ueberschnitt. Schmaler wird der Fortschritt,
+     nicht die Liste -- in der Liste stehen Peters Texte, hier Zahlen. */
+  body[data-gross="telefon-hoch"] #agWerkName{width:min(36vw,135px);}
+  body[data-gross="telefon-quer"] #agWerkName{width:min(28vw,200px);}
   body[data-gross="telefon-hoch"] #agEcke{
-    width:min(60vw,230px);
+    width:min(50vw,187px);
     bottom:calc(max(14px,env(safe-area-inset-bottom)) + var(--agTastenH,52px) + 10px);}
   body[data-gross="telefon-hoch"] #agRechts{width:min(46vw,190px);}
   body[data-gross="telefon-hoch"] #agMarke{width:min(40vw,140px);}
@@ -651,8 +671,13 @@
   .agTut.lang b{opacity:.95;}
   #agMotoren{position:fixed; inset:0; z-index:4; pointer-events:none;}
   .agMot{position:absolute; transform:translate(-50%,0); opacity:.5;
-    font:400 10.5px/1 ui-monospace,SFMono-Regular,Menlo,monospace;
-    letter-spacing:.16em; text-transform:uppercase; white-space:nowrap;}
+    font:400 10.5px/1.25 ui-monospace,SFMono-Regular,Menlo,monospace;
+    letter-spacing:.16em; text-transform:uppercase;
+    /* Nicht breiter als der Platz zwischen zwei Agenten. Die Zahl setzt
+       die Schicht aus den wirklichen Plaetzen; umbrechen ist besser, als
+       in den Nachbarn zu laufen. */
+    width:var(--agMotBr,170px); text-align:center;
+    overflow-wrap:anywhere;}
   .agMot.tut{opacity:.95;}
   .agMot em{display:block; margin-top:3px; font-style:normal; font-size:9px;
     letter-spacing:.1em; text-transform:none; opacity:.8;}
@@ -665,10 +690,15 @@
   /* Der Status der Kostenbasis. Er steht unten in der Mitte des Bandes,
      gut sichtbar, und er geht nicht weg — eine fehlende Anzeige liest man
      als Fehler, eine beschriftete als Auskunft. */
-  .agBasis{position:absolute; left:50%; transform:translate(-50%,0);
-    bottom:max(14px,env(safe-area-inset-bottom));
+  /* UEBER die Knopfleiste, nicht darunter. Im Bild nachgesehen: Auf
+     1194 Pixeln Breite endete der Satz bei 656 -- genau dort, wo die
+     Leiste beginnt, und lief darunter weiter. Dieselbe gemessene Hoehe
+     wie bei der Liste und beim Fortschritt. */
+  .agBasis{position:absolute; left:var(--agBasisM,50%);
+    max-width:var(--agBasisW,70vw); transform:translate(-50%,0);
+    bottom:calc(max(14px,env(safe-area-inset-bottom)) + var(--agTastenH,44px) + 10px);
     font:400 9.5px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;
-    letter-spacing:.18em; text-transform:uppercase; white-space:nowrap;
+    letter-spacing:.18em; text-transform:uppercase; text-align:center;
     color:#6B7689;}
   .agBasis.luecke{color:#C9A227;
     text-decoration:underline dotted; text-underline-offset:4px;}
@@ -718,8 +748,8 @@
 <div id="agKostenEbene"></div>
 <div id="agWerk"></div>
 <div id="agMarke"><b>Agentarium</b><em title="BALL — Bio-Agent &amp; LLM Logistics">See intelligence move. Powered by BALL</em><small id="agFassung"></small></div>
-<div id="agRechts"><div id="agKopf"><i id="agProjekt"></i><span id="agUhr">00:00</span></div>
-<div id="agWerkName"></div></div>
+<div id="agRechts"><div id="agKopf"><i id="agProjekt"></i><span id="agUhr">00:00</span></div></div>
+<div id="agWerkName"></div>
 <div id="agWas"></div>
 <div id="agMotoren"></div>
 <div id="agTun"></div>
