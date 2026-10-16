@@ -1,6 +1,6 @@
 {
   "schema": "agentarium.requirement-cost-register.v1",
-  "version": 9,
+  "version": 10,
   "created_at": "2026-10-14T04:15:27.033Z",
   "currency": "USD",
   "scope": "Known NACHTPOST-003/VISUAL-004 calls plus explicit earlier failure gaps. This is not the full project bill.",
@@ -702,7 +702,8 @@
             "costBasis": "list"
           }
         }
-      ]
+      ],
+      "followup_ref": "AG-PILOT-001-LOCAL-TRANSPORT-V2"
     },
     {
       "attempt_id": "AG-PILOT-001-LOCAL-TRANSPORT-V2",
@@ -712,7 +713,7 @@
       "actual_reasoning": "unconfirmed",
       "reported_usage_cost_usd": 0.1286485,
       "cost_source": "Claude CLI terminal metadata, no invoice reconciliation",
-      "status": "CORRECTION_RETURNED_RUNTIME_QA_PENDING",
+      "status": "SUCCESS_LOCAL_RUNTIME_QA_PASS_18_OF_18",
       "run": "https://github.com/pahlborn/agentarium/actions/runs/38886371918",
       "evidence_ref": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6213328234",
       "requirement_refs": [
@@ -746,7 +747,9 @@
             "costBasis": "list"
           }
         }
-      ]
+      ],
+      "accepted_commit": "19463534defa6f9c6b48812eeebf56433fa28e89",
+      "acceptance_scope": "Synthetic local transport only; no real pilot, auth, durable storage or field"
     }
   ],
   "unknown_cost_attempts": [
