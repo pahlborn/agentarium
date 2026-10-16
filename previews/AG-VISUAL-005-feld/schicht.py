@@ -214,7 +214,7 @@ SKRIPT = """
 
      Der Bauzeitpunkt kommt beim Bauen aus der Uhr. Von Hand gepflegte
      Datumsangaben sind nach der zweiten Änderung falsch. */
-  var FASSUNG = '45', GEBAUT = '__GEBAUT__';
+  var FASSUNG = '46', GEBAUT = '__GEBAUT__';
 
   /* DIE BETRIEBSART. Sie kommt aus den Daten; fehlt sie, gilt `demo`.
      Alles, was sich zwischen Prototyp und Produktivbetrieb unterscheidet,
@@ -256,6 +256,18 @@ SKRIPT = """
      Die 20 Sekunden stehen nicht hier, sondern im Vertrag
      (AG-VISUAL-005-schnittstelle-v2, Abschnitt 4): Takt 5 Sekunden, nach
      20 Sekunden ohne Empfang gilt die Ansicht als veraltet. */
+  /* IM LIVEBETRIEB SPIELT DAS FELD KEINE AUFZEICHNUNG.
+
+     Bisher lag im Live-Modus immer noch die Ereignisliste des gewaehlten
+     Stuecks bereit. Solange nichts lief, fiel das nicht auf; sobald ein
+     echter Strom das Feld anlaufen laesst, wuerde NACHTPOST losspielen.
+     Also eine eigene, anfangs leere Liste. Sie waechst nur durch
+     `window.__agEreignis`. */
+  var liveListe = [];
+  function ereignisse() {
+    return (MODUS === 'live') ? liveListe : STUECK.ereignisse;
+  }
+
   var verbunden = false, letztesLZ = 0, jeLZ = false;
   var LZ_TAKT = 5000, LZ_ALT = 20000;
 
@@ -534,9 +546,36 @@ SKRIPT = """
      Empfängers: Sie wird so weit gekürzt, dass 0,4 Sekunden Luft bleiben.
      Die Daten geben den Takt, nicht die Geometrie — und wer die Plätze
      verschiebt, verschiebt damit nie die Kausalität. */
+  /* EINHOLEN STATT VORAUSSEHEN.
+
+     Im aufgezeichneten Stueck darf der Ball in die Zukunft sehen: Die
+     Liste ist vollstaendig, und er kuerzt seinen Flug so, dass er beim
+     Empfaenger ankommt, BEVOR der handelt. Live gibt es kein Als-Naechstes;
+     die Liste endet bei jetzt.
+
+     Also umgedreht: Der Flug ist, was der Weg hergibt, und wenn der
+     Empfaenger frueher handelt als gedacht, wird der Ball EINGEHOLT -- er
+     landet in 0,28 Sekunden statt zu verschwinden oder ueberholt zu
+     werden. Reaktion statt Vorhersage; dasselbe Bild, nur ehrlich
+     zustande gekommen. */
+  function baelleEinholen(name) {
+    for (var bi = 0; bi < baelle.length; bi++) {
+      var B = baelle[bi];
+      if (B.an !== name || B.u >= 1) continue;
+      var rest = 1 - B.u;
+      if (rest <= 0.001) continue;
+      var kurzD = 0.28 / rest;
+      if (kurzD < B.dauer) B.dauer = kurzD;
+    }
+  }
+
   function flugdauer(E, m, p0, z0) {
     var d = Math.max(0.9, Math.hypot(z0[0]-p0[0], z0[1]-p0[1]) / (260 * m.tempo));
     if (!E.an) return d;
+    /* Live steht in der Liste nichts, was noch nicht geschehen ist. Der
+       Blick nach vorn faende ohnehin nichts -- hier steht, dass er nicht
+       gemeint ist, damit niemand ihn spaeter fuer kaputt haelt. */
+    if (MODUS === 'live') return d;
     for (var i = 0; i < STUECK.ereignisse.length; i++) {
       var N = STUECK.ereignisse[i];
       if (N.t <= E.t || N.von !== E.an) continue;
@@ -548,6 +587,9 @@ SKRIPT = """
   }
 
   function wirf(E) {
+    /* Handelt jemand, waehrend noch ein Ball zu ihm unterwegs ist, landet
+       der zuerst. Im Stueck verhinderte das der Blick nach vorn. */
+    if (MODUS === 'live') baelleEinholen(E.von);
     var A = nachName[E.von], B = nachName[E.an] || A;
     var p = heimat(A), z = heimat(B);
     var m = ARTEN[E.art] || ARTEN.handoff;
@@ -2298,9 +2340,10 @@ SKRIPT = """
   function schritt(dt) {
     if (laeuft) {
       zeit += dt * tempo;
-      while (naechstes < STUECK.ereignisse.length &&
-             STUECK.ereignisse[naechstes].t <= zeit) {
-          var E = STUECK.ereignisse[naechstes++];
+      var LISTE = ereignisse();
+      while (naechstes < LISTE.length &&
+             LISTE[naechstes].t <= zeit) {
+          var E = LISTE[naechstes++];
         /* Was beendet die Arbeit? Nicht alles, was jemand von sich gibt.
            Eine Rückfrage beendet sie nicht — man fragt und arbeitet weiter;
            ein Widerspruch und ein gemeldeter Fehler auch nicht. Was sie
@@ -2352,8 +2395,11 @@ SKRIPT = """
         wirf(E);
         tunStill = 0;        /* es ist etwas passiert — die Pause ist aus */
       }
-      if (naechstes >= STUECK.ereignisse.length) {
-        if (!ausklang && zeit > STUECK.dauer + 3) ausklangBeginnen();
+      if (naechstes >= ereignisse().length) {
+        /* Im Livebetrieb ist "nichts mehr da" der Normalfall, nicht das
+           Ende. Ein Ausklang waere die Behauptung, das Projekt sei fertig. */
+        if (MODUS !== 'live' && !ausklang && zeit > STUECK.dauer + 3)
+          ausklangBeginnen();
         if (ausklang) {
           ausklang -= dt;
           ausklangStufen();
@@ -2407,7 +2453,7 @@ SKRIPT = """
   /* Messsonde. Nur zum Nachmessen im Browser, nicht fürs Bild. */
   window.__agStand = function () {
     return { zeit: zeit, ausklang: ausklang, naechstes: naechstes,
-             ereignisse: STUECK.ereignisse.length, dauer: STUECK.dauer,
+             ereignisse: ereignisse().length, dauer: STUECK.dauer,
              bausteine: bausteine.length, visionen: visionen,
              aufgabenAuf: aufgabenAuf, aufgabenZu: aufgabenZu,
              register: register.length,
@@ -2416,6 +2462,12 @@ SKRIPT = """
                auftrag: geraten.auftrag, abnahme: geraten.abnahme,
                gegen: geraten.gegen, antwort: geraten.antwort },
              ball: derBall ? derBall.bei : null,
+             /* Die fliegenden Baelle, damit sich das Einholen nachmessen
+                laesst: Wer wirft, wohin, wie weit ist er, wie lange soll
+                der Flug noch dauern. */
+             fliegend: baelle.map(function (b) {
+               return { von: b.von, an: b.an, u: +b.u.toFixed(3),
+                        dauer: +b.dauer.toFixed(3) }; }),
              still: tunStill,
              arbeiten: (function () { var r = [];
                for (var n in arbeit) if (!arbeit[n].aus && arbeit[n].liste.length)
@@ -2480,6 +2532,9 @@ SKRIPT = """
   function modusSetzen(m) {
     if (!MODI[m]) return;
     MODUS = m;
+    /* Jeder Wechsel setzt den Livepuffer zurueck. Was ein voriger Strom
+       geliefert hat, gehoert nicht in den naechsten. */
+    liveListe.length = 0;
     zurueckAufAnfang();
     laeuft = !!modus().start;
     kopfSetzen();
@@ -2920,6 +2975,123 @@ SKRIPT = """
                her: letztesLZ ? Date.now() - letztesLZ : null,
                zustand: stromWar, takt: LZ_TAKT, alt: LZ_ALT };
     }
+  };
+
+  /* ============ DER EINGANG FUER EIN ARBEITSEREIGNIS ============
+
+     Hier kommt an, was der Arbeitsstrom liefert. Die Feldnamen sind die
+     des Vertrags V2.1 (`arbeitsereignis`), nicht eigene -- und was der
+     Vertrag verlangt, verlangt dieser Eingang auch:
+
+       actor      Pflicht, muss ein bekannter Agent sein
+       kind       Pflicht; eine Art, die das Feld NICHT kennt, wird
+                  abgewiesen statt mit einer fremden Gestalt gezeigt
+       title      Pflicht, nichtleer
+       recipient  Pflicht fuer die neun Kommunikationsarten des Vertrags
+                  ("eine Nachricht ohne Empfaenger ist keine Nachricht")
+
+     Abgewiesen heisst abgewiesen: kein Ersatzwert, keine erfundene
+     Gestalt, keine Null bei Kosten. Der Rueckgabewert sagt warum, damit
+     die Gegenstelle es protokollieren kann.
+
+     `occurred_at` ordnet, taktet aber nicht: Das Feld setzt den Ball auf
+     die eigene Uhr, sobald das Ereignis EINTRIFFT. Eine nachgelieferte
+     Vergangenheit rueckwaerts abzuspielen waere eine Behauptung ueber
+     etwas, das man nicht gesehen hat. */
+  var KOMMUNIKATION = { request:1, handoff:1, answer:1, question:1,
+                        objection:1, change_request:1, proposal:1,
+                        recommendation:1, contribution:1 };
+  var liveNr = 0;
+
+  /* ============ WELCHER LAUF HIER LAEUFT ============
+
+     Ohne das zeigt das Feld im Livebetrieb den Namen des zuletzt
+     gewaehlten aufgezeichneten Stuecks -- im Bild stand "NACHTPOST V1"
+     ueber einem Lauf, der nichts damit zu tun hatte. Das ist keine
+     Unschoenheit, das ist eine falsche Angabe.
+
+     Die Felder sind die des Vertrags (`project.created`, `run.started`):
+     project_id, run_id, titel. Was nicht geliefert wird, bleibt leer --
+     kein Ersatzname. */
+  window.__agLauf = function (d) {
+    if (MODUS !== 'live') return { angenommen: false, grund: 'nicht im Live-Betrieb' };
+    if (!d || typeof d !== 'object') return { angenommen: false, grund: 'keine Angabe' };
+    var pid = (typeof d.project_id === 'string') ? d.project_id.trim() : '';
+    if (!pid) return { angenommen: false, grund: 'project_id fehlt' };
+    STUECK.projekt = (typeof d.kurz === 'string' && d.kurz.trim()) ? d.kurz.trim() : pid;
+    STUECK.titel   = (typeof d.titel === 'string' && d.titel.trim()) ? d.titel.trim() : pid;
+    STUECK.was     = (typeof d.was === 'string') ? d.was : '';
+    STUECK.ablage  = (typeof d.ablage === 'string') ? d.ablage : '';
+    /* Keinen Umfang behaupten, den niemand genannt hat. */
+    if (typeof d.umfang === 'number') STUECK.umfang = d.umfang;
+    else delete STUECK.umfang;
+    kopfSetzen();
+    return { angenommen: true, projekt: STUECK.projekt };
+  };
+
+  window.__agEreignis = function (e) {
+    function nein(g) { return { angenommen: false, grund: g }; }
+    if (MODUS !== 'live') return nein('nicht im Live-Betrieb');
+    if (!e || typeof e !== 'object') return nein('kein Ereignis');
+
+    var von = (typeof e.actor === 'string') ? e.actor.trim().toLowerCase() : '';
+    if (!von) return nein('actor fehlt');
+    if (!nachName[von]) return nein('actor unbekannt: ' + von);
+
+    var art = (typeof e.kind === 'string') ? e.kind.trim() : '';
+    if (!art) return nein('kind fehlt');
+    if (!ARTEN[art]) return nein('kind unbekannt: ' + art);
+
+    var text = (typeof e.title === 'string') ? e.title.trim() : '';
+    if (!text) return nein('title fehlt');
+
+    var an = (typeof e.recipient === 'string') ? e.recipient.trim().toLowerCase() : '';
+    if (KOMMUNIKATION[art] && !an) return nein('recipient fehlt bei ' + art);
+    if (an && !nachName[an]) return nein('recipient unbekannt: ' + an);
+
+    var E = { id: (typeof e.id === 'string' && e.id) ? e.id : ('L' + (++liveNr)),
+              t: zeit, von: von, an: an || '', art: art, text: text,
+              folgen: 1, gross: 1.0 };
+
+    /* VERBRAUCH: GENAU DIE FELDER DES VERTRAGS, KEINE ERFUNDENEN.
+
+       Beim ersten Anlauf standen hier `kosten_usd`, `quelle` und
+       `cache_tokens`. Keines davon gibt es. Der Vertrag (`$defs.verbrauch`)
+       kennt `belegt` (Pflicht), `input_tokens`, `output_tokens`,
+       `thinking_tokens`, `actual_model`, `platform`, `agent_id` -- und
+       **kein Geld**. Das ist derselbe Fehler wie in Schnittstelle V1, wo
+       sieben Feldnamen erfunden wurden; er bleibt nicht stehen.
+
+       Folge, und sie ist richtig so: Aus einem echten Strom kommt im Feld
+       nie ein Betrag. Es bleibt bei Peters Satz. Die Betraege in den
+       beiden aufgezeichneten Stuecken sind erfunden und bleiben dort.
+
+       `belegt: false` heisst: Es ist gearbeitet und nichts gemeldet
+       worden. Dann traegt das Ereignis KEINE Zahlen -- das ist etwas
+       anderes als null, und das Feld zeigt dafuer "keine Kostenangabe". */
+    var v = e.verbrauch;
+    if (v && typeof v === 'object' && v.belegt === true) {
+      var tk = {};
+      if (typeof v.output_tokens === 'number') tk.aus = v.output_tokens;
+      if (typeof v.input_tokens === 'number') tk.ein = v.input_tokens;
+      if (typeof v.thinking_tokens === 'number') tk.denken = v.thinking_tokens;
+      for (var _k in tk) { E.tokens = tk; break; }
+    }
+    if (v && typeof v === 'object' && typeof v.actual_model === 'string')
+      E.modell = v.actual_model;
+    if (typeof e.caused_by !== 'undefined') E.caused_by = e.caused_by;
+    if (typeof e.fictional === 'boolean') E.fictional = e.fictional;
+    if (typeof e.occurred_at === 'string') E.occurred_at = e.occurred_at;
+
+    liveListe.push(E);
+    /* Ein eingetroffenes Ereignis ist ebenso ein Beleg fuer eine lebende
+       Leitung wie ein Lebenszeichen. */
+    verbunden = true; jeLZ = true; letztesLZ = Date.now();
+    /* "Sobald eine Schnittstelle liefert, laeuft es an" -- so steht es
+       auf der Tafel, und so ist es jetzt auch. */
+    if (!laeuft) laeuft = true;
+    stromZeigen();
+    return { angenommen: true, id: E.id };
   };
 
   function uhrZeigen() {

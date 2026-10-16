@@ -1,4 +1,4 @@
-/* Der Arbeiter. Fassung 45.
+/* Der Arbeiter. Fassung 46.
 
    Zwei Dinge sind hier mit Absicht so und nicht anders:
 
@@ -16,7 +16,7 @@
    Neuladen mitten im Lauf gibt es nicht: Was gerade zu sehen ist, soll
    zu Ende laufen duerfen.
 */
-const VORRAT = 'agentarium-v45';
+const VORRAT = 'agentarium-v46';
 const STUECKE = ['./', 'index.html', 'manifest.webmanifest',
                  'icon-120.png', 'icon-152.png', 'icon-180.png',
                  'icon-192.png', 'icon-512.png'];
