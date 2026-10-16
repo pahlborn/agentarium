@@ -1,6 +1,6 @@
 {
   "schema": "agentarium.requirement-cost-register.v1",
-  "version": 16,
+  "version": 17,
   "created_at": "2026-10-14T04:15:27.033Z",
   "currency": "USD",
   "scope": "Known NACHTPOST-003/VISUAL-004 calls plus explicit earlier failure gaps. This is not the full project bill.",
@@ -948,6 +948,34 @@
         }
       ],
       "scope_note": "Public-repository guard passed and real worker ran. error_max_turns after9turns; no non-empty adapter or field hook delivered. No automatic retry."
+    },
+    {
+      "attempt_id": "AG-PILOT-001-FIELD-ADAPTER-V3",
+      "session": "065336d2-8af6-40c4-8a55-7135c70441f5",
+      "role": "forge",
+      "actual_model": "claude-sonnet-5-5",
+      "actual_reasoning": "unconfirmed",
+      "reported_usage_cost_usd": 0.4518881,
+      "cost_source": "Claude CLI terminal runtime, not invoice reconciled",
+      "status": "SUCCESS_SENTINEL_PASS_WITH_LIMITS_BROWSER_NOT_TESTED",
+      "run": "https://github.com/pahlborn/agentarium/actions/runs/38934352513",
+      "evidence_ref": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6220343563",
+      "requirement_refs": [
+        "handoffs/AG-PILOT-001-field-adapter-v3.json"
+      ],
+      "patch_sha256": "73571f323424aec6442358015d578b73998341da82a9f8fece05e7fd06fa3458",
+      "token_status": "PROVIDER_REPORTED",
+      "token_usage": [
+        {
+          "actual_model": "claude-sonnet-5-5",
+          "input_tokens": 30,
+          "output_tokens": 25193,
+          "cache_read_input_tokens": 355181,
+          "cache_creation_input_tokens": 65752,
+          "thinking_tokens": 12244
+        }
+      ],
+      "scope_note": "No turn cutoff; one bounded run,24turns. Exact patch independently QA PASS_WITH_LIMITS. Browser DOM NOT_TESTED."
     }
   ],
   "unknown_cost_attempts": [
@@ -986,7 +1014,9 @@
     "additional_activity_v2_cost_usd": 0.20881909999999998,
     "additional_source_hook_v1_cost_usd": 0.30678419999999995,
     "additional_field_adapter_v1_cost_usd": 0.09127579999999999,
-    "additional_field_adapter_v2_cost_usd": 0.154038
+    "additional_field_adapter_v2_cost_usd": 0.154038,
+    "additional_field_adapter_v3_cost_usd": 0.4518881,
+    "source_and_field_integration_calls_usd": 1.0039861
   },
   "other_costs": {
     "chatgpt": "Subscription usage; per-agent monetary allocation unavailable here, not recorded as zero",
@@ -1137,7 +1167,7 @@
     "resume_condition": "Overall costs can be determined",
     "historical_records": "Retained",
     "runtime_spending_authorization": "No expansion; no new paid execution authorized by this pause",
-    "last_execution": "FIELD_ADAPTER_V2_FAILED_MAX_TURNS_NO_NEW_ADAPTER",
+    "last_execution": "FIELD_ADAPTER_V3_SUCCESS_SENTINEL_PASS_WITH_LIMITS_BROWSER_OPEN",
     "skipped_field_adapter_v2": {
       "run": "https://github.com/pahlborn/agentarium/actions/runs/38913485148",
       "conclusion": "skipped",
@@ -1148,8 +1178,8 @@
     },
     "exact_authorization": {
       "source": "Peter",
-      "decided_at": "2026-10-16T18:37:41+02:00",
-      "scope": "One public-repository Forge V2 continuation only"
+      "decided_at": "2026-10-16T18:43:29+02:00",
+      "scope": "One Forge V3 run without turn cutoff; 900-second technical timeout; no automatic retry"
     }
   }
 }

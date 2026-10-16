@@ -1,0 +1,43 @@
+{
+  "schema": "agentarium.handoff.v0",
+  "task_id": "AG-PILOT-001-FIELD-ADAPTER-V3",
+  "version": 3,
+  "sender": "Atlas",
+  "recipient": "Forge/coding-agent",
+  "status": "IMPLEMENTED_SENTINEL_PASS_WITH_LIMITS",
+  "repository": "pahlborn/agentarium",
+  "working_branch": "feature/ag-interface-k3-final",
+  "base_commit": "2b9c7150c20284103f00786dcaf34d0f2dc0f89b",
+  "dispatch_commit": "d7262659f8c6abc9efd3f36ead579a733e06ac6c",
+  "accepted_work_commit": "800874ee1c6fd2ed3a806ba7774a19c2e11f3878",
+  "run": "https://github.com/pahlborn/agentarium/actions/runs/38934352513",
+  "session_id": "065336d2-8af6-40c4-8a55-7135c70441f5",
+  "actual_model": "claude-sonnet-5-5",
+  "actual_reasoning": "unconfirmed",
+  "cost_usd": 0.4518881,
+  "patch_sha256": "73571f323424aec6442358015d578b73998341da82a9f8fece05e7fd06fa3458",
+  "changed_paths": [
+    "previews/AG-VISUAL-005-feld/activity-input.js",
+    "previews/AG-VISUAL-005-feld/schicht.py"
+  ],
+  "qa": {
+    "agent_id": "/root/sentinel_field_v3",
+    "signal": "AGENTARIUM:AG-PILOT-001-FIELD-ADAPTER-V3-QA:QA_REPORT:V1",
+    "verdict": "PASS_WITH_LIMITS",
+    "browser_dom": "NOT_TESTED",
+    "product_failures": []
+  },
+  "evidence": {
+    "activity_sha256": "dd1a1344258397804cae761c91f95d6c7b886ae323a319ed211e44ee38706c59",
+    "http_requests": 96,
+    "http_errors": 0,
+    "working_observed_seen": true,
+    "stopped_success_seen": true
+  },
+  "boundaries": [
+    "unmerged working commit only",
+    "no release or deployment",
+    "browser/GPU/DOM not tested",
+    "no complete project cost claim"
+  ]
+}

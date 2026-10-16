@@ -36,6 +36,8 @@ Tokenfelder sind Providerangaben. Thinking separat ausgewiesen; nicht nochmals z
 
 | forge | AG-PILOT-001-FIELD-ADAPTER-V2 | 7cedd45b | 18 | 3334 | 142795 | 42553 | 1403 | 0.1540380 | [Runtime](https://github.com/pahlborn/agentarium/issues/2#issuecomment-6220189114) |
 
+| forge | AG-PILOT-001-FIELD-ADAPTER-V3 | 065336d2 | 30 | 25193 | 355181 | 65752 | 12244 | 0.4518881 | [Runtime](https://github.com/pahlborn/agentarium/issues/2#issuecomment-6220343563) |
+
 K3-Versuch: CLI-Turngrenze erreicht; Patch erhalten und unabhängig geprüft. Der anschließende begrenzte K1-Testauftrag ist erfolgreich geliefert und durch Sentinel bestätigt: beide Prüfer grün, K1/K2/K3-Rückfälle erkannt. Liefercommit da860fd19f38e9938ed201546f2a6e5b4cc765f8. Kein Merge oder Deployment. Aktuelles Kostenfeld bleibt sichtbar und zeigt bei unvollständiger Erfassung ausschließlich „Kosten nicht vollständig ermittelbar.“
 
 ## ChatGPT – Erfassungslücken
@@ -68,3 +70,5 @@ Aktivitätsmonitor: V1 an Turn-Grenze beendet, Patch erhalten, QA zunächst FAIL
 Quellerfassung: Sentinel PASS (Stream9/9, Diagnostik8/8, Capture8/8). Feldadapter V1: CA_QUESTION, nur lokale /field-Route geliefert; unabhängige Teil-QA PASS (Transport18/18, Aktivität14/14, Route und echte Daten16/16), vollständige Feldanbindung INCOMPLETE. Diese zwei Claude-Aufrufe zusammen 0.3980600 USD; kein Projektgesamtbetrag. Feldadapter V2 wurde vom bestehenden Private-Repo-Guard übersprungen, keine Schritte/kein Modellaufruf. Keine geschätzte Nullbuchung für andere Kosten.
 
 Feldadapter V2: öffentlicher Relay-Guard von Peter freigegeben und wirksam; Worker gestartet, aber nach9Turns mit error_max_turns beendet. 0.1540380USD. activity-input.js blieb leer, schicht.py unverändert, daher kein neuer Feldadapter und kein automatischer Retry. Die drei Source/Field-Aufrufe SOURCE-HOOK-V1 + FIELD-ADAPTER-V1 + FIELD-ADAPTER-V2 ergeben 0.5520980USD; weiterhin kein vollständiger Projektgesamtbetrag.
+
+Feldadapter V3: ohne Turn-Grenze erfolgreich nach24Turns/190.361s,0.4518881USD; Sentinel PASS_WITH_LIMITS, Browser-DOM NOT_TESTED. Source hook V1 + Field V1/V2/V3 =1.0039861USD. Kein vollständiger Projektgesamtbetrag und daher kein Betrag in der Produktanzeige.
