@@ -1,0 +1,41 @@
+{
+  "schema": "agentarium.handoff.v0",
+  "task_id": "AG-PILOT-001-LOCAL-TRANSPORT-V1",
+  "version": 1,
+  "sender": "Atlas",
+  "recipient": "Forge/coding-agent",
+  "status": "AUTHORIZED",
+  "repository": "pahlborn/agentarium",
+  "branch": "feature/ag-interface-k3-final",
+  "base_commit": "da860fd19f38e9938ed201546f2a6e5b4cc765f8",
+  "allowed_paths": [
+    "pilot/AG-PILOT-001/local_transport.py",
+    "pilot/AG-PILOT-001/README.md"
+  ],
+  "authorization": {
+    "source": "Peter 2026-10-16 12:09 Europe/Berlin asks Atlas to continue interface integration. Atlas selects the smallest portable local test slice within existing concept, no hosting/deployment or real pilot activation.",
+    "scope": "One coding session, standard-library loopback prototype only. No permanent host, new dependency or paid service. Return patch."
+  },
+  "goal": "IMPLEMENT the smallest runnable local HTTP/SSE integration probe using the existing verified reducer. No visual changes. This is an explicitly labelled test harness, not a production service or real live pilot.",
+  "instructions": [
+    "Only create local_transport.py and short README. Use Python stdlib, import exact existing tests/AG-VISUAL-005-referenz-reducer.py by path (no copy/rewrite). No Bash/network/subagents available, do not attempt tests; Sentinel runs them independently.",
+    "Command: python3 pilot/AG-PILOT-001/local_transport.py --input /explicit/path/probe.json --port <port>; port0 supported and actual bind address printed/flushed. Bind EXCLUSIVELY 127.0.0.1, refuse public addresses; no TLS/auth/persistence claim. Use ThreadingHTTPServer and default access logs may be silenced; never log input payloads/secrets. No endpoints that write or execute commands, no POST accepted.",
+    "Input JSON: {\"snapshot\": <existing run snapshot from fixture11 or fixture01>, \"events\": [<canonical existing agentarium.strom.v2.1 work.event envelopes>]}. Snapshot is the pinned initial baseline. A human/test producer may append events to this supplied file while server runs. Read with mtime caching/locking, do not overwrite source file. Scope ONE configured project/run, validate identities and sequences, report malformed updates clearly and retain prior valid input instead of claiming success.",
+    "GET /health returns clearly local_probe, supported_actions:[], no production readiness claims. GET /snapshot derives current run snapshot/state at all accepted contiguous input using existing reducer and initial snapshot state/cursor. Keep original input times/IDs and label probe data synthetic out of band, do NOT assert OBSERVED real work.",
+    "GET /events SSE: no cursor=>current derived snapshot first, then later file-appended events, no double effect. Last-Event-ID (and explicit ?cursor= for testing) selects only events after that transport cursor; future or below-retained-baseline cursors => explicit resync error before streaming. Valid events framed id:<sequence>, event:agentarium,data:<original envelope>. Heartbeat every5s, no id/no persisted entry/no cursor advancement. Missing sequence must not be silently skipped; surface resync/error and stop that connection. Detect client disconnect cleanly.",
+    "GET /state?cursor=N returns reference-reducer state at that cursor for deterministic historical reconstruction from the SAME baseline+events, same accepted state as snapshot at same cursor. Reject cursor outside available contiguous range. Expose rejection diagnostics separately from accepted state; an invalid semantic Done is received but does not alter task state. Do NOT implement a competing reducer, accept commands, or forge Done proof.",
+    "GET /archive returns explicitly labelled LOCAL_TEST_BUNDLE containing unmodified input snapshot+events for reconstruction, NOT a claim to implement final GitHub archive packaging. Limit to registered input run. This is only a portable test bundle, no GitHub/archive branch/publication.",
+    "Keep costs object visible/incomplete, no money/zero/partials, exact status_text Kosten nicht vollständig ermittelbar. Do not invent unknown time, duration, model or costs. No LLM calls in server. No CSS/graphics/field code changes.",
+    "Small focused implementation, no needless frameworks/config systems/test generation. README: exact input example constructed from existing fixture data, start command, endpoints, append-file example, limits (volatile test environment, no auth, no real producer hooks/field adapter, NOT PILOT READY). Stop with concise CA_IMPLEMENTED, changed files, TESTS_NOT_RUN_BY_FORGE after creating the 2 files."
+  ],
+  "model_routing": {
+    "requested_model": "sonnet",
+    "requested_reasoning": "medium",
+    "actual_model": null,
+    "actual_reasoning": "unconfirmed",
+    "override": false,
+    "cost_control": "One bounded session; same eight-turn coding role default; preserve partial work/actual terminal usage; no price-triggered cutoff. No automatic retry; stop on insufficient credit.",
+    "estimated_cost_usd": null
+  },
+  "expected_result": "Patch in allowed paths; independent Sentinel runtime QA required; no deployment."
+}
