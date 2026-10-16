@@ -240,8 +240,26 @@
   .wTitel{font:400 10px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;
     letter-spacing:.22em; text-transform:uppercase;
     overflow-wrap:anywhere;}
-  .wOrt{margin-top:4px; font:400 8.5px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;
+  .wOrt{margin-top:6px; font:400 8.5px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;
     letter-spacing:.24em; text-transform:uppercase; opacity:.6;}
+  /* EIN BLOCK, EINE REIHENFOLGE: was es ist, wie weit, wovon wieviel,
+     woraus es besteht. Vorher stand die Aufschluesselung unten rechts in
+     einem zweiten Block, der denselben Aufgabenzaehler zeigte. */
+  .wZahl{margin-top:5px; font:400 9px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;
+    letter-spacing:.18em; text-transform:uppercase; color:#8295B0;}
+  .wAuf{margin-top:9px; padding-top:8px;
+    border-top:1px solid rgba(150,170,200,.12);}
+  .wAufZ{display:flex; align-items:center; justify-content:flex-end;
+    gap:7px; margin-bottom:4px;}
+  .wAufZ u{text-decoration:none; color:#55637A; order:1;
+    font:400 8.5px/1 ui-monospace,SFMono-Regular,Menlo,monospace;
+    letter-spacing:.2em; text-transform:uppercase; min-width:58px;
+    text-align:right;}
+  .wAufZ b{color:#9FAFC6; order:2; font-weight:400; min-width:14px;
+    text-align:right;
+    font:400 10px/1 ui-monospace,SFMono-Regular,Menlo,monospace;}
+  .wAufZ i{display:flex; gap:2px; order:0;}
+  .wAufZ s{display:block; width:3px; height:10px; text-decoration:none;}
   /* DAS REGISTER: woraus das Produkt besteht. Kennung, Fassung, Zustand —
      eine Fassung v2 ist der sichtbare Beweis einer Überarbeitung. */
   .wReg{margin-top:9px; padding-top:8px;
@@ -383,21 +401,19 @@
      an, nur ohne Grund; sonst sprängen die Blöcke beim Zeigen um. Beim
      Zeigen kommt der dunkle Grund dazu, und die Blöcke stehen dann auf
      etwas statt im Feld. */
-  #agMarke, #agKopf, #agWerkName, #agStand{pointer-events:auto;
+  #agMarke, #agKopf, #agWerkName{pointer-events:auto;
     padding:11px 13px; border-radius:10px;
     background:rgba(6,9,14,0); border:1px solid rgba(150,170,200,0);
     transition:opacity .3s ease, filter .3s ease, transform .3s ease,
                background .3s ease, border-color .3s ease;}
   #agMarke:hover, #agMarke.lesen,
   #agKopf:hover, #agKopf.lesen,
-  #agWerkName:hover, #agWerkName.lesen,
-  #agStand:hover, #agStand.lesen{
+  #agWerkName:hover, #agWerkName.lesen{
     background:rgba(6,9,14,.93); border-color:rgba(150,170,200,.16);
     -webkit-backdrop-filter:blur(3px); backdrop-filter:blur(3px);}
   #agMarke:hover, #agMarke.lesen,
   #agKopf:hover, #agKopf.lesen,
-  #agWerkName:hover, #agWerkName.lesen,
-  #agStand:hover, #agStand.lesen{filter:brightness(1.85) saturate(1.1);}
+  #agWerkName:hover, #agWerkName.lesen{filter:brightness(1.85) saturate(1.1);}
   /* Und sie werden größer. Heller allein reicht für kleine Schrift nicht —
      wer hinsieht, will lesen. Der Bezugspunkt ist die jeweilige ECKE,
      damit die Blöcke nach INNEN wachsen und nicht über den Rand hinaus. */
@@ -412,12 +428,9 @@
      ueber dem Text, den man gerade lesen wollte. */
   #agMarke:hover, #agMarke.lesen,
   #agKopf:hover, #agKopf.lesen,
-  #agWerkName:hover, #agWerkName.lesen,
-  #agStand:hover, #agStand.lesen{z-index:12;}
-  #agStand{transform-origin:bottom right;}
+  #agWerkName:hover, #agWerkName.lesen{z-index:12;}
   #agKopf:hover, #agKopf.lesen,
-  #agWerkName:hover, #agWerkName.lesen,
-  #agStand:hover, #agStand.lesen{transform:scale(1.28);}
+  #agWerkName:hover, #agWerkName.lesen{transform:scale(1.28);}
   /* Die Marke waechst weniger: Sie muss nicht gelesen werden, sie steht da. */
   #agMarke:hover, #agMarke.lesen{transform:scale(1.10);}
   #agWerkName:hover, #agWerkName.lesen{opacity:1;}
@@ -438,25 +451,34 @@
     border-bottom:1px dotted rgba(150,170,200,.35); padding-bottom:1px;}
   /* Die Kurzbeschreibung auf Antippen — auf einem iPad gibt es kein
      Darüberfahren, also kein Tooltip, sondern ein Blatt. */
-  #agWas{position:fixed; right:max(14px,env(safe-area-inset-right));
-    top:calc(max(14px,env(safe-area-inset-top)) + 58px); z-index:9;
-    width:min(70vw,330px); padding:15px 17px; border-radius:10px;
-    background:rgba(8,12,19,.95); border:1px solid rgba(150,170,200,.16);
-    color:#C2CEE2; font:400 12.5px/1.5 -apple-system,system-ui,sans-serif;
-    text-transform:none; letter-spacing:0; text-align:left;
+  /* DAS BLATT GEHOERT ZUM KOPF, ALSO SIEHT ES AUCH SO AUS.
+     Peter: „die projektauswahl passt vom format nicht zur titelanzeige."
+     Stimmt -- es war ein breites, linksbuendiges Blatt in Flaechenschrift
+     unter einer schmalen, rechtsbuendigen Spalte in Schreibmaschinenschrift.
+     Jetzt dieselbe Breite wie die Spalte, dieselbe Kante, rechtsbuendig. */
+  #agWas{position:fixed; right:max(3px,calc(env(safe-area-inset-right) - 10px));
+    top:calc(max(3px,env(safe-area-inset-top)) + 46px); z-index:9;
+    width:min(32vw,320px); padding:13px 13px 15px; border-radius:10px;
+    background:rgba(6,9,14,.96); border:1px solid rgba(150,170,200,.16);
+    -webkit-backdrop-filter:blur(3px); backdrop-filter:blur(3px);
+    color:#C2CEE2; font:400 11px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace;
+    letter-spacing:.06em; text-align:right;
     opacity:0; transform:translateY(-6px); pointer-events:none;
     transition:opacity .35s ease, transform .35s ease;}
+  @media (orientation:portrait){ #agWas{width:min(40vw,260px);} }
+  body[data-gross="telefon-hoch"] #agWas{width:min(46vw,190px);}
+  body[data-gross="telefon-quer"] #agWas{width:min(24vw,180px);}
   #agWas.auf{opacity:1; transform:none; pointer-events:auto;}
   /* Die Projektwahl sitzt im selben Blatt wie die Beschreibung: Was läuft
      und was es ist, gehören zusammen. */
-  .wProjekte{list-style:none; margin:0 0 12px; padding:0 0 11px;
+  .wProjekte{list-style:none; margin:0 0 11px; padding:0 0 10px;
     border-bottom:1px solid rgba(150,170,200,.16);}
-  .wProjekte li{cursor:pointer; padding:5px 0; color:#8EA0BA;
-    font:400 11px/1.3 ui-monospace,SFMono-Regular,Menlo,monospace;
-    letter-spacing:.18em; text-transform:uppercase;}
+  .wProjekte li{cursor:pointer; padding:6px 0; color:#8EA0BA;
+    font:400 10px/1.3 ui-monospace,SFMono-Regular,Menlo,monospace;
+    letter-spacing:.22em; text-transform:uppercase;}
   .wProjekte li:hover{color:#D6E0F0;}
   .wProjekte li.hier{color:#E8D9A8;}
-  .wProjekte li.hier::before{content:'— '; opacity:.7;}
+  .wProjekte li.hier::after{content:' —'; opacity:.7;}
   /* Die Betriebsart wird dort gewählt, wo man auch das Projekt wählt —
      sie gehört zum Projekt, nicht zur Bedienung. */
   .wModi{list-style:none; display:flex; gap:1px; margin:13px 0 8px; padding:0;
@@ -498,24 +520,52 @@
      passen auf 375 Pixel Hoehe nicht -- gemessen, sie stiessen aneinander.
      Dass gerade dieser Block weicht, ist kein Zufall: Er zeigt den
      Aufgabenzaehler ein zweites Mal, und der steht auch im Produkt. */
-  body[data-gross^="telefon"] #agStand{display:none;}
   body[data-gross="telefon-hoch"] #agEcke{
     width:min(60vw,230px);
-    bottom:calc(max(14px,env(safe-area-inset-bottom)) + 52px);}
+    bottom:calc(max(14px,env(safe-area-inset-bottom)) + var(--agTastenH,52px) + 10px);}
   body[data-gross="telefon-hoch"] #agRechts{width:min(46vw,190px);}
   body[data-gross="telefon-hoch"] #agMarke{width:min(40vw,140px);}
+  /* DIE KNOEPFE BRECHEN AUF DEM TELEFON UM. Gemessen: Die Leiste ist
+     407 Pixel breit, das iPhone SE 375 -- "Was geschieht" stand 46 Pixel
+     links ausserhalb des Bildes, auf dem iPhone 15 noch 28. Rechts
+     verankert faellt immer der erste Knopf heraus, und das ist
+     ausgerechnet der, den man zuerst braucht. Die Woerter bleiben wie
+     sie sind; umbrechen darf die Leiste. */
+  body[data-gross="telefon-hoch"] #agTasten,
+  body[data-gross="telefon-quer"] #agTasten{
+    left:max(6px,env(safe-area-inset-left));
+    right:max(6px,env(safe-area-inset-right));
+    flex-wrap:wrap; justify-content:flex-end;}
+  body[data-gross="telefon-hoch"] #agTasten button,
+  body[data-gross="telefon-quer"] #agTasten button{
+    padding:9px 11px; letter-spacing:.10em;}
+  /* AUF DEM TELEFON DIE ZUSAMMENFASSUNG, DAS DETAIL AUF ANTIPPEN.
+     Gemessen: Der eine Block mit Titel, Balken, Zaehler, Aufschluesselung,
+     Ablage und Register ist auf 667 Pixeln Hoehe so hoch, dass fuer den
+     Kreis 30 Pixel blieben -- neun Namen auf einem Fingernagel. Oben
+     stehen deshalb die drei Dinge, die die Frage "wie weit" beantworten;
+     Aufschluesselung und Register kommen beim Lesen dazu. */
+  body[data-gross="telefon-hoch"] #agWerkName .wAuf,
+  body[data-gross="telefon-hoch"] #agWerkName .wReg,
+  body[data-gross="telefon-hoch"] #agWerkName .wOrt{display:none;}
+  body[data-gross="telefon-hoch"] #agWerkName:hover .wAuf,
+  body[data-gross="telefon-hoch"] #agWerkName.lesen .wAuf,
+  body[data-gross="telefon-hoch"] #agWerkName:hover .wReg,
+  body[data-gross="telefon-hoch"] #agWerkName.lesen .wReg,
+  body[data-gross="telefon-hoch"] #agWerkName:hover .wOrt,
+  body[data-gross="telefon-hoch"] #agWerkName.lesen .wOrt{display:block;}
+  body[data-gross="telefon-hoch"] #agWerkName:hover .wAufZ,
+  body[data-gross="telefon-hoch"] #agWerkName.lesen .wAufZ{display:flex;}
   body[data-gross="telefon-quer"] #agEcke{
     width:min(34vw,200px);
-    bottom:calc(max(14px,env(safe-area-inset-bottom)) + 48px);}
+    bottom:calc(max(14px,env(safe-area-inset-bottom)) + var(--agTastenH,48px) + 10px);}
   body[data-gross="telefon-quer"] #agRechts{width:min(24vw,180px);}
   body[data-gross="telefon-quer"] #agMarke{width:min(20vw,140px);}
   /* Beim Lesen nicht vergroessern, wo es keinen Platz dafuer gibt. */
   body[data-gross^="telefon"] #agKopf:hover,
   body[data-gross^="telefon"] #agKopf.lesen,
   body[data-gross^="telefon"] #agWerkName:hover,
-  body[data-gross^="telefon"] #agWerkName.lesen,
-  body[data-gross^="telefon"] #agStand:hover,
-  body[data-gross^="telefon"] #agStand.lesen{transform:scale(1.06);}
+  body[data-gross^="telefon"] #agWerkName.lesen{transform:scale(1.06);}
   body[data-gross^="telefon"] #agMarke:hover,
   body[data-gross^="telefon"] #agMarke.lesen{transform:none;}
 
@@ -527,44 +577,10 @@
      weiter oben hatte das schon gesetzt — diese hier stand später im
      Stylesheet und hat es bei gleicher Gewichtung wieder genommen. Genau
      derselbe Fehler wie bei der Kopfbreite im Hochformat. */
-  #agStand{position:fixed; right:max(3px,calc(env(safe-area-inset-right) - 10px));
-    bottom:calc(max(14px,env(safe-area-inset-bottom)) + 44px);
-    z-index:4; pointer-events:auto; text-align:right;}
-  .sZeile{display:flex; align-items:center; justify-content:flex-end;
-    gap:7px; margin-bottom:5px;}
-  .sZeile u{text-decoration:none; color:#55637A; order:1;
-    font:400 9px/1 ui-monospace,SFMono-Regular,Menlo,monospace;
-    letter-spacing:.2em; text-transform:uppercase; min-width:62px;
-    text-align:right;}
-  .sZeile b{color:#9FAFC6; order:2; font-weight:400; min-width:16px;
-    font:400 11px/1 ui-monospace,SFMono-Regular,Menlo,monospace;}
-  .sZeile i{display:flex; gap:2px; order:0;}
-  .sZeile s{display:block; width:3px; height:11px; text-decoration:none;}
-  .sOffen{background:#8FA3C0;}
-  .sTisch{background:#C8D4E6;}
-  .sStop{background:#A8707A;}
-  .sFertig{background:#E8D9A8;}
-  /* ZUM SCHLUSS LEUCHTET DAS FERTIGE.
-
-     Peters zwei Anweisungen treffen sich hier: „Das Produkt muss leuchtend
-     erstrahlen" und „belassen wir es bei dem nüchternen, anwachsenden
-     Balken." Also leuchtet der Balken — die Zeile, die ohnehin zählt, was
-     fertig ist. Kein zweites Gebilde im Feld.
-
-     Drei Sekunden Übergang, damit es aufgeht und nicht angeht. */
-  #agStand .sZeile, #agStand .sZeile s, #agStand .sZeile u, #agStand .sZeile b{
-    transition:color 3s ease, background 3s ease, box-shadow 3s ease,
-               opacity 3s ease, transform 3s ease;}
-  #agStand.fertig .sZeile{opacity:.3;}
-  #agStand.fertig .sZeile:last-of-type{opacity:1;}
-  #agStand.fertig .sFertig{background:#FFF3CF; box-shadow:0 0 9px #E8D9A8;
-    transform:scaleY(1.5);}
-  #agStand.fertig .sZeile:last-of-type u{color:#E8D9A8;}
-  #agStand.fertig .sZeile:last-of-type b{color:#FFF3CF;}
-  #agStand.fertig .sUmfang{color:#AEBCD2;}
-  .sUmfang{margin-top:7px; color:#55637A;
-    font:400 9px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;
-    letter-spacing:.14em;}
+  /* Der Stilblock des alten Standes unten rechts ist ENTFALLEN -- mit dem
+     Block selbst. Seine vier Groessen und der Aufgabenzaehler stehen jetzt
+     im einen Block oben rechts; unten rechts bleiben nur die Knoepfe.
+     Zwei Anzeigen, die nahezu dasselbe aussagten, sind eine geworden. */
   #agTasten{position:fixed; right:max(14px,env(safe-area-inset-right));
     bottom:max(14px,env(safe-area-inset-bottom)); z-index:11; display:flex; gap:1px;
     border-radius:8px; overflow:hidden; background:rgba(150,170,200,.12);}
@@ -700,7 +716,6 @@
 <div id="agRufe"></div>
 <div id="agSteck"></div>
 <div id="agKostenEbene"></div>
-<div id="agStand"></div>
 <div id="agWerk"></div>
 <div id="agMarke"><b>Agentarium</b><em title="BALL — Bio-Agent &amp; LLM Logistics">See intelligence move. Powered by BALL</em><small id="agFassung"></small></div>
 <div id="agRechts"><div id="agKopf"><i id="agProjekt"></i><span id="agUhr">00:00</span></div>

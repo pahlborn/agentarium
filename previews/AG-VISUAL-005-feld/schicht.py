@@ -214,7 +214,7 @@ SKRIPT = """
 
      Der Bauzeitpunkt kommt beim Bauen aus der Uhr. Von Hand gepflegte
      Datumsangaben sind nach der zweiten Änderung falsch. */
-  var FASSUNG = '40', GEBAUT = '__GEBAUT__';
+  var FASSUNG = '41', GEBAUT = '__GEBAUT__';
 
   /* DIE BETRIEBSART. Sie kommt aus den Daten; fehlt sie, gilt `demo`.
      Alles, was sich zwischen Prototyp und Produktivbetrieb unterscheidet,
@@ -311,6 +311,15 @@ SKRIPT = """
      Liste rutscht nach unten über die Knöpfe, und der Stand unten rechts
      entfällt — er ist ohnehin der Block, der den Aufgabenzähler ein
      zweites Mal zeigt. */
+  /* Wie tief der rechte Block reicht -- gemessen, nicht geschaetzt. Vor
+     dem ersten Zeichnen ist er leer; dann gilt ein Ersatzwert, und beim
+     naechsten Durchlauf stimmt die echte Hoehe. */
+  function kopfUnten() {
+    var e = document.getElementById('agRechts');
+    if (!e) return 150;
+    var u = e.getBoundingClientRect().bottom;
+    return u > 20 ? u : 150;
+  }
   function schmal() { return W() < 560; }                      /* Telefon hoch */
   function flach()  { return H() < 460 && W() < 1000; }        /* Telefon quer */
   function klein()  { return schmal() || flach(); }
@@ -344,13 +353,13 @@ SKRIPT = """
            R * 0.92. Deshalb steht hier /0.92 — zweimal habe ich ihn beim
            Messen als Kreis gerechnet und einen Fehler gemeldet, den es
            nicht gab. */
-        /* Wieviel Luft der Kopf braucht, haengt davon ab, WO er steht.
-           Hoch sitzt er ueber dem Feld und braucht viel (150). Quer sitzt
-           er schmal am rechten Rand, und die Namen kommen ihm nur auf
-           halber Hoehe nahe -- dort genuegen 60. Erst stand hier fuer
-           beide 150, und der Ring schrumpfte quer auf 33 Pixel: neun
-           Namen auf einem Fingernagel. */
-        hoch = schmal() ? (H() * 0.48 - 150) / 0.92
+        /* Wieviel Luft der Kopf braucht, haengt davon ab, WO er steht --
+           und WIE HOCH er ist. Erst stand hier eine feste 150. Dann wurden
+           Produkt und Stand zu einem Block zusammengelegt, der Block wurde
+           hoeher, und auf dem Telefon standen wieder Namen darunter. Eine
+           geratene Zahl ist beim naechsten Inhalt wieder falsch, also wird
+           der Block gefragt. */
+        hoch = schmal() ? (H() * 0.48 - (kopfUnten() + 18)) / 0.92
              : flach()  ? (H() * 0.50 - 60)  / 0.92
                         : (H() * 0.44 - 48)  / 0.92,
         passt = Math.min(breit / 2.34, hoch);
@@ -1163,16 +1172,30 @@ SKRIPT = """
     var glanz = ausklang
       ? Math.max(0, Math.min(1, (AUSKLANG_DAUER - ausklang - 6) / 5)) : 0;
 
-    if (standEl && (glanz > 0.25) !== standEl.classList.contains('fertig'))
-      standEl.classList.toggle('fertig', glanz > 0.25);
 
     /* Eröffnet gegen abgeschlossen — dieselbe Einheit auf beiden Seiten.
        Der Nenner wächst im Lauf, und das ist richtig so. */
+    /* EIN BLOCK STATT ZWEIER, DIE DASSELBE SAGEN.
+
+       Peter: „ich wuensche mir eine zusammenfassung der informationen,
+       welche wichtig ist um zu erkennen, wie weit das projekt gediehen
+       ist. aus produkt wurde irgendetwas gebastelt ohne ruecksicht auf
+       das, was bereits vorhanden ist."
+
+       Der Vorwurf trifft: Ich habe das Produkt oben rechts gebaut, ohne
+       den Stand unten rechts zu beachten, der schon da war. Beide zeigten
+       denselben Aufgabenzaehler, der eine als Zahl, der andere als Zahl
+       UND als Balken. Jetzt steht alles einmal, in dieser Reihenfolge:
+       was es ist, wie weit, wovon wieviel, woraus es besteht. */
+    var offen = 0, blockiert = 0;
+    for (var nq in arbeit) { var Sq = arbeit[nq]; if (Sq && !Sq.aus) offen += Sq.liste.length; }
+    for (var bq in stopper) blockiert++;
     var ganz = aufgabenAuf,
         teil = ganz ? Math.min(1, aufgabenZu / ganz) : 0,
         schl = (STUECK.titel || STUECK.projekt || '') + '|' +
                aufgabenZu + '|' + ganz + '|' + (glanz > 0.25) + '|' +
-               register.length + '|' +
+               offen + '|' + tisch.length + '|' + blockiert + '|' +
+               bausteine.length + '|' + register.length + '|' +
                register.map(function (r) { return r.zustand; }).join('');
 
     /* Kein `left` mehr. Diese Zeile stammte aus der Fassung, in der das
@@ -1205,13 +1228,36 @@ SKRIPT = """
         reg += '</div>';
       }
 
+      /* Die Aufschluesselung. Striche statt Kurve: Jeder Strich ist ein
+         Stueck Arbeit, und man kann sie zaehlen. Eine Kurve wuerde
+         glaetten, was gerade nicht glatt ist. */
+      var reihe = function (k, zahl, kl) {
+        var s = '<div class="wAufZ"><u>' + k + '</u><b>' + zahl + '</b><i>';
+        for (var q = 0; q < Math.min(zahl, 18); q++)
+          s += '<s class="' + kl + '"></s>';
+        return s + '</i></div>';
+      };
       werkNameEl.innerHTML =
+        /* 1. Was es ist */
+        '<div class="wTitel">' + (STUECK.titel || STUECK.projekt || '') + '</div>' +
+        /* 2. Wie weit */
         '<div class="wBalken"><span style="width:' +
           (teil * 100).toFixed(1) + '%"></span></div>' +
-        '<div class="wTitel">' + (STUECK.titel || STUECK.projekt || '') + '</div>' +
+        '<div class="wZahl">' +
+          (ganz ? aufgabenZu + ' von ' + ganz + ' Aufgaben erledigt'
+                : 'noch keine Aufgabe eröffnet') + '</div>' +
+        /* 3. Wovon wieviel */
+        '<div class="wAuf">' +
+          reihe('offen', offen, 'sOffen') +
+          reihe('prüfung', tisch.length, 'sTisch') +
+          reihe('blockiert', blockiert, 'sStop') +
+          reihe('fertig', bausteine.length, 'sFertig') +
+        '</div>' +
+        /* 4. Woher und was das Konzept behauptet */
         '<div class="wOrt">' + (STUECK.ablage || 'extern') +
-          (ganz ? ' · ' + aufgabenZu + ' von ' + ganz + ' Aufgaben'
-                : ' · noch keine Aufgabe') + '</div>' + reg;
+          (STUECK.umfang ? ' · laut Konzept ' + STUECK.umfang : '') + '</div>' +
+        /* 5. Woraus es besteht */
+        reg;
     }
   }
 
@@ -2168,32 +2214,12 @@ SKRIPT = """
      Der Umfang (V1: vier Stories, V2: 21 Storyideen) steht in eurem
      Konzeptpapier und kommt als Datenfeld mit. Fehlt er, zeigt der Stand
      nur die vier Größen und behauptet keine Vollständigkeit. */
-  var standEl = document.getElementById('agStand');
-
-  function standZeigen() {
-    var offen = 0, blockiert = 0;
-    for (var n in arbeit) { var S = arbeit[n]; if (S && !S.aus) offen += S.liste.length; }
-    for (var b in stopper) blockiert++;
-    var reihe = function (k, zahl, kl) {
-      var h = '<div class="sZeile"><u>' + k + '</u><b>' + zahl + '</b><i>';
-      for (var i = 0; i < Math.min(zahl, 24); i++) h += '<s class="' + kl + '"></s>';
-      return h + '</i></div>';
-    };
-    var h = reihe('offen', offen, 'sOffen') +
-            reihe('prüfung', tisch.length, 'sTisch') +
-            reihe('blockiert', blockiert, 'sStop') +
-            reihe('fertig', bausteine.length, 'sFertig');
-    /* `umfang` bleibt sichtbar, aber als das, was es ist: eine Angabe aus
-       dem Konzept. Als Nenner des Fortschritts war sie falsch — die Zähler
-       waren Ereignisse, der Nenner Storyideen. */
-    if (STUECK.umfang) {
-      h += '<div class="sUmfang">laut Konzept ' + STUECK.umfang +
-           (STUECK.umfangText ? ' · ' + STUECK.umfangText : '') + '</div>';
-    }
-    h += '<div class="sUmfang">' + aufgabenZu + ' von ' + aufgabenAuf +
-         ' Aufgaben erledigt</div>';
-    if (standEl.__h !== h) { standEl.__h = h; standEl.innerHTML = h; }
-  }
+  /* Der Block unten rechts ist ENTFALLEN. Er zeigte dieselben vier
+     Groessen und denselben Aufgabenzaehler wie der Block oben rechts --
+     zwei Anzeigen, die nahezu dasselbe aussagten. Die vier Groessen stehen
+     jetzt im einen Block oben; unten rechts bleiben nur die Knoepfe.
+     Der Umfang aus dem Konzept steht dort als das, was er ist: eine
+     Angabe aus dem Papier, kein Messwert. */
 
   /* -------------------------------------------------------- Das Stück */
   /* `laeuft` beginnt nur im Demo-Modus auf wahr. In allen anderen wartet
@@ -2299,7 +2325,6 @@ SKRIPT = """
     knoepfeSetzen();
     stoppZeigen();
     tunZeigen(dt);
-    standZeigen();
     bereitschaft(dt);
     rollenWechseln(dt);
     motorenZeigen();
@@ -2365,6 +2390,18 @@ SKRIPT = """
     document.body.setAttribute('data-modus', MODUS);
     document.body.setAttribute('data-gross',
       schmal() ? 'telefon-hoch' : (flach() ? 'telefon-quer' : 'weit'));
+    /* Wie hoch die Knopfleiste WIRKLICH ist, statt einer Zahl im
+       Stylesheet. Auf dem Telefon bricht sie um, und dann stimmt jede
+       feste Zahl nicht mehr -- 52 Pixel waren fuer eine Reihe gemessen,
+       zwei Reihen schoben die Liste in die Knoepfe. Gemessen wird nach
+       dem Umbruch, also im naechsten Bild. */
+    setTimeout(function () {
+      var tst = document.getElementById('agTasten');
+      if (!tst) return;
+      var hoehe = Math.round(tst.getBoundingClientRect().height);
+      if (hoehe > 0)
+        document.documentElement.style.setProperty('--agTastenH', hoehe + 'px');
+    }, 0);
   }
 
   /* Umschalten. Der Modus gehört zum PROJEKT, also wird er dort gewählt,
@@ -2439,11 +2476,25 @@ SKRIPT = """
       var nr = +li.getAttribute('data-nr');
       if (nr !== stueckNr) { stueckNr = nr; STUECK = STUECKE[nr];
                              kopfSetzen(); zurueckAufAnfang(); }
-      wasEl.classList.add('auf');     /* offen lassen: man liest noch */
+      /* NACH DER WAHL GEHT DAS BLATT ZU.
+         Vorher blieb es offen, mit der Begruendung „man liest noch".
+         Peter: „wenn ein projekt ausgewaehlt wurde, ist das schliessen des
+         fensters eher muehsam." Wer gewaehlt hat, ist fertig -- und das
+         Gewaehlte steht danach im Kopf, wo man es ohnehin sieht. */
+      wasEl.classList.remove('auf');
       return;
     }
     wasEl.classList.remove('auf');
   });
+
+  /* Und ein Tippen irgendwo sonst schliesst es auch. Vorher ging es nur
+     ueber ein zweites Tippen auf genau den Kopf zurueck -- auf einem
+     Telefon ein kleines Ziel. */
+  document.addEventListener('click', function (e) {
+    if (!wasEl.classList.contains('auf')) return;
+    if (wasEl.contains(e.target) || kopfEl.contains(e.target)) return;
+    wasEl.classList.remove('auf');
+  }, true);
 
   var uhr  = document.getElementById('agUhr'),
       ring = document.getElementById('agRing'),
@@ -3045,7 +3096,7 @@ SKRIPT = """
   /* Berühren hellt auf, wie Zeigen — nur hört es von selbst wieder auf.
      Ohne das wäre die Regel am iPad, wo es kein Zeigen gibt, wirkungslos. */
   (function () {
-    ['agKopf', 'agWerkName', 'agStand'].forEach(function (id) {
+    ['agKopf', 'agWerkName'].forEach(function (id) {
       var el = document.getElementById(id);
       if (!el) return;
       el.addEventListener('click', function (ev) {
