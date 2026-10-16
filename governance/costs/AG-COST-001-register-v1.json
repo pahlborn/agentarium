@@ -1,6 +1,6 @@
 {
   "schema": "agentarium.requirement-cost-register.v1",
-  "version": 13,
+  "version": 14,
   "created_at": "2026-10-14T04:15:27.033Z",
   "currency": "USD",
   "scope": "Known NACHTPOST-003/VISUAL-004 calls plus explicit earlier failure gaps. This is not the full project bill.",
@@ -836,6 +836,48 @@
       ],
       "accepted_commit": "22ee82b48239082eca89a533db4645a9dc16d523",
       "acceptance_scope": "Local state derivation and HTTP. Activity14/14, transport18/18; source JS expiry inspection. No browser/end-to-end/live coverage guarantee."
+    },
+    {
+      "attempt_id": "AG-PILOT-001-SOURCE-HOOK-V1",
+      "session": "bf2aa07d-a3cb-44f7-9d5e-9b032fa733fa",
+      "role": "forge",
+      "actual_model": "claude-sonnet-5-5",
+      "actual_reasoning": "unconfirmed",
+      "reported_usage_cost_usd": 0.30678419999999995,
+      "cost_source": "Claude CLI terminal runtime, not invoice reconciled",
+      "status": "SOURCE_HOOK_RETURNED_QA_PENDING",
+      "run": "https://github.com/pahlborn/agentarium/actions/runs/38905283794",
+      "evidence_ref": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6216191294",
+      "requirement_refs": [
+        "handoffs/AG-PILOT-001-source-hook-v1.json"
+      ],
+      "patch_sha256": "70bad8cf119ce11af60602efc9abe412ec7b78923b89f23043b4dbc7522f8b73",
+      "token_status": "PROVIDER_REPORTED",
+      "token_usage": [
+        {
+          "actual_model": "claude-sonnet-5-5",
+          "input_tokens": 16,
+          "output_tokens": 20838,
+          "cache_read_input_tokens": 111997,
+          "cache_creation_input_tokens": 34869,
+          "thinking_tokens": 8202,
+          "raw_usage": {
+            "inputTokens": 16,
+            "outputTokens": 20838,
+            "cacheReadInputTokens": 111997,
+            "cacheCreationInputTokens": 34869,
+            "webSearchRequests": 0,
+            "costUSD": 0.30678419999999995,
+            "contextWindow": 1000000,
+            "maxOutputTokens": 128000,
+            "thinkingTokens": 8202,
+            "canonicalModel": "claude-sonnet-5-5",
+            "provider": "firstParty",
+            "costBasis": "list"
+          }
+        }
+      ],
+      "signal_note": "execution.signals scanned generated stdout; BUDGET_EXCEEDED/RATE_LIMITED not treated as credit failure when terminal success/is_error false. No account balance inferred."
     }
   ],
   "unknown_cost_attempts": [
@@ -871,7 +913,8 @@
     "additional_pilot_local_cost_usd": 0.16888330000000001,
     "additional_pilot_local_v2_cost_usd": 0.1286485,
     "additional_activity_v1_cost_usd": 0.3843575,
-    "additional_activity_v2_cost_usd": 0.20881909999999998
+    "additional_activity_v2_cost_usd": 0.20881909999999998,
+    "additional_source_hook_v1_cost_usd": 0.30678419999999995
   },
   "other_costs": {
     "chatgpt": "Subscription usage; per-agent monetary allocation unavailable here, not recorded as zero",
