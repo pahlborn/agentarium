@@ -3,7 +3,7 @@
    dieselben Wirbel, die in Resonanz die Hand erzeugt. Ein Ball ist ein Kern,
    der unterwegs ist."""
 import datetime
-import io, json
+import io, json, os
 
 # Name, Farbe (0..1), Platz auf der Uhr, Abstand von der Mitte, Rolle,
 # Vorgabeplattform, Weise des Arbeitens, technische Kennung, Geltungsbereich,
@@ -214,7 +214,7 @@ SKRIPT = """
 
      Der Bauzeitpunkt kommt beim Bauen aus der Uhr. Von Hand gepflegte
      Datumsangaben sind nach der zweiten Änderung falsch. */
-  var FASSUNG = '39', GEBAUT = '__GEBAUT__';
+  var FASSUNG = '41', GEBAUT = '__GEBAUT__';
 
   /* DIE BETRIEBSART. Sie kommt aus den Daten; fehlt sie, gilt `demo`.
      Alles, was sich zwischen Prototyp und Produktivbetrieb unterscheidet,
@@ -294,24 +294,88 @@ SKRIPT = """
 
      Die Liste ist im Hochformat schmaler als im Querformat; dieselbe Regel
      steht in den Stilangaben, und beide müssen übereinstimmen. */
+  /* EIN TELEFON IST KEIN KLEINES IPAD.
+
+     Gemessen über fünfzehn Fenstermaße: iPad, MacBook, HD, iMac und
+     ultrabreit stehen sauber — kaputt waren nur die Telefone, und dort
+     zweierlei. Hoch stieß die Liste unten links gegen den Block unten
+     rechts und gegen die Knöpfe; quer ragten zwei Agentennamen in die
+     rechte Spalte. Der Grund ist derselbe: Die Aufteilung reserviert
+     links eine Listenspalte und rechts eine Textspalte, und auf 375
+     Pixeln bleibt dazwischen kein Band übrig. `Math.max(56, …)` hat das
+     verdeckt — der Boden gewann gegen das, was hineinpasst, und der Ring
+     wurde größer als sein Platz.
+
+     Also auf dem Telefon eine andere Aufteilung statt gequetschter
+     gleicher: Der Ring nimmt die ganze Breite und sitzt mittig, die
+     Liste rutscht nach unten über die Knöpfe, und der Stand unten rechts
+     entfällt — er ist ohnehin der Block, der den Aufgabenzähler ein
+     zweites Mal zeigt. */
+  /* Wie tief der rechte Block reicht -- gemessen, nicht geschaetzt. Vor
+     dem ersten Zeichnen ist er leer; dann gilt ein Ersatzwert, und beim
+     naechsten Durchlauf stimmt die echte Hoehe. */
+  function kopfUnten() {
+    var e = document.getElementById('agRechts');
+    if (!e) return 150;
+    var u = e.getBoundingClientRect().bottom;
+    return u > 20 ? u : 150;
+  }
+  function schmal() { return W() < 560; }                      /* Telefon hoch */
+  function flach()  { return H() < 460 && W() < 1000; }        /* Telefon quer */
+  function klein()  { return schmal() || flach(); }
+
   function listeBreite() {
+    if (klein()) return Math.min(W() * 0.60, 230);
     return H() > W() ? Math.min(W() * 0.34, 240)
                      : Math.min(W() * 0.42, 330);
   }
-  function bandL() { return listeBreite() + 18; }
+  function bandL() {
+    /* Quer steht die Marke oben links UND der Ring reicht bis an den
+       linken Rand -- gemessen lag "sentinel" unter der Marke. Auf dem
+       Schreibtisch haelt die Listenspalte diesen Platz frei; quer muss
+       das die Marke selbst tun. Hoch ist der Ring tief genug unten, da
+       genuegen 12 Pixel. */
+    if (flach()) return Math.min(W() * 0.22, 160);
+    return klein() ? 12 : listeBreite() + 18;
+  }
   function bandR() {
     /* Rechts stehen drei Dinge übereinander: Kopf, Produkt, Stand der
        Arbeit. Sie teilen sich eine Spalte, und die muss breit genug für
-       den längsten Projekttitel sein. */
+       den längsten Projekttitel sein. Auf dem Telefon gibt es diese
+       Spalte nicht — dort steht der Kopf über dem Feld, nicht daneben. */
+    if (schmal()) return W() - 12;
+    if (flach())  return W() - Math.min(W() * 0.24, 190);
     return W() - Math.min(W() * 0.30, 340);
   }
   function ringR() {
-    var breit = bandR() - bandL();
-    return Math.max(56, Math.min(breit / 2.34, (H() * 0.44 - 48) / 0.92));
+    var breit = bandR() - bandL(),
+        /* Der Ring ist flachgedrückt: `heimat` rechnet die Höhe mit
+           R * 0.92. Deshalb steht hier /0.92 — zweimal habe ich ihn beim
+           Messen als Kreis gerechnet und einen Fehler gemeldet, den es
+           nicht gab. */
+        /* Wieviel Luft der Kopf braucht, haengt davon ab, WO er steht --
+           und WIE HOCH er ist. Erst stand hier eine feste 150. Dann wurden
+           Produkt und Stand zu einem Block zusammengelegt, der Block wurde
+           hoeher, und auf dem Telefon standen wieder Namen darunter. Eine
+           geratene Zahl ist beim naechsten Inhalt wieder falsch, also wird
+           der Block gefragt. */
+        hoch = schmal() ? (H() * 0.48 - (kopfUnten() + 18)) / 0.92
+             : flach()  ? (H() * 0.50 - 60)  / 0.92
+                        : (H() * 0.44 - 48)  / 0.92,
+        passt = Math.min(breit / 2.34, hoch);
+    /* KEIN Boden, der den Platz sprengt. Vorher stand hier
+       Math.max(56, …): Auf 375 Pixeln passten 50, gesetzt wurden 56, und
+       der Ring lief aus seinem Band. Ein Mindestmaß darf nie gegen das
+       gewinnen, was hineinpasst. */
+    return Math.max(klein() ? 30 : 56, passt);
   }
 
-  function mx() { return bandL() + ringR() * 1.28; }
-  function my() { return H() * 0.44; }
+  function mx() {
+    return klein() ? (bandL() + bandR()) / 2 : bandL() + ringR() * 1.28;
+  }
+  function my() {
+    return schmal() ? H() * 0.48 : flach() ? H() * 0.50 : H() * 0.44;
+  }
 
   function heimat(a) {
     var w = a.winkel * Math.PI / 180;
@@ -1108,16 +1172,30 @@ SKRIPT = """
     var glanz = ausklang
       ? Math.max(0, Math.min(1, (AUSKLANG_DAUER - ausklang - 6) / 5)) : 0;
 
-    if (standEl && (glanz > 0.25) !== standEl.classList.contains('fertig'))
-      standEl.classList.toggle('fertig', glanz > 0.25);
 
     /* Eröffnet gegen abgeschlossen — dieselbe Einheit auf beiden Seiten.
        Der Nenner wächst im Lauf, und das ist richtig so. */
+    /* EIN BLOCK STATT ZWEIER, DIE DASSELBE SAGEN.
+
+       Peter: „ich wuensche mir eine zusammenfassung der informationen,
+       welche wichtig ist um zu erkennen, wie weit das projekt gediehen
+       ist. aus produkt wurde irgendetwas gebastelt ohne ruecksicht auf
+       das, was bereits vorhanden ist."
+
+       Der Vorwurf trifft: Ich habe das Produkt oben rechts gebaut, ohne
+       den Stand unten rechts zu beachten, der schon da war. Beide zeigten
+       denselben Aufgabenzaehler, der eine als Zahl, der andere als Zahl
+       UND als Balken. Jetzt steht alles einmal, in dieser Reihenfolge:
+       was es ist, wie weit, wovon wieviel, woraus es besteht. */
+    var offen = 0, blockiert = 0;
+    for (var nq in arbeit) { var Sq = arbeit[nq]; if (Sq && !Sq.aus) offen += Sq.liste.length; }
+    for (var bq in stopper) blockiert++;
     var ganz = aufgabenAuf,
         teil = ganz ? Math.min(1, aufgabenZu / ganz) : 0,
         schl = (STUECK.titel || STUECK.projekt || '') + '|' +
                aufgabenZu + '|' + ganz + '|' + (glanz > 0.25) + '|' +
-               register.length + '|' +
+               offen + '|' + tisch.length + '|' + blockiert + '|' +
+               bausteine.length + '|' + register.length + '|' +
                register.map(function (r) { return r.zustand; }).join('');
 
     /* Kein `left` mehr. Diese Zeile stammte aus der Fassung, in der das
@@ -1150,13 +1228,36 @@ SKRIPT = """
         reg += '</div>';
       }
 
+      /* Die Aufschluesselung. Striche statt Kurve: Jeder Strich ist ein
+         Stueck Arbeit, und man kann sie zaehlen. Eine Kurve wuerde
+         glaetten, was gerade nicht glatt ist. */
+      var reihe = function (k, zahl, kl) {
+        var s = '<div class="wAufZ"><u>' + k + '</u><b>' + zahl + '</b><i>';
+        for (var q = 0; q < Math.min(zahl, 18); q++)
+          s += '<s class="' + kl + '"></s>';
+        return s + '</i></div>';
+      };
       werkNameEl.innerHTML =
+        /* 1. Was es ist */
+        '<div class="wTitel">' + (STUECK.titel || STUECK.projekt || '') + '</div>' +
+        /* 2. Wie weit */
         '<div class="wBalken"><span style="width:' +
           (teil * 100).toFixed(1) + '%"></span></div>' +
-        '<div class="wTitel">' + (STUECK.titel || STUECK.projekt || '') + '</div>' +
+        '<div class="wZahl">' +
+          (ganz ? aufgabenZu + ' von ' + ganz + ' Aufgaben erledigt'
+                : 'noch keine Aufgabe eröffnet') + '</div>' +
+        /* 3. Wovon wieviel */
+        '<div class="wAuf">' +
+          reihe('offen', offen, 'sOffen') +
+          reihe('prüfung', tisch.length, 'sTisch') +
+          reihe('blockiert', blockiert, 'sStop') +
+          reihe('fertig', bausteine.length, 'sFertig') +
+        '</div>' +
+        /* 4. Woher und was das Konzept behauptet */
         '<div class="wOrt">' + (STUECK.ablage || 'extern') +
-          (ganz ? ' · ' + aufgabenZu + ' von ' + ganz + ' Aufgaben'
-                : ' · noch keine Aufgabe') + '</div>' + reg;
+          (STUECK.umfang ? ' · laut Konzept ' + STUECK.umfang : '') + '</div>' +
+        /* 5. Woraus es besteht */
+        reg;
     }
   }
 
@@ -1681,7 +1782,8 @@ SKRIPT = """
       '<b>Live — keine Verbindung</b>' +
       '<span>Es ist kein Strom angeschlossen. Dieses Feld zeigt nicht ein ' +
       'ruhiges Projekt, sondern gar keines. Sobald eine Schnittstelle ' +
-      'liefert, läuft es an; einen Selbststart gibt es hier nicht.</span>';
+      'liefert, läuft es an; einen Selbststart gibt es hier nicht.</span>' +
+      (window.__agActivity ? window.__agActivity.hinweis() : '');
   }
 
   function tunZeigen(dt) {
@@ -2113,32 +2215,12 @@ SKRIPT = """
      Der Umfang (V1: vier Stories, V2: 21 Storyideen) steht in eurem
      Konzeptpapier und kommt als Datenfeld mit. Fehlt er, zeigt der Stand
      nur die vier Größen und behauptet keine Vollständigkeit. */
-  var standEl = document.getElementById('agStand');
-
-  function standZeigen() {
-    var offen = 0, blockiert = 0;
-    for (var n in arbeit) { var S = arbeit[n]; if (S && !S.aus) offen += S.liste.length; }
-    for (var b in stopper) blockiert++;
-    var reihe = function (k, zahl, kl) {
-      var h = '<div class="sZeile"><u>' + k + '</u><b>' + zahl + '</b><i>';
-      for (var i = 0; i < Math.min(zahl, 24); i++) h += '<s class="' + kl + '"></s>';
-      return h + '</i></div>';
-    };
-    var h = reihe('offen', offen, 'sOffen') +
-            reihe('prüfung', tisch.length, 'sTisch') +
-            reihe('blockiert', blockiert, 'sStop') +
-            reihe('fertig', bausteine.length, 'sFertig');
-    /* `umfang` bleibt sichtbar, aber als das, was es ist: eine Angabe aus
-       dem Konzept. Als Nenner des Fortschritts war sie falsch — die Zähler
-       waren Ereignisse, der Nenner Storyideen. */
-    if (STUECK.umfang) {
-      h += '<div class="sUmfang">laut Konzept ' + STUECK.umfang +
-           (STUECK.umfangText ? ' · ' + STUECK.umfangText : '') + '</div>';
-    }
-    h += '<div class="sUmfang">' + aufgabenZu + ' von ' + aufgabenAuf +
-         ' Aufgaben erledigt</div>';
-    if (standEl.__h !== h) { standEl.__h = h; standEl.innerHTML = h; }
-  }
+  /* Der Block unten rechts ist ENTFALLEN. Er zeigte dieselben vier
+     Groessen und denselben Aufgabenzaehler wie der Block oben rechts --
+     zwei Anzeigen, die nahezu dasselbe aussagten. Die vier Groessen stehen
+     jetzt im einen Block oben; unten rechts bleiben nur die Knoepfe.
+     Der Umfang aus dem Konzept steht dort als das, was er ist: eine
+     Angabe aus dem Papier, kein Messwert. */
 
   /* -------------------------------------------------------- Das Stück */
   /* `laeuft` beginnt nur im Demo-Modus auf wahr. In allen anderen wartet
@@ -2244,9 +2326,9 @@ SKRIPT = """
     knoepfeSetzen();
     stoppZeigen();
     tunZeigen(dt);
-    standZeigen();
     bereitschaft(dt);
     rollenWechseln(dt);
+    aktivitaetZeigen();
     motorenZeigen();
     ballSchrittRuhend(dt);
     tischSchritt(dt);
@@ -2308,6 +2390,20 @@ SKRIPT = """
                                                                   : 'Weiter');
     }
     document.body.setAttribute('data-modus', MODUS);
+    document.body.setAttribute('data-gross',
+      schmal() ? 'telefon-hoch' : (flach() ? 'telefon-quer' : 'weit'));
+    /* Wie hoch die Knopfleiste WIRKLICH ist, statt einer Zahl im
+       Stylesheet. Auf dem Telefon bricht sie um, und dann stimmt jede
+       feste Zahl nicht mehr -- 52 Pixel waren fuer eine Reihe gemessen,
+       zwei Reihen schoben die Liste in die Knoepfe. Gemessen wird nach
+       dem Umbruch, also im naechsten Bild. */
+    setTimeout(function () {
+      var tst = document.getElementById('agTasten');
+      if (!tst) return;
+      var hoehe = Math.round(tst.getBoundingClientRect().height);
+      if (hoehe > 0)
+        document.documentElement.style.setProperty('--agTastenH', hoehe + 'px');
+    }, 0);
   }
 
   /* Umschalten. Der Modus gehört zum PROJEKT, also wird er dort gewählt,
@@ -2319,6 +2415,22 @@ SKRIPT = """
     laeuft = !!modus().start;
     kopfSetzen();
     knoepfeSetzen();
+    aktivitaetModus();
+  }
+
+  /* Der lokale Aktivitaets-Eingang (activity-input.js) ist eigenstaendig und
+     nur im Live-Modus mit ausdruecklicher Freigabe aktiv. Er bekommt nur den
+     Modus und die Namensschilder; er ruft weder arbeitAn() noch
+     auftragFertig() und beruehrt keine Zaehler. */
+  function aktivitaetModus() {
+    if (window.__agActivity) window.__agActivity.modus(MODUS);
+  }
+  function aktivitaetZeigen() {
+    if (!window.__agActivity) return;
+    var n = [];
+    for (var i = 0; i < AGENTEN.length; i++) n.push(AGENTEN[i].name);
+    window.__agActivity.render(window.performance ? performance.now() : Date.now(),
+                               ring.children, n);
   }
 
   function kopfSetzen() {
@@ -2382,11 +2494,25 @@ SKRIPT = """
       var nr = +li.getAttribute('data-nr');
       if (nr !== stueckNr) { stueckNr = nr; STUECK = STUECKE[nr];
                              kopfSetzen(); zurueckAufAnfang(); }
-      wasEl.classList.add('auf');     /* offen lassen: man liest noch */
+      /* NACH DER WAHL GEHT DAS BLATT ZU.
+         Vorher blieb es offen, mit der Begruendung „man liest noch".
+         Peter: „wenn ein projekt ausgewaehlt wurde, ist das schliessen des
+         fensters eher muehsam." Wer gewaehlt hat, ist fertig -- und das
+         Gewaehlte steht danach im Kopf, wo man es ohnehin sieht. */
+      wasEl.classList.remove('auf');
       return;
     }
     wasEl.classList.remove('auf');
   });
+
+  /* Und ein Tippen irgendwo sonst schliesst es auch. Vorher ging es nur
+     ueber ein zweites Tippen auf genau den Kopf zurueck -- auf einem
+     Telefon ein kleines Ziel. */
+  document.addEventListener('click', function (e) {
+    if (!wasEl.classList.contains('auf')) return;
+    if (wasEl.contains(e.target) || kopfEl.contains(e.target)) return;
+    wasEl.classList.remove('auf');
+  }, true);
 
   var uhr  = document.getElementById('agUhr'),
       ring = document.getElementById('agRing'),
@@ -2449,7 +2575,8 @@ SKRIPT = """
     /* Vier. Vorher waren es sechzehn, weil die Liste über den ganzen
        Schirm lief; jetzt hängt sie unter dem Kopf und soll dort aufhören,
        wo man im Vorbeigehen noch mitliest. Der älteste fällt oben weg. */
-    while (strom.length > 4) { var w = strom.shift(); if (w.parentNode) w.remove(); }
+    var zeilen = klein() ? 2 : 4;
+    while (strom.length > zeilen) { var w = strom.shift(); if (w.parentNode) w.remove(); }
   }
 
   /* Wenn ein Auftrag erledigt ist, hört seine Zeile auf, hell zu sein. */
@@ -2672,6 +2799,17 @@ SKRIPT = """
 
   /* Die Namen am Ring — ruhig, und sie verschwinden nicht. */
   function ringZeichnen() {
+    /* DIE BESCHRIFTUNG HAENGT AM RING, NICHT AN EINER FESTEN ZAHL.
+
+     Gemessen mit einer Pruefung, die mir bis heute fehlte -- ob sich
+     Beschriftungen GEGENSEITIG decken: Auf dem iPad hochkant taten sie es
+     in 10 von 14 Stichproben, auf dem iPhone in 6 von 14, im Querformat
+     nie. Immer traf es die langen ROLLENWOERTER ("Spezifikation",
+     "Qualitaet"), nie die Namen -- hochkant ist der Ring kleiner, die
+     Woerter bleiben gleich lang. Die Woerter sind Peters Texte und
+     bleiben, also haengt jetzt die Schriftgroesse am Radius. */
+    var gr = Math.max(9, Math.min(14, ringR() / 13));
+    document.documentElement.style.setProperty('--agNameGr', gr.toFixed(2) + 'px');
     ring.innerHTML = '';
     AGENTEN.forEach(function (a, i) {
       var p = heimat(a), e = document.createElement('div');
@@ -2888,6 +3026,9 @@ SKRIPT = """
       if (e.__rolle === soll) continue;
       e.__rolle = soll;
       e.textContent = soll ? A.rolle : A.name;
+      /* Die Rolle ist das laengere Wort und bekommt deshalb eine Stufe
+         weniger. Nicht der Name wird kleiner -- der ist kurz. */
+      e.classList.toggle('rolleDa', !!soll);
       /* Neu klemmen: „AUFTRAGGEBER" ist deutlich breiter als „PETER", also
          passt eine Lage, die für das eine Wort stimmt, für das andere
          nicht. Beim ersten Versuch wurde nur einmal beim Aufbau geklemmt —
@@ -2910,7 +3051,13 @@ SKRIPT = """
   }
   window.__agRing = ringZeichnen;
   setTimeout(ringZeichnen, 60);
-  window.addEventListener('resize', function () { setTimeout(ringZeichnen, 120); });
+  /* Beim Drehen aendert sich die Aufteilung, nicht nur die Groesse: Aus
+     einem Telefon hoch wird ein Telefon quer. Also auch die Knoepfe und
+     das Groessenmerkmal am Koerper neu setzen -- vorher wurde nur der Ring
+     neu gezeichnet, und `data-gross` blieb auf dem Stand vom Start. */
+  window.addEventListener('resize', function () {
+    setTimeout(function () { ringZeichnen(); knoepfeSetzen(); }, 120);
+  });
 
   document.getElementById('agHalt').addEventListener('click', function () {
     laeuft = !laeuft;
@@ -2940,6 +3087,7 @@ SKRIPT = """
   laeuft = !!modus().start;
   kopfSetzen();
   knoepfeSetzen();
+  aktivitaetModus();
 
   /* Der Hinweis „Du darfst mitrühren" stammt aus Resonanz, wo er den
      ganzen Zweck benennt. Hier ist das Mitrühren eine Zugabe, nicht die
@@ -2967,7 +3115,7 @@ SKRIPT = """
   /* Berühren hellt auf, wie Zeigen — nur hört es von selbst wieder auf.
      Ohne das wäre die Regel am iPad, wo es kein Zeigen gibt, wirkungslos. */
   (function () {
-    ['agKopf', 'agWerkName', 'agStand'].forEach(function (id) {
+    ['agKopf', 'agWerkName'].forEach(function (id) {
       var el = document.getElementById(id);
       if (!el) return;
       el.addEventListener('click', function (ev) {
@@ -3064,6 +3212,13 @@ def bauen(quelle, ziel, stueck):
                 .replace('__ARTEN__', json.dumps(ARTEN))
                 .replace('__GEBAUT__', gebaut)
                 .replace('__STUECKE__', json.dumps(stueck, ensure_ascii=False)))
-    s = s.replace('</body>', sk + '\n</body>')
+    # Der lokale Aktivitaets-Eingang bleibt eine eigene Datei und wird beim
+    # Bauen eingebettet, damit das gebaute Feld in sich geschlossen ist.
+    akt = io.open(os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                               'activity-input.js'), encoding='utf-8').read()
+    if not akt.strip():
+        raise ValueError('activity-input.js ist leer')
+    akt = '<script>\n' + akt.replace('</script', '<\\/script') + '\n</script>\n'
+    s = s.replace('</body>', akt + sk + '\n</body>')
     io.open(ziel, 'w', encoding='utf-8').write(s)
     return len(s)

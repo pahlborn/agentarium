@@ -1,0 +1,344 @@
+/* Agentarium Aktivitaets-Eingang (lokal, opt-in, nur Live-Modus).
+
+   Kleiner, isolierter Adapter fuer GET /activity (gleicher Ursprung). Er kennt
+   weder Aufgaben, Nachrichten, Uebergaben noch Artefakte des Feldes und ruft
+   nichts davon auf: Er setzt ausschliesslich Marker, title und aria-label an
+   den vorhandenen Namensschildern. Transport, Quelle und Abdeckung werden
+   getrennt gefuehrt. Kosten: immer nur der feste Satz, nie eine Zahl.
+
+   Aktiv nur, wenn BEIDES gilt: Modus 'live' UND ausdrueckliche Freigabe
+   (URL ?activity=1 oder __agActivity.enable()). Jeder Moduswechsel erhoeht
+   die Generation; verspaetete Antworten werden verworfen. */
+(function () {
+  'use strict';
+  if (window.__agActivity) return;
+
+  var ENDPOINT = '/activity', POLL_MS = 1000, TIMEOUT_MS = 4000;
+  var KOSTEN = 'Kosten nicht vollständig ermittelbar.';
+  var ROSTER = ['atlas', 'nova', 'scout', 'archibald', 'forge', 'argus', 'sentinel', 'cadence'];
+  var ZUSTAND = { working_observed: 1, waiting: 1, blocked: 1, stopped: 1, unknown: 1 };
+  var RANG = { blocked: 5, working_observed: 4, waiting: 3, unknown: 2, stopped: 1 };
+  var BEFRISTET = { working_observed: 1, waiting: 1, blocked: 1 };
+  var ENDE = { success: 'ok', failed: 'Fehler', aborted: 'Abbruch' };
+  var ENDERANG = { failed: 3, aborted: 2, success: 1 };
+
+  var S = { frei: false, poll: true, modus: '', aktiv: false, gen: 0, timer: null,
+            ctl: null, transport: 'aus', transportText: '', doc: null, zeilen: [],
+            marken: {}, puls: {}, pulsNr: 0, bemerkt: [], quelle: null };
+
+  function jetzt() {
+    return (window.performance && performance.now) ? performance.now() : Date.now();
+  }
+  function esc(t) {
+    return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;');
+  }
+  function kurz(t, n) { t = String(t == null ? '' : t); return t.length > n ? t.slice(0, n - 1) + '…' : t; }
+  function freigegeben() {
+    if (S.frei) return true;
+    try { return /[?&](activity|aktivitaet)=(1|local)(&|$)/.test(location.search || ''); }
+    catch (e) { return false; }
+  }
+
+  function stil() {
+    if (document.getElementById('agAktStil')) return;
+    var st = document.createElement('style');
+    st.id = 'agAktStil';
+    st.textContent =
+      '.agName[data-akt]::after{content:attr(data-akt-text);position:absolute;' +
+      'left:50%;bottom:100%;transform:translateX(-50%);margin-bottom:.15em;' +
+      'font-size:.62em;letter-spacing:.04em;white-space:nowrap;pointer-events:none;' +
+      'font-weight:400;opacity:.9}' +
+      '.agName[data-akt=waiting]::after{opacity:.6}' +
+      '.agName[data-akt=blocked]::after{color:#ff6b5a;opacity:1;font-weight:700}' +
+      '.agName[data-akt=stopped]::after{opacity:.7}' +
+      '.agName[data-akt=unknown]::after{opacity:.5;font-style:italic}' +
+      '.agName.agAktImpuls::before{content:"";position:absolute;left:50%;top:50%;' +
+      'width:2.4em;height:2.4em;margin:-1.2em 0 0 -1.2em;border-radius:50%;' +
+      'border:1px solid currentColor;pointer-events:none;' +
+      'animation:agAktImp 1.1s ease-out 1 both}' +
+      '@keyframes agAktImp{from{transform:scale(.4);opacity:.9}to{transform:scale(2.2);opacity:0}}' +
+      '@media (prefers-reduced-motion:reduce){.agName.agAktImpuls::before{animation:none;opacity:0}}';
+    (document.head || document.documentElement).appendChild(st);
+  }
+
+  /* ---------------------------------------------------------- Eingang */
+  function neueZeile(r, t0) {
+    var z = { agent: String(r.agent).trim().toLowerCase(),
+              session: (typeof r.session_id === 'string') ? r.session_id : null,
+              task: (typeof r.task_id === 'string') ? r.task_id : null,
+              state: ZUSTAND[r.state] ? r.state : 'unknown',
+              reason: (typeof r.reason === 'string') ? r.reason : '',
+              evidenceAt: (typeof r.last_evidence_at === 'string') ? r.last_evidence_at : null,
+              ref: (typeof r.evidence_ref === 'string') ? r.evidence_ref : null,
+              outcome: (typeof r.outcome === 'string') ? r.outcome : null,
+              diag: Array.isArray(r.diagnostics) ? r.diagnostics.slice(0, 3) : [],
+              got: t0, expireAt: null, expired: false };
+    if (!ZUSTAND[r.state]) z.reason = 'Zustand vom Sender nicht erkannt: ' + kurz(r.state, 40);
+    if (BEFRISTET[z.state]) {
+      var rest = r.remaining_valid_ms;
+      /* Ohne endliche Restgueltigkeit gilt der Nachweis als bereits abgelaufen. */
+      z.expireAt = (typeof rest === 'number' && isFinite(rest) && rest >= 0) ? t0 + rest : t0;
+    }
+    return z;
+  }
+
+  /* Deterministisch: doc = Antwort von /activity, t0 = Anfragezeit (performance.now).
+     Der Rest der Gueltigkeit laeuft ab t0 -- konservativ, ab Absenden. */
+  function annehmen(doc, t0) {
+    if (!S.aktiv) return false;
+    if (!doc || typeof doc !== 'object' || !Array.isArray(doc.rows)) {
+      meldeFehler('Antwort ohne rows-Liste');
+      return false;
+    }
+    S.transport = 'ok'; S.transportText = '';
+    if (doc.mode !== 'LIVE') {
+      S.doc = doc; S.zeilen = [];
+      S.quelle = 'Antwort ist nicht LIVE (' + kurz(doc.mode, 20) + '): nicht dargestellt';
+      return false;
+    }
+    S.quelle = null; S.doc = doc;
+    var alt = S.marken, neu = {}, zeilen = [];
+    doc.rows.forEach(function (r) {
+      if (!r || typeof r !== 'object' || typeof r.agent !== 'string' || !r.agent.trim()) return;
+      var z = neueZeile(r, t0), k = z.agent + '|' + z.session + '|' + z.task;
+      zeilen.push(z);
+      if (z.state === 'working_observed' && z.expireAt > t0) {
+        var tok = (z.evidenceAt || '') + '|' + (z.ref || '');
+        neu[k] = tok;
+        if (alt[k] !== tok) {              /* neuer Nachweis: ein Impuls, einmal */
+          S.puls[z.agent] = { nr: ++S.pulsNr, at: t0 };
+        }
+      }
+    });
+    S.marken = neu; S.zeilen = zeilen;
+    return true;
+  }
+
+  function meldeFehler(text) {
+    S.transport = 'nicht_erreichbar'; S.transportText = kurz(text, 120);
+    /* Zeilen bleiben stehen und laufen nach remaining_valid_ms von selbst ab. */
+  }
+
+  function holen(g) {
+    if (g !== S.gen || !S.aktiv || !S.poll) return;
+    if (!/^https?:$/.test(location.protocol)) {
+      meldeFehler('Seite nicht über http(s) geladen: kein gleicher Ursprung für /activity');
+      return;
+    }
+    if (typeof fetch !== 'function') { meldeFehler('fetch nicht verfügbar'); return; }
+    var t0 = jetzt(), ctl = (typeof AbortController === 'function') ? new AbortController() : null;
+    S.ctl = ctl;
+    var to = setTimeout(function () { if (ctl) ctl.abort(); }, TIMEOUT_MS);
+    var fertig = function () { clearTimeout(to); if (g === S.gen && S.aktiv) weiter(g); };
+    fetch(ENDPOINT, { cache: 'no-store', credentials: 'same-origin',
+                      signal: ctl ? ctl.signal : undefined })
+      .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(function (doc) { if (g === S.gen) annehmen(doc, t0); fertig(); })
+      .catch(function (e) {
+        if (g === S.gen) meldeFehler(e && e.message ? e.message : 'Anfrage fehlgeschlagen');
+        fertig();
+      });
+  }
+  function weiter(g) { S.timer = setTimeout(function () { holen(g); }, POLL_MS); }
+
+  /* ---------------------------------------------------------- Steuerung */
+  function stoppen() {
+    S.gen++;                              /* verspaetete Antworten sind damit ungueltig */
+    if (S.timer) { clearTimeout(S.timer); S.timer = null; }
+    if (S.ctl) { try { S.ctl.abort(); } catch (e) {} S.ctl = null; }
+    S.aktiv = false; S.transport = 'aus'; S.transportText = '';
+    S.doc = null; S.zeilen = []; S.marken = {}; S.puls = {}; S.quelle = null;
+    aufraeumen();
+  }
+  function starten() {
+    S.gen++; S.aktiv = true; S.transport = 'verbinde'; S.transportText = '';
+    S.doc = null; S.zeilen = []; S.marken = {}; S.puls = {}; S.quelle = null;
+    stil();
+    if (S.poll) holen(S.gen);
+  }
+  function abgleich() {
+    var soll = (S.modus === 'live') && freigegeben();
+    if (soll && !S.aktiv) starten();
+    else if (!soll && (S.aktiv || S.bemerkt.length)) stoppen();
+  }
+
+  /* ---------------------------------------------------------- Ansicht */
+  function wirksam(z, now) {
+    if (z.expireAt !== null && BEFRISTET[z.state] && now >= z.expireAt) {
+      var c = {}; for (var k in z) c[k] = z[k];
+      c.state = 'unknown'; c.expired = true;
+      c.reason = 'Nachweis lokal abgelaufen (zuvor ' + z.state + '); kein neuer Nachweis';
+      return c;
+    }
+    return z;
+  }
+
+  /* Je Agent: alle Sitzungen/Aufgaben bleiben erhalten, nichts faellt auf
+     "ruhig" zusammen. Vorrang: blocked > working_observed > waiting >
+     unknown > stopped. */
+  function ansicht(now) {
+    now = (typeof now === 'number') ? now : jetzt();
+    var out = {};
+    S.zeilen.forEach(function (z) {
+      var w = wirksam(z, now), a = out[z.agent];
+      if (!a) a = out[z.agent] = { agent: z.agent, state: null, zeilen: [], anzahl: 0, outcome: null };
+      a.zeilen.push(w); a.anzahl++;
+    });
+    ROSTER.forEach(function (n) {
+      if (!out[n] && S.doc) out[n] = { agent: n, state: 'unknown', anzahl: 0, outcome: null,
+        zeilen: [{ agent: n, session: null, task: null, state: 'unknown', expired: false,
+                   reason: 'Keine Zeile für diesen Agenten in der Antwort', ref: null,
+                   evidenceAt: null, got: now, expireAt: null, diag: [] }] };
+    });
+    for (var n in out) {
+      var a = out[n], best = null;
+      a.zeilen.forEach(function (w) { if (!best || RANG[w.state] > RANG[best.state]) best = w; });
+      a.state = best.state; a.reason = best.reason;
+      if (a.state === 'stopped') {
+        a.zeilen.forEach(function (w) {
+          if (w.state === 'stopped' && (!a.outcome || (ENDERANG[w.outcome] || 0) > (ENDERANG[a.outcome] || 0)))
+            a.outcome = w.outcome;
+        });
+      }
+    }
+    if (!S.doc && S.aktiv && S.transport !== 'ok') {   /* noch nie Daten: sichtbar unbekannt */
+      ROSTER.forEach(function (n) {
+        out[n] = { agent: n, state: 'unknown', anzahl: 0, outcome: null,
+          reason: 'Keine Verbindung zur Aktivitätsquelle',
+          zeilen: [{ agent: n, session: null, task: null, state: 'unknown', expired: false,
+                     reason: 'Keine Verbindung zur Aktivitätsquelle', ref: null,
+                     evidenceAt: null, got: now, expireAt: null, diag: [] }] };
+      });
+    }
+    return out;
+  }
+
+  function markenText(a) {
+    var t;
+    if (a.state === 'working_observed') t = '▸ Aktivität beobachtet';
+    else if (a.state === 'waiting') t = '‖ wartet';
+    else if (a.state === 'blocked') t = '▲ blockiert';
+    else if (a.state === 'stopped') t = '■ beendet' + (a.outcome ? ' · ' + (ENDE[a.outcome] || a.outcome) : '');
+    else t = '? unbekannt';
+    return t + (a.zeilen.length > 1 ? ' ×' + a.zeilen.length : '');
+  }
+
+  function titelText(name, a, now) {
+    var q = S.doc && S.doc.data_kind === 'SYNTHETIC' ? ' [synthetische Testdaten]' : '';
+    var t = [name + ': ' + markenText(a) + q];
+    a.zeilen.forEach(function (w) {
+      var s = (w.session ? 'Sitzung ' + kurz(w.session, 40) : 'ohne Sitzung') +
+              (w.task ? ' · Aufgabe ' + kurz(w.task, 40) : '') + ': ' + w.state +
+              (w.outcome ? ' (' + w.outcome + ')' : '');
+      if (w.reason) s += ' — ' + kurz(w.reason, 140);
+      if (w.ref) s += ' — Beleg ' + kurz(w.ref, 80);
+      if (w.evidenceAt) s += ' — Nachweis ' + w.evidenceAt;
+      if (w.expireAt !== null && !w.expired)
+        s += ' — noch gültig ' + Math.max(0, Math.floor((w.expireAt - now) / 1000)) + ' s';
+      if (w.diag && w.diag.length) s += ' — Hinweis: ' + kurz(w.diag.join('; '), 140);
+      t.push(s);
+    });
+    if (S.transport !== 'ok') t.push('Quelle derzeit nicht bestätigt (' + S.transport + '); letzter Stand.');
+    return t.join('\n');
+  }
+
+  function frei(el) {
+    if (!el.__akt) return;
+    el.removeAttribute('data-akt'); el.removeAttribute('data-akt-text');
+    el.classList.remove('agAktImpuls');
+    var v = el.__aktVor || {};
+    ['title', 'aria-label'].forEach(function (k) {
+      if (v[k] == null) el.removeAttribute(k); else el.setAttribute(k, v[k]);
+    });
+    el.__akt = false; el.__aktSig = null; el.__aktPuls = undefined;
+  }
+  function aufraeumen() {
+    S.bemerkt.forEach(frei); S.bemerkt = [];
+  }
+
+  function setzen(el, name, a, now) {
+    if (!el.__akt) {
+      el.__aktVor = { title: el.getAttribute('title'), 'aria-label': el.getAttribute('aria-label') };
+      el.__akt = true; S.bemerkt.push(el);
+    }
+    var text = markenText(a), titel = titelText(name, a, now);
+    var sig = a.state + '|' + text + '|' + titel;
+    if (el.__aktSig !== sig) {
+      el.__aktSig = sig;
+      el.setAttribute('data-akt', a.state);
+      el.setAttribute('data-akt-text', text);
+      el.setAttribute('title', titel);
+      el.setAttribute('aria-label', titel.replace(/\n/g, '. '));
+    }
+    var p = S.puls[a.agent];
+    if (p && el.__aktPuls !== p.nr) {
+      el.__aktPuls = p.nr;
+      if (now - p.at < 1500) {            /* nur frisch; ein neu gebauter Ring spielt nichts nach */
+        el.classList.remove('agAktImpuls');
+        void el.offsetWidth;
+        el.classList.add('agAktImpuls');
+      }
+    }
+  }
+
+  /* Pro Bild vom Feld gerufen: els = Namensschilder, namen = Agentennamen
+     in derselben Reihenfolge. Ohne Zeile (z. B. Peter) wird nichts behauptet. */
+  function zeichnen(now, els, namen) {
+    if (!S.aktiv) { if (S.bemerkt.length) aufraeumen(); return; }
+    if (!els || !namen) return;
+    now = (typeof now === 'number') ? now : jetzt();
+    var V = ansicht(now);
+    for (var i = 0; i < namen.length; i++) {
+      var el = els[i]; if (!el) continue;
+      var a = V[String(namen[i]).toLowerCase()];
+      if (a) setzen(el, namen[i], a, now); else frei(el);
+    }
+  }
+
+  function hinweis(now) {
+    if (!S.aktiv) return '';
+    now = (typeof now === 'number') ? now : jetzt();
+    var d = S.doc, h = '<b>Aktivität (lokal, Teilanbindung)</b>';
+    var tr = S.transport === 'ok' ? 'Transport: erreichbar'
+           : S.transport === 'verbinde' ? 'Transport: verbinde …'
+           : 'Transport: nicht erreichbar' + (S.transportText ? ' (' + S.transportText + ')' : '');
+    h += '<span>' + esc(tr) + '</span>';
+    var q = 'Quelle: ';
+    if (!d) q += 'noch keine Antwort';
+    else {
+      q += d.data_kind === 'OBSERVED' ? 'beobachtet' : d.data_kind === 'SYNTHETIC'
+           ? 'synthetische Testdaten, keine beobachtete Arbeit' : 'keine Daten';
+      if (d.provenance && d.provenance.source) q += ' · ' + kurz(d.provenance.source, 60);
+      if (Array.isArray(d.source_errors) && d.source_errors.length)
+        q += ' · Fehler: ' + kurz(d.source_errors[0], 100);
+      if (S.quelle) q += ' · ' + S.quelle;
+    }
+    h += '<span>' + esc(q) + '</span>';
+    var ab = 'Abdeckung: ' + (d && d.coverage ? kurz(d.coverage.status, 40) +
+             (d.coverage.note ? ' — ' + kurz(d.coverage.note, 140) : '') : 'unbekannt');
+    h += '<span>' + esc(ab) + '</span>';
+    h += '<span>' + esc(KOSTEN) + '</span>';
+    return h;
+  }
+
+  window.__agActivity = {
+    /* opt: true | { poll: false } (kein fetch, fuer deterministische Pruefung) */
+    enable: function (opt) {
+      S.frei = opt !== false;
+      S.poll = !(opt && typeof opt === 'object' && opt.poll === false);
+      abgleich();
+    },
+    modus: function (m) { S.modus = String(m || ''); abgleich(); },
+    render: zeichnen,
+    hinweis: hinweis,
+    /* Testzugang: nur wirksam, solange aktiv (live + freigegeben). */
+    ingest: annehmen,
+    view: ansicht,
+    state: function (now) {
+      return { aktiv: S.aktiv, modus: S.modus, freigegeben: freigegeben(), gen: S.gen,
+               transport: S.transport, zeilen: S.zeilen.length,
+               agenten: ansicht(now), kosten: KOSTEN };
+    }
+  };
+})();
