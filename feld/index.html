@@ -386,6 +386,46 @@
   }
   #agUhr{color:#8295B0;}
 
+  /* ================= OB EIN STROM ANLIEGT, UND OB ER LEBT =================
+
+     Peter: "ich wuerde gerne sehen, wenn agentarium im live modus laeuft.
+     und ob ein datenstrom aktiv ist. nur ganz leise anzeige, nicht lautes,
+     auffaelliges, stoerendes."
+
+     Also kommt nichts Neues ins Bild. Die Uhr steht ohnehin oben rechts
+     und zeigt im Live-Betrieb die Wirklichkeitszeit; sie bekommt einen
+     Punkt davor. Drei Zustaende, und der erste ist die Abwesenheit:
+
+       Demo/Archiv      kein Punkt. Es wird kein Strom erwartet, also
+                        gibt es nichts zu melden.
+       Strom lebt       der Punkt atmet EINMAL JE EMPFANGENEM
+                        Lebenszeichen -- kein Takt, den das Feld selbst
+                        erzeugt. Ein selbst erzeugter Puls behauptete
+                        Leben, wo keines ist, und das waere die
+                        gefaehrlichste Anzeige von allen.
+       veraltet         der Punkt wird hohl und hoert auf zu atmen.
+                        Dazu ein Wort, weil der Vertrag es verlangt:
+                        nach 20 Sekunden ohne Lebenszeichen sagt das
+                        Feld, seit wann.
+
+     Kein Blinken, keine Signalfarbe. Dasselbe Atmen, das die Namen im
+     Feld ohnehin haben. */
+  #agPuls{display:none; width:5px; height:5px; border-radius:3px;
+    text-decoration:none; vertical-align:middle; margin:0 7px 2px 0;
+    background:#8FA3C0; opacity:.34;}
+  body[data-strom="lebt"] #agPuls, body[data-strom="alt"] #agPuls{
+    display:inline-block;}
+  body[data-strom="alt"] #agPuls{background:transparent; opacity:.55;
+    box-shadow:inset 0 0 0 1px #8295B0;}
+  #agPuls.schlag{animation:agSchlag 1.7s ease-out;}
+  @keyframes agSchlag{
+    0%{opacity:.34; transform:scale(1);}
+    10%{opacity:1; transform:scale(1.5);}
+    100%{opacity:.34; transform:scale(1);}}
+  #agStromWort{display:none; font-style:normal; color:#8295B0;
+    font-size:8.5px; letter-spacing:.14em; margin-top:3px;}
+  body[data-strom="alt"] #agStromWort{display:block;}
+
   /* DUNKEL BLEIBEN, ABER LESBAR WERDEN.
 
      Peters Bitte: „Die Anzeige für Titel und Produkt rechts oben und rechts
@@ -805,7 +845,7 @@
 <div id="agKostenEbene"></div>
 <div id="agWerk"></div>
 <div id="agMarke"><b>Agentarium</b><em title="BALL — Bio-Agent &amp; LLM Logistics">See intelligence move. Powered by BALL</em><small id="agFassung"></small><label id="agRegler"><u>Helligkeit <i id="agHellWert">100 %</i></u><input id="agHell" type="range" min="60" max="190" step="2" value="100" aria-label="Helligkeit"></label></div>
-<div id="agRechts"><div id="agKopf"><i id="agProjekt"></i><span id="agUhr">00:00</span></div></div>
+<div id="agRechts"><div id="agKopf"><i id="agProjekt"></i><s id="agPuls"></s><span id="agUhr">00:00</span><em id="agStromWort"></em></div></div>
 <div id="agWerkName"></div>
 <div id="agWas"></div>
 <div id="agMotoren"></div>
@@ -2182,7 +2222,7 @@
 
      Der Bauzeitpunkt kommt beim Bauen aus der Uhr. Von Hand gepflegte
      Datumsangaben sind nach der zweiten Änderung falsch. */
-  var FASSUNG = '43', GEBAUT = '2026-10-16T14:12Z';
+  var FASSUNG = '44', GEBAUT = '2026-10-16T14:22Z';
 
   /* DIE BETRIEBSART. Sie kommt aus den Daten; fehlt sie, gilt `demo`.
      Alles, was sich zwischen Prototyp und Produktivbetrieb unterscheidet,
@@ -2203,7 +2243,29 @@
      Schnittstelle. Die Zeile steht trotzdem hier, weil alles, was von ihr
      abhängt, schon jetzt richtig sein soll: Ein Knopf, der nichts tun kann,
      wird nicht angezeigt. */
-  var verbunden = false;
+  /* ================== DER STROM ==================
+
+     `verbunden` stand hier seit jeher und wurde an KEINER Stelle gesetzt
+     -- eine tote Variable. Die Folge war still und falsch: Die grosse
+     Tafel "Live -- keine Verbindung" erschien im Live-Betrieb IMMER, auch
+     wenn ein Strom geliefert haette. Peter hat danach gefragt, gemeldet
+     hatte es niemand.
+
+     Drei Dinge, und sie sind nicht dasselbe:
+
+       verbunden      Eine Verbindung steht. Ab hier WERDEN Lebenszeichen
+                      erwartet.
+       letztesLZ      Wann zuletzt eines EMPFANGEN wurde. Nicht wann eines
+                      faellig waere -- das Feld erzeugt keinen eigenen
+                      Takt. Ein selbst erzeugter Puls behauptete Leben.
+       jeLZ           Ob ueberhaupt je eines kam. Entscheidet, ob die
+                      laute Tafel noch zustaendig ist.
+
+     Die 20 Sekunden stehen nicht hier, sondern im Vertrag
+     (AG-VISUAL-005-schnittstelle-v2, Abschnitt 4): Takt 5 Sekunden, nach
+     20 Sekunden ohne Empfang gilt die Ansicht als veraltet. */
+  var verbunden = false, letztesLZ = 0, jeLZ = false;
+  var LZ_TAKT = 5000, LZ_ALT = 20000;
 
   var STUECKE = [{"titel": "NACHTPOST – eine Stadt aus ungesendeten Briefen", "dauer": 120, "ereignisse": [{"id": "E01", "t": 0, "von": "peter", "an": "atlas", "art": "request", "text": "Gemeinsames Staunen, zurückziehbare Beiträge", "folgen": 3, "gross": 1.0, "kommando": "BEGINNE", "tokens": {"aus": 14802, "denken": 10289, "ein": 6, "cache": 11510}, "kosten": 0.2172, "quelle": "geschaetzt"}, {"id": "E02", "t": 3, "von": "atlas", "an": "nova", "art": "handoff", "text": "Visionstrang eröffnet", "folgen": 1, "gross": 0.744, "dauer": 52, "kommando": "ERÖFFNE", "tokens": {"aus": 79658, "denken": 62448, "ein": 7, "cache": 27092}, "kosten": 1.2111, "quelle": "geschaetzt"}, {"id": "E03", "t": 3, "von": "atlas", "an": "scout", "art": "handoff", "text": "Speicherung und Rücknahme untersuchen", "folgen": 1, "gross": 0.438, "dauer": 7, "kommando": "UNTERSUCHE", "tokens": {"aus": 7604, "denken": 6037, "ein": 4, "cache": 5171}, "kosten": 0.1161, "quelle": "geschaetzt"}, {"id": "E04", "t": 8, "von": "nova", "an": "peter", "art": "question", "text": "Darf eine Löschung eine sichtbare Lücke hinterlassen?", "folgen": 1}, {"id": "E05", "t": 10, "von": "scout", "an": "archibald", "art": "contribution", "text": "Abgeleitete Formen brauchen Herkunftsbeziehungen", "folgen": 2}, {"id": "E06", "t": 13, "von": "peter", "an": "nova", "art": "decision", "text": "Leere Stellen erlaubt; rekonstruierbare Textreste verboten", "folgen": 2}, {"id": "E07", "t": 17, "von": "atlas", "an": "archibald", "art": "handoff", "text": "Konzept in drei Epics und Stories entfalten", "folgen": 1, "gross": 0.41, "dauer": 5, "kommando": "ENTFALTE", "tokens": {"aus": 6657, "denken": 4020, "ein": 7, "cache": 859}, "kosten": 0.094, "quelle": "geschaetzt"}, {"id": "E08", "t": 22, "von": "archibald", "an": "forge", "art": "artifact", "text": "Epics und Stories V1 bereit", "folgen": 2}, {"id": "E09", "t": 25, "von": "atlas", "an": "forge", "art": "handoff", "text": "Gebäudegenerator unabhängig von offener Löschfrage bauen", "folgen": 1, "gross": 0.52, "dauer": 15, "kommando": "BAUE", "tokens": {"aus": 22552, "denken": 15845, "ein": 4, "cache": 13481}, "kosten": 0.3319, "quelle": "geschaetzt"}, {"id": "E10", "t": 26, "von": "atlas", "an": "argus", "art": "handoff", "text": "Rücknahme-Kriterien unabhängig prüfen", "folgen": 1, "gross": 0.78, "dauer": 70, "kommando": "PRÜFE", "tokens": {"aus": 63366, "denken": 54445, "ein": 8, "cache": 45767}, "kosten": 0.992, "quelle": "geschaetzt"}, {"id": "E11", "t": 32, "von": "argus", "an": "archibald", "art": "objection", "text": "Eine verbliebene Brücke kann einen entfernten Ursprung verraten", "folgen": 4}, {"id": "E12", "t": 36, "von": "archibald", "an": "scout", "art": "question", "text": "Welche gemeinsamen Ableitungen müssen zurückgenommen werden?", "folgen": 1}, {"id": "E13", "t": 40, "von": "forge", "an": "sentinel", "art": "artifact", "text": "Stadtteil V1 zur Prüfung bereit", "folgen": 1}, {"id": "E14", "t": 42, "von": "atlas", "an": "sentinel", "art": "handoff", "text": "V1 gegen Story-Kriterien prüfen", "folgen": 1, "gross": 0.735, "dauer": 50, "kommando": "PRÜFE", "tokens": {"aus": 40757, "denken": 31714, "ein": 8, "cache": 11999}, "kosten": 0.6182, "quelle": "geschaetzt"}, {"id": "E15", "t": 48, "von": "sentinel", "an": "forge", "art": "defect", "text": "Haus gelöscht, abgeleitete Brücke bleibt bestehen", "folgen": 3}, {"id": "E16", "t": 50, "von": "scout", "an": "archibald", "art": "answer", "text": "Veraltete Zuordnung und gemeinsame Ableitung betroffen", "folgen": 3}, {"id": "E17", "t": 53, "von": "atlas", "an": "forge", "art": "handoff", "text": "Herkunftskette reparieren; V1 bleibt nachvollziehbar", "folgen": 1, "gross": 0.622, "dauer": 29, "kommando": "REPARIERE", "tokens": {"aus": 24274, "denken": 12390, "ein": 8, "cache": 18523}, "kosten": 0.3292, "quelle": "geschaetzt"}, {"id": "E18", "t": 55, "von": "nova", "an": "forge", "art": "proposal", "text": "Lichtstege bei Rücknahme zerfallen lassen", "folgen": 2}, {"id": "E19", "t": 59, "von": "argus", "an": "nova", "art": "objection", "text": "Sichtbarer Zerfall ersetzt keine Entfernung gespeicherter Ableitungen", "folgen": 1}, {"id": "E20", "t": 60, "von": "peter", "an": "atlas", "art": "change_request", "text": "Zwei Besucher sollen gemeinsam einen Brief gestalten können", "folgen": 1}, {"id": "E21", "t": 63, "von": "atlas", "an": "cadence", "art": "handoff", "text": "Doppelte Korrekturarbeit durch zwei Löschbegriffe klären", "folgen": 1, "gross": 0.424, "dauer": 6, "kommando": "KLÄRE", "tokens": {"aus": 7153, "denken": 6653, "ein": 3, "cache": 2071}, "kosten": 0.115, "quelle": "geschaetzt"}, {"id": "DEMO-STOP-1", "t": 64, "von": "atlas", "an": "sentinel", "art": "stop", "klasse": "budget", "text": "Kanal zum Modell geschlossen: Guthaben des Prüfkontos aufgebraucht."}, {"id": "E22", "t": 66, "von": "atlas", "an": "peter", "art": "question", "text": "Darf jeder Mitautor den gesamten gemeinsamen Beitrag zurückziehen?", "folgen": 1}, {"id": "E23", "t": 69, "von": "cadence", "an": "archibald", "art": "recommendation", "text": "Ein kanonisches Kriterium mit Verweisen auf beide Stories", "folgen": 1}, {"id": "E24", "t": 73, "von": "peter", "an": "atlas", "art": "decision", "text": "Jeder Mitautor darf den gemeinsamen Beitrag vollständig zurückziehen", "folgen": 1}, {"id": "E25", "t": 77, "von": "archibald", "an": "forge", "art": "artifact", "text": "Story-Kriterien V2 inklusive gemeinsamer Rücknahme", "folgen": 1}, {"id": "E26", "t": 82, "von": "forge", "an": "sentinel", "art": "artifact", "text": "V2: Herkunftsreparatur und gemeinsamer Entwurf bereit", "folgen": 1}, {"id": "E27", "t": 85, "von": "atlas", "an": "sentinel", "art": "handoff", "text": "V2 gezielt und mit relevanten Regressionen prüfen", "folgen": 1, "gross": 0.438, "dauer": 7, "kommando": "PRÜFE", "tokens": {"aus": 9472, "denken": 5313, "ein": 4, "cache": 3668}, "kosten": 0.1313, "quelle": "geschaetzt"}, {"id": "DEMO-RES-1", "t": 88, "von": "peter", "an": "sentinel", "art": "resume", "text": "Guthaben nachgelegt, Kanal wieder offen."}, {"id": "E28", "t": 92, "von": "sentinel", "an": "argus", "art": "test_result", "text": "Gezielte Prüfungen bestanden; unterbrochene Sitzungen ungeprüft", "folgen": 1}, {"id": "E29", "t": 96, "von": "argus", "an": "atlas", "art": "review_result", "text": "Rücknahmelogik nachvollziehbar; Erlebnisabnahme bleibt offen", "folgen": 2}, {"id": "E30", "t": 100, "von": "atlas", "an": "peter", "art": "handoff", "text": "Ergebnis und verbleibende Grenzen zur Entscheidung", "folgen": 1, "gross": 0.52, "dauer": 15, "kommando": "ÜBERNIMM", "tokens": {"aus": 23649, "denken": 14502, "ein": 4, "cache": 9279}, "kosten": 0.3353, "quelle": "geschaetzt"}, {"id": "E31", "t": 105, "von": "nova", "an": "atlas", "art": "question", "text": "Können zurückbleibende Lücken einen öffentlichen Garten bilden?", "folgen": 2}, {"id": "E32", "t": 108, "von": "atlas", "an": "scout", "art": "handoff", "text": "Neue Idee unabhängig auf verbleibende Informationen prüfen", "folgen": 1, "gross": 0.52, "dauer": 15, "kommando": "PRÜFE", "tokens": {"aus": 17624, "denken": 13367, "ein": 7, "cache": 9556}, "kosten": 0.2653, "quelle": "geschaetzt"}, {"id": "E33", "t": 108, "von": "atlas", "an": "argus", "art": "handoff", "text": "Neue Gartenidee unabhängig hinterfragen", "folgen": 1, "gross": 0.52, "dauer": 15, "kommando": "HINTERFRAGE", "tokens": {"aus": 14729, "denken": 11908, "ein": 6, "cache": 8315}, "kosten": 0.2261, "quelle": "geschaetzt"}, {"id": "E34", "t": 120, "von": "atlas", "an": null, "art": "open_state", "text": "Kein Abschluss: Erlebnisabnahme, Gartenfrage und Sitzungsprüfung offen", "folgen": 0}], "projekt": "NACHTPOST V1", "beschreibung": "Eine Stadt aus ungesendeten Briefen. Beiträge werden zu Lichtgebäuden und Nachbarschaften — und jeder Beitrag muss zurückziehbar bleiben. Die Spannung: Wie wächst etwas gemeinsam, wenn seine Ursprünge verschwinden dürfen?", "umfang": 4, "umfangText": "3 Epics · 4 Stories", "ablage": "Repository"}, {"projekt": "NACHTPOST V2", "titel": "Die Stadt, die sich gemeinsam verändert", "beschreibung": "Sieben Arbeitsstränge, 21 Storyideen und vier Konfliktschleifen. Die zentrale Spannung: Wie kann etwas gemeinsam wachsen, wenn seine Ursprünge verschwinden dürfen? Abgeleitet aus eurem Konzeptpapier — Zeiten und Kausalität sind ein Vorschlag, kein Fixture.", "dauer": 480, "ereignisse": [{"id": "N001", "t": 0, "von": "peter", "an": "atlas", "art": "request", "text": "Gemeinsames Wachsen bei zurückziehbaren Ursprüngen", "folgen": 7, "gross": 1.0, "kommando": "BEGINNE", "tokens": {"aus": 19227, "denken": 14641, "ein": 5, "cache": 16635}, "kosten": 0.2897, "quelle": "geschaetzt", "aufgabe": "AG-V2-001"}, {"id": "N002", "t": 5, "von": "atlas", "an": "nova", "art": "handoff", "text": "Wachsende Häuser und stille Höfe vorschlagen", "folgen": 1, "gross": 0.602, "dauer": 26, "kommando": "VORSCHLAGE", "tokens": {"aus": 39693, "denken": 28730, "ein": 8, "cache": 29976}, "kosten": 0.5892, "quelle": "geschaetzt", "aufgabe": "AG-V2-002"}, {"id": "N003", "t": 8, "von": "atlas", "an": "forge", "art": "handoff", "text": "Zwei Lichtgebäudeformen parallel entwickeln", "folgen": 1, "gross": 0.705, "dauer": 44, "kommando": "ÜBERNIMM", "tokens": {"aus": 55471, "denken": 42291, "ein": 7, "cache": 6125}, "kosten": 0.8362, "quelle": "geschaetzt", "aufgabe": "AG-V2-003"}, {"id": "N008", "t": 14, "von": "atlas", "an": "scout", "art": "handoff", "text": "Herkunftsbeziehungen verwandter Beiträge untersuchen", "folgen": 1, "gross": 0.628, "dauer": 30, "kommando": "UNTERSUCHE", "tokens": {"aus": 28080, "denken": 13325, "ein": 7, "cache": 5071}, "kosten": 0.3748, "quelle": "geschaetzt", "aufgabe": "AG-V2-004"}, {"id": "N009", "t": 26, "von": "scout", "an": "atlas", "art": "contribution", "text": "Fundstück 1: Rezept ohne nachvollziehbare Grundlage", "folgen": 1, "aufgabe": "AG-V2-004", "erledigt": "AG-V2-004"}, {"id": "N010", "t": 29, "von": "scout", "an": "atlas", "art": "open_state", "text": "Fundstück 1 verworfen: keine Grundlage", "folgen": 0}, {"id": "N004", "t": 31, "von": "nova", "an": "archibald", "art": "proposal", "text": "Stille Höfe als ruhige Betrachtung", "folgen": 2, "aufgabe": "AG-V2-002", "erledigt": "AG-V2-002"}, {"id": "N005", "t": 34, "von": "atlas", "an": "archibald", "art": "handoff", "text": "Beobachtbare Unterschiede der Formen verlangen", "folgen": 1, "gross": 0.56, "dauer": 20, "kommando": "VERLANGE", "tokens": {"aus": 28859, "denken": 16033, "ein": 5, "cache": 16453}, "kosten": 0.3992, "quelle": "geschaetzt", "aufgabe": "AG-V2-005"}, {"id": "N011", "t": 44, "von": "scout", "an": "archibald", "art": "contribution", "text": "Fundstück 2: Herkunftsmodell für Ableitungen", "folgen": 3}, {"id": "N012", "t": 48, "von": "atlas", "an": "argus", "art": "handoff", "text": "Das Herkunftsmodell an Gegenbeispielen prüfen", "folgen": 1, "gross": 0.651, "dauer": 34, "kommando": "PRÜFE", "tokens": {"aus": 25654, "denken": 24253, "ein": 7, "cache": 3480}, "kosten": 0.4149, "quelle": "geschaetzt", "aufgabe": "AG-V2-006"}, {"id": "N006", "t": 54, "von": "archibald", "an": "forge", "art": "artifact", "text": "US-01/05/06: Formkriterien bereit", "folgen": 2, "aufgabe": "AG-V2-005", "erledigt": "AG-V2-005", "artefakt": "ART-01", "version": "v1"}, {"id": "N007", "t": 56, "von": "forge", "an": "sentinel", "art": "artifact", "text": "Zwei Formen mit Ursprungsbezug", "folgen": 1, "aufgabe": "AG-V2-003", "erledigt": "AG-V2-003", "artefakt": "ART-02", "version": "v1"}, {"id": "N016", "t": 60, "von": "atlas", "an": "argus", "art": "handoff", "text": "Verräterische Leerstellen nach Rücknahme hinterfragen", "folgen": 1, "gross": 0.615, "dauer": 28, "kommando": "HINTERFRAGE", "tokens": {"aus": 44043, "denken": 21235, "ein": 7, "cache": 16244}, "kosten": 0.5899, "quelle": "geschaetzt", "aufgabe": "AG-V2-007"}, {"id": "N013", "t": 82, "von": "argus", "an": "scout", "art": "objection", "text": "Gegenbeispiel: Regel trägt nicht überall", "folgen": 3, "prueft": "ART-02"}, {"id": "N017", "t": 88, "von": "argus", "an": "nova", "art": "objection", "text": "Sichtbarer Zerfall kann den Ursprung verraten", "folgen": 4, "prueft": "ART-02"}, {"id": "N018", "t": 92, "von": "atlas", "an": "nova", "art": "handoff", "text": "Die Zerfallsidee überarbeiten", "folgen": 1, "gross": 0.663, "dauer": 36, "kommando": "ÜBERARBEITE", "tokens": {"aus": 48963, "denken": 33172, "ein": 4, "cache": 11578}, "kosten": 0.7131, "quelle": "geschaetzt", "aufgabe": "AG-V2-008"}, {"id": "N014", "t": 96, "von": "scout", "an": "archibald", "art": "answer", "text": "Herkunftsmodell auf direkte Ableitungen eingegrenzt", "folgen": 2}, {"id": "N031", "t": 96, "von": "peter", "an": "atlas", "art": "change_request", "text": "CR-01: Gemeinsame Autorschaft aufnehmen", "folgen": 3, "prueft": "ART-02"}, {"id": "N032", "t": 100, "von": "atlas", "an": "archibald", "art": "handoff", "text": "Gemeinsame Autorschaft spezifizieren", "folgen": 1, "gross": 0.64, "dauer": 32, "kommando": "SPEZIFIZIERE", "tokens": {"aus": 42022, "denken": 23322, "ein": 7, "cache": 12479}, "kosten": 0.5812, "quelle": "geschaetzt", "aufgabe": "AG-V2-009"}, {"id": "N015", "t": 104, "von": "scout", "an": "atlas", "art": "contribution", "text": "Fundstück 3: nachvollziehbare Fallbeschreibung", "folgen": 1}, {"id": "N022", "t": 118, "von": "atlas", "an": "sentinel", "art": "handoff", "text": "Die verbleibende Brücke nachstellen", "folgen": 1, "gross": 0.628, "dauer": 30, "kommando": "NACHSTELLE", "tokens": {"aus": 32534, "denken": 25737, "ein": 6, "cache": 5925}, "kosten": 0.496, "quelle": "geschaetzt", "aufgabe": "AG-V2-010"}, {"id": "N033", "t": 126, "von": "archibald", "an": "peter", "art": "question", "text": "Darf ein Mitautor den ganzen Beitrag zurückziehen?", "folgen": 2}, {"id": "N019", "t": 128, "von": "nova", "an": "archibald", "art": "proposal", "text": "Zerfall ohne rekonstruierbare Reste", "folgen": 2, "aufgabe": "AG-V2-008", "erledigt": "AG-V2-008"}, {"id": "N020", "t": 132, "von": "atlas", "an": "archibald", "art": "handoff", "text": "Die veränderte Bedeutung prüfbar machen", "folgen": 1, "gross": 0.589, "dauer": 24, "kommando": "MACHE", "tokens": {"aus": 26132, "denken": 23298, "ein": 6, "cache": 16921}, "kosten": 0.4142, "quelle": "geschaetzt", "aufgabe": "AG-V2-011"}, {"id": "N034", "t": 140, "von": "peter", "an": "archibald", "art": "decision", "text": "Jeder Mitautor darf den gemeinsamen Beitrag zurückziehen", "folgen": 2, "antwortet_auf": "N033"}, {"id": "N023", "t": 148, "von": "sentinel", "an": "forge", "art": "defect", "text": "Haus gelöscht, abgeleitete Brücke bleibt stehen", "folgen": 4, "prueft": "ART-02"}, {"id": "N024", "t": 154, "von": "forge", "an": "atlas", "art": "question", "text": "Wie weit reichen abhängige Ableitungen?", "folgen": 2}, {"id": "N021", "t": 156, "von": "archibald", "an": "forge", "art": "artifact", "text": "US-03/09/10: Rücknahmekriterien V1", "folgen": 2, "aufgabe": "AG-V2-009", "erledigt": "AG-V2-009", "artefakt": "ART-03", "version": "v1"}, {"id": "N025", "t": 166, "von": "atlas", "an": "forge", "art": "decision", "text": "Umfang: direkte Ableitungen, unabhängige Nachbarn bleiben", "folgen": 2, "aufgabe": "AG-V2-001", "erledigt": "AG-V2-001", "antwortet_auf": "N024"}, {"id": "N026", "t": 170, "von": "atlas", "an": "forge", "art": "handoff", "text": "Die Herkunftskette reparieren", "folgen": 1, "gross": 0.685, "dauer": 40, "kommando": "REPARIERE", "tokens": {"aus": 38375, "denken": 30886, "ein": 3, "cache": 27199}, "kosten": 0.5883, "quelle": "geschaetzt", "aufgabe": "AG-V2-012"}, {"id": "N035", "t": 172, "von": "archibald", "an": "forge", "art": "artifact", "text": "US-04/11/12: Regeln gemeinsamer Autorschaft", "folgen": 2, "aufgabe": "AG-V2-011", "erledigt": "AG-V2-011", "artefakt": "ART-04", "version": "v1"}, {"id": "N036", "t": 190, "von": "peter", "an": "atlas", "art": "change_request", "text": "CR-02: Wiederaufnahme nach Unterbrechung", "folgen": 3, "prueft": "ART-04"}, {"id": "N037", "t": 194, "von": "atlas", "an": "forge", "art": "handoff", "text": "Unterbrochene Entwürfe wiederaufnehmen", "folgen": 1, "gross": 0.674, "dauer": 38, "kommando": "WIEDERAUFNEHME", "tokens": {"aus": 41958, "denken": 38271, "ein": 8, "cache": 11620}, "kosten": 0.6702, "quelle": "geschaetzt", "aufgabe": "AG-V2-013"}, {"id": "DEMO-STOP-1", "t": 196, "von": "atlas", "an": "scout", "art": "stop", "klasse": "technisch", "text": "Scout antwortet nicht. Die Laufzeitumgebung wurde neu gestartet; der letzte Auftrag ist ohne Rückmeldung geblieben."}, {"id": "N027", "t": 210, "von": "forge", "an": "sentinel", "art": "artifact", "text": "Herkunftsreparatur V2 bereit", "folgen": 2, "aufgabe": "AG-V2-012", "erledigt": "AG-V2-012", "artefakt": "ART-05", "version": "v1"}, {"id": "N028", "t": 214, "von": "atlas", "an": "sentinel", "art": "handoff", "text": "Gezielt und mit relevanten Regressionen prüfen", "folgen": 1, "gross": 0.575, "dauer": 22, "kommando": "PRÜFE", "tokens": {"aus": 17288, "denken": 14238, "ein": 8, "cache": 7483}, "kosten": 0.267, "quelle": "geschaetzt", "aufgabe": "AG-V2-014"}, {"id": "DEMO-RES-1", "t": 228, "von": "atlas", "an": "scout", "art": "resume", "text": "Scout ist wieder erreichbar."}, {"id": "N038", "t": 232, "von": "forge", "an": "atlas", "art": "defect", "text": "Alte Sitzung bringt zurückgezogenen Entwurf zurück", "folgen": 4, "prueft": "ART-05"}, {"id": "N029", "t": 236, "von": "sentinel", "an": "argus", "art": "test_result", "text": "Gezielte Prüfungen bestanden", "folgen": 1, "aufgabe": "AG-V2-010", "erledigt": "AG-V2-010", "prueft": "ART-05"}, {"id": "N039", "t": 238, "von": "atlas", "an": "sentinel", "art": "handoff", "text": "Die Wiederholungsfolge nachstellen", "folgen": 1, "gross": 0.602, "dauer": 26, "kommando": "NACHSTELLE", "tokens": {"aus": 31018, "denken": 18848, "ein": 8, "cache": 6006}, "kosten": 0.4388, "quelle": "geschaetzt", "aufgabe": "AG-V2-015"}, {"id": "N030", "t": 244, "von": "argus", "an": "atlas", "art": "review_result", "text": "Herkunftsreparatur nachvollziehbar", "folgen": 2, "aufgabe": "AG-V2-006", "erledigt": "AG-V2-006", "prueft": "ART-05"}, {"id": "N046", "t": 250, "von": "atlas", "an": "nova", "art": "handoff", "text": "Verständlichkeit der Rücknahme untersuchen", "folgen": 1, "gross": 0.651, "dauer": 34, "kommando": "UNTERSUCHE", "tokens": {"aus": 44623, "denken": 26350, "ein": 7, "cache": 20719}, "kosten": 0.6266, "quelle": "geschaetzt", "aufgabe": "AG-V2-016"}, {"id": "N040", "t": 264, "von": "sentinel", "an": "atlas", "art": "artifact", "text": "Reproduzierbare Unterbrechungs-/Rücknahmefolge", "folgen": 2, "aufgabe": "AG-V2-014", "erledigt": "AG-V2-014", "artefakt": "ART-06", "version": "v1"}, {"id": "N041", "t": 270, "von": "atlas", "an": "peter", "art": "open_state", "text": "Gemeinschaftsfunktion blockiert; Konfliktregel offen", "folgen": 0}, {"id": "N042", "t": 276, "von": "atlas", "an": "cadence", "art": "handoff", "text": "Zwei Rücknahmebegriffe und doppelte Reparatur klären", "folgen": 1, "gross": 0.589, "dauer": 24, "kommando": "KLÄRE", "tokens": {"aus": 23892, "denken": 11487, "ein": 5, "cache": 3882}, "kosten": 0.3198, "quelle": "geschaetzt", "aufgabe": "AG-V2-017"}, {"id": "N047", "t": 284, "von": "nova", "an": "sentinel", "art": "proposal", "text": "Rücknahme ohne Textwand erlebbar", "folgen": 2, "aufgabe": "AG-V2-016", "erledigt": "AG-V2-016"}, {"id": "N048", "t": 290, "von": "atlas", "an": "sentinel", "art": "handoff", "text": "Verschwinden, Fehler und fehlende Verbindung unterscheiden", "folgen": 1, "gross": 0.615, "dauer": 28, "kommando": "UNTERSCHEIDE", "tokens": {"aus": 32813, "denken": 17450, "ein": 7, "cache": 26419}, "kosten": 0.4492, "quelle": "geschaetzt", "aufgabe": "AG-V2-018"}, {"id": "DEMO-STOP-2", "t": 296, "von": "atlas", "an": "nova", "art": "stop", "klasse": "budget", "text": "Kanal zum Modell geschlossen: Guthaben aufgebraucht. Es fließt nichts und es kostet nichts, solange er zu ist."}, {"id": "N043", "t": 300, "von": "cadence", "an": "archibald", "art": "recommendation", "text": "Ein kanonisches Kriterium mit Verweisen", "folgen": 2, "aufgabe": "AG-V2-017", "erledigt": "AG-V2-017"}, {"id": "N044", "t": 306, "von": "atlas", "an": "archibald", "art": "handoff", "text": "Die gemeinsamen Begriffe präzisieren", "folgen": 1, "gross": 0.575, "dauer": 22, "kommando": "PRÄZISIERE", "tokens": {"aus": 34001, "denken": 22186, "ein": 8, "cache": 19399}, "kosten": 0.4901, "quelle": "geschaetzt", "aufgabe": "AG-V2-019"}, {"id": "N049", "t": 318, "von": "sentinel", "an": "nova", "art": "defect", "text": "Drei Zustände sehen gleich aus", "folgen": 3, "prueft": "ART-06"}, {"id": "N050", "t": 324, "von": "nova", "an": "archibald", "art": "question", "text": "Reicht Farbe zur Unterscheidung?", "folgen": 2}, {"id": "N045", "t": 328, "von": "archibald", "an": "atlas", "art": "artifact", "text": "Begriffsklärung Rücknahme übernommen", "folgen": 1, "aufgabe": "AG-V2-019", "erledigt": "AG-V2-019", "artefakt": "ART-07", "version": "v1"}, {"id": "N051", "t": 338, "von": "archibald", "an": "nova", "art": "answer", "text": "Nein — Bewegung und Dauer müssen unterscheiden", "folgen": 2, "antwortet_auf": "N050"}, {"id": "N052", "t": 344, "von": "atlas", "an": "forge", "art": "handoff", "text": "Die drei Zustände unterscheidbar bauen", "folgen": 1, "gross": 0.663, "dauer": 36, "kommando": "BAUE", "tokens": {"aus": 42066, "denken": 19004, "ein": 3, "cache": 35765}, "kosten": 0.5557, "quelle": "geschaetzt", "aufgabe": "AG-V2-020"}, {"id": "N057", "t": 350, "von": "atlas", "an": "nova", "art": "handoff", "text": "Die Gartenidee erneut öffnen", "folgen": 1, "gross": 0.602, "dauer": 26, "kommando": "ÖFFNE", "tokens": {"aus": 32725, "denken": 27646, "ein": 3, "cache": 8283}, "kosten": 0.5095, "quelle": "geschaetzt", "aufgabe": "AG-V2-021"}, {"id": "DEMO-RES-2", "t": 354, "von": "peter", "an": "nova", "art": "resume", "text": "Budget freigegeben, Kanal wieder offen."}, {"id": "N058", "t": 376, "von": "nova", "an": "atlas", "art": "proposal", "text": "Garten aus unabhängigen neuen Beiträgen", "folgen": 3, "aufgabe": "AG-V2-021", "erledigt": "AG-V2-021"}, {"id": "N053", "t": 380, "von": "forge", "an": "sentinel", "art": "artifact", "text": "US-16/17/18: Unterscheidbare Zustände", "folgen": 2, "aufgabe": "AG-V2-013", "erledigt": "AG-V2-013", "artefakt": "ART-08", "version": "v1"}, {"id": "N059", "t": 382, "von": "atlas", "an": "scout", "art": "handoff", "text": "Den Ursprung der Gartenformen hinterfragen", "folgen": 1, "gross": 0.628, "dauer": 30, "kommando": "HINTERFRAGE", "tokens": {"aus": 46963, "denken": 22921, "ein": 7, "cache": 34836}, "kosten": 0.6306, "quelle": "geschaetzt", "aufgabe": "AG-V2-022"}, {"id": "N054", "t": 384, "von": "atlas", "an": "sentinel", "art": "handoff", "text": "Die Unterscheidung gezielt prüfen", "folgen": 1, "gross": 0.56, "dauer": 20, "kommando": "PRÜFE", "tokens": {"aus": 24026, "denken": 17948, "ein": 7, "cache": 9229}, "kosten": 0.36, "quelle": "geschaetzt", "aufgabe": "AG-V2-023"}, {"id": "N060", "t": 386, "von": "atlas", "an": "argus", "art": "handoff", "text": "Die Aussagekraft verbliebener Formen hinterfragen", "folgen": 1, "gross": 0.628, "dauer": 30, "kommando": "HINTERFRAGE", "tokens": {"aus": 41071, "denken": 34271, "ein": 7, "cache": 9766}, "kosten": 0.6369, "quelle": "geschaetzt", "aufgabe": "AG-V2-024"}, {"id": "N055", "t": 404, "von": "sentinel", "an": "argus", "art": "test_result", "text": "Unterscheidung bestanden; Prüfgrenze benannt", "folgen": 1, "aufgabe": "AG-V2-015", "erledigt": "AG-V2-015", "prueft": "ART-08"}, {"id": "N056", "t": 412, "von": "argus", "an": "atlas", "art": "review_result", "text": "Erlebnis nachvollziehbar; Abnahme offen", "folgen": 2, "aufgabe": "AG-V2-007", "erledigt": "AG-V2-007", "prueft": "ART-08"}, {"id": "N061", "t": 412, "von": "scout", "an": "atlas", "art": "objection", "text": "Gartenform übernimmt Beziehungen eines entfernten Briefes", "folgen": 2, "prueft": "ART-08"}, {"id": "N062", "t": 416, "von": "argus", "an": "atlas", "art": "objection", "text": "Verbliebene Formen können Rücknahmelücken nutzen", "folgen": 2, "prueft": "ART-08"}, {"id": "N063", "t": 430, "von": "atlas", "an": "peter", "art": "open_state", "text": "Nutzung von Rücknahmelücken bleibt offen", "folgen": 0}, {"id": "DEMO-STOP-3", "t": 438, "von": "argus", "an": "forge", "art": "stop", "klasse": "freigabe", "text": "Wartet auf Peters Entscheidung zur Rücknahme-Semantik. Ohne sie lässt sich der Umbau nicht abschließen."}, {"id": "N064", "t": 452, "von": "atlas", "an": "peter", "art": "handoff", "text": "Ergebnis und verbleibende Grenzen zur Entscheidung", "folgen": 1, "gross": 0.92, "kommando": "ÜBERNIMM", "tokens": {"aus": 28293, "denken": 14514, "ein": 5, "cache": 9498}, "kosten": 0.3842, "quelle": "geschaetzt", "aufgabe": "AG-V2-025"}, {"id": "N065", "t": 470, "von": "atlas", "an": null, "art": "open_state", "text": "Kein Abschluss: Konfliktregel, Erlebnisabnahme und Gartenfrage offen", "folgen": 0}], "umfang": 21, "umfangText": "7 Stränge · 21 Storyideen", "ablage": "Repository", "bezuege": "konstruiert — siehe previews/AG-VISUAL-005-evidence-v1.md"}];
   var stueckNr = 0;
@@ -3744,7 +3806,12 @@
   function liveHinweis() {
     var e = document.getElementById('agLive');
     if (!e) return;
-    var an = (MODUS === 'live');
+    /* NUR NOCH EIN FALL: Live gewaehlt und noch nie etwas angekommen.
+       Dieser braucht Worte, weil ein leeres Feld sonst wie ein ruhiges
+       Projekt aussieht (Funktionsmatrix 2a.3). Reisst eine Verbindung
+       ab, die einmal stand, ist der Punkt an der Uhr zustaendig -- die
+       Tafel kommt dann nicht zurueck und verdeckt nichts. */
+    var an = (MODUS === 'live') && !verbunden && !jeLZ;
     e.classList.toggle('auf', an);
     if (an) e.innerHTML =
       '<b>Live — keine Verbindung</b>' +
@@ -4313,6 +4380,7 @@
     ballSchrittRuhend(dt);
     tischSchritt(dt);
     uhrZeigen();
+    stromZeigen();
   }
   window.__agSchritt = schritt;
   /* Messsonde. Nur zum Nachmessen im Browser, nicht fürs Bild. */
@@ -4773,6 +4841,66 @@
     });
     return 'rgb(' + r.map(function (v) { return Math.round(90 + v * 165); }).join(',') + ')';
   }
+  /* ============ DIE ANZEIGE DES STROMS ============
+
+     Einmal je Bild, und sie rechnet nichts hoch: Sie liest nur, wann
+     zuletzt wirklich etwas ankam. */
+  var pulsEl = null, stromWortEl = null, stromWar = '';
+  function stromZeigen() {
+    if (!pulsEl) {
+      pulsEl = document.getElementById('agPuls');
+      stromWortEl = document.getElementById('agStromWort');
+    }
+    var zustand = 'keiner';
+    if (MODUS === 'live' && (verbunden || jeLZ)) {
+      var her = letztesLZ ? (Date.now() - letztesLZ) : Infinity;
+      zustand = (her > LZ_ALT) ? 'alt' : 'lebt';
+      if (zustand === 'alt' && stromWortEl) {
+        var sek = letztesLZ ? Math.floor(her / 1000) : 0;
+        var neu = letztesLZ
+          ? 'Verbindung seit ' + sek + ' s ohne Lebenszeichen'
+          : 'Verbindung ohne Lebenszeichen';
+        if (stromWortEl.textContent !== neu) stromWortEl.textContent = neu;
+      }
+    }
+    if (zustand !== stromWar) {
+      stromWar = zustand;
+      document.body.setAttribute('data-strom', zustand);
+      if (zustand !== 'alt' && stromWortEl) stromWortEl.textContent = '';
+      liveHinweis();
+    }
+  }
+
+  /* ============ DER ANSCHLUSS FUER EINEN ECHTEN STROM ============
+
+     Hier haengt spaeter die Schnittstelle dran, und nur hier. Das Feld
+     erzeugt selbst KEIN Lebenszeichen -- `lebenszeichen()` heisst
+     "eines ist EMPFANGEN worden", nicht "eines waere jetzt faellig".
+
+     Projektunabhaengig nach P03: Die drei Griffe kennen weder Projekt
+     noch Lauf; sie sagen nur, ob eine Leitung steht und wann zuletzt
+     etwas darueber kam. */
+  window.__agStrom = {
+    an: function () { verbunden = true; stromZeigen(); },
+    lebenszeichen: function () {
+      verbunden = true; jeLZ = true; letztesLZ = Date.now();
+      stromZeigen();
+      /* Ein Atemzug je empfangenem Zeichen. Neu angestossen, nicht in
+         Schleife: Bleibt der Strom aus, hoert auch das Atmen auf -- ohne
+         dass jemand es abschalten muesste. */
+      var e = document.getElementById('agPuls');
+      if (e) { e.classList.remove('schlag'); void e.offsetWidth;
+               e.classList.add('schlag'); }
+    },
+    aus: function () { verbunden = false; stromZeigen(); },
+    /* Nur zum Nachmessen, nicht fuers Bild. */
+    stand: function () {
+      return { verbunden: verbunden, jeLZ: jeLZ,
+               her: letztesLZ ? Date.now() - letztesLZ : null,
+               zustand: stromWar, takt: LZ_TAKT, alt: LZ_ALT };
+    }
+  };
+
   function uhrZeigen() {
     /* Im Live-Betrieb läuft die Uhr der Wirklichkeit, ohne Deckel. In den
        anderen Betriebsarten die Zeit des Stücks, und die endet mit ihm. */
