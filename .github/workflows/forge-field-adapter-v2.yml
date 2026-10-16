@@ -11,7 +11,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   forge:
-    if: github.event.repository.private == true && github.ref_name == 'feature/ag-interface-k3-final'
+    if: github.repository == 'pahlborn/agentarium' && github.repository_owner_id == '277496791' && github.actor_id == '277496791' && github.event_name == 'push' && github.ref_name == 'feature/ag-interface-k3-final'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
