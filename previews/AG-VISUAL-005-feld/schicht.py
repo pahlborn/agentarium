@@ -214,7 +214,7 @@ SKRIPT = """
 
      Der Bauzeitpunkt kommt beim Bauen aus der Uhr. Von Hand gepflegte
      Datumsangaben sind nach der zweiten Änderung falsch. */
-  var FASSUNG = '43', GEBAUT = '__GEBAUT__';
+  var FASSUNG = '44', GEBAUT = '__GEBAUT__';
 
   /* DIE BETRIEBSART. Sie kommt aus den Daten; fehlt sie, gilt `demo`.
      Alles, was sich zwischen Prototyp und Produktivbetrieb unterscheidet,
@@ -235,7 +235,29 @@ SKRIPT = """
      Schnittstelle. Die Zeile steht trotzdem hier, weil alles, was von ihr
      abhängt, schon jetzt richtig sein soll: Ein Knopf, der nichts tun kann,
      wird nicht angezeigt. */
-  var verbunden = false;
+  /* ================== DER STROM ==================
+
+     `verbunden` stand hier seit jeher und wurde an KEINER Stelle gesetzt
+     -- eine tote Variable. Die Folge war still und falsch: Die grosse
+     Tafel "Live -- keine Verbindung" erschien im Live-Betrieb IMMER, auch
+     wenn ein Strom geliefert haette. Peter hat danach gefragt, gemeldet
+     hatte es niemand.
+
+     Drei Dinge, und sie sind nicht dasselbe:
+
+       verbunden      Eine Verbindung steht. Ab hier WERDEN Lebenszeichen
+                      erwartet.
+       letztesLZ      Wann zuletzt eines EMPFANGEN wurde. Nicht wann eines
+                      faellig waere -- das Feld erzeugt keinen eigenen
+                      Takt. Ein selbst erzeugter Puls behauptete Leben.
+       jeLZ           Ob ueberhaupt je eines kam. Entscheidet, ob die
+                      laute Tafel noch zustaendig ist.
+
+     Die 20 Sekunden stehen nicht hier, sondern im Vertrag
+     (AG-VISUAL-005-schnittstelle-v2, Abschnitt 4): Takt 5 Sekunden, nach
+     20 Sekunden ohne Empfang gilt die Ansicht als veraltet. */
+  var verbunden = false, letztesLZ = 0, jeLZ = false;
+  var LZ_TAKT = 5000, LZ_ALT = 20000;
 
   var STUECKE = __STUECKE__;
   var stueckNr = 0;
@@ -1776,7 +1798,12 @@ SKRIPT = """
   function liveHinweis() {
     var e = document.getElementById('agLive');
     if (!e) return;
-    var an = (MODUS === 'live');
+    /* NUR NOCH EIN FALL: Live gewaehlt und noch nie etwas angekommen.
+       Dieser braucht Worte, weil ein leeres Feld sonst wie ein ruhiges
+       Projekt aussieht (Funktionsmatrix 2a.3). Reisst eine Verbindung
+       ab, die einmal stand, ist der Punkt an der Uhr zustaendig -- die
+       Tafel kommt dann nicht zurueck und verdeckt nichts. */
+    var an = (MODUS === 'live') && !verbunden && !jeLZ;
     e.classList.toggle('auf', an);
     if (an) e.innerHTML =
       '<b>Live — keine Verbindung</b>' +
@@ -2345,6 +2372,7 @@ SKRIPT = """
     ballSchrittRuhend(dt);
     tischSchritt(dt);
     uhrZeigen();
+    stromZeigen();
   }
   window.__agSchritt = schritt;
   /* Messsonde. Nur zum Nachmessen im Browser, nicht fürs Bild. */
@@ -2805,6 +2833,66 @@ SKRIPT = """
     });
     return 'rgb(' + r.map(function (v) { return Math.round(90 + v * 165); }).join(',') + ')';
   }
+  /* ============ DIE ANZEIGE DES STROMS ============
+
+     Einmal je Bild, und sie rechnet nichts hoch: Sie liest nur, wann
+     zuletzt wirklich etwas ankam. */
+  var pulsEl = null, stromWortEl = null, stromWar = '';
+  function stromZeigen() {
+    if (!pulsEl) {
+      pulsEl = document.getElementById('agPuls');
+      stromWortEl = document.getElementById('agStromWort');
+    }
+    var zustand = 'keiner';
+    if (MODUS === 'live' && (verbunden || jeLZ)) {
+      var her = letztesLZ ? (Date.now() - letztesLZ) : Infinity;
+      zustand = (her > LZ_ALT) ? 'alt' : 'lebt';
+      if (zustand === 'alt' && stromWortEl) {
+        var sek = letztesLZ ? Math.floor(her / 1000) : 0;
+        var neu = letztesLZ
+          ? 'Verbindung seit ' + sek + ' s ohne Lebenszeichen'
+          : 'Verbindung ohne Lebenszeichen';
+        if (stromWortEl.textContent !== neu) stromWortEl.textContent = neu;
+      }
+    }
+    if (zustand !== stromWar) {
+      stromWar = zustand;
+      document.body.setAttribute('data-strom', zustand);
+      if (zustand !== 'alt' && stromWortEl) stromWortEl.textContent = '';
+      liveHinweis();
+    }
+  }
+
+  /* ============ DER ANSCHLUSS FUER EINEN ECHTEN STROM ============
+
+     Hier haengt spaeter die Schnittstelle dran, und nur hier. Das Feld
+     erzeugt selbst KEIN Lebenszeichen -- `lebenszeichen()` heisst
+     "eines ist EMPFANGEN worden", nicht "eines waere jetzt faellig".
+
+     Projektunabhaengig nach P03: Die drei Griffe kennen weder Projekt
+     noch Lauf; sie sagen nur, ob eine Leitung steht und wann zuletzt
+     etwas darueber kam. */
+  window.__agStrom = {
+    an: function () { verbunden = true; stromZeigen(); },
+    lebenszeichen: function () {
+      verbunden = true; jeLZ = true; letztesLZ = Date.now();
+      stromZeigen();
+      /* Ein Atemzug je empfangenem Zeichen. Neu angestossen, nicht in
+         Schleife: Bleibt der Strom aus, hoert auch das Atmen auf -- ohne
+         dass jemand es abschalten muesste. */
+      var e = document.getElementById('agPuls');
+      if (e) { e.classList.remove('schlag'); void e.offsetWidth;
+               e.classList.add('schlag'); }
+    },
+    aus: function () { verbunden = false; stromZeigen(); },
+    /* Nur zum Nachmessen, nicht fuers Bild. */
+    stand: function () {
+      return { verbunden: verbunden, jeLZ: jeLZ,
+               her: letztesLZ ? Date.now() - letztesLZ : null,
+               zustand: stromWar, takt: LZ_TAKT, alt: LZ_ALT };
+    }
+  };
+
   function uhrZeigen() {
     /* Im Live-Betrieb läuft die Uhr der Wirklichkeit, ohne Deckel. In den
        anderen Betriebsarten die Zeit des Stücks, und die endet mit ihm. */

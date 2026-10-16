@@ -386,6 +386,46 @@
   }
   #agUhr{color:#8295B0;}
 
+  /* ================= OB EIN STROM ANLIEGT, UND OB ER LEBT =================
+
+     Peter: "ich wuerde gerne sehen, wenn agentarium im live modus laeuft.
+     und ob ein datenstrom aktiv ist. nur ganz leise anzeige, nicht lautes,
+     auffaelliges, stoerendes."
+
+     Also kommt nichts Neues ins Bild. Die Uhr steht ohnehin oben rechts
+     und zeigt im Live-Betrieb die Wirklichkeitszeit; sie bekommt einen
+     Punkt davor. Drei Zustaende, und der erste ist die Abwesenheit:
+
+       Demo/Archiv      kein Punkt. Es wird kein Strom erwartet, also
+                        gibt es nichts zu melden.
+       Strom lebt       der Punkt atmet EINMAL JE EMPFANGENEM
+                        Lebenszeichen -- kein Takt, den das Feld selbst
+                        erzeugt. Ein selbst erzeugter Puls behauptete
+                        Leben, wo keines ist, und das waere die
+                        gefaehrlichste Anzeige von allen.
+       veraltet         der Punkt wird hohl und hoert auf zu atmen.
+                        Dazu ein Wort, weil der Vertrag es verlangt:
+                        nach 20 Sekunden ohne Lebenszeichen sagt das
+                        Feld, seit wann.
+
+     Kein Blinken, keine Signalfarbe. Dasselbe Atmen, das die Namen im
+     Feld ohnehin haben. */
+  #agPuls{display:none; width:5px; height:5px; border-radius:3px;
+    text-decoration:none; vertical-align:middle; margin:0 7px 2px 0;
+    background:#8FA3C0; opacity:.34;}
+  body[data-strom="lebt"] #agPuls, body[data-strom="alt"] #agPuls{
+    display:inline-block;}
+  body[data-strom="alt"] #agPuls{background:transparent; opacity:.55;
+    box-shadow:inset 0 0 0 1px #8295B0;}
+  #agPuls.schlag{animation:agSchlag 1.7s ease-out;}
+  @keyframes agSchlag{
+    0%{opacity:.34; transform:scale(1);}
+    10%{opacity:1; transform:scale(1.5);}
+    100%{opacity:.34; transform:scale(1);}}
+  #agStromWort{display:none; font-style:normal; color:#8295B0;
+    font-size:8.5px; letter-spacing:.14em; margin-top:3px;}
+  body[data-strom="alt"] #agStromWort{display:block;}
+
   /* DUNKEL BLEIBEN, ABER LESBAR WERDEN.
 
      Peters Bitte: „Die Anzeige für Titel und Produkt rechts oben und rechts
@@ -800,7 +840,7 @@
 <div id="agKostenEbene"></div>
 <div id="agWerk"></div>
 <div id="agMarke"><b>Agentarium</b><em title="BALL — Bio-Agent &amp; LLM Logistics">See intelligence move. Powered by BALL</em><small id="agFassung"></small><label id="agRegler"><u>Helligkeit <i id="agHellWert">100 %</i></u><input id="agHell" type="range" min="60" max="190" step="2" value="100" aria-label="Helligkeit"></label></div>
-<div id="agRechts"><div id="agKopf"><i id="agProjekt"></i><span id="agUhr">00:00</span></div></div>
+<div id="agRechts"><div id="agKopf"><i id="agProjekt"></i><s id="agPuls"></s><span id="agUhr">00:00</span><em id="agStromWort"></em></div></div>
 <div id="agWerkName"></div>
 <div id="agWas"></div>
 <div id="agMotoren"></div>
