@@ -67,6 +67,77 @@ Edit the file so `events` gets one more envelope with the next `stream_sequence`
     json.dump(d,open(p,'w'),ensure_ascii=False)
     EOF
 
+## Activity monitor (partial connection, local only)
+
+Optional, additive; the transport/reducer behaviour above is unchanged. Not complete
+runtime capture and not an end-to-end guarantee. `/monitor` and `/activity` are GET only.
+
+Start (both options together; `--activity-fresh-ms` is required with `--activity-input`):
+
+    python3 pilot/AG-PILOT-001/local_transport.py --input /abs/path/probe.json --port 8765 \
+      --activity-input /abs/path/activity.json --activity-fresh-ms 90000
+
+Open `http://127.0.0.1:8765/monitor` (live) or `/monitor?at=2026-10-16T10:00:00Z` (archive
+replay, never auto-advances). `GET /activity` returns the JSON; `?at=<ISO with zone>` selects
+ARCHIVE (observations after that instant are ignored, no wall-clock ageing). Without
+`--activity-input` all agents are `unknown`.
+
+Input schema `agentarium.activity-observations.v1`:
+
+    {"schema":"agentarium.activity-observations.v1","data_kind":"SYNTHETIC",
+     "observations":[{"id":"o1","agent":"Forge","session_id":"s1","task_id":"t1",
+       "observed_at":"2026-10-16T10:00:00Z","evidence_ref":"relay-log#1",
+       "signal":"stream_sample","event_counts":{"stream_event":3},
+       "last_event_seconds":10,"elapsed_seconds":12}]}
+
+`data_kind` is `OBSERVED` or `SYNTHETIC`. Signals: `host_received`, `stream_sample`
+(`event_counts`, `last_event_seconds`, `elapsed_seconds`), `source_waiting`/`source_blocked`
+(nonempty `reason`), `source_resumed`, `execution_stopped` (`outcome` success|failed|aborted),
+`transport_heartbeat`. `observed_at` is collector observation time (ISO-8601 with zone), not
+guaranteed event time. Nonempty `evidence_ref` is required for any state claim.
+`--activity-fresh-ms` is a test configuration, not a realtime/SLA guarantee.
+
+Example marked **TEST (synthetic)**: two samples for Forge/s1/t1, counter `stream_event` 3 then 5, both within
+the fresh window => `working_observed`.
+
+Acceptance cases (to be verified independently; Forge ran none):
+1. Genuine delta: two samples, same agent/session/task, increased `stream_event`/`assistant`/`user` counter, recent event => working_observed.
+2. Heartbeat/host receipt or unchanged samples => no work (stays unknown).
+3. Stale evidence (sample event age + observation age > fresh ms) => unknown, not waiting.
+4. Waiting/blocked only from explicit source signal with reason; silence => unknown.
+5. `execution_stopped` success => stopped, task is never set done; terminal for that session/task.
+
+V2 corrections (Forge ran no tests; independent QA required):
+
+- Roster (`activity.ROSTER`, canonical lowercase): atlas, nova, scout, archibald, forge, argus,
+  sentinel, cadence. Known names are matched case-insensitively and normalized to the canonical id
+  (no duplicate Forge/forge rows). Unknown names get their own row and never replace a default row.
+- Work evidence: only a positive delta of `stream_event`, `assistant` or `user` counters proves
+  `working_observed`. `system`, `progress_timer`, `telemetry_failure`, `invalid_line` and other
+  counters are ignored, and `last_event_seconds` changing alone is not proof (the wrapper also
+  updates it for metadata). First sample is a baseline; unchanged samples, heartbeat and host
+  receipt never renew work. A positive delta still needs a fresh source event. No inference of
+  thinking or continuous work.
+- Explicit waiting/blocked is authoritative until explicit `source_resumed` or terminal. If the hold
+  is stale the row is `unknown`; work accumulated while held is never used. `source_resumed` clears
+  the hold AND old work evidence: resume alone is not working, a later positive work delta is needed.
+  Terminal still absorbs later same-session progress.
+- Every row has `remaining_valid_ms`: 0 for unknown, null for stopped, otherwise the conservative
+  remaining freshness computed with the same `now` and event age as the state. It is a local display
+  validity only: no SLA, no capture guarantee, never renewed by transport.
+- Browser (LIVE): each response's `remaining_valid_ms` is tracked with `performance.now()`, reduced by
+  the request duration. A local timer turns expired nonterminal cards into `unknown` (dashed, no pulse),
+  even with Auto off or server unreachable. ARCHIVE is never aged by the client clock. Auto defaults
+  ON (2 s) in LIVE; ARCHIVE has it disabled. Repeating the same work evidence after an expiry or failed
+  request does not pulse again; only a changed evidence stamp does. Transport errors are shown apart
+  from source errors. Terminal `stopped` stays conclusive; no end is fabricated from a disconnect.
+- Browser binary NOT tested. Main Gewebe/Partitur and actual runtime hooks are still absent. The
+  existing 60 s sample cadence is not instantaneous. This is a local component only, no product success claim.
+
+Honest limits: the existing relay cadence is 60 s, so short freshness values will flap; ChatGPT
+activity hooks are absent; no automatic capture, no end-to-end guarantee. No LLM calls for
+telemetry, no per-token/frame logs. Costs stay "Kosten nicht vollständig ermittelbar." with no numbers.
+
 ## Limits
 
 No real producer hooks, no field adapter, no hosting, no LLM calls, no writes or commands.

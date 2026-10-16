@@ -40,6 +40,19 @@ def load_reducer():
 
 REDUCER = load_reducer()
 
+ACTIVITY_PATH = Path(__file__).resolve().parent / 'activity.py'
+MONITOR_HTML = Path(__file__).resolve().parent / 'activity.html'  # the only file /monitor serves
+
+
+def load_activity():
+    spec = importlib.util.spec_from_file_location('ag_activity', str(ACTIVITY_PATH))
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+ACTIVITY = load_activity()
+
 
 class InputError(Exception):
     pass
@@ -184,6 +197,8 @@ def jdump(obj):
 class Handler(BaseHTTPRequestHandler):
     server_version = 'AgPilotLocalProbe/1'
     store = None
+    activity_path = None
+    activity_fresh_ms = None
 
     def log_message(self, fmt, *args):  # silenced; never log payloads
         pass
@@ -213,6 +228,25 @@ class Handler(BaseHTTPRequestHandler):
         url = urlparse(self.path)
         q = parse_qs(url.query)
         snap, state0, base, events, err, _ = self.store.view()
+        if url.path == '/activity':  # read-only; independent of the task reducer/heartbeat
+            at = (q.get('at') or [None])[0]
+            try:
+                doc = ACTIVITY.build_response(self.activity_path, self.activity_fresh_ms, at=at)
+            except ValueError as exc:
+                return self._json(400, {'error': 'at: %s' % exc})
+            return self._json(200, doc)
+        if url.path == '/monitor':
+            try:
+                body = MONITOR_HTML.read_bytes()
+            except OSError:
+                return self._json(404, {'error': 'monitor page missing'})
+            self.send_response(200)
+            self.send_header('Content-Type', 'text/html; charset=utf-8')
+            self.send_header('Content-Length', str(len(body)))
+            self.send_header('Cache-Control', 'no-store')
+            self.end_headers()
+            self.wfile.write(body)
+            return
         if url.path == '/health':
             return self._json(200, {
                 'mode': 'local_probe', 'supported_actions': [],
@@ -303,9 +337,18 @@ def main():
     ap = argparse.ArgumentParser(description='AG-PILOT-001 local loopback test probe')
     ap.add_argument('--input', required=True, help='explicit path to probe.json')
     ap.add_argument('--port', type=int, required=True, help='0 = pick free port')
+    ap.add_argument('--activity-input', default=None,
+                    help='optional activity observations JSON (agentarium.activity-observations.v1)')
+    ap.add_argument('--activity-fresh-ms', type=int, default=None,
+                    help='freshness window in ms (test configuration; required with --activity-input)')
     args = ap.parse_args()
     if not 0 <= args.port <= 65535:
         ap.error('port out of range')
+    if args.activity_input is not None and (args.activity_fresh_ms is None
+                                            or args.activity_fresh_ms <= 0):
+        ap.error('--activity-fresh-ms (integer > 0) is required with --activity-input')
+    Handler.activity_path = args.activity_input
+    Handler.activity_fresh_ms = args.activity_fresh_ms
     store = Store(args.input)
     store.refresh()
     if store.snap is None:

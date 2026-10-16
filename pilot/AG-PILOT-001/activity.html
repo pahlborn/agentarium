@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agentarium – lokaler Aktivitätsmonitor / Teilanbindung</title>
+<style>
+  body { font-family: system-ui, sans-serif; margin: 1rem auto; max-width: 56rem; padding: 0 1rem; color: #1b1b1b; background: #fafafa; }
+  h1 { font-size: 1.3rem; }
+  .bar { display: flex; flex-wrap: wrap; gap: .75rem; align-items: center; margin: .75rem 0; }
+  .notice { border-left: 4px solid #888; padding: .4rem .75rem; background: #eee; margin: .5rem 0; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr)); gap: .75rem; }
+  .card { border: 2px solid #444; border-radius: .5rem; padding: .6rem .75rem; background: #fff; }
+  .card.unknown { border-style: dashed; border-color: #888; color: #444; }
+  .card.waiting { border-color: #2a5db0; }
+  .card.blocked { border-color: #b36b00; background: #fff6e5; }
+  .card.stopped { border-color: #333; }
+  .card.stopped.problem { border-color: #b00020; }
+  .card.working_observed { border-color: #1b7a3a; }
+  .card.pulse { animation: pulse 0.9s ease-out 1; }
+  @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(27,122,58,.6); } 100% { box-shadow: 0 0 0 .8rem rgba(27,122,58,0); } }
+  @media (prefers-reduced-motion: reduce) { .card.pulse { animation: none; } }
+  .name { font-weight: 700; }
+  .state { font-weight: 600; }
+  .meta { font-size: .85rem; color: #444; word-break: break-word; }
+  .err { color: #b00020; }
+</style>
+</head>
+<body>
+<h1>Agentarium – lokaler Aktivitätsmonitor / Teilanbindung</h1>
+<div class="notice" id="coverage">Lade …</div>
+<div class="bar">
+  <button id="refresh" type="button">Aktualisieren</button>
+  <label><input type="checkbox" id="auto"> automatisch alle 2 s (lokal)</label>
+  <span id="transport">Monitorabruf: unbekannt</span>
+  <span id="mode"></span>
+</div>
+<div class="err" id="errors"></div>
+<div class="grid" id="grid"></div>
+<p class="notice" id="costs">Kosten nicht vollständig ermittelbar.</p>
+<script>
+(function () {
+  'use strict';
+  var params = new URLSearchParams(location.search);
+  var at = params.get('at');
+  var grid = document.getElementById('grid');
+  var seen = null; // key -> last pulsed/seen work evidence stamp; null until first load (baseline, no pulse)
+  var timer = null;
+  var expiryTimer = null;
+  var current = []; // [{r: row, deadline: performance.now() ms or null, expired: bool}]
+  var auto = document.getElementById('auto');
+  if (at) { auto.disabled = true; auto.checked = false; } else { auto.checked = true; }
+  var NONTERMINAL = { working_observed: 1, waiting: 1, blocked: 1 };
+
+  var LABELS = {
+    working_observed: ['▶', 'Arbeit beobachtet'],
+    waiting: ['⏸', 'Wartet (laut Quelle)'],
+    blocked: ['⚠', 'Blockiert (laut Quelle)'],
+    stopped: ['■', 'Beendet'],
+    unknown: ['?', 'Unbekannt']
+  };
+
+  function el(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) { e.className = cls; }
+    if (text !== undefined && text !== null) { e.textContent = String(text); }
+    return e;
+  }
+
+  // Draw cards from `current`. Expired nonterminal rows are shown as unknown (local
+  // display validity only). `allowPulse` is true only for a freshly fetched response.
+  function draw(allowPulse) {
+    var first = seen === null;
+    var nextSeen = first ? {} : seen;
+    grid.textContent = '';
+    current.forEach(function (item) {
+      var r = item.r;
+      var state = item.expired ? 'unknown' : r.state;
+      var known = Object.prototype.hasOwnProperty.call(LABELS, state);
+      var lab = known ? LABELS[state] : LABELS.unknown;
+      var key = r.agent + '|' + r.session_id + '|' + r.task_id;
+      var stamp = (!item.expired && r.state === 'working_observed') ? (r.last_evidence_at + '|' + r.evidence_ref) : '';
+      var cls = 'card ' + (known ? state : 'unknown') + (!item.expired && r.problem ? ' problem' : '');
+      if (allowPulse && !first && !at && stamp && nextSeen[key] !== stamp) { cls += ' pulse'; }
+      if (allowPulse && stamp) { nextSeen[key] = stamp; }
+      var c = el('div', cls);
+      c.appendChild(el('div', 'name', r.agent));
+      c.appendChild(el('div', 'state', lab[0] + ' ' + lab[1] +
+        (state === 'stopped' && r.outcome ? ' – ' + r.outcome : '') + (!item.expired && r.problem ? ' (Problem)' : '')));
+      c.appendChild(el('div', 'meta', 'Grund: ' + (item.expired
+        ? 'Lokale Anzeige-Gültigkeit abgelaufen (keine neue Antwort): unbekannt' : r.reason)));
+      c.appendChild(el('div', 'meta', 'Letzter Nachweis: ' + (r.last_evidence_at || 'keiner') +
+        (r.evidence_ref ? ' (' + r.evidence_ref + ')' : '')));
+      c.appendChild(el('div', 'meta', 'Session: ' + (r.session_id || '–') + ' · Task: ' + (r.task_id || '–')));
+      (r.diagnostics || []).forEach(function (d) { c.appendChild(el('div', 'meta err', d)); });
+      grid.appendChild(c);
+    });
+    seen = nextSeen;
+  }
+
+  // Local expiry timer (monotone clock); independent of fetch success and Auto.
+  function checkExpiry() {
+    if (expiryTimer) { clearTimeout(expiryTimer); expiryTimer = null; }
+    if (at) { return; }
+    var now = performance.now();
+    var changed = false;
+    var nextDeadline = null;
+    current.forEach(function (item) {
+      if (item.deadline === null || item.expired) { return; }
+      if (item.deadline <= now) { item.expired = true; changed = true; }
+      else if (nextDeadline === null || item.deadline < nextDeadline) { nextDeadline = item.deadline; }
+    });
+    if (changed) { draw(false); }
+    if (nextDeadline !== null) {
+      expiryTimer = setTimeout(checkExpiry, Math.max(50, Math.min(nextDeadline - now, 1000)));
+    }
+  }
+
+  function render(doc, t0, t1) {
+    var dur = Math.max(0, t1 - t0);
+    current = doc.rows.map(function (r) {
+      var deadline = null;
+      if (!at && NONTERMINAL[r.state]) {
+        var rem = r.remaining_valid_ms;
+        // missing/invalid remaining => treated as already expired (conservative)
+        deadline = (typeof rem === 'number' && isFinite(rem) && rem >= 0) ? t0 + rem - dur : t0;
+      }
+      return { r: r, deadline: deadline, expired: false };
+    });
+    draw(true);
+    checkExpiry();
+    document.getElementById('coverage').textContent =
+      'Teilanbindung / nicht verbunden: ' + doc.coverage.note +
+      ' · Datenart: ' + (doc.data_kind || 'keine Quelle') +
+      ' · Frische-Schwelle: ' + (doc.configured_fresh_ms === null ? 'nicht gesetzt' : doc.configured_fresh_ms + ' ms') +
+      ' (' + doc.fresh_ms_note + ')';
+    document.getElementById('mode').textContent =
+      doc.mode === 'ARCHIVE' ? 'Archiv-Wiedergabe bei ' + doc.replay_at + ' (kein Auto-Fortschritt)' : 'LIVE ' + doc.now;
+    document.getElementById('errors').textContent = (doc.source_errors || []).join(' | ');
+    document.getElementById('costs').textContent = doc.kosten.status_text;
+    document.getElementById('transport').textContent = 'Monitorabruf erreichbar';
+  }
+
+  function load() {
+    var url = '/activity' + (at ? '?at=' + encodeURIComponent(at) : '');
+    var t0 = performance.now();
+    fetch(url, { cache: 'no-store' }).then(function (res) {
+      return res.json().then(function (j) { return { ok: res.ok, j: j }; });
+    }).then(function (x) {
+      var t1 = performance.now();
+      if (!x.ok) { throw new Error(x.j && x.j.error ? x.j.error : 'Fehler'); }
+      render(x.j, t0, t1);
+    }).catch(function (e) {
+      // transport error stays separate from source errors; cards age via the local timer
+      document.getElementById('transport').textContent = 'Monitorabruf nicht erreichbar: ' +
+        String(e && e.message ? e.message : e);
+      checkExpiry();
+    });
+  }
+
+  document.getElementById('refresh').addEventListener('click', load);
+  auto.addEventListener('change', function () {
+    if (timer) { clearInterval(timer); timer = null; }
+    if (auto.checked && !at) { timer = setInterval(load, 2000); }
+  });
+  if (auto.checked && !at) { timer = setInterval(load, 2000); }
+  load();
+}());
+</script>
+</body>
+</html>
