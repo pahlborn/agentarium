@@ -1,0 +1,50 @@
+name: Owner-dispatched bounded team review
+# This file alone does not start model execution. A separate authorized activation commit is required.
+on:
+  push:
+    branches: [agent/team-review-repair-20261016]
+    paths: ['handoffs/AG-REVIEW-20261016-TEAM-activate.json']
+permissions:
+  contents: read
+  issues: write
+jobs:
+  review:
+    if: >-
+      github.repository == 'pahlborn/agentarium' &&
+      github.repository_owner_id == '277496791' &&
+      github.actor_id == '277496791' &&
+      github.event_name == 'push' &&
+      github.ref_name == 'agent/team-review-repair-20261016'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        role: [archibald, forge, cadence]
+    concurrency:
+      group: agentarium-review-20261016-${{ matrix.role }}
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Validate explicit activation before any model call
+        run: |
+          python3 -m py_compile relay/team_process_review_once.py
+          python3 -m unittest discover -s relay -p test_team_review_dispatch.py
+          python3 - <<'ACTIVATION'
+          import json
+          from pathlib import Path
+          d = json.loads(Path('handoffs/AG-REVIEW-20261016-TEAM-activate.json').read_text())
+          assert d == {'task_id': 'AG-REVIEW-20261016-TEAM', 'version': 1, 'authorize_once': True, 'max_model_budget_usd': 0.57}
+          ACTIVATION
+      - run: npm install --global @anthropic-ai/claude-code
+      - name: One isolated read-only role result
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          REVIEW_TASK_ID: AG-REVIEW-20261016-TEAM
+          REVIEW_EXECUTION_AUTHORIZED: AG-REVIEW-20261016-TEAM
+        run: python3 relay/team_process_review_once.py ${{ matrix.role }}
