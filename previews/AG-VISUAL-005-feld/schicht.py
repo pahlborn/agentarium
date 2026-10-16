@@ -214,7 +214,7 @@ SKRIPT = """
 
      Der Bauzeitpunkt kommt beim Bauen aus der Uhr. Von Hand gepflegte
      Datumsangaben sind nach der zweiten Änderung falsch. */
-  var FASSUNG = '44', GEBAUT = '__GEBAUT__';
+  var FASSUNG = '45', GEBAUT = '__GEBAUT__';
 
   /* DIE BETRIEBSART. Sie kommt aus den Daten; fehlt sie, gilt `demo`.
      Alles, was sich zwischen Prototyp und Produktivbetrieb unterscheidet,
@@ -259,6 +259,33 @@ SKRIPT = """
   var verbunden = false, letztesLZ = 0, jeLZ = false;
   var LZ_TAKT = 5000, LZ_ALT = 20000;
 
+  /* ============ OHNE MASCHINE KEINE SCHICHT ============
+
+     Befund eines unabhaengigen Pruefers an der veroeffentlichten Fassung
+     (AG-PILOT-001-published-browser-smoke-v1): "TypeError: Cannot read
+     properties of undefined (reading 'W')" in W, schmal, knoepfeSetzen
+     und ringZeichnen. Offen gelassen hatte er, ob es nur bei
+     fehlgeschlagener WebGL-Einrichtung auftritt.
+
+     Nachgestellt und damit beantwortet: JA, und zwar notwendig. Die
+     Maschine bricht bei fehlendem WebGL ab, BEVOR sie `window.__feld`
+     setzt -- die Schicht greift danach ins Leere, und zwar sofort beim
+     ersten Rechnen einer Breite. Das betrifft nicht nur eine Wolken-
+     umgebung ohne Grafikkarte, sondern jedes Geraet ohne WebGL.
+
+     Statt einer Fehlerkaskade genau ein Satz. Danach endet die Schicht
+     von selbst: Was sie zeichnen wuerde, haengt an Breite und Hoehe der
+     Maschine, und die gibt es hier nicht. */
+  if (!window.__feld) {
+    var hw = document.getElementById('hinweis');
+    if (hw) {
+      hw.textContent =
+        'Dieses Ger\u00e4t kann das Feld nicht zeichnen \u2014 Agentarium braucht WebGL.';
+      hw.style.opacity = '1';
+    }
+    return;
+  }
+
   var STUECKE = __STUECKE__;
   var stueckNr = 0;
   var STUECK = STUECKE[0];
@@ -268,8 +295,10 @@ SKRIPT = """
 
   /* Die Heimat jedes Agenten: ein Platz auf einem Ring. Er bleibt, auch wenn
      der Agent schweigt — damit man lernt, wer wo wohnt. */
-  function W() { return window.__feld.W; }
-  function H() { return window.__feld.H; }
+  /* Doppelt gesichert: Sollte die Maschine je halb eingerichtet sein,
+     liefert das Fenster die Masse, statt dass hier etwas wirft. */
+  function W() { return (window.__feld && window.__feld.W) || window.innerWidth; }
+  function H() { return (window.__feld && window.__feld.H) || window.innerHeight; }
 
   /* Die Mitte des KREISES ist nicht die Mitte des Bildes.
      Unten gedrängt standen Peter, Atlas und Cadence auf engem Raum — drei
