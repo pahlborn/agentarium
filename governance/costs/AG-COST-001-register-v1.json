@@ -1,6 +1,6 @@
 {
   "schema": "agentarium.requirement-cost-register.v1",
-  "version": 10,
+  "version": 11,
   "created_at": "2026-10-14T04:15:27.033Z",
   "currency": "USD",
   "scope": "Known NACHTPOST-003/VISUAL-004 calls plus explicit earlier failure gaps. This is not the full project bill.",
@@ -750,6 +750,45 @@
       ],
       "accepted_commit": "19463534defa6f9c6b48812eeebf56433fa28e89",
       "acceptance_scope": "Synthetic local transport only; no real pilot, auth, durable storage or field"
+    },
+    {
+      "attempt_id": "AG-PILOT-001-ACTIVITY-V1",
+      "session": "d9d5ef20-4dfb-496c-8174-441a90af03f4",
+      "role": "forge",
+      "actual_model": "claude-sonnet-5-5",
+      "actual_reasoning": "unconfirmed",
+      "reported_usage_cost_usd": 0.3843575,
+      "cost_source": "Claude CLI terminal metadata preserved under failure.terminal_usage; not invoice reconciled",
+      "status": "TURN_LIMIT_PATCH_PRESERVED_ACTIVITY_QA_PENDING",
+      "run": "https://github.com/pahlborn/agentarium/actions/runs/38890028971",
+      "evidence_ref": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6213943285",
+      "requirement_refs": [
+        "specifications/AG-PILOT-001-activity-acceptance-v1.md",
+        "handoffs/AG-PILOT-001-activity-v1.json"
+      ],
+      "patch_sha256": "ae90437d6be200bc139dee46164085e39697a46fa32387e56020c7af2f062a48",
+      "token_status": "PROVIDER_REPORTED",
+      "token_usage": [
+        {
+          "actual_model": "claude-sonnet-5-5",
+          "input_tokens": 18,
+          "output_tokens": 27697,
+          "cache_read_input_tokens": 105215,
+          "cache_creation_input_tokens": 38732,
+          "thinking_tokens": 6134,
+          "raw_usage": {
+            "inputTokens": 18,
+            "outputTokens": 27697,
+            "cacheReadInputTokens": 105215,
+            "cacheCreationInputTokens": 38732,
+            "webSearchRequests": 0,
+            "costUSD": 0.3843575,
+            "contextWindow": 1000000,
+            "maxOutputTokens": 128000,
+            "thinkingTokens": 6134
+          }
+        }
+      ]
     }
   ],
   "unknown_cost_attempts": [
@@ -783,7 +822,8 @@
     "additional_k3_attempt_cost_usd": 0.22442469999999998,
     "additional_k1_counterprobe_cost_usd": 0.1315362,
     "additional_pilot_local_cost_usd": 0.16888330000000001,
-    "additional_pilot_local_v2_cost_usd": 0.1286485
+    "additional_pilot_local_v2_cost_usd": 0.1286485,
+    "additional_activity_v1_cost_usd": 0.3843575
   },
   "other_costs": {
     "chatgpt": "Subscription usage; per-agent monetary allocation unavailable here, not recorded as zero",
