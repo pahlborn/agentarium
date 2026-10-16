@@ -1,0 +1,48 @@
+{
+  "schema": "agentarium.handoff.v0",
+  "task_id": "AG-PILOT-001-FIELD-ADAPTER-V1",
+  "version": 1,
+  "sender": "Atlas",
+  "recipient": "Forge/coding-agent, separate field-integration session",
+  "status": "AUTHORIZED",
+  "repository": "pahlborn/agentarium",
+  "field_input": {
+    "ref": "f741d59429dba6a74d1b5bbe10a8e7b76c2456e0",
+    "path": "previews/AG-VISUAL-005-feld/schicht.py",
+    "blob": "65dd50c836c306f971cfdbbe794d0994c0ba12a6"
+  },
+  "source_input": {
+    "task": "AG-PILOT-001-SOURCE-HOOK-V1",
+    "commit": "9ef5262d2a61dfaf4a3d29d9af0b49bfabb72f24",
+    "status": "SENTINEL_PASS_9_STREAM_8_CLI_8_CAPTURE",
+    "recorder": "relay/activity_capture.py"
+  },
+  "authorization": {
+    "source": "Peter 2026-10-16 15:02 Europe/Berlin: implement actual source and field receiver; Atlas owns routing.",
+    "scope": "Existing-field local adapter only. No new visual concept, architecture, public endpoint, merge, release or deployment."
+  },
+  "goal": "Connect the EXISTING Agentarium field to the existing /activity API in opt-in local live mode, using one real captured Forge execution as source evidence; do not make a new mock.",
+  "allowed_paths": [
+    "previews/AG-VISUAL-005-feld/schicht.py",
+    "previews/AG-VISUAL-005-feld/activity-input.js",
+    "pilot/AG-PILOT-001/local_transport.py",
+    "pilot/AG-PILOT-001/README.md"
+  ],
+  "instructions": [
+    "Use EXACT current field generator blob65dd50c836c306f971cfdbbe794d0994c0ba12a6 fromVisualbranch, not older workingbranch4fe. Preserve existing layout, Gewebe, renderengine, demo/archive behavior, builder3argAPI and positions. Need small isolated data adapter, no new card/page design.",
+    "Consume existing /activity sameorigin ONLY when explicitly enabled in live mode. Local testserver may expose /field from one explicitly chosen builtHTML (--field-html), no arbitrary filesystem route/public bind. Existing nofield invocation staysunchanged. JS may be separate source inlined by existing builder for selfcontained testpage. No external scripts/keys/GitHub/Anthropic calls in browser.",
+    "Within existing agentplaces show truth states and reason/evidence/time (hover/title/accessibility text). Newworkingevidence -> short one-shot impulse; same evidence no repeated pulse; waiting pause, blocked warning, stopped end/outcome, unknown dashed/question. Per-session/task provenance retained; concurrent sessions must not be flattened into false idle/one assignment. Coverage, data_kind and localtransportreachable remain separately visible. Only signalobservations included in source -> no inference for other7roles.",
+    "DO NOT call arbeitAn()/auftragFertig() for activity; they alter taskcounts/implicit oldest completion. Do NOT turn activity rows into handoff/artifact/review/Done or flyingmessages. Keep ownactivity state/rendering separate from demo implicitwork. No canonicaltask/reducer/schema changes. In optedlive profile prevent demo events from masquerading as observed work.",
+    "Reuse verified freshness semantics from activity.html: remaining_valid_ms + performance.now expiry independent of fetch success; latest stateunknown onexpiry, ARCHIVE no wallclockage. Fetch cleanup and response-generation guard across modechanges; staleinflight replies cannot reenablelive afterleaving. Startunknown, never trust OBSERVED label alone as sourceproof. Kosten field visible exact Kosten nicht vollständig ermittelbar. withoutnumericmoney inliveprofile.",
+    "Useful current generator anchors: verbunden line238; arbeitAn1452/auftragFertig1477 (DO NOT USE forActivity); live hint1777; schritt2229; window.__agStand2337; modusSetzen2409; ringZeichnen2783; rollenWechseln2998; bauen3177. Grep/read relevantsections, avoid rewriting enormous comment/style blocks. Expose narrow testable adapter/state hook, keep __agStand canonicalcounts unchanged.",
+    "Sentinel acceptance3cases from Argus: actual capturedsource positives reach right agent/session/task; only heartbeat/baseline/error/expiry do notwork orincrementdone; demo/archive/layout preserved and modecleanup safe. Existing browserbinary is unavailable, no install or pretendrenderPASS. Return code and exact NOT_TESTED notes. No testgeneration/unrelatedfixes.",
+    "The host records THIS actual coding session automatically via the accepted ActivityRecorder and samples local /activity HTTP during work. This is the real source proof, not a paid modeltest. You must only implement the4allowed files. Main field source seeded fromexactlatest visualbranch in your workspace; don't revertit. No changes to sourcecapture/helper/workflows.",
+    "Reuse the existing verified activity.html expiry semantics; no new telemetry/reducer/domain model. Keep change small: new activity-input.js + minimal inside-IIFE display hook/mode callback in current schicht.py, narrow optional --field-html route and brief README start/build instructions. Do not read/rewrite full156KB comments unnecessarily: grepanchors/readtargetsections. No testexecution available. Return concise CA_IMPLEMENTED+TESTS_NOT_RUN_BY_FORGE, stop."
+  ],
+  "runtime": {
+    "worker_started": false,
+    "session_id": null
+  },
+  "stop_condition": "One actual field coding session, capture evidence is real. No merge/deploy/architecture changes or new paid services. Independent Sentinel before acceptance.",
+  "base_commit": "9ef5262d2a61dfaf4a3d29d9af0b49bfabb72f24"
+}
