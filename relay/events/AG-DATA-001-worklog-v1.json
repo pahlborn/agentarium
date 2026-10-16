@@ -1,0 +1,184 @@
+{
+  "schema": "agentarium.observed-worklog.v1",
+  "task_id": "AG-DATA-001",
+  "version": 1,
+  "mode": "OBSERVED_PROJECT_WORK",
+  "recorded_at": "2026-10-16T04:27:14Z",
+  "fictional": false,
+  "status": "CONCEPT_RETURNED_IMPLEMENTATION_NOT_STARTED",
+  "coverage": {
+    "ordering": "Beobachtete Auftrags-/Handbackreihenfolge; Empfang ist kein Beweis tatsaechlicher Erstellungsreihenfolge.",
+    "timestamps": "Nur Nutzerauftragszeit und Ablagezeit belegt; Agentenlaufzeiten unbekannt.",
+    "runtime": "Reale Subagentenbeitraege; keine laufende Datenanbindung oder Produktpruefung.",
+    "actual_models": "Keine Laufzeitnachweise; Modelle bleiben unbestaetigt.",
+    "tokens_and_costs": "Nicht verfuegbar, keine Nullwerte oder Gesamtkostenbehauptung."
+  },
+  "result_ref": {
+    "path": "concepts/AG-DATA-001-live-archive-data-concept-v1.md",
+    "commit": "950bb3b24519f84b1d9f648c584512798cc22eb1",
+    "blob": "fa475762b171e3461543c87810f7d9dcce5474db"
+  },
+  "event_contract_note": "Echter Vorbereitungsnachweis nach bisherigem Worklogmuster. Kein Nachweis, dass der noch nicht implementierte Live-/Archivparser ihn bereits einlesen kann.",
+  "events": [
+    {
+      "id": "AG-DATA-001-E01",
+      "sequence": 1,
+      "task_id": "AG-DATA-001",
+      "kind": "request",
+      "actor": "peter",
+      "recipient": "atlas",
+      "title": "Daten-/Zugriffskonzept ausarbeiten, Luecken finden und optimieren",
+      "caused_by": [],
+      "occurred_at": "2026-10-16T06:22:40+02:00",
+      "recorded_at": "2026-10-16T04:27:14Z",
+      "agent_id": null,
+      "source_evidence": "Nutzerauftrag dieser Sitzung",
+      "fictional": false,
+      "actual_model": null,
+      "input_tokens": null,
+      "output_tokens": null
+    },
+    {
+      "id": "AG-DATA-001-E02",
+      "sequence": 2,
+      "task_id": "AG-DATA-001",
+      "kind": "handoff",
+      "actor": "atlas",
+      "recipient": "scout",
+      "title": "Offizielle GitHub-Faehigkeiten fuer private Live-/Archivdaten recherchieren",
+      "caused_by": [
+        "AG-DATA-001-E01"
+      ],
+      "occurred_at": null,
+      "recorded_at": "2026-10-16T04:27:14Z",
+      "agent_id": "/root/scout_data_access_concept",
+      "source_evidence": "Tatsaechliche collaboration.spawn_agent: scout_data_access_concept",
+      "fictional": false,
+      "actual_model": null,
+      "input_tokens": null,
+      "output_tokens": null
+    },
+    {
+      "id": "AG-DATA-001-E03",
+      "sequence": 3,
+      "task_id": "AG-DATA-001",
+      "kind": "handoff",
+      "actor": "atlas",
+      "recipient": "argus",
+      "title": "Konzeptskizze auf Integritaet, Wiederherstellung, Rechte und Ablage pruefen",
+      "caused_by": [
+        "AG-DATA-001-E01"
+      ],
+      "occurred_at": null,
+      "recorded_at": "2026-10-16T04:27:14Z",
+      "agent_id": "/root/argus_data_access_concept",
+      "source_evidence": "Tatsaechliche collaboration.spawn_agent: argus_data_access_concept",
+      "fictional": false,
+      "actual_model": null,
+      "input_tokens": null,
+      "output_tokens": null
+    },
+    {
+      "id": "AG-DATA-001-E04",
+      "sequence": 4,
+      "task_id": "AG-DATA-001",
+      "kind": "handoff",
+      "actor": "atlas",
+      "recipient": "sentinel",
+      "title": "Testbarkeit und acht spaetere Abnahmeszenarien untersuchen",
+      "caused_by": [
+        "AG-DATA-001-E01"
+      ],
+      "occurred_at": null,
+      "recorded_at": "2026-10-16T04:27:14Z",
+      "agent_id": "/root/sentinel_data_capture_concept",
+      "source_evidence": "Tatsaechliche collaboration.spawn_agent: sentinel_data_capture_concept",
+      "fictional": false,
+      "actual_model": null,
+      "input_tokens": null,
+      "output_tokens": null
+    },
+    {
+      "id": "AG-DATA-001-E05",
+      "sequence": 5,
+      "task_id": "AG-DATA-001",
+      "kind": "contribution",
+      "actor": "scout",
+      "recipient": "atlas",
+      "title": "Sechs quellenbasierte Empfehlungen und GitHub-Quellenregister geliefert",
+      "caused_by": [
+        "AG-DATA-001-E02"
+      ],
+      "occurred_at": null,
+      "recorded_at": "2026-10-16T04:27:14Z",
+      "agent_id": "/root/scout_data_access_concept",
+      "source_evidence": "Tatsaechlicher RKA_READY-Handback AG-DATA-001-RESEARCH V1",
+      "fictional": false,
+      "actual_model": null,
+      "input_tokens": null,
+      "output_tokens": null
+    },
+    {
+      "id": "AG-DATA-001-E06",
+      "sequence": 6,
+      "task_id": "AG-DATA-001",
+      "kind": "review_result",
+      "actor": "argus",
+      "recipient": "atlas",
+      "title": "Sechs Konzeptluecken A1-A6; PASS_WITH_NOTES fuer Skizze, keine Laufzeitpruefung",
+      "caused_by": [
+        "AG-DATA-001-E03"
+      ],
+      "occurred_at": null,
+      "recorded_at": "2026-10-16T04:27:14Z",
+      "agent_id": "/root/argus_data_access_concept",
+      "source_evidence": "Tatsaechlicher RA_REVIEW-Handback AG-DATA-001-CONCEPT-REVIEW V1",
+      "fictional": false,
+      "actual_model": null,
+      "input_tokens": null,
+      "output_tokens": null
+    },
+    {
+      "id": "AG-DATA-001-E07",
+      "sequence": 7,
+      "task_id": "AG-DATA-001",
+      "kind": "testability_review",
+      "actor": "sentinel",
+      "recipient": "atlas",
+      "title": "Acht Szenarien T1-T8, vier Vertragsluecken; alle Runtimepruefungen NOT_TESTED",
+      "caused_by": [
+        "AG-DATA-001-E04"
+      ],
+      "occurred_at": null,
+      "recorded_at": "2026-10-16T04:27:14Z",
+      "agent_id": "/root/sentinel_data_capture_concept",
+      "source_evidence": "Tatsaechlicher TESTABILITY_REVIEW-Handback AG-DATA-001-TESTABILITY V1",
+      "fictional": false,
+      "actual_model": null,
+      "input_tokens": null,
+      "output_tokens": null
+    },
+    {
+      "id": "AG-DATA-001-E08",
+      "sequence": 8,
+      "task_id": "AG-DATA-001",
+      "kind": "synthesis",
+      "actor": "atlas",
+      "recipient": null,
+      "title": "Beitraege und selbst geoeffnete Primaerquellen konsolidiert",
+      "caused_by": [
+        "AG-DATA-001-E05",
+        "AG-DATA-001-E06",
+        "AG-DATA-001-E07"
+      ],
+      "occurred_at": null,
+      "recorded_at": "2026-10-16T04:27:14Z",
+      "agent_id": null,
+      "source_evidence": "Konzeptdatei auf GitHub angelegt und Inhalt am Liefercommit nachgelesen",
+      "fictional": false,
+      "actual_model": null,
+      "input_tokens": null,
+      "output_tokens": null
+    }
+  ]
+}
