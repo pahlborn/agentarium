@@ -33,3 +33,6 @@ Entscheidungsvorschlag an Peter: zuerst vorhandenen Rechner/Server nutzen, falls
 GitHub-Deployments-/Workflow-Sammlungsabruf wurde vom Connector mit INVALID_ARGUMENT abgelehnt. Diese Abfragen liefern keinen Nachweis über externe Deployments. Keine Ableitung „existiert sicher nicht“.
 Kein Zugriff auf Peters lokalen Rechner in dieser Laufzeit. Keine öffentliche Freigabe als Ersatz.
 Keine neuen Anthropic-API-Aufrufe für diese Prüfung; ChatGPT-Kosten/Token bleiben unbekannt. Kein Projektgesamtbetrag.
+
+## Fortschreibung nach tatsächlicher Umsetzung
+Die oben beschriebene Inventur ist der Vorherstand. Der unabhängig getestete lokale Transportprototyp liegt jetzt auf Arbeitscommit19463534defa6f9c6b48812eeebf56433fa28e89. Echte Forge-Läufe V1/V2 und Sentinel RuntimePASS18/18 sind in governance/AG-PILOT-001-local-abschluss-v2.md belegt. Kein dauerhafter Betrieb, keine tatsächliche Runtimeerfassung, kein Feldadapter, keine Produktionsauthentifizierung und kein gestarteter Pilot. Die Feld-/Betriebsintegration bleibt der nächste konkrete Umfang.
