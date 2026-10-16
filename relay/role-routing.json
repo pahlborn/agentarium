@@ -5,7 +5,8 @@
     "atlas": {
       "platform": "chatgpt",
       "technical_id": "operate-as-atlas",
-      "state": "active_orchestrator_2026-10-13"
+      "state": "active_orchestrator_2026-10-13",
+      "accountability": "Product Owner and project-responsible orchestrator within Peter's customer mandate"
     },
     "nova": {
       "platform": "chatgpt",
@@ -186,5 +187,16 @@
     "review": "governance/team-review-2026-10-16.md",
     "runtime_status": "new_definitions_not_yet_loaded_or_verified",
     "historical_evidence_note": "Existing role states/run evidence below are historical, not current reachability."
+  },
+  "customer_sponsor": {
+    "name": "Peter",
+    "not_role": "Product Owner",
+    "authority": [
+      "mandate",
+      "Epic_and_budget",
+      "material_changes",
+      "customer_acceptance",
+      "reserved_release_publication"
+    ]
   }
 }
