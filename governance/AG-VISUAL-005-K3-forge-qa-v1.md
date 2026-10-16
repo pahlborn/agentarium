@@ -1,6 +1,6 @@
 # AG-VISUAL-005 K3 – Forge-Nachprüfung V1
 Datum: 2026-10-16
-Status: K3_FUNCTIONAL_PASS / INTEGRATION_BLOCKED_TEST_GAP
+Status: HISTORICAL_QA_FAILURE_SUPERSEDED_BY_VERIFIED_FOLLOWUP
 Atlas entscheidet im von Peter delegierten Umfang: Forge übernimmt. Bisheriger Verfasser: keinen parallelen Produktfix anwenden.
 
 ## Exakte Lieferung
@@ -61,3 +61,6 @@ Im Produkt bleibt das Kostenfeld sichtbar mit: „Kosten nicht vollständig ermi
 Kein Merge, Release, Deployment oder Integration des nicht vollständig grünen Testpakets.
 Pilot AG-PILOT-001 bleibt gesperrt bis grüner Schnittstellenlieferung UND geklärtem Host, dauerhaftem Speicher, Zugriff und Diagnosenjournal.
 Gemeldete sieben Bildschirmbefunde bleiben beim Feldverfasser; nicht Gegenstand dieses Fixes.
+
+## Abschlussnachtrag 2026-10-16
+Der konkrete Restbefund AG-VISUAL-005-K3-QA-01 ist nach echtem Forge-Folgeauftrag und unabhängiger Sentinel-Prüfung geschlossen. Beide Prüfer Exit0; K1/K2/K3-Rückfälle erkannt. Geprüfter Arbeitscommit da860fd19f38e9938ed201546f2a6e5b4cc765f8. Kein Merge/Deployment. Maßgeblicher Abschluss: [AG-VISUAL-005-K3-K1-abschluss-v1.md](https://github.com/pahlborn/agentarium/blob/claude/agentarium-visualisierung/governance/AG-VISUAL-005-K3-K1-abschluss-v1.md). Vorstehender Bericht bleibt als Historie erhalten.
