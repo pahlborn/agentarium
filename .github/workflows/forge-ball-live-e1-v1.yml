@@ -1,0 +1,38 @@
+name: Forge BALL live real source experiment E1
+on:
+  push:
+    branches: [agent/ball-live-concept-20261017]
+    paths: ['handoffs/AG-BALL-LIVE-001-forge-e1-activate.json']
+permissions:
+  contents: read
+  issues: write
+concurrency:
+  group: agentarium-forge-ball-live-e1-v1
+  cancel-in-progress: false
+jobs:
+  source-experiment:
+    if: github.repository == 'pahlborn/agentarium' && github.repository_owner_id == '277496791' && github.actor_id == '277496791' && github.event_name == 'push' && github.ref_name == 'agent/ball-live-concept-20261017'
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Validate relay syntax
+        run: python3 -m py_compile relay/forge_ball_live_e1_once.py
+      - name: Install Claude Code CLI
+        run: npm install --global @anthropic-ai/claude-code
+      - name: Forge real stream to HTTP source experiment
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python3 relay/forge_ball_live_e1_once.py
+      - name: Preserve real source evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: forge-ball-live-e1-output
+          path: forge-ball-live-e1-output/
+          if-no-files-found: warn
+          retention-days: 14
