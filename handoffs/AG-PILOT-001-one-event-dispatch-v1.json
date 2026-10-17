@@ -1,0 +1,15 @@
+{
+  "task_id": "AG-PILOT-001-ONE-EVENT-V1",
+  "status": "DISPATCHED",
+  "run": "https://github.com/pahlborn/agentarium/actions/runs/39006658377",
+  "activation_commit": "9bff7285b8c12430103f7e70b22309d48c4394e9",
+  "source_commit": "56059ef3d098594dc5a751aa96dfc6d31f4d252c",
+  "profile_blob": "38d9747018bd4bfc5299a2dd9aeded9659337e77",
+  "authorized_by": "Peter explicit yes in current session 2026-10-17",
+  "scope": "one actual Argus event read once into original field",
+  "product_publication_authorized": false,
+  "merge_authorized": false,
+  "worker_start": "not yet independently confirmed",
+  "next_owner": "Atlas",
+  "next_action": "retrieve actual worker result, arrange independent verification"
+}
