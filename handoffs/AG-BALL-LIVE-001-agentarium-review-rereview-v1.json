@@ -1,0 +1,35 @@
+{
+  "schema": "agentarium.handoff.v0",
+  "task_id": "AG-BALL-LIVE-001-AGENTARIUM-REVIEW-V2-REQUEST",
+  "version": 1,
+  "mode": "review_correction_only",
+  "source_review_commit": "1dd40dfe7b7101f67bf682ceb689223aa9c47f0b",
+  "product_baseline": "c7a8da04d9b06d83edcd110f210c0cf84d4aa8ba",
+  "verdict_on_v1": "FAIL",
+  "confirmed": [
+    "generated feld/index.html is not a durable source of the live integration",
+    "the build sources do not yet contain the live integration",
+    "placing expandable content under agRechts creates a geometry dependency requiring measurement"
+  ],
+  "blockers": [
+    "unchanged c1 local_server startup guard rejects the proposed c2 index before SSE hello",
+    "anonymous one-second GitHub comment polling exceeds the 60 requests/hour/IP limit and responses may be cached for 60 seconds",
+    "existing relays publish receipt and result but no continuous real work events; no ChatGPT producer is defined"
+  ],
+  "required_result": [
+    "exact existing build inputs and complete durable source mapping",
+    "explicit page/client/protocol version contract including server guard",
+    "measured geometry test before selecting the layout fix",
+    "one complete real Claude and ChatGPT event path to an already-open iPad monitor",
+    "latency, auth, privacy, cost, lifecycle and exact Peter decisions",
+    "explicit confirmation that no implementation occurred"
+  ],
+  "forbidden_actions": [
+    "implement or apply the patch",
+    "modify product branches",
+    "merge, publish or deploy",
+    "store a GitHub token in browser code or localStorage",
+    "claim iPad or near-real-time success without a real-device end-to-end test"
+  ],
+  "stop_condition": "Return corrected review V2 or one exact evidence blocker."
+}
