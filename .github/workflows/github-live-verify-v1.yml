@@ -16,7 +16,7 @@ jobs:
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
-          ref: f7f75e545dadce583d9b6e5dbba4b783e2bb561c
+          ref: 4854f44d1bc2f38363fa4d40478c6c4cc84c47c0
           persist-credentials: false
       - name: Rebuild exact Original candidate
         run: python3 previews/AG-VISUAL-005-feld/bauen.py /tmp/ag-gh-built --stuecke-aus feld/index.html --vergleich feld/index.html --gebaut 2026-10-17T20:45Z --icons feld --one-event feld/one-event.json
