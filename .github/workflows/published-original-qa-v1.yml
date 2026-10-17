@@ -1,0 +1,32 @@
+name: Published original one event acceptance
+on:
+  push:
+    branches: [agent/mvp-one-event-20261017]
+    paths: ['handoffs/AG-PILOT-001-published-original-qa-activate.json']
+permissions:
+  contents: read
+jobs:
+  qa:
+    if: github.repository == 'pahlborn/agentarium' && github.repository_owner_id == '277496791' && github.actor_id == '277496791' && github.event_name == 'push' && github.ref_name == 'agent/mvp-one-event-20261017'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Install isolated browser testing dependencies
+        run: |
+          npm install --prefix "$RUNNER_TEMP/published-qa" playwright
+          node "$RUNNER_TEMP/published-qa/node_modules/playwright/cli.js" install --with-deps chromium
+      - name: Test actual original Pages URL, no local application
+        env:
+          NODE_PATH: ${{ runner.temp }}/published-qa/node_modules
+        run: node tests/AG-PILOT-001-published-original-qa.cjs
+      - name: Preserve actual original acceptance evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: published-original-qa-output
+          path: published-original-qa-output/
+          if-no-files-found: warn
+          retention-days: 14
