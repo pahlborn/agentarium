@@ -1,6 +1,6 @@
-# AG-BALL-LIVE-001 — Sentinel QA_REPORT V2
+# AG-BALL-LIVE-001 — Sentinel QA_REPORT V2 (strukturierte Kurzfassung)
 
-> Von Atlas dokumentierte echte Rückgabe des Subagenten `/root/sentinel_ball_live_evidence`. Sentinel blieb gemäß Skill read-only und nahm selbst keine Projektänderung vor.
+> Von Atlas dokumentierte strukturierte Kurzfassung der echten Rückgabe des Subagenten `/root/sentinel_ball_live_evidence`. Sie ist kein wörtlicher Volltext. Sentinel blieb gemäß Skill read-only und nahm selbst keine Projektänderung vor. Sentinel bestätigte anschließend Pfad und Kernaussagen, beanstandete aber die ursprüngliche Bezeichnung als vollständige Erhaltung; diese Kennzeichnung korrigiert genau diesen Dokumentationsfehler.
 
 ## Prüfkopf
 
@@ -40,15 +40,15 @@ Die Gründe sind konkrete Widersprüche und unvollständige Testoracles, nicht n
 
 ### F2 — Laufend-Nachweis auf sichtbare Anzeige beziehen
 
-Bei Claude Prozess-/Ergebnisgrenze statt Actions-Jobstatus bei M5 belegen. Bei Work eine konkrete, korrelierte echte Arbeitsaktion zwischen Checkpoints nachweisen. Sichtbarkeit muss sicher vor dem belegten Ende liegen; zeitlich ununterscheidbar ist kein Pass.
+Bei Claude Prozess-/Ergebnisgrenze statt Actions-Jobstatus bei M5 belegen. Bei Work eine konkrete, korrelierte echte Arbeitsaktion zwischen Checkpoints nachweisen; bei Kindern muss genau das bezeichnete Kind die Aussage tragen. Sichtbarkeit muss sicher vor dem belegten Ende liegen; zeitlich ununterscheidbar ist kein Pass. Die Akzeptanz kooperativer Work-Selbstauskunft bleibt Peters Datenschutz-/Wahrheitsentscheidung.
 
 ### F3 — M0–M5 und Pixelbeweis operationalisieren
 
-Messpunkt, Uhr, Einheit und Erhebungsstelle definieren; M5′ als Proxy kennzeichnen. Sichtbare Actor-/Art-/Vertrauensanzeige per korreliertem Videoframe belegen. Ohne gesicherte Zeitbasis nur Schätzwerte ausweisen.
+Messpunkt, Uhr, Einheit und Erhebungsstelle für M1→M5 definieren; M0 bleibt unbekannt. M5′ als Proxy kennzeichnen. Sichtbare Actor-/Art-/Vertrauensanzeige per korreliertem Videoframe belegen. Ohne gesicherte Zeitbasis nur Schätzwerte ausweisen; Übertragungszeit, Ein-Sekunden-Uhrauflösung und Frameunsicherheit berücksichtigen. Keine unbeschlossene Echtzeitschwelle als erfüllt ausgeben.
 
 ### F4 — Positive Fixtures ausführbar machen
 
-Ein isoliertes Fixturemodell festlegen, ohne produktiven Fictional-Ausschluss zu lockern. Lokale und reale gehostete Fälle trennen; Cursor, IDs, Eingaben, Zustände und Zähler exakt definieren.
+Ein isoliertes Fixturemodell festlegen, ohne produktiven Fictional-Ausschluss zu lockern. Lokale und reale gehostete Fälle trennen; Cursor, IDs, Eingaben, Zustände und Zähler exakt definieren. ORD-03 startet bei Cursor **103**; lokaler ORD-01 darf kein echtes GitHub-Redeliver voraussetzen.
 
 ### F5 — Freshness, Agenten- und Run-Ende
 
@@ -56,15 +56,15 @@ Eine deterministische Transitionstabelle mit Zeitanker, Terminalpriorität und R
 
 ### F6 — Recovery und Fehlerpfade
 
-`alt`-Grenze vereinheitlichen; Producer-Spool separat testen; positiven Heartbeat-, Cursor-, Snapshot-, Generation- und Storage-Ack-Test ergänzen. Catch-up endet am festgehaltenen Journalkopf. Eine zeitliche SLA bleibt Peters Entscheidung.
+`alt`-Grenze vereinheitlichen; Producer-Spool separat testen; positiven Heartbeat-Test (5 s + 1 s Toleranz) ergänzen. Cursor 0/letzter/zu hoher Cursor, Snapshot, verspätete alte Generation, verweigertes `sessionStorage` und Cursorfortsetzung bei Hook-Ablehnung prüfen. Speicherfehler vor Bestätigung und verlorene Bestätigungsantwort nach erfolgreichem Append getrennt testen. Catch-up endet am festgehaltenen Journalkopf. Funklochereignisse müssen zur Producer-Drosselung passen. Eine zeitliche SLA bleibt Peters Entscheidung.
 
 ### F7 — Auth/XSS/Datenschutz
 
-Markup entweder als Text zulassen oder explizit ablehnen; Escaping bleibt Pflicht. Je Negativtest nur eine Bedingung verletzen. CORS, Herkunft und Read-Token getrennt prüfen. Keine Secrets oder Rohpayload-Auszüge in Ablehnungslogs/Export.
+Markup entweder als Text zulassen oder explizit ablehnen; Escaping bleibt Pflicht. Je Negativtest nur eine Bedingung verletzen. CORS, Herkunft und Read-Token getrennt prüfen. Keine Secrets oder Rohpayload-Auszüge in Ablehnungslogs/Export; nichtgeheime Canary-Werte verwenden. Alle von Hook-Eingaben erreichbaren Senken prüfen, nicht nur einen `img`-Fall oder Regex-Grep.
 
 ### F8 — Archivprojektion und Replay
 
-Journal→Archiv-Projektion explizit und verlustbewusst definieren. Arbeitsereignisse und Run-State getrennt bilanzieren. Replay muss konkrete IDs, Reihenfolge und Endzustand prüfen; Work-only-Terminalisierung festlegen.
+Journal→Archiv-Projektion explizit und verlustbewusst definieren. Arbeitsereignisse und Run-State getrennt bilanzieren; `liveListe` nicht gegen gemischte Journaleinträge vergleichen. Replay muss konkrete IDs, Reihenfolge und Endzustand prüfen; Nullzeit, Teilabdeckung, bekannten Spool-Verlust und Work-only-Terminalisierung festlegen.
 
 ### F9 — Coverage und Stopregeln
 
