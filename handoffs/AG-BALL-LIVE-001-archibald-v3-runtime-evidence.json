@@ -1,0 +1,82 @@
+{
+  "task_id": "AG-BALL-LIVE-001-ARCHIBALD-SPEC-V3-RECOVERY-V1",
+  "request_commit": "0bfa16597f3cc7fb6a7a4dfd99c9ca6a70a5fc05",
+  "definition_blob": "ee21df45884c9f4fef3d493fca739e0e87c3cb55",
+  "run": "https://github.com/pahlborn/agentarium/actions/runs/39030948445",
+  "cli_version": "2.1.302 (Claude Code)",
+  "requested_model": "opus",
+  "requested_effort": "high",
+  "actual_reasoning": "unconfirmed",
+  "session_id": "69ae6db1-d6b8-401b-bba1-49ac65771f9b",
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 20,
+      "outputTokens": 79007,
+      "cacheReadInputTokens": 613909,
+      "cacheCreationInputTokens": 141070,
+      "webSearchRequests": 0,
+      "costUSD": 2.4083518,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 39090,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "usage": {
+    "input_tokens": 20,
+    "cache_creation_input_tokens": 141070,
+    "cache_read_input_tokens": 613909,
+    "output_tokens": 79007,
+    "output_tokens_details": {
+      "thinking_tokens": 39090
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 0,
+      "ephemeral_5m_input_tokens": 141070
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 75307,
+        "cache_read_input_tokens": 134645,
+        "cache_creation_input_tokens": 6425,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 6425,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "num_turns": 24,
+  "total_cost_usd": 2.4083518,
+  "execution": {
+    "kind": "SUCCESS",
+    "detail": "SUCCESS",
+    "returncode": 0,
+    "elapsed_seconds": 736.788,
+    "timeout_seconds": 1800,
+    "stdout_bytes": 74311,
+    "stderr_bytes": 0,
+    "stdout_sha256": "2364185539c4f72c1b65f8a3960883614970a12d5a296b0d8c5ffab288194602",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "signals": []
+  },
+  "failure": null,
+  "raw_response_chars": 69364,
+  "raw_saved_before_validation": true,
+  "changed_paths": [],
+  "unexpected_product_changes": [],
+  "tests_run": false,
+  "product_published": false
+}
