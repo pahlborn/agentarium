@@ -4,10 +4,10 @@ import datetime, difflib, hashlib, json, os, selectors, subprocess, tempfile, ti
 from pathlib import Path
 from forge_one_shot import api, API
 
-TASK='AG-GH-LIVE-001-FORGE-V1'
+TASK='AG-GH-LIVE-002-FORGE-CHECK-V1'
 BRANCH='agent/ball-live-concept-20261017'
-PRODUCT='eb73b5d07c99586cf9d8e2c46f694b2c4dbe9f5b'
-GENERATOR='61d02292a6bd6c822980f91c36363b6601ecaf6f'
+PRODUCT='a6601b1fd2c6aa23d3e080ba585c8105835852cd'
+GENERATOR='d0e032c228d0b514e812fc1e121ed81298cfabe3'
 PROFILE='38d9747018bd4bfc5299a2dd9aeded9659337e77'
 OUT=Path('forge-github-live-output').resolve()
 
@@ -29,7 +29,7 @@ def main():
     else: raise RuntimeError('Incomplete history')
     profile=src(head,'.claude/agents/coding-agent.md')
     if hashlib.sha1(b'blob '+str(len(profile)).encode()+b'\0'+profile).hexdigest()!=PROFILE: raise RuntimeError('Role mismatch')
-    packet=json.loads(src(head,'handoffs/AG-GH-LIVE-001-forge-request-v1.json'))
+    packet=json.loads(src(head,'handoffs/AG-GH-LIVE-002-forge-check-v1.json'))
     allowed=set(packet['allowed_paths']); OUT.mkdir(exist_ok=True)
     run=os.environ['GITHUB_RUN_ID']; runurl='https://github.com/pahlborn/agentarium/actions/runs/'+run
     post('## '+TASK+' — HOST_RECEIVED\n'+runurl+'\nAuthorized direct GitHub Original pilot implementation. Safe runtime work events will be posted while Claude runs. No merge/publication.')
@@ -40,7 +40,7 @@ def main():
             p=work/path;p.parent.mkdir(parents=True,exist_ok=True);p.write_bytes(data);before[path]=data
         for name in subprocess.check_output(['git','ls-tree','-r','--name-only',PRODUCT,'feld'],text=True).splitlines(): put(name,src(PRODUCT,name))
         for name in ('AGENTS.md','governance/agentarium-rulebook-v1.2.md','governance/agentarium-process-v1.2.md'):put(name,src(PRODUCT,name))
-        for name in ('schicht.py','pages.py','resonanz-maschine.html','ereignisse-v1.json','ereignisse-v2.json'):
+        for name in ('schicht.py','pages.py','resonanz-maschine.html','ereignisse-v1.json','ereignisse-v2.json','github-live.js'):
             path='previews/AG-VISUAL-005-feld/'+name;put(path,src(GENERATOR,path))
         for name in allowed:
             if name not in before: put(name,b'# Forge placeholder\n' if name.endswith(('.py','.md')) else b'/* Forge placeholder */\n')
@@ -50,7 +50,7 @@ def main():
             lines.append(name)
             lines.extend(str(i)+': '+line[:200] for i,line in enumerate(before[name].decode().splitlines(),1) if re.search(r'ARTEN|__agLauf|__agEreignis|__agStrom|FASSUNG|modusSetzen|function starten|requestAnimationFrame|STUECK|agKopf|agRechts|ringZeichnen|serviceWorker|function melden|stromZeile',line))
         put('HOST_CODE_MAP.txt',('\n'.join(lines)+'\n').encode())
-        config={'coding-agent':{'description':'Forge direct GitHub live Original implementation','prompt':profile.decode()+'\nTASK OVERRIDE: Peter requests best suitable model: opus/high. Effective Read/Edit only, placeholders exist. One complete implementation; no tiny turn/cost limit. Edit only allowed paths.','model':'inherit','tools':['Read','Edit']}}
+        config={'coding-agent':{'description':'Forge direct GitHub live Original implementation','prompt':profile.decode()+'\nTASK OVERRIDE: Peter requests best suitable model: opus/high. Effective Read/Edit only, placeholders exist. Read-only technical check; edit only the handback file. No implementation. No tiny turn/cost limit. Edit only allowed paths.','model':'inherit','tools':['Read','Edit']}}
         cmd=['claude','--bare','-p',json.dumps(packet),'--agents',json.dumps(config),'--agent','coding-agent','--tools','Read,Edit','--allowedTools','Read,Edit','--disallowedTools','Bash,Agent,WebFetch,WebSearch,mcp__*','--permission-mode','dontAsk','--model','opus','--effort','high','--no-session-persistence','--output-format','stream-json','--verbose','--include-partial-messages']
         env=dict(os.environ)
         for k in ('GH_TOKEN','GITHUB_TOKEN','ACTIONS_RUNTIME_TOKEN'):env.pop(k,None)

@@ -1,0 +1,14 @@
+{
+  "schema": "agentarium.handoff.v0",
+  "task_id": "AG-GH-LIVE-002-FORGE-CHECK-V1",
+  "goal": "Real small follow-up review while Peter's iPad monitor is already connected: check token-expiry addition in current github-live.js. Read source, give actual technical judgment; no code changes.",
+  "authority": "Peter confirmed connected monitor and authorized first actual team task at 2026-10-17T23:11 Europe/Berlin.",
+  "allowed_paths": [
+    "handoffs/AG-GH-LIVE-002-forge-check-result.md"
+  ],
+  "requirements": [
+    "Use your Forge coding-agent profile. Read previews/AG-VISUAL-005-feld/github-live.js. Assess only whether date warning starts at <=10 days, date-only persistence leaves token in memory, and any concrete expiry UI defect. Default90 days is editable and explicitly provisional.",
+    "Write at most 3 findings with source line references to allowed handback file; explicitly identify NOT_RUN testing; final <=250 words. No architecture, implementation, broad audit, merge or publication. Do not claim iPad observed outcome.",
+    "Host observes your actual Read/Edit tool calls and publishes safe progress records during this run. Work normally; no artificial delays, invented work or test events."
+  ]
+}
