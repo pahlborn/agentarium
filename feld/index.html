@@ -2224,6 +2224,15 @@
      Datumsangaben sind nach der zweiten Änderung falsch. */
   var FASSUNG = '47', GEBAUT = '2026-10-17T05:40Z';
 
+  /* AG-BALL-LIVE-001 (lokaler Versuch, Kandidat c1). Nur mit `?ball_live=1`.
+     Ohne den Schalter bleibt alles wie in Fassung 47: keine neue Art, kein
+     Laden von live.js. `progress` ist Fortschritt aus dem Laufzeitstrom:
+     kein Flug, kein Abschluss, kein Ergebnis -- nur eine Zeile im Strom. */
+  var BALL_LIVE_FASSUNG = 'AG-BALL-LIVE-001-c1', BALL_LIVE = false;
+  try { BALL_LIVE = new URLSearchParams(location.search).get('ball_live') === '1'; } catch (x) {}
+  if (BALL_LIVE) ARTEN.progress = { abgabe: 0.0, nachhall: 0.0, gestalt: 'fortschritt',
+    kraft: 0.0, tempo: 1.0, was: 'Fortschritt aus dem Laufzeitstrom; beendet nichts, liefert nichts' };
+
   /* DIE BETRIEBSART. Sie kommt aus den Daten; fehlt sie, gilt `demo`.
      Alles, was sich zwischen Prototyp und Produktivbetrieb unterscheidet,
      hängt an dieser einen Stelle — Selbststart, Neubeginn, welche Knöpfe
@@ -4388,6 +4397,13 @@
           var S2 = stopper[E.an];
           if (!zf || !S2 || !S2.frage || S2.frage === zf) stopperAus(E.an);
         }
+        /* AG-BALL-LIVE-001: Fortschritt fliegt nicht, beendet keinen
+           Auftrag und legt nichts auf den Tisch. Nur die Zeile im Strom. */
+        if (E.art === 'progress') {
+          stromZeile(E, ARTEN.progress);
+          tunStill = 0;
+          continue;
+        }
         /* Ein ausdrücklicher Stop trifft den EMPFÄNGER — er ist der, der
            nicht weiterkann. Ein `resume` hebt ihn auf. */
         if (E.art === 'stop' || E.art === 'resume') {
@@ -4559,7 +4575,8 @@
       'BALL — Bio-Agent &amp; LLM Logistics<br>' +
       'Agentarium ist die sichtbare Welt des Teams; BALL die Orchestrierung ' +
       'dahinter: Aufgaben, Zustände und Übergaben zwischen Mensch und ' +
-      'LLM-Agenten.<br><b>Fassung ' + FASSUNG + ' &middot; ' + GEBAUT + '</b>';
+      'LLM-Agenten.<br><b>Fassung ' + FASSUNG + ' &middot; ' + GEBAUT +
+      (BALL_LIVE ? ' &middot; ' + BALL_LIVE_FASSUNG : '') + '</b>';
     var h = '';
     if (STUECKE.length > 1) {
       h += '<ul class="wProjekte">';
@@ -5121,7 +5138,8 @@
     wurf:    'Wurf — läuft weiter und pflügt ins Feld',
     gegen:   'Pfeil, der quer wegdreht; Wirbel dreht dagegen',
     bersten: 'zerspringt in Funken',
-    sonne:   'ein Stück vom goldenen Ball — der Empfänger arbeitet dann'
+    sonne:   'ein Stück vom goldenen Ball — der Empfänger arbeitet dann',
+    fortschritt: 'kein Flug — eine Zeile im Strom; beendet nichts'
   };
 
   /* Die Legende hat zwei Teile, und der Unterschied ist wichtig:
@@ -5703,7 +5721,7 @@
   (function () {
     var wunsch = '';
     try { wunsch = new URLSearchParams(location.search).get('mvp'); } catch (x) {}
-    if (wunsch !== '1') return;
+    if (wunsch !== '1' || BALL_LIVE) return;   /* ball_live schliesst one-event.json aus */
 
     var ST = window.__agMvp = { abrufe: 0, http: null, lauf: null,
                                 ereignis: null, fehler: null };
@@ -5753,6 +5771,34 @@
         ST.fehler = String(x && x.message || x);
         sag('MVP: kein Ereignis gelesen — ' + ST.fehler);
       });
+  })();
+
+  /* ============ AG-BALL-LIVE-001: LOKALER LIVESTROM (Kandidat c1) ============
+     Nur mit `?ball_live=1`. Schaltet in den Live-Betrieb (kein Demo-
+     Selbststart) und laedt live.js derselben Herkunft. live.js prueft die
+     Kandidatenkennung und verweigert bei Abweichung. Kein Neuladen, kein
+     eval: live.js benutzt nur __agLauf, __agEreignis und __agStrom. */
+  (function () {
+    if (!BALL_LIVE) return;
+    window.__agBallLiveErwartet = BALL_LIVE_FASSUNG;
+    document.body.setAttribute('data-ball-live', BALL_LIVE_FASSUNG);
+    modusSetzen('live');
+    var s = document.createElement('script');
+    s.src = 'live.js?v=' + encodeURIComponent(BALL_LIVE_FASSUNG);
+    s.onerror = function () {
+      window.__agBallLive = { version: null, state: 'fehlt',
+                              diagnostics: ['live.js nicht ladbar'] };
+      var d = document.createElement('div');
+      d.id = 'agBallLive';
+      d.setAttribute('data-state', 'fehlt');
+      d.style.cssText = 'position:fixed;left:8px;bottom:8px;z-index:50;' +
+        'font:12px/1.4 monospace;color:#ffb3a0;background:rgba(0,0,0,.6);' +
+        'padding:6px 8px;pointer-events:none';
+      d.textContent = 'BALL LIVE ' + BALL_LIVE_FASSUNG +
+                      ': live.js nicht ladbar — kein Livestrom.';
+      document.body.appendChild(d);
+    };
+    document.body.appendChild(s);
   })();
 
   /* Der Hinweis „Du darfst mitrühren" stammt aus Resonanz, wo er den
@@ -5919,7 +5965,10 @@
 })();
 </script>
 <script>
-if ('serviceWorker' in navigator) {
+/* AG-BALL-LIVE-001: Im lokalen Livestrom-Versuch keinen Arbeiter anmelden --
+   er bediente sonst den Strom und alte Dateien aus dem Vorrat. */
+if ('serviceWorker' in navigator &&
+    !/[?&]ball_live=1(&|$)/.test(location.search)) {
   window.addEventListener('load', function () {
     navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' })
       .catch(function () { /* ohne Arbeiter laeuft es online weiter */ });
