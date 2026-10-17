@@ -1,0 +1,57 @@
+{
+  "schema": "agentarium.handoff.v0",
+  "task_id": "AG-BALL-LIVE-001-FORGE-ORIGINAL-C2-V1",
+  "worker_role": "coding-agent",
+  "version": 1,
+  "authority": "Peter authorized the next bounded stage with 'Ja' on 2026-10-17: correct the three observed presentation defects on the existing Original live candidate and prepare, but do not deploy, the iPad pilot. This packet authorizes only the UI correction. No merge, Pages publication, hosting account, deployment or infrastructure purchase.",
+  "goal": "Correct AG-BL-UI-01/02/03 on the existing Original live candidate without rebuilding it: no content overlay, a truthful visible impulse from an actual progress event, and a correct cursor display.",
+  "baseline": "c7a8da04d9b06d83edcd110f210c0cf84d4aa8ba",
+  "allowed_paths": [
+    "feld/index.html",
+    "feld/live.js",
+    "tests/AG-BALL-LIVE-001-local-live.cjs"
+  ],
+  "findings": [
+    {
+      "id": "AG-BL-UI-01",
+      "problem": "The fixed technical BALL LIVE panel overlays the Original event list.",
+      "required_outcome": "No live-status or event-evidence content covers the Original list or primary field at phone, tablet or desktop sizes. Integrate status into existing non-overlapping layout or a user-opened detail area; do not hide required evidence. Preserve normal Original routes."
+    },
+    {
+      "id": "AG-BL-UI-02",
+      "problem": "A real progress event appears only as text; no visible work impulse is associated with its actor.",
+      "required_outcome": "Each accepted progress event produces one short, clearly visible impulse at or immediately associated with the actor's existing Original representation. It decays completely and may be retriggered only by another accepted event. Preserve readable last-observed evidence. A single progress event must never create a persistent busy/working state or imply completion; silence means no current activity observed, not inactivity."
+    },
+    {
+      "id": "AG-BL-UI-03",
+      "problem": "The visible transport text can remain at Cursor 0 after accepting event sequence 1.",
+      "required_outcome": "Whenever a hello or ag event advances the cursor, every visible cursor value is updated from the same accepted cursor state."
+    }
+  ],
+  "vision_input": {
+    "source": "Nova real subagent /root/nova_original_live_c2, task AG-BALL-LIVE-001-NOVA-C2 V1",
+    "direction": "Use a small beat-light at the agent name: every real work impulse creates a brief brightness strike, never a loop. Let it fully decay; retain 'last work signal' evidence. Put concise state in the existing Original flow, with technical detail only in normal flow or explicitly opened. Make gaps and signal age visible; do not use connection or cursor as proof of work."
+  },
+  "requirements": [
+    "Inspect the exact c7 candidate and Original DOM/CSS before choosing the smallest safe integration. Forge owns the technical method and must challenge this packet if it would damage the Original.",
+    "Advance the explicit candidate marker consistently from AG-BALL-LIVE-001-c1 to AG-BALL-LIVE-001-c2 in index.html and live.js; mixed versions must still refuse activation.",
+    "Keep ?ball_live=1 opt-in, no demo autostart, same-origin SSE, existing hooks, validation, escaping, dedupe, reconnect/gap semantics, service-worker bypass and normal Original/demo behavior unchanged unless directly required by these fixes.",
+    "The pulse must be driven only after the external event is validated, deduplicated and accepted by the Original. Expose deterministic DOM/class/state evidence so QA can test pulse start and decay without treating the class as proof of source reality.",
+    "Visible provenance, event ID and title remain available. Technical detail may be compact/collapsible, but tests must be able to open it without browser console.",
+    "Update the existing Playwright test only where needed for c2. Add coverage for no overlap at 390x844, 1024x1366 and 1280x800; cursor visibly changes to 1; actor impulse appears and then decays within a documented bounded interval; no progress completion or persistent busy state. Do not weaken the prior 57 checks.",
+    "Use no external package or provider and make no hosted/iPad claim. This is still a local candidate."
+  ],
+  "constraints": [
+    "Effective tools are Read and Edit only. The three allowed files already exist at the pinned baseline. HOST_CODE_MAP.txt provides relevant Original line numbers; use Read offsets as needed. Bash, Agent and network tools are denied; tests are NOT_RUN by Forge.",
+    "Edit only allowed paths. Do not replace the Original, change server/auth/transport architecture, add demo data, fake activity, alter cost display, or implement the hosted pilot.",
+    "One complete implementation session with no tiny turn or cost cutoff and no automatic retry. Stop on key/credit/quota failure or a material product-design contradiction.",
+    "Keep the handback under 1000 words and report CA_IMPLEMENTED or one exact CA_BLOCKED reason."
+  ],
+  "model_routing": {
+    "requested_model": "opus",
+    "requested_effort": "high",
+    "actual_model": "unconfirmed",
+    "budget": "One complete implementation session; no automatic retry."
+  },
+  "expected_result": "CA_IMPLEMENTED with exact changed paths, implementation choices, tests NOT_RUN and residual risks; or CA_BLOCKED with one exact blocker."
+}
