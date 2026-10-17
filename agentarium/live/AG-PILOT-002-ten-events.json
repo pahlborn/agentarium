@@ -1,0 +1,14 @@
+{
+  "run": {
+    "project_id": "agentarium",
+    "run_id": "AG-PILOT-002",
+    "titel": "Zehn echte Teamereignisse"
+  },
+  "events": [],
+  "closed": false,
+  "provenance": {
+    "capture_scope": "Selected actual runtime team boundaries exported by Atlas; no autonomous all-runtime collector",
+    "data_kind": "OBSERVED",
+    "note": "Empty source. No ten-event experiment has started; events will only be appended after they actually occur, independently of monitor opening."
+  }
+}
