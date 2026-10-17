@@ -1,0 +1,6 @@
+{
+  "task_id": "AG-PILOT-001-ONE-EVENT-QA-V2",
+  "reason": "Validate actual existing Pages packaging, missing in V1 source-only integration test",
+  "authorized": true,
+  "publish": false
+}
