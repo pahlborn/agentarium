@@ -1,0 +1,131 @@
+{
+  "task": "AG-PILOT-001-ONE-EVENT",
+  "environment": "isolated CI Chromium + SwiftShader; existing generator and pages.py PWA package, first-visit happy path with SW allowed; not published original",
+  "time": "2026-10-17T05:40:30.882Z",
+  "browser": "156.0.8078.4",
+  "source_sha256": "a8ba94c8abc2540300240eb4ebc8229fee8ca2f95f808558096bb6c354c60197",
+  "html_sha256": "23e8b503e1b623e798bef587f5775b932e44b9561178d58ca1ec3c4a6d3e68d4",
+  "records": [
+    {
+      "name": "normal-mode-no-read",
+      "status": "passed"
+    },
+    {
+      "name": "happy-evidence",
+      "status": "passed",
+      "state": {
+        "abrufe": 1,
+        "http": 200,
+        "lauf": {
+          "angenommen": true,
+          "projekt": "agentarium"
+        },
+        "ereignis": {
+          "angenommen": true,
+          "id": "AG-PILOT-RECOVERY-20261017-RA-REVIEW-V1"
+        },
+        "fehler": null
+      },
+      "visible": "argus → ATLAS REVIEW_RESULT\nArgus: FAIL für eine behauptete Live-Abnahme; kein Einwand gegen den präzisierten Ein-Ereignis-Piloten.",
+      "webgl": {
+        "machine": true,
+        "ua": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.8078.4 Safari/537.36"
+      },
+      "source_sha256": "a8ba94c8abc2540300240eb4ebc8229fee8ca2f95f808558096bb6c354c60197"
+    },
+    {
+      "name": "real-source-once-visible",
+      "status": "passed"
+    },
+    {
+      "name": "http404-no-hooks",
+      "status": "passed"
+    },
+    {
+      "name": "unknown-kind-rejected",
+      "status": "passed"
+    }
+  ],
+  "requests": [
+    {
+      "scenario": "normal",
+      "url": "/feld/",
+      "time": "2026-10-17T05:40:21.755Z"
+    },
+    {
+      "scenario": "happy",
+      "url": "/feld/?mvp=1",
+      "time": "2026-10-17T05:40:24.942Z"
+    },
+    {
+      "scenario": "happy",
+      "url": "/feld/one-event.json",
+      "time": "2026-10-17T05:40:24.996Z"
+    },
+    {
+      "scenario": "happy",
+      "url": "/feld/sw.js",
+      "time": "2026-10-17T05:40:25.033Z"
+    },
+    {
+      "scenario": "happy",
+      "url": "/feld/",
+      "time": "2026-10-17T05:40:25.052Z"
+    },
+    {
+      "scenario": "happy",
+      "url": "/feld/index.html",
+      "time": "2026-10-17T05:40:25.055Z"
+    },
+    {
+      "scenario": "happy",
+      "url": "/feld/icon-120.png",
+      "time": "2026-10-17T05:40:25.065Z"
+    },
+    {
+      "scenario": "happy",
+      "url": "/feld/icon-152.png",
+      "time": "2026-10-17T05:40:25.068Z"
+    },
+    {
+      "scenario": "happy",
+      "url": "/feld/manifest.webmanifest",
+      "time": "2026-10-17T05:40:25.076Z"
+    },
+    {
+      "scenario": "happy",
+      "url": "/feld/icon-180.png",
+      "time": "2026-10-17T05:40:25.078Z"
+    },
+    {
+      "scenario": "happy",
+      "url": "/feld/icon-192.png",
+      "time": "2026-10-17T05:40:25.086Z"
+    },
+    {
+      "scenario": "happy",
+      "url": "/feld/icon-512.png",
+      "time": "2026-10-17T05:40:25.087Z"
+    },
+    {
+      "scenario": "404",
+      "url": "/feld/?mvp=1",
+      "time": "2026-10-17T05:40:30.093Z"
+    },
+    {
+      "scenario": "404",
+      "url": "/feld/one-event.json",
+      "time": "2026-10-17T05:40:30.145Z"
+    },
+    {
+      "scenario": "unknown-kind",
+      "url": "/feld/?mvp=1",
+      "time": "2026-10-17T05:40:30.622Z"
+    },
+    {
+      "scenario": "unknown-kind",
+      "url": "/feld/one-event.json",
+      "time": "2026-10-17T05:40:30.682Z"
+    }
+  ]
+}
