@@ -80,6 +80,13 @@ def main():
             dest = work / name
             dest.parent.mkdir(parents=True, exist_ok=True)
             dest.write_bytes(raw)
+        for item in packet.get('external_reading', []):
+            raw = source(item['ref'], item['path'])
+            name = item['as']
+            before[name] = raw
+            dest = work / name
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            dest.write_bytes(raw)
         try:
             result, execution = run_json(cmd, cwd=tmp, env=env, timeout=1800)
             response = validate_handback(result, execution, max_chars=70000)
