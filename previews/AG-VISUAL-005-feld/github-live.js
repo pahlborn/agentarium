@@ -24,7 +24,7 @@
   var ENDPOINT = 'https://api.github.com/repos/pahlborn/agentarium/issues/2/comments?per_page=100';
   var MARKER = '<!-- AGENTARIUM_EVENT_V1 -->';
   var SCHEMA = 'agentarium.github-event.v1';
-  var LOGIN = 'pahlborn';
+  var LOGINS = { 'pahlborn': true, 'github-actions[bot]': true };
   var TAKT = 2000, MAX_WARTEN = 3600000, MAX_IDS = 5000, MAX_LOG = 20;
   var MAX_KOERPER = 65536, MAX_SEITEN = 100, MAX_TITEL = 200;
   var FELDER = ['schema', 'id', 'project_id', 'run_id', 'task_id', 'actor', 'kind',
@@ -164,7 +164,7 @@
     if (body.length > MAX_KOERPER) return nein('Kommentar zu gross');
     if (body.indexOf(MARKER, i + MARKER.length) >= 0) return nein('Marker mehrfach');
     var login = (c.user && typeof c.user.login === 'string') ? c.user.login : '';
-    if (login !== LOGIN) return nein('Autor nicht erlaubt');
+    if (!Object.prototype.hasOwnProperty.call(LOGINS, login)) return nein('Autor nicht erlaubt');
     var m = /^\s*```(?:json)?[ \t]*\r?\n([\s\S]*?)\r?\n[ \t]*```/.exec(body.slice(i + MARKER.length));
     if (!m) return nein('kein JSON-Block direkt nach dem Marker');
     var d;

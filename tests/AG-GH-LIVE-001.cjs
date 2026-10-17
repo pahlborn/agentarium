@@ -188,7 +188,7 @@ const feld = (page) => page.evaluate(() => window.__agStand());
     check('input cleared after connect', (await p.inputValue('#agGhToken')) === '');
 
     /* ===== C. new event without reload through original hooks ===== */
-    gh.add('pahlborn', evBody({ id: 'LIVE-1', title: 'Forge baut den Adapter' }));
+    gh.add('github-actions[bot]', evBody({ id: 'LIVE-1', title: 'Forge baut den Adapter' }));
     check('new event rendered in Original list', await warte(p, () => !!document.querySelector('#agLaeuft [data-ereignis="LIVE-1"]')));
     const c = await p.evaluate(() => ({ r: document.getElementById('agRufe').textContent,
       l: document.getElementById('agLaeuft').textContent, k: window.__keinReload, s: window.__agStand() }));
