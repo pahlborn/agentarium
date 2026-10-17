@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE svg
+  PUBLIC '-//W3C//DTD SVG 1.0//EN'
+  'http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd'>
+<svg width="1600" height="1120" preserveAspectRatio="xMinYMin meet" viewBox="0 0 1600 1120" xmlns="http://www.w3.org/2000/svg" version="1.0" fill-rule="evenodd" xmlns:xlink="http://www.w3.org/1999/xlink">
+	<title>...</title>
+	<desc>...</desc>
+	<clipPath id="clip">
+		<rect x="0" y="0" width="1600" height="1120"/>
+	</clipPath>
+	<g id="group" transform="scale(1,-1) translate(0,-1120)" style="clip-path: url(#clip)">
+		<g transform="">
+			<rect x="0" y="0" width="1600" height="1120" style="stroke: none; stroke-linecap: butt; stroke-width: 1.4; fill: rgb(100%,100%,100%); fill-rule: evenodd;"/>
+			<text x="60" y="1072" style="font-family: DejaVu-Bold; font-size: 16px;fill: rgb(40%,28%,72%); stroke:none;" transform="translate(0,2144) scale(1,-1)">AGENTARIUM  /  SOFTWAREARCHITEKTUR</text>
+			<text x="60" y="1019" style="font-family: DejaVu-Bold; font-size: 35px;fill: rgb(7%,16%,27%); stroke:none;" transform="translate(0,2038) scale(1,-1)">MVP-Ausschnitt: ein reales Ereignis</text>
+			<text x="60" y="983" style="font-family: DejaVu; font-size: 17px;fill: rgb(32%,40%,48%); stroke:none;" transform="translate(0,1966) scale(1,-1)">Dynamische Sequenzsicht. Genau ein Export, ein Dateilesen und die beiden vorhandenen Feldeingänge.</text>
+			<text x="1387.18017578125" y="1072" style="font-family: DejaVu; font-size: 13px;fill: rgb(32%,40%,48%); stroke:none;" transform="translate(0,2144) scale(1,-1)">AG-ARCH-001 · V1 · 2/2</text>
+			<rect x="60" y="914" width="1480" height="44" rx="7" ry="7" style="stroke: none; stroke-linecap: butt; stroke-width: 1.4; fill: rgb(94%,92%,98%); fill-rule: evenodd;"/>
+			<text x="78" y="930" style="font-family: DejaVu; font-size: 15px;fill: rgb(40%,28%,72%); stroke:none;" transform="translate(0,1860) scale(1,-1)">Leseregel: durchgezogen = belegt  |  gestrichelt = offen / vorgesehen  |  M = MVP-Umfang, kein Erfolgsstatus</text>
+			<rect x="60" y="782" width="250" height="102" rx="8" ry="8" style="stroke: rgb(40%,28%,72%); stroke-linecap: butt; stroke-width: 1.8; fill: rgb(94%,92%,98%); fill-rule: evenodd;"/>
+			<text x="153.74462890625" y="856" style="font-family: DejaVu-Bold; font-size: 19px;fill: rgb(7%,16%,27%); stroke:none;" transform="translate(0,1712) scale(1,-1)">Argus</text>
+			<text x="123.3896484375" y="831" style="font-family: DejaVu; font-size: 13px;fill: rgb(32%,40%,48%); stroke:none;" transform="translate(0,1662) scale(1,-1)">ChatGPT-Subagent</text>
+			<text x="108.437744140625" y="804" style="font-family: DejaVu; font-size: 13px;fill: rgb(32%,40%,48%); stroke:none;" transform="translate(0,1608) scale(1,-1)">reale Review-Rückgabe</text>
+			<path d="M 185,775 L 185,208 Z" style="stroke: rgb(79%,83%,87%); stroke-linecap: butt; stroke-width: 1.2; stroke-dasharray: 4, 5;"/>
+			<rect x="365" y="782" width="250" height="102" rx="8" ry="8" style="stroke: rgb(40%,28%,72%); stroke-linecap: butt; stroke-width: 1.8; fill: rgb(94%,92%,98%); fill-rule: evenodd;"/>
+			<text x="417.530029296875" y="856" style="font-family: DejaVu-Bold; font-size: 19px;fill: rgb(7%,16%,27%); stroke:none;" transform="translate(0,1712) scale(1,-1)">Atlas / Export</text>
+			<text x="394.585205078125" y="831" style="font-family: DejaVu; font-size: 13px;fill: rgb(32%,40%,48%); stroke:none;" transform="translate(0,1662) scale(1,-1)">Toolgestützte Orchestrierung</text>
+			<text x="407.553466796875" y="804" style="font-family: DejaVu; font-size: 13px;fill: rgb(32%,40%,48%); stroke:none;" transform="translate(0,1608) scale(1,-1)">kein autonomer Collector</text>
+			<path d="M 490,775 L 490,208 Z" style="stroke: rgb(79%,83%,87%); stroke-linecap: butt; stroke-width: 1.2; stroke-dasharray: 4, 5;"/>
+			<rect x="675" y="782" width="250" height="102" rx="8" ry="8" style="stroke: rgb(40%,28%,72%); stroke-linecap: butt; stroke-width: 1.8; fill: rgb(100%,100%,100%); fill-rule: evenodd;"/>
+			<text x="699.70263671875" y="856" style="font-family: DejaVu-Bold; font-size: 19px;fill: rgb(7%,16%,27%); stroke:none;" transform="translate(0,1712) scale(1,-1)">Repository / Pages</text>
+			<text x="713.037109375" y="831" style="font-family: DejaVu; font-size: 13px;fill: rgb(32%,40%,48%); stroke:none;" transform="translate(0,1662) scale(1,-1)">Dateiablage + HTTPS-Host</text>
+			<text x="751.691162109375" y="804" style="font-family: DejaVu; font-size: 13px;fill: rgb(32%,40%,48%); stroke:none;" transform="translate(0,1608) scale(1,-1)">one-event.json</text>
+			<path d="M 800,775 L 800,208 Z" style="stroke: rgb(79%,83%,87%); stroke-linecap: butt; stroke-width: 1.2; stroke-dasharray: 4, 5;"/>
+			<rect x="980" y="782" width="250" height="102" rx="8" ry="8" style="stroke: rgb(40%,28%,72%); stroke-linecap: butt; stroke-width: 1.8; fill: rgb(100%,100%,100%); fill-rule: evenodd;"/>
+			<text x="1035.702880859375" y="856" style="font-family: DejaVu-Bold; font-size: 19px;fill: rgb(7%,16%,27%); stroke:none;" transform="translate(0,1712) scale(1,-1)">Einmal-Leser</text>
+			<text x="1033.6650390625" y="831" style="font-family: DejaVu; font-size: 13px;fill: rgb(32%,40%,48%); stroke:none;" transform="translate(0,1662) scale(1,-1)">JavaScript im Browser</text>
+			<text x="1052.68896484375" y="804" style="font-family: DejaVu; font-size: 13px;fill: rgb(32%,40%,48%); stroke:none;" transform="translate(0,1608) scale(1,-1)">nur bei ?mvp=1</text>
+			<path d="M 1105,775 L 1105,208 Z" style="stroke: rgb(79%,83%,87%); stroke-linecap: butt; stroke-width: 1.2; stroke-dasharray: 4, 5;"/>
+			<rect x="1285" y="782" width="250" height="102" rx="8" ry="8" style="stroke: rgb(40%,28%,72%); stroke-linecap: butt; stroke-width: 1.8; fill: rgb(100%,100%,100%); fill-rule: evenodd;"/>
+			<text x="1346.863037109375" y="856" style="font-family: DejaVu-Bold; font-size: 19px;fill: rgb(7%,16%,27%); stroke:none;" transform="translate(0,1712) scale(1,-1)">Originalfeld</text>
+			<text x="1347.885009765625" y="831" style="font-family: DejaVu; font-size: 13px;fill: rgb(32%,40%,48%); stroke:none;" transform="translate(0,1662) scale(1,-1)">JavaScript / WebGL</text>
+			<text x="1339.125244140625" y="804" style="font-family: DejaVu; font-size: 13px;fill: rgb(32%,40%,48%); stroke:none;" transform="translate(0,1608) scale(1,-1)">bestehende Eingänge</text>
+			<path d="M 1410,775 L 1410,208 Z" style="stroke: rgb(79%,83%,87%); stroke-linecap: butt; stroke-width: 1.2; stroke-dasharray: 4, 5;"/>
+			<path d="M 185,733 L 490,733 Z" style="stroke: rgb(7%,47%,43%); stroke-linecap: butt; stroke-width: 1.8;"/>
+			<polygon points="490 733, 481.896 729.0853, 481.896 736.9147" style="stroke: none; stroke-linecap: butt; stroke-width: 1; fill: rgb(7%,47%,43%); fill-rule: evenodd;"/>
+			<rect x="205" y="758" width="193.1142578125" height="20" rx="2" ry="2" style="stroke: none; stroke-linecap: butt; stroke-width: 1.4; fill: rgb(100%,100%,100%); fill-rule: evenodd;"/>
+			<text x="210" y="763" style="font-family: DejaVu; font-size: 14px;fill: rgb(7%,47%,43%); stroke:none;" transform="translate(0,1526) scale(1,-1)">1  tatsächlicher Handback</text>
+			<rect x="205" y="738" width="132.6025390625" height="20" rx="2" ry="2" style="stroke: none; stroke-linecap: butt; stroke-width: 1.4; fill: rgb(100%,100%,100%); fill-rule: evenodd;"/>
+			<text x="210" y="743" style="font-family: DejaVu; font-size: 14px;fill: rgb(7%,47%,43%); stroke:none;" transform="translate(0,1486) scale(1,-1)">Subagentenkanal</text>
+			<path d="M 490,690 L 560,690 Z" style="stroke: rgb(7%,47%,43%); stroke-linecap: butt; stroke-width: 1.8;"/>
+			<path d="M 560,690 L 560,645 Z" style="stroke: rgb(7%,47%,43%); stroke-linecap: butt; stroke-width: 1.8;"/>
+			<path d="M 560,645 L 490,645 Z" style="stroke: rgb(7%,47%,43%); stroke-linecap: butt; stroke-width: 1.8;"/>
+			<polygon points="490 645, 498.104 648.9147, 498.104 641.0853" style="stroke: none; stroke-linecap: butt; stroke-width: 1; fill: rgb(7%,47%,43%); fill-rule: evenodd;"/>
+			<rect x="595" y="678" width="273.3203125" height="20" rx="2" ry="2" style="stroke: none; stroke-linecap: butt; stroke-width: 1.4; fill: rgb(100%,100%,100%); fill-rule: evenodd;"/>
+			<text x="600" y="683" style="font-family: DejaVu; font-size: 14px;fill: rgb(7%,47%,43%); stroke:none;" transform="translate(0,1366) scale(1,-1)">2  serialisiert run + event + evidence</text>
+			<rect x="595" y="658" width="272.814453125" height="20" rx="2" ry="2" style="stroke: none; stroke-linecap: butt; stroke-width: 1.4; fill: rgb(100%,100%,100%); fill-rule: evenodd;"/>
+			<text x="600" y="663" style="font-family: DejaVu; font-size: 14px;fill: rgb(7%,47%,43%); stroke:none;" transform="translate(0,1326) scale(1,-1)">kind = review_result; fictional = false</text>
+			<rect x="60" y="579" width="1480" height="44" rx="6" ry="6" style="stroke: none; stroke-linecap: butt; stroke-width: 1.4; fill: rgb(100%,95%,87%); fill-rule: evenodd;"/>
+			<text x="80" y="595" style="font-family: DejaVu-Bold; font-size: 16px;fill: rgb(65%,38%,4%); stroke:none;" transform="translate(0,1190) scale(1,-1)">FREIGABEPUNKT PETER: erst danach JSON und vorbereiteten Leser am ORIGINAL veröffentlichen.</text>
+			<path d="M 490,540 L 800,540 Z" style="stroke: rgb(65%,38%,4%); stroke-linecap: butt; stroke-width: 1.8; stroke-dasharray: 7, 5;"/>
+			<polygon points="800 540, 791.896 536.0853, 791.896 543.9147" style="stroke: none; stroke-linecap: butt; stroke-width: 1; fill: rgb(65%,38%,4%); fill-rule: evenodd;"/>
+			<rect x="510" y="564" width="254.4326171875" height="20" rx="2" ry="2" style="stroke: none; stroke-linecap: butt; stroke-width: 1.4; fill: rgb(100%,100%,100%); fill-rule: evenodd;"/>
+			<text x="515" y="569" style="font-family: DejaVu; font-size: 14px;fill: rgb(65%,38%,4%); stroke:none;" transform="translate(0,1138) scale(1,-1)">3  Code + Datendatei bereitstellen</text>
+			<rect x="510" y="544" width="308.3544921875" height="20" rx="2" ry="2" style="stroke: none; stroke-linecap: butt; stroke-width: 1.4; fill: rgb(100%,100%,100%); fill-rule: evenodd;"/>
+			<text x="515" y="549" style="font-family: DejaVu; font-size: 14px;fill: rgb(65%,38%,4%); stroke:none;" transform="translate(0,1098) scale(1,-1)">Git / Pages; konkrete Freigabe erforderlich</text>
+			<path d="M 1105,478 L 800,478 Z" style="stroke: rgb(40%,28%,72%); stroke-linecap: butt; stroke-width: 1.8; stroke-dasharray: 7, 5;"/>
+			<polygon points="800 478, 808.104 481.9147, 808.104 474.0853" style="stroke: none; stroke-linecap: butt; stroke-width: 1; fill: rgb(40%,28%,72%); fill-rule: evenodd;"/>
+			<rect x="815" y="506" width="223.130859375" height="20" rx="2" ry="2" style="stroke: none; stroke-linecap: butt; stroke-width: 1.4; fill: rgb(100%,100%,100%); fill-rule: evenodd;"/>
+			<text x="820" y="511" style="font-family: DejaVu; font-size: 14px;fill: rgb(40%,28%,72%); stroke:none;" transform="translate(0,1022) scale(1,-1)">4  HTTPS GET ./one-event.json</text>
+			<rect x="815" y="486" width="191.6240234375" height="20" rx="2" ry="2" style="stroke: none; stroke-linecap: butt; stroke-width: 1.4; fill: rgb(100%,100%,100%); fill-rule: evenodd;"/>
+			<text x="820" y="491" style="font-family: DejaVu; font-size: 14px;fill: rgb(40%,28%,72%); stroke:none;" transform="translate(0,982) scale(1,-1)">einmal, gleicher Ursprung</text>
+			<path d="M 800,414 L 1105,414 Z" style="stroke: rgb(40%,28%,72%); stroke-linecap: butt; stroke-width: 1.8; stroke-dasharray: 7, 5;"/>
+			<polygon points="1105 414, 1096.896 410.0853, 1096.896 417.9147" style="stroke: none; stroke-linecap: butt; stroke-width: 1; fill: rgb(40%,28%,72%); fill-rule: evenodd;"/>
+			<rect x="815" y="441" width="150.19140625" height="20" rx="2" ry="2" style="stroke: none; stroke-linecap: butt; stroke-width: 1.4; fill: rgb(100%,100%,100%); fill-rule: evenodd;"/>
+			<text x="820" y="446" style="font-family: DejaVu; font-size: 14px;fill: rgb(40%,28%,72%); stroke:none;" transform="translate(0,892) scale(1,-1)">5  HTTP 200 + JSON</text>
+			<rect x="815" y="421" width="209.5751953125" height="20" rx="2" ry="2" style="stroke: none; stroke-linecap: butt; stroke-width: 1.4; fill: rgb(100%,100%,100%); fill-rule: evenodd;"/>
+			<text x="820" y="426" style="font-family: DejaVu; font-size: 14px;fill: rgb(40%,28%,72%); stroke:none;" transform="translate(0,852) scale(1,-1)">keine weitere Modellabfrage</text>
+			<path d="M 1105,348 L 1410,348 Z" style="stroke: rgb(40%,28%,72%); stroke-linecap: butt; stroke-width: 1.8; stroke-dasharray: 7, 5;"/>
+			<polygon points="1410 348, 1401.896 344.0853, 1401.896 351.9147" style="stroke: none; stroke-linecap: butt; stroke-width: 1; fill: rgb(40%,28%,72%); fill-rule: evenodd;"/>
+			<rect x="1119" y="375" width="168.443359375" height="20" rx="2" ry="2" style="stroke: none; stroke-linecap: butt; stroke-width: 1.4; fill: rgb(100%,100%,100%); fill-rule: evenodd;"/>
+			<text x="1124" y="380" style="font-family: DejaVu; font-size: 14px;fill: rgb(40%,28%,72%); stroke:none;" transform="translate(0,760) scale(1,-1)">6a  __agLauf(data.run)</text>
+			<rect x="1119" y="355" width="196.9765625" height="20" rx="2" ry="2" style="stroke: none; stroke-linecap: butt; stroke-width: 1.4; fill: rgb(100%,100%,100%); fill-rule: evenodd;"/>
+			<text x="1124" y="360" style="font-family: DejaVu; font-size: 14px;fill: rgb(40%,28%,72%); stroke:none;" transform="translate(0,720) scale(1,-1)">Projekt / Titel übernehmen</text>
+			<path d="M 1105,280 L 1410,280 Z" style="stroke: rgb(40%,28%,72%); stroke-linecap: butt; stroke-width: 1.8; stroke-dasharray: 7, 5;"/>
+			<polygon points="1410 280, 1401.896 276.0853, 1401.896 283.9147" style="stroke: none; stroke-linecap: butt; stroke-width: 1; fill: rgb(40%,28%,72%); fill-rule: evenodd;"/>
+			<rect x="1119" y="306" width="210.990234375" height="20" rx="2" ry="2" style="stroke: none; stroke-linecap: butt; stroke-width: 1.4; fill: rgb(100%,100%,100%); fill-rule: evenodd;"/>
+			<text x="1124" y="311" style="font-family: DejaVu; font-size: 14px;fill: rgb(40%,28%,72%); stroke:none;" transform="translate(0,622) scale(1,-1)">6b  __agEreignis(data.event)</text>
+			<rect x="1119" y="286" width="241.57421875" height="20" rx="2" ry="2" style="stroke: none; stroke-linecap: butt; stroke-width: 1.4; fill: rgb(100%,100%,100%); fill-rule: evenodd;"/>
+			<text x="1124" y="291" style="font-family: DejaVu; font-size: 14px;fill: rgb(40%,28%,72%); stroke:none;" transform="translate(0,582) scale(1,-1)">Ereignis prüfen und übernehmen</text>
+			<rect x="60" y="94" width="895" height="145" rx="8" ry="8" style="stroke: rgb(79%,83%,87%); stroke-linecap: butt; stroke-width: 1.4; fill: rgb(95%,96%,98%); fill-rule: evenodd;"/>
+			<text x="78" y="212" style="font-family: DejaVu-Bold; font-size: 14px;fill: rgb(32%,40%,48%); stroke:none;" transform="translate(0,424) scale(1,-1)">DAS REALE NUTZDATUM</text>
+			<text x="78" y="185" style="font-family: DejaVu; font-size: 16px;fill: rgb(32%,40%,48%); stroke:none;" transform="translate(0,370) scale(1,-1)">actor: argus   |   kind: review_result   |   recipient: atlas</text>
+			<text x="78" y="160" style="font-family: DejaVu; font-size: 16px;fill: rgb(32%,40%,48%); stroke:none;" transform="translate(0,320) scale(1,-1)">id: AG-PILOT-RECOVERY-20261017-RA-REVIEW-V1</text>
+			<text x="78" y="135" style="font-family: DejaVu; font-size: 16px;fill: rgb(32%,40%,48%); stroke:none;" transform="translate(0,270) scale(1,-1)">Quelle: abgeschlossener Subagent /root/argus_pilot_recovery</text>
+			<text x="78" y="110" style="font-family: DejaVu; font-size: 16px;fill: rgb(32%,40%,48%); stroke:none;" transform="translate(0,220) scale(1,-1)">Export durch Atlas ist belegt; automatische Laufzeiterfassung ist nicht Teil dieses MVP.</text>
+			<rect x="1015" y="95" width="525" height="128" rx="8" ry="8" style="stroke: rgb(7%,47%,43%); stroke-linecap: butt; stroke-width: 1.4; fill: rgb(91%,96%,94%); fill-rule: evenodd;"/>
+			<text x="1035" y="194" style="font-family: DejaVu-Bold; font-size: 20px;fill: rgb(7%,47%,43%); stroke:none;" transform="translate(0,388) scale(1,-1)">7  Erwarteter sichtbarer Nachweis</text>
+			<text x="1035" y="166" style="font-family: DejaVu; font-size: 16px;fill: rgb(7%,16%,27%); stroke:none;" transform="translate(0,332) scale(1,-1)">Lauf angenommen; Ereignis angenommen.</text>
+			<text x="1035" y="142" style="font-family: DejaVu; font-size: 16px;fill: rgb(7%,16%,27%); stroke:none;" transform="translate(0,284) scale(1,-1)">Genau die echte Review-ID steht im Feld.</text>
+			<text x="1035" y="118" style="font-family: DejaVu; font-size: 16px;fill: rgb(7%,16%,27%); stroke:none;" transform="translate(0,236) scale(1,-1)">Veröffentlichtes Original: Abnahme noch offen.</text>
+			<text x="60" y="50" style="font-family: DejaVu; font-size: 12px;fill: rgb(32%,40%,48%); stroke:none;" transform="translate(0,100) scale(1,-1)">MVP-Quelle: observed-v1.json; Forge-Patch 69442975…; Originalpaket in CI 39007084765 geprüft. Veröffentlichung bleibt ausstehend.</text>
+			<text x="60" y="27" style="font-family: DejaVu; font-size: 12px;fill: rgb(32%,40%,48%); stroke:none;" transform="translate(0,54) scale(1,-1)">Stand 17.10.2026 · Atlas; Notationsrecherche: Scout · Kein Merge und keine Veröffentlichung durch diese Zeichnung.</text>
+			<text x="1532.365234375" y="27" style="font-family: DejaVu; font-size: 12px;fill: rgb(32%,40%,48%); stroke:none;" transform="translate(0,54) scale(1,-1)">2</text>
+			<text x="60" y="72" style="font-family: DejaVu; font-size: 12px;fill: rgb(32%,40%,48%); stroke:none;" transform="translate(0,144) scale(1,-1)">Notationsbasis: c4model.com/diagrams/dynamic. CI = isolierte Testumgebung; ein grüner Test ist keine Freigabe des veröffentlichten Originals.</text>
+		</g>
+	</g>
+</svg>
