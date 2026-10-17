@@ -1,0 +1,88 @@
+--- a/previews/AG-VISUAL-005-feld/schicht.py
++++ b/previews/AG-VISUAL-005-feld/schicht.py
+@@ -214,7 +214,7 @@
+ 
+      Der Bauzeitpunkt kommt beim Bauen aus der Uhr. Von Hand gepflegte
+      Datumsangaben sind nach der zweiten Änderung falsch. */
+-  var FASSUNG = '46', GEBAUT = '__GEBAUT__';
++  var FASSUNG = '47', GEBAUT = '__GEBAUT__';
+ 
+   /* DIE BETRIEBSART. Sie kommt aus den Daten; fehlt sie, gilt `demo`.
+      Alles, was sich zwischen Prototyp und Produktivbetrieb unterscheidet,
+@@ -3677,6 +3677,76 @@
+   kopfSetzen();
+   knoepfeSetzen();
+ 
++  /* ============ AG-PILOT-001: EIN EREIGNIS, EINMAL GELESEN ============
++
++     Nur auf ausdruecklichen Wunsch (`?mvp=1`), sonst geschieht hier nichts
++     -- Demo und Archiv bleiben unberuehrt. Genau EIN Abruf je Seitenaufruf
++     einer festen Datei derselben Herkunft (`one-event.json`, neben dieser
++     Seite): kein Wiederholen, kein Takt, keine fremde Adresse.
++
++     Die Datei ist der unveraenderte Export einer wirklichen Rueckmeldung:
++     `run` geht an `__agLauf`, `event` an `__agEreignis`, beide Objekte
++     unveraendert. Es werden keine Ereignisse erfunden. Beide Rueckgaben
++     werden festgehalten und gezeigt, auch die Abweisungen -- ohne
++     Konsole, denn auf dem iPad gibt es keine.
++
++     Eine Fehlerseite (HTTP-Fehler, kein JSON, kein run/event) ist kein
++     Ereignis und wird nie an die Griffe gereicht. */
++  (function () {
++    var wunsch = '';
++    try { wunsch = new URLSearchParams(location.search).get('mvp'); } catch (x) {}
++    if (wunsch !== '1') return;
++
++    var ST = window.__agMvp = { abrufe: 0, http: null, lauf: null,
++                                ereignis: null, fehler: null };
++    var tafel = document.createElement('div');
++    tafel.id = 'agMvp';
++    tafel.style.cssText = 'position:fixed;left:8px;bottom:8px;max-width:60vw;' +
++      'z-index:50;font:11px/1.35 monospace;color:#9fd6b5;opacity:.85;' +
++      'pointer-events:none;white-space:pre-wrap';
++    document.body.appendChild(tafel);
++    function sag(t) { tafel.textContent = t; }
++
++    modusSetzen('live');
++    sag('MVP: lese one-event.json …');
++
++    var url;
++    try {
++      url = new URL('one-event.json', location.href);
++      if (url.origin !== location.origin) throw new Error('fremde Herkunft');
++    } catch (x) { ST.fehler = String(x.message || x); sag('MVP: Fehler — ' + ST.fehler); return; }
++
++    function kurz(r) {
++      return r && r.angenommen ? 'angenommen' : 'abgewiesen: ' + (r ? r.grund : '?');
++    }
++    ST.abrufe = 1;
++    fetch(url.href, { cache: 'no-store', credentials: 'omit' })
++      .then(function (r) {
++        ST.http = r.status;
++        if (!r.ok) throw new Error('HTTP ' + r.status);
++        return r.text();
++      })
++      .then(function (t) {
++        var d;
++        try { d = JSON.parse(t); } catch (x) { throw new Error('Antwort ist kein JSON'); }
++        if (!d || typeof d !== 'object' || !d.run || typeof d.run !== 'object' ||
++            !d.event || typeof d.event !== 'object')
++          throw new Error('run oder event fehlt');
++        if (typeof window.__agLauf !== 'function' ||
++            typeof window.__agEreignis !== 'function')
++          throw new Error('Griffe fehlen');
++        /* Beide werden aufgerufen und beide Rueckgaben festgehalten. */
++        ST.lauf = window.__agLauf(d.run);
++        ST.ereignis = window.__agEreignis(d.event);
++        sag('MVP: ' + url.pathname + ' (HTTP ' + ST.http + ')\\n' +
++            'Lauf: ' + kurz(ST.lauf) + '\\nEreignis: ' + kurz(ST.ereignis));
++      })
++      .catch(function (x) {
++        ST.fehler = String(x && x.message || x);
++        sag('MVP: kein Ereignis gelesen — ' + ST.fehler);
++      });
++  })();
++
+   /* Der Hinweis „Du darfst mitrühren" stammt aus Resonanz, wo er den
+      ganzen Zweck benennt. Hier ist das Mitrühren eine Zugabe, nicht die
+      Sache — und er steht genau dort, wo Peters Beschriftungen hinlaufen.
