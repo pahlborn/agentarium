@@ -1,0 +1,41 @@
+name: Independent one real event browser QA
+on:
+  push:
+    branches: [agent/mvp-one-event-20261017]
+    paths: ['handoffs/AG-PILOT-001-one-event-qa-activate.json']
+permissions:
+  contents: read
+concurrency:
+  group: agentarium-one-event-qa-v1
+  cancel-in-progress: false
+jobs:
+  qa:
+    if: github.repository == 'pahlborn/agentarium' && github.repository_owner_id == '277496791' && github.actor_id == '277496791' && github.event_name == 'push' && github.ref_name == 'agent/mvp-one-event-20261017'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Apply exact unaccepted Forge candidate in disposable CI checkout
+        run: |
+          echo '69442975acc315f73b88190dc7f5dfb86ca494fc1cbb5dc65e88d974b9784f61  handoffs/AG-PILOT-001-one-event-forge-v1.patch' | sha256sum --check
+          git apply --check handoffs/AG-PILOT-001-one-event-forge-v1.patch
+          git apply handoffs/AG-PILOT-001-one-event-forge-v1.patch
+          python3 -m py_compile previews/AG-VISUAL-005-feld/schicht.py
+      - name: Install browser QA dependencies outside repository
+        run: |
+          npm install --prefix "$RUNNER_TEMP/one-event-qa" playwright
+          node "$RUNNER_TEMP/one-event-qa/node_modules/playwright/cli.js" install --with-deps chromium
+      - name: Sentinel authored integration tests with real Argus data
+        env:
+          NODE_PATH: ${{ runner.temp }}/one-event-qa/node_modules
+        run: node tests/AG-PILOT-001-one-event-browser-qa.cjs
+      - name: Preserve independent QA evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: one-event-browser-qa-output
+          path: one-event-browser-qa-output/
+          if-no-files-found: warn
+          retention-days: 14
