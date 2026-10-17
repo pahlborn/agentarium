@@ -1,0 +1,83 @@
+{
+  "task_id": "AG-BALL-LIVE-001-FORGE-E1-V1",
+  "request_commit": "204008d7358a1fb9488cfb6d99d0013d03c1d248",
+  "product_baseline": "d111b062770e32dbef0f9bb618a4923d88ff20be",
+  "role_blob": "38d9747018bd4bfc5299a2dd9aeded9659337e77",
+  "run": "https://github.com/pahlborn/agentarium/actions/runs/39040331415",
+  "cli_version": "2.1.302 (Claude Code)",
+  "requested_model": "opus",
+  "requested_effort": "high",
+  "actual_reasoning": "unconfirmed",
+  "session_id": "fffb252a-a6a6-4be5-91a8-3d9415a934df",
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 20,
+      "outputTokens": 4672,
+      "cacheReadInputTokens": 215428,
+      "cacheCreationInputTokens": 56244,
+      "webSearchRequests": 0,
+      "costUSD": 0.4178256,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 1442,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "usage": {
+    "input_tokens": 20,
+    "cache_creation_input_tokens": 56244,
+    "cache_read_input_tokens": 215428,
+    "output_tokens": 4672,
+    "output_tokens_details": {
+      "thinking_tokens": 1442
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 0,
+      "ephemeral_5m_input_tokens": 56244
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 3241,
+        "cache_read_input_tokens": 55052,
+        "cache_creation_input_tokens": 1192,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 1192,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "total_cost_usd": 0.4178256,
+  "event_counts": {
+    "system": 30,
+    "stream_event": 597,
+    "assistant": 20,
+    "user": 10,
+    "result": 1
+  },
+  "terminal_monotonic_ns": 209472372732,
+  "process_exit_observed_monotonic_ns": 209974598184,
+  "receipt_before_terminal_seconds": 50.072887079,
+  "returncode": 0,
+  "failure": null,
+  "changed_paths": [],
+  "stderr_bytes": 0,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "E1_verdict": "PASS",
+  "original_ui_tested": false,
+  "ipad_tested": false,
+  "product_published": false,
+  "limits": "Observed tool-use start -> local loopback HTTP only; no hosted transport, rendered UI, full telemetry or tool success claim."
+}
