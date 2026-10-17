@@ -1,0 +1,17 @@
+[
+  {
+    "id": "AG-BALL-LIVE-001-FORGE-E1-V1-event-1",
+    "run_id": "gha:39040331415",
+    "actor": "forge",
+    "kind": "progress",
+    "recipient": null,
+    "title": "Forge startet eine echte Quellenpr\u00fcfung",
+    "source_evidence": "runtime_stream",
+    "source_type": "content_block_start.tool_use",
+    "tool_name": "Read",
+    "source_tool_id": "toolu_015ZyRqc6BpYDXJo38bvvZvc",
+    "captured_monotonic_ns": 159398330427,
+    "received_monotonic_ns": 159399485653,
+    "process_alive_at_receipt": true
+  }
+]
