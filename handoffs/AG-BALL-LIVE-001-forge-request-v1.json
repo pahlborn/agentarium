@@ -1,0 +1,58 @@
+{
+  "schema": "agentarium.handoff.v0",
+  "task_id": "AG-BALL-LIVE-001-FORGE-ARCH-V1",
+  "worker_role": "coding-agent",
+  "mode": "read-only architecture and feasibility",
+  "branch": "agent/ball-live-concept-20261017",
+  "goal": "Produce a complete technical feasibility architecture through the final live target, then define the smallest honest MVP/prototype path. The already-open ORIGINAL Agentarium on iPad/browser must show a correlated real intermediate event from an actually still-running ChatGPT/Atlas agent and Claude Code agent without reload, demo data or a substitute UI.",
+  "authority": "Peter authorized the concept/feasibility study, MVP definition and later prototype build, and explicitly requested the best appropriate LLM. This invocation is architecture only: no product implementation, infrastructure activation, provider account, secret, test mutation, merge, release or publication.",
+  "model_routing": {
+    "task_complexity": "K",
+    "risk": "high",
+    "role_default": "sonnet/medium",
+    "requested_model": "best",
+    "requested_reasoning": "xhigh",
+    "override_authorization": "Peter explicitly instructed Atlas not to skimp on LLM quality for this critical live architecture; task-only override, persistent role definition unchanged.",
+    "actual_model": "unconfirmed",
+    "actual_reasoning": "unconfirmed",
+    "budget": "One complete architecture session without tiny turn/cost cap; no model benchmark or automatic retry. Stop on key, credit or quota error and preserve evidence."
+  },
+  "required_reading": [
+    "AGENTS.md",
+    ".claude/agents/coding-agent.md",
+    "governance/agentarium-rulebook-v1.2.md",
+    "governance/agentarium-process-v1.2.md",
+    "governance/product-development-practice-v1.md",
+    "handoffs/AG-BALL-LIVE-001-charter-v1.md",
+    "handoffs/AG-BALL-LIVE-001-team-input-v1.md",
+    "handoffs/AG-LIVE-THINK-001-alternativen-v1.md",
+    "governance/AG-VISUAL-005-INTERFACE-rereview-team-v1.md",
+    "feld/index.html",
+    "relay/forge_live_thinking_once.py"
+  ],
+  "required_output": [
+    "Architecture decision record with 2-3 complete variants and one recommendation, including the main disadvantage",
+    "Component and data-flow definition from both runtime sources through ingest/store/subscription into existing original hooks and archive",
+    "Feasibility matrix: verified / needs experiment / blocked / out of scope",
+    "Truth semantics for active, idle, blocked, completed, stale/unknown and provenance",
+    "Security, privacy, failure recovery, observability and iPad constraints",
+    "Precise MVP boundary and staged prototype proof plan through the final target",
+    "Concrete provider/runtime decisions Peter must make before implementation, with consequences",
+    "Estimate by complexity/cost class, not fabricated exact project cost",
+    "One smallest decisive experiment for every critical unknown"
+  ],
+  "forbidden": [
+    "Edit",
+    "Write",
+    "Bash",
+    "Agent",
+    "network access",
+    "product implementation",
+    "deployment",
+    "publishing",
+    "claiming Work hooks are active without runtime evidence",
+    "using a static file, terminal-only event or synthetic demo as live MVP proof"
+  ],
+  "expected_result": "German, technically concrete, no arbitrary word cap. Return CA_ADVICE with explicit facts/proposals/unknowns and next owner, or one CA_QUESTION only if a material decision prevents useful architecture work. No implementation."
+}
+
