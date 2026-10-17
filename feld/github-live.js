@@ -25,7 +25,7 @@
   var MARKER = '<!-- AGENTARIUM_EVENT_V1 -->';
   var SCHEMA = 'agentarium.github-event.v1';
   var LOGINS = { 'pahlborn': true, 'github-actions[bot]': true };
-  var TAKT = 2000, MAX_WARTEN = 3600000, MAX_IDS = 5000, MAX_LOG = 20;
+  var TAKT = 2000, MAX_IDS = 5000, MAX_LOG = 20;
   var MAX_KOERPER = 65536, MAX_SEITEN = 100, MAX_TITEL = 200;
   var FELDER = ['schema', 'id', 'project_id', 'run_id', 'task_id', 'actor', 'kind',
                 'title', 'occurred_at', 'source_evidence', 'source_tool_id'];
@@ -305,7 +305,7 @@
     }
     if (g !== gen) throw ABBRUCH;
     var pi = zahlKopf(r, 'X-Poll-Interval');
-    Z.intervall = pi ? Math.min(300000, Math.max(TAKT, pi * 1000)) : TAKT;
+    Z.intervall = pi ? Math.max(TAKT, pi * 1000) : TAKT;
     if (r.status === 304) { zahl.n304++; return { status: 304 }; }
     if (r.status === 200) {
       var d;
@@ -317,11 +317,15 @@
       zahl.n200++;
       return { status: 200, items: d, link: r.headers.get('Link') };
     }
-    var s = r.status, ra = zahlKopf(r, 'Retry-After'),
+    var retryHeader = r.headers.get('Retry-After') || '';
+    var retryDate = Date.parse(retryHeader);
+    var retryMs = /^\d+$/.test(retryHeader.trim()) ? Number(retryHeader.trim()) * 1000
+      : (isNaN(retryDate) ? 0 : Math.max(0, retryDate - Date.now()));
+    var s = r.status, ra = retryMs,
         rest = r.headers.get('X-RateLimit-Remaining'), reset = zahlKopf(r, 'X-RateLimit-Reset');
     if (s === 401) throw fehler('HTTP 401 — Token ungültig, abgelaufen oder widerrufen; bitte neues Token eingeben', 'auth');
     if (s === 403 || s === 429) {
-      var w = ra ? ra * 1000 : (rest === '0' && reset ? reset * 1000 - Date.now() + 1000 : 0);
+      var w = ra ? ra : (rest === '0' && reset ? reset * 1000 - Date.now() + 1000 : 0);
       if (w > 0 || s === 429 || rest === '0')
         throw fehler('HTTP ' + s + ' — Abruflimit', 'limit', w > 0 ? w : 60000);
       throw fehler('HTTP 403 — Zugriff verweigert (Token-Berechtigung?)', 'verboten', 60000);
@@ -345,7 +349,6 @@
   }
 
   async function aufbau(g) {
-    Z.schnitt = Date.now(); Z.schnittIso = new Date(Z.schnitt).toISOString();
     Z.kommentare.leeren(); Z.etags = {}; Z.seite = 1; Z.anzahl = 0;
     zahl.basisKommentare = 0; zahl.basisMarkiert = 0;
     var spaeter = [], basisIds = Menge(MAX_IDS);
@@ -379,14 +382,18 @@
 
   function planen(ms) {
     clearTimeout(uhr);
-    ms = Math.max(0, Math.min(MAX_WARTEN, ms));
+    ms = Math.max(0, ms);
     Z.nichtVor = Date.now() + ms;
-    uhr = setTimeout(zyklus, ms);
+    uhr = setTimeout(zyklus, Math.min(2147483647, ms));
   }
 
   async function zyklus() {
     uhr = null;
     if (!token || laufend) return;
+    if (Z.nichtVor > Date.now()) {
+      uhr = setTimeout(zyklus, Math.min(2147483647, Z.nichtVor - Date.now()));
+      return;
+    }
     if (document.hidden) { Z.pausiert = true; anzeigen(); return; }
     Z.pausiert = false;
     laufend = true;
@@ -423,6 +430,8 @@
     token = t; t = null;
     gen++;
     ctrl = (typeof AbortController === 'function') ? new AbortController() : null;
+    Z.schnitt = Date.now(); Z.schnittIso = new Date(Z.schnitt).toISOString();
+    Z.nichtVor = 0;
     Z.phase = 'aufbau'; Z.fehler = ''; Z.fehlerFolge = 0; Z.intervall = TAKT;
     aktuellerLauf = '';
     anzeigen();
