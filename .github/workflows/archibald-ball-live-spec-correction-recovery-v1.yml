@@ -1,0 +1,39 @@
+name: Archibald BALL live V3 correction recovery
+on:
+  push:
+    branches: [agent/ball-live-concept-20261017]
+    paths: ['handoffs/AG-BALL-LIVE-001-archibald-correction-recovery-activate.json']
+permissions:
+  contents: read
+  issues: write
+concurrency:
+  group: agentarium-archibald-ball-live-spec-correction-recovery-v1
+  cancel-in-progress: false
+jobs:
+  recovery:
+    if: github.repository == 'pahlborn/agentarium' && github.repository_owner_id == '277496791' && github.actor_id == '277496791' && github.event_name == 'push' && github.ref_name == 'agent/ball-live-concept-20261017'
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Validate recovery relay syntax
+        run: python3 -m py_compile relay/archibald_ball_live_spec_correction_recovery_once.py relay/claude_cli_diagnostics.py
+      - name: Install Claude Code CLI
+        run: npm install --global @anthropic-ai/claude-code
+      - name: Archibald one paid recovery
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python3 relay/archibald_ball_live_spec_correction_recovery_once.py
+      - name: Preserve raw and validated recovery output
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: archibald-ball-live-spec-correction-recovery-output
+          path: archibald-ball-live-spec-correction-recovery-output/
+          if-no-files-found: warn
+          retention-days: 14
+
