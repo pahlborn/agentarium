@@ -1,0 +1,13 @@
+{
+  "task_id": "AG-PILOT-001-ONE-EVENT",
+  "status": "PUBLISHED_ACCEPTANCE_RUNNING",
+  "authorization": "Peter explicit ja bitte for exact three-file commit in current session",
+  "published_commit": "d111b062770e32dbef0f9bb618a4923d88ff20be",
+  "previous_main": "5529391bd8215db6384ebb9bac708dfb2e6aab02",
+  "method": "expected-sha-guarded non-force fast-forward of main to single prepared commit; no merge of development branch",
+  "pages_run": "https://github.com/pahlborn/agentarium/actions/runs/39008018867",
+  "pages_result": "success",
+  "original_url": "https://pahlborn.github.io/agentarium/feld/?mvp=1",
+  "acceptance": "Pending independent actual-public-URL browser probe",
+  "native_ipad_safari": "NOT_TESTED"
+}
