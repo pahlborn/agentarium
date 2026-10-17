@@ -1,6 +1,6 @@
-# AG-BALL-LIVE-001 — Argus RA_REVIEW V1
+# AG-BALL-LIVE-001 — Argus RA_REVIEW V1 (strukturierte Kurzfassung)
 
-> Von Atlas dokumentierte echte Rückgabe des Subagenten `/root/argus_ball_live_spec_review`. Argus blieb gemäß Skill read-only und nahm selbst keine Projektänderung vor.
+> Von Atlas dokumentierte strukturierte Kurzfassung der echten Rückgabe des Subagenten `/root/argus_ball_live_spec_review`. Sie ist kein wörtlicher Volltext. Argus blieb gemäß Skill read-only und nahm selbst keine Projektänderung vor. Argus bestätigte anschließend Pfad und fachliche Kernaussagen, beanstandete aber die ursprüngliche Bezeichnung als vollständige Erhaltung; diese Kennzeichnung korrigiert genau diesen Dokumentationsfehler.
 
 ## Prüfkopf
 
@@ -33,11 +33,11 @@ Ein dauerhaft erreichbarer Pushdienst ist für den gewählten Weg ab MVP sinnvol
 
 ### ARG-BL-02 — Journal, V2.1-Archiv und Abnahmezählung widersprechen sich
 
-**BLOCKER · conflicting.** Das Journal enthält `work.event` und `run.state_changed`; das unveränderte V2.1-Archiv erlaubt ausschließlich Arbeitsereignisse. Die verlangte Identität und gleiche Anzahl sind daher nicht erfüllbar. Auditjournal und deterministische V2.1-Projektion trennen, Laufzustand separat bilanzieren und einen dauerhaften Archivlesepfad festlegen.
+**BLOCKER · conflicting.** Das Journal enthält `work.event` und `run.state_changed`; das unveränderte V2.1-Archiv erlaubt ausschließlich Arbeitsereignisse. Die verlangte Identität und gleiche Anzahl sind daher nicht erfüllbar; insbesondere darf `liveListe` nicht gegen alle Journaleinträge gezählt werden. Auditjournal und deterministische V2.1-Projektion trennen, Laufzustand separat bilanzieren, verlorene Wrapper-Spoolereignisse ausweisen und einen dauerhaften Archivlesepfad festlegen.
 
 ### ARG-BL-03 — Webhookausfall vor dem Journal bleibt unentdeckt und unrepariert
 
-**BLOCKER · confirmed.** GitHub stellt fehlgeschlagene Webhooks nicht automatisch erneut zu. Browser-Catch-up kann nur bereits journalisierte Ereignisse nachholen. Vor dem gehosteten Pilot ist genau ein begrenzter automatischer Recovery-/Reconciliationweg mit Alarm, Cursor und Dedupe festzulegen; Test: Kommentar während Relayausfall.
+**BLOCKER · confirmed.** GitHub stellt fehlgeschlagene Webhooks nicht automatisch erneut zu. Browser-Catch-up kann nur bereits journalisierte Ereignisse nachholen. Vor dem gehosteten Pilot ist genau ein begrenzter automatischer Recovery-/Reconciliationweg mit Alarm, Cursor, erforderlichen Rechten und Dedupe festzulegen; die GitHub-Zustellung darf erst nach dauerhaftem Speichern/Enqueueing innerhalb der Zustellfrist bestätigt werden. Delivery-ID dient der Diagnose, fachliche Dedupe der Kommentar-ID; der Hash basiert auf stabilem normalisiertem Kommentarinhalt. Test: Kommentar während Relayausfall.
 
 ### ARG-BL-04 — Die private Alternative veröffentlicht ihr Archiv trotzdem öffentlich
 
@@ -53,7 +53,7 @@ Ein dauerhaft erreichbarer Pushdienst ist für den gewählten Weg ab MVP sinnvol
 
 ### ARG-BL-07 — Transportgrenzen dürfen nicht vom Implementierer erraten werden
 
-**MAJOR · confirmed.** Es fehlen ehrliche Beispielnachrichten und Regeln für leeren Katalogstrom, Snapshot bei nicht fortsetzbarem Cursor, UI-Zustand versus Dedupe, privates Lesetoken/CORS sowie eine einheitliche Markup-Regel. Kleine validierte Beispiele und Fehler-/Resume-Tabelle ergänzen.
+**MAJOR · confirmed.** Es fehlen ehrliche Beispielnachrichten: Das unveränderte Schema verlangt einen **nichtleeren** `katalogstrom`, obwohl der MVP den Katalog ausschließt. Außerdem offen sind Snapshot bei nicht fortsetzbarem Cursor, UI-Zustand versus Dedupe, privates Lesetoken/CORS sowie eine einheitliche Markup-Regel. Kleine validierte Beispiele und Fehler-/Resume-Tabelle ergänzen.
 
 ### ARG-BL-08 — „Nahezu Echtzeit“ wird gemessen, aber nicht bewertet
 
@@ -65,5 +65,11 @@ Peter soll nicht HMAC-Details oder Feldlisten konstruieren. Das Team legt einen 
 
 ## Nächste Aktion
 
-Atlas routet ARG-BL-01–08 an Archibald; Forge baut noch nicht gegen V2. Danach genügt ein gezieltes Delta-Review. E1/E2 müssen vor breitem Ausbau die Quellenrisiken auflösen, E3 vor der Original-Pages-Abnahme.
+Atlas routet ARG-BL-01–08 an Archibald und Forge sowie die Kriterienkorrekturen an Sentinel; Forge baut noch nicht gegen V2. Danach genügt ein gezieltes Delta-Review. E1/E2 müssen vor breitem Ausbau die Quellenrisiken auflösen, E3 vor der Original-Pages-Abnahme.
+
+## Evidenzgrenzen
+
+Keine Tests oder künstlichen Ereignisse wurden ausgeführt. Claude-Laufmetadaten aus vorhandenen Handbacks wurden gelesen, aber nicht als eigenes Runtimeaudit bestätigt. Aktuelle Konto-/Infrastrukturberechtigungen wurden nicht geprüft. Beiträge anderer Rollen werden weder ersetzt noch als Zustimmung ausgegeben.
+
+Die von Argus gelieferte vollständige Akzeptanzmatrix bewertete AC-1.1 bis AC-6.2 und „Nahezu Echtzeit am offenen iPad“ überwiegend als `blocked` oder `not tested`; AC-5.6 und AC-6.1 als `failed`. Kein Produktnachweis wurde behauptet.
 
