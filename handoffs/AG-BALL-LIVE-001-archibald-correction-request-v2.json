@@ -1,0 +1,94 @@
+{
+  "schema": "agentarium.handoff.v0",
+  "task_id": "AG-BALL-LIVE-001-ARCHIBALD-SPEC-V3-RECOVERY-V1",
+  "worker_role": "spec-agent",
+  "mode": "read-only bounded specification correction recovery",
+  "branch": "agent/ball-live-concept-20261017",
+  "outcome": "Correct only the review-proven contradictions in specification V2 and return a coherent build-ready V3 delta/specification for the smallest genuine two-provider live prototype on the ORIGINAL Agentarium.",
+  "authority": "Peter explicitly authorized one paid recovery on 2026-10-17 after the first V3 result was lost by the relay character cap. This invocation is specification recovery only. No implementation, infrastructure activation, account, secret, test mutation, merge, release or publication.",
+  "baselines": {
+    "product_original": "d111b062770e32dbef0f9bb618a4923d88ff20be",
+    "contract_and_reducer_reference_only": "da860fd19f38e9938ed201546f2a6e5b4cc765f8",
+    "local_adapter_pattern_only": "800874ee1c6fd2ed3a806ba7774a19c2e11f3878",
+    "reviewed_spec_commit": "06751872460d8bb27fb8308c9b76a879f44bfc33"
+  },
+  "required_reading": [
+    "AGENTS.md",
+    ".claude/agents/spec-agent.md",
+    "governance/agentarium-rulebook-v1.2.md",
+    "governance/agentarium-process-v1.2.md",
+    "governance/product-development-practice-v1.md",
+    "handoffs/AG-BALL-LIVE-001-charter-v1.md",
+    "handoffs/AG-BALL-LIVE-001-machbarkeitsstudie-v1.md",
+    "handoffs/AG-BALL-LIVE-001-forge-handback-v1.md",
+    "handoffs/AG-BALL-LIVE-001-archibald-spec-v2.md",
+    "governance/AG-BALL-LIVE-001-argus-review-v1.md",
+    "governance/AG-BALL-LIVE-001-sentinel-testability-v2.md",
+    "handoffs/AG-BALL-LIVE-001-archibald-v3-correction-failure-v1.md"
+  ],
+  "external_reading": [
+    {
+      "ref": "d111b062770e32dbef0f9bb618a4923d88ff20be",
+      "path": "feld/index.html",
+      "as": "external/published-d111/feld/index.html"
+    },
+    {
+      "ref": "d111b062770e32dbef0f9bb618a4923d88ff20be",
+      "path": "feld/sw.js",
+      "as": "external/published-d111/feld/sw.js"
+    },
+    {
+      "ref": "da860fd19f38e9938ed201546f2a6e5b4cc765f8",
+      "path": "specifications/AG-VISUAL-005-schemas-v2/vertrag-v2-1.schema.json",
+      "as": "external/contract-da860fd/vertrag-v2-1.schema.json"
+    },
+    {
+      "ref": "800874ee1c6fd2ed3a806ba7774a19c2e11f3878",
+      "path": "previews/AG-VISUAL-005-feld/activity-input.js",
+      "as": "external/local-adapter-800874e/activity-input.js"
+    }
+  ],
+  "binding_corrections": [
+    "Close Argus ARG-BL-01 through ARG-BL-08 and Sentinel F1 through F9 explicitly. Do not start a new general architecture study.",
+    "Separate overall project/run lifecycle from each producer execution. No Claude child may close the shared Work run. Give every ingest envelope, including lifecycle messages, an idempotency identity without modifying V2.1.",
+    "Define an append-only audit journal for all envelopes and a deterministic V2.1 archive projection for work.event only; account for lifecycle separately and specify the durable archive read path after relay retention.",
+    "For the GitHub webhook checkpoint path, add one bounded automated pre-journal delivery recovery/reconciliation mechanism, a visible unrecoverable-gap signal, delivery diagnostics and dedupe. Browser polling remains forbidden.",
+    "Make privacy end-to-end. A private source may not export to the public Agentarium repository. Never log raw rejected payload excerpts when secret leakage is suspected.",
+    "Add the smallest explicit Original initialization/version hook required by the IIFE and make every visible activity statement truth-consistent, not only the agent label.",
+    "Make child agent provenance transportable. A running GitHub Actions job is not proof that the Claude process is still running; two Work comments are not proof of the work between them. Define independent correlated M5 evidence.",
+    "Resolve catalogstrom, snapshot/cursor, browser storage/generation, read auth/CORS, Markup-as-text versus rejection, Heartbeat and all exact recovery oracles.",
+    "Separate functional through-path success from a near-real-time experience hypothesis. Propose one bounded pilot threshold and continue/change/stop rule, while leaving Peter the material approval.",
+    "Keep Peter's decision package minimal: one concrete hosted pilot proposal with budget/region/retention/operator; public cooperative metadata versus an end-to-end private path; the proposed experience hypothesis; and later release. Do not ask Peter to design HMAC, schemas or field lists."
+  ],
+  "required_output": [
+    "A standalone German V3 correction that preserves all valid V2 decisions and is directly usable by Forge without consulting unstated assumptions",
+    "A correction ledger mapping every ARG-BL-01..08 and F1..F9 to exact changed requirements, acceptance criteria and tests",
+    "Complete normalized ingest examples for work.event and lifecycle envelopes, identity/provenance rules, actor and recipient allowlists, and one deterministic run/activity state table",
+    "A precise journal-to-V2.1-archive projection and archive-read/retention behavior",
+    "A single bounded GitHub webhook failure recovery design and test, without browser polling",
+    "Operational M1 through visible M5 evidence for still-running Claude and Work activity, including time uncertainty and a concrete pixel/video oracle",
+    "Executable fixture rules and corrected test cases for heartbeats, cursor boundaries, generations, storage denial, auth, CORS, XSS, secrets, concurrency, reconnect, replay and regression",
+    "A compact FR/NFR to AC/test traceability matrix and corrected stop rules",
+    "A reduced customer decision brief with a specific team recommendation; clearly distinguish what can be built locally before hosting approval",
+    "No implementation and no claim that any product test has passed"
+  ],
+  "model_routing": {
+    "task_complexity": "K",
+    "risk": "high",
+    "role_default": "opus/high",
+    "requested_model": "opus",
+    "requested_reasoning": "high",
+    "actual_model": "unconfirmed",
+    "actual_reasoning": "unconfirmed",
+    "budget": "Exactly one complete recovery session without tiny turn/cost cap; raw result must be preserved before validation; no benchmark and no automatic retry. Stop on key, quota or credit error and preserve evidence."
+  },
+  "forbidden": [
+    "implementation, provider activation, test execution, deployment or publishing",
+    "broadening into a new product or architecture study",
+    "changing the V2.1 contract or reducer",
+    "browser polling, static-file simulation or terminal-only events as the live MVP",
+    "embedding long-lived producer or GitHub secrets in the browser",
+    "claiming Peter approved provider, budget, public metadata, latency threshold or release"
+  ],
+  "expected_result": "German SA_READY V3 with the bounded corrected build specification and exact remaining material customer decisions, or SA_BLOCKED with one evidenced blocker. The complete raw result must be preserved before validation."
+}
