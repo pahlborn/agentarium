@@ -1,0 +1,10 @@
+{
+  "url": "http://127.0.0.1:37899/index.html?ball_live=1",
+  "navigations": 1,
+  "marker": {
+    "time_origin": 1792248945807.4,
+    "accepted": [],
+    "version": "AG-BALL-LIVE-001-c1"
+  },
+  "wall_ms": 1792248946008
+}

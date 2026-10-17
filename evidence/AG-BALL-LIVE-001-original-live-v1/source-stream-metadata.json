@@ -1,0 +1,11 @@
+{
+  "type": "stream_event",
+  "event": {
+    "type": "content_block_start",
+    "content_block": {
+      "type": "tool_use",
+      "name": "Read",
+      "id": "toolu_014NHeikCRN4SgSU17ZxgEBR"
+    }
+  }
+}

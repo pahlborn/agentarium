@@ -1,0 +1,4 @@
+{"event":"SSE_OPEN","cursor":null,"replay":0,"gap":null,"clients":1,"monotonic_ns":"137766356166"}
+{"event":"INGEST","id":"REAL-39042768838-1","seq":1,"duplicate":false,"run_id":"gha:39042768838","kind":"progress","actor":"forge","source_evidence":"runtime_stream","source_tool_id":"toolu_014NHeikCRN4SgSU17ZxgEBR","clients":1,"monotonic_ns":"141583473697"}
+{"event":"SSE_CLOSE","reason":"client_gone","clients":0,"monotonic_ns":"151584484784"}
+{"event":"STOPPED","monotonic_ns":"189909865047"}

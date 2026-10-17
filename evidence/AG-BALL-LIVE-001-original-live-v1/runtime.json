@@ -1,0 +1,71 @@
+{
+  "task_id": "AG-BALL-LIVE-001-ORIGINAL-REAL-VERIFY-V1",
+  "candidate_commit": "c7a8da04d9b06d83edcd110f210c0cf84d4aa8ba",
+  "run": "https://github.com/pahlborn/agentarium/actions/runs/39042768838",
+  "event_id": "REAL-39042768838-1",
+  "browser_ready_monotonic_ns": 137843431947,
+  "source_start_monotonic_ns": 137845091491,
+  "terminal_observed_monotonic_ns": 188349228685,
+  "exit_observed_monotonic_ns": 189209982019,
+  "session_id": "374cb038-0234-4153-a675-c22a384118f8",
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 6,
+      "outputTokens": 4598,
+      "cacheReadInputTokens": 2456,
+      "cacheCreationInputTokens": 20550,
+      "webSearchRequests": 0,
+      "costUSD": 0.1952252,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 3247,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "usage": {
+    "input_tokens": 6,
+    "cache_creation_input_tokens": 20550,
+    "cache_read_input_tokens": 2456,
+    "output_tokens": 4598,
+    "output_tokens_details": {
+      "thinking_tokens": 3247
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 0,
+      "ephemeral_5m_input_tokens": 20550
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 4308,
+        "cache_read_input_tokens": 2456,
+        "cache_creation_input_tokens": 18094,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 18094,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "total_cost_usd": 0.1952252,
+  "requested_model": "opus",
+  "requested_effort": "high",
+  "actual_reasoning": "unconfirmed",
+  "source_returncode": 0,
+  "browser_returncode": 0,
+  "verdict": "PASS",
+  "ipad_tested": false,
+  "hosted_path_tested": false,
+  "product_published": false
+}

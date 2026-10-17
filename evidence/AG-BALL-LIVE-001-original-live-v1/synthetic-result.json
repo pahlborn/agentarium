@@ -1,0 +1,541 @@
+{
+  "task": "AG-BALL-LIVE-001",
+  "version": "AG-BALL-LIVE-001-c1",
+  "evidence_class": "SYNTHETIC_COMPONENT_TEST — not real-source evidence",
+  "result": "PASS",
+  "error": null,
+  "checks": [
+    {
+      "name": "ready_json",
+      "ok": true,
+      "detail": {
+        "event": "READY",
+        "version": "AG-BALL-LIVE-001-c1",
+        "base": "http://127.0.0.1:44887",
+        "url": "http://127.0.0.1:44887/index.html?ball_live=1",
+        "port": 44887,
+        "pid": 2916,
+        "instance": "5e78c806c80ad598",
+        "ring_max": 8,
+        "durable": false,
+        "root": "/home/runner/work/agentarium/agentarium/app/feld",
+        "monotonic_ns": "124026035612",
+        "wall_ms": 1792248932214
+      }
+    },
+    {
+      "name": "health_before_browser",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "version": "AG-BALL-LIVE-001-c1",
+        "instance": "5e78c806c80ad598",
+        "seq": 0,
+        "oldest_seq": null,
+        "ring_max": 8,
+        "clients": 0,
+        "monotonic_ns": "124031667235",
+        "durable": false
+      }
+    },
+    {
+      "name": "sw_not_served",
+      "ok": true,
+      "detail": 404
+    },
+    {
+      "name": "webgl_available",
+      "ok": true,
+      "detail": "ORIGINAL needs WebGL; without it the hooks are never defined"
+    },
+    {
+      "name": "health_sees_viewer",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "version": "AG-BALL-LIVE-001-c1",
+        "instance": "5e78c806c80ad598",
+        "seq": 0,
+        "oldest_seq": null,
+        "ring_max": 8,
+        "clients": 1,
+        "monotonic_ns": "125487578073",
+        "durable": false
+      }
+    },
+    {
+      "name": "candidate_version_ui_js",
+      "ok": true,
+      "detail": {
+        "modus": "live",
+        "ballLive": "AG-BALL-LIVE-001-c1",
+        "panel": "BALL LIVE · AG-BALL-LIVE-001-c1Transport: verbunden (SSE) · Cursor 0Noch kein Ereignis empfangen.",
+        "ereignisse": 0,
+        "swController": false
+      }
+    },
+    {
+      "name": "demo_disabled_live_mode",
+      "ok": true,
+      "detail": {
+        "modus": "live",
+        "ballLive": "AG-BALL-LIVE-001-c1",
+        "panel": "BALL LIVE · AG-BALL-LIVE-001-c1Transport: verbunden (SSE) · Cursor 0Noch kein Ereignis empfangen.",
+        "ereignisse": 0,
+        "swController": false
+      }
+    },
+    {
+      "name": "no_service_worker_controller",
+      "ok": true,
+      "detail": {
+        "modus": "live",
+        "ballLive": "AG-BALL-LIVE-001-c1",
+        "panel": "BALL LIVE · AG-BALL-LIVE-001-c1Transport: verbunden (SSE) · Cursor 0Noch kein Ereignis empfangen.",
+        "ereignisse": 0,
+        "swController": false
+      }
+    },
+    {
+      "name": "no_service_worker_registration",
+      "ok": true,
+      "detail": 0
+    },
+    {
+      "name": "ingest_e1_201",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "duplicate": false,
+        "id": "SYN-1f82cc6f-1",
+        "seq": 1,
+        "clients": 1,
+        "server_received_monotonic_ns": "125500187365"
+      }
+    },
+    {
+      "name": "panel_visible_id_title",
+      "ok": true,
+      "detail": {
+        "text": "BALL LIVE · AG-BALL-LIVE-001-c1\nTransport: verbunden (SSE) · Cursor 0\nEreignis SYN-1f82cc6f-1 · SYNTHETIC_TEST_FIXTURE #1 – Forge progress (component test, not real evidence)\nHerkunft: SYNTHETISCH (synthetic_test_fixture, kein Beleg) · tool synthetic-tool-1 · forge · progress · #1",
+        "provenance": "synthetic_test_fixture",
+        "eventId": "SYN-1f82cc6f-1",
+        "visible": true
+      }
+    },
+    {
+      "name": "panel_provenance_is_synthetic",
+      "ok": true,
+      "detail": {
+        "text": "BALL LIVE · AG-BALL-LIVE-001-c1\nTransport: verbunden (SSE) · Cursor 0\nEreignis SYN-1f82cc6f-1 · SYNTHETIC_TEST_FIXTURE #1 – Forge progress (component test, not real evidence)\nHerkunft: SYNTHETISCH (synthetic_test_fixture, kein Beleg) · tool synthetic-tool-1 · forge · progress · #1",
+        "provenance": "synthetic_test_fixture",
+        "eventId": "SYN-1f82cc6f-1",
+        "visible": true
+      }
+    },
+    {
+      "name": "progress_no_completion",
+      "ok": true,
+      "detail": {
+        "before": {
+          "aufgabenAuf": 0,
+          "aufgabenZu": 0,
+          "register": 0,
+          "bausteine": 0,
+          "ball": null,
+          "arbeiten": [],
+          "fliegend": 0,
+          "ereignisse": 0
+        },
+        "after": {
+          "aufgabenAuf": 0,
+          "aufgabenZu": 0,
+          "register": 0,
+          "bausteine": 0,
+          "ball": null,
+          "arbeiten": [],
+          "fliegend": 0,
+          "ereignisse": 1
+        },
+        "row": "agAuf tat"
+      }
+    },
+    {
+      "name": "reject_no_token",
+      "ok": true,
+      "detail": {
+        "status": 401,
+        "body": {
+          "ok": false,
+          "error": "invalid or missing ingest token"
+        }
+      }
+    },
+    {
+      "name": "reject_wrong_token",
+      "ok": true,
+      "detail": {
+        "status": 401,
+        "body": {
+          "ok": false,
+          "error": "invalid or missing ingest token"
+        }
+      }
+    },
+    {
+      "name": "reject_kind_artifact",
+      "ok": true,
+      "detail": {
+        "status": 400,
+        "body": {
+          "ok": false,
+          "error": "kind not allowed (this slice accepts: progress)"
+        }
+      }
+    },
+    {
+      "name": "reject_kind_unknown",
+      "ok": true,
+      "detail": {
+        "status": 400,
+        "body": {
+          "ok": false,
+          "error": "kind not allowed (this slice accepts: progress)"
+        }
+      }
+    },
+    {
+      "name": "reject_extra_field_raw_tool_input",
+      "ok": true,
+      "detail": {
+        "status": 400,
+        "body": {
+          "ok": false,
+          "error": "unknown field(s) not allowed"
+        }
+      }
+    },
+    {
+      "name": "reject_bad_id",
+      "ok": true,
+      "detail": {
+        "status": 400,
+        "body": {
+          "ok": false,
+          "error": "id must match [A-Za-z0-9._:-]{1,80}"
+        }
+      }
+    },
+    {
+      "name": "reject_unknown_actor",
+      "ok": true,
+      "detail": {
+        "status": 400,
+        "body": {
+          "ok": false,
+          "error": "actor unknown"
+        }
+      }
+    },
+    {
+      "name": "reject_bad_evidence",
+      "ok": true,
+      "detail": {
+        "status": 400,
+        "body": {
+          "ok": false,
+          "error": "source_evidence must be runtime_stream or synthetic_test_fixture"
+        }
+      }
+    },
+    {
+      "name": "reject_empty_title",
+      "ok": true,
+      "detail": {
+        "status": 400,
+        "body": {
+          "ok": false,
+          "error": "title must be 1..160 characters"
+        }
+      }
+    },
+    {
+      "name": "reject_control_chars",
+      "ok": true,
+      "detail": {
+        "status": 400,
+        "body": {
+          "ok": false,
+          "error": "title contains control/format characters"
+        }
+      }
+    },
+    {
+      "name": "reject_invalid_json",
+      "ok": true,
+      "detail": 400
+    },
+    {
+      "name": "reject_non_object",
+      "ok": true,
+      "detail": 400
+    },
+    {
+      "name": "reject_content_type",
+      "ok": true,
+      "detail": 415
+    },
+    {
+      "name": "ingest_m1_201",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "rejected_never_reach_ui",
+      "ok": true,
+      "detail": [
+        "SYN-1f82cc6f-1",
+        "SYN-1f82cc6f-13"
+      ]
+    },
+    {
+      "name": "server_duplicate_200",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "duplicate": true,
+        "id": "SYN-1f82cc6f-1",
+        "seq": 1,
+        "clients": 1,
+        "server_received_monotonic_ns": "128058905127"
+      }
+    },
+    {
+      "name": "ingest_m2_201",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "dedupe_no_double_accept",
+      "ok": true,
+      "detail": [
+        "SYN-1f82cc6f-1",
+        "SYN-1f82cc6f-13",
+        "SYN-1f82cc6f-14"
+      ]
+    },
+    {
+      "name": "dedupe_no_double_row",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "replay_deduped_client_side",
+      "ok": true,
+      "detail": {
+        "pre": 0,
+        "now": 3
+      }
+    },
+    {
+      "name": "replay_no_double_row",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "ingest_x1_201",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "title_escaped",
+      "ok": true,
+      "detail": {
+        "imgs": 0,
+        "panel": "Ereignis SYN-1f82cc6f-15 · <img src=x onerror=\"window.__agXss=1\">SYNTHETIC_TEST_FIXTURE xss probe"
+      }
+    },
+    {
+      "name": "ingest_while_disconnected_201",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "not_delivered_while_disconnected",
+      "ok": true,
+      "detail": "getrennt"
+    },
+    {
+      "name": "catch_up_without_gap",
+      "ok": true,
+      "detail": []
+    },
+    {
+      "name": "drop_streams",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "dropped_streams": 2
+      }
+    },
+    {
+      "name": "ingest_after_auto_reconnect_201",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "ingest_burst_0",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "ingest_burst_1",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "ingest_burst_2",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "ingest_burst_3",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "ingest_burst_4",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "ingest_burst_5",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "ingest_burst_6",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "ingest_burst_7",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "ingest_burst_8",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "ingest_burst_9",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "gap_explicit",
+      "ok": true,
+      "detail": {
+        "gaps": [
+          {
+            "from": 7,
+            "to": 8,
+            "reason": "ring_evicted"
+          }
+        ],
+        "lost": [
+          "SYN-1f82cc6f-18",
+          "SYN-1f82cc6f-19"
+        ],
+        "gapText": "Lücke: Ereignisse #7–#8 nicht nachholbar (ring_evicted)"
+      }
+    },
+    {
+      "name": "no_reload",
+      "ok": true,
+      "detail": {
+        "navs": 1,
+        "fin": {
+          "marker": "kept",
+          "origin": 1792248933494.6,
+          "navEntries": 1
+        }
+      }
+    },
+    {
+      "name": "xss_flag_still_unset",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "token_not_in_browser",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "no_live_js_page_errors",
+      "ok": true,
+      "detail": []
+    },
+    {
+      "name": "health_after",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "version": "AG-BALL-LIVE-001-c1",
+        "instance": "5e78c806c80ad598",
+        "seq": 16,
+        "oldest_seq": 9,
+        "ring_max": 8,
+        "clients": 1,
+        "monotonic_ns": "130535782575",
+        "durable": false
+      }
+    }
+  ],
+  "page_errors": [],
+  "console_errors": [],
+  "server_log": [
+    "{\"event\":\"READY\",\"version\":\"AG-BALL-LIVE-001-c1\",\"base\":\"http://127.0.0.1:44887\",\"url\":\"http://127.0.0.1:44887/index.html?ball_live=1\",\"port\":44887,\"pid\":2916,\"instance\":\"5e78c806c80ad598\",\"ring_max\":8,\"durable\":false,\"root\":\"/home/runner/work/agentarium/agentarium/app/feld\",\"monotonic_ns\":\"124026035612\",\"wall_ms\":1792248932214}",
+    "{\"event\":\"SSE_OPEN\",\"cursor\":null,\"replay\":0,\"gap\":null,\"clients\":1,\"monotonic_ns\":\"125439781229\"}",
+    "{\"event\":\"INGEST\",\"id\":\"SYN-1f82cc6f-1\",\"seq\":1,\"duplicate\":false,\"run_id\":\"SYNTHETIC-RUN-1f82cc6f\",\"kind\":\"progress\",\"actor\":\"forge\",\"source_evidence\":\"synthetic_test_fixture\",\"source_tool_id\":\"synthetic-tool-1\",\"clients\":1,\"monotonic_ns\":\"125500187365\"}",
+    "{\"event\":\"INGEST_REJECTED\",\"reason\":\"auth\",\"monotonic_ns\":\"128030726519\"}",
+    "{\"event\":\"INGEST_REJECTED\",\"reason\":\"auth\",\"monotonic_ns\":\"128032580884\"}",
+    "{\"event\":\"INGEST_REJECTED\",\"reason\":\"kind not allowed (this slice accepts: progress)\",\"monotonic_ns\":\"128034583471\"}",
+    "{\"event\":\"INGEST_REJECTED\",\"reason\":\"kind not allowed (this slice accepts: progress)\",\"monotonic_ns\":\"128036303480\"}",
+    "{\"event\":\"INGEST_REJECTED\",\"reason\":\"unknown field(s) not allowed\",\"monotonic_ns\":\"128038335635\"}",
+    "{\"event\":\"INGEST_REJECTED\",\"reason\":\"id must match [A-Za-z0-9._:-]{1,80}\",\"monotonic_ns\":\"128040410774\"}",
+    "{\"event\":\"INGEST_REJECTED\",\"reason\":\"actor unknown\",\"monotonic_ns\":\"128041762987\"}",
+    "{\"event\":\"INGEST_REJECTED\",\"reason\":\"source_evidence must be runtime_stream or synthetic_test_fixture\",\"monotonic_ns\":\"128043316274\"}",
+    "{\"event\":\"INGEST_REJECTED\",\"reason\":\"title must be 1..160 characters\",\"monotonic_ns\":\"128045209942\"}",
+    "{\"event\":\"INGEST_REJECTED\",\"reason\":\"title contains control/format characters\",\"monotonic_ns\":\"128046575261\"}",
+    "{\"event\":\"INGEST_REJECTED\",\"reason\":\"invalid JSON\",\"monotonic_ns\":\"128047841822\"}",
+    "{\"event\":\"INGEST_REJECTED\",\"reason\":\"body must be a JSON object\",\"monotonic_ns\":\"128049213577\"}",
+    "{\"event\":\"INGEST\",\"id\":\"SYN-1f82cc6f-13\",\"seq\":2,\"duplicate\":false,\"run_id\":\"SYNTHETIC-RUN-1f82cc6f\",\"kind\":\"progress\",\"actor\":\"forge\",\"source_evidence\":\"synthetic_test_fixture\",\"source_tool_id\":\"synthetic-tool-13\",\"clients\":1,\"monotonic_ns\":\"128051637671\"}",
+    "{\"event\":\"INGEST\",\"id\":\"SYN-1f82cc6f-1\",\"seq\":1,\"duplicate\":true,\"run_id\":\"SYNTHETIC-RUN-1f82cc6f\",\"kind\":\"progress\",\"actor\":\"forge\",\"source_evidence\":\"synthetic_test_fixture\",\"source_tool_id\":\"synthetic-tool-1\",\"clients\":1,\"monotonic_ns\":\"128058905127\"}",
+    "{\"event\":\"INGEST\",\"id\":\"SYN-1f82cc6f-14\",\"seq\":3,\"duplicate\":false,\"run_id\":\"SYNTHETIC-RUN-1f82cc6f\",\"kind\":\"progress\",\"actor\":\"forge\",\"source_evidence\":\"synthetic_test_fixture\",\"source_tool_id\":\"synthetic-tool-14\",\"clients\":1,\"monotonic_ns\":\"128060184129\"}",
+    "{\"event\":\"SSE_OPEN\",\"cursor\":0,\"replay\":3,\"gap\":null,\"clients\":2,\"monotonic_ns\":\"128072073448\"}",
+    "{\"event\":\"INGEST\",\"id\":\"SYN-1f82cc6f-15\",\"seq\":4,\"duplicate\":false,\"run_id\":\"SYNTHETIC-RUN-1f82cc6f\",\"kind\":\"progress\",\"actor\":\"forge\",\"source_evidence\":\"synthetic_test_fixture\",\"source_tool_id\":\"synthetic-tool-15\",\"clients\":2,\"monotonic_ns\":\"128098110604\"}",
+    "{\"event\":\"INGEST\",\"id\":\"SYN-1f82cc6f-16\",\"seq\":5,\"duplicate\":false,\"run_id\":\"SYNTHETIC-RUN-1f82cc6f\",\"kind\":\"progress\",\"actor\":\"forge\",\"source_evidence\":\"synthetic_test_fixture\",\"source_tool_id\":\"synthetic-tool-16\",\"clients\":2,\"monotonic_ns\":\"128169283941\"}",
+    "{\"event\":\"SSE_CLOSE\",\"reason\":\"client_gone\",\"clients\":1,\"monotonic_ns\":\"128171217623\"}",
+    "{\"event\":\"SSE_OPEN\",\"cursor\":4,\"replay\":1,\"gap\":null,\"clients\":2,\"monotonic_ns\":\"128182507793\"}",
+    "{\"event\":\"DEBUG_DROP_STREAMS\",\"clients\":2,\"monotonic_ns\":\"128192549529\"}",
+    "{\"event\":\"SSE_CLOSE\",\"reason\":\"dropped_by_debug_endpoint\",\"clients\":1,\"monotonic_ns\":\"128192600557\"}",
+    "{\"event\":\"SSE_CLOSE\",\"reason\":\"dropped_by_debug_endpoint\",\"clients\":0,\"monotonic_ns\":\"128192619312\"}",
+    "{\"event\":\"SSE_OPEN\",\"cursor\":5,\"replay\":0,\"gap\":null,\"clients\":1,\"monotonic_ns\":\"129198248649\"}",
+    "{\"event\":\"INGEST\",\"id\":\"SYN-1f82cc6f-17\",\"seq\":6,\"duplicate\":false,\"run_id\":\"SYNTHETIC-RUN-1f82cc6f\",\"kind\":\"progress\",\"actor\":\"forge\",\"source_evidence\":\"synthetic_test_fixture\",\"source_tool_id\":\"synthetic-tool-17\",\"clients\":1,\"monotonic_ns\":\"129242354325\"}",
+    "{\"event\":\"INGEST\",\"id\":\"SYN-1f82cc6f-18\",\"seq\":7,\"duplicate\":false,\"run_id\":\"SYNTHETIC-RUN-1f82cc6f\",\"kind\":\"progress\",\"actor\":\"forge\",\"source_evidence\":\"synthetic_test_fixture\",\"source_tool_id\":\"synthetic-tool-18\",\"clients\":1,\"monotonic_ns\":\"129307849467\"}",
+    "{\"event\":\"INGEST\",\"id\":\"SYN-1f82cc6f-19\",\"seq\":8,\"duplicate\":false,\"run_id\":\"SYNTHETIC-RUN-1f82cc6f\",\"kind\":\"progress\",\"actor\":\"forge\",\"source_evidence\":\"synthetic_test_fixture\",\"source_tool_id\":\"synthetic-tool-19\",\"clients\":1,\"monotonic_ns\":\"129309400411\"}",
+    "{\"event\":\"SSE_CLOSE\",\"reason\":\"client_gone\",\"clients\":0,\"monotonic_ns\":\"129309589202\"}",
+    "{\"event\":\"INGEST\",\"id\":\"SYN-1f82cc6f-20\",\"seq\":9,\"duplicate\":false,\"run_id\":\"SYNTHETIC-RUN-1f82cc6f\",\"kind\":\"progress\",\"actor\":\"forge\",\"source_evidence\":\"synthetic_test_fixture\",\"source_tool_id\":\"synthetic-tool-20\",\"clients\":0,\"monotonic_ns\":\"129311348247\"}",
+    "{\"event\":\"INGEST\",\"id\":\"SYN-1f82cc6f-21\",\"seq\":10,\"duplicate\":false,\"run_id\":\"SYNTHETIC-RUN-1f82cc6f\",\"kind\":\"progress\",\"actor\":\"forge\",\"source_evidence\":\"synthetic_test_fixture\",\"source_tool_id\":\"synthetic-tool-21\",\"clients\":0,\"monotonic_ns\":\"129312768964\"}",
+    "{\"event\":\"INGEST\",\"id\":\"SYN-1f82cc6f-22\",\"seq\":11,\"duplicate\":false,\"run_id\":\"SYNTHETIC-RUN-1f82cc6f\",\"kind\":\"progress\",\"actor\":\"forge\",\"source_evidence\":\"synthetic_test_fixture\",\"source_tool_id\":\"synthetic-tool-22\",\"clients\":0,\"monotonic_ns\":\"129314125826\"}",
+    "{\"event\":\"INGEST\",\"id\":\"SYN-1f82cc6f-23\",\"seq\":12,\"duplicate\":false,\"run_id\":\"SYNTHETIC-RUN-1f82cc6f\",\"kind\":\"progress\",\"actor\":\"forge\",\"source_evidence\":\"synthetic_test_fixture\",\"source_tool_id\":\"synthetic-tool-23\",\"clients\":0,\"monotonic_ns\":\"129315439803\"}",
+    "{\"event\":\"INGEST\",\"id\":\"SYN-1f82cc6f-24\",\"seq\":13,\"duplicate\":false,\"run_id\":\"SYNTHETIC-RUN-1f82cc6f\",\"kind\":\"progress\",\"actor\":\"forge\",\"source_evidence\":\"synthetic_test_fixture\",\"source_tool_id\":\"synthetic-tool-24\",\"clients\":0,\"monotonic_ns\":\"129316720104\"}",
+    "{\"event\":\"INGEST\",\"id\":\"SYN-1f82cc6f-25\",\"seq\":14,\"duplicate\":false,\"run_id\":\"SYNTHETIC-RUN-1f82cc6f\",\"kind\":\"progress\",\"actor\":\"forge\",\"source_evidence\":\"synthetic_test_fixture\",\"source_tool_id\":\"synthetic-tool-25\",\"clients\":0,\"monotonic_ns\":\"129317956650\"}",
+    "{\"event\":\"INGEST\",\"id\":\"SYN-1f82cc6f-26\",\"seq\":15,\"duplicate\":false,\"run_id\":\"SYNTHETIC-RUN-1f82cc6f\",\"kind\":\"progress\",\"actor\":\"forge\",\"source_evidence\":\"synthetic_test_fixture\",\"source_tool_id\":\"synthetic-tool-26\",\"clients\":0,\"monotonic_ns\":\"129319275053\"}",
+    "{\"event\":\"INGEST\",\"id\":\"SYN-1f82cc6f-27\",\"seq\":16,\"duplicate\":false,\"run_id\":\"SYNTHETIC-RUN-1f82cc6f\",\"kind\":\"progress\",\"actor\":\"forge\",\"source_evidence\":\"synthetic_test_fixture\",\"source_tool_id\":\"synthetic-tool-27\",\"clients\":0,\"monotonic_ns\":\"129320523441\"}",
+    "{\"event\":\"SSE_OPEN\",\"cursor\":6,\"replay\":8,\"gap\":{\"from\":7,\"to\":8,\"reason\":\"ring_evicted\"},\"clients\":1,\"monotonic_ns\":\"129323288929\"}"
+  ]
+}

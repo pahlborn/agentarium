@@ -1,0 +1,24 @@
+{
+  "status": 201,
+  "response": {
+    "ok": true,
+    "duplicate": false,
+    "id": "REAL-39042768838-1",
+    "seq": 1,
+    "clients": 1,
+    "server_received_monotonic_ns": "141583473697"
+  },
+  "received_by_host_ns": 141584019739,
+  "source_captured_ns": 141581964312,
+  "body": {
+    "id": "REAL-39042768838-1",
+    "run_id": "gha:39042768838",
+    "actor": "forge",
+    "kind": "progress",
+    "title": "Forge liest Kandidatcode \u00b7 echte Laufzeitaktion",
+    "recipient": null,
+    "source_evidence": "runtime_stream",
+    "source_tool_id": "toolu_014NHeikCRN4SgSU17ZxgEBR"
+  },
+  "process_alive_after_ingest": true
+}

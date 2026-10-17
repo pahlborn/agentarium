@@ -1,0 +1,57 @@
+{
+  "verdict": "PASS",
+  "browser": "151.0.7922.34",
+  "event_id": "REAL-39042768838-1",
+  "navigations": 1,
+  "before": {
+    "monotonic_ns": 141701174388,
+    "alive": true,
+    "terminal_seen": false,
+    "pid": 3123
+  },
+  "after": {
+    "monotonic_ns": 144211105965,
+    "alive": true,
+    "terminal_seen": false,
+    "pid": 3123
+  },
+  "visible": {
+    "text": "BALL LIVE · AG-BALL-LIVE-001-c1\nTransport: verbunden (SSE) · Cursor 0\nEreignis REAL-39042768838-1 · Forge liest Kandidatcode · echte Laufzeitaktion\nHerkunft: runtime_stream · tool toolu_014NHeikCRN4SgSU17ZxgEBR · forge · progress · #1",
+    "width": 637.328125,
+    "height": 79.1875,
+    "provenance": "runtime_stream",
+    "event_id": "REAL-39042768838-1",
+    "original_list": "forge PROGRESS\nForge liest Kandidatcode · echte Laufzeitaktion",
+    "state": {
+      "id": "REAL-39042768838-1",
+      "seq": 1,
+      "run_id": "gha:39042768838",
+      "actor": "forge",
+      "kind": "progress",
+      "title": "Forge liest Kandidatcode · echte Laufzeitaktion",
+      "recipient": null,
+      "source_evidence": "runtime_stream",
+      "source_tool_id": "toolu_014NHeikCRN4SgSU17ZxgEBR",
+      "server_instance": "7ab4380e7da1dfef",
+      "server_received_monotonic_ns": "141583473697",
+      "server_received_wall_ms": 1792248949772,
+      "browser_received_wall_ms": 1792248949774,
+      "browser_received_perf_ms": 3966.899999999994,
+      "browser_time_origin_ms": 1792248945807.4,
+      "browser_painted_wall_ms": 1792248949865
+    },
+    "accepted": [
+      "REAL-39042768838-1"
+    ],
+    "time_origin": 1792248945807.4,
+    "marker": "same-page",
+    "navigation_entries": 1
+  },
+  "errors": [],
+  "ready": {
+    "time_origin": 1792248945807.4,
+    "accepted": [],
+    "version": "AG-BALL-LIVE-001-c1"
+  },
+  "wall_ms": 1792248952401
+}
