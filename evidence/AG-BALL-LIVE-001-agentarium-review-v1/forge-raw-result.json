@@ -1,0 +1,99 @@
+{
+  "duration_api_ms": 349448,
+  "stop_reason": "end_turn",
+  "session_id": "55c4b360-cdde-4114-8fc3-4bc45d925110",
+  "total_cost_usd": 1.2901366,
+  "usage": {
+    "input_tokens": 18,
+    "cache_creation_input_tokens": 90561,
+    "cache_read_input_tokens": 301498,
+    "output_tokens": 38848,
+    "output_tokens_details": {
+      "thinking_tokens": 22327
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 0,
+      "ephemeral_5m_input_tokens": 90561
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 2627,
+        "cache_read_input_tokens": 85751,
+        "cache_creation_input_tokens": 4810,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 4810,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 18,
+      "outputTokens": 38848,
+      "cacheReadInputTokens": 301498,
+      "cacheCreationInputTokens": 90561,
+      "webSearchRequests": 0,
+      "costUSD": 1.2901366,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 22327,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 46,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "**CA_IMPLEMENTED (not tested)**: AG-BALL-LIVE-001-FORGE-ORIGINAL-C2-V1, version 1. I fixed all three defects on the existing c1 candidate without rebuilding it. Tests have not been run, because I have no shell; nothing here is a PASS.\n\n**Baseline:** c7a8da04d9b06d83edcd110f210c0cf84d4aa8ba, as given in the packet. I could not check which commit is actually checked out (workspace `/tmp/forge-ball-live-original-c2-cndh6hfj`).\n\n**Changed files:** `feld/index.html`, `feld/live.js`, `tests/AG-BALL-LIVE-001-local-live.cjs`. No other files.\n\n**Who did what:** I wrote the code. Nobody has run the tests, nothing is published, and nobody has reviewed it.\n\n## One thing I changed from the packet: two version markers\nThe page and `live.js` are now marked `AG-BALL-LIVE-001-c2`. But `live.js` used to refuse to connect unless the server's opening message (`hello`) reported that same version. The server (`pilot/AG-BALL-LIVE-001/local_server.py`) isn't one of my allowed files and isn't in this workspace. Changing only the page marker would therefore have broken every connection.\n\nSo `live.js` now checks two things separately:\n- **Page vs. `live.js`:** both must say c2. If they differ it still refuses to start, as required.\n- **Server:** must report `AG-BALL-LIVE-001-c1`, a new constant `SERVER_VERSION`.\n\nThe test's `ready_json` check now compares against `SERVER_VERSION`. **Assumption:** the server still reports c1. I took this from the c1 test, which asserted it. I could not read the server to confirm.\n\n## How each defect was fixed\n**AG-BL-UI-01 (status covered the list):** The fixed panel in the bottom-left corner is gone. The status now sits in the normal layout of the existing top-right column (`#agRechts`), just under the header.\n- It is a collapsible section (`<details id=\"agBallLive\">`). The always-visible line reads \"Live · state · Cursor N\" (plus \"· Lücke\" if events were lost) and \"Letztes Arbeitssignal: actor · vor N s\".\n- Tapping it opens the full detail: version, transport, event ID, title, provenance (marked synthetic where it is), gaps, a note that silence means \"no current activity observed — not idle, not finished; connection and cursor are not proof of work\", and any refusal reason. The detail is capped at 38% of screen height and scrolls.\n- The fallback message shown when `live.js` can't load also moved into that column. All text still goes in via `textContent`.\n\n**AG-BL-UI-02 (no visible impulse):**\n- I added a function `arbeitsImpuls(E)` to `index.html`. It is called only from the Original's existing progress-event branch, i.e. after `live.js` has validated and de-duplicated the event and the Original has accepted it.\n- Each call places one short glow at the actor's actual name label, measured on screen after the Original has shifted it into place. Each name label now carries a `data-ag` attribute so it can be found. If no label is found, it falls back to the actor's home position.\n- The glow lasts 1.4 s, ends fully transparent and removes itself. A timer removes it anyway after 1.8 s if the end-of-animation signal never arrives. It never loops, never adds a \"working\" class and doesn't touch the Original's work, completion or stop state.\n- For QA, `window.__agImpulse` exposes `{dauer_ms, grenze_ms, log[], aktiv()}`, with start and end times per event. This shows the glow happened and when; it says nothing about where the event really came from.\n\n**AG-BL-UI-03 (cursor stuck at 0):** One function, `anzeigen()`, now writes every visible cursor value — the summary line, the transport line and a `data-cursor` attribute — always from the same stored cursor. It runs after `hello`, after every `ag` event (straight after the cursor advances, even if the event is then rejected or a duplicate), on gaps, on every state change, and once a second to keep the signal age current. The status texts no longer build their own cursor strings.\n\nEverything else is unchanged: `?ball_live=1` opt-in, no demo autostart, same-origin SSE, the existing hooks, validation, escaping, de-duplication, reconnect and gap handling, service-worker bypass, and normal Original and demo behaviour.\n\n## Test changes\nAll 57 previous checks are kept. Two were adjusted:\n- `ready_json` now compares against `SERVER_VERSION` (see above).\n- Before `panel_visible_id_title` reads the panel text, the test now opens the detail by clicking it, not via the console.\n\nNew checks:\n- `cursor_display_boot_consistent`\n- `actor_name_anchor_present`\n- `cursor_visible_advances_to_1`: the event gets sequence 1 and every visible cursor shows 1.\n- `impulse_once_at_actor`\n- `impulse_decays_bounded`: gone within 1800 ms + 300 ms timer slack, with nothing left on screen.\n- `impulse_no_persistent_busy`\n- `replay_no_double_impulse`\n- `no_overlap_390x844`, `no_overlap_1024x1366`, `no_overlap_1280x800`: open and closed, the status must not be fixed-position, must sit in `#agRechts`, must be on screen, and must not intersect `#agEcke`, any list row or any ring name. Each saves a screenshot `c2-layout-WxH.png`.\n\n## Risks\n1. **Server version:** if the server doesn't actually report c1, `live.js` refuses to connect. Either change the server (needs separate authorisation) or update the constant.\n2. **Layout:** a taller top-right column could shift other Original elements if something measures that column's height; I didn't check. The detail could reach the progress block at the bottom right on small phones, but only when someone opens it. Whether ring names stay clear of the right column comes from the Original's own comments; the new overlap checks will show it.\n3. **Blending:** the glow uses screen blending over the field; on some GPUs it may look weaker or different.\n4. **Hidden tabs:** while the tab is hidden, animation frames stop and events queue up, so several glows may fire together when it becomes visible again. That's still one per event.\n5. **Possible false failure:** `impulse_no_persistent_busy` compares the forge name's `arbeitet` class before and after. It would fail wrongly if the Original sets that class for its own reasons in between.\n6. **Unchecked scope:** I assumed `hex`, `heimat` and `nachName` are reachable from where I put `arbeitsImpuls`, because the neighbouring function `stromZeile` uses them; I couldn't search to confirm. The glow layer is also not included in the brightness slider's filter.\n\nThis is a local candidate only; nothing is hosted, deployed or claimed for iPad.\n\n**Next owner:** Atlas, to arrange an authorised test run of `node tests/AG-BALL-LIVE-001-local-live.cjs` and confirm the server reports c1. After that, review by someone other than me.",
+  "ttft_ms": 4685,
+  "type": "result",
+  "duration_ms": 349570,
+  "uuid": "184e6a06-d1ad-4c4d-97d9-643fec5a61b7",
+  "ttft_stream_ms": 2755,
+  "time_to_request_ms": 56,
+  "first_content_frame_ms": 2756,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

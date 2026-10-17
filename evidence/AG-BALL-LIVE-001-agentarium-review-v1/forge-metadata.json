@@ -1,0 +1,84 @@
+{
+  "task_id": "AG-BALL-LIVE-001-FORGE-ORIGINAL-C2-V1",
+  "request_commit": "48c63d344eced607bb8f0a8bc068b9b44a48fd7f",
+  "product_baseline": "c7a8da04d9b06d83edcd110f210c0cf84d4aa8ba",
+  "role_blob": "38d9747018bd4bfc5299a2dd9aeded9659337e77",
+  "run": "https://github.com/pahlborn/agentarium/actions/runs/39047436322",
+  "requested_model": "opus",
+  "requested_effort": "high",
+  "actual_reasoning": "unconfirmed",
+  "session_id": "55c4b360-cdde-4114-8fc3-4bc45d925110",
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 18,
+      "outputTokens": 38848,
+      "cacheReadInputTokens": 301498,
+      "cacheCreationInputTokens": 90561,
+      "webSearchRequests": 0,
+      "costUSD": 1.2901366,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 22327,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "usage": {
+    "input_tokens": 18,
+    "cache_creation_input_tokens": 90561,
+    "cache_read_input_tokens": 301498,
+    "output_tokens": 38848,
+    "output_tokens_details": {
+      "thinking_tokens": 22327
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 0,
+      "ephemeral_5m_input_tokens": 90561
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 2627,
+        "cache_read_input_tokens": 85751,
+        "cache_creation_input_tokens": 4810,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 4810,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "total_cost_usd": 1.2901366,
+  "execution": {
+    "kind": "SUCCESS",
+    "detail": "SUCCESS",
+    "returncode": 0,
+    "elapsed_seconds": 350.419,
+    "timeout_seconds": 1800,
+    "stdout_bytes": 8538,
+    "stderr_bytes": 0,
+    "stdout_sha256": "878800339cece71189999b9fc3d8288a6f8fd3d86422a71842f3231add5ac30b",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "signals": []
+  },
+  "failure": null,
+  "changed_paths": [
+    "feld/index.html",
+    "feld/live.js",
+    "tests/AG-BALL-LIVE-001-local-live.cjs"
+  ],
+  "unauthorized_paths": [],
+  "patch_sha256": "0abe225d74e2814cde3b0deafcc4c9a6d17c1fb1bfdfeeb697b82f17e94036bc",
+  "tests_run": false,
+  "product_published": false
+}

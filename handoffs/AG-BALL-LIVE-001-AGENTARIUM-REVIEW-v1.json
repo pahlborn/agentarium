@@ -1,0 +1,40 @@
+{
+  "schema": "agentarium.handoff.v0",
+  "task_id": "AG-BALL-LIVE-001-AGENTARIUM-REVIEW-V1",
+  "version": 1,
+  "mode": "review_only",
+  "authority": "Peter directed on 2026-10-17 that required Agentarium changes be written to GitHub for his Agentarium agent to review before a later implementation assignment.",
+  "repository": "pahlborn/agentarium",
+  "product_baseline": "c7a8da04d9b06d83edcd110f210c0cf84d4aa8ba",
+  "goal": "Independently review the proposed c2 UI correction and choose one complete near-real-time iPad pilot path from real agent action to the already-open Original monitor.",
+  "inputs": [
+    "handoffs/AG-BALL-LIVE-001-AGENTARIUM-REVIEW-v1.md",
+    "evidence/AG-BALL-LIVE-001-agentarium-review-v1/forge-original-c2.patch",
+    "evidence/AG-BALL-LIVE-001-agentarium-review-v1/forge-metadata.json",
+    "evidence/AG-BALL-LIVE-001-agentarium-review-v1/forge-handback.md",
+    "evidence/AG-BALL-LIVE-001-agentarium-review-v1/nova-direction.md",
+    "evidence/AG-BALL-LIVE-001-agentarium-review-v1/scout-ipad-options.md"
+  ],
+  "required_review": [
+    "AG-BL-UI-01 no overlay",
+    "AG-BL-UI-02 truthful event-driven impulse without persistent busy claim",
+    "AG-BL-UI-03 consistent visible cursor",
+    "c2 page/live.js versus c1 server version compatibility",
+    "retention of 57 prior checks plus validity of new tests",
+    "complete real-source to reachable iPad monitor path including TLS, auth, origin and lifecycle"
+  ],
+  "allowed_actions": [
+    "read exact artifacts",
+    "run non-mutating checks in an isolated environment",
+    "produce a review report and implementation recommendation"
+  ],
+  "forbidden_actions": [
+    "modify product files or branches",
+    "apply the Forge patch",
+    "merge or publish",
+    "deploy or create a hosting/tunnel account",
+    "claim iPad compatibility without a real-device test"
+  ],
+  "expected_result": "Verdict for UI patch, one complete pilot architecture, exact later change set and test plan, risks and cost/operating range; explicitly state that no implementation occurred.",
+  "stop_condition": "Return the review or one exact evidence blocker. Await Peter's later implementation instruction."
+}

@@ -1,0 +1,19 @@
+Checked by Atlas on 2026-10-17 against exact baseline
+c7a8da04d9b06d83edcd110f210c0cf84d4aa8ba.
+
+PASS  git apply --check forge-original-c2.patch
+PASS  node --check feld/live.js after isolated patch application
+PASS  node --check tests/AG-BALL-LIVE-001-local-live.cjs after isolated patch application
+CONFIRMED local_server.py VERSION = AG-BALL-LIVE-001-c1
+CONFIRMED proposed index.html/live.js page marker = AG-BALL-LIVE-001-c2
+
+Patch SHA-256:
+0abe225d74e2814cde3b0deafcc4c9a6d17c1fb1bfdfeeb697b82f17e94036bc
+
+Patch numstat:
+95 insertions, 7 deletions   feld/index.html
+80 insertions, 37 deletions  feld/live.js
+91 insertions, 4 deletions   tests/AG-BALL-LIVE-001-local-live.cjs
+
+These are mechanical checks only. No browser, behavioral, layout, iPad or
+independent-review PASS is claimed.
