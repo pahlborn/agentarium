@@ -1,0 +1,46 @@
+{
+  "schema": "agentarium.handoff.v0",
+  "task_id": "AG-BALL-LIVE-001-FORGE-ORIGINAL-V2",
+  "worker_role": "coding-agent",
+  "version": 2,
+  "authority": "Peter authorized next local live connection to Original with 'Bitte weiter' on 2026-10-17 after real E1 PASS. Authorized bounded implementation and verification; no hosting account, merge, Pages release or deployment.",
+  "goal": "Build the smallest local vertical slice: ORIGINAL page already open, no reload; a running real Claude worker produces a stream tool-use start, host forwards safe metadata to local server; page receives continuously and visibly displays it. The paid real-source verification is arranged separately by Atlas, not simulated by tests.",
+  "baseline": "d111b062770e32dbef0f9bb618a4923d88ff20be",
+  "allowed_paths": [
+    "feld/index.html",
+    "feld/live.js",
+    "pilot/AG-BALL-LIVE-001/local_server.py",
+    "tests/AG-BALL-LIVE-001-local-live.cjs",
+    "pilot/AG-BALL-LIVE-001/README.md"
+  ],
+  "scope": "LOCAL experiment candidate only. Host materializes pinned Original feld/ files. Reuse current UI/hooks, add minimal live bootstrap, safe progress type and transport. Local bounded event log/cursor may be in memory; explicitly no durability/archiving claim. Do not implement full hosted V3. Do not rebuild Original.",
+  "requirements": [
+    "Inspect actual F0 code/ARTEN/closure/hooks/field rendering before edits. Preserve Original appearance and demo route; query ?ball_live=1 enables experiment and disables automatic demo. Provide unique explicit candidate version detectable in UI and JS.",
+    "Choose the simplest continuous same-origin transport (SSE preferred), local server binds 127.0.0.1 on port0 supported, serves pinned feld plus live.js, and exposes machine-readable JSON READY on stdout with actual URL/port. Python stdlib only, ThreadingHTTPServer. Server command documented exactly.",
+    "Local ingest POST /ingest accepts a normalized safe event {id,run_id,actor,kind,title,recipient,source_evidence,source_tool_id}; test kind progress from forge. Reject invalid bodies, duplicates have no UI double effect; local ingest token from server env BALL_INGEST_TOKEN. Token never sent to browser. GET health for readiness.",
+    "Browser connects before source work begins; an event after connection updates existing Original via __agLauf/__agEreignis/__agStrom without navigation/reload or eval-based injection. Progress must not finish tasks or claim result. Add only minimal progress ARTEN behavior.",
+    "Show event ID and title in visible UI for pixel evidence. data provenance labels must honestly state runtime_stream. A debug object window.__agBallLive may expose accepted IDs/state/last event for tests but cannot replace visible proof.",
+    "Handle viewer disconnection/reconnection with dedupe and bounded event catch-up within process lifetime. Use Last-Event-ID/cursor and make gaps explicit. No guaranteed durable archive. Connection loss/heartbeat/stale must not invent idle/done.",
+    "Service worker must not intercept local stream or old adapter assets in ball_live mode. Choose bounded local mode bypass/skip registration and no-store local server responses; preserve normal Original behavior. Mixed versions refuse activation or show diagnostic.",
+    "Escape every external text field reaching UI. Prefer textContent; audit reachable sinks from event/run titles/provenance. No secrets/raw tool arguments/thinking to UI.",
+    "Create Playwright CJS verification using available require('playwright'). Nonpaid test may inject explicitly SYNTHETIC test fixture into local ingest for component checks, labelled; must never call these real-source evidence. Test opens Original first, waits transport ready, then POST, verifies accepted ID, visible title/ID, screenshot, no reload, progress no completion, rejects unknown kind, dedupe, reconnect. No fixed sleep for correctness; bounded waits.",
+    "Output supports Atlas separately verifying one actual E1-type stream event without changing page from fixture to real. Test helpers must not require fake data to start or prepopulate UI. Document how host sends real stream metadata while process alive and how source/transport/browser evidence correlate."
+  ],
+  "constraints": [
+    "Effective tools Read and Edit only. All allowed new paths precreated with inert placeholders. Replace placeholder using Edit; code search via HOST_CODE_MAP.txt then Read offsets. Bash denied, tests NOT_RUN by you.",
+    "No new npm dependencies or external provider/service. Browser Playwright package already exists in Atlas runtime, headless Chromium availability to be verified.",
+    "Do not adopt prior one-event.json load-on-open suggestion; Peter requires already open monitor receiving during work.",
+    "Unresolved V3 clock bounds are not valid. For local proof use same host monotonic process/HTTP/browser timing and visible screenshot before verified CLI process exit. Report internal CLI termination-time uncertainty honestly.",
+    "Reconciler/180-day archive/hosted privacy choices deferred from this bounded local slice; do not implement them or claim closed.",
+    "Keep handback concise (<1200 words), identify real technical blockers. Do not demand a third Archibald full spec or Peter's routine implementation choices.",
+    "Local runtime has Playwright JS but browser binary download currently fails with corrupt/truncated ZIP. Write normal Playwright test; Atlas may run it in GitHub Actions with installed browser. Do not claim browser test PASS."
+  ],
+  "model_routing": {
+    "requested_model": "opus",
+    "requested_effort": "high",
+    "actual_model": "unconfirmed",
+    "budget": "One complete implementation session, no tiny turn or cost cap, no automatic retry; stop on credit/key/quota failure."
+  },
+  "expected_result": "CA_IMPLEMENTED with changed files, exact launch/test commands, critical residual risks and NOT_RUN tests, or CA_BLOCKED with one exact blocker.",
+  "recovery": "V1 returned CA_BLOCKED before edits: actual runtime only Read/Edit. Atlas diagnosed. Four new allowed files now exist as inert placeholders; use Edit to replace them. HOST_CODE_MAP.txt gives exact Original line numbers; read it first. Effective Read/Edit is sufficient; no tool rights expanded, no blind repeat. Implement within same user-approved scope."
+}
