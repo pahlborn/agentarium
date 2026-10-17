@@ -1,0 +1,34 @@
+name: Forge direct GitHub Original live pilot
+on:
+  push:
+    branches: [agent/ball-live-concept-20261017]
+    paths: ['handoffs/AG-GH-LIVE-001-activate.json']
+permissions:
+  contents: read
+  issues: write
+concurrency:
+  group: ag-gh-live-forge-v1
+  cancel-in-progress: false
+jobs:
+  forge:
+    if: github.repository == 'pahlborn/agentarium' && github.actor_id == '277496791' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - run: python3 -m py_compile relay/forge_github_live_once.py
+      - run: npm install --global @anthropic-ai/claude-code
+      - name: Forge observes and implements
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python3 relay/forge_github_live_once.py
+      - if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: forge-github-live-output
+          path: forge-github-live-output/
+          retention-days: 14
