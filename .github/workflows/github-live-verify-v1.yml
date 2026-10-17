@@ -1,0 +1,39 @@
+name: Verify Original direct GitHub live pilot
+on:
+  push:
+    branches: [agent/ball-live-concept-20261017]
+    paths: ['handoffs/AG-GH-LIVE-001-verify-activate.json']
+permissions:
+  contents: read
+concurrency:
+  group: ag-gh-live-verify-v1
+  cancel-in-progress: false
+jobs:
+  browser:
+    if: github.repository == 'pahlborn/agentarium' && github.actor_id == '277496791'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: c59b4afb759ee37f942f1dce16fdd7a639f5ac07
+          persist-credentials: false
+      - name: Rebuild exact Original candidate
+        run: python3 previews/AG-VISUAL-005-feld/bauen.py /tmp/ag-gh-built --stuecke-aus feld/index.html --vergleich feld/index.html --gebaut 2026-10-17T20:45Z --icons feld --one-event feld/one-event.json
+      - name: Install test browser
+        run: |
+          npm install --prefix "$RUNNER_TEMP/ag-gh-browser" playwright@1.62.1
+          node "$RUNNER_TEMP/ag-gh-browser/node_modules/playwright/cli.js" install --with-deps chromium
+      - name: Synthetic component and Original regression checks
+        env:
+          NODE_PATH: ${{ runner.temp }}/ag-gh-browser/node_modules
+        run: node tests/AG-GH-LIVE-001.cjs /tmp/ag-gh-built
+      - name: Preserve candidate and test output
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: github-live-browser-evidence
+          path: |
+            /tmp/ag-gh-built/
+            artifacts/
+          retention-days: 14
