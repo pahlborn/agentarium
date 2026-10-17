@@ -1,0 +1,39 @@
+{
+  "task_id": "AG-PILOT-001-ONE-EVENT",
+  "status": "READY_FOR_EXPLICIT_PUBLICATION_DECISION",
+  "candidate_commit": "d111b062770e32dbef0f9bb618a4923d88ff20be",
+  "candidate_branch": "agent/mvp-one-event-release-20261017",
+  "expected_main": "5529391bd8215db6384ebb9bac708dfb2e6aab02",
+  "changes": [
+    "feld/index.html",
+    "feld/sw.js",
+    "feld/one-event.json"
+  ],
+  "files": [
+    {
+      "path": "feld/index.html",
+      "sha": "fa28a3730539cf4cca45704cb7f6483daf3e8bc9"
+    },
+    {
+      "path": "feld/sw.js",
+      "sha": "956bbd9f88b8347e838811f725d10418e8be6698"
+    },
+    {
+      "path": "feld/one-event.json",
+      "sha": "01c3ed8ec7b7fbec6856987f732baca1ffc27f12"
+    }
+  ],
+  "build_evidence": "https://github.com/pahlborn/agentarium/actions/runs/38960534741",
+  "publishing_source": {
+    "branch": "main",
+    "source": ".",
+    "evidence": "successful previous Pages build job117174180058 log: checkout ref main, build source ., artifact includes feld/"
+  },
+  "test_run": "https://github.com/pahlborn/agentarium/actions/runs/39007084765",
+  "independent_qa": "governance/AG-PILOT-001-one-event-sentinel-qa-v1.md",
+  "published": false,
+  "merge": false,
+  "remaining_acceptance": "load Fassung47 on original URL, read exact observed JSON, original hooks accepted and real event visible",
+  "ui_limitation": "MVP diagnostics overlaps left event list; central event remains visible in CI. No Safari/iPad acceptance yet.",
+  "known_runtime_limit": "Work Cloud Browser lacks WebGL; software-WebGL CI needed for independent rendering proof after publication."
+}
