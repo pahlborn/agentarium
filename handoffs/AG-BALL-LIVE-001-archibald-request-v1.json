@@ -1,0 +1,97 @@
+{
+  "schema": "agentarium.handoff.v0",
+  "task_id": "AG-BALL-LIVE-001-ARCHIBALD-SPEC-V1",
+  "worker_role": "spec-agent",
+  "mode": "read-only MVP specification",
+  "branch": "agent/ball-live-concept-20261017",
+  "outcome": "Create a proportional, implementation-ready MVP specification and initial test cases for a genuine two-provider live prototype on the ORIGINAL Agentarium, preserving the full target architecture and all evidence limits.",
+  "authority": "Peter authorized concept/feasibility, MVP definition and later prototype build. This invocation is specification only. No implementation, infrastructure activation, provider account, secret, test mutation, merge, release or publication.",
+  "baselines": {
+    "published_original": "d111b062770e32dbef0f9bb618a4923d88ff20be",
+    "contract_and_reducer": "da860fd19f38e9938ed201546f2a6e5b4cc765f8",
+    "latest_local_adapter_evidence_branch_head": "800874ee1c6fd4ed3a806ba7774a19c2e11f3878",
+    "concept_draft": "2b9e93e7c52807f54ed83b8d898265737ad59145"
+  },
+  "required_reading": [
+    "AGENTS.md",
+    ".claude/agents/spec-agent.md",
+    "governance/agentarium-rulebook-v1.2.md",
+    "governance/agentarium-process-v1.2.md",
+    "governance/product-development-practice-v1.md",
+    "handoffs/AG-BALL-LIVE-001-charter-v1.md",
+    "handoffs/AG-BALL-LIVE-001-team-input-v1.md",
+    "handoffs/AG-BALL-LIVE-001-machbarkeitsstudie-v1.md",
+    "handoffs/AG-BALL-LIVE-001-forge-handback-v1.md",
+    "handoffs/AG-PILOT-001-one-event-implementation-v1.md",
+    "governance/AG-PILOT-001-one-event-published-sentinel-qa-v1.md"
+  ],
+  "external_reading": [
+    {
+      "ref": "d111b062770e32dbef0f9bb618a4923d88ff20be",
+      "path": "feld/index.html",
+      "as": "external/published-d111/feld/index.html"
+    },
+    {
+      "ref": "d111b062770e32dbef0f9bb618a4923d88ff20be",
+      "path": "feld/sw.js",
+      "as": "external/published-d111/feld/sw.js"
+    },
+    {
+      "ref": "da860fd19f38e9938ed201546f2a6e5b4cc765f8",
+      "path": "specifications/AG-VISUAL-005-schnittstelle-v2.1.2-abschluss-K1-K3.md",
+      "as": "external/contract-da860fd/AG-VISUAL-005-schnittstelle-v2.1.2-abschluss-K1-K3.md"
+    },
+    {
+      "ref": "da860fd19f38e9938ed201546f2a6e5b4cc765f8",
+      "path": "specifications/AG-VISUAL-005-schemas-v2/vertrag-v2-1.schema.json",
+      "as": "external/contract-da860fd/vertrag-v2-1.schema.json"
+    },
+    {
+      "ref": "da860fd19f38e9938ed201546f2a6e5b4cc765f8",
+      "path": "tests/AG-VISUAL-005-referenz-reducer.py",
+      "as": "external/contract-da860fd/AG-VISUAL-005-referenz-reducer.py"
+    },
+    {
+      "ref": "800874ee1c6fd4ed3a806ba7774a19c2e11f3878",
+      "path": "previews/AG-VISUAL-005-feld/activity-input.js",
+      "as": "external/local-adapter-800874e/activity-input.js"
+    }
+  ],
+  "binding_corrections": [
+    "Do not adopt Forge's A0 5-6 second browser polling as the MVP. Official GitHub docs say only correctly authorized conditional 304 requests avoid the primary limit; unauthenticated public REST is 60/hour, while no durable GitHub token may be embedded in the static Original. GitHub also recommends webhooks instead of polling.",
+    "Use the published original d111b062 as product baseline, not the older Fassung 46 copy Forge inspected on the concept branch.",
+    "The MVP target is a minimal hosted relay from the start. Work may initially emit a clearly labelled cooperative checkpoint via a signed GitHub issue_comment webhook if Peter accepts public minimal metadata; Claude may use the controlled host stream/hook and direct authenticated ingest or the same webhook.",
+    "The 17 current kinds lack a side-effect-free progress event, and the external-data XSS path plus missing dedupe/order/provenance must be addressed before external ingest.",
+    "Connection health, run state, agent activity and product progress remain distinct. Silence is unknown/stale, not idle or done."
+  ],
+  "required_output": [
+    "One clearly named MVP Epic with 3-6 user stories, followed by a separate post-MVP target roadmap; no unnecessary full-program specification",
+    "Exact functional and non-functional requirements, data/source truth semantics, trust/provenance labels and accepted event kinds",
+    "Exact bounded implementation baseline, allowed components/paths and reuse of existing hooks, V2.1 artifacts and local adapter evidence",
+    "Versioned interface delta for progress, ingest, journal, read stream/catch-up and original adapter; no silent rewrite of the full V2.1 contract",
+    "Given/When/Then acceptance criteria traceable Epic -> story -> requirement -> test",
+    "Initial executable test cases covering a still-running event from each provider, original visible pixels, latency measurement, dedupe/order, interruption/reconnect, stale-vs-idle, auth/injection, archive/replay and concurrent sources",
+    "Explicit prerequisites and Stop/Blocked rules, including the one decision package Peter must approve before implementation",
+    "Implementation sequence for Forge, independent Sentinel evidence and Argus review without merge/release/publish authority",
+    "Open questions that materially change implementation; resolve technical detail yourself where the evidence permits"
+  ],
+  "model_routing": {
+    "task_complexity": "K",
+    "risk": "high",
+    "role_default": "opus/high",
+    "requested_model": "opus",
+    "requested_reasoning": "high",
+    "actual_model": "unconfirmed",
+    "actual_reasoning": "unconfirmed",
+    "budget": "One complete specification session without tiny turn/cost cap; no model benchmark or automatic retry. Stop on key, credit or quota error and preserve evidence."
+  },
+  "forbidden": [
+    "implementation or edits",
+    "deployment or publishing",
+    "inventing active Work hooks or full telemetry",
+    "substituting a static file, terminal-only event, browser polling or synthetic demo for the live MVP",
+    "embedding a long-lived provider/GitHub secret in the browser",
+    "claiming Peter approved latency, provider, public event metadata or release"
+  ],
+  "expected_result": "German SA_READY with proportional implementation-ready specification and initial tests, or one SA_QUESTION only if a truly material Peter decision prevents useful completion. No implementation."
+}
