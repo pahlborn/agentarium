@@ -1,0 +1,57 @@
+name: Original local live browser and real source verification
+on:
+  push:
+    branches: [agent/ball-live-concept-20261017]
+    paths: ['handoffs/AG-BALL-LIVE-001-original-verify-activate.json']
+permissions:
+  contents: read
+  issues: write
+concurrency:
+  group: agentarium-original-live-verification-v1
+  cancel-in-progress: false
+jobs:
+  verify:
+    if: github.repository == 'pahlborn/agentarium' && github.repository_owner_id == '277496791' && github.actor_id == '277496791' && github.event_name == 'push' && github.ref_name == 'agent/ball-live-concept-20261017'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: c7a8da04d9b06d83edcd110f210c0cf84d4aa8ba
+          path: app
+          persist-credentials: false
+      - name: Install verification browser dependency outside product
+        run: npm install --prefix "$RUNNER_TEMP/ball-browser" playwright@1.62.1
+      - name: Install Chromium for verification
+        run: node "$RUNNER_TEMP/ball-browser/node_modules/playwright/cli.js" install --with-deps chromium
+      - name: Syntax checks
+        run: |
+          python3 -m py_compile app/pilot/AG-BALL-LIVE-001/local_server.py relay/ball_original_real_verify_once.py
+          node --check app/feld/live.js
+          node --check app/tests/AG-BALL-LIVE-001-local-live.cjs
+          node --check relay/ball_original_real_browser.cjs
+      - name: Synthetic component browser checks
+        env:
+          BALL_OUT_DIR: ${{ github.workspace }}/ball-component-output
+        run: NODE_PATH="$RUNNER_TEMP/ball-browser/node_modules" node app/tests/AG-BALL-LIVE-001-local-live.cjs
+      - name: Install existing Claude CLI for one real proof
+        run: npm install --global @anthropic-ai/claude-code
+      - name: Real source to already open Original
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: NODE_PATH="$RUNNER_TEMP/ball-browser/node_modules" python3 relay/ball_original_real_verify_once.py
+      - name: Preserve component and real evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: ball-original-live-verification
+          path: |
+            ball-component-output/
+            ball-original-real-output/
+          if-no-files-found: warn
+          retention-days: 14
