@@ -5,7 +5,7 @@ from pathlib import Path
 from forge_one_shot import api, API
 from claude_cli_diagnostics import run_json, validate_handback, ClaudeCliFailure
 
-TASK = 'AG-BALL-LIVE-001-ARCHIBALD-SPEC-V1'
+TASK = 'AG-BALL-LIVE-001-ARCHIBALD-SPEC-V2'
 BRANCH = 'agent/ball-live-concept-20261017'
 PROFILE = 'ee21df45884c9f4fef3d493fca739e0e87c3cb55'
 OUT = Path('archibald-ball-live-spec-output').resolve()
