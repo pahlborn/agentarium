@@ -54,3 +54,13 @@ G2 Archibalds Kriterien sind fuer Sentinel ausfuehrbar; Argus findet keinen unbe
 G3 Peter entscheidet ueber Architekturvariante, Betriebsform, Ziel-Latenz und die getrennte Pilot-/Implementierungsfreigabe.
 
 Die Erstellung dieser Studie aktiviert keines dieser Umsetzungs-Gates automatisch.
+
+## Erweiterter Lieferumfang: MVP und Prototyp
+
+Peter hat am 2026-10-17 nach Start der Studie zusaetzlich eine verbindliche MVP-Definition und den anschliessenden Bau eines echten Prototyps beauftragt.
+
+Reihenfolge: vollstaendige Machbarkeitsstudie -> technische Zielarchitektur -> versionierte MVP-Spezifikation und Nachweisplan -> unabhaengiges Vorab-Review -> nur notwendige Betriebsentscheidung durch Peter -> Forge-Implementierung -> Sentinel-Nachweis -> Argus-Ergebnisreview.
+
+Vorlaeufiger, durch Archibald und die Reviews zu schaerfender MVP-Kern: Das bereits geoeffnete ORIGINAL-Agentarium zeigt ohne Reload mindestens ein eindeutig korreliertes, echtes Zwischenereignis eines noch laufenden ChatGPT/Atlas-Agenten und eines noch laufenden Claude-Code-Agenten. Quelle, Bridge, Transport, Original-UI und sichtbare Darstellung sind fuer dieselbe Run-/Event-ID nachgewiesen. Abschlussereignis, statische Datei, Demo-/Fixture-Verkehr oder eine Ersatzoberflaeche bestehen diese Abnahme nicht.
+
+Der Prototyp darf erst gebaut werden, wenn keine unbekannte Plattformluecke als vorhandene Faehigkeit behandelt wird. Externe Infrastruktur, neue Zugangsdaten, veroeffentlichte Endpunkte, Merge und Release bleiben gesonderte Entscheidungen. Das Bau-Mandat ist keine pauschale Freigabe fuer diese Aktionen.
