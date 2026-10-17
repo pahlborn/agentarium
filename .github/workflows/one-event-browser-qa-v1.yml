@@ -2,7 +2,7 @@ name: Independent one real event browser QA
 on:
   push:
     branches: [agent/mvp-one-event-20261017]
-    paths: ['handoffs/AG-PILOT-001-one-event-qa-activate.json']
+    paths: ['handoffs/AG-PILOT-001-one-event-qa-activate.json', 'handoffs/AG-PILOT-001-one-event-qa-v2-activate.json']
 permissions:
   contents: read
 concurrency:
