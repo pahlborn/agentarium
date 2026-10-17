@@ -32,7 +32,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: forge-ball-live-original-output
-          path: forge-ball-live-original-output/
+          name: forge-ball-live-original-v2-output
+          path: forge-ball-live-original-v2-output/
           if-no-files-found: warn
           retention-days: 14
