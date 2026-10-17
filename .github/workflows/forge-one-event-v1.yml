@@ -1,0 +1,38 @@
+name: Forge single real event MVP
+on:
+  push:
+    branches: [agent/mvp-one-event-20261017]
+    paths: ['handoffs/AG-PILOT-001-one-event-activate.json']
+permissions:
+  contents: read
+  issues: write
+concurrency:
+  group: agentarium-forge-one-event-v1
+  cancel-in-progress: false
+jobs:
+  forge:
+    if: github.repository == 'pahlborn/agentarium' && github.repository_owner_id == '277496791' && github.actor_id == '277496791' && github.event_name == 'push' && github.ref_name == 'agent/mvp-one-event-20261017'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Validate relay syntax without model calls
+        run: python3 -m py_compile relay/forge_one_event_once.py relay/claude_cli_diagnostics.py
+      - name: Install existing Claude Code CLI dependency
+        run: npm install --global @anthropic-ai/claude-code
+      - name: Authorized Forge implementation session
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python3 relay/forge_one_event_once.py
+      - name: Preserve patch, handback and runtime evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: forge-one-event-output
+          path: forge-one-event-output/
+          if-no-files-found: warn
+          retention-days: 14
