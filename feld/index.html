@@ -2222,7 +2222,18 @@
 
      Der Bauzeitpunkt kommt beim Bauen aus der Uhr. Von Hand gepflegte
      Datumsangaben sind nach der zweiten Änderung falsch. */
-  var FASSUNG = '47', GEBAUT = '2026-10-17T05:40Z';
+  var FASSUNG = '48', GEBAUT = '2026-10-17T20:45Z';
+
+  /* AG-GH-LIVE-001: JEDE TEXTSENKE MASKIERT.
+     Seit Live-Daten von aussen kommen (GitHub-Kommentare, one-event.json),
+     darf kein Datenfeld ungeprueft in innerHTML landen. Fuer die beiden
+     aufgezeichneten Stuecke ist die Ausgabe Zeichen fuer Zeichen gleich:
+     Sie enthalten keines der fuenf Zeichen. */
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
 
   /* DIE BETRIEBSART. Sie kommt aus den Daten; fehlt sie, gilt `demo`.
      Alles, was sich zwischen Prototyp und Produktivbetrieb unterscheidet,
@@ -3250,7 +3261,7 @@
          Farbe — bei den dunkleren Tönen war es dann nicht zu lesen, und
          eine Beschriftung, die man nicht lesen kann, ist Dekoration. */
       e.innerHTML = '<u style="color:' + hex(S.ton) + '">angenommen</u>' +
-                    '<span>' + S.text + '</span>';
+                    '<span>' + esc(S.text) + '</span>';
       werkEl.appendChild(e);
       setTimeout(function () { if (e.parentNode) e.remove(); }, 8600);
       while (werkEl.children.length > 3) werkEl.removeChild(werkEl.firstChild);
@@ -3319,8 +3330,8 @@
         zuletzt.forEach(function (r) {
           reg += '<div class="wZeile z-' + r.zustand + '">' +
                  '<u style="color:' + hex(r.ton) + '">' +
-                 (r.kennung || 'ohne Kennung') + '</u>' +
-                 (r.version ? '<i>' + r.version + '</i>' : '') +
+                 esc(r.kennung || 'ohne Kennung') + '</u>' +
+                 (r.version ? '<i>' + esc(r.version) + '</i>' : '') +
                  '<s>' + r.zustand + '</s></div>';
         });
         if (register.length > 6)
@@ -3340,7 +3351,7 @@
       };
       werkNameEl.innerHTML =
         /* 1. Was es ist */
-        '<div class="wTitel">' + (STUECK.titel || STUECK.projekt || '') + '</div>' +
+        '<div class="wTitel">' + esc(STUECK.titel || STUECK.projekt || '') + '</div>' +
         /* 2. Wie weit */
         '<div class="wBalken"><span style="width:' +
           (teil * 100).toFixed(1) + '%"></span></div>' +
@@ -3355,8 +3366,8 @@
           reihe('fertig', bausteine.length, 'sFertig') +
         '</div>' +
         /* 4. Woher und was das Konzept behauptet */
-        '<div class="wOrt">' + (STUECK.ablage || 'extern') +
-          (STUECK.umfang ? ' · laut Konzept ' + STUECK.umfang : '') + '</div>' +
+        '<div class="wOrt">' + esc(STUECK.ablage || 'extern') +
+          (STUECK.umfang ? ' · laut Konzept ' + esc(STUECK.umfang) : '') + '</div>' +
         /* 5. Woraus es besteht */
         reg;
     }
@@ -3861,7 +3872,7 @@
     stoppEl.innerHTML =
       '<b style="color:' + K.farbe + '">' + K.wort + '</b>' +
       '<i>' + A.name + ' · ' + A.rolle + '</i>' +
-      '<p>' + (S.grund || 'Die Daten nennen keinen Grund.') + '</p>' +
+      '<p>' + esc(S.grund || 'Die Daten nennen keinen Grund.') + '</p>' +
       '<small>' + K.was + '</small>';
     stoppEl.classList.add('auf');
     var b = stoppEl.getBoundingClientRect();
@@ -4352,6 +4363,18 @@
       while (naechstes < LISTE.length &&
              LISTE[naechstes].t <= zeit) {
           var E = LISTE[naechstes++];
+        /* AG-GH-LIVE-001: Fortschritt ist eine Meldung AM PLATZ, kein Flug.
+           Er beendet keinen Auftrag, eroeffnet keinen, blockiert nichts und
+           hinterlaesst nichts -- ein kurzer Puls und eine lesbare Zeile.
+           Diese Art gibt es nur im GitHub-Livebetrieb (siehe __agEreignis). */
+        if (E.art === 'progress') {
+          stromZeile(E, FORTSCHRITT);
+          melden(E.von, '', 'progress', E.text, FORTSCHRITT,
+                 E.id + ' \u00b7 ' + herkunftWort(E.herkunft));
+          pulsAn(E.von);
+          tunStill = 0;
+          continue;
+        }
         /* Was beendet die Arbeit? Nicht alles, was jemand von sich gibt.
            Eine Rückfrage beendet sie nicht — man fragt und arbeitet weiter;
            ein Widerspruch und ein gemeldeter Fehler auch nicht. Was sie
@@ -4565,14 +4588,14 @@
       h += '<ul class="wProjekte">';
       STUECKE.forEach(function (S, i) {
         h += '<li' + (i === stueckNr ? ' class="hier"' : '') +
-             ' data-nr="' + i + '">' + (S.projekt || S.titel || ('Stück ' + (i+1))) +
+             ' data-nr="' + i + '">' + esc(S.projekt || S.titel || ('Stück ' + (i+1))) +
              '</li>';
       });
       h += '</ul>';
     }
     if (STUECK.titel && STUECK.titel !== STUECK.projekt)
-      h += '<p class="wTitel">' + STUECK.titel + '</p>';
-    if (STUECK.beschreibung) h += '<p>' + STUECK.beschreibung + '</p>';
+      h += '<p class="wTitel">' + esc(STUECK.titel) + '</p>';
+    if (STUECK.beschreibung) h += '<p>' + esc(STUECK.beschreibung) + '</p>';
 
     h += '<ul class="wModi">';
     ['demo', 'archiv', 'live'].forEach(function (m) {
@@ -4678,14 +4701,15 @@
     e.__wer = E.an; e.__auftrag = auftrag;
     var zu = zustandVon(m);
     e.innerHTML = auftrag
-      ? ('<u style="color:' + hex(B.farbe) + '">' + (E.kommando || '') +
-         '</u> <b style="color:' + hex(B.farbe) + '">' + E.an + '</b>' +
-         (E.modell ? ' <i class="agMotor">' + E.modell + '</i>' : '') +
-         '<br><span>' + E.text + '</span>')
-      : ('<u style="color:' + hex(A.farbe) + '">' + E.von + '</u>' +
-         (B ? ' <b style="color:' + hex(B.farbe) + '">→ ' + E.an + '</b>' : '') +
-         ' <s class="z-' + zu[0] + '">' + E.art + '</s>' +
-         '<br><span>' + E.text + '</span>');
+      ? ('<u style="color:' + hex(B.farbe) + '">' + esc(E.kommando || '') +
+         '</u> <b style="color:' + hex(B.farbe) + '">' + esc(E.an) + '</b>' +
+         (E.modell ? ' <i class="agMotor">' + esc(E.modell) + '</i>' : '') +
+         '<br><span>' + esc(E.text) + '</span>')
+      : ('<u style="color:' + hex(A.farbe) + '">' + esc(E.von) + '</u>' +
+         (B ? ' <b style="color:' + hex(B.farbe) + '">→ ' + esc(E.an) + '</b>' : '') +
+         ' <s class="z-' + zu[0] + '">' + esc(E.art) + '</s>' +
+         '<br><span>' + esc(E.text) + '</span>');
+    if (MODUS === 'live' && E.id) e.setAttribute('data-ereignis', String(E.id).slice(0, 120));
     laeuftEl.appendChild(e);
     strom.push(e);
     /* Vier. Vorher waren es sechzehn, weil die Liste über den ganzen
@@ -4834,7 +4858,7 @@
     return { top: parseFloat(e.style.top), rest: 1 };
   }
 
-  function melden(von, an, art, text, m) {
+  function melden(von, an, art, text, m, zusatz) {
     var A = nachName[an] || nachName[von];
     if (!A || !nachName[von]) return;
     var o = heimat(A);
@@ -4866,8 +4890,9 @@
     e.style.textAlign = Math.cos(zm) < -0.25 ? 'right' : 'left';
     var zu = zustandVon(m);
     e.innerHTML = '<u style="color:' + hex(nachName[von].farbe) + '">' +
-                  von + '</u> <s class="z-' + zu[0] + '">' + art + '</s>' +
-                  '<br><span>' + text + '</span>';
+                  esc(von) + '</u> <s class="z-' + zu[0] + '">' + esc(art) + '</s>' +
+                  '<br><span>' + esc(text) + '</span>' +
+                  (zusatz ? '<br><small class="agHerkunft">' + esc(zusatz) + '</small>' : '');
     rufeEl.appendChild(e);
     /* Nach außen schreiben ist richtig, solange außen Platz ist. Seit der
        Kreis nach rechts gewandert ist, stehen Nova, Argus und Archibald
@@ -5011,6 +5036,43 @@
                         recommendation:1, contribution:1 };
   var liveNr = 0;
 
+  /* ============ AG-GH-LIVE-001: FORTSCHRITT, NUR IM GITHUB-LIVEBETRIEB ============
+
+     Mit Absicht NICHT in ARTEN: Dort stuende er in der Legende von Demo
+     und Archiv und waere ueber __agEreignis in jedem Livebetrieb
+     annehmbar. Er gilt nur, wenn die Seite mit ?live=github geoeffnet
+     wurde. Abgabe 0, kurzer Nachhall: "hinterlaesst nichts". Er schliesst
+     keine Aufgabe, eroeffnet keine Arbeit und behauptet kein andauerndes
+     Arbeiten -- er sagt nur: diese Meldung ist eingetroffen. */
+  var ghLive = false;
+  var FORTSCHRITT = { abgabe: 0.0, nachhall: 0.9, gestalt: 'zustand', kraft: 0.0,
+                      tempo: 1.0, was: 'Fortschritt (nur GitHub-Live)' };
+  function herkunftWort(h) {
+    if (h === 'reported_checkpoint')
+      return 'reported_checkpoint \u2014 gemeldet, kein Laufzeitbeleg';
+    if (h === 'runtime_stream') return 'runtime_stream \u00b7 GitHub-Kommentar';
+    return 'Herkunft unbekannt';
+  }
+  /* Ein kurzer Puls am Platz des Meldenden. Knoten und Faeden ohne Abgabe:
+     sichtbar, und nach einer Sekunde nichts mehr. */
+  function pulsAn(name) {
+    var A = nachName[name];
+    if (!A || !window.__feld) return;
+    var p = heimat(A);
+    window.__feld.knoten(p[0], p[1], 0.80, A.farbe, 0, 16, 0.9);
+    for (var k = 0; k < 10; k++) {
+      var w = k * 0.6283;
+      window.__feld.strang(p[0] + Math.cos(w) * 8, p[1] + Math.sin(w) * 8,
+        Math.cos(w) * 150, Math.sin(w) * 150, 0.34, 0.55, A.farbe, 0);
+    }
+    var el = ring.children[AGENTEN.indexOf(A)];
+    if (el) {
+      el.classList.remove('agGhPuls'); void el.offsetWidth;
+      el.classList.add('agGhPuls');
+      setTimeout(function () { el.classList.remove('agGhPuls'); }, 1600);
+    }
+  }
+
   /* ============ WELCHER LAUF HIER LAEUFT ============
 
      Ohne das zeigt das Feld im Livebetrieb den Namen des zuletzt
@@ -5048,7 +5110,14 @@
 
     var art = (typeof e.kind === 'string') ? e.kind.trim() : '';
     if (!art) return nein('kind fehlt');
-    if (!ARTEN[art]) return nein('kind unbekannt: ' + art);
+    var fortschritt = (ghLive && art === 'progress');
+    if (!ARTEN[art] && !fortschritt) return nein('kind unbekannt: ' + art);
+    var herkunft = '';
+    if (fortschritt) {
+      herkunft = (e.source_evidence === 'runtime_stream' ||
+                  e.source_evidence === 'reported_checkpoint') ? e.source_evidence : '';
+      if (!herkunft) return nein('source_evidence fehlt bei progress');
+    }
 
     var text = (typeof e.title === 'string') ? e.title.trim() : '';
     if (!text) return nein('title fehlt');
@@ -5077,7 +5146,10 @@
        `belegt: false` heisst: Es ist gearbeitet und nichts gemeldet
        worden. Dann traegt das Ereignis KEINE Zahlen -- das ist etwas
        anderes als null, und das Feld zeigt dafuer "keine Kostenangabe". */
-    var v = e.verbrauch;
+    /* Fortschritt traegt keinen Verbrauch und kein Modell: Aus solchen
+       Angaben darf weder Arbeit noch Abschluss gemacht werden. */
+    var v = fortschritt ? null : e.verbrauch;
+    if (fortschritt) E.herkunft = herkunft;
     if (v && typeof v === 'object' && v.belegt === true) {
       var tk = {};
       if (typeof v.output_tokens === 'number') tk.aus = v.output_tokens;
@@ -5086,7 +5158,7 @@
       for (var _k in tk) { E.tokens = tk; break; }
     }
     if (v && typeof v === 'object' && typeof v.actual_model === 'string')
-      E.modell = v.actual_model;
+      E.modell = v.actual_model.slice(0, 80);
     if (typeof e.caused_by !== 'undefined') E.caused_by = e.caused_by;
     if (typeof e.fictional === 'boolean') E.fictional = e.fictional;
     if (typeof e.occurred_at === 'string') E.occurred_at = e.occurred_at;
@@ -5523,7 +5595,7 @@
       h += '<div class="agMot' + ((S && !S.aus) ? ' tut' : '') +
            '" data-wer="' + A.name + '" data-y="' + Math.round(o[1]) +
            '" style="left:' + o[0] + 'px;top:' + (o[1] + 18) + 'px;color:' +
-           hex(A.farbe) + '">' + txt + zus + '</div>';
+           hex(A.farbe) + '">' + esc(txt) + zus + '</div>';
     });
     /* DER STATUS DER KOSTENBASIS, und er verschwindet nicht.
 
@@ -5753,6 +5825,37 @@
         ST.fehler = String(x && x.message || x);
         sag('MVP: kein Ereignis gelesen — ' + ST.fehler);
       });
+  })();
+
+  /* ============ AG-GH-LIVE-001: GITHUB-KOMMENTARE, DIREKT GELESEN ============
+
+     Nur auf ausdruecklichen Wunsch (`?live=github`), sonst geschieht hier
+     nichts: kein Abruf, kein Skript, keine Tafel. Das Original wird in den
+     Livebetrieb geschaltet (kein Selbststart, leere Liveliste) und laedt
+     den Adapter `github-live.js` von derselben Herkunft. Der Adapter liest
+     die Kommentare mit einem persoenlichen Lesetoken, das NUR im
+     Arbeitsspeicher der Seite liegt, und reicht ausschliesslich gepruefte,
+     neue Ereignisse an __agLauf / __agEreignis. */
+  (function () {
+    var wunsch = '';
+    try { wunsch = new URLSearchParams(location.search).get('live'); } catch (x) {}
+    if (wunsch !== 'github') return;
+    ghLive = true;
+    modusSetzen('live');
+    window.__agGithubBruecke = {
+      fassung: FASSUNG,
+      akteure: AGENTEN.map(function (a) { return a.name; }),
+      istLive: function () { return MODUS === 'live'; }
+    };
+    var s = document.createElement('script');
+    s.src = 'github-live.js?v=' + FASSUNG;
+    s.async = true;
+    s.onerror = function () {
+      var hw = document.getElementById('hinweis');
+      if (hw) { hw.textContent = 'GitHub-Live: github-live.js nicht geladen.';
+                hw.style.opacity = '1'; }
+    };
+    document.body.appendChild(s);
   })();
 
   /* Der Hinweis „Du darfst mitrühren" stammt aus Resonanz, wo er den
