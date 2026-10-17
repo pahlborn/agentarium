@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Agentarium Schlüssel-Probe</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Messgerät, eine Spalte: Urteil oben, die drei Messungen darunter. */
+:root { padding-top: env(safe-area-inset-top, 0px);
+         padding-bottom: env(safe-area-inset-bottom, 0px); color-scheme: light; }
+:root {
+  --grund:   #f4f5f7;
+  --blatt:   #ffffff;
+  --kante:   #d9dde3;
+  --schrift: #1e242c;
+  --leise:   #646e7b;
+  --ja:      #1f6f63;
+  --nein:    #9a4a35;
+  --offen:   #8a6a1f;
+  --ui:   'IBM Plex Sans', system-ui, sans-serif;
+  --zahl: 'IBM Plex Mono', ui-monospace, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --grund: #15191e; --blatt: #1d2227; --kante: #333a42;
+  --schrift: #e6e9ed; --leise: #99a3ae;
+  --ja: #6fc3b2; --nein: #d99478; --offen: #d4b465; color-scheme: dark;
+} }
+:root[data-theme="dark"] {
+  --grund: #15191e; --blatt: #1d2227; --kante: #333a42;
+  --schrift: #e6e9ed; --leise: #99a3ae;
+  --ja: #6fc3b2; --nein: #d99478; --offen: #d4b465; color-scheme: dark;
+}
+body { margin: 0; background: var(--grund); color: var(--schrift); font-family: var(--ui);
+  font-size: 16px; line-height: 1.55; }
+.huelle { max-width: 42rem; margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 2rem 3rem; display: flex; flex-direction: column; gap: 1.75rem; }
+h1 { font-size: 1.5rem; font-weight: 600; margin: 0; letter-spacing: -.01em;
+  text-wrap: balance; }
+.frage { color: var(--leise); margin: .35rem 0 0; }
+.urteil { background: var(--blatt); border: 1px solid var(--kante);
+  border-left: 4px solid var(--kante); border-radius: 3px; padding: 1.1rem 1.25rem; }
+.urteil b { display: block; font-size: 1.15rem; font-weight: 600; }
+.urteil p { margin: .4rem 0 0; color: var(--leise); }
+.urteil[data-stand="ja"]    { border-left-color: var(--ja); }
+.urteil[data-stand="ja"] b  { color: var(--ja); }
+.urteil[data-stand="nein"]  { border-left-color: var(--nein); }
+.urteil[data-stand="nein"] b{ color: var(--nein); }
+.urteil[data-stand="offen"] { border-left-color: var(--offen); }
+.urteil[data-stand="offen"] b { color: var(--offen); }
+form { display: flex; flex-wrap: wrap; gap: .6rem; }
+label { flex: 1 1 100%; font-size: .8rem; font-weight: 500; color: var(--leise);
+  text-transform: uppercase; letter-spacing: .06em; }
+input { flex: 1 1 14rem; min-width: 0; font-family: var(--zahl); font-size: 1rem;
+  padding: .6rem .7rem; border: 1px solid var(--kante); border-radius: 3px;
+  background: var(--blatt); color: var(--schrift); }
+button { font-family: var(--ui); font-size: 1rem; font-weight: 500;
+  padding: .6rem 1.2rem; border: 1px solid var(--schrift); border-radius: 3px;
+  background: var(--schrift); color: var(--grund); cursor: pointer; }
+button:disabled { opacity: .5; cursor: default; }
+input:focus-visible, button:focus-visible { outline: 2px solid var(--ja);
+  outline-offset: 2px; }
+ol { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--kante); }
+li { display: flex; flex-wrap: wrap; gap: .25rem 1rem; align-items: baseline;
+  padding: .85rem 0; border-bottom: 1px solid var(--kante); }
+.was { flex: 1 1 11rem; min-width: 0; font-weight: 500; }
+.ergebnis { flex: 1 1 100%; font-family: var(--zahl); font-size: .9rem;
+  font-variant-numeric: tabular-nums; color: var(--leise); }
+h2 { font-size: .8rem; font-weight: 600; text-transform: uppercase;
+  letter-spacing: .06em; color: var(--leise); margin: 0 0 .5rem; }
+.fuss { font-size: .875rem; color: var(--leise); }
+.fuss p { margin: 0 0 .6rem; }
+a { color: var(--ja); }
+</style>
+</head>
+<body>
+
+<div class="huelle">
+  <header>
+    <h1>Agentarium Schlüssel-Probe</h1>
+    <p class="frage">Darf der Browser einen GitHub-Schlüssel mitsenden? Davon
+    hängt ab, ob Agentarium die goldene Variante ohne zusätzliche Geräte
+    bekommt.</p>
+  </header>
+
+  <div class="urteil" id="urteil" data-stand="leer">
+    <b id="urteilWort">Noch nicht gemessen</b>
+    <p id="urteilText">Schlüssel eintragen und messen. Die Probe macht drei
+    Abrufe bei GitHub und liest ab, was zurückkommt.</p>
+  </div>
+
+  <form id="form">
+    <label for="tok">Lese-Schlüssel</label>
+    <input id="tok" type="password" inputmode="text" autocomplete="off"
+      spellcheck="false" placeholder="github_pat_…">
+    <button id="los" type="submit">Messen</button>
+  </form>
+
+  <section>
+    <h2>Messungen</h2>
+    <ol>
+      <li><span class="was">Ohne Schlüssel</span>
+          <span class="ergebnis" id="m1">wartet</span></li>
+      <li><span class="was">Mit Schlüssel</span>
+          <span class="ergebnis" id="m2">wartet</span></li>
+      <li><span class="was">Tempo, fünf Abrufe</span>
+          <span class="ergebnis" id="m3">wartet</span></li>
+    </ol>
+  </section>
+
+  <div class="fuss">
+    <h2>Woher der Schlüssel kommt</h2>
+    <p>Auf GitHub: Profilbild → <b>Settings</b> → <b>Developer settings</b> →
+    <b>Personal access tokens</b> → <b>Fine-grained tokens</b> →
+    <b>Generate new token</b>. Dort <b>Only select repositories</b> wählen und
+    nur <b>pahlborn/agentarium</b> eintragen, bei den Rechten nur
+    <b>Contents: Read-only</b> und <b>Issues: Read-only</b>.</p>
+    <p>Direkt:
+    <a href="https://github.com/settings/personal-access-tokens/new">github.com/settings/personal-access-tokens/new</a></p>
+    <h2>Was mit dem Schlüssel passiert</h2>
+    <p>Er bleibt im Arbeitsspeicher dieser Seite und wird <b>nicht
+    gespeichert</b> — nach dem Schließen ist er weg. Gesendet wird er an
+    niemanden außer GitHub selbst. Widerrufen kannst du ihn jederzeit auf
+    derselben GitHub-Seite.</p>
+  </div>
+</div>
+
+<script>
+(function () {
+  var LIMIT = 'https://api.github.com/rate_limit';
+  var LESEN = 'https://api.github.com/repos/pahlborn/agentarium/issues/comments?per_page=1';
+  var form = document.getElementById('form'),
+      tok  = document.getElementById('tok'),
+      los  = document.getElementById('los'),
+      urt  = document.getElementById('urteil'),
+      wort = document.getElementById('urteilWort'),
+      text = document.getElementById('urteilText');
+
+  function zeigen(id, s) { document.getElementById(id).textContent = s; }
+  function urteil(stand, w, t) {
+    urt.setAttribute('data-stand', stand); wort.textContent = w; text.textContent = t;
+  }
+
+  /* Ein Abruf, der nie wirft: Das Urteil steckt im Rückgabewert, nicht in
+     einer Ausnahme. Nur so lässt sich "der Browser hat verweigert" von
+     "GitHub hat abgelehnt" unterscheiden. */
+  async function hol(url, schluessel) {
+    var o = { cache: 'no-store' };
+    if (schluessel) o.headers = { Authorization: 'Bearer ' + schluessel };
+    try {
+      var a = await fetch(url, o);
+      return { durch: true, status: a.status,
+               limit: a.headers.get('x-ratelimit-limit'),
+               rest:  a.headers.get('x-ratelimit-remaining') };
+    } catch (e) {
+      return { durch: false, fehler: String((e && e.message) || e) };
+    }
+  }
+
+  form.addEventListener('submit', async function (e) {
+    e.preventDefault();
+    var s = tok.value.trim();
+    if (!s) { urteil('offen', 'Kein Schlüssel eingetragen',
+      'Ohne Schlüssel lässt sich die Frage nicht beantworten.'); return; }
+
+    los.disabled = true;
+    urteil('leer', 'Wird gemessen', 'Drei Abrufe bei GitHub.');
+    zeigen('m1', 'läuft'); zeigen('m2', 'läuft'); zeigen('m3', 'wartet');
+
+    /* 1 — ohne Schlüssel. Scheitert das schon, liegt es nicht am Schlüssel. */
+    var a = await hol(LIMIT, null);
+    if (!a.durch) {
+      zeigen('m1', 'gescheitert — ' + a.fehler); zeigen('m2', '—'); zeigen('m3', '—');
+      urteil('offen', 'GitHub war nicht erreichbar',
+        'Schon der Abruf ohne Schlüssel ging nicht durch. Das ist kein Befund ' +
+        'zur Frage — erst die Verbindung prüfen, dann nochmal messen.');
+      los.disabled = false; return;
+    }
+    zeigen('m1', 'HTTP ' + a.status + ' · Limit ' + a.limit + ' je Stunde');
+
+    /* 2 — mit Schlüssel. Hier fällt die Entscheidung. */
+    var b = await hol(LIMIT, s);
+    if (!b.durch) {
+      zeigen('m2', 'gesperrt — ' + b.fehler); zeigen('m3', '—');
+      urteil('nein', 'Nein — der Browser sendet den Schlüssel nicht',
+        'Der Abruf ohne Schlüssel ging durch, derselbe Abruf mit Schlüssel ' +
+        'nicht. Damit hat der Browser die Schlüssel-Kopfzeile verweigert, ' +
+        'nicht das Netz. Dann bleibt es beim Pi oder beim Zertifikat.');
+      los.disabled = false; return;
+    }
+    zeigen('m2', 'HTTP ' + b.status + ' · Limit ' + b.limit +
+                 ' · noch ' + b.rest + ' frei');
+
+    if (b.status === 401 || b.status === 403) {
+      zeigen('m3', '—');
+      urteil('offen', 'Der Schlüssel wurde abgelehnt',
+        'Wichtig: Der Browser hat ihn durchgelassen — die Antwort kam von ' +
+        'GitHub. Das ist also kein Browser-Problem, sondern ein falscher, ' +
+        'abgelaufener oder zu knapp berechtigter Schlüssel. Neuen erzeugen ' +
+        'und nochmal messen.');
+      los.disabled = false; return;
+    }
+
+    var hoch = Number(b.limit) > Number(a.limit);
+    if (!hoch) {
+      zeigen('m3', '—');
+      urteil('offen', 'Der Schlüssel kam an, zählt aber nicht',
+        'Limit mit Schlüssel ist nicht höher als ohne (' + b.limit + ' zu ' +
+        a.limit + '). Der Browser hat ihn gesendet, GitHub hat ihn nicht ' +
+        'angerechnet. Meist ein Schlüssel, der zum Repository nicht passt.');
+      los.disabled = false; return;
+    }
+
+    /* 3 — Tempo. Fünf echte Abrufe dessen, was die App lesen würde. */
+    zeigen('m3', 'läuft');
+    var t0 = performance.now(), fehl = 0;
+    for (var i = 0; i < 5; i++) {
+      var r = await hol(LESEN, s);
+      if (!r.durch || r.status >= 400) fehl++;
+    }
+    var je = Math.round((performance.now() - t0) / 5);
+    zeigen('m3', je + ' ms je Abruf' + (fehl ? ' · ' + fehl + ' gescheitert' : ''));
+
+    var proStunde = 1800; /* alle zwei Sekunden */
+    var passt = Number(b.limit) >= proStunde;
+    urteil('ja', 'Ja — es geht ohne zusätzliche Geräte',
+      'Der Browser sendet den Schlüssel, GitHub rechnet ihn an: ' + b.limit +
+      ' Abrufe je Stunde statt ' + a.limit + '. Ein Abruf alle zwei Sekunden ' +
+      'wären ' + proStunde + ' je Stunde, ' +
+      (passt ? 'das passt. ' : 'das passt nicht — langsamer takten. ') +
+      'Gemessen ' + je + ' ms je Abruf. Kein Pi, kein Zertifikat, ' +
+      'ein Symbol — zu Hause wie unterwegs.');
+    los.disabled = false;
+  });
+})();
+</script>
+</body>
+</html>
