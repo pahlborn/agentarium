@@ -1,0 +1,31 @@
+{
+  "schema": "agentarium.handoff.v0",
+  "task_id": "AG-BALL-LIVE-001-FORGE-E1-V1",
+  "worker_role": "coding-agent",
+  "version": 1,
+  "authority": "Peter explicitly authorized 2026-10-17 16:18 Europe/Berlin. Exactly one real source experiment.",
+  "baseline": "d111b062770e32dbef0f9bb618a4923d88ff20be",
+  "goal": "Real runtime stream tool-use event must reach loopback HTTP receiver while same Claude process still lives and before terminal result, proven using common monotonic clock.",
+  "scope": [
+    "Read-only Forge reconnaissance of original hooks",
+    "Host captures actual content_block_start.tool_use",
+    "Host forwards safe metadata once",
+    "Preserve source event, HTTP receipt, process liveness, terminal timestamp, runtime model and usage"
+  ],
+  "forbidden": [
+    "product edit",
+    "hosting",
+    "deployment",
+    "Pages release",
+    "extra paid invocation",
+    "thinking/reasoning payload export"
+  ],
+  "model_routing": {
+    "requested_model": "opus",
+    "requested_effort": "high",
+    "actual_model": "unconfirmed",
+    "authority": "Peter requested best suitable LLM; task-specific override of persistent sonnet/medium, no persistent profile change"
+  },
+  "limits": "E1 proves local source segment only; original rendered UI/iPad remain not tested",
+  "next_owner": "Atlas verifies evidence then arranges independent Sentinel check"
+}
