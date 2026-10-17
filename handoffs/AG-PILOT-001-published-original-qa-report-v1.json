@@ -1,0 +1,56 @@
+{
+  "task": "AG-PILOT-001-ONE-EVENT",
+  "scope": "published original happy path; fresh Chromium SwiftShader, native Safari/iPad not tested",
+  "started": "2026-10-17T05:57:14.509Z",
+  "url": "https://pahlborn.github.io/agentarium/feld/?mvp=1",
+  "browser": "156.0.8078.4",
+  "requests": [
+    {
+      "url": "https://pahlborn.github.io/agentarium/feld/?mvp=1",
+      "method": "GET",
+      "at": "2026-10-17T05:57:14.516Z"
+    },
+    {
+      "url": "https://pahlborn.github.io/agentarium/feld/one-event.json",
+      "method": "GET",
+      "at": "2026-10-17T05:57:14.723Z"
+    }
+  ],
+  "errors": [],
+  "status": "passed",
+  "navigation": {
+    "url": "https://pahlborn.github.io/agentarium/feld/?mvp=1",
+    "status": 200,
+    "sha256": "23e8b503e1b623e798bef587f5775b932e44b9561178d58ca1ec3c4a6d3e68d4"
+  },
+  "seen47": true,
+  "state": {
+    "abrufe": 1,
+    "http": 200,
+    "lauf": {
+      "angenommen": true,
+      "projekt": "agentarium"
+    },
+    "ereignis": {
+      "angenommen": true,
+      "id": "AG-PILOT-RECOVERY-20261017-RA-REVIEW-V1"
+    },
+    "fehler": null
+  },
+  "source": {
+    "url": "https://pahlborn.github.io/agentarium/feld/one-event.json",
+    "status": 200,
+    "sha256": "a8ba94c8abc2540300240eb4ebc8229fee8ca2f95f808558096bb6c354c60197",
+    "id": "AG-PILOT-RECOVERY-20261017-RA-REVIEW-V1",
+    "actor": "argus",
+    "kind": "review_result",
+    "recipient": "atlas",
+    "title": "Argus: FAIL für eine behauptete Live-Abnahme; kein Einwand gegen den präzisierten Ein-Ereignis-Piloten."
+  },
+  "visible": "argus → ATLAS REVIEW_RESULT\nArgus: FAIL für eine behauptete Live-Abnahme; kein Einwand gegen den präzisierten Ein-Ereignis-Piloten.",
+  "webgl": {
+    "machine": true,
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.8078.4 Safari/537.36"
+  },
+  "finished": "2026-10-17T05:57:18.029Z"
+}
