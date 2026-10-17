@@ -1,6 +1,6 @@
 {
   "schema": "agentarium.handoff.v0",
-  "task_id": "AG-BALL-LIVE-001-ARCHIBALD-SPEC-V1",
+  "task_id": "AG-BALL-LIVE-001-ARCHIBALD-SPEC-V2",
   "worker_role": "spec-agent",
   "mode": "read-only MVP specification",
   "branch": "agent/ball-live-concept-20261017",
@@ -9,7 +9,7 @@
   "baselines": {
     "published_original": "d111b062770e32dbef0f9bb618a4923d88ff20be",
     "contract_and_reducer": "da860fd19f38e9938ed201546f2a6e5b4cc765f8",
-    "latest_local_adapter_evidence_branch_head": "800874ee1c6fd4ed3a806ba7774a19c2e11f3878",
+    "latest_local_adapter_evidence_branch_head": "800874ee1c6fd2ed3a806ba7774a19c2e11f3878",
     "concept_draft": "2b9e93e7c52807f54ed83b8d898265737ad59145"
   },
   "required_reading": [
@@ -52,7 +52,7 @@
       "as": "external/contract-da860fd/AG-VISUAL-005-referenz-reducer.py"
     },
     {
-      "ref": "800874ee1c6fd4ed3a806ba7774a19c2e11f3878",
+      "ref": "800874ee1c6fd2ed3a806ba7774a19c2e11f3878",
       "path": "previews/AG-VISUAL-005-feld/activity-input.js",
       "as": "external/local-adapter-800874e/activity-input.js"
     }
