@@ -1,0 +1,634 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "agentarium.vertrag.v2.1",
+  "title": "Agentarium Schnittstellenvertrag V2.1 – eine Datei, alle Definitionen",
+  "description": "V2 hatte vier getrennte Dateien. Dadurch existierte die Kostendefinition ZWEIMAL: im Schnappschuss streng, im Archiv als beliebiges Objekt. Befund B5. Hier gibt es sie genau einmal, und Schnappschuss wie Archiv verweisen darauf. Einstiegspunkte: $defs.umschlag, $defs.schnappschuss, $defs.archivmanifest, $defs.befehl, $defs.resume_antwort, $defs.betrieb.",
+  "$defs": {
+    "zeitpunkt": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]+)?(Z|[+-][0-9]{2}:[0-9]{2})$"
+    },
+    "kennung": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "text_nichtleer": { "type": "string", "minLength": 1 },
+
+    "laufzustand": {
+      "enum": ["geplant", "aktiv", "wartend", "pausiert", "blockiert",
+               "abgeschlossen", "abgebrochen", "fehlgeschlagen", "wiedereroeffnet"]
+    },
+    "herkunft": {
+      "type": "object",
+      "properties": {
+        "mode": { "enum": ["OBSERVED_PROJECT_WORK", "SIMULATION"] },
+        "fictional": { "type": "boolean" },
+        "source_evidence": { "type": ["string", "null"] }
+      },
+      "required": ["mode", "fictional"],
+      "additionalProperties": false
+    },
+
+    "kommunikationsarten": {
+      "$comment": "B2/Negativprobe minimal_work_event: Eine Nachricht ohne Empfaenger ist keine Nachricht. Diese Arten verlangen recipient nichtleer.",
+      "enum": ["request", "handoff", "answer", "question", "objection",
+               "change_request", "proposal", "recommendation", "contribution"]
+    },
+
+    "umschlag": {
+      "oneOf": [
+        { "$ref": "#/$defs/umschlag_fach" },
+        { "$ref": "#/$defs/umschlag_herzschlag" },
+        { "$ref": "#/$defs/umschlag_hinweis" }
+      ]
+    },
+
+    "umschlag_fach": {
+      "type": "object",
+      "properties": {
+        "schema": { "const": "agentarium.strom.v2.1" },
+        "stream": { "enum": ["katalog", "lauf"] },
+        "stream_id": { "$ref": "#/$defs/kennung" },
+        "stream_sequence": { "type": "integer", "minimum": 1 },
+        "kind": {
+          "$comment": "B4/O6: catalog.changed ist ENTFERNT. Es war ein Platzhalter ohne Nutzdatendefinition.",
+          "enum": ["project.created", "run.started", "run.finished",
+                   "run.state_changed", "work.event"]
+        },
+        "sent_at": { "$ref": "#/$defs/zeitpunkt" },
+        "payload": { "type": "object" }
+      },
+      "required": ["schema", "stream", "stream_id", "stream_sequence", "kind", "sent_at", "payload"],
+      "additionalProperties": false,
+      "allOf": [
+        { "if": { "properties": { "stream": { "const": "katalog" } }, "required": ["stream"] },
+          "then": { "properties": { "kind": { "enum": ["project.created", "run.started", "run.finished"] } } } },
+        { "if": { "properties": { "stream": { "const": "lauf" } }, "required": ["stream"] },
+          "then": { "properties": { "kind": { "enum": ["work.event", "run.state_changed"] } } } },
+        { "if": { "properties": { "kind": { "const": "work.event" } }, "required": ["kind"] },
+          "then": { "properties": { "payload": { "$ref": "#/$defs/arbeitsereignis" } } } },
+        { "if": { "properties": { "kind": { "const": "project.created" } }, "required": ["kind"] },
+          "then": { "properties": { "payload": { "$ref": "#/$defs/projekt_angelegt" } } } },
+        { "if": { "properties": { "kind": { "enum": ["run.started", "run.finished", "run.state_changed"] } }, "required": ["kind"] },
+          "then": { "properties": { "payload": { "$ref": "#/$defs/laufmeldung" } } } }
+      ]
+    },
+
+    "umschlag_herzschlag": {
+      "type": "object",
+      "description": "Fluechtig. Takt 5 s, veraltet nach 20 s. Keine Persistierung, keine Fachereignis-ID, keine Sequenzwirkung, kein Replayeintrag, kein LLM-Aufruf.",
+      "properties": {
+        "schema": { "const": "agentarium.strom.v2.1" },
+        "stream": { "enum": ["katalog", "lauf"] },
+        "stream_id": { "$ref": "#/$defs/kennung" },
+        "kind": { "const": "heartbeat" },
+        "sent_at": { "$ref": "#/$defs/zeitpunkt" },
+        "last_sequence": { "type": ["integer", "null"], "minimum": 0 }
+      },
+      "required": ["schema", "stream", "stream_id", "kind", "sent_at"],
+      "additionalProperties": false
+    },
+
+    "umschlag_hinweis": {
+      "type": "object",
+      "description": "BEFUND B1. Natives EventSource stellt dem Anwendungscode KEINEN auslesbaren Nicht-200-Koerper bereit: Ein anderer Status laesst die Verbindung scheitern (HTML-Standard, Server-sent events). Ein 409 mit JSON ist daher auf diesem Pfad unauswertbar. Der Server antwortet deshalb mit 200 und sendet diesen auswertbaren Steuerhinweis IM Strom; danach schliesst er. Auf dem fetch-Pfad ist zusaetzlich HTTP 409 mit JSON zulaessig.",
+      "properties": {
+        "schema": { "const": "agentarium.strom.v2.1" },
+        "stream": { "enum": ["katalog", "lauf"] },
+        "stream_id": { "$ref": "#/$defs/kennung" },
+        "kind": { "const": "strom.hinweis" },
+        "grund": {
+          "enum": ["replay_grenze_unterschritten", "cursor_unbekannt",
+                   "cursor_zu_hoch", "strom_beendet"]
+        },
+        "replay_grenze": { "type": "integer", "minimum": 0 },
+        "hoechste_sequenz": { "type": "integer", "minimum": 0 },
+        "neuer_schnappschuss": { "$ref": "#/$defs/text_nichtleer" },
+        "sent_at": { "$ref": "#/$defs/zeitpunkt" }
+      },
+      "required": ["schema", "stream", "stream_id", "kind", "grund",
+                   "replay_grenze", "hoechste_sequenz", "sent_at"],
+      "additionalProperties": false,
+      "allOf": [
+        { "if": { "properties": { "grund": { "enum": ["replay_grenze_unterschritten", "cursor_unbekannt", "cursor_zu_hoch"] } }, "required": ["grund"] },
+          "then": { "required": ["neuer_schnappschuss"] } }
+      ]
+    },
+
+    "betrieb": {
+      "type": "object",
+      "description": "BEFUND B1: Der Betriebsrahmen muss VOR dem Verbindungsaufbau feststehen, nicht erst in dessen Antwort. Diese Auskunft wird als gewoehnliche JSON-Antwort geholt, bevor irgendein Strom geoeffnet wird.",
+      "properties": {
+        "schema": { "const": "agentarium.betrieb.v2.1" },
+        "rahmen": {
+          "enum": ["cookie_gleicher_ursprung", "header_fetch_streaming"],
+          "description": "cookie_gleicher_ursprung: natives EventSource, Wiederaufnahme eingebaut. header_fetch_streaming: fetch mit Authorization, Cursor und Reconnect selbst geschrieben."
+        },
+        "katalogstrom": { "$ref": "#/$defs/text_nichtleer" },
+        "resume_pruefung": { "$ref": "#/$defs/text_nichtleer" },
+        "heartbeat_takt_s": { "type": "integer", "minimum": 1 },
+        "veraltet_nach_s": { "type": "integer", "minimum": 1 },
+        "supported_actions": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/text_nichtleer" },
+          "description": "R4 des V2.1-Reviews: maschinenlesbar, nicht nur in Prosa. AKTUELLES PROFIL IST []: Atlas' Team hat nachgesehen, kein ausfuehrbarer integrierter Befehl ist nachgewiesen. Eine Oberflaeche darf daraus keine bedienbare Steueraktion ableiten. Ein generisches Befehlsschema darf als NICHT AKTIVIERTES Beispiel bestehen; es ist kein Nachweis unterstuetzter Befehle."
+        }
+      },
+      "required": ["schema", "rahmen", "katalogstrom", "resume_pruefung",
+                   "heartbeat_takt_s", "veraltet_nach_s", "supported_actions"],
+      "additionalProperties": false
+    },
+
+    "resume_antwort": {
+      "type": "object",
+      "description": "BEFUND B1: vorgelagerte Resume-Pruefung. GRENZSEMANTIK, in V2 falsch: replay_grenze ist die NIEDRIGSTE lieferbare Sequenz, der Strom setzt bei cursor+1 fort. Fortsetzbar ist also cursor+1 >= replay_grenze — nicht cursor >= replay_grenze. Bei Grenze 120 ist Cursor 119 fortsetzbar.",
+      "properties": {
+        "schema": { "const": "agentarium.resume.v2.1" },
+        "stream_id": { "$ref": "#/$defs/kennung" },
+        "cursor": { "type": "integer", "minimum": 0 },
+        "replay_grenze": { "type": "integer", "minimum": 0 },
+        "hoechste_sequenz": { "type": "integer", "minimum": 0 },
+        "fortsetzbar": { "type": "boolean" },
+        "grund": {
+          "enum": ["fortsetzbar", "replay_grenze_unterschritten",
+                   "cursor_unbekannt", "cursor_zu_hoch"]
+        },
+        "neuer_schnappschuss": { "type": ["string", "null"] }
+      },
+      "required": ["schema", "stream_id", "cursor", "replay_grenze",
+                   "hoechste_sequenz", "fortsetzbar", "grund"],
+      "additionalProperties": false,
+      "allOf": [
+        { "if": { "properties": { "fortsetzbar": { "const": false } }, "required": ["fortsetzbar"] },
+          "then": { "properties": { "neuer_schnappschuss": { "$ref": "#/$defs/text_nichtleer" },
+                                    "grund": { "enum": ["replay_grenze_unterschritten", "cursor_unbekannt", "cursor_zu_hoch"] } },
+                    "required": ["neuer_schnappschuss"] } },
+        { "if": { "properties": { "fortsetzbar": { "const": true } }, "required": ["fortsetzbar"] },
+          "then": { "properties": { "grund": { "const": "fortsetzbar" } } } }
+      ]
+    },
+
+    "projekt_angelegt": {
+      "type": "object",
+      "properties": {
+        "project_id": { "$ref": "#/$defs/kennung" },
+        "name": { "$ref": "#/$defs/text_nichtleer" },
+        "titel": { "type": ["string", "null"] },
+        "beschreibung": { "type": ["string", "null"] },
+        "created_at": { "$ref": "#/$defs/zeitpunkt" },
+        "herkunft": { "$ref": "#/$defs/herkunft" }
+      },
+      "required": ["project_id", "name", "created_at", "herkunft"],
+      "additionalProperties": false
+    },
+
+    "laufmeldung": {
+      "type": "object",
+      "properties": {
+        "project_id": { "$ref": "#/$defs/kennung" },
+        "run_id": { "$ref": "#/$defs/kennung" },
+        "zustand": { "$ref": "#/$defs/laufzustand" },
+        "zustand_vorher": { "oneOf": [{ "$ref": "#/$defs/laufzustand" }, { "type": "null" }] },
+        "occurred_at": { "oneOf": [{ "$ref": "#/$defs/zeitpunkt" }, { "type": "null" }] },
+        "grund": { "type": ["string", "null"] },
+        "arbeitsstrom": { "type": ["string", "null"] }
+      },
+      "required": ["project_id", "run_id", "zustand", "occurred_at"],
+      "additionalProperties": false
+    },
+
+    "arbeitsereignis": {
+      "type": "object",
+      "description": "BEFUND B4: quellenerhaltend. Die flachen Felder des echten observed-worklog.v1 (agent_id, platform, actual_model, actual_reasoning, *_tokens) sind HIER ZULAESSIG, wie sie dort stehen. Der Adapter in §B4 des Korrekturpapiers beschreibt, wie sie zusaetzlich nach verbrauch abgebildet werden; die Quellform bleibt erhalten und wird nicht verlagert.",
+      "properties": {
+        "id": { "$ref": "#/$defs/kennung" },
+        "project_id": { "$ref": "#/$defs/kennung" },
+        "run_id": { "$ref": "#/$defs/kennung" },
+        "sequence": { "type": ["integer", "null"] },
+        "task_id": { "type": ["string", "null"] },
+        "parent_task_id": { "type": ["string", "null"] },
+        "actor": { "$ref": "#/$defs/kennung" },
+        "recipient": { "type": ["string", "null"] },
+        "kind": { "$ref": "#/$defs/text_nichtleer" },
+        "title": { "$ref": "#/$defs/text_nichtleer" },
+        "caused_by": { "type": "array", "items": { "type": "string" } },
+        "occurred_at": { "oneOf": [{ "$ref": "#/$defs/zeitpunkt" }, { "type": "null" }] },
+        "recorded_at": { "$ref": "#/$defs/zeitpunkt" },
+        "fictional": { "type": "boolean" },
+        "source_evidence": { "type": ["string", "null"] },
+        "ownership_change": {
+          "type": ["object", "null"],
+          "description": "R5 des V2.1-Reviews: Die effektive Zielaufgabe muss eindeutig aus ownership_change.task_id ODER task_id des Ereignisses hervorgehen; widersprechen sich beide, wird abgelehnt (geprueft im Reducer, da Felder verglichen werden muessen). scope und basis bleiben ERHALTEN, sind aber NICHT Pflicht -- optionale Quellangaben pauschal verpflichtend zu machen war kein Auftrag. Verantwortung folgt nie aus recipient oder parent_task_id allein.",
+          "properties": {
+            "from": { "type": ["string", "null"] },
+            "to": { "$ref": "#/$defs/text_nichtleer" },
+            "task_id": { "type": ["string", "null"] },
+            "scope": { "type": ["string", "null"] },
+            "basis": { "type": ["string", "null"] }
+          },
+          "required": ["to"],
+          "additionalProperties": false
+        },
+        "result_ref": { "type": ["string", "null"] },
+        "agent_id": { "type": ["string", "null"] },
+        "platform": { "type": ["string", "null"] },
+        "actual_model": { "type": ["string", "null"] },
+        "actual_reasoning": { "type": ["string", "null"] },
+        "input_tokens": { "type": ["integer", "null"], "minimum": 0 },
+        "output_tokens": { "type": ["integer", "null"], "minimum": 0 },
+        "thinking_tokens": { "type": ["integer", "null"], "minimum": 0 },
+        "artifact_id": { "type": ["string", "null"] },
+        "version": { "type": ["string", "null"] },
+        "question_id": { "type": ["string", "null"] },
+        "reply_to": { "type": ["string", "null"] },
+        "supersedes": { "type": ["string", "null"] },
+        "corrects": { "type": ["string", "null"] },
+        "block_id": { "type": ["string", "null"] },
+        "resolving_event_id": { "type": ["string", "null"] },
+        "criteria_ref": { "type": ["string", "null"] },
+        "outcome": { "enum": ["pass", "fail", "blocked", "not_tested", "partial", null] },
+        "work_item_type": { "enum": ["story", "task", "defect", "experiment", null] },
+        "item_revision": { "type": ["integer", "null"], "minimum": 1 },
+        "previous_transition_id": { "type": ["string", "null"] },
+        "from": { "type": ["string", "null"] },
+        "to": { "type": ["string", "null"] },
+        "scope_version": { "type": ["string", "null"] },
+        "nachweis_ref": {
+          "type": ["string", "null"],
+          "description": "R2 des V2.1-Reviews: die Ereignis-ID des massgeblichen Pruefnachweises. Genannt, muss sie der Pruefung unter genau (task_id, artifact_id, version, criteria_ref) entsprechen."
+        },
+        "abweichung_autorisiert_durch": {
+          "type": ["string", "null"],
+          "description": "B2: Done ohne versionsgebundenen Erfuellungsnachweis ist nur mit ausdruecklich autorisierter Abweichung zulaessig. Hier steht, wer sie autorisiert hat."
+        },
+        "abweichung_grund": { "type": ["string", "null"] },
+        "verbrauch": { "$ref": "#/$defs/verbrauch" }
+      },
+      "required": ["id", "project_id", "run_id", "actor", "kind", "title",
+                   "occurred_at", "recorded_at", "fictional", "caused_by"],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "$comment": "R1 des V2.1-Reviews: NUR status_change darf Zustandsfelder tragen. Sentinels Probe original_noop_with_required_shell war ein formal vollstaendiges Ereignis unbekannter Art, das item_revision und to trug und damit an der Done-Pruefung vorbeikam. Der else-Zweig laesst diese Felder bei jeder anderen Art nicht durch.",
+          "if": { "properties": { "kind": { "const": "status_change" } }, "required": ["kind"] },
+          "else": {
+            "properties": {
+              "item_revision": { "type": "null" },
+              "from": { "type": "null" },
+              "to": { "type": "null" },
+              "previous_transition_id": { "type": "null" },
+              "nachweis_ref": { "type": "null" }
+            }
+          },
+          "then": {
+            "properties": {
+              "task_id": { "$ref": "#/$defs/text_nichtleer" },
+              "from": {
+                "type": ["string", "null"],
+                "$comment": "null NUR beim ersten Uebergang einer Aufgabe, erkennbar an previous_transition_id null. Der Reducer prueft das Paar; ein Schema kann zwei Felder nicht gegeneinander pruefen."
+              },
+              "to": { "$ref": "#/$defs/text_nichtleer" },
+              "item_revision": { "type": "integer", "minimum": 1 },
+              "previous_transition_id": { "type": ["string", "null"] },
+              "nachweis_ref": { "type": ["string", "null"] }
+            },
+            "required": ["task_id", "from", "to", "item_revision", "previous_transition_id"]
+          }
+        },
+        {
+          "if": { "properties": { "kind": { "enum": ["review_result", "test_result"] } }, "required": ["kind"] },
+          "then": {
+            "properties": {
+              "task_id": { "$ref": "#/$defs/text_nichtleer" },
+              "artifact_id": { "$ref": "#/$defs/text_nichtleer" },
+              "version": { "$ref": "#/$defs/text_nichtleer" },
+              "criteria_ref": { "$ref": "#/$defs/text_nichtleer" },
+              "outcome": { "enum": ["pass", "fail", "blocked", "not_tested", "partial"] }
+            },
+            "required": ["task_id", "artifact_id", "version", "criteria_ref", "outcome"]
+          }
+        },
+        {
+          "if": { "properties": { "kind": { "const": "artifact" } }, "required": ["kind"] },
+          "then": {
+            "properties": { "artifact_id": { "$ref": "#/$defs/text_nichtleer" },
+                            "version": { "$ref": "#/$defs/text_nichtleer" } },
+            "required": ["artifact_id", "version"]
+          }
+        },
+        {
+          "$comment": "Negativprobe minimal_work_event: eine Nachricht ohne Empfaenger ist keine Nachricht.",
+          "if": { "properties": { "kind": { "$ref": "#/$defs/kommunikationsarten" } }, "required": ["kind"] },
+          "then": { "properties": { "recipient": { "$ref": "#/$defs/text_nichtleer" } },
+                    "required": ["recipient"] }
+        },
+        {
+          "if": { "properties": { "kind": { "const": "block" } }, "required": ["kind"] },
+          "then": { "properties": { "block_id": { "$ref": "#/$defs/text_nichtleer" },
+                                    "task_id": { "$ref": "#/$defs/text_nichtleer" } },
+                    "required": ["block_id", "task_id"] }
+        },
+        {
+          "if": { "properties": { "kind": { "const": "unblock" } }, "required": ["kind"] },
+          "then": { "properties": { "block_id": { "$ref": "#/$defs/text_nichtleer" },
+                                    "resolving_event_id": { "$ref": "#/$defs/text_nichtleer" } },
+                    "required": ["block_id", "resolving_event_id"] }
+        }
+      ]
+    },
+
+    "verbrauch": {
+      "type": ["object", "null"],
+      "description": "Abgeleitete Ablageebene. Fehlt ein Wert, heisst das keine Angabe - niemals null Tokens, niemals 0 Geld.",
+      "properties": {
+        "input_tokens": { "type": ["integer", "null"], "minimum": 0 },
+        "output_tokens": { "type": ["integer", "null"], "minimum": 0 },
+        "thinking_tokens": { "type": ["integer", "null"], "minimum": 0 },
+        "platform": { "type": ["string", "null"] },
+        "agent_id": { "type": ["string", "null"] },
+        "actual_model": { "type": ["string", "null"] },
+        "belegt": { "type": "boolean" }
+      },
+      "required": ["belegt"],
+      "additionalProperties": false
+    },
+
+    "kostenfeld": {
+      "type": "object",
+      "description": "BEFUND B5: GENAU EINE Definition, von Schnappschuss UND Archiv verwendet. Peters Entscheidung vom 15.10.2026, 21:01:52 Europe/Berlin: Das Feld bleibt sichtbar; solange die Gesamtkosten nicht vollstaendig ermittelbar sind, erscheint ausschliesslich der Statussatz. Keine Betraege, Teilsummen, Gesamtsummen oder Nullersatzwerte.",
+      "properties": {
+        "sichtbar": { "const": true },
+        "erfassung": { "enum": ["unvollstaendig", "vollstaendig"] },
+        "daten": {
+          "enum": ["real", "synthetisch"],
+          "description": "B5: Synthetische Beispiele duerfen keine real belegte Gesamterfassung suggerieren. Produktiv ist eine vollstaendige Gesamterfassung UNBESTAETIGT."
+        },
+        "status_text": { "type": "string" },
+        "gesamt": {
+          "type": "object",
+          "properties": {
+            "betrag": { "type": "number", "minimum": 0 },
+            "waehrung": { "$ref": "#/$defs/text_nichtleer" },
+            "belegt": { "const": true },
+            "abdeckung_beleg": { "$ref": "#/$defs/text_nichtleer" },
+            "quellen": { "type": "array", "items": { "$ref": "#/$defs/text_nichtleer" }, "minItems": 1 }
+          },
+          "required": ["betrag", "waehrung", "belegt", "abdeckung_beleg", "quellen"],
+          "additionalProperties": false
+        },
+        "ohne_angabe": { "type": "integer", "minimum": 0 }
+      },
+      "required": ["sichtbar", "erfassung", "daten", "ohne_angabe"],
+      "additionalProperties": false,
+      "allOf": [
+        { "if": { "properties": { "erfassung": { "const": "unvollstaendig" } }, "required": ["erfassung"] },
+          "then": { "required": ["status_text"],
+                    "properties": { "status_text": { "const": "Kosten nicht vollständig ermittelbar." } },
+                    "not": { "required": ["gesamt"] } } },
+        { "if": { "properties": { "erfassung": { "const": "vollstaendig" } }, "required": ["erfassung"] },
+          "then": { "required": ["gesamt"],
+                    "properties": { "ohne_angabe": { "const": 0 } } } }
+      ]
+    },
+
+    "aufgabenzustand": {
+      "type": "object",
+      "description": "BEFUND B3: typisierter, fortschreibbarer Zustand statt Zaehler und untypisierter Arrays.",
+      "properties": {
+        "task_id": { "$ref": "#/$defs/text_nichtleer" },
+        "parent_task_id": { "type": ["string", "null"] },
+        "work_item_type": { "enum": ["story", "task", "defect", "experiment", null] },
+        "status": { "$ref": "#/$defs/text_nichtleer" },
+        "item_revision": { "type": "integer", "minimum": 1 },
+        "letzte_transition_id": { "type": ["string", "null"] },
+        "owner": { "type": ["string", "null"] }
+      },
+      "required": ["task_id", "status", "item_revision", "letzte_transition_id"],
+      "additionalProperties": false
+    },
+    "artefaktzustand": {
+      "type": "object",
+      "properties": {
+        "artifact_id": { "$ref": "#/$defs/text_nichtleer" },
+        "version": { "$ref": "#/$defs/text_nichtleer" },
+        "supersedes": { "type": ["string", "null"] },
+        "pruefungen": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "kind": { "enum": ["review_result", "test_result"] },
+              "task_id": { "$ref": "#/$defs/text_nichtleer" },
+              "criteria_ref": { "$ref": "#/$defs/text_nichtleer" },
+              "outcome": { "enum": ["pass", "fail", "blocked", "not_tested", "partial"] },
+              "event_id": { "$ref": "#/$defs/text_nichtleer" }
+            },
+            "$comment": "R2 des V2.1-Reviews: task_id gehoert in den Schluessel des Nachweises. Ohne sie koennte ein Pass einer FREMDEN Aufgabe Done erlauben.",
+            "required": ["kind", "task_id", "criteria_ref", "outcome", "event_id"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["artifact_id", "version", "pruefungen"],
+      "additionalProperties": false
+    },
+    "blockadezustand": {
+      "type": "object",
+      "properties": {
+        "block_id": { "$ref": "#/$defs/text_nichtleer" },
+        "task_id": { "$ref": "#/$defs/text_nichtleer" },
+        "grund": { "type": ["string", "null"] },
+        "seit": { "oneOf": [{ "$ref": "#/$defs/zeitpunkt" }, { "type": "null" }] },
+        "resolving_event_id": { "type": ["string", "null"] }
+      },
+      "required": ["block_id", "task_id", "resolving_event_id"],
+      "additionalProperties": false
+    },
+    "zustand_am_cursor": {
+      "type": "object",
+      "description": "BEFUND B3: der vollstaendige, typisierte Zustand am Cursor. Aus den Ereignissen berechenbar; der Referenz-Reducer in tests/ rechnet ihn nach.",
+      "properties": {
+        "cursor": { "type": "integer", "minimum": 0 },
+        "aufgaben": { "type": "array", "items": { "$ref": "#/$defs/aufgabenzustand" } },
+        "artefakte": { "type": "array", "items": { "$ref": "#/$defs/artefaktzustand" } },
+        "blockaden": { "type": "array", "items": { "$ref": "#/$defs/blockadezustand" } },
+        "abdeckung": { "enum": ["complete", "partial", "unavailable"] }
+      },
+      "required": ["cursor", "aufgaben", "artefakte", "blockaden", "abdeckung"],
+      "additionalProperties": false
+    },
+
+    "schnappschuss": {
+      "type": "object",
+      "properties": {
+        "schema": { "const": "agentarium.schnappschuss.v2.1" },
+        "stream": { "enum": ["katalog", "lauf"] },
+        "stream_id": { "$ref": "#/$defs/kennung" },
+        "cursor": { "type": "integer", "minimum": 0 },
+        "sent_at": { "$ref": "#/$defs/zeitpunkt" },
+        "replay_grenze": { "type": "integer", "minimum": 0 },
+        "hoechste_sequenz": { "type": "integer", "minimum": 0 },
+        "rechte": { "type": "array", "items": { "enum": ["read", "command"] },
+                    "minItems": 1, "uniqueItems": true, "contains": { "const": "read" } },
+        "supported_actions": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/text_nichtleer" },
+          "description": "R4: aktuelles Profil, heute []. Siehe $defs.betrieb."
+        },
+        "projekte": { "type": "array", "items": { "$ref": "#/$defs/projektstand" } },
+        "lauf": { "oneOf": [{ "$ref": "#/$defs/laufstand" }, { "type": "null" }] },
+        "kosten": { "$ref": "#/$defs/kostenfeld" }
+      },
+      "required": ["schema", "stream", "stream_id", "cursor", "sent_at",
+                   "replay_grenze", "hoechste_sequenz", "rechte"],
+      "additionalProperties": false,
+      "allOf": [
+        { "if": { "properties": { "stream": { "const": "katalog" } }, "required": ["stream"] },
+          "then": { "required": ["projekte"] } },
+        { "if": { "properties": { "stream": { "const": "lauf" } }, "required": ["stream"] },
+          "then": { "required": ["lauf", "kosten"] } }
+      ]
+    },
+
+    "projektstand": {
+      "type": "object",
+      "properties": {
+        "project_id": { "$ref": "#/$defs/kennung" },
+        "name": { "$ref": "#/$defs/text_nichtleer" },
+        "titel": { "type": ["string", "null"] },
+        "created_at": { "$ref": "#/$defs/zeitpunkt" },
+        "herkunft": { "$ref": "#/$defs/herkunft" },
+        "laeufe": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "run_id": { "$ref": "#/$defs/kennung" },
+              "zustand": { "$ref": "#/$defs/laufzustand" },
+              "terminal": { "type": "boolean" },
+              "ansicht": { "enum": ["live", "archiv"] },
+              "arbeitsstrom": { "type": ["string", "null"] },
+              "archiv": { "type": ["string", "null"] }
+            },
+            "required": ["run_id", "zustand", "terminal", "ansicht"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["project_id", "name", "created_at", "herkunft", "laeufe"],
+      "additionalProperties": false
+    },
+
+    "laufstand": {
+      "type": "object",
+      "properties": {
+        "project_id": { "$ref": "#/$defs/kennung" },
+        "run_id": { "$ref": "#/$defs/kennung" },
+        "zustand": { "$ref": "#/$defs/laufzustand" },
+        "terminal": { "type": "boolean" },
+        "ansicht": { "enum": ["live", "archiv"] },
+        "befehlsfaehig": { "type": "boolean" },
+        "herkunft": { "$ref": "#/$defs/herkunft" },
+        "zeitachse": { "enum": ["complete", "partial", "none"] },
+        "zustand_am_cursor": { "$ref": "#/$defs/zustand_am_cursor" },
+        "letzte": { "type": "array", "items": { "$ref": "#/$defs/arbeitsereignis" }, "maxItems": 10 }
+      },
+      "required": ["project_id", "run_id", "zustand", "terminal", "ansicht",
+                   "befehlsfaehig", "herkunft", "zeitachse", "zustand_am_cursor"],
+      "additionalProperties": false
+    },
+
+    "archivmanifest": {
+      "type": "object",
+      "properties": {
+        "schema": { "const": "agentarium.archivmanifest.v2.1" },
+        "project_id": { "$ref": "#/$defs/kennung" },
+        "run_id": { "$ref": "#/$defs/kennung" },
+        "archiv_version": { "$ref": "#/$defs/text_nichtleer" },
+        "schema_fassung": { "$ref": "#/$defs/text_nichtleer" },
+        "zustand": { "enum": ["abgeschlossen", "abgebrochen", "fehlgeschlagen"] },
+        "vollstaendig": { "type": "boolean" },
+        "herkunft": { "$ref": "#/$defs/herkunft" },
+        "quellen": { "type": "array", "items": { "$ref": "#/$defs/text_nichtleer" }, "minItems": 1 },
+        "abdeckung": {
+          "type": "object",
+          "properties": {
+            "ordering": { "$ref": "#/$defs/text_nichtleer" },
+            "timestamps": { "$ref": "#/$defs/text_nichtleer" },
+            "luecken": { "type": "array", "items": { "type": "string" } }
+          },
+          "required": ["ordering", "timestamps", "luecken"],
+          "additionalProperties": false
+        },
+        "zeitachse": { "enum": ["complete", "partial", "none"] },
+        "wiedergabe": {
+          "type": "object",
+          "properties": {
+            "nebenwirkungsfrei": { "const": true },
+            "zeitsprung": { "type": "boolean" },
+            "einzelschritt": { "type": "boolean" },
+            "deterministisch": { "const": true }
+          },
+          "required": ["nebenwirkungsfrei", "zeitsprung", "einzelschritt", "deterministisch"],
+          "additionalProperties": false
+        },
+        "kosten": { "$ref": "#/$defs/kostenfeld" },
+        "ereignisse": {
+          "$comment": "B3: dasselbe kanonische Ereignisschema wie im Strom. In V2 war dies ein beliebiges Objekt, sodass [{}] akzeptiert wurde.",
+          "type": "array", "items": { "$ref": "#/$defs/arbeitsereignis" }, "minItems": 1
+        }
+      },
+      "required": ["schema", "project_id", "run_id", "archiv_version", "schema_fassung",
+                   "zustand", "vollstaendig", "herkunft", "quellen", "abdeckung",
+                   "zeitachse", "wiedergabe", "kosten", "ereignisse"],
+      "additionalProperties": false
+    },
+
+    "befehl": {
+      "description": "O1: supported_actions ist []. Es ist KEIN ausfuehrbarer integrierter Befehl nachgewiesen. Dieser Rahmen bleibt Erweiterung; eine Oberflaeche darf keine bedienbaren Steueraktionen anbieten.",
+      "oneOf": [{ "$ref": "#/$defs/befehl_anfrage" }, { "$ref": "#/$defs/befehl_antwort" }]
+    },
+    "befehl_anfrage": {
+      "type": "object",
+      "properties": {
+        "schema": { "const": "agentarium.befehl.v2.1" },
+        "richtung": { "const": "anfrage" },
+        "command_id": { "$ref": "#/$defs/text_nichtleer" },
+        "aktion": { "$ref": "#/$defs/text_nichtleer" },
+        "project_id": { "$ref": "#/$defs/kennung" },
+        "run_id": { "$ref": "#/$defs/kennung" },
+        "task_id": { "type": ["string", "null"] },
+        "erwartete_revision": { "type": ["integer", "null"], "minimum": 1 },
+        "gesendet": { "$ref": "#/$defs/zeitpunkt" }
+      },
+      "required": ["schema", "richtung", "command_id", "aktion", "project_id", "run_id", "gesendet"],
+      "additionalProperties": false
+    },
+    "befehl_antwort": {
+      "type": "object",
+      "properties": {
+        "schema": { "const": "agentarium.befehl.v2.1" },
+        "richtung": { "const": "antwort" },
+        "command_id": { "$ref": "#/$defs/text_nichtleer" },
+        "stufe": { "enum": ["empfangen", "angenommen", "abgelehnt", "ausgefuehrt"] },
+        "grund": { "type": ["string", "null"] },
+        "fehlercode": {
+          "enum": ["recht_fehlt", "zustand_unzulaessig", "revision_veraltet",
+                   "doppelt_ignoriert", "unbekannte_aktion", "nicht_unterstuetzt", null]
+        },
+        "nebenwirkung": { "type": "boolean" },
+        "folge_ereignisse": { "type": "array", "items": { "$ref": "#/$defs/text_nichtleer" } },
+        "gesendet": { "$ref": "#/$defs/zeitpunkt" }
+      },
+      "required": ["schema", "richtung", "command_id", "stufe", "nebenwirkung", "gesendet"],
+      "additionalProperties": false,
+      "allOf": [
+        { "if": { "properties": { "stufe": { "const": "abgelehnt" } }, "required": ["stufe"] },
+          "then": { "properties": { "nebenwirkung": { "const": false },
+                                    "fehlercode": { "enum": ["recht_fehlt", "zustand_unzulaessig", "revision_veraltet", "doppelt_ignoriert", "unbekannte_aktion", "nicht_unterstuetzt"] },
+                                    "grund": { "$ref": "#/$defs/text_nichtleer" } },
+                    "required": ["fehlercode", "grund"] } },
+        { "if": { "properties": { "stufe": { "const": "ausgefuehrt" } }, "required": ["stufe"] },
+          "then": { "required": ["folge_ereignisse"],
+                    "properties": { "folge_ereignisse": { "minItems": 1 } } } }
+      ]
+    }
+  }
+}

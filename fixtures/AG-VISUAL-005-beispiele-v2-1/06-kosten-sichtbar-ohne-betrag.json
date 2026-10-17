@@ -1,0 +1,120 @@
+{
+  "fall": "06",
+  "titel": "Kostenfeld sichtbar, bei unvollstaendiger Erfassung ohne jeden Betrag",
+  "prueft": [
+    "§9 Kosten"
+  ],
+  "grundlage": "Peters Entscheidung vom 15.10.2026, 21:01:52 Europe/Berlin. Ersetzt die frühere Ausblendung des Kostenfelds.",
+  "erwartung": [
+    {
+      "regel": "R-08",
+      "soll": "Bei erfassung=unvollstaendig enthaelt das Kostenfeld KEIN Feld gesamt und NIRGENDS eine Zahl, die als Betrag lesbar waere. Es zeigt ausschliesslich den Satz 'Kosten nicht vollständig ermittelbar.'"
+    },
+    {
+      "regel": "R-08b",
+      "soll": "sichtbar ist true. Das Feld verschwindet nicht - ein leeres Feld liest sich wie ein Fehler."
+    },
+    {
+      "regel": "R-08c",
+      "soll": "ohne_angabe ist eine ANZAHL von Ereignissen, kein Betrag und kein Ersatzwert. Fehlende Werte sind nicht null."
+    },
+    {
+      "regel": "R-09",
+      "soll": "Nur bei erfassung=vollstaendig steht gesamt mit belegt=true."
+    },
+    {
+      "regel": "R-09b",
+      "soll": "Einzelnachweise bleiben erhalten: verbrauch je Ereignis mit belegt=true/false. Ein unbelegter Verbrauch wird NICHT zu 0 gerechnet."
+    },
+    {
+      "regel": "R-08d",
+      "soll": "Schnappschuss und Archiv verwenden DIESELBE Kostendefinition. Ein unvollstaendiges Kostenfeld mit Gesamtsumme wird in beiden abgelehnt. Befund B5."
+    },
+    {
+      "regel": "R-08e",
+      "soll": "Jedes Kostenfeld nennt daten: real oder synthetisch. Alle Beispiele hier sind synthetisch und duerfen keine reale Gesamterfassung suggerieren. Befund B5."
+    },
+    {
+      "regel": "R-09c",
+      "soll": "Eine vollstaendige Erfassung verlangt zusaetzlich abdeckung_beleg, mindestens eine Kostenquelle und ohne_angabe = 0. Befund B5."
+    }
+  ],
+  "daten": {
+    "unvollstaendig": {
+      "kosten": {
+        "sichtbar": true,
+        "erfassung": "unvollstaendig",
+        "daten": "synthetisch",
+        "status_text": "Kosten nicht vollständig ermittelbar.",
+        "ohne_angabe": 6
+      },
+      "anzeige": "Kosten nicht vollständig ermittelbar.",
+      "verboten": [
+        "jede Gesamtsumme",
+        "jede Teilsumme",
+        "0 €",
+        "0,00 USD",
+        "~ geschaetzt",
+        "ein leeres oder verborgenes Kostenfeld"
+      ],
+      "einzelnachweise": [
+        {
+          "id": "E412",
+          "verbrauch": {
+            "input_tokens": 4100,
+            "output_tokens": 820,
+            "thinking_tokens": null,
+            "platform": "claude",
+            "agent_id": "/root/forge_x",
+            "actual_model": "claude-opus-5",
+            "belegt": true
+          }
+        },
+        {
+          "id": "E413",
+          "verbrauch": {
+            "input_tokens": null,
+            "output_tokens": null,
+            "thinking_tokens": null,
+            "platform": "claude",
+            "agent_id": null,
+            "actual_model": null,
+            "belegt": false
+          }
+        }
+      ],
+      "begruendung_unvollstaendig": "6 von 31 Ereignissen ohne Verbrauchsnachweis; zusaetzlich 2 laufende Auftraege, die noch nichts gemeldet haben. Laufende Auftraege zaehlen GEGEN die Vollstaendigkeit."
+    },
+    "vollstaendig": {
+      "kosten": {
+        "sichtbar": true,
+        "erfassung": "vollstaendig",
+        "daten": "synthetisch",
+        "gesamt": {
+          "betrag": 9.6087,
+          "waehrung": "USD",
+          "belegt": true,
+          "abdeckung_beleg": "Alle 31 Ereignisse des Laufs tragen einen belegten Verbrauch; Lauf terminal; kein Auftrag offen.",
+          "quellen": [
+            "synthetisches Pruefmaterial, keine reale Abrechnung"
+          ]
+        },
+        "ohne_angabe": 0
+      },
+      "anzeige": "9,6087 USD",
+      "bedingung": "Alle Ereignisse tragen belegten Verbrauch, der Lauf ist terminal, kein Auftrag laeuft, Abdeckungsnachweis und Kostenquellen sind genannt. ACHTUNG: daten ist synthetisch. Eine real vollstaendig belegte Gesamterfassung ist produktiv UNBESTAETIGT; dieses Beispiel zeigt die Schemaform, nicht einen erreichten Zustand. Befund B5."
+    },
+    "archiv": {
+      "unvollstaendig": {
+        "kosten": {
+          "sichtbar": true,
+          "erfassung": "unvollstaendig",
+          "daten": "synthetisch",
+          "status_text": "Kosten nicht vollständig ermittelbar.",
+          "ohne_angabe": 2
+        }
+      },
+      "bemerkung": "Dieselbe Definition wie im Schnappschuss. In V2 war Archivkosten ein beliebiges Objekt, sodass unvollstaendige Erfassung MIT Gesamtsumme akzeptiert wurde -- Befund B5."
+    }
+  }
+}

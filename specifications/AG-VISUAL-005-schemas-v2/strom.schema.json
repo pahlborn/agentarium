@@ -1,0 +1,214 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "agentarium.strom.v2",
+  "title": "Agentarium Stromvertrag V2 – Umschlag und Ereignisse",
+  "description": "Zwei getrennte Stroeme: katalog (Projektentdeckung) und lauf (fachliche Arbeit). Jeder Strom hat seinen eigenen monotonen stream_sequence-Raum. Das Lebenszeichen traegt KEINE stream_sequence und KEINE Fachereignis-ID.",
+  "oneOf": [
+    { "$ref": "#/$defs/umschlag_fach" },
+    { "$ref": "#/$defs/umschlag_herzschlag" }
+  ],
+  "$defs": {
+    "zeitpunkt": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]+)?(Z|[+-][0-9]{2}:[0-9]{2})$",
+      "description": "ISO 8601 mit Zeitzone. Ein Datum allein ist unzulaessig."
+    },
+    "kennung": { "type": "string", "minLength": 1, "maxLength": 128 },
+
+    "laufzustand": {
+      "enum": ["geplant", "aktiv", "wartend", "pausiert", "blockiert",
+               "abgeschlossen", "abgebrochen", "fehlgeschlagen", "wiedereroeffnet"],
+      "description": "Terminal sind ausschliesslich abgeschlossen, abgebrochen, fehlgeschlagen. Ein nicht terminaler Lauf oeffnet in Live-Beobachtung, ein terminaler als Archivwiedergabe. wiedereroeffnet ist NICHT terminal."
+    },
+    "herkunft": {
+      "type": "object",
+      "description": "Herkunft ist unabhaengig von der Darstellungsart und bleibt sichtbar.",
+      "properties": {
+        "mode": { "enum": ["OBSERVED_PROJECT_WORK", "SIMULATION"] },
+        "fictional": { "type": "boolean" },
+        "source_evidence": { "type": ["string", "null"] }
+      },
+      "required": ["mode", "fictional"],
+      "additionalProperties": false
+    },
+
+    "umschlag_fach": {
+      "type": "object",
+      "properties": {
+        "schema": { "const": "agentarium.strom.v2" },
+        "stream": { "enum": ["katalog", "lauf"] },
+        "stream_id": { "$ref": "#/$defs/kennung" },
+        "stream_sequence": { "type": "integer", "minimum": 1 },
+        "kind": {
+          "enum": ["project.created", "run.started", "run.finished",
+                   "run.state_changed", "catalog.changed", "work.event"]
+        },
+        "sent_at": { "$ref": "#/$defs/zeitpunkt" },
+        "payload": { "type": "object" }
+      },
+      "required": ["schema", "stream", "stream_id", "stream_sequence", "kind", "sent_at", "payload"],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": { "properties": { "stream": { "const": "katalog" } } },
+          "then": {
+            "properties": {
+              "kind": { "enum": ["project.created", "run.started", "run.finished", "catalog.changed"] }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "stream": { "const": "lauf" } } },
+          "then": {
+            "properties": { "kind": { "enum": ["work.event", "run.state_changed"] } }
+          }
+        },
+        {
+          "if": { "properties": { "kind": { "const": "work.event" } } },
+          "then": { "properties": { "payload": { "$ref": "#/$defs/arbeitsereignis" } } }
+        },
+        {
+          "if": { "properties": { "kind": { "const": "project.created" } } },
+          "then": { "properties": { "payload": { "$ref": "#/$defs/projekt_angelegt" } } }
+        },
+        {
+          "if": { "properties": { "kind": { "enum": ["run.started", "run.finished", "run.state_changed"] } } },
+          "then": { "properties": { "payload": { "$ref": "#/$defs/laufmeldung" } } }
+        }
+      ]
+    },
+
+    "umschlag_herzschlag": {
+      "type": "object",
+      "description": "Fluechtig. Nicht persistiert, keine Fachereignis-ID, keine Sequenzwirkung, kein Eintrag im Replaypuffer, kein LLM-Aufruf. Takt 5 s; nach 20 s ohne Empfang gilt die Ansicht als veraltet.",
+      "properties": {
+        "schema": { "const": "agentarium.strom.v2" },
+        "stream": { "enum": ["katalog", "lauf"] },
+        "stream_id": { "$ref": "#/$defs/kennung" },
+        "kind": { "const": "heartbeat" },
+        "sent_at": { "$ref": "#/$defs/zeitpunkt" },
+        "last_sequence": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "description": "Rein nachrichtlich: die hoechste bisher in DIESEM Strom gesendete stream_sequence. Veraendert den Cursor des Empfaengers nicht."
+        }
+      },
+      "required": ["schema", "stream", "stream_id", "kind", "sent_at"],
+      "additionalProperties": false
+    },
+
+    "projekt_angelegt": {
+      "type": "object",
+      "description": "Zuerst wird die project_id erzeugt, dann wird project.created mit genau dieser ID veroeffentlicht. project_id ist die dauerhafte Projektklammer.",
+      "properties": {
+        "project_id": { "$ref": "#/$defs/kennung" },
+        "name": { "type": "string" },
+        "titel": { "type": ["string", "null"] },
+        "beschreibung": { "type": ["string", "null"] },
+        "created_at": { "$ref": "#/$defs/zeitpunkt" },
+        "herkunft": { "$ref": "#/$defs/herkunft" }
+      },
+      "required": ["project_id", "name", "created_at", "herkunft"],
+      "additionalProperties": false
+    },
+
+    "laufmeldung": {
+      "type": "object",
+      "description": "run_id bezeichnet eine einzelne Ausfuehrung und ist die Archiv- und Replayeinheit. Ein Projekt kann mehrere Laeufe haben.",
+      "properties": {
+        "project_id": { "$ref": "#/$defs/kennung" },
+        "run_id": { "$ref": "#/$defs/kennung" },
+        "zustand": { "$ref": "#/$defs/laufzustand" },
+        "zustand_vorher": { "oneOf": [{ "$ref": "#/$defs/laufzustand" }, { "type": "null" }] },
+        "occurred_at": { "oneOf": [{ "$ref": "#/$defs/zeitpunkt" }, { "type": "null" }] },
+        "grund": { "type": ["string", "null"] },
+        "arbeitsstrom": {
+          "type": ["string", "null"],
+          "description": "Adresse des fachlichen Stroms dieses Laufs. Erst ab run.started vorhanden."
+        }
+      },
+      "required": ["project_id", "run_id", "zustand", "occurred_at"],
+      "additionalProperties": false
+    },
+
+    "arbeitsereignis": {
+      "type": "object",
+      "description": "Vokabular aus agentarium.observed-worklog.v1. Spalte 1 der Feldtabelle (heute vorhanden) ist Pflicht; Spalte 2 (additiv aus AG-REPORT-001) ist optional; Spalte 3 (neu in V2) ist project_id/run_id.",
+      "properties": {
+        "id": { "$ref": "#/$defs/kennung" },
+        "project_id": { "$ref": "#/$defs/kennung" },
+        "run_id": { "$ref": "#/$defs/kennung" },
+        "sequence": { "type": ["integer", "null"] },
+        "task_id": { "type": ["string", "null"] },
+        "parent_task_id": { "type": ["string", "null"] },
+        "actor": { "$ref": "#/$defs/kennung" },
+        "recipient": { "type": ["string", "null"] },
+        "kind": { "type": "string", "minLength": 1 },
+        "title": { "type": "string" },
+        "caused_by": { "type": "array", "items": { "type": "string" } },
+        "occurred_at": {
+          "oneOf": [{ "$ref": "#/$defs/zeitpunkt" }, { "type": "null" }],
+          "description": "Tatsaechliche Ereigniszeit. null ist zulaessig und bedeutet unbekannt - niemals der Importzeitpunkt."
+        },
+        "recorded_at": { "$ref": "#/$defs/zeitpunkt" },
+        "fictional": { "type": "boolean" },
+        "source_evidence": { "type": ["string", "null"] },
+        "ownership_change": {
+          "type": ["object", "null"],
+          "properties": { "from": { "type": ["string", "null"] }, "to": { "type": ["string", "null"] } },
+          "additionalProperties": false
+        },
+        "result_ref": { "type": ["string", "null"] },
+
+        "artifact_id": { "type": ["string", "null"] },
+        "version": { "type": ["string", "null"] },
+        "question_id": { "type": ["string", "null"] },
+        "reply_to": { "type": ["string", "null"] },
+        "supersedes": { "type": ["string", "null"] },
+        "corrects": { "type": ["string", "null"] },
+        "block_id": { "type": ["string", "null"] },
+        "resolving_event_id": { "type": ["string", "null"] },
+        "criteria_ref": { "type": ["string", "null"] },
+        "outcome": { "enum": ["pass", "fail", "blocked", "not_tested", "partial", null] },
+        "work_item_type": { "enum": ["story", "task", "defect", "experiment", null] },
+        "item_revision": { "type": ["integer", "null"], "minimum": 1 },
+        "previous_transition_id": { "type": ["string", "null"] },
+        "from": { "type": ["string", "null"] },
+        "to": { "type": ["string", "null"] },
+        "scope_version": { "type": ["string", "null"] },
+        "verbrauch": { "$ref": "#/$defs/verbrauch" }
+      },
+      "required": ["id", "project_id", "run_id", "actor", "kind", "title",
+                   "occurred_at", "recorded_at", "fictional"],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "description": "Ein Statuswechsel auf Done braucht Revision und Vorgaenger. Eine Lieferung, ein Reviewpass oder ein Testpass setzt NIE automatisch Done - das Feld erledigt gibt es nicht.",
+          "if": { "properties": { "kind": { "const": "status_change" } }, "required": ["kind"] },
+          "then": { "required": ["task_id", "from", "to", "item_revision"] }
+        },
+        {
+          "description": "Eine Pruefung nennt ihr genaues Ziel samt Version und die Kriterienfassung.",
+          "if": { "properties": { "kind": { "enum": ["review_result", "test_result"] } }, "required": ["kind"] },
+          "then": { "required": ["artifact_id", "version", "criteria_ref", "outcome"] }
+        }
+      ]
+    },
+
+    "verbrauch": {
+      "type": ["object", "null"],
+      "description": "Einzelnachweis je Ereignis. Fehlt ein Wert, heisst das keine Angabe - NIEMALS null Tokens und niemals 0 Euro.",
+      "properties": {
+        "input_tokens": { "type": ["integer", "null"], "minimum": 0 },
+        "output_tokens": { "type": ["integer", "null"], "minimum": 0 },
+        "thinking_tokens": { "type": ["integer", "null"], "minimum": 0 },
+        "platform": { "type": ["string", "null"] },
+        "agent_id": { "type": ["string", "null"] },
+        "actual_model": { "type": ["string", "null"] },
+        "belegt": { "type": "boolean", "description": "true nur mit Laufzeitbeleg." }
+      },
+      "required": ["belegt"],
+      "additionalProperties": false
+    }
+  }
+}

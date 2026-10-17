@@ -1,0 +1,571 @@
+--- a/pilot/AG-PILOT-001/README.md
++++ b/pilot/AG-PILOT-001/README.md
+@@ -67,6 +67,51 @@
+     json.dump(d,open(p,'w'),ensure_ascii=False)
+     EOF
+ 
++## Activity monitor (partial connection, local only)
++
++Optional, additive; the transport/reducer behaviour above is unchanged. Not complete
++runtime capture and not an end-to-end guarantee. `/monitor` and `/activity` are GET only.
++
++Start (both options together; `--activity-fresh-ms` is required with `--activity-input`):
++
++    python3 pilot/AG-PILOT-001/local_transport.py --input /abs/path/probe.json --port 8765 \
++      --activity-input /abs/path/activity.json --activity-fresh-ms 90000
++
++Open `http://127.0.0.1:8765/monitor` (live) or `/monitor?at=2026-10-16T10:00:00Z` (archive
++replay, never auto-advances). `GET /activity` returns the JSON; `?at=<ISO with zone>` selects
++ARCHIVE (observations after that instant are ignored, no wall-clock ageing). Without
++`--activity-input` all agents are `unknown`.
++
++Input schema `agentarium.activity-observations.v1`:
++
++    {"schema":"agentarium.activity-observations.v1","data_kind":"SYNTHETIC",
++     "observations":[{"id":"o1","agent":"Forge","session_id":"s1","task_id":"t1",
++       "observed_at":"2026-10-16T10:00:00Z","evidence_ref":"relay-log#1",
++       "signal":"stream_sample","event_counts":{"msg":3},
++       "last_event_seconds":10,"elapsed_seconds":12}]}
++
++`data_kind` is `OBSERVED` or `SYNTHETIC`. Signals: `host_received`, `stream_sample`
++(`event_counts`, `last_event_seconds`, `elapsed_seconds`), `source_waiting`/`source_blocked`
++(nonempty `reason`), `source_resumed`, `execution_stopped` (`outcome` success|failed|aborted),
++`transport_heartbeat`. `observed_at` is collector observation time (ISO-8601 with zone), not
++guaranteed event time. Nonempty `evidence_ref` is required for any state claim.
++`--activity-fresh-ms` is a test configuration, not a realtime/SLA guarantee.
++
++Example marked **TEST (synthetic)**: two samples for Forge/s1/t1, counter `msg` 3 then 5, both within
++the fresh window => `working_observed`.
++
++Acceptance cases (to be verified independently; Forge ran none):
++1. Genuine delta: two samples, same agent/session/task, increased counter or `last_event_seconds`, recent event => working_observed.
++2. Heartbeat/host receipt or unchanged samples => no work (stays unknown).
++3. Stale evidence (sample event age + observation age > fresh ms) => unknown, not waiting.
++4. Waiting/blocked only from explicit source signal with reason; silence => unknown.
++5. `execution_stopped` success => stopped, task is never set done; terminal for that session/task.
++
++Honest limits: the existing relay cadence is 60 s, so short freshness values will flap; ChatGPT
++activity hooks are absent; no automatic capture, no end-to-end guarantee. No LLM calls for
++telemetry, no per-token/frame logs. The agent roster in `activity.ROSTER` must list all eight
++agents (open item). Costs stay "Kosten nicht vollständig ermittelbar." with no numbers.
++
+ ## Limits
+ 
+ No real producer hooks, no field adapter, no hosting, no LLM calls, no writes or commands.
+--- a/pilot/AG-PILOT-001/activity.html
++++ b/pilot/AG-PILOT-001/activity.html
+@@ -0,0 +1,125 @@
++<!DOCTYPE html>
++<html lang="de">
++<head>
++<meta charset="utf-8">
++<meta name="viewport" content="width=device-width, initial-scale=1">
++<title>Agentarium – lokaler Aktivitätsmonitor / Teilanbindung</title>
++<style>
++  body { font-family: system-ui, sans-serif; margin: 1rem auto; max-width: 56rem; padding: 0 1rem; color: #1b1b1b; background: #fafafa; }
++  h1 { font-size: 1.3rem; }
++  .bar { display: flex; flex-wrap: wrap; gap: .75rem; align-items: center; margin: .75rem 0; }
++  .notice { border-left: 4px solid #888; padding: .4rem .75rem; background: #eee; margin: .5rem 0; }
++  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr)); gap: .75rem; }
++  .card { border: 2px solid #444; border-radius: .5rem; padding: .6rem .75rem; background: #fff; }
++  .card.unknown { border-style: dashed; border-color: #888; color: #444; }
++  .card.waiting { border-color: #2a5db0; }
++  .card.blocked { border-color: #b36b00; background: #fff6e5; }
++  .card.stopped { border-color: #333; }
++  .card.stopped.problem { border-color: #b00020; }
++  .card.working_observed { border-color: #1b7a3a; }
++  .card.pulse { animation: pulse 0.9s ease-out 1; }
++  @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(27,122,58,.6); } 100% { box-shadow: 0 0 0 .8rem rgba(27,122,58,0); } }
++  @media (prefers-reduced-motion: reduce) { .card.pulse { animation: none; } }
++  .name { font-weight: 700; }
++  .state { font-weight: 600; }
++  .meta { font-size: .85rem; color: #444; word-break: break-word; }
++  .err { color: #b00020; }
++</style>
++</head>
++<body>
++<h1>Agentarium – lokaler Aktivitätsmonitor / Teilanbindung</h1>
++<div class="notice" id="coverage">Lade …</div>
++<div class="bar">
++  <button id="refresh" type="button">Aktualisieren</button>
++  <label><input type="checkbox" id="auto"> automatisch alle 2 s (lokal)</label>
++  <span id="transport">Monitorabruf: unbekannt</span>
++  <span id="mode"></span>
++</div>
++<div class="err" id="errors"></div>
++<div class="grid" id="grid"></div>
++<p class="notice" id="costs">Kosten nicht vollständig ermittelbar.</p>
++<script>
++(function () {
++  'use strict';
++  var params = new URLSearchParams(location.search);
++  var at = params.get('at');
++  var grid = document.getElementById('grid');
++  var seen = null; // key -> evidence stamp; null until first load (baseline, no pulse)
++  var timer = null;
++  var auto = document.getElementById('auto');
++  if (at) { auto.disabled = true; }
++
++  var LABELS = {
++    working_observed: ['▶', 'Arbeit beobachtet'],
++    waiting: ['⏸', 'Wartet (laut Quelle)'],
++    blocked: ['⚠', 'Blockiert (laut Quelle)'],
++    stopped: ['■', 'Beendet'],
++    unknown: ['?', 'Unbekannt']
++  };
++
++  function el(tag, cls, text) {
++    var e = document.createElement(tag);
++    if (cls) { e.className = cls; }
++    if (text !== undefined && text !== null) { e.textContent = String(text); }
++    return e;
++  }
++
++  function render(doc) {
++    var next = {};
++    var first = seen === null;
++    grid.textContent = '';
++    doc.rows.forEach(function (r) {
++      var known = Object.prototype.hasOwnProperty.call(LABELS, r.state);
++      var lab = known ? LABELS[r.state] : LABELS.unknown;
++      var key = r.agent + '|' + r.session_id + '|' + r.task_id;
++      var stamp = r.state === 'working_observed' ? (r.last_evidence_at + '|' + r.evidence_ref) : '';
++      next[key] = stamp;
++      var cls = 'card ' + (known ? r.state : 'unknown') + (r.problem ? ' problem' : '');
++      if (!first && !at && stamp && seen[key] !== stamp) { cls += ' pulse'; }
++      var c = el('div', cls);
++      c.appendChild(el('div', 'name', r.agent));
++      c.appendChild(el('div', 'state', lab[0] + ' ' + lab[1] +
++        (r.state === 'stopped' && r.outcome ? ' – ' + r.outcome : '') + (r.problem ? ' (Problem)' : '')));
++      c.appendChild(el('div', 'meta', 'Grund: ' + r.reason));
++      c.appendChild(el('div', 'meta', 'Letzter Nachweis: ' + (r.last_evidence_at || 'keiner') +
++        (r.evidence_ref ? ' (' + r.evidence_ref + ')' : '')));
++      c.appendChild(el('div', 'meta', 'Session: ' + (r.session_id || '–') + ' · Task: ' + (r.task_id || '–')));
++      (r.diagnostics || []).forEach(function (d) { c.appendChild(el('div', 'meta err', d)); });
++      grid.appendChild(c);
++    });
++    seen = next;
++    document.getElementById('coverage').textContent =
++      'Teilanbindung / nicht verbunden: ' + doc.coverage.note +
++      ' · Datenart: ' + (doc.data_kind || 'keine Quelle') +
++      ' · Frische-Schwelle: ' + (doc.configured_fresh_ms === null ? 'nicht gesetzt' : doc.configured_fresh_ms + ' ms') +
++      ' (' + doc.fresh_ms_note + ')';
++    document.getElementById('mode').textContent =
++      doc.mode === 'ARCHIVE' ? 'Archiv-Wiedergabe bei ' + doc.replay_at + ' (kein Auto-Fortschritt)' : 'LIVE ' + doc.now;
++    document.getElementById('errors').textContent = (doc.source_errors || []).join(' | ');
++    document.getElementById('costs').textContent = doc.kosten.status_text;
++    document.getElementById('transport').textContent = 'Monitorabruf erreichbar';
++  }
++
++  function load() {
++    var url = '/activity' + (at ? '?at=' + encodeURIComponent(at) : '');
++    fetch(url, { cache: 'no-store' }).then(function (res) {
++      return res.json().then(function (j) { return { ok: res.ok, j: j }; });
++    }).then(function (x) {
++      if (!x.ok) { throw new Error(x.j && x.j.error ? x.j.error : 'Fehler'); }
++      render(x.j);
++    }).catch(function (e) {
++      document.getElementById('transport').textContent = 'Monitorabruf nicht erreichbar';
++      document.getElementById('errors').textContent = String(e && e.message ? e.message : e);
++    });
++  }
++
++  document.getElementById('refresh').addEventListener('click', load);
++  auto.addEventListener('change', function () {
++    if (timer) { clearInterval(timer); timer = null; }
++    if (auto.checked && !at) { timer = setInterval(load, 2000); }
++  });
++  load();
++}());
++</script>
++</body>
++</html>
+--- a/pilot/AG-PILOT-001/activity.py
++++ b/pilot/AG-PILOT-001/activity.py
+@@ -0,0 +1,310 @@
++"""AG-PILOT-001 activity derivation (pure, evidence based, LOCAL prototype).
++
++Partial connection only: this module derives per agent/session/task states from
++explicit collector observations. It does NOT capture runtime activity, does not
++call providers/LLMs/network and never infers unknown times, models or costs.
++
++Exact signature (for independent tests):
++
++    derive(observations, *, now, fresh_ms) -> list[dict]
++
++* observations: list of observation dicts (see README, schema
++  'agentarium.activity-observations.v1'). List order is the observation order
++  within one (agent, session_id, task_id); an observation older than the previous
++  accepted one of the SAME key is rejected (diagnostic), never re-sorted.
++* now: timezone-aware datetime or ISO-8601 string WITH zone (explicit instant).
++* fresh_ms: int > 0 (bool rejected). Test configuration, NOT a realtime/SLA claim.
++* raises ValueError for malformed now / fresh_ms / non-list observations.
++* returns JSON-compatible rows sorted by ROSTER order, then session_id, task_id.
++  Row keys: agent, session_id, task_id, state, reason, last_evidence_at,
++  evidence_ref, delta, outcome, problem, diagnostics.
++  state in: working_observed | waiting | blocked | stopped | unknown.
++
++Clock: observed_at is the collector observation time, not a guaranteed event time.
++Future timestamps (> now) and backwards timestamps (same key) are rejected, so a
++negative age can never occur.
++"""
++import json
++from datetime import datetime, timezone
++
++SCHEMA = 'agentarium.activity-observations.v1'
++DATA_KINDS = ('OBSERVED', 'SYNTHETIC')
++SIGNALS = ('host_received', 'stream_sample', 'source_waiting', 'source_blocked',
++           'source_resumed', 'execution_stopped', 'transport_heartbeat')
++OUTCOMES = ('success', 'failed', 'aborted')
++# OPEN ITEM: Forge could not verify the full eight-agent roster from the allowed
++# paths. Complete this tuple to the 8 agents. Agents seen in observations but
++# missing here still get rows.
++ROSTER = ('Atlas', 'Forge', 'Argus', 'Sentinel')
++
++
++def parse_ts(value):
++    """Return aware UTC datetime; ValueError if malformed or zone missing."""
++    if isinstance(value, datetime):
++        d = value
++    elif isinstance(value, str) and value.strip():
++        s = value.strip()
++        if s[-1] in 'Zz':
++            s = s[:-1] + '+00:00'
++        try:
++            d = datetime.fromisoformat(s)
++        except ValueError:
++            raise ValueError('Zeitstempel nicht ISO-8601: %r' % value)
++        if 'T' not in s and ' ' not in s:
++            raise ValueError('Zeitstempel ohne Uhrzeit: %r' % value)
++    else:
++        raise ValueError('Zeitstempel fehlt oder ist kein Text')
++    if d.tzinfo is None or d.utcoffset() is None:
++        raise ValueError('Zeitstempel ohne Zeitzone: %r' % (value,))
++    return d.astimezone(timezone.utc)
++
++
++def iso(d):
++    return d.astimezone(timezone.utc).isoformat().replace('+00:00', 'Z') if d else None
++
++
++def _text(o, k):
++    v = o.get(k)
++    if not isinstance(v, str) or not v.strip():
++        raise ValueError('%s fehlt oder leer' % k)
++    return v
++
++
++def _num(v, name):
++    if isinstance(v, bool) or not isinstance(v, (int, float)) or v != v or v < 0:
++        raise ValueError('%s muss Zahl >= 0 sein' % name)
++    return v
++
++
++def _validate(o):
++    if not isinstance(o, dict):
++        raise ValueError('Beobachtung ist kein Objekt')
++    c = {'id': _text(o, 'id'), 'agent': _text(o, 'agent'),
++         'session_id': _text(o, 'session_id'), 'task_id': _text(o, 'task_id')}
++    try:
++        c['at'] = parse_ts(o.get('observed_at'))
++    except ValueError as exc:
++        raise ValueError('observed_at: %s' % exc)
++    if not isinstance(o.get('evidence_ref'), str) or not o['evidence_ref'].strip():
++        raise ValueError('evidence_ref fehlt oder leer (kein Zustandsnachweis)')
++    c['ref'] = o['evidence_ref']
++    sig = o.get('signal')
++    if sig not in SIGNALS:
++        raise ValueError('signal unbekannt: %r' % (sig,))
++    c['signal'] = sig
++    if sig == 'stream_sample':
++        ec = o.get('event_counts')
++        if not isinstance(ec, dict) or not ec:
++            raise ValueError('event_counts fehlt')
++        for k, v in ec.items():
++            if not isinstance(k, str) or isinstance(v, bool) or not isinstance(v, int) or v < 0:
++                raise ValueError('event_counts enthaelt ungueltigen Wert')
++        c['counts'] = dict(ec)
++        c['last'] = _num(o.get('last_event_seconds'), 'last_event_seconds')
++        c['elapsed'] = _num(o.get('elapsed_seconds'), 'elapsed_seconds')
++        if c['last'] > c['elapsed']:
++            raise ValueError('last_event_seconds > elapsed_seconds')
++    elif sig in ('source_waiting', 'source_blocked'):
++        c['reason'] = _text(o, 'reason')
++    elif sig == 'execution_stopped':
++        if o.get('outcome') not in OUTCOMES:
++            raise ValueError('outcome muss success|failed|aborted sein')
++        c['outcome'] = o['outcome']
++    return c
++
++
++def _check_fresh(fresh_ms):
++    if isinstance(fresh_ms, bool) or not isinstance(fresh_ms, int) or fresh_ms <= 0:
++        raise ValueError('fresh_ms muss ganze Zahl > 0 sein')
++
++
++def _new_rec():
++    return {'ids': set(), 'last_at': None, 'sample': None, 'work': None, 'hold': None,
++            'terminal': None, 'transport_at': None, 'diag': [],
++            'evidence_at': None, 'ref': None}
++
++
++def _apply(rec, c):
++    sig, at = c['signal'], c['at']
++    if sig in ('host_received', 'transport_heartbeat'):
++        rec['transport_at'] = at  # never renews work, never a state claim
++    elif sig == 'stream_sample':
++        prev = rec['sample']
++        cur = {'counts': c['counts'], 'last': c['last'], 'elapsed': c['elapsed']}
++        delta = None
++        if prev is not None:
++            if c['elapsed'] < prev['elapsed'] or any(
++                    c['counts'].get(k, 0) < v for k, v in prev['counts'].items()):
++                rec['diag'].append('%s: Zaehler/Zeitbasis zurueckgesetzt, neue Basismessung' % c['id'])
++            else:
++                inc = {k: v - prev['counts'].get(k, 0) for k, v in c['counts'].items()
++                       if v > prev['counts'].get(k, 0)}
++                lev = c['last'] > prev['last']
++                if inc or lev:
++                    delta = {'counters': inc,
++                             'last_event_seconds': {'from': prev['last'], 'to': c['last']} if lev else None,
++                             'elapsed_seconds': {'from': prev['elapsed'], 'to': c['elapsed']}}
++        rec['sample'] = cur
++        if delta:
++            rec['work'] = {'at': at, 'event_age': c['elapsed'] - c['last'],
++                           'delta': delta, 'ref': c['ref']}
++            rec['evidence_at'], rec['ref'] = at, c['ref']
++    elif sig in ('source_waiting', 'source_blocked'):
++        rec['hold'] = {'kind': 'waiting' if sig == 'source_waiting' else 'blocked',
++                       'reason': c['reason'], 'at': at, 'ref': c['ref']}
++        rec['evidence_at'], rec['ref'] = at, c['ref']
++    elif sig == 'source_resumed':
++        rec['hold'] = None  # not work proof
++        rec['evidence_at'], rec['ref'] = at, c['ref']
++    elif sig == 'execution_stopped':
++        rec['terminal'] = {'outcome': c['outcome'], 'at': at, 'ref': c['ref']}
++        rec['evidence_at'], rec['ref'] = at, c['ref']
++
++
++def _row(agent, sid, tid, rec, now, fresh_ms):
++    r = {'agent': agent, 'session_id': sid, 'task_id': tid, 'state': 'unknown',
++         'reason': '', 'last_evidence_at': iso(rec['evidence_at']) if rec else None,
++         'evidence_ref': rec['ref'] if rec else None, 'delta': None, 'outcome': None,
++         'problem': False, 'diagnostics': list(rec['diag']) if rec else []}
++    if rec is None:
++        r['reason'] = 'Keine Quelle angebunden / keine Beobachtung'
++        return r
++    t, h, w = rec['terminal'], rec['hold'], rec['work']
++    if t:  # terminal conclusion, distinct from any stale active/waiting evidence
++        r.update(state='stopped', outcome=t['outcome'], problem=t['outcome'] != 'success',
++                 last_evidence_at=iso(t['at']), evidence_ref=t['ref'],
++                 reason='Ausfuehrung beendet (%s); Aufgabe nicht als erledigt gesetzt' % t['outcome'])
++        return r
++    if h:
++        age = (now - h['at']).total_seconds() * 1000
++        if age <= fresh_ms:
++            r.update(state=h['kind'], reason=h['reason'], last_evidence_at=iso(h['at']),
++                     evidence_ref=h['ref'], problem=h['kind'] == 'blocked')
++            return r
++        r['diagnostics'].append('%s-Signal aelter als %d ms: veraltet' % (h['kind'], fresh_ms))
++    if w:
++        age = (now - w['at']).total_seconds() * 1000 + w['event_age'] * 1000
++        if age <= fresh_ms:
++            r.update(state='working_observed', delta=w['delta'], last_evidence_at=iso(w['at']),
++                     evidence_ref=w['ref'],
++                     reason='Zaehlerfortschritt zwischen zwei Messungen, Quellereignis frisch')
++            return r
++        r.update(delta=w['delta'], last_evidence_at=iso(w['at']), evidence_ref=w['ref'],
++                 reason='Arbeitsnachweis veraltet (aelter als %d ms): unbekannt' % fresh_ms)
++        return r
++    if h:
++        r['reason'] = 'Warte-/Blockiersignal veraltet: unbekannt'
++    elif rec['sample']:
++        r['reason'] = 'Nur Basismessung oder unveraenderte Messung: kein Arbeitsnachweis'
++    elif rec['transport_at']:
++        r['reason'] = 'Nur Empfang/Transport belegt: kein Arbeitsnachweis'
++    else:
++        r['reason'] = 'Kein Nachweis'
++    return r
++
++
++def derive(observations, *, now, fresh_ms):
++    now_dt = parse_ts(now)
++    _check_fresh(fresh_ms)
++    if not isinstance(observations, (list, tuple)):
++        raise ValueError('observations muss eine Liste sein')
++    recs, agent_diag = {}, {}
++    for i, o in enumerate(observations):
++        try:
++            c = _validate(o)
++        except ValueError as exc:
++            a = o.get('agent') if isinstance(o, dict) else None
++            a = a if isinstance(a, str) and a.strip() else '(unbekannt)'
++            oid = o.get('id') if isinstance(o, dict) else None
++            agent_diag.setdefault(a, []).append('Beobachtung #%d (%s) verworfen: %s' % (i, oid, exc))
++            continue
++        key = (c['agent'], c['session_id'], c['task_id'])
++        if c['at'] > now_dt:
++            agent_diag.setdefault(c['agent'], []).append(
++                'Beobachtung %s liegt nach Bezugszeit (Zukunft), verworfen' % c['id'])
++            continue
++        rec = recs.setdefault(key, _new_rec())
++        if c['id'] in rec['ids']:
++            rec['diag'].append('%s: doppelte id, verworfen' % c['id'])
++            continue
++        if rec['last_at'] and c['at'] < rec['last_at']:
++            rec['diag'].append('%s: Zeit rueckwaerts innerhalb Session/Task, verworfen' % c['id'])
++            continue
++        rec['ids'].add(c['id'])
++        rec['last_at'] = c['at']
++        if rec['terminal']:
++            rec['diag'].append('%s: nach Abschluss ignoriert (terminal)' % c['id'])
++            continue
++        _apply(rec, c)
++    rows = [_row(a, s, t, rec, now_dt, fresh_ms) for (a, s, t), rec in recs.items()]
++    have = {r['agent'] for r in rows}
++    for a in set(ROSTER) | set(agent_diag):
++        if a not in have:
++            rows.append(_row(a, None, None, None, now_dt, fresh_ms))
++    # diagnostics of rejected observations go on the agent's first row
++    for a, d in agent_diag.items():
++        first = next((r for r in rows if r['agent'] == a), None)
++        if first is not None:
++            first['diagnostics'] += d
++
++    def order(r):
++        ai = ROSTER.index(r['agent']) if r['agent'] in ROSTER else len(ROSTER)
++        return (ai, r['agent'], r['session_id'] or '', r['task_id'] or '')
++    rows.sort(key=order)
++    return rows
++
++
++def load_observations(path):
++    """Return (data_kind, observations, errors). Never raises."""
++    try:
++        with open(path, 'rb') as fh:
++            doc = json.loads(fh.read().decode('utf-8'))
++    except (OSError, ValueError) as exc:
++        return None, [], ['activity-input nicht lesbar/ungueltig: %s' % exc]
++    if not isinstance(doc, dict) or doc.get('schema') != SCHEMA:
++        return None, [], ['schema muss %r sein' % SCHEMA]
++    if doc.get('data_kind') not in DATA_KINDS:
++        return None, [], ['data_kind muss OBSERVED oder SYNTHETIC sein']
++    obs = doc.get('observations')
++    if not isinstance(obs, list):
++        return doc['data_kind'], [], ['observations muss eine Liste sein']
++    return doc['data_kind'], obs, []
++
++
++def build_response(path, fresh_ms, *, at=None, now=None):
++    """Document for GET /activity. at=None -> LIVE vs. current UTC; else ARCHIVE replay.
++    Raises ValueError if `at` is malformed (caller answers 400)."""
++    errors, kind, obs = [], None, []
++    if path:
++        kind, obs, errors = load_observations(path)
++    if at is not None:
++        ref = parse_ts(at)
++        mode = 'ARCHIVE'
++        kept = []
++        for o in obs:
++            try:
++                if parse_ts(o.get('observed_at')) > ref:
++                    continue  # after replay instant: ignored
++            except (ValueError, AttributeError):
++                pass  # malformed stays and yields a diagnostic
++            kept.append(o)
++        obs = kept
++    else:
++        ref = parse_ts(now) if now is not None else datetime.now(timezone.utc)
++        mode = 'LIVE'
++    rows = derive(obs, now=ref, fresh_ms=fresh_ms if fresh_ms else 1)
++    return {
++        'mode': mode, 'replay_at': iso(ref) if mode == 'ARCHIVE' else None,
++        'now': iso(ref), 'data_kind': kind,
++        'provenance': {'source': 'activity-input file' if path else None,
++                       'clock': 'Kollektor-Beobachtungszeit, nicht garantierte Ereigniszeit',
++                       'no_aging_by_wall_clock': mode == 'ARCHIVE'},
++        'source_errors': errors,
++        'configured_fresh_ms': fresh_ms if path else None,
++        'fresh_ms_note': 'Testkonfiguration, keine Echtzeit-/SLA-Zusage',
++        'coverage': {'status': 'partial_unconnected',
++                     'note': 'Teilanbindung: nur Agenten/Signale aus der Eingabedatei; '
++                             'keine vollstaendige Laufzeiterfassung'},
++        'kosten': {'sichtbar': True, 'status_text': 'Kosten nicht vollständig ermittelbar.'},
++        'rows': rows,
++    }
+--- a/pilot/AG-PILOT-001/local_transport.py
++++ b/pilot/AG-PILOT-001/local_transport.py
+@@ -39,6 +39,19 @@
+ 
+ 
+ REDUCER = load_reducer()
++
++ACTIVITY_PATH = Path(__file__).resolve().parent / 'activity.py'
++MONITOR_HTML = Path(__file__).resolve().parent / 'activity.html'  # the only file /monitor serves
++
++
++def load_activity():
++    spec = importlib.util.spec_from_file_location('ag_activity', str(ACTIVITY_PATH))
++    mod = importlib.util.module_from_spec(spec)
++    spec.loader.exec_module(mod)
++    return mod
++
++
++ACTIVITY = load_activity()
+ 
+ 
+ class InputError(Exception):
+@@ -184,6 +197,8 @@
+ class Handler(BaseHTTPRequestHandler):
+     server_version = 'AgPilotLocalProbe/1'
+     store = None
++    activity_path = None
++    activity_fresh_ms = None
+ 
+     def log_message(self, fmt, *args):  # silenced; never log payloads
+         pass
+@@ -213,6 +228,25 @@
+         url = urlparse(self.path)
+         q = parse_qs(url.query)
+         snap, state0, base, events, err, _ = self.store.view()
++        if url.path == '/activity':  # read-only; independent of the task reducer/heartbeat
++            at = (q.get('at') or [None])[0]
++            try:
++                doc = ACTIVITY.build_response(self.activity_path, self.activity_fresh_ms, at=at)
++            except ValueError as exc:
++                return self._json(400, {'error': 'at: %s' % exc})
++            return self._json(200, doc)
++        if url.path == '/monitor':
++            try:
++                body = MONITOR_HTML.read_bytes()
++            except OSError:
++                return self._json(404, {'error': 'monitor page missing'})
++            self.send_response(200)
++            self.send_header('Content-Type', 'text/html; charset=utf-8')
++            self.send_header('Content-Length', str(len(body)))
++            self.send_header('Cache-Control', 'no-store')
++            self.end_headers()
++            self.wfile.write(body)
++            return
+         if url.path == '/health':
+             return self._json(200, {
+                 'mode': 'local_probe', 'supported_actions': [],
+@@ -303,9 +337,18 @@
+     ap = argparse.ArgumentParser(description='AG-PILOT-001 local loopback test probe')
+     ap.add_argument('--input', required=True, help='explicit path to probe.json')
+     ap.add_argument('--port', type=int, required=True, help='0 = pick free port')
++    ap.add_argument('--activity-input', default=None,
++                    help='optional activity observations JSON (agentarium.activity-observations.v1)')
++    ap.add_argument('--activity-fresh-ms', type=int, default=None,
++                    help='freshness window in ms (test configuration; required with --activity-input)')
+     args = ap.parse_args()
+     if not 0 <= args.port <= 65535:
+         ap.error('port out of range')
++    if args.activity_input is not None and (args.activity_fresh_ms is None
++                                            or args.activity_fresh_ms <= 0):
++        ap.error('--activity-fresh-ms (integer > 0) is required with --activity-input')
++    Handler.activity_path = args.activity_input
++    Handler.activity_fresh_ms = args.activity_fresh_ms
+     store = Store(args.input)
+     store.refresh()
+     if store.snap is None:

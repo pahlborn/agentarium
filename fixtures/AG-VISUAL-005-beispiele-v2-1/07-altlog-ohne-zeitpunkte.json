@@ -1,0 +1,178 @@
+{
+  "fall": "07",
+  "titel": "Altlog mit fehlenden Zeitpunkten - keine erfundenen Zeiten, keine Dauern",
+  "prueft": [
+    "§6 Zeitachse",
+    "§10 Altlasten"
+  ],
+  "erwartung": [
+    {
+      "regel": "R-10",
+      "soll": "zeitachse=partial ist korrekt abgeleitet: von drei Ereignissen hat eines ein occurred_at, zwei haben null. Nicht alle fehlen, also nicht none."
+    },
+    {
+      "regel": "R-18",
+      "soll": "Bei partial darf keine Dauer, Parallelitaet oder aktive Arbeitszeit behauptet werden. Die Darstellung wechselt in eine SICHTBAR BEZEICHNETE Schrittfolge."
+    },
+    {
+      "regel": "R-18b",
+      "soll": "recorded_at wird NICHT als Ereigniszeit verwendet. Es ist Ablagezeit."
+    },
+    {
+      "regel": "R-10b",
+      "soll": "Der Vergleichsfall zeitachse=none: kein Ereignis hat occurred_at."
+    },
+    {
+      "regel": "R-30",
+      "soll": "Die flachen Quellfelder des echten Altlogs sind zulaessig und bleiben erhalten: agent_id, platform, actual_model, actual_reasoning und die drei Tokenfelder. In V2 waren sie abgelehnt oder verlagert. Befund B4."
+    },
+    {
+      "regel": "R-31",
+      "soll": "ownership_change behaelt task_id, scope und basis. Verantwortung wird nie aus Empfaenger oder Parent allein abgeleitet. Befund B4."
+    }
+  ],
+  "daten": {
+    "manifest": {
+      "schema": "agentarium.archivmanifest.v2.1",
+      "project_id": "AG-PARTITUR",
+      "run_id": "AG-PARTITUR-R1",
+      "archiv_version": "1",
+      "schema_fassung": "agentarium.observed-worklog.v1",
+      "zustand": "abgeschlossen",
+      "vollstaendig": false,
+      "herkunft": {
+        "mode": "OBSERVED_PROJECT_WORK",
+        "fictional": false,
+        "source_evidence": "relay/events/…"
+      },
+      "quellen": [
+        "relay/events/AG-PARTITUR-001-worklog-v1.json"
+      ],
+      "abdeckung": {
+        "ordering": "Beobachtete Reihenfolge der Nachrichten; der Handback kann vor dem Empfang erzeugt worden sein.",
+        "timestamps": "Nutzernachrichten und Issue-Anlage bekannt; genaue Agentenaufruf- und Rueckgabezeiten nicht verfuegbar.",
+        "luecken": [
+          "Agentenaufrufzeiten",
+          "Rueckgabezeiten"
+        ]
+      },
+      "zeitachse": "partial",
+      "wiedergabe": {
+        "nebenwirkungsfrei": true,
+        "zeitsprung": true,
+        "einzelschritt": true,
+        "deterministisch": true
+      },
+      "kosten": {
+        "sichtbar": true,
+        "erfassung": "unvollstaendig",
+        "daten": "synthetisch",
+        "status_text": "Kosten nicht vollständig ermittelbar.",
+        "ohne_angabe": 2
+      },
+      "ereignisse": [
+        {
+          "id": "P01",
+          "project_id": "AG-PARTITUR",
+          "run_id": "AG-PARTITUR-R1",
+          "sequence": 1,
+          "task_id": "AG-PARTITUR-001",
+          "actor": "peter",
+          "recipient": "atlas",
+          "kind": "request",
+          "title": "Partitur ins Backlog und parallel vorbereiten",
+          "caused_by": [],
+          "occurred_at": "2026-10-14T18:49:42+02:00",
+          "recorded_at": "2026-10-14T16:55:48.939Z",
+          "fictional": false,
+          "source_evidence": "Peters Nachricht samt mitgeliefertem Zeitkontext",
+          "agent_id": null,
+          "platform": null,
+          "actual_model": null,
+          "actual_reasoning": null,
+          "input_tokens": null,
+          "output_tokens": null,
+          "thinking_tokens": null,
+          "ownership_change": {
+            "from": null,
+            "to": "atlas",
+            "task_id": "AG-PARTITUR-001",
+            "scope": "Auftrag",
+            "basis": "Peters Nachricht"
+          }
+        },
+        {
+          "id": "P02",
+          "project_id": "AG-PARTITUR",
+          "run_id": "AG-PARTITUR-R1",
+          "sequence": 2,
+          "task_id": "AG-PARTITUR-001",
+          "actor": "atlas",
+          "recipient": "scout",
+          "kind": "handoff",
+          "title": "Recherche angefordert",
+          "caused_by": [
+            "P01"
+          ],
+          "occurred_at": null,
+          "recorded_at": "2026-10-14T16:55:48.939Z",
+          "fictional": false,
+          "source_evidence": "Handback-Vermerk; Aufrufzeit nicht belegt"
+        },
+        {
+          "id": "P03",
+          "project_id": "AG-PARTITUR",
+          "run_id": "AG-PARTITUR-R1",
+          "sequence": 3,
+          "task_id": "AG-PARTITUR-001",
+          "actor": "scout",
+          "recipient": "atlas",
+          "kind": "contribution",
+          "title": "Quellenfaecher zurueck",
+          "caused_by": [
+            "P02"
+          ],
+          "occurred_at": null,
+          "recorded_at": "2026-10-14T16:55:48.939Z",
+          "fictional": false,
+          "source_evidence": "Handback-Vermerk; Rueckgabezeit nicht belegt"
+        }
+      ]
+    },
+    "darstellung": {
+      "modus": "schrittfolge",
+      "beschriftung": "Schrittfolge - keine belegte Zeitachse",
+      "verboten": [
+        "Flugdauern aus Zeitdifferenzen",
+        "Pausenlaengen",
+        "Gleichzeitigkeitsaussagen",
+        "aktive Arbeitszeit",
+        "recorded_at als Ereigniszeit"
+      ]
+    },
+    "vergleichsfall_none": {
+      "zeitachse": "none",
+      "ereignisse": [
+        {
+          "id": "X1",
+          "occurred_at": null
+        },
+        {
+          "id": "X2",
+          "occurred_at": null
+        }
+      ],
+      "begruendung": "Kein Ereignis traegt einen belegten Zeitpunkt."
+    },
+    "adapter": {
+      "quellform": "flach am Ereignis, wie in agentarium.observed-worklog.v1: agent_id, platform, actual_model, actual_reasoning, input_tokens, output_tokens, thinking_tokens",
+      "zielform": "zusaetzlich gebuendelt unter verbrauch mit belegt",
+      "regel": "Der Adapter ERGAENZT, er verlagert nicht. Die Quellfelder bleiben am Ereignis stehen und werden nicht entfernt; fehlt ein Wert, bleibt er null und wird nicht zu 0.",
+      "ablageebenen": [
+        "Ereignis flach (Quelle)",
+        "verbrauch gebuendelt (abgeleitet)"
+      ],
+      "verlustfrei": true
+    }
+  }
+}

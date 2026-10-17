@@ -24,6 +24,21 @@ Tokenfelder sind Providerangaben. Thinking separat ausgewiesen; nicht nochmals z
 | archibald | AG-PROC-REVIEW-001 | 724c22a4 | nicht verfügbar | nicht verfügbar | nicht verfügbar | nicht verfügbar | nicht verfügbar | 0.0924060 | [Runtime](https://github.com/pahlborn/agentarium/issues/2#issuecomment-6150728851) |
 | forge | AG-PROC-REVIEW-001 | 0bda9588 | nicht verfügbar | nicht verfügbar | nicht verfügbar | nicht verfügbar | nicht verfügbar | 0.0254630 | [Runtime](https://github.com/pahlborn/agentarium/issues/2#issuecomment-6150740099) |
 | cadence | AG-PROC-REVIEW-001 | 9024fd9e | nicht verfügbar | nicht verfügbar | nicht verfügbar | nicht verfügbar | nicht verfügbar | 0.1237810 | [Runtime](https://github.com/pahlborn/agentarium/issues/2#issuecomment-6150760833) |
+| forge | AG-VISUAL-005-K3-FORGE-FINAL-V1 | 1292d0c3 | 18 | 11131 | 141812 | 39559 | 2234 | 0.2244247 | [Runtime](https://github.com/pahlborn/agentarium/issues/2#issuecomment-6212103126) |
+| forge | AG-VISUAL-005-K1-COUNTERPROBE-V1 | a307250d | 14 | 3013 | 91457 | 36893 | 262 | 0.1315362 | [Runtime](https://github.com/pahlborn/agentarium/issues/2#issuecomment-6213044280) |
+| forge | AG-PILOT-001-LOCAL-TRANSPORT-V1 | f0f7d565 | 16 | 10277 | 72913 | 23516 | 2824 | 0.1688833 | [Runtime](https://github.com/pahlborn/agentarium/issues/2#issuecomment-6213264341) |
+| forge | AG-PILOT-001-LOCAL-TRANSPORT-V2 | fdace86d | 10 | 6459 | 30310 | 24403 | 760 | 0.1286485 | [Runtime](https://github.com/pahlborn/agentarium/issues/2#issuecomment-6213328234) |
+| forge | AG-PILOT-001-ACTIVITY-V1 | d9d5ef20 | 18 | 27697 | 105215 | 38732 | 6134 | 0.3843575 | [Runtime](https://github.com/pahlborn/agentarium/issues/2#issuecomment-6213943285) |
+| forge | AG-PILOT-001-ACTIVITY-V2 | 3ba53364 | 16 | 13026 | 86446 | 27953 | 2503 | 0.2088191 | [Runtime](https://github.com/pahlborn/agentarium/issues/2#issuecomment-6214054273) |
+
+| forge | AG-PILOT-001-SOURCE-HOOK-V1 | bf2aa07d | 16 | 20838 | 111997 | 34869 | 8202 | 0.3067842 | [Runtime](https://github.com/pahlborn/agentarium/issues/2#issuecomment-6216191294) |
+| forge | AG-PILOT-001-FIELD-ADAPTER-V1 | b7b2bb73 | 16 | 3097 | 59438 | 21732 | 635 | 0.0912758 | [Runtime](https://github.com/pahlborn/agentarium/issues/2#issuecomment-6216323172) |
+
+| forge | AG-PILOT-001-FIELD-ADAPTER-V2 | 7cedd45b | 18 | 3334 | 142795 | 42553 | 1403 | 0.1540380 | [Runtime](https://github.com/pahlborn/agentarium/issues/2#issuecomment-6220189114) |
+
+| forge | AG-PILOT-001-FIELD-ADAPTER-V3 | 065336d2 | 30 | 25193 | 355181 | 65752 | 12244 | 0.4518881 | [Runtime](https://github.com/pahlborn/agentarium/issues/2#issuecomment-6220343563) |
+
+K3-Versuch: CLI-Turngrenze erreicht; Patch erhalten und unabhängig geprüft. Der anschließende begrenzte K1-Testauftrag ist erfolgreich geliefert und durch Sentinel bestätigt: beide Prüfer grün, K1/K2/K3-Rückfälle erkannt. Liefercommit da860fd19f38e9938ed201546f2a6e5b4cc765f8. Kein Merge oder Deployment. Aktuelles Kostenfeld bleibt sichtbar und zeigt bei unvollständiger Erfassung ausschließlich „Kosten nicht vollständig ermittelbar.“
 
 ## ChatGPT – Erfassungslücken
 
@@ -46,4 +61,14 @@ Die Work-Laufzeit stellt hier keine belegten Tokenzähler pro Agent bereit. Abon
 
 Jeder neue Auftrag: genaue Anforderungsversion, Agent/Session, tatsächliches Modell, Billing-Pfad, Provider-Tokenfelder oder explizit nicht verfügbar, Kostenquelle, Abbruch-/Retry-Status und Ergebnis. Keine erfundene anteilige Kostenverteilung bei mehreren Anforderungen in einem Aufruf. Die Datenbasis liegt in [AG-COST-001-register-v1.json](AG-COST-001-register-v1.json).
 
-Diese Tabellenaktualisierung: keine neuen Anthropic-API-Aufrufe; API-Zusatzverbrauch USD0. ChatGPT/GitHub-Abrechnung hier nicht zugänglich.
+Aktualisierung 16.10.2026: Der reguläre K3-Codingaufruf oben ist neu erfasst. Keine zusätzlichen Modellaufrufe für die Buchführung. ChatGPT-/GitHub-Abrechnung bleibt unzugänglich; keine vollständige Gesamtsumme.
+
+Lokaler Transport: V1 Worker erfolgreich, Runtime-QA FAIL14/18; V2 gezielt korrigiert, unabhängige Runtime-QA PASS18/18. Arbeitscommit19463534defa6f9c6b48812eeebf56433fa28e89; kein Merge/Deployment/echter Pilot. Beide Aufrufe0.2975318USD, kein Projektgesamtbetrag.
+
+Aktivitätsmonitor: V1 an Turn-Grenze beendet, Patch erhalten, QA zunächst FAIL 11/14. V2 Worker erfolgreich, Aktivität 14/14 und Transport 18/18; redaktionelle README-Korrektur separat bestätigt. Browser-DOM nicht getestet. Beide Aufrufe zusammen 0.5931766 USD, kein Projektgesamtbetrag. Keine weitere Anthropic-Ausführung für die Dokukorrektur.
+
+Quellerfassung: Sentinel PASS (Stream9/9, Diagnostik8/8, Capture8/8). Feldadapter V1: CA_QUESTION, nur lokale /field-Route geliefert; unabhängige Teil-QA PASS (Transport18/18, Aktivität14/14, Route und echte Daten16/16), vollständige Feldanbindung INCOMPLETE. Diese zwei Claude-Aufrufe zusammen 0.3980600 USD; kein Projektgesamtbetrag. Feldadapter V2 wurde vom bestehenden Private-Repo-Guard übersprungen, keine Schritte/kein Modellaufruf. Keine geschätzte Nullbuchung für andere Kosten.
+
+Feldadapter V2: öffentlicher Relay-Guard von Peter freigegeben und wirksam; Worker gestartet, aber nach9Turns mit error_max_turns beendet. 0.1540380USD. activity-input.js blieb leer, schicht.py unverändert, daher kein neuer Feldadapter und kein automatischer Retry. Die drei Source/Field-Aufrufe SOURCE-HOOK-V1 + FIELD-ADAPTER-V1 + FIELD-ADAPTER-V2 ergeben 0.5520980USD; weiterhin kein vollständiger Projektgesamtbetrag.
+
+Feldadapter V3: ohne Turn-Grenze erfolgreich nach24Turns/190.361s,0.4518881USD; Sentinel PASS_WITH_LIMITS, Browser-DOM NOT_TESTED. Source hook V1 + Field V1/V2/V3 =1.0039861USD. Kein vollständiger Projektgesamtbetrag und daher kein Betrag in der Produktanzeige.

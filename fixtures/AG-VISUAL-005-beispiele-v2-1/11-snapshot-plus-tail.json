@@ -1,0 +1,686 @@
+{
+  "fall": "11",
+  "titel": "Schnappschuss plus Tail mit echten Stromcursorn, gegen die Vollhistorie",
+  "prueft": [
+    "V2.1.1 §R3"
+  ],
+  "grundlage": "Befund R3. Der Reducer begann leer und setzte cursor = Anzahl der Eingaben; er konnte einen Schnappschuss nicht FORTSCHREIBEN, und innerer wie aeusserer Cursor wurden nie abgeglichen. Die Anzahl importierter Ereignisse ist keine Transportsequenz.",
+  "erwartung": [
+    {
+      "regel": "R-39",
+      "soll": "Der aeussere Schnappschusscursor und zustand_am_cursor.cursor sind gleich (beide 103) und sind eine stream_sequence, keine Anzahl."
+    },
+    {
+      "regel": "R-40",
+      "soll": "Vollhistorie bis 106 ergibt denselben Zustand wie Schnappschuss bei 103 plus Tail 104-106 - in Aufgaben, Pruefungen, Blockaden, Owner UND Cursor."
+    },
+    {
+      "regel": "R-41",
+      "soll": "Ein doppeltes Ereignis im Tail erzeugt keine unbemerkte doppelte Zustandsaenderung: es wird als doppelt erkannt und verworfen."
+    },
+    {
+      "regel": "R-42",
+      "soll": "K2: Bei Tail 104,106 bleibt der Cursor 104 UND der Zustand enthaelt die Wirkung von 106 nicht. Geprueft wird der ZUSTAND, nicht nur ein Fehlertext."
+    },
+    {
+      "regel": "R-43",
+      "soll": "K2: Nach Nachlieferung von 105 ist der Cursor 106 und der Zustand zeichengleich der geordneten Zustellung. Eine Luecke sperrt, sie verwirft nicht."
+    }
+  ],
+  "daten": {
+    "schnappschuss": {
+      "schema": "agentarium.schnappschuss.v2.1",
+      "stream": "lauf",
+      "stream_id": "AG-NEU/AG-NEU-R1",
+      "cursor": 103,
+      "sent_at": "2026-10-15T13:30:00Z",
+      "replay_grenze": 100,
+      "hoechste_sequenz": 106,
+      "rechte": [
+        "read"
+      ],
+      "supported_actions": [],
+      "lauf": {
+        "project_id": "AG-NEU",
+        "run_id": "AG-NEU-R1",
+        "zustand": "aktiv",
+        "terminal": false,
+        "ansicht": "live",
+        "befehlsfaehig": true,
+        "herkunft": {
+          "mode": "OBSERVED_PROJECT_WORK",
+          "fictional": false,
+          "source_evidence": "synthetisch"
+        },
+        "zeitachse": "complete",
+        "zustand_am_cursor": {
+          "cursor": 103,
+          "aufgaben": [
+            {
+              "task_id": "T-1",
+              "parent_task_id": null,
+              "work_item_type": "story",
+              "status": "offen",
+              "item_revision": 1,
+              "letzte_transition_id": "S1",
+              "owner": null
+            }
+          ],
+          "artefakte": [
+            {
+              "artifact_id": "ART-9",
+              "version": "v1",
+              "supersedes": null,
+              "pruefungen": [
+                {
+                  "kind": "test_result",
+                  "task_id": "T-1",
+                  "criteria_ref": "KRIT@v1",
+                  "outcome": "pass",
+                  "event_id": "S3"
+                }
+              ]
+            }
+          ],
+          "blockaden": [],
+          "abdeckung": "complete"
+        },
+        "letzte": []
+      },
+      "kosten": {
+        "sichtbar": true,
+        "erfassung": "unvollstaendig",
+        "daten": "synthetisch",
+        "status_text": "Kosten nicht vollständig ermittelbar.",
+        "ohne_angabe": 6
+      }
+    },
+    "zustand_voll_soll": {
+      "cursor": 106,
+      "aufgaben": [
+        {
+          "task_id": "T-1",
+          "parent_task_id": null,
+          "work_item_type": "story",
+          "status": "done",
+          "item_revision": 2,
+          "letzte_transition_id": "S6",
+          "owner": null
+        }
+      ],
+      "artefakte": [
+        {
+          "artifact_id": "ART-9",
+          "version": "v1",
+          "supersedes": null,
+          "pruefungen": [
+            {
+              "kind": "test_result",
+              "task_id": "T-1",
+              "criteria_ref": "KRIT@v1",
+              "outcome": "pass",
+              "event_id": "S3"
+            }
+          ]
+        }
+      ],
+      "blockaden": [
+        {
+          "block_id": "B-1",
+          "task_id": "T-1",
+          "grund": "wartet auf Freigabe",
+          "seit": "2026-10-15T14:00:00Z",
+          "resolving_event_id": "S5"
+        }
+      ],
+      "abdeckung": "complete"
+    },
+    "doppelt_im_tail": {
+      "beschreibung": "S4 wird zweimal zugestellt",
+      "soll": "doppelt erkannt, Zustand gleich dem Soll",
+      "tail_umschlaege": [
+        {
+          "schema": "agentarium.strom.v2.1",
+          "stream": "lauf",
+          "stream_id": "AG-NEU/AG-NEU-R1",
+          "stream_sequence": 104,
+          "kind": "work.event",
+          "sent_at": "2026-10-15T14:00:01Z",
+          "payload": {
+            "id": "S4",
+            "project_id": "AG-NEU",
+            "run_id": "AG-NEU-R1",
+            "actor": "atlas",
+            "kind": "block",
+            "title": "wartet auf Freigabe",
+            "caused_by": [],
+            "occurred_at": "2026-10-15T14:00:00Z",
+            "recorded_at": "2026-10-15T14:00:01Z",
+            "fictional": false,
+            "task_id": "T-1",
+            "block_id": "B-1"
+          }
+        },
+        {
+          "schema": "agentarium.strom.v2.1",
+          "stream": "lauf",
+          "stream_id": "AG-NEU/AG-NEU-R1",
+          "stream_sequence": 104,
+          "kind": "work.event",
+          "sent_at": "2026-10-15T14:00:01Z",
+          "payload": {
+            "id": "S4",
+            "project_id": "AG-NEU",
+            "run_id": "AG-NEU-R1",
+            "actor": "atlas",
+            "kind": "block",
+            "title": "wartet auf Freigabe",
+            "caused_by": [],
+            "occurred_at": "2026-10-15T14:00:00Z",
+            "recorded_at": "2026-10-15T14:00:01Z",
+            "fictional": false,
+            "task_id": "T-1",
+            "block_id": "B-1"
+          }
+        },
+        {
+          "schema": "agentarium.strom.v2.1",
+          "stream": "lauf",
+          "stream_id": "AG-NEU/AG-NEU-R1",
+          "stream_sequence": 105,
+          "kind": "work.event",
+          "sent_at": "2026-10-15T15:00:01Z",
+          "payload": {
+            "id": "S5",
+            "project_id": "AG-NEU",
+            "run_id": "AG-NEU-R1",
+            "actor": "peter",
+            "kind": "unblock",
+            "title": "Freigabe erteilt",
+            "caused_by": [],
+            "occurred_at": "2026-10-15T15:00:00Z",
+            "recorded_at": "2026-10-15T15:00:01Z",
+            "fictional": false,
+            "task_id": "T-1",
+            "block_id": "B-1",
+            "resolving_event_id": "S5"
+          }
+        },
+        {
+          "schema": "agentarium.strom.v2.1",
+          "stream": "lauf",
+          "stream_id": "AG-NEU/AG-NEU-R1",
+          "stream_sequence": 106,
+          "kind": "work.event",
+          "sent_at": "2026-10-15T16:00:01Z",
+          "payload": {
+            "id": "S6",
+            "project_id": "AG-NEU",
+            "run_id": "AG-NEU-R1",
+            "actor": "atlas",
+            "kind": "status_change",
+            "title": "T-1 auf Done",
+            "caused_by": [],
+            "occurred_at": "2026-10-15T16:00:00Z",
+            "recorded_at": "2026-10-15T16:00:01Z",
+            "fictional": false,
+            "task_id": "T-1",
+            "from": "offen",
+            "to": "done",
+            "item_revision": 2,
+            "previous_transition_id": "S1",
+            "artifact_id": "ART-9",
+            "version": "v1",
+            "criteria_ref": "KRIT@v1",
+            "nachweis_ref": "S3"
+          }
+        }
+      ]
+    },
+    "luecke_im_tail": {
+      "beschreibung": "Tail 104 und 106, 105 fehlt. K2: 106 darf weder wirken noch den Cursor setzen.",
+      "tail_umschlaege": [
+        {
+          "schema": "agentarium.strom.v2.1",
+          "stream": "lauf",
+          "stream_id": "AG-NEU/AG-NEU-R1",
+          "stream_sequence": 104,
+          "kind": "work.event",
+          "sent_at": "2026-10-15T14:00:01Z",
+          "payload": {
+            "id": "S4",
+            "project_id": "AG-NEU",
+            "run_id": "AG-NEU-R1",
+            "actor": "atlas",
+            "kind": "block",
+            "title": "wartet auf Freigabe",
+            "caused_by": [],
+            "occurred_at": "2026-10-15T14:00:00Z",
+            "recorded_at": "2026-10-15T14:00:01Z",
+            "fictional": false,
+            "task_id": "T-1",
+            "block_id": "B-1"
+          }
+        },
+        {
+          "schema": "agentarium.strom.v2.1",
+          "stream": "lauf",
+          "stream_id": "AG-NEU/AG-NEU-R1",
+          "stream_sequence": 106,
+          "kind": "work.event",
+          "sent_at": "2026-10-15T16:00:01Z",
+          "payload": {
+            "id": "S6",
+            "project_id": "AG-NEU",
+            "run_id": "AG-NEU-R1",
+            "actor": "atlas",
+            "kind": "status_change",
+            "title": "T-1 auf Done",
+            "caused_by": [],
+            "occurred_at": "2026-10-15T16:00:00Z",
+            "recorded_at": "2026-10-15T16:00:01Z",
+            "fictional": false,
+            "task_id": "T-1",
+            "from": "offen",
+            "to": "done",
+            "item_revision": 2,
+            "previous_transition_id": "S1",
+            "artifact_id": "ART-9",
+            "version": "v1",
+            "criteria_ref": "KRIT@v1",
+            "nachweis_ref": "S3"
+          }
+        }
+      ],
+      "soll_cursor": 104,
+      "soll_zustand": {
+        "cursor": 104,
+        "aufgaben": [
+          {
+            "task_id": "T-1",
+            "parent_task_id": null,
+            "work_item_type": "story",
+            "status": "offen",
+            "item_revision": 1,
+            "letzte_transition_id": "S1",
+            "owner": null
+          }
+        ],
+        "artefakte": [
+          {
+            "artifact_id": "ART-9",
+            "version": "v1",
+            "supersedes": null,
+            "pruefungen": [
+              {
+                "kind": "test_result",
+                "task_id": "T-1",
+                "criteria_ref": "KRIT@v1",
+                "outcome": "pass",
+                "event_id": "S3"
+              }
+            ]
+          }
+        ],
+        "blockaden": [
+          {
+            "block_id": "B-1",
+            "task_id": "T-1",
+            "grund": "wartet auf Freigabe",
+            "seit": "2026-10-15T14:00:00Z",
+            "resolving_event_id": null
+          }
+        ],
+        "abdeckung": "complete"
+      },
+      "soll": "Luecke gemeldet UND Cursor bleibt 104 UND Zustand ohne die Wirkung von 106"
+    },
+    "vollhistorie_umschlaege": [
+      {
+        "schema": "agentarium.strom.v2.1",
+        "stream": "lauf",
+        "stream_id": "AG-NEU/AG-NEU-R1",
+        "stream_sequence": 101,
+        "kind": "work.event",
+        "sent_at": "2026-10-15T11:00:01Z",
+        "payload": {
+          "id": "S1",
+          "project_id": "AG-NEU",
+          "run_id": "AG-NEU-R1",
+          "actor": "atlas",
+          "kind": "status_change",
+          "title": "T-1 eroeffnet",
+          "caused_by": [],
+          "occurred_at": "2026-10-15T11:00:00Z",
+          "recorded_at": "2026-10-15T11:00:01Z",
+          "fictional": false,
+          "task_id": "T-1",
+          "from": null,
+          "to": "offen",
+          "item_revision": 1,
+          "previous_transition_id": null,
+          "work_item_type": "story"
+        }
+      },
+      {
+        "schema": "agentarium.strom.v2.1",
+        "stream": "lauf",
+        "stream_id": "AG-NEU/AG-NEU-R1",
+        "stream_sequence": 102,
+        "kind": "work.event",
+        "sent_at": "2026-10-15T12:00:01Z",
+        "payload": {
+          "id": "S2",
+          "project_id": "AG-NEU",
+          "run_id": "AG-NEU-R1",
+          "actor": "forge",
+          "kind": "artifact",
+          "title": "ART-9 v1",
+          "caused_by": [],
+          "occurred_at": "2026-10-15T12:00:00Z",
+          "recorded_at": "2026-10-15T12:00:01Z",
+          "fictional": false,
+          "artifact_id": "ART-9",
+          "version": "v1"
+        }
+      },
+      {
+        "schema": "agentarium.strom.v2.1",
+        "stream": "lauf",
+        "stream_id": "AG-NEU/AG-NEU-R1",
+        "stream_sequence": 103,
+        "kind": "work.event",
+        "sent_at": "2026-10-15T13:00:01Z",
+        "payload": {
+          "id": "S3",
+          "project_id": "AG-NEU",
+          "run_id": "AG-NEU-R1",
+          "actor": "sentinel",
+          "kind": "test_result",
+          "title": "ART-9 v1 bestanden",
+          "caused_by": [],
+          "occurred_at": "2026-10-15T13:00:00Z",
+          "recorded_at": "2026-10-15T13:00:01Z",
+          "fictional": false,
+          "task_id": "T-1",
+          "artifact_id": "ART-9",
+          "version": "v1",
+          "criteria_ref": "KRIT@v1",
+          "outcome": "pass"
+        }
+      },
+      {
+        "schema": "agentarium.strom.v2.1",
+        "stream": "lauf",
+        "stream_id": "AG-NEU/AG-NEU-R1",
+        "stream_sequence": 104,
+        "kind": "work.event",
+        "sent_at": "2026-10-15T14:00:01Z",
+        "payload": {
+          "id": "S4",
+          "project_id": "AG-NEU",
+          "run_id": "AG-NEU-R1",
+          "actor": "atlas",
+          "kind": "block",
+          "title": "wartet auf Freigabe",
+          "caused_by": [],
+          "occurred_at": "2026-10-15T14:00:00Z",
+          "recorded_at": "2026-10-15T14:00:01Z",
+          "fictional": false,
+          "task_id": "T-1",
+          "block_id": "B-1"
+        }
+      },
+      {
+        "schema": "agentarium.strom.v2.1",
+        "stream": "lauf",
+        "stream_id": "AG-NEU/AG-NEU-R1",
+        "stream_sequence": 105,
+        "kind": "work.event",
+        "sent_at": "2026-10-15T15:00:01Z",
+        "payload": {
+          "id": "S5",
+          "project_id": "AG-NEU",
+          "run_id": "AG-NEU-R1",
+          "actor": "peter",
+          "kind": "unblock",
+          "title": "Freigabe erteilt",
+          "caused_by": [],
+          "occurred_at": "2026-10-15T15:00:00Z",
+          "recorded_at": "2026-10-15T15:00:01Z",
+          "fictional": false,
+          "task_id": "T-1",
+          "block_id": "B-1",
+          "resolving_event_id": "S5"
+        }
+      },
+      {
+        "schema": "agentarium.strom.v2.1",
+        "stream": "lauf",
+        "stream_id": "AG-NEU/AG-NEU-R1",
+        "stream_sequence": 106,
+        "kind": "work.event",
+        "sent_at": "2026-10-15T16:00:01Z",
+        "payload": {
+          "id": "S6",
+          "project_id": "AG-NEU",
+          "run_id": "AG-NEU-R1",
+          "actor": "atlas",
+          "kind": "status_change",
+          "title": "T-1 auf Done",
+          "caused_by": [],
+          "occurred_at": "2026-10-15T16:00:00Z",
+          "recorded_at": "2026-10-15T16:00:01Z",
+          "fictional": false,
+          "task_id": "T-1",
+          "from": "offen",
+          "to": "done",
+          "item_revision": 2,
+          "previous_transition_id": "S1",
+          "artifact_id": "ART-9",
+          "version": "v1",
+          "criteria_ref": "KRIT@v1",
+          "nachweis_ref": "S3"
+        }
+      }
+    ],
+    "tail_umschlaege": [
+      {
+        "schema": "agentarium.strom.v2.1",
+        "stream": "lauf",
+        "stream_id": "AG-NEU/AG-NEU-R1",
+        "stream_sequence": 104,
+        "kind": "work.event",
+        "sent_at": "2026-10-15T14:00:01Z",
+        "payload": {
+          "id": "S4",
+          "project_id": "AG-NEU",
+          "run_id": "AG-NEU-R1",
+          "actor": "atlas",
+          "kind": "block",
+          "title": "wartet auf Freigabe",
+          "caused_by": [],
+          "occurred_at": "2026-10-15T14:00:00Z",
+          "recorded_at": "2026-10-15T14:00:01Z",
+          "fictional": false,
+          "task_id": "T-1",
+          "block_id": "B-1"
+        }
+      },
+      {
+        "schema": "agentarium.strom.v2.1",
+        "stream": "lauf",
+        "stream_id": "AG-NEU/AG-NEU-R1",
+        "stream_sequence": 105,
+        "kind": "work.event",
+        "sent_at": "2026-10-15T15:00:01Z",
+        "payload": {
+          "id": "S5",
+          "project_id": "AG-NEU",
+          "run_id": "AG-NEU-R1",
+          "actor": "peter",
+          "kind": "unblock",
+          "title": "Freigabe erteilt",
+          "caused_by": [],
+          "occurred_at": "2026-10-15T15:00:00Z",
+          "recorded_at": "2026-10-15T15:00:01Z",
+          "fictional": false,
+          "task_id": "T-1",
+          "block_id": "B-1",
+          "resolving_event_id": "S5"
+        }
+      },
+      {
+        "schema": "agentarium.strom.v2.1",
+        "stream": "lauf",
+        "stream_id": "AG-NEU/AG-NEU-R1",
+        "stream_sequence": 106,
+        "kind": "work.event",
+        "sent_at": "2026-10-15T16:00:01Z",
+        "payload": {
+          "id": "S6",
+          "project_id": "AG-NEU",
+          "run_id": "AG-NEU-R1",
+          "actor": "atlas",
+          "kind": "status_change",
+          "title": "T-1 auf Done",
+          "caused_by": [],
+          "occurred_at": "2026-10-15T16:00:00Z",
+          "recorded_at": "2026-10-15T16:00:01Z",
+          "fictional": false,
+          "task_id": "T-1",
+          "from": "offen",
+          "to": "done",
+          "item_revision": 2,
+          "previous_transition_id": "S1",
+          "artifact_id": "ART-9",
+          "version": "v1",
+          "criteria_ref": "KRIT@v1",
+          "nachweis_ref": "S3"
+        }
+      }
+    ],
+    "hinweis_transport": "stream_sequence steht im UMSCHLAG, nicht im Arbeitsereignis. Transportfolge und Fachidentitaet sind verschiedene Groessen; der Pruefer setzt die Folge fuer den Reducer aus dem Umschlag ein, statt sie im Fachereignis zu fuehren. R3.",
+    "nachlieferung": {
+      "beschreibung": "105 kommt nach; danach muss 106 geordnet verarbeitbar bleiben.",
+      "tail_umschlaege": [
+        {
+          "schema": "agentarium.strom.v2.1",
+          "stream": "lauf",
+          "stream_id": "AG-NEU/AG-NEU-R1",
+          "stream_sequence": 104,
+          "kind": "work.event",
+          "sent_at": "2026-10-15T14:00:01Z",
+          "payload": {
+            "id": "S4",
+            "project_id": "AG-NEU",
+            "run_id": "AG-NEU-R1",
+            "actor": "atlas",
+            "kind": "block",
+            "title": "wartet auf Freigabe",
+            "caused_by": [],
+            "occurred_at": "2026-10-15T14:00:00Z",
+            "recorded_at": "2026-10-15T14:00:01Z",
+            "fictional": false,
+            "task_id": "T-1",
+            "block_id": "B-1"
+          }
+        },
+        {
+          "schema": "agentarium.strom.v2.1",
+          "stream": "lauf",
+          "stream_id": "AG-NEU/AG-NEU-R1",
+          "stream_sequence": 106,
+          "kind": "work.event",
+          "sent_at": "2026-10-15T16:00:01Z",
+          "payload": {
+            "id": "S6",
+            "project_id": "AG-NEU",
+            "run_id": "AG-NEU-R1",
+            "actor": "atlas",
+            "kind": "status_change",
+            "title": "T-1 auf Done",
+            "caused_by": [],
+            "occurred_at": "2026-10-15T16:00:00Z",
+            "recorded_at": "2026-10-15T16:00:01Z",
+            "fictional": false,
+            "task_id": "T-1",
+            "from": "offen",
+            "to": "done",
+            "item_revision": 2,
+            "previous_transition_id": "S1",
+            "artifact_id": "ART-9",
+            "version": "v1",
+            "criteria_ref": "KRIT@v1",
+            "nachweis_ref": "S3"
+          }
+        },
+        {
+          "schema": "agentarium.strom.v2.1",
+          "stream": "lauf",
+          "stream_id": "AG-NEU/AG-NEU-R1",
+          "stream_sequence": 105,
+          "kind": "work.event",
+          "sent_at": "2026-10-15T15:00:01Z",
+          "payload": {
+            "id": "S5",
+            "project_id": "AG-NEU",
+            "run_id": "AG-NEU-R1",
+            "actor": "peter",
+            "kind": "unblock",
+            "title": "Freigabe erteilt",
+            "caused_by": [],
+            "occurred_at": "2026-10-15T15:00:00Z",
+            "recorded_at": "2026-10-15T15:00:01Z",
+            "fictional": false,
+            "task_id": "T-1",
+            "block_id": "B-1",
+            "resolving_event_id": "S5"
+          }
+        }
+      ],
+      "soll_cursor": 106,
+      "soll_zustand": {
+        "cursor": 106,
+        "aufgaben": [
+          {
+            "task_id": "T-1",
+            "parent_task_id": null,
+            "work_item_type": "story",
+            "status": "done",
+            "item_revision": 2,
+            "letzte_transition_id": "S6",
+            "owner": null
+          }
+        ],
+        "artefakte": [
+          {
+            "artifact_id": "ART-9",
+            "version": "v1",
+            "supersedes": null,
+            "pruefungen": [
+              {
+                "kind": "test_result",
+                "task_id": "T-1",
+                "criteria_ref": "KRIT@v1",
+                "outcome": "pass",
+                "event_id": "S3"
+              }
+            ]
+          }
+        ],
+        "blockaden": [
+          {
+            "block_id": "B-1",
+            "task_id": "T-1",
+            "grund": "wartet auf Freigabe",
+            "seit": "2026-10-15T14:00:00Z",
+            "resolving_event_id": "S5"
+          }
+        ],
+        "abdeckung": "complete"
+      },
+      "soll": "Zustand zeichengleich der geordneten Zustellung 104-105-106"
+    }
+  }
+}

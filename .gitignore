@@ -1,0 +1,4 @@
+
+# Von Claude versehentlich mitversioniert (git add -A), 15.10.2026
+__pycache__/
+*.pyc

@@ -1,0 +1,90 @@
+{
+  "fall": "06",
+  "titel": "Kostenfeld sichtbar, bei unvollstaendiger Erfassung ohne jeden Betrag",
+  "prueft": [
+    "§9 Kosten"
+  ],
+  "grundlage": "Peters Entscheidung vom 15.10.2026, 21:01:52 Europe/Berlin. Ersetzt die frühere Ausblendung des Kostenfelds.",
+  "erwartung": [
+    {
+      "regel": "R-08",
+      "soll": "Bei erfassung=unvollstaendig enthaelt das Kostenfeld KEIN Feld gesamt und NIRGENDS eine Zahl, die als Betrag lesbar waere. Es zeigt ausschliesslich den Satz 'Kosten nicht vollständig ermittelbar.'"
+    },
+    {
+      "regel": "R-08b",
+      "soll": "sichtbar ist true. Das Feld verschwindet nicht - ein leeres Feld liest sich wie ein Fehler."
+    },
+    {
+      "regel": "R-08c",
+      "soll": "ohne_angabe ist eine ANZAHL von Ereignissen, kein Betrag und kein Ersatzwert. Fehlende Werte sind nicht null."
+    },
+    {
+      "regel": "R-09",
+      "soll": "Nur bei erfassung=vollstaendig steht gesamt mit belegt=true."
+    },
+    {
+      "regel": "R-09b",
+      "soll": "Einzelnachweise bleiben erhalten: verbrauch je Ereignis mit belegt=true/false. Ein unbelegter Verbrauch wird NICHT zu 0 gerechnet."
+    }
+  ],
+  "daten": {
+    "unvollstaendig": {
+      "kosten": {
+        "sichtbar": true,
+        "erfassung": "unvollstaendig",
+        "status_text": "Kosten nicht vollständig ermittelbar.",
+        "ohne_angabe": 6
+      },
+      "anzeige": "Kosten nicht vollständig ermittelbar.",
+      "verboten": [
+        "jede Gesamtsumme",
+        "jede Teilsumme",
+        "0 €",
+        "0,00 USD",
+        "~ geschaetzt",
+        "ein leeres oder verborgenes Kostenfeld"
+      ],
+      "einzelnachweise": [
+        {
+          "id": "E412",
+          "verbrauch": {
+            "input_tokens": 4100,
+            "output_tokens": 820,
+            "thinking_tokens": null,
+            "platform": "claude",
+            "agent_id": "/root/forge_x",
+            "actual_model": "claude-opus-5",
+            "belegt": true
+          }
+        },
+        {
+          "id": "E413",
+          "verbrauch": {
+            "input_tokens": null,
+            "output_tokens": null,
+            "thinking_tokens": null,
+            "platform": "claude",
+            "agent_id": null,
+            "actual_model": null,
+            "belegt": false
+          }
+        }
+      ],
+      "begruendung_unvollstaendig": "6 von 31 Ereignissen ohne Verbrauchsnachweis; zusaetzlich 2 laufende Auftraege, die noch nichts gemeldet haben. Laufende Auftraege zaehlen GEGEN die Vollstaendigkeit."
+    },
+    "vollstaendig": {
+      "kosten": {
+        "sichtbar": true,
+        "erfassung": "vollstaendig",
+        "gesamt": {
+          "betrag": 9.6087,
+          "waehrung": "USD",
+          "belegt": true
+        },
+        "ohne_angabe": 0
+      },
+      "anzeige": "9,6087 USD",
+      "bedingung": "Alle Ereignisse des Laufs tragen einen belegten Verbrauch, der Lauf ist terminal, es laeuft kein Auftrag mehr."
+    }
+  }
+}

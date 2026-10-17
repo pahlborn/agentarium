@@ -1,0 +1,153 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "agentarium.schnappschuss.v2",
+  "title": "Einstiegsschnappschuss V2",
+  "description": "Einmal beim Verbinden, je Strom. Er traegt seinen eigenen Cursor; die anschliessenden Ereignisse setzen genau dort an. Push allein laesst den Monitor leer: wer um 14 Uhr aufmacht, was um 9 Uhr begann, saehe ohne Schnappschuss 0 von 0.",
+  "type": "object",
+  "properties": {
+    "schema": { "const": "agentarium.schnappschuss.v2" },
+    "stream": { "enum": ["katalog", "lauf"] },
+    "stream_id": { "type": "string", "minLength": 1 },
+    "cursor": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "stream_sequence des letzten im Schnappschuss beruecksichtigten Ereignisses. Das erste danach gelieferte Ereignis hat cursor+1. 0 heisst: der Strom hat noch nichts gesendet."
+    },
+    "sent_at": { "type": "string" },
+    "replay_grenze": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Niedrigste stream_sequence, die der Server noch nachliefern kann. Liegt der Cursor des Empfaengers darunter, ist nur ein neuer Schnappschuss moeglich."
+    },
+    "rechte": { "$ref": "#/$defs/rechte" },
+    "projekte": { "type": "array", "items": { "$ref": "#/$defs/projektstand" } },
+    "lauf": { "oneOf": [{ "$ref": "#/$defs/laufstand" }, { "type": "null" }] },
+    "kosten": { "$ref": "#/$defs/kostenfeld" }
+  },
+  "required": ["schema", "stream", "stream_id", "cursor", "sent_at", "replay_grenze", "rechte"],
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": { "properties": { "stream": { "const": "katalog" } }, "required": ["stream"] },
+      "then": { "required": ["projekte"] }
+    },
+    {
+      "if": { "properties": { "stream": { "const": "lauf" } }, "required": ["stream"] },
+      "then": { "required": ["lauf", "kosten"] }
+    }
+  ],
+  "$defs": {
+    "rechte": {
+      "type": "array",
+      "items": { "enum": ["read", "command"] },
+      "minItems": 1,
+      "uniqueItems": true,
+      "contains": { "const": "read" },
+      "description": "Die SERVERSEITIG festgestellten Rechte. read allein genuegt zum Beobachten und ist immer enthalten. command steht nur dort, wo der Server es zugesprochen hat; Wand- und Praesentationsansichten erhalten ausschliesslich read. Der Client darf daraus die Oberflaeche ableiten, aber das Verbergen einer Schaltflaeche ist KEINE Rechtepruefung - der Server lehnt einen Befehl ohne command in jedem Fall ab, ohne fachliche Nebenwirkung."
+    },
+    "projektstand": {
+      "type": "object",
+      "properties": {
+        "project_id": { "type": "string" },
+        "name": { "type": "string" },
+        "titel": { "type": ["string", "null"] },
+        "created_at": { "type": "string" },
+        "herkunft": { "type": "object" },
+        "laeufe": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "run_id": { "type": "string" },
+              "zustand": { "type": "string" },
+              "terminal": { "type": "boolean" },
+              "ansicht": {
+                "enum": ["live", "archiv"],
+                "description": "Abgeleitet, nicht gewaehlt: nicht terminal -> live, terminal -> archiv. Ein archivierter Lauf darf nicht als Live etikettiert werden."
+              },
+              "arbeitsstrom": { "type": ["string", "null"] },
+              "archiv": { "type": ["string", "null"] }
+            },
+            "required": ["run_id", "zustand", "terminal", "ansicht"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["project_id", "name", "created_at", "herkunft", "laeufe"],
+      "additionalProperties": false
+    },
+    "laufstand": {
+      "type": "object",
+      "properties": {
+        "project_id": { "type": "string" },
+        "run_id": { "type": "string" },
+        "zustand": { "type": "string" },
+        "terminal": { "type": "boolean" },
+        "ansicht": { "enum": ["live", "archiv"] },
+        "befehlsfaehig": {
+          "type": "boolean",
+          "description": "Ob dieser Zustand Befehle ueberhaupt zulaesst. Unabhaengig davon entscheidet das Recht command."
+        },
+        "herkunft": { "type": "object" },
+        "zeitachse": { "enum": ["complete", "partial", "none"] },
+        "aufgaben": {
+          "type": "object",
+          "properties": {
+            "eroeffnet": { "type": "integer", "minimum": 0 },
+            "abgeschlossen": { "type": "integer", "minimum": 0 },
+            "abdeckung": { "enum": ["complete", "partial", "unavailable"] }
+          },
+          "required": ["eroeffnet", "abgeschlossen", "abdeckung"],
+          "additionalProperties": false
+        },
+        "offen": { "type": "array" },
+        "blockaden": { "type": "array" },
+        "artefakte": { "type": "array" },
+        "letzte": { "type": "array", "maxItems": 10 }
+      },
+      "required": ["project_id", "run_id", "zustand", "terminal", "ansicht",
+                   "befehlsfaehig", "herkunft", "zeitachse", "aufgaben"],
+      "additionalProperties": false
+    },
+    "kostenfeld": {
+      "type": "object",
+      "description": "PETERS ENTSCHEIDUNG vom 15.10.2026, 21:01:52 Europe/Berlin. Das Feld bleibt SICHTBAR. Solange die Gesamtkosten nicht vollstaendig ermittelbar sind, erscheint AUSSCHLIESSLICH der Statussatz - keine Betraege, keine Teilsummen, keine Gesamtsumme, keine 0-Ersatzwerte. Erst bei vollstaendiger belegter Gesamterfassung werden Kosten ausgewiesen.",
+      "properties": {
+        "sichtbar": { "const": true },
+        "erfassung": { "enum": ["unvollstaendig", "vollstaendig"] },
+        "status_text": { "type": "string" },
+        "gesamt": {
+          "type": "object",
+          "properties": {
+            "betrag": { "type": "number", "minimum": 0 },
+            "waehrung": { "type": "string" },
+            "belegt": { "const": true }
+          },
+          "required": ["betrag", "waehrung", "belegt"],
+          "additionalProperties": false
+        },
+        "ohne_angabe": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Anzahl Ereignisse ohne Verbrauchsnachweis. Dies ist eine ANZAHL, kein Betrag. Fehlende Werte sind nicht null."
+        }
+      },
+      "required": ["sichtbar", "erfassung"],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": { "properties": { "erfassung": { "const": "unvollstaendig" } }, "required": ["erfassung"] },
+          "then": {
+            "required": ["status_text"],
+            "properties": { "status_text": { "const": "Kosten nicht vollständig ermittelbar." } },
+            "not": { "anyOf": [{ "required": ["gesamt"] }] }
+          }
+        },
+        {
+          "if": { "properties": { "erfassung": { "const": "vollstaendig" } }, "required": ["erfassung"] },
+          "then": { "required": ["gesamt"] }
+        }
+      ]
+    }
+  }
+}

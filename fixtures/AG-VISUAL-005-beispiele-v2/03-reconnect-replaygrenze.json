@@ -1,0 +1,119 @@
+{
+  "fall": "03",
+  "titel": "Reconnect innerhalb und ausserhalb des Replaypuffers",
+  "prueft": [
+    "§4 Wiederaufnahme",
+    "§3 Snapshot-Reconciliation"
+  ],
+  "erwartung": [
+    {
+      "regel": "R-06",
+      "soll": "Last-Event-ID 413 >= replay_grenze 120: Nachlieferung ab 414 ist zulaessig."
+    },
+    {
+      "regel": "R-06b",
+      "soll": "Last-Event-ID 118 < replay_grenze 120: Nachlieferung unmoeglich, Server antwortet 409 und der Empfaenger holt einen neuen Schnappschuss. Eine Luecke wird NIE stillschweigend uebersprungen."
+    },
+    {
+      "regel": "R-05",
+      "soll": "Der Ersatz-Schnappschuss traegt seinen eigenen Cursor (500); danach folgt 501."
+    }
+  ],
+  "daten": {
+    "im_puffer": {
+      "anfrage": {
+        "Last-Event-ID": "413"
+      },
+      "antwort_status": 200,
+      "nachgeliefert": [
+        {
+          "schema": "agentarium.strom.v2",
+          "stream": "lauf",
+          "stream_id": "AG-NEU/AG-NEU-R1",
+          "stream_sequence": 414,
+          "kind": "run.state_changed",
+          "sent_at": "2026-10-15T14:05:02.000Z",
+          "payload": {
+            "project_id": "AG-NEU",
+            "run_id": "AG-NEU-R1",
+            "zustand": "wartend",
+            "zustand_vorher": "aktiv",
+            "occurred_at": "2026-10-15T14:05:01.800Z",
+            "grund": "wartet auf Freigabe"
+          }
+        }
+      ]
+    },
+    "ausserhalb_puffer": {
+      "anfrage": {
+        "Last-Event-ID": "118"
+      },
+      "antwort_status": 409,
+      "fehler": {
+        "code": "replay_grenze_unterschritten",
+        "replay_grenze": 120,
+        "hinweis": "Cursor zu alt. Neuen Schnappschuss anfordern.",
+        "neuer_schnappschuss": "/agentarium/lauf/AG-NEU/AG-NEU-R1/schnappschuss"
+      },
+      "ersatz_schnappschuss": {
+        "schema": "agentarium.schnappschuss.v2",
+        "stream": "lauf",
+        "stream_id": "AG-NEU/AG-NEU-R1",
+        "cursor": 500,
+        "sent_at": "2026-10-15T14:09:00.000Z",
+        "replay_grenze": 380,
+        "rechte": [
+          "read"
+        ],
+        "lauf": {
+          "project_id": "AG-NEU",
+          "run_id": "AG-NEU-R1",
+          "zustand": "aktiv",
+          "terminal": false,
+          "ansicht": "live",
+          "befehlsfaehig": true,
+          "herkunft": {
+            "mode": "OBSERVED_PROJECT_WORK",
+            "fictional": false,
+            "source_evidence": "relay/events/…"
+          },
+          "zeitachse": "complete",
+          "aufgaben": {
+            "eroeffnet": 26,
+            "abgeschlossen": 19,
+            "abdeckung": "partial"
+          }
+        },
+        "kosten": {
+          "sichtbar": true,
+          "erfassung": "unvollstaendig",
+          "status_text": "Kosten nicht vollständig ermittelbar.",
+          "ohne_angabe": 7
+        }
+      },
+      "danach": [
+        {
+          "schema": "agentarium.strom.v2",
+          "stream": "lauf",
+          "stream_id": "AG-NEU/AG-NEU-R1",
+          "stream_sequence": 501,
+          "kind": "work.event",
+          "sent_at": "2026-10-15T14:09:04.000Z",
+          "payload": {
+            "id": "E501",
+            "project_id": "AG-NEU",
+            "run_id": "AG-NEU-R1",
+            "task_id": "AG-NEU-026",
+            "actor": "scout",
+            "kind": "contribution",
+            "title": "Quellenfaecher zurueck",
+            "occurred_at": "2026-10-15T14:09:03.600Z",
+            "recorded_at": "2026-10-15T14:09:04.000Z",
+            "fictional": false,
+            "caused_by": []
+          }
+        }
+      ]
+    }
+  }
+}

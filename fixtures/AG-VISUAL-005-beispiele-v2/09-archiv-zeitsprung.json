@@ -1,0 +1,164 @@
+{
+  "fall": "09",
+  "titel": "Archivwiedergabe und Zeitsprung ohne externe Nebenwirkung",
+  "prueft": [
+    "§10 Archiv"
+  ],
+  "erwartung": [
+    {
+      "regel": "R-16",
+      "soll": "wiedergabe.nebenwirkungsfrei=true und deterministisch=true."
+    },
+    {
+      "regel": "R-16b",
+      "soll": "Nach einem Zeitsprung auf denselben Cursor ist der abgeleitete fachliche Zustand identisch - unabhaengig vom Weg dorthin."
+    },
+    {
+      "regel": "R-16c",
+      "soll": "Waehrend der Wiedergabe entsteht KEIN neues fachliches Ereignis, kein Befehl wird erneut ausgefuehrt, kein Agent und kein API-Aufruf angestossen."
+    },
+    {
+      "regel": "R-17",
+      "soll": "zustand=abgeschlossen ist terminal, ansicht=archiv. Der Lauf darf nicht als Live etikettiert werden."
+    }
+  ],
+  "daten": {
+    "manifest": {
+      "schema": "agentarium.archivmanifest.v2",
+      "project_id": "AG-ALT",
+      "run_id": "AG-ALT-R1",
+      "archiv_version": "1",
+      "schema_fassung": "agentarium.observed-worklog.v1",
+      "zustand": "abgeschlossen",
+      "vollstaendig": true,
+      "herkunft": {
+        "mode": "OBSERVED_PROJECT_WORK",
+        "fictional": false,
+        "source_evidence": "relay/events/…"
+      },
+      "quellen": [
+        "relay/events/AG-REPORT-001-worklog-v1.json"
+      ],
+      "abdeckung": {
+        "ordering": "Vollstaendig belegt",
+        "timestamps": "Vollstaendig belegt",
+        "luecken": []
+      },
+      "zeitachse": "complete",
+      "wiedergabe": {
+        "nebenwirkungsfrei": true,
+        "zeitsprung": true,
+        "einzelschritt": true,
+        "deterministisch": true
+      },
+      "kosten": {
+        "sichtbar": true,
+        "erfassung": "vollstaendig",
+        "gesamt": {
+          "betrag": 4.0247,
+          "waehrung": "USD",
+          "belegt": true
+        },
+        "ohne_angabe": 0
+      },
+      "ereignisse": [
+        {
+          "id": "R1",
+          "project_id": "AG-ALT",
+          "run_id": "AG-ALT-R1",
+          "task_id": "AG-ALT-001",
+          "actor": "peter",
+          "recipient": "atlas",
+          "kind": "request",
+          "title": "Auftrag",
+          "caused_by": [],
+          "occurred_at": "2026-10-14T09:00:00Z",
+          "recorded_at": "2026-10-14T09:00:01Z",
+          "fictional": false
+        },
+        {
+          "id": "R2",
+          "project_id": "AG-ALT",
+          "run_id": "AG-ALT-R1",
+          "task_id": "AG-ALT-001",
+          "actor": "forge",
+          "kind": "artifact",
+          "title": "ART-01 v1",
+          "caused_by": [
+            "R1"
+          ],
+          "occurred_at": "2026-10-14T10:30:00Z",
+          "recorded_at": "2026-10-14T10:30:02Z",
+          "fictional": false,
+          "artifact_id": "ART-01",
+          "version": "v1"
+        },
+        {
+          "id": "R3",
+          "project_id": "AG-ALT",
+          "run_id": "AG-ALT-R1",
+          "task_id": "AG-ALT-001",
+          "actor": "atlas",
+          "kind": "status_change",
+          "title": "Auf Done",
+          "caused_by": [
+            "R2"
+          ],
+          "occurred_at": "2026-10-14T11:00:00Z",
+          "recorded_at": "2026-10-14T11:00:01Z",
+          "fictional": false,
+          "from": "offen",
+          "to": "done",
+          "item_revision": 2,
+          "previous_transition_id": null,
+          "artifact_id": "ART-01",
+          "version": "v1",
+          "criteria_ref": "AG-PROC-REVIEW-001@v1"
+        }
+      ]
+    },
+    "wiedergabe": {
+      "weg_a": {
+        "beschreibung": "Schritt fuer Schritt bis Cursor 3",
+        "schritte": [
+          "R1",
+          "R2",
+          "R3"
+        ],
+        "zustand_danach": {
+          "aufgaben_eroeffnet": 1,
+          "aufgaben_done": 1,
+          "artefakte": [
+            {
+              "artifact_id": "ART-01",
+              "version": "v1"
+            }
+          ]
+        }
+      },
+      "weg_b": {
+        "beschreibung": "Zeitsprung direkt auf Cursor 3",
+        "schritte": [
+          "sprung:3"
+        ],
+        "zustand_danach": {
+          "aufgaben_eroeffnet": 1,
+          "aufgaben_done": 1,
+          "artefakte": [
+            {
+              "artifact_id": "ART-01",
+              "version": "v1"
+            }
+          ]
+        }
+      },
+      "nebenwirkungen_beobachtet": {
+        "neue_fachereignisse": 0,
+        "befehle_ausgefuehrt": 0,
+        "agentenaufrufe": 0,
+        "api_aufrufe": 0,
+        "github_aktionen": 0
+      }
+    }
+  }
+}

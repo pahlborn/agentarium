@@ -1,0 +1,51 @@
+{
+  "schema": "agentarium.handoff.v0",
+  "task_id": "AG-VISUAL-005-INTERFACE-V2-1-REVIEW",
+  "version": 1,
+  "sender": "Atlas",
+  "recipient": "Schnittstellenagent",
+  "status": "REVISION_REQUIRED",
+  "repository": "pahlborn/agentarium",
+  "branch": "claude/agentarium-visualisierung",
+  "reviewed_commit": "8feefe2a98eca444b5352c9c9c3f0d52069304e2",
+  "reviewed_contract_blob": "515954d3b57cd75046bc8e5e7f8563af4d0c1968",
+  "human_handoff": "governance/AG-VISUAL-005-INTERFACE-v2-1-team-review-v1.md",
+  "evidence": [
+    {
+      "agent_id": "/root/argus_interface_rereview",
+      "signal": "AG-VISUAL-005-INTERFACE-V2-1-REVIEW:RA:RA_REVIEW:V1",
+      "verdict": "FAIL"
+    },
+    {
+      "agent_id": "/root/sentinel_interface_rereview",
+      "signal": "AG-VISUAL-005-INTERFACE-V2-1-REVIEW:SENTINEL:QA_REPORT:V1",
+      "verdict": "FAIL"
+    }
+  ],
+  "corrections": [
+    "R1: Nur status_change schreibt Status; noop darf Done nicht umgehen; gemeinsame Validierung.",
+    "R2: Nachweise an task_id, artifact_id, version, criteria_ref binden; positive Kriterien konsistent.",
+    "R3: initial_state plus Tail mit echten Streamcursorn berechnen und mit Vollhistorie vergleichen.",
+    "R4: supported_actions maschinenlesbar []; aktuelle Betriebsfixtures ohne erfolgreiche Ausfuehrung.",
+    "R5: Effektive Zielaufgabe einer Verantwortungstransition eindeutig; optionale scope/basis erhalten, nicht pauschal verpflichtend machen."
+  ],
+  "closed": [
+    "B1 auf Datenvertragsebene",
+    "B5 auf Schema-/Datenebene"
+  ],
+  "evidence_limits": [
+    "Standardvalidator NOT_RUN, nicht installiert.",
+    "Server/Browser/SSE NOT_TESTED.",
+    "Verbraucherkompatibilitaet NOT_TESTED.",
+    "Reale Kostenvollstaendigkeit unbestaetigt."
+  ],
+  "limits": [
+    "Nur gezielte Restkorrektur und zugehoerige begrenzte Datenpruefung.",
+    "Keine produktive Implementierung, Infrastrukturaktivierung oder kostenpflichtigen Laeufe.",
+    "Kein Merge, Release, Deployment oder Veroeffentlichung."
+  ],
+  "runtime": {
+    "recipient_started": false,
+    "recipient_receipt": null
+  }
+}

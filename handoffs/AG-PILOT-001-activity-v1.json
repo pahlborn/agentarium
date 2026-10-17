@@ -1,0 +1,45 @@
+{
+  "schema": "agentarium.handoff.v0",
+  "task_id": "AG-PILOT-001-ACTIVITY-V1",
+  "version": 1,
+  "sender": "Atlas",
+  "recipient": "Forge/coding-agent",
+  "status": "AUTHORIZED",
+  "repository": "pahlborn/agentarium",
+  "branch": "feature/ag-interface-k3-final",
+  "base_commit": "19463534defa6f9c6b48812eeebf56433fa28e89",
+  "allowed_paths": [
+    "pilot/AG-PILOT-001/activity.py",
+    "pilot/AG-PILOT-001/activity.html",
+    "pilot/AG-PILOT-001/local_transport.py",
+    "pilot/AG-PILOT-001/README.md"
+  ],
+  "authorization": {
+    "source": "Peter 2026-10-16 12:48 Europe/Berlin: continue after requiring actual agent activity/problems visibly monitored. Existing interface integration scope, local prototype only.",
+    "scope": "One bounded coding session. No real pilot activation, provider instrumentation, architecture change, main field redesign or deployment."
+  },
+  "goal": "IMPLEMENT truthful evidence-based activity derivation and a small local browser status monitor in existing loopback prototype. Do not claim complete runtime capture.",
+  "instructions": [
+    "Only4 allowed files. Existing local transport/reducer behavior must remain unchanged. No Bash/network/subagents available; don't attempt tests. Add pure activity.py + self-contained activity.html and narrow local_transport endpoints/options; concise README update.",
+    "Activity input via OPTIONAL --activity-input FILE. JSON {schema:'agentarium.activity-observations.v1',data_kind:'OBSERVED'|'SYNTHETIC',observations:[{id,agent,session_id,task_id,observed_at:ISO8601-with-zone,evidence_ref,signal,...}]}. Required explicit --activity-fresh-ms integer>0 when this file supplied: test configuration, NOT realtime/SLA guarantee. Never infer unknown times/models/costs. Nonempty evidence_ref required for a state claim; missing/malformed=>unknown with clear diagnostic. Source clock is collector observation time, not guaranteed event time.",
+    "Signals: host_received,stream_sample,source_waiting,source_blocked,source_resumed,execution_stopped,transport_heartbeat. stream_sample has event_counts,last_event_seconds,elapsed_seconds from REAL existing relay metadata. Need two samples SAME agent/session/task with increasing relevant stream counters or last_event_seconds to derive working_observed. First sample alone is baseline. Repeated unchanged timer samples, host receipt and heartbeats NEVER renew work freshness; process-alive never implies working. Also require recent source event within configured freshness (sample elapsed_seconds-last_event_seconds, plus observation age). No continued animation without new positive evidence.",
+    "waiting/blocked ONLY explicit source signals with nonempty reason. Silence=>unknown after freshness, not waiting. source_resumed removes block but is not work proof. execution_stopped has outcome success|failed|aborted: stopped, problem if failed/aborted, terminal for SAME session/task even if later progress. Never set canonical task done; expose no command endpoint. Preserve separate session/task records, cannot merge parallel work into one idle/working claim. Enumerate all8 agents as unknown when source absent.",
+    "Expose pure derive(observations, *, now, fresh_ms) -> JSON-compatible rows (agent/session/task,state,reason,last_evidence_at,evidence_ref,delta,outcome/problem) for independent tests. now explicit datetime or ISO; document exact signature. Reject future/backwards/malformed timestamps rather than negative freshness. Sort only with clear same-session observation order; no cross-session contamination. Keep terminal conclusion distinct from stale active/waiting evidence.",
+    "Narrow GET /activity reads optional activity-input, derives LIVE against current UTC. ?at=<ISO> selects ARCHIVE against exact replay instant; ignore observations AFTER replay time, no wall-clock aging there. Return mode, provenance/data_kind, source errors, configured freshness, source coverage explicitly partial/unconnected. No input file=>8 unknown states. No POST. Do not modify task reducer/input schema or reuse live transport heartbeat as activity.",
+    "GET /monitor serves only the fixed local activity.html file (no arbitrary static path). HTML German, clearly 'Agentarium – lokaler Aktivitätsmonitor / Teilanbindung'; normal responsive document flow, no screen overlay or external library/assets. Show agent states with labels+symbols, reason, last evidence+session/task; short single impulse only on NEW working evidence, no endless idle-working pulse. Waiting pause sign; blocked warning; stopped end sign/outcome; unknown dashed outline/question mark. Transport indicator says only 'Monitorabruf erreichbar', never 'Agent arbeitet'. Unknown sources explicit, unsupported data never silently working. Provide manual Refresh and optional 2s local refresh, no provider/Github calls. Replay selection can be query?at and must not auto-advance.",
+    "Use textContent for untrusted text, no injected HTML or uncontrolled link execution. Costs field remains visible with exact 'Kosten nicht vollständig ermittelbar.' and no numeric costs. Renderer all8 agents incl unknown; multiple sessions separate. This local page is a technical component, not a redesign of existing Gewebe/Partitur. No main field code changes.",
+    "README states input schema, exact start/monitor commands, synthetic example marked TEST, five acceptance cases: genuine delta; heartbeat unchanged=>no work; stale=>unknown; explicit wait/block only; stop success does not done. Honest limits: existing relay cadence60s, ChatGPT activity hooks absent, no end-to-end guarantee or automatic capture. No LLM calls for telemetry, no per-token/frame logs. Return concise CA_IMPLEMENTED + TESTS_NOT_RUN_BY_FORGE after files, stop."
+  ],
+  "model_routing": {
+    "requested_model": "sonnet",
+    "requested_reasoning": "medium",
+    "actual_model": null,
+    "actual_reasoning": "unconfirmed",
+    "override": false,
+    "cost_control": "One bounded coding session, same existing role-default eight turns, no price-triggered cutoff; preserve patch and actual usage. No paid availability probe/retry; stop on credit/key/quota failure.",
+    "estimated_cost_usd": null
+  },
+  "dispatch_commit": "172c2055fdff20f440db056847c661c2a1390a41",
+  "run": "https://github.com/pahlborn/agentarium/actions/runs/38890028971",
+  "runtime_status": "WORKFLOW_STARTED_NO_WORKER_SUCCESS_CLAIM"
+}

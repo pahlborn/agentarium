@@ -1,0 +1,388 @@
+{
+  "summary": {
+    "captured": true,
+    "http_requests": 15,
+    "working_observed_seen": true,
+    "stopped_seen": true,
+    "browser_tested": false,
+    "sha256": "887bf5f0c46851410d80c2630eed819425c2b20e96ae2bdbaf9090f7b35a75b2"
+  },
+  "first": {
+    "observed_at": "2026-10-16T13:15:30.379430+00:00",
+    "mode": "LIVE",
+    "data_kind": "OBSERVED",
+    "source_errors": [],
+    "forge": [
+      {
+        "agent": "forge",
+        "session_id": "b7b2bb73-1510-49b8-9016-560fa910c2a6",
+        "task_id": "AG-PILOT-001-FIELD-ADAPTER-V1",
+        "state": "unknown",
+        "reason": "Nur Basismessung oder unveraenderte Messung: kein Arbeitsnachweis",
+        "last_evidence_at": null,
+        "evidence_ref": null,
+        "delta": null,
+        "outcome": null,
+        "problem": false,
+        "diagnostics": [],
+        "remaining_valid_ms": 0
+      }
+    ],
+    "other_agents": [
+      {
+        "agent": "atlas",
+        "session_id": null,
+        "task_id": null,
+        "state": "unknown",
+        "reason": "Keine Quelle angebunden / keine Beobachtung",
+        "last_evidence_at": null,
+        "evidence_ref": null,
+        "delta": null,
+        "outcome": null,
+        "problem": false,
+        "diagnostics": [],
+        "remaining_valid_ms": 0
+      },
+      {
+        "agent": "nova",
+        "session_id": null,
+        "task_id": null,
+        "state": "unknown",
+        "reason": "Keine Quelle angebunden / keine Beobachtung",
+        "last_evidence_at": null,
+        "evidence_ref": null,
+        "delta": null,
+        "outcome": null,
+        "problem": false,
+        "diagnostics": [],
+        "remaining_valid_ms": 0
+      },
+      {
+        "agent": "scout",
+        "session_id": null,
+        "task_id": null,
+        "state": "unknown",
+        "reason": "Keine Quelle angebunden / keine Beobachtung",
+        "last_evidence_at": null,
+        "evidence_ref": null,
+        "delta": null,
+        "outcome": null,
+        "problem": false,
+        "diagnostics": [],
+        "remaining_valid_ms": 0
+      },
+      {
+        "agent": "archibald",
+        "session_id": null,
+        "task_id": null,
+        "state": "unknown",
+        "reason": "Keine Quelle angebunden / keine Beobachtung",
+        "last_evidence_at": null,
+        "evidence_ref": null,
+        "delta": null,
+        "outcome": null,
+        "problem": false,
+        "diagnostics": [],
+        "remaining_valid_ms": 0
+      },
+      {
+        "agent": "argus",
+        "session_id": null,
+        "task_id": null,
+        "state": "unknown",
+        "reason": "Keine Quelle angebunden / keine Beobachtung",
+        "last_evidence_at": null,
+        "evidence_ref": null,
+        "delta": null,
+        "outcome": null,
+        "problem": false,
+        "diagnostics": [],
+        "remaining_valid_ms": 0
+      },
+      {
+        "agent": "sentinel",
+        "session_id": null,
+        "task_id": null,
+        "state": "unknown",
+        "reason": "Keine Quelle angebunden / keine Beobachtung",
+        "last_evidence_at": null,
+        "evidence_ref": null,
+        "delta": null,
+        "outcome": null,
+        "problem": false,
+        "diagnostics": [],
+        "remaining_valid_ms": 0
+      },
+      {
+        "agent": "cadence",
+        "session_id": null,
+        "task_id": null,
+        "state": "unknown",
+        "reason": "Keine Quelle angebunden / keine Beobachtung",
+        "last_evidence_at": null,
+        "evidence_ref": null,
+        "delta": null,
+        "outcome": null,
+        "problem": false,
+        "diagnostics": [],
+        "remaining_valid_ms": 0
+      }
+    ]
+  },
+  "last": {
+    "observed_at": "2026-10-16T13:15:56.577670+00:00",
+    "mode": "LIVE",
+    "data_kind": "OBSERVED",
+    "source_errors": [],
+    "forge": [
+      {
+        "agent": "forge",
+        "session_id": "b7b2bb73-1510-49b8-9016-560fa910c2a6",
+        "task_id": "AG-PILOT-001-FIELD-ADAPTER-V1",
+        "state": "stopped",
+        "reason": "Ausfuehrung beendet (success); Aufgabe nicht als erledigt gesetzt",
+        "last_evidence_at": "2026-10-16T13:15:56.575000Z",
+        "evidence_ref": "https://github.com/pahlborn/agentarium/actions/runs/38906425847",
+        "delta": null,
+        "outcome": "success",
+        "problem": false,
+        "diagnostics": [],
+        "remaining_valid_ms": null
+      }
+    ],
+    "other_agents": [
+      {
+        "agent": "atlas",
+        "session_id": null,
+        "task_id": null,
+        "state": "unknown",
+        "reason": "Keine Quelle angebunden / keine Beobachtung",
+        "last_evidence_at": null,
+        "evidence_ref": null,
+        "delta": null,
+        "outcome": null,
+        "problem": false,
+        "diagnostics": [],
+        "remaining_valid_ms": 0
+      },
+      {
+        "agent": "nova",
+        "session_id": null,
+        "task_id": null,
+        "state": "unknown",
+        "reason": "Keine Quelle angebunden / keine Beobachtung",
+        "last_evidence_at": null,
+        "evidence_ref": null,
+        "delta": null,
+        "outcome": null,
+        "problem": false,
+        "diagnostics": [],
+        "remaining_valid_ms": 0
+      },
+      {
+        "agent": "scout",
+        "session_id": null,
+        "task_id": null,
+        "state": "unknown",
+        "reason": "Keine Quelle angebunden / keine Beobachtung",
+        "last_evidence_at": null,
+        "evidence_ref": null,
+        "delta": null,
+        "outcome": null,
+        "problem": false,
+        "diagnostics": [],
+        "remaining_valid_ms": 0
+      },
+      {
+        "agent": "archibald",
+        "session_id": null,
+        "task_id": null,
+        "state": "unknown",
+        "reason": "Keine Quelle angebunden / keine Beobachtung",
+        "last_evidence_at": null,
+        "evidence_ref": null,
+        "delta": null,
+        "outcome": null,
+        "problem": false,
+        "diagnostics": [],
+        "remaining_valid_ms": 0
+      },
+      {
+        "agent": "argus",
+        "session_id": null,
+        "task_id": null,
+        "state": "unknown",
+        "reason": "Keine Quelle angebunden / keine Beobachtung",
+        "last_evidence_at": null,
+        "evidence_ref": null,
+        "delta": null,
+        "outcome": null,
+        "problem": false,
+        "diagnostics": [],
+        "remaining_valid_ms": 0
+      },
+      {
+        "agent": "sentinel",
+        "session_id": null,
+        "task_id": null,
+        "state": "unknown",
+        "reason": "Keine Quelle angebunden / keine Beobachtung",
+        "last_evidence_at": null,
+        "evidence_ref": null,
+        "delta": null,
+        "outcome": null,
+        "problem": false,
+        "diagnostics": [],
+        "remaining_valid_ms": 0
+      },
+      {
+        "agent": "cadence",
+        "session_id": null,
+        "task_id": null,
+        "state": "unknown",
+        "reason": "Keine Quelle angebunden / keine Beobachtung",
+        "last_evidence_at": null,
+        "evidence_ref": null,
+        "delta": null,
+        "outcome": null,
+        "problem": false,
+        "diagnostics": [],
+        "remaining_valid_ms": 0
+      }
+    ]
+  },
+  "working": {
+    "observed_at": "2026-10-16T13:15:32.380997+00:00",
+    "mode": "LIVE",
+    "data_kind": "OBSERVED",
+    "source_errors": [],
+    "forge": [
+      {
+        "agent": "forge",
+        "session_id": "b7b2bb73-1510-49b8-9016-560fa910c2a6",
+        "task_id": "AG-PILOT-001-FIELD-ADAPTER-V1",
+        "state": "working_observed",
+        "reason": "Zaehlerfortschritt zwischen zwei Messungen, Quellereignis frisch",
+        "last_evidence_at": "2026-10-16T13:15:30.643000Z",
+        "evidence_ref": "https://github.com/pahlborn/agentarium/actions/runs/38906425847",
+        "delta": {
+          "counters": {
+            "stream_event": 1
+          },
+          "last_event_seconds": {
+            "from": 0,
+            "to": 2.265
+          },
+          "elapsed_seconds": {
+            "from": 0.839,
+            "to": 2.265
+          }
+        },
+        "outcome": null,
+        "problem": false,
+        "diagnostics": [],
+        "remaining_valid_ms": 88262
+      }
+    ],
+    "other_agents": [
+      {
+        "agent": "atlas",
+        "session_id": null,
+        "task_id": null,
+        "state": "unknown",
+        "reason": "Keine Quelle angebunden / keine Beobachtung",
+        "last_evidence_at": null,
+        "evidence_ref": null,
+        "delta": null,
+        "outcome": null,
+        "problem": false,
+        "diagnostics": [],
+        "remaining_valid_ms": 0
+      },
+      {
+        "agent": "nova",
+        "session_id": null,
+        "task_id": null,
+        "state": "unknown",
+        "reason": "Keine Quelle angebunden / keine Beobachtung",
+        "last_evidence_at": null,
+        "evidence_ref": null,
+        "delta": null,
+        "outcome": null,
+        "problem": false,
+        "diagnostics": [],
+        "remaining_valid_ms": 0
+      },
+      {
+        "agent": "scout",
+        "session_id": null,
+        "task_id": null,
+        "state": "unknown",
+        "reason": "Keine Quelle angebunden / keine Beobachtung",
+        "last_evidence_at": null,
+        "evidence_ref": null,
+        "delta": null,
+        "outcome": null,
+        "problem": false,
+        "diagnostics": [],
+        "remaining_valid_ms": 0
+      },
+      {
+        "agent": "archibald",
+        "session_id": null,
+        "task_id": null,
+        "state": "unknown",
+        "reason": "Keine Quelle angebunden / keine Beobachtung",
+        "last_evidence_at": null,
+        "evidence_ref": null,
+        "delta": null,
+        "outcome": null,
+        "problem": false,
+        "diagnostics": [],
+        "remaining_valid_ms": 0
+      },
+      {
+        "agent": "argus",
+        "session_id": null,
+        "task_id": null,
+        "state": "unknown",
+        "reason": "Keine Quelle angebunden / keine Beobachtung",
+        "last_evidence_at": null,
+        "evidence_ref": null,
+        "delta": null,
+        "outcome": null,
+        "problem": false,
+        "diagnostics": [],
+        "remaining_valid_ms": 0
+      },
+      {
+        "agent": "sentinel",
+        "session_id": null,
+        "task_id": null,
+        "state": "unknown",
+        "reason": "Keine Quelle angebunden / keine Beobachtung",
+        "last_evidence_at": null,
+        "evidence_ref": null,
+        "delta": null,
+        "outcome": null,
+        "problem": false,
+        "diagnostics": [],
+        "remaining_valid_ms": 0
+      },
+      {
+        "agent": "cadence",
+        "session_id": null,
+        "task_id": null,
+        "state": "unknown",
+        "reason": "Keine Quelle angebunden / keine Beobachtung",
+        "last_evidence_at": null,
+        "evidence_ref": null,
+        "delta": null,
+        "outcome": null,
+        "problem": false,
+        "diagnostics": [],
+        "remaining_valid_ms": 0
+      }
+    ]
+  }
+}

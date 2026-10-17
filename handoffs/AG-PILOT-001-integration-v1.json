@@ -1,0 +1,107 @@
+{
+  "schema": "agentarium.handoff.v0",
+  "task_id": "AG-PILOT-001-INTEGRATION",
+  "version": 1,
+  "sender": "Atlas",
+  "recipient": "Forge/coding-agent",
+  "status": "READY_FOR_ENVIRONMENT_BINDING",
+  "repository": "pahlborn/agentarium",
+  "base_commit": "da860fd19f38e9938ed201546f2a6e5b4cc765f8",
+  "goal": "Implement the smallest portable local integration prototype for one registered Agentarium project/run, then independently verify before real pilot start.",
+  "authorization": {
+    "scope": "Preparation now. No paid worker started by this handoff. No merge/release/deployment/new infrastructure or recurring charge.",
+    "source": "Peter asks Atlas to continue interface integration and pilot preparation; binding infrastructure input remains missing."
+  },
+  "inputs": [
+    {
+      "path": "concepts/AG-DATA-001-live-archive-data-concept-v1.md",
+      "ref": "ca44112da1f053182171d90096ad751cd6549f0d",
+      "blob": "fa475762b171e3461543c87810f7d9dcce5474db"
+    },
+    {
+      "path": "previews/AG-VISUAL-005-feld/schicht.py",
+      "ref": "ca44112da1f053182171d90096ad751cd6549f0d",
+      "blob": "4fe415a12b39df3b935423ada03ac95e02ee3ff3"
+    },
+    {
+      "path": "tests/AG-VISUAL-005-referenz-reducer.py",
+      "ref": "da860fd19f38e9938ed201546f2a6e5b4cc765f8",
+      "blob": "348d31a4b5550fc199d3a1baf5fea64ebba90fe0"
+    }
+  ],
+  "allowed_paths": [
+    "pilot/AG-PILOT-001/**",
+    "tests/AG-PILOT-001/**"
+  ],
+  "conditional_paths": [
+    {
+      "path": "previews/AG-VISUAL-005-feld/schicht.py",
+      "condition": "Only narrow data-input hook after exact bridge mapping review; no layout/visual rewrite."
+    }
+  ],
+  "implementation_slices": [
+    {
+      "id": "I1",
+      "scope": "Portable loopback-only integration harness using existing reference reducer, explicit local test input, existing catalog/snapshot/tail/archive contract. Distinguish raw accepted input, rejected diagnostics and consumed transport cursor. Local test storage only, no durability guarantee.",
+      "deliverable": "A bounded executable with exact start/check commands and machine-readable responses."
+    },
+    {
+      "id": "I2",
+      "scope": "Narrow existing-field consumer adapter. Explicit mapping from canonical work-event fields to legacy display. No invented occurred_at/duration/model/cost; unknown time uses labelled step sequence. Unsupported event kinds visible, never silently dropped.",
+      "deliverable": "Actual existing field receives input and identifies simulation/observed/coverage correctly."
+    },
+    {
+      "id": "I3",
+      "scope": "Real one-run pilot only after verified host/storage/auth/producer inputs and Sentinel runtime PASS.",
+      "deliverable": "Same actual journal reconstructs same accepted state live and archived."
+    }
+  ],
+  "acceptance": [
+    {
+      "id": "AC1",
+      "expected": "Existing K3/K1 checkers remain green and reducer bytes match verified blob."
+    },
+    {
+      "id": "AC2",
+      "expected": "Late entry snapshot plus tail equals complete reduction at same cursor, no double effect."
+    },
+    {
+      "id": "AC3",
+      "expected": "Reconnect, duplicate, gap and invalid Done preserve correct state and report diagnosis."
+    },
+    {
+      "id": "AC4",
+      "expected": "Archive replay causes no agent execution, provider calls, GitHub writes or command execution."
+    },
+    {
+      "id": "AC5",
+      "expected": "Loopback prototype clearly labelled test; does not claim production user authentication or environment-level durability."
+    },
+    {
+      "id": "AC6",
+      "expected": "Costs field visible with exact incomplete-status text and no amounts."
+    },
+    {
+      "id": "AC7",
+      "expected": "Real pilot remains blocked until journal/diagnostic restore after restart and authorized private access proven."
+    }
+  ],
+  "missing_runtime_inputs": [
+    "Named execution host/operator and actual start access",
+    "Storage path and persistence/recovery boundary",
+    "Producer authentication and user read access for real observation",
+    "Archive target/ref authorization"
+  ],
+  "forbidden_actions": [
+    "No public listener or deployment",
+    "No new paid service, GitHub App, webhook, secret or permission",
+    "No merge or release",
+    "No Atlas implementation replacing Forge",
+    "No false complete capture, runtime model, timings or full costs"
+  ],
+  "runtime": {
+    "worker_started": false,
+    "session_id": null
+  },
+  "stop_condition": "Return exact missing input if environment cannot be bound; never claim real pilot ready from local fixture PASS."
+}

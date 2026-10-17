@@ -1,0 +1,176 @@
+{
+  "fall": "01",
+  "titel": "Einstiegsschnappschuss mit anschliessendem Live-Strom",
+  "prueft": [
+    "§3 Schnappschuss",
+    "§4 Arbeitsstrom"
+  ],
+  "erwartung": [
+    {
+      "regel": "R-01",
+      "soll": "Jeder Umschlag entspricht strom.schema.json."
+    },
+    {
+      "regel": "R-05",
+      "soll": "cursor + 1 ist die erste anschliessende stream_sequence (411 -> 412)."
+    },
+    {
+      "regel": "R-02",
+      "soll": "stream_sequence laeuft lueckenlos 412, 413, 414."
+    },
+    {
+      "regel": "R-17",
+      "soll": "zustand aktiv ist nicht terminal, ansicht ist live."
+    },
+    {
+      "regel": "R-24",
+      "soll": "zustand_am_cursor ist typisiert und vollstaendig: Aufgaben, Artefakte mit Pruefungen je genauer Version, Blockaden, Abdeckung. Befund B3."
+    },
+    {
+      "regel": "R-25",
+      "soll": "hoechste_sequenz ist vorhanden, damit ein Cursor oberhalb des Hoechstwerts erkennbar ist. Befund B1."
+    },
+    {
+      "regel": "R-36",
+      "soll": "Jeder Pruefungseintrag im Zustand nennt task_id -- der Nachweis haengt an der vollen Referenz. R2."
+    }
+  ],
+  "daten": {
+    "schnappschuss": {
+      "schema": "agentarium.schnappschuss.v2.1",
+      "stream": "lauf",
+      "stream_id": "AG-NEU/AG-NEU-R1",
+      "cursor": 411,
+      "sent_at": "2026-10-15T14:04:30.000Z",
+      "replay_grenze": 120,
+      "rechte": [
+        "read"
+      ],
+      "lauf": {
+        "project_id": "AG-NEU",
+        "run_id": "AG-NEU-R1",
+        "zustand": "aktiv",
+        "terminal": false,
+        "ansicht": "live",
+        "befehlsfaehig": true,
+        "herkunft": {
+          "mode": "OBSERVED_PROJECT_WORK",
+          "fictional": false,
+          "source_evidence": "relay/events/…"
+        },
+        "zeitachse": "complete",
+        "zustand_am_cursor": {
+          "cursor": 411,
+          "aufgaben": [
+            {
+              "task_id": "AG-NEU-021",
+              "parent_task_id": null,
+              "work_item_type": "story",
+              "status": "offen",
+              "item_revision": 1,
+              "letzte_transition_id": "E300",
+              "owner": "forge"
+            }
+          ],
+          "artefakte": [
+            {
+              "artifact_id": "ART-05",
+              "version": "v2",
+              "supersedes": "ART-05@v1",
+              "pruefungen": [
+                {
+                  "kind": "review_result",
+                  "criteria_ref": "AG-PROC-REVIEW-001@v1",
+                  "outcome": "pass",
+                  "event_id": "E401",
+                  "task_id": "AG-NEU-021"
+                }
+              ]
+            }
+          ],
+          "blockaden": [],
+          "abdeckung": "complete"
+        },
+        "letzte": []
+      },
+      "kosten": {
+        "sichtbar": true,
+        "erfassung": "unvollstaendig",
+        "daten": "synthetisch",
+        "status_text": "Kosten nicht vollständig ermittelbar.",
+        "ohne_angabe": 6
+      },
+      "hoechste_sequenz": 414,
+      "supported_actions": []
+    },
+    "danach": [
+      {
+        "schema": "agentarium.strom.v2.1",
+        "stream": "lauf",
+        "stream_id": "AG-NEU/AG-NEU-R1",
+        "stream_sequence": 412,
+        "kind": "work.event",
+        "sent_at": "2026-10-15T14:04:31.880Z",
+        "payload": {
+          "id": "E412",
+          "project_id": "AG-NEU",
+          "run_id": "AG-NEU-R1",
+          "task_id": "AG-NEU-021",
+          "actor": "forge",
+          "kind": "handoff",
+          "title": "Entwurf an Argus",
+          "occurred_at": "2026-10-15T14:04:31.500Z",
+          "recorded_at": "2026-10-15T14:04:31.880Z",
+          "fictional": false,
+          "recipient": "argus",
+          "caused_by": [],
+          "artifact_id": "ART-07",
+          "version": "v1"
+        }
+      },
+      {
+        "schema": "agentarium.strom.v2.1",
+        "stream": "lauf",
+        "stream_id": "AG-NEU/AG-NEU-R1",
+        "stream_sequence": 413,
+        "kind": "work.event",
+        "sent_at": "2026-10-15T14:04:48.100Z",
+        "payload": {
+          "id": "E413",
+          "project_id": "AG-NEU",
+          "run_id": "AG-NEU-R1",
+          "task_id": "AG-NEU-021",
+          "actor": "argus",
+          "kind": "review_result",
+          "title": "Entwurf angenommen",
+          "occurred_at": "2026-10-15T14:04:47.900Z",
+          "recorded_at": "2026-10-15T14:04:48.100Z",
+          "fictional": false,
+          "caused_by": [
+            "E412"
+          ],
+          "artifact_id": "ART-07",
+          "version": "v1",
+          "criteria_ref": "AG-PROC-REVIEW-001@v1",
+          "outcome": "pass"
+        }
+      },
+      {
+        "schema": "agentarium.strom.v2.1",
+        "stream": "lauf",
+        "stream_id": "AG-NEU/AG-NEU-R1",
+        "stream_sequence": 414,
+        "kind": "run.state_changed",
+        "sent_at": "2026-10-15T14:05:02.000Z",
+        "payload": {
+          "project_id": "AG-NEU",
+          "run_id": "AG-NEU-R1",
+          "zustand": "wartend",
+          "zustand_vorher": "aktiv",
+          "occurred_at": "2026-10-15T14:05:01.800Z",
+          "grund": "wartet auf Freigabe durch Peter"
+        }
+      }
+    ]
+  }
+}

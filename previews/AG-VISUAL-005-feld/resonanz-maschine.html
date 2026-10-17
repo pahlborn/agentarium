@@ -1,0 +1,2178 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Agentarium</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Resonanz">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#05070C">
+<style>
+  :root{ --grund:#05070C; --agHell:1; }
+  html,body{margin:0;padding:0;width:100%;height:100%;background:var(--grund);}
+  html{overflow:hidden;overscroll-behavior:none;touch-action:none;}
+  body{position:fixed;inset:0;overflow:hidden;overscroll-behavior:none;touch-action:none;}
+  canvas{
+    position:fixed; inset:0; width:100%; height:100%; display:block;
+    background:var(--grund); touch-action:none;
+    -webkit-user-select:none; user-select:none; -webkit-tap-highlight-color:transparent;
+  }
+  #hinweis{
+    position:fixed; left:0; right:0; bottom:max(22px, env(safe-area-inset-bottom));
+    text-align:center; pointer-events:none;
+    font:400 12px/1.6 ui-monospace, SFMono-Regular, Menlo, monospace;
+    letter-spacing:.22em; text-transform:uppercase; color:#4B5A72;
+    transition:opacity 1.2s ease;
+  }
+  #kopf{
+    position:fixed; left:0; right:0; top:max(14px, env(safe-area-inset-top));
+    text-align:center; pointer-events:none; z-index:3;
+    font:400 13px/1.7 ui-monospace, SFMono-Regular, Menlo, monospace;
+    letter-spacing:.26em; text-transform:uppercase; color:#7B8AA6;
+  }
+  #kopf b{display:block; font-weight:400; font-size:17px; color:#C9D4E6; letter-spacing:.20em;}
+  #kopf i{display:block; font-style:normal; font-size:11px; color:#4B5A72; letter-spacing:.16em;
+          text-transform:none; margin-top:5px;}
+  #tuer{
+    position:fixed; right:max(12px, env(safe-area-inset-right));
+    bottom:max(12px, env(safe-area-inset-bottom));
+    z-index:6; pointer-events:auto; -webkit-tap-highlight-color:transparent;
+    width:46px; height:46px; border-radius:23px; border:1px solid rgba(160,180,210,.16);
+    background:rgba(10,14,22,.30); backdrop-filter:blur(6px);
+    display:flex; align-items:center; justify-content:center;
+    color:rgba(180,198,224,.42); font:400 17px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+    transition:opacity .6s ease, background .2s ease; opacity:.55;
+  }
+  #tuer:active{background:rgba(20,28,42,.55);}
+  #leiste{
+    position:fixed; right:max(12px, env(safe-area-inset-right));
+    bottom:calc(max(12px, env(safe-area-inset-bottom)) + 56px);
+    z-index:6; display:none; flex-direction:column; gap:1px;
+    background:rgba(150,170,200,.12); border:1px solid rgba(150,170,200,.12);
+    border-radius:10px; overflow:hidden; min-width:172px;
+  }
+  #leiste.auf{display:flex;}
+  #leiste a, #leiste button{
+    appearance:none; border:0; text-align:left; cursor:pointer;
+    display:block; padding:13px 17px; background:rgba(9,13,20,.86);
+    color:#C2CEE2; text-decoration:none;
+    font:400 13px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing:.14em;
+    text-transform:uppercase; -webkit-tap-highlight-color:transparent;
+  }
+  #leiste a:active, #leiste button:active{background:rgba(22,30,45,.95);}
+  #ruf{
+    position:fixed; left:0; right:0; bottom:calc(max(12px, env(safe-area-inset-bottom)) + 72px);
+    z-index:7; text-align:center; pointer-events:none; opacity:0;
+    transition:opacity .5s ease; color:#9FB0CC;
+    font:400 12px/1.6 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing:.2em;
+    text-transform:uppercase;
+  }
+  #ruf.da{opacity:1;}
+  #agRing{position:fixed; inset:0; pointer-events:none; z-index:3;}
+  /* Der Steckbrief eines Agenten: beim Daraufzeigen, beim Antippen. */
+  #agSteck{position:fixed; z-index:9; width:270px; padding:15px 17px;
+    border-radius:10px; background:rgba(8,12,19,.96);
+    border:1px solid rgba(150,170,200,.18);
+    font:400 12px/1.5 -apple-system,system-ui,sans-serif; color:#AEBCD2;
+    opacity:0; pointer-events:none; transition:opacity .25s ease;}
+  #agSteck.auf{opacity:1;}
+  #agSteck b{font-weight:500; font-size:13px; letter-spacing:.14em;
+    text-transform:uppercase;}
+  #agSteck i{display:block; font-style:normal; color:#8295B0; font-size:11px;
+    letter-spacing:.2em; text-transform:uppercase; margin-top:2px;}
+  #agSteck code{display:block; margin-top:7px; color:#6B7689; font-size:10.5px;
+    letter-spacing:.08em; font-family:ui-monospace,SFMono-Regular,Menlo,monospace;}
+  #agSteck p{margin:11px 0 12px; color:#C8D4E6;}
+  #agSteck dl{margin:0; display:grid; grid-template-columns:auto 1fr;
+    gap:3px 12px; font-size:11px;}
+  #agSteck dt{color:#6B7689; letter-spacing:.14em; text-transform:uppercase;
+    font-size:9.5px; padding-top:2px;
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;}
+  #agSteck dd{margin:0; color:#AEBCD2;}
+  #agSteck .nein{color:#A8707A;}
+  #agSteck .schaetz{color:#9A8A62;}
+  /* Was ein Auftrag verbraucht hat — erscheint beim Erledigen, verebbt. */
+  #agKostenEbene{position:fixed; inset:0; z-index:5; pointer-events:none;}
+  .agKosten{position:absolute; transform:translate(-50%,-100%);
+    font:400 10px/1 ui-monospace,SFMono-Regular,Menlo,monospace;
+    letter-spacing:.12em; white-space:nowrap;
+    animation:agKostenEin 16s ease forwards;}
+  /* Geschätztes kursiv und in Klammern: Es muss sich als geschätzt zu
+     erkennen geben, auch ohne dass jemand den Steckbrief öffnet. */
+  .agKosten.geschaetzt{font-style:italic; opacity:.8;}
+  .agKosten.geschaetzt::before{content:'~';opacity:.6;padding-right:3px;}
+  /* Sechzehn Sekunden statt sechs, und der Aufstieg ist flacher. Vorher
+     war die Zahl weg, bevor man sie gelesen hatte — und sie wanderte dabei
+     so weit nach oben, dass sie sich schon im Verschwinden befand, während
+     man noch hinsah. Jetzt steht sie fast die ganze Zeit still. */
+  @keyframes agKostenEin{0%{opacity:0;transform:translate(-50%,-80%);}
+    5%{opacity:1;transform:translate(-50%,-100%);}
+    84%{opacity:1;transform:translate(-50%,-108%);}
+    100%{opacity:0;transform:translate(-50%,-122%);}}
+  /* Die Namen atmen durchgehend — ein Team, das wartet, ist nicht tot.
+     Der Wechsel Name <-> Rolle fällt in das Tal dieses Atems, deshalb
+     sieht man kein Umspringen, sondern nur, dass beim Hellwerden etwas
+     anderes dasteht. */
+  .agName{position:absolute; transform:translate(-50%,-50%);
+    font:400 var(--agNameGr,14px)/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+    letter-spacing:.2em; text-transform:uppercase;
+    white-space:nowrap; opacity:.7;
+    animation:agAtem 4s ease-in-out infinite;}
+  /* Das Atmen darf nicht zum Verstecken werden. Vorher ging es von 0,30 bis
+     0,66 — im Tal war der Name praktisch weg, und zusammen mit 11 px war er
+     nicht mehr zu lesen. Jetzt 0,52 bis 0,88: Man sieht den Atem immer
+     noch, aber man muss ihn nicht abwarten, um den Namen zu erkennen. */
+  @keyframes agAtem{0%,100%{opacity:.52;} 50%{opacity:.88;}}
+  /* Wer arbeitet, leuchtet — damit man es auch am Rand des Blicks bemerkt. */
+  /* Wer arbeitet, atmet tiefer und schneller. */
+  .agName.arbeitet{animation:agPuls 2.4s ease-in-out infinite;}
+  /* Wer gleich fängt, schwillt an — und zwar ohne Übergangszeit: Eine
+     Erwartung, die sanft einblendet, kommt zu spät. Das Zurückgehen
+     danach darf weich sein. */
+  .agName.faengt{opacity:1 !important; animation:none;
+    transition:transform .12s ease-out;}
+  .agName{transition:transform .5s ease;}
+  @keyframes agPuls{0%,100%{opacity:.80;} 50%{opacity:1;}}
+  /* Erstes Pult: Wer vorgezogen sitzt, steht auch etwas deutlicher da. */
+  /* Wer außerhalb des Kreises steht, steht auch anders da: etwas größer
+     und weiter gesperrt. Kein Abzeichen — nur ein anderer Ton. */
+  .agDraussen{font-size:calc(var(--agNameGr,14px) * 1.11); letter-spacing:.34em;}
+  /* Die Rolle ist laenger als der Name und bekommt eine Stufe weniger,
+     damit zwei Nachbarn sich nicht decken. */
+  .agName.rolleDa{font-size:calc(var(--agNameGr,14px) * 0.86);
+    letter-spacing:.13em;}
+  /* Der Umschlag Name <-> Rolle: Die Schrift läuft auseinander und wieder
+     zusammen, als würde das Wort im Feld neu gegossen — kein Ausblenden. */
+  @keyframes agGuss{
+    0%{letter-spacing:.85em; opacity:0; filter:blur(3px);}
+    45%{letter-spacing:.2em; opacity:1; filter:blur(0);}
+    100%{letter-spacing:.2em;}}
+  /* Beim Umschlag läuft die Schrift kurz auseinander und wieder zusammen —
+     dann übernimmt wieder der Atem. */
+  .agGuss{animation:agGuss 1.3s cubic-bezier(.2,.7,.3,1) both,
+                    agAtem 4s ease-in-out infinite;}
+
+  /* Oben links EINE Liste. Sie wechselt zwischen dem, was zu tun ist, und
+     dem, was geschehen ist — zwei Listen nebeneinander waren zu viel.
+     Die Überschrift sagt, welche gerade steht; ohne sie müsste man raten. */
+  /* Die Liste steht UNTEN und wächst nach oben: Der neueste Eintrag liegt
+     immer direkt über der Beschriftung, ältere rücken hinauf und laufen
+     oben aus dem Bild. Vorher hing sie oben und wurde unten abgeschnitten
+     — da verschwand das NEUESTE, und das ist genau falsch herum.
+     Die Maske oben lässt sie ins Nichts auslaufen statt an einer Kante
+     abzureißen. */
+  /* Die Liste hängt unter dem Kopf und wächst nach UNTEN, höchstens vier
+     Einträge weit. Vorher lief sie von unten nach oben über den ganzen
+     Schirm und verschwand oben im Nichts — eindrucksvoll, aber sie nahm
+     dem Geschehen den Platz und war beim Vorbeisehen nicht zu fassen.
+     Vier Einträge sind das, was man im Vorbeigehen liest. */
+  /* Unten links, der neueste Eintrag ganz unten — dort sucht das Auge
+     das Neueste. Höchstens vier; der älteste rückt oben hinaus und läuft
+     in der Maske aus, statt an einer Kante abzureißen. */
+  #agEcke{position:fixed; left:max(14px,env(safe-area-inset-left));
+    bottom:calc(max(14px,env(safe-area-inset-bottom)) + 10px);
+    z-index:4; pointer-events:none; width:min(42vw,330px);
+    display:flex; flex-direction:column; justify-content:flex-end;
+    overflow:hidden; transition:opacity .45s ease;
+    -webkit-mask-image:linear-gradient(to bottom, transparent 0, #000 46px);
+    mask-image:linear-gradient(to bottom, transparent 0, #000 46px);}
+  #agEcke.leise{opacity:0;}
+  /* Im Ausklang verblasst die Liste von selbst — langsamer als beim
+     Wegschalten, denn hier geht nichts aus, hier klingt etwas ab. */
+  #agEcke.ausklang{opacity:0; transition:opacity 4.5s ease;}
+  /* Im Hochformat ist die Liste schmaler, sonst bliebe für das Feld
+     kein Band übrig. Dieselbe Zahl steht in der Schicht (`listeBreite`);
+     gehen die beiden auseinander, rechnet das Feld mit einem Platz, den es
+     nicht hat. */
+  @media (orientation:portrait){
+    #agEcke{width:min(34vw,240px);}
+  }
+  #agLaeuft{flex:0 0 auto;}
+  /* Die Beschriftung „Was geschieht" ist jetzt ein Knopf unten rechts,
+     bei den anderen. Hier bleibt nichts stehen. */
+  #agTitel{display:none;}
+  #agLaeuft{font:400 12px/1.45 -apple-system,system-ui,sans-serif;}
+  .agAuf{margin-bottom:11px; transition:opacity .8s ease;}
+  /* Ein offener Auftrag steht hell. Was geschehen ist, steht blass — die
+     Liste sagt damit zweierlei zugleich, wofür es vorher zwei brauchte. */
+  .agAuf.offen{opacity:1;}
+  .agAuf.tat{opacity:.42;}
+  .agAuf.tat s{text-decoration:none; font-size:9px; letter-spacing:.16em;
+    text-transform:uppercase;}
+  .agAuf u{text-decoration:none;
+    font:400 10px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;
+    letter-spacing:.22em;}
+  .agAuf b{font-weight:500; font-size:11px; letter-spacing:.1em;
+    text-transform:uppercase; opacity:.75;}
+  .agAuf span{color:#C2CEE2;}
+  .agAuf em{font-style:normal; color:#8295B0; font-size:9px;
+    letter-spacing:.16em; text-transform:uppercase;
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;}
+  /* Der Verlauf steht nicht mehr in einer Spalte, sondern dort, wo er
+     geschieht — am Empfänger, nach außen geschrieben, und er vergeht. */
+  #agRufe{position:fixed; inset:0; z-index:4; pointer-events:none;}
+  /* Die Beschriftung des Werks: leuchtet bei der Abnahme auf, verebbt
+     wieder. Mittig gesetzt, denn dort wächst es. */
+  #agWerk{position:fixed; inset:0; z-index:5; pointer-events:none;}
+  /* DAS PRODUKT: SCHRIFT UND EIN WAAGERECHTER BALKEN.
+
+     Es sitzt unten in der Mitte des freien Bandes, nicht im Feld. Damit
+     kann es nichts überlagern und von nichts überlagert werden — und es
+     besteht aus Schrift statt aus Fäden, also kann dort auch kein
+     Fadenwerk stehenbleiben. */
+  /* Das Produkt steht rechts oben — dort, wo sonst der Kopf stand. Es
+     ist das Ziel der ganzen Übung, also bekommt es die Ecke, die das Auge
+     nach dem Titel als zweites ansteuert. */
+  /* Unter dem Kopf, mit einer Trennlinie dazwischen: Es gehört zusammen
+     (das ist das Projekt, das ist sein Stand), aber es ist nicht dasselbe. */
+  /* DER FORTSCHRITT STEHT UNTEN RECHTS. Peter: "koennen wir bitte den
+     block mit projektfortschritt nach rechts unten setzen". Oben bleibt
+     damit nur, WELCHES Projekt laeuft -- unten steht, WIE WEIT es ist.
+     Der Abstand nach unten haengt an der gemessenen Hoehe der
+     Knopfleiste, nicht an einer Zahl: Auf dem Telefon bricht sie um. */
+  #agWerkName{position:fixed;
+    right:max(3px,calc(env(safe-area-inset-right) - 10px));
+    bottom:calc(max(14px,env(safe-area-inset-bottom)) + var(--agTastenH,44px) + 12px);
+    width:min(32vw,320px); z-index:6;
+    opacity:0; transition:opacity 1.2s ease;
+    text-align:right; color:#AEBCD2;}
+  @media (orientation:portrait){
+    #agWerkName{width:min(40vw,260px);}
+  }
+  #agWerkName.auf{opacity:.72;}
+  #agWerkName.hell{opacity:1;}
+  .wBalken{height:3px; border-radius:2px; overflow:hidden;
+    background:rgba(150,170,200,.17); margin-bottom:9px;}
+  .wBalken span{display:block; height:100%; background:#8FA3C0;
+    transition:width 1.4s ease, background 2s ease;}
+  #agWerkName.hell .wBalken span{background:#E8D9A8;
+    box-shadow:0 0 10px rgba(232,217,168,.75);}
+  .wTitel{font:400 10px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;
+    letter-spacing:.22em; text-transform:uppercase;
+    overflow-wrap:anywhere;}
+  .wOrt{margin-top:6px; font:400 8.5px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;
+    letter-spacing:.24em; text-transform:uppercase; opacity:.6;}
+  /* EIN BLOCK, EINE REIHENFOLGE: was es ist, wie weit, wovon wieviel,
+     woraus es besteht. Vorher stand die Aufschluesselung unten rechts in
+     einem zweiten Block, der denselben Aufgabenzaehler zeigte. */
+  .wZahl{margin-top:5px; font:400 9px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;
+    letter-spacing:.18em; text-transform:uppercase; color:#8295B0;}
+  .wAuf{margin-top:9px; padding-top:8px;
+    border-top:1px solid rgba(150,170,200,.12);}
+  .wAufZ{display:flex; align-items:center; justify-content:flex-end;
+    gap:7px; margin-bottom:4px;}
+  .wAufZ u{text-decoration:none; color:#55637A; order:1;
+    font:400 8.5px/1 ui-monospace,SFMono-Regular,Menlo,monospace;
+    letter-spacing:.2em; text-transform:uppercase; min-width:58px;
+    text-align:right;}
+  .wAufZ b{color:#9FAFC6; order:2; font-weight:400; min-width:14px;
+    text-align:right;
+    font:400 10px/1 ui-monospace,SFMono-Regular,Menlo,monospace;}
+  .wAufZ i{display:flex; gap:2px; order:0;}
+  .wAufZ s{display:block; width:3px; height:10px; text-decoration:none;}
+  /* DAS REGISTER: woraus das Produkt besteht. Kennung, Fassung, Zustand —
+     eine Fassung v2 ist der sichtbare Beweis einer Überarbeitung. */
+  .wReg{margin-top:9px; padding-top:8px;
+    border-top:1px solid rgba(150,170,200,.12);
+    font:400 9px/1.7 ui-monospace,SFMono-Regular,Menlo,monospace;
+    letter-spacing:.1em;}
+  .wZeile{display:flex; justify-content:flex-end; gap:7px; white-space:nowrap;}
+  .wZeile u{text-decoration:none; order:1;}
+  .wZeile i{font-style:normal; order:2; color:#8295B0; min-width:20px;}
+  .wZeile s{text-decoration:none; order:3; min-width:76px; text-align:right;
+    text-transform:uppercase; font-size:8px; letter-spacing:.16em;
+    color:#55637A;}
+  .wZeile.z-angenommen s{color:#E8D9A8;}
+  .wZeile.z-ersetzt{opacity:.45;}
+  .wZeile.z-ersetzt s{text-decoration:line-through;}
+  .wZeile.z-verworfen{opacity:.5;}
+  .wZeile.z-verworfen s{color:#A8707A;}
+  .wMehr{color:#55637A; font-size:8px; letter-spacing:.16em;
+    text-transform:uppercase; margin-top:3px;}
+  /* Die Beschriftung einer Abnahme. Diese drei Zeilen hatte einer meiner
+     Schnitte beim Umbau mitgenommen — danach hatte das Element gar keine
+     Positionierung mehr und klebte in der linken oberen Ecke, über dem
+     Titel. Inline gesetzte `left`/`top` nützen nichts ohne `position`. */
+  .agWerk{position:absolute; transform:translate(-50%,0); width:270px;
+    text-align:center; animation:agWerkEin 8.6s ease forwards;}
+  .agWerk span{display:block; color:#DCE5F3;
+    font:400 13px/1.4 -apple-system,system-ui,sans-serif;
+    text-shadow:0 0 16px rgba(0,0,0,.9), 0 0 5px rgba(0,0,0,.9);}
+  .agWerk u{display:block; text-decoration:none; font-size:9px;
+    letter-spacing:.3em; text-transform:uppercase; opacity:.7;
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace; margin-bottom:3px;}
+  @keyframes agWerkEin{
+    0%{opacity:0; transform:translate(-50%,8px); filter:blur(4px);}
+    9%{opacity:1; transform:translate(-50%,0); filter:blur(0);}
+    55%{opacity:1;} 100%{opacity:0;}}
+  .agRuf{position:absolute; width:210px;
+    font:400 11.5px/1.35 -apple-system,system-ui,sans-serif; color:#9FAFC6;
+    animation:agEin 7.2s ease forwards;}
+  .agRuf u{text-decoration:none; font-weight:500;}
+  .agRuf s{text-decoration:none; font-size:9px; letter-spacing:.16em;
+    text-transform:uppercase;}
+  .agRuf span{color:#AEBCD2;}
+  @keyframes agEin{0%{opacity:0;transform:translateY(5px);}
+    7%{opacity:1;transform:none;} 62%{opacity:1;} 100%{opacity:0;}}
+  /* Der Kopf steht links oben: Name, Projekt, Uhr. Klassisch, und genau
+     deshalb lesbar — man sucht einen Titel oben links. */
+  /* Kopf und Produkt stehen übereinander rechts oben: wer das hier ist,
+     und was dabei herauskommt. Links unten läuft mit, was geschieht. */
+  /* EINE SPALTE STATT ZWEIER FESTER LAGEN.
+
+     Kopf und Produkt standen beide fest positioniert, das Produkt auf
+     einem Abstand von 104 Pixeln unter dem oberen Rand. Ein fester Abstand
+     ist hier das falsche Werkzeug: Die Kopfhöhe hängt vom Text und von der
+     Breite ab. Im Hochformat bricht das Leitmotiv um, der Kopf wird höher —
+     nachgemessen überlappten sich die beiden dort um zehn Pixel.
+
+     Jetzt stehen sie in einer Spalte untereinander, und das Produkt folgt
+     dem Kopf von selbst. Eine Klasse von Fehlern weniger. */
+  #agRechts{position:fixed; right:max(3px,calc(env(safe-area-inset-right) - 10px));
+    top:max(3px,calc(env(safe-area-inset-top) - 10px)); z-index:7;
+    display:flex; flex-direction:column; align-items:flex-end; gap:6px;
+    width:min(32vw,320px); pointer-events:none;}
+  #agKopf{position:static; width:100%; text-align:right;
+    font:400 11px/1.7 ui-monospace,SFMono-Regular,Menlo,monospace;
+    letter-spacing:.2em; text-transform:uppercase; color:#55637A;}
+
+  /* DIE MARKE STEHT LINKS, DER LAUF RECHTS.
+
+     Vorher trug der Kopf rechts oben SECHS Dinge: Marke, Leitmotiv,
+     Projektname, Uhr, Fassung, darunter das Produkt. Peter: „Das ist
+     aktuell noch etwas unübersichtlich." Der Grund war nicht die Zahl,
+     sondern die Vermischung: Die Marke ändert sich nie, der Lauf ändert
+     sich dauernd. Zwei verschiedene Dinge in einem Block.
+
+     Jetzt: links, was immer gleich bleibt — rechts, was gerade gilt.
+     Links beginnt die Bahn erst bei bandL (348 im Querformat, 258 im
+     Hochformat), der Platz ist also frei. Beim Zeigen wächst der Block
+     nach rechts, deshalb ist er schmaler als der Raum: Hochformat 200
+     statt 240, sonst stieß er vergrößert in die Bahn. */
+  /* KLEINER. Peter: „das muss nicht so ueberpraesent sein."
+     Er hat recht, und der Grund liegt nicht in der Ruhegroesse, sondern im
+     Lesen: Auf dem iPad gibt es kein Zeigen, also setzt die Schicht bei
+     JEDER Beruehrung kurz `lesen` — und damit wuchs die Marke bei jedem
+     Antippen irgendwo im Feld auf 128 Prozent. Eine Marke, die bei jeder
+     Beruehrung aufspringt, draengt sich auf.
+     Also beides zurueck: Ruhegroesse 11/9 statt 13/10,5, und beim Lesen
+     nur 1,10 statt 1,28. Sie ist der Name der Sache, nicht die Sache. */
+  #agMarke{position:fixed; left:max(3px,calc(env(safe-area-inset-left) - 10px));
+    top:max(3px,calc(env(safe-area-inset-top) - 10px)); z-index:7;
+    width:min(26vw,220px); text-align:left;
+    font:400 9.5px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;
+    letter-spacing:.18em; text-transform:uppercase; color:#55637A;}
+  #agMarke b{display:block; color:#AFC0D8; font-weight:400; font-size:11px;
+    letter-spacing:.14em;}
+  #agMarke em{display:block; font-style:normal; font-size:9px;
+    letter-spacing:.08em; text-transform:none; color:#5E6E86;
+    margin:2px 0 0; line-height:1.4;}
+  @media (orientation:portrait){
+    #agMarke{width:min(32vw,172px);}
+  }
+  /* Das Leitmotiv, wie es in AG-MOCK-COMPARE-001 steht. Klein, einmal, und
+     es bleibt stehen — es ist der Name der Sache, keine Beschriftung. */
+  /* 10,5 px statt 8,5 und etwas heller. Mit 8,5 war das Leitmotiv zwar
+     da, aber nicht zu lesen — eine Beschriftung, die man nicht lesen kann,
+     ist Dekoration. */
+
+  /* Diese Regel muss NACH der Breitenangabe des Kopfes stehen. Beim ersten
+     Versuch stand sie weiter oben bei der Liste — gleiche Gewichtung, also
+     gewann die spätere Zeile, und der Kopf blieb im Hochformat 330 breit.
+     Nachgemessen: rechter Rand bei 344 statt 254. */
+  @media (orientation:portrait){
+    #agRechts{width:min(40vw,260px);}
+  }
+  #agUhr{color:#8295B0;}
+
+  /* ================= OB EIN STROM ANLIEGT, UND OB ER LEBT =================
+
+     Peter: "ich wuerde gerne sehen, wenn agentarium im live modus laeuft.
+     und ob ein datenstrom aktiv ist. nur ganz leise anzeige, nicht lautes,
+     auffaelliges, stoerendes."
+
+     Also kommt nichts Neues ins Bild. Die Uhr steht ohnehin oben rechts
+     und zeigt im Live-Betrieb die Wirklichkeitszeit; sie bekommt einen
+     Punkt davor. Drei Zustaende, und der erste ist die Abwesenheit:
+
+       Demo/Archiv      kein Punkt. Es wird kein Strom erwartet, also
+                        gibt es nichts zu melden.
+       Strom lebt       der Punkt atmet EINMAL JE EMPFANGENEM
+                        Lebenszeichen -- kein Takt, den das Feld selbst
+                        erzeugt. Ein selbst erzeugter Puls behauptete
+                        Leben, wo keines ist, und das waere die
+                        gefaehrlichste Anzeige von allen.
+       veraltet         der Punkt wird hohl und hoert auf zu atmen.
+                        Dazu ein Wort, weil der Vertrag es verlangt:
+                        nach 20 Sekunden ohne Lebenszeichen sagt das
+                        Feld, seit wann.
+
+     Kein Blinken, keine Signalfarbe. Dasselbe Atmen, das die Namen im
+     Feld ohnehin haben. */
+  #agPuls{display:none; width:5px; height:5px; border-radius:3px;
+    text-decoration:none; vertical-align:middle; margin:0 7px 2px 0;
+    background:#8FA3C0; opacity:.34;}
+  body[data-strom="lebt"] #agPuls, body[data-strom="alt"] #agPuls{
+    display:inline-block;}
+  body[data-strom="alt"] #agPuls{background:transparent; opacity:.55;
+    box-shadow:inset 0 0 0 1px #8295B0;}
+  #agPuls.schlag{animation:agSchlag 1.7s ease-out;}
+  @keyframes agSchlag{
+    0%{opacity:.34; transform:scale(1);}
+    10%{opacity:1; transform:scale(1.5);}
+    100%{opacity:.34; transform:scale(1);}}
+  #agStromWort{display:none; font-style:normal; color:#8295B0;
+    font-size:8.5px; letter-spacing:.14em; margin-top:3px;}
+  body[data-strom="alt"] #agStromWort{display:block;}
+
+  /* DUNKEL BLEIBEN, ABER LESBAR WERDEN.
+
+     Peters Bitte: „Die Anzeige für Titel und Produkt rechts oben und rechts
+     unten für den kleinen Monitor sind erfreulich dunkel gehalten, ich mag
+     das. Aber bei Mouseover erhellen, dass man es auch lesen kann, wäre
+     toll."
+
+     Also bleibt der Ruhezustand, wie er ist — und wer hinsieht, bekommt
+     Licht. Auf dem iPad gibt es kein Zeigen, deshalb hört dieselbe Regel
+     auch auf eine Berührung; die Schicht setzt dafür `lesen` und nimmt es
+     nach ein paar Sekunden zurück.
+
+     Die drei Ecken nehmen dafür Zeigerereignisse an. Das kostet dort das
+     Mitrühren im Feld — ein kleiner Preis für eine Anzeige, die man lesen
+     kann. */
+  /* EIN GRUND UNTER DEM VERGRÖSSERTEN BLOCK.
+
+     Peters Befund: „Wenn Titel und Zusatzdaten bei Mouseover vergrößert
+     werden, durchscheint der Hintergrund, also der Titel des Projektes.
+     Das ist ein wenig unruhig und hinderlich beim Lesen."
+
+     Stimmt — vergrößerte Schrift über einem bewegten Feld ist schlechter
+     lesbar als kleine. Die Polsterung liegt deshalb SCHON IM RUHEZUSTAND
+     an, nur ohne Grund; sonst sprängen die Blöcke beim Zeigen um. Beim
+     Zeigen kommt der dunkle Grund dazu, und die Blöcke stehen dann auf
+     etwas statt im Feld. */
+  #agMarke, #agKopf, #agWerkName{pointer-events:auto;
+    padding:11px 13px; border-radius:10px;
+    background:rgba(6,9,14,0); border:1px solid rgba(150,170,200,0);
+    transition:opacity .3s ease, filter .3s ease, transform .3s ease,
+               background .3s ease, border-color .3s ease;}
+  #agMarke:hover, #agMarke.lesen,
+  #agKopf:hover, #agKopf.lesen,
+  #agWerkName:hover, #agWerkName.lesen{
+    background:rgba(6,9,14,.93); border-color:rgba(150,170,200,.16);
+    -webkit-backdrop-filter:blur(3px); backdrop-filter:blur(3px);}
+  #agMarke:hover, #agMarke.lesen,
+  #agKopf:hover, #agKopf.lesen,
+  #agWerkName:hover, #agWerkName.lesen{filter:brightness(1.85) saturate(1.1);}
+
+  /* WO DIE HELLIGKEIT WIRKT.
+
+     Das Bild und die stillen Bloecke, nicht die Tafeln, die man zum Lesen
+     aufmacht -- die sind schon hell, und heller wuerde dort blenden.
+
+     Die Bloecke, die sich beim Lesen aufhellen, rechnen den Regler mit:
+     Sonst waere der Unterschied zwischen "steht da" und "wird gelesen"
+     bei hochgedrehtem Regler verschwunden, und genau der ist Absicht.
+
+     `body.hellAn` ist der Schalter: Steht der Regler auf 1, gibt es
+     ueberhaupt keinen Filter und damit auch keinen Durchgang auf der
+     Grafikkarte. */
+  body.hellAn #feld,
+  body.hellAn #agRing, body.hellAn #agRufe, body.hellAn #agWerk,
+  body.hellAn #agMotoren, body.hellAn #agTun,
+  body.hellAn #agStoppSchilder, body.hellAn #agKostenEbene,
+  body.hellAn #agEcke, body.hellAn #agTasten,
+  body.hellAn #agMarke, body.hellAn #agKopf, body.hellAn #agWerkName{
+    filter:brightness(var(--agHell));}
+  body.hellAn #agMarke:hover, body.hellAn #agMarke.lesen,
+  body.hellAn #agKopf:hover, body.hellAn #agKopf.lesen,
+  body.hellAn #agWerkName:hover, body.hellAn #agWerkName.lesen{
+    filter:brightness(calc(var(--agHell) * 1.85)) saturate(1.1);}
+  /* Und sie werden größer. Heller allein reicht für kleine Schrift nicht —
+     wer hinsieht, will lesen. Der Bezugspunkt ist die jeweilige ECKE,
+     damit die Blöcke nach INNEN wachsen und nicht über den Rand hinaus. */
+  #agKopf{transform-origin:top right;}
+  #agWerkName{transform-origin:bottom right;}
+  #agMarke{transform-origin:top left;}
+  /* Wer gelesen wird, liegt OBEN. Vergroessert waechst ein Block von seiner
+     Ecke nach innen und deckt dabei seinen Nachbarn teilweise zu — gemessen
+     im Querformat: Kopf reicht vergroessert bis 269 px hinunter, das Produkt
+     beginnt bei 92. Das ist kein Fehler, solange der gelesene Block
+     DECKEND und OBEN ist; er hat beim Lesen Grund und Unschaerfe. Ohne
+     diese Zeile entschied die Reihenfolge im Dokument, und das Produkt lag
+     ueber dem Text, den man gerade lesen wollte. */
+  #agMarke:hover, #agMarke.lesen,
+  #agKopf:hover, #agKopf.lesen,
+  #agWerkName:hover, #agWerkName.lesen{z-index:12;}
+  #agKopf:hover, #agKopf.lesen,
+  #agWerkName:hover, #agWerkName.lesen{transform:scale(1.28);}
+  /* Die Marke waechst weniger: Sie muss nicht gelesen werden, sie steht da. */
+  #agMarke:hover, #agMarke.lesen{transform:scale(1.10);}
+  #agWerkName:hover, #agWerkName.lesen{opacity:1;}
+  /* Die Auskunft zum Namen: nur beim Zeigen, sonst nimmt sie Platz weg,
+     den das Feld braucht. */
+  #agFassung{display:block; max-height:0; overflow:hidden; opacity:0;
+    transition:max-height .35s ease, opacity .35s ease, margin .35s ease;
+    font:400 9px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;
+    letter-spacing:.05em; text-transform:none; color:#6B7689;}
+  #agMarke:hover #agFassung, #agMarke.lesen #agFassung{
+    max-height:160px; opacity:1; margin-top:9px;}
+  #agFassung b{display:block; margin-top:5px; font-weight:400; color:#AFC0D8;
+    letter-spacing:.1em; font-size:8.5px;}
+  /* DER HELLIGKEITSREGLER, UND ER IST LEISE.
+
+     Peter: "kannst du einen helligkeitsregler einbauen? er sollte aber
+     leise sein." Leise heisst hier: Er steht dort, wo ohnehin die Angaben
+     zur Sache stehen -- in der Marke, die sich beim Beruehren oeffnet --
+     und nicht als sechster Knopf unten. Ein Knopf waere eine Behauptung,
+     dass man ihn oft braucht. Man braucht ihn einmal je Gerät.
+
+     Er merkt sich seinen Wert im Geraet, nicht anderswo. */
+  #agRegler{display:block; max-height:0; overflow:hidden; opacity:0;
+    transition:max-height .35s ease, opacity .35s ease, margin .35s ease;}
+  #agMarke:hover #agRegler, #agMarke.lesen #agRegler{
+    max-height:60px; opacity:1; margin-top:10px;}
+  #agRegler u{display:block; text-decoration:none; color:#6B7689;
+    font-size:8px; letter-spacing:.2em; text-transform:uppercase;
+    margin-bottom:5px;}
+  #agRegler u i{font-style:normal; color:#AFC0D8; letter-spacing:.08em;}
+  #agHell{-webkit-appearance:none; appearance:none; width:100%; height:14px;
+    background:transparent; margin:0; cursor:pointer; display:block;}
+  #agHell::-webkit-slider-runnable-track{height:2px; border-radius:1px;
+    background:rgba(150,170,200,.26);}
+  #agHell::-moz-range-track{height:2px; border-radius:1px;
+    background:rgba(150,170,200,.26);}
+  #agHell::-webkit-slider-thumb{-webkit-appearance:none; appearance:none;
+    width:11px; height:11px; border-radius:6px; margin-top:-4.5px;
+    background:#AFC0D8; border:0;}
+  #agHell::-moz-range-thumb{width:11px; height:11px; border-radius:6px;
+    background:#AFC0D8; border:0;}
+  /* Welches Projekt gerade läuft — aus den Daten, nicht aus dem Code. */
+  #agProjekt{display:block; font-style:normal; color:#8295B0; font-size:10px;
+    letter-spacing:.22em; margin-bottom:2px;}
+  #agProjekt.fragbar{pointer-events:auto; cursor:pointer;
+    border-bottom:1px dotted rgba(150,170,200,.35); padding-bottom:1px;}
+  /* Die Kurzbeschreibung auf Antippen — auf einem iPad gibt es kein
+     Darüberfahren, also kein Tooltip, sondern ein Blatt. */
+  /* DAS BLATT GEHOERT ZUM KOPF, ALSO SIEHT ES AUCH SO AUS.
+     Peter: „die projektauswahl passt vom format nicht zur titelanzeige."
+     Stimmt -- es war ein breites, linksbuendiges Blatt in Flaechenschrift
+     unter einer schmalen, rechtsbuendigen Spalte in Schreibmaschinenschrift.
+     Jetzt dieselbe Breite wie die Spalte, dieselbe Kante, rechtsbuendig. */
+  #agWas{position:fixed; right:max(3px,calc(env(safe-area-inset-right) - 10px));
+    top:calc(max(3px,env(safe-area-inset-top)) + 46px); z-index:9;
+    width:min(32vw,320px); padding:13px 13px 15px; border-radius:10px;
+    background:rgba(6,9,14,.96); border:1px solid rgba(150,170,200,.16);
+    -webkit-backdrop-filter:blur(3px); backdrop-filter:blur(3px);
+    color:#C2CEE2; font:400 11px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace;
+    letter-spacing:.06em; text-align:right;
+    opacity:0; transform:translateY(-6px); pointer-events:none;
+    transition:opacity .35s ease, transform .35s ease;}
+  @media (orientation:portrait){ #agWas{width:min(40vw,260px);} }
+  body[data-gross="telefon-hoch"] #agWas{width:min(46vw,190px);}
+  body[data-gross="telefon-quer"] #agWas{width:min(24vw,180px);}
+  #agWas.auf{opacity:1; transform:none; pointer-events:auto;}
+  /* Die Projektwahl sitzt im selben Blatt wie die Beschreibung: Was läuft
+     und was es ist, gehören zusammen. */
+  .wProjekte{list-style:none; margin:0 0 11px; padding:0 0 10px;
+    border-bottom:1px solid rgba(150,170,200,.16);}
+  .wProjekte li{cursor:pointer; padding:6px 0; color:#8EA0BA;
+    font:400 10px/1.3 ui-monospace,SFMono-Regular,Menlo,monospace;
+    letter-spacing:.22em; text-transform:uppercase;}
+  .wProjekte li:hover{color:#D6E0F0;}
+  .wProjekte li.hier{color:#E8D9A8;}
+  .wProjekte li.hier::after{content:' —'; opacity:.7;}
+  /* Die Betriebsart wird dort gewählt, wo man auch das Projekt wählt —
+     sie gehört zum Projekt, nicht zur Bedienung. */
+  .wModi{list-style:none; display:flex; gap:1px; margin:13px 0 8px; padding:0;
+    border-radius:7px; overflow:hidden; background:rgba(150,170,200,.12);}
+  .wModi li{flex:1; text-align:center; cursor:pointer; padding:8px 4px;
+    background:rgba(9,13,20,.86); color:#8EA0BA;
+    font:400 10px/1 ui-monospace,SFMono-Regular,Menlo,monospace;
+    letter-spacing:.18em; text-transform:uppercase;}
+  .wModi li.hier{background:rgba(20,27,39,.92); color:#E6EEFB;
+    box-shadow:inset 0 1px 0 rgba(184,198,220,.34);}
+  .wModusWas{color:#8295B0; font-size:11px; line-height:1.45;}
+  /* Live ohne Verbindung: Das muss dastehen, nicht fehlen. */
+  #agLive{position:fixed; left:50%; top:50%; transform:translate(-50%,-50%);
+    z-index:8; width:min(74vw,420px); padding:18px 20px; border-radius:12px;
+    background:rgba(8,12,19,.95); border:1px solid rgba(201,162,39,.3);
+    opacity:0; pointer-events:none; transition:opacity .5s ease;
+    font:400 12.5px/1.55 -apple-system,system-ui,sans-serif; color:#C8D4E6;
+    text-align:center;}
+  #agLive.auf{opacity:1;}
+  #agLive b{display:block; font-weight:500; color:#C9A227; font-size:11px;
+    letter-spacing:.22em; text-transform:uppercase; margin-bottom:10px;
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;}
+  #agWas .wTitel{margin:0 0 7px; color:#D6E0F0; font-size:13px;}
+  #agWas p{margin:0;}
+  /* ========================== TELEFON ==========================
+     Unten ist auf einem Telefon kein Platz fuer drei Dinge nebeneinander.
+     Gemessen: Liste gegen Stand, Liste gegen Knoepfe, Stand gegen Knoepfe
+     -- auf allen drei Telefonhoehen. Also:
+
+       - der Stand unten rechts entfaellt. Er ist der Block, der den
+         Aufgabenzaehler ein zweites Mal zeigt; im Produkt steht er auch.
+       - die Liste rutscht UEBER die Knoepfe und wird schmaler.
+       - die rechte Spalte wird schmaler, damit keine Namen hineinragen.
+
+     Quer ist mehr Breite da, aber weniger Hoehe: dort bleibt der Stand,
+     nur die Liste muss hoeher und schmaler. */
+  /* Der Stand entfaellt auf JEDEM Telefon, nicht nur hochkant: Quer ist
+     die Hoehe das Problem, und Kopf, Produkt und Stand uebereinander
+     passen auf 375 Pixel Hoehe nicht -- gemessen, sie stiessen aneinander.
+     Dass gerade dieser Block weicht, ist kein Zufall: Er zeigt den
+     Aufgabenzaehler ein zweites Mal, und der steht auch im Produkt. */
+  /* Gemessen nach dem Umzug: Liste links und Fortschritt rechts stiessen
+     hochkant aneinander (375 Pixel, 225 + 150 + Raender). Beide schmaler,
+     statt einen von beiden zu opfern. */
+  /* Gemessen auf 375 Pixeln: 14 + 187 Liste + 178 Fortschritt = 379,
+     also sieben Pixel Ueberschnitt. Schmaler wird der Fortschritt,
+     nicht die Liste -- in der Liste stehen Peters Texte, hier Zahlen. */
+  body[data-gross="telefon-hoch"] #agWerkName{width:min(36vw,135px);}
+  body[data-gross="telefon-quer"] #agWerkName{width:min(28vw,200px);}
+  body[data-gross="telefon-hoch"] #agEcke{
+    width:min(50vw,187px);
+    bottom:calc(max(14px,env(safe-area-inset-bottom)) + var(--agTastenH,52px) + 10px);}
+  body[data-gross="telefon-hoch"] #agRechts{width:min(46vw,190px);}
+  body[data-gross="telefon-hoch"] #agMarke{width:min(40vw,140px);}
+  /* DIE KNOEPFE BRECHEN AUF DEM TELEFON UM. Gemessen: Die Leiste ist
+     407 Pixel breit, das iPhone SE 375 -- "Was geschieht" stand 46 Pixel
+     links ausserhalb des Bildes, auf dem iPhone 15 noch 28. Rechts
+     verankert faellt immer der erste Knopf heraus, und das ist
+     ausgerechnet der, den man zuerst braucht. Die Woerter bleiben wie
+     sie sind; umbrechen darf die Leiste. */
+  body[data-gross="telefon-hoch"] #agTasten,
+  body[data-gross="telefon-quer"] #agTasten{
+    left:max(6px,env(safe-area-inset-left));
+    right:max(6px,env(safe-area-inset-right));
+    flex-wrap:wrap; justify-content:flex-end;}
+  body[data-gross="telefon-hoch"] #agTasten button,
+  body[data-gross="telefon-quer"] #agTasten button{
+    padding:9px 11px; letter-spacing:.10em;}
+  /* AUF DEM TELEFON DIE ZUSAMMENFASSUNG, DAS DETAIL AUF ANTIPPEN.
+     Gemessen: Der eine Block mit Titel, Balken, Zaehler, Aufschluesselung,
+     Ablage und Register ist auf 667 Pixeln Hoehe so hoch, dass fuer den
+     Kreis 30 Pixel blieben -- neun Namen auf einem Fingernagel. Oben
+     stehen deshalb die drei Dinge, die die Frage "wie weit" beantworten;
+     Aufschluesselung und Register kommen beim Lesen dazu. */
+  body[data-gross="telefon-hoch"] #agWerkName .wAuf,
+  body[data-gross="telefon-hoch"] #agWerkName .wReg,
+  body[data-gross="telefon-hoch"] #agWerkName .wOrt{display:none;}
+  body[data-gross="telefon-hoch"] #agWerkName:hover .wAuf,
+  body[data-gross="telefon-hoch"] #agWerkName.lesen .wAuf,
+  body[data-gross="telefon-hoch"] #agWerkName:hover .wReg,
+  body[data-gross="telefon-hoch"] #agWerkName.lesen .wReg,
+  body[data-gross="telefon-hoch"] #agWerkName:hover .wOrt,
+  body[data-gross="telefon-hoch"] #agWerkName.lesen .wOrt{display:block;}
+  body[data-gross="telefon-hoch"] #agWerkName:hover .wAufZ,
+  body[data-gross="telefon-hoch"] #agWerkName.lesen .wAufZ{display:flex;}
+  body[data-gross="telefon-quer"] #agEcke{
+    width:min(34vw,200px);
+    bottom:calc(max(14px,env(safe-area-inset-bottom)) + var(--agTastenH,48px) + 10px);}
+  body[data-gross="telefon-quer"] #agRechts{width:min(24vw,180px);}
+  body[data-gross="telefon-quer"] #agMarke{width:min(20vw,140px);}
+  /* Beim Lesen nicht vergroessern, wo es keinen Platz dafuer gibt. */
+  body[data-gross^="telefon"] #agKopf:hover,
+  body[data-gross^="telefon"] #agKopf.lesen,
+  body[data-gross^="telefon"] #agWerkName:hover,
+  body[data-gross^="telefon"] #agWerkName.lesen{transform:scale(1.06);}
+  body[data-gross^="telefon"] #agMarke:hover,
+  body[data-gross^="telefon"] #agMarke.lesen{transform:none;}
+
+  /* Der Stand der Arbeit, unten rechts über den Knöpfen. Keine Grafik,
+     sondern Striche: Jeder Strich ist ein Stück Arbeit, und man kann sie
+     zählen. Eine Kurve würde glätten, was gerade nicht glatt ist. */
+  /* `pointer-events:auto`, nicht `none`: Die Tafel soll beim Zeigen
+     aufhellen, und dafür muss sie den Zeiger überhaupt bemerken. Die Regel
+     weiter oben hatte das schon gesetzt — diese hier stand später im
+     Stylesheet und hat es bei gleicher Gewichtung wieder genommen. Genau
+     derselbe Fehler wie bei der Kopfbreite im Hochformat. */
+  /* Der Stilblock des alten Standes unten rechts ist ENTFALLEN -- mit dem
+     Block selbst. Seine vier Groessen und der Aufgabenzaehler stehen jetzt
+     im einen Block oben rechts; unten rechts bleiben nur die Knoepfe.
+     Zwei Anzeigen, die nahezu dasselbe aussagten, sind eine geworden. */
+  #agTasten{position:fixed; right:max(14px,env(safe-area-inset-right));
+    bottom:max(14px,env(safe-area-inset-bottom)); z-index:11; display:flex; gap:1px;
+    border-radius:8px; overflow:hidden; background:rgba(150,170,200,.12);}
+  #agTasten button{appearance:none;border:0;cursor:pointer;padding:12px 16px;
+    background:rgba(9,13,20,.82); color:#B8C6DC; pointer-events:auto;
+    font:400 11px/1 ui-monospace,SFMono-Regular,Menlo,monospace;
+    letter-spacing:.16em; text-transform:uppercase;
+    -webkit-tap-highlight-color:transparent;}
+  #agTasten button:active{background:rgba(22,30,45,.95);}
+  /* Die Knöpfe gehen weg, wenn man sie nicht braucht — das Feld ist die
+     Hauptsache, nicht die Bedienung. Sie kommen bei der kleinsten Bewegung
+     zurück und bleiben, solange eine Tafel offen ist.
+     Unsichtbar heißt auch unanklickbar: Ein blinder Treffer auf einen
+     Knopf, den man nicht sieht, wäre schlimmer als ein zweites Antippen. */
+  #agTasten{transition:opacity .55s ease;}
+  #agTasten.leise{opacity:0; pointer-events:none;}
+  /* Angeschaltet heißt heller, nicht bunter. Vorher stand hier ein
+     gesättigtes Blau — der einzige Farbblock in einem Bild aus gedeckten
+     Tönen, und entsprechend fremd. Jetzt derselbe Grund, nur eine Stufe
+     aufgehellt, und die Kante trägt die Auskunft. */
+  #agTasten button.an{background:rgba(20,27,39,.92); color:#E6EEFB;
+    box-shadow:inset 0 1px 0 rgba(184,198,220,.34);}
+  /* Welches Modell an welcher Aufgabe sitzt — einblendbar, nicht ständig. */
+  /* WER GERADE ARBEITET — und zwar an seinem Platz, nicht in einer Liste.
+     Peters Frage: „Manchmal wartet man auf Aktion und es kommt nichts,
+     weil wahrscheinlich ein Agent arbeitet und alle warten auf die
+     Beendigung dieser." Genau das muss dastehen, sonst liest sich die
+     Pause als Stillstand. */
+  #agTun{position:fixed; inset:0; z-index:6; pointer-events:none;}
+  /* Das Schild eines Stops. Es sitzt ÜBER dem Namen, während die
+     Arbeitsanzeige darunter sitzt — beides zugleich kommt vor (ein Agent
+     kann an einem Auftrag arbeiten und an einem anderen hängen). */
+  #agStoppSchilder{position:fixed; inset:0; z-index:7; pointer-events:none;}
+  .agStoppS{position:absolute; transform:translate(-50%,-100%);
+    pointer-events:auto; cursor:pointer; text-align:center; white-space:nowrap;
+    font:400 9px/1.35 ui-monospace,SFMono-Regular,Menlo,monospace;
+    letter-spacing:.2em; text-transform:uppercase;
+    -webkit-tap-highlight-color:transparent;}
+  .agStoppS::after{content:''; display:block; width:1px; height:9px;
+    margin:3px auto 0; background:currentColor; opacity:.5;}
+  .agStoppS b{display:block; font-weight:400; opacity:.65;
+    letter-spacing:.14em; text-transform:none;}
+  /* Der Grund, auf Zeigen oder Antippen. */
+  #agStopp{position:fixed; z-index:10; width:290px; padding:14px 16px;
+    border-radius:10px; background:rgba(8,12,19,.97);
+    border:1px solid rgba(150,170,200,.18);
+    font:400 12px/1.5 -apple-system,system-ui,sans-serif; color:#C8D4E6;
+    opacity:0; pointer-events:none; transition:opacity .2s ease;}
+  #agStopp.auf{opacity:1;}
+  #agStopp b{font-weight:500; font-size:11px; letter-spacing:.2em;
+    text-transform:uppercase;
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;}
+  #agStopp i{display:block; font-style:normal; color:#8295B0; font-size:10px;
+    letter-spacing:.16em; text-transform:uppercase; margin-top:3px;
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;}
+  #agStopp p{margin:10px 0 9px;}
+  #agStopp small{display:block; color:#8295B0; font-size:11px; line-height:1.45;
+    padding-top:9px; border-top:1px solid rgba(150,170,200,.14);}
+  .agTut{position:absolute; transform:translate(-50%,0); white-space:nowrap;
+    font:400 9px/1.3 ui-monospace,SFMono-Regular,Menlo,monospace;
+    letter-spacing:.2em; text-transform:uppercase; text-align:center;
+    opacity:0; transition:opacity .8s ease;}
+  .agTut.auf{opacity:.92;}
+  .agTut b{font-weight:400; display:block; opacity:.62; letter-spacing:.14em;}
+  /* Je länger alle warten, desto deutlicher. Die Pause selbst ist die
+     Auskunft — nicht ein Zustand, den man wegdesignen müsste. */
+  .agTut.lang{opacity:1;}
+  .agTut.lang b{opacity:.95;}
+  #agMotoren{position:fixed; inset:0; z-index:4; pointer-events:none;}
+  .agMot{position:absolute; transform:translate(-50%,0); opacity:.5;
+    font:400 10.5px/1.25 ui-monospace,SFMono-Regular,Menlo,monospace;
+    letter-spacing:.16em; text-transform:uppercase;
+    /* Nicht breiter als der Platz zwischen zwei Agenten. Die Zahl setzt
+       die Schicht aus den wirklichen Plaetzen; umbrechen ist besser, als
+       in den Nachbarn zu laufen. */
+    width:var(--agMotBr,170px); text-align:center;
+    overflow-wrap:anywhere;}
+  .agMot.tut{opacity:.95;}
+  .agMot em{display:block; margin-top:3px; font-style:normal; font-size:9px;
+    letter-spacing:.1em; text-transform:none; opacity:.8;}
+  /* Eine Lücke sieht anders aus als eine Zahl — sonst liest man sie als
+     Null. Gepunktet unterstrichen heißt „fehlt", nicht „ist null". */
+  .agMot em.luecke{opacity:.95; color:#C9A227;
+    text-decoration:underline dotted; text-underline-offset:3px;}
+  .agMot em.leer{opacity:.42; font-style:italic;}
+  .agKosten.nurZeit{opacity:.75;}
+  /* Der Status der Kostenbasis. Er steht unten in der Mitte des Bandes,
+     gut sichtbar, und er geht nicht weg — eine fehlende Anzeige liest man
+     als Fehler, eine beschriftete als Auskunft. */
+  /* UEBER die Knopfleiste, nicht darunter. Im Bild nachgesehen: Auf
+     1194 Pixeln Breite endete der Satz bei 656 -- genau dort, wo die
+     Leiste beginnt, und lief darunter weiter. Dieselbe gemessene Hoehe
+     wie bei der Liste und beim Fortschritt. */
+  .agBasis{position:absolute; left:var(--agBasisM,50%);
+    max-width:var(--agBasisW,70vw); transform:translate(-50%,0);
+    bottom:calc(max(14px,env(safe-area-inset-bottom)) + var(--agTastenH,44px) + 10px);
+    font:400 9.5px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;
+    letter-spacing:.18em; text-transform:uppercase; text-align:center;
+    color:#6B7689;}
+  .agBasis.luecke{color:#C9A227;
+    text-decoration:underline dotted; text-underline-offset:4px;}
+  .agMot em s{display:block; text-decoration:none; opacity:.75;
+    color:#C9A227; font-size:8.5px;}
+  .agAuf i.agMotor{font-style:normal; color:#6B7689; font-size:9px;
+    letter-spacing:.16em; text-transform:uppercase;
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;}
+
+  /* Die Legende: das Gesetz zum Nachlesen. Sie liegt über dem Feld und
+     geht wieder weg — sie ist kein Teil des Bildes. */
+  #agGesetz{position:fixed; inset:0; z-index:9; display:none;
+    overflow-y:auto; -webkit-overflow-scrolling:touch;
+    background:rgba(6,9,14,.93); color:#AFC0D8;
+    padding:calc(max(18px,env(safe-area-inset-top)) + 8px)
+            max(18px,env(safe-area-inset-right)) 96px
+            max(18px,env(safe-area-inset-left));
+    font:400 13px/1.5 -apple-system,system-ui,sans-serif;}
+  #agGesetz.auf{display:block;}
+  #agGesetz .gSatz{margin:0 0 26px; color:#D6E0F0; font-size:15px; line-height:1.6;
+    max-width:40em;}
+  #agGesetz .gSatz b{font-weight:500;}
+  #agGesetz h4{margin:26px 0 8px; font-weight:400; font-size:11px;
+    letter-spacing:.2em; text-transform:uppercase;}
+  #agGesetz table{border-collapse:collapse; width:100%; max-width:46em;}
+  #agGesetz td{padding:6px 12px 6px 0; vertical-align:top;
+    border-top:1px solid rgba(150,170,200,.11);}
+  #agGesetz .gArt{color:#7F8FA8; white-space:nowrap;
+    font:400 11px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;}
+  #agGesetz .gWas{color:#C2CEE2;}
+  #agGesetz .gRes{color:#7F8FA8; font-size:12px;}
+  #agGesetz .gDau{color:#6B7689; font-size:11px; white-space:nowrap;
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;}
+  #agGesetz .gFuss{margin:30px 0 0; color:#7F8FA8; max-width:40em;}
+  .z-bleibt{color:#E8D9A8;} .z-verblasst{color:#8FA3C0;} .z-nichts{color:#6B7689;}
+  .agZeile u{text-decoration:none; font-size:10px; letter-spacing:.12em;
+    text-transform:uppercase;}
+</style>
+</head>
+<body>
+<canvas id="feld"></canvas>
+
+<div id="agRing"></div>
+<div id="agEcke"><div id="agLaeuft"></div></div>
+<div id="agRufe"></div>
+<div id="agSteck"></div>
+<div id="agKostenEbene"></div>
+<div id="agWerk"></div>
+<div id="agMarke"><b>Agentarium</b><em title="BALL — Bio-Agent &amp; LLM Logistics">See intelligence move. Powered by BALL</em><small id="agFassung"></small><label id="agRegler"><u>Helligkeit <i id="agHellWert">100 %</i></u><input id="agHell" type="range" min="60" max="190" step="2" value="100" aria-label="Helligkeit"></label></div>
+<div id="agRechts"><div id="agKopf"><i id="agProjekt"></i><s id="agPuls"></s><span id="agUhr">00:00</span><em id="agStromWort"></em></div></div>
+<div id="agWerkName"></div>
+<div id="agWas"></div>
+<div id="agMotoren"></div>
+<div id="agTun"></div>
+<div id="agStoppSchilder"></div>
+<div id="agStopp"></div>
+<div id="agLive"></div>
+<div id="agTasten"><button id="agListe" type="button" class="an">Was geschieht</button><button id="agMotor" type="button">LLM &amp; Kosten</button>
+<button id="agLeg" type="button">Gesetz</button>
+<button id="agHalt" type="button">Halt</button>
+<button id="agVorn" type="button">Von vorn</button></div>
+<div id="agGesetz"></div>
+<p id="hinweis">Du darfst mitrühren</p>
+<script>
+(function () {
+  'use strict';
+
+  /* ======================================================================
+     Resonanz — Versuch R (Schwaches verblasst, Starkes bleibt)
+
+     Zwei Schichten:
+
+       MEDIUM        Vierzehntausend Fäden, die immer antworten. Wer die
+                     Fläche berührt, schiebt sie — ausnahmslos, sofort.
+                     Sie leuchten nach ihrer Geschwindigkeit und sind in
+                     Ruhe unsichtbar.
+
+       NIEDERSCHLAG  Was liegen bleibt. Geschrieben wird nur, solange der
+                     Wirbel in Resonanz ist. Danebengegriffenes wirbelt
+                     sichtbar und verschwindet spurlos.
+
+     Die Selektivität sitzt nicht zwischen Nichts und Etwas, sondern
+     zwischen zwei Antworten: Der Wirbel sammelt sich oder er zerfällt.
+     Beides ist zu sehen, nur eines schreibt.
+
+     Das Vorbild ist die Schaukel. Man kann sie nicht in beliebigem Takt
+     anschieben — man schiebt im Takt oder man bremst sie. Der Takt ist
+     dabei nicht versteckt: Er ist die Drehzahl des Wirbels, den man selbst
+     erzeugt hat, und die sieht man. Solange wenig Energie da ist, nimmt der
+     Kern fast jeden Takt an; mit wachsender Energie wird er wählerisch.
+     ==================================================================== */
+
+  /* Die Strenge des Feldes. In den festen Fassungen steht sie ein für alle
+     Mal; im Pult wird sie bei jedem Zugriff neu gelesen, damit sich auch
+     daran drehen lässt. */
+  var STIMMUNG = {
+    get sigma()   { return 3.2; },    /* Wie eng der Takt getroffen sein muss */
+    get stoerung(){ return 0.7; },    /* Wie schnell Danebengreifen zerlegt   */
+    get zerfall() { return 0.14; },  /* Grundzerfall, auch bei allem richtig  */
+    get aufbau()  { return 1.7; },   /* Wie schnell Treffer Energie sammeln   */
+    get schwelle(){ return 0.20; }  /* Ab wann Farbe liegen bleibt           */
+  };
+
+  /* --- Deterministische Grundlage: fester Zeitschritt, gesäter Zufall.
+         Kostet jetzt nichts und wäre später kaum nachzurüsten. ---------- */
+  var SEED = (Math.random() * 4294967296) >>> 0;
+  function mulberry32(a){return function(){a|=0;a=(a+0x6D2B79F5)|0;var t=Math.imul(a^(a>>>15),1|a);t=(t+Math.imul(t^(t>>>7),61|t))^t;return ((t^(t>>>14))>>>0)/4294967296;};}
+  var rnd = mulberry32(SEED);
+  var DT = 1/120, MAX_SUB = 4;
+
+  /* Lebenszeichen: Jede Wirkung trägt ein, wann sie zuletzt wirklich gefeuert
+     hat. Das Pult macht daraus ein Leuchten — damit man sieht, welche Bewegung
+     eine Wirkung ruft, statt es erklärt zu bekommen. */
+  var PULS = window.PULS || (window.PULS = {});
+  function puls(k) { PULS[k] = performance.now(); }
+
+  var N = 14000;            /* Fäden */
+  var SCHWEIF = 0.125;      /* Länge des Schweifs in Sekunden Bewegung */
+  var KERNE_MAX = 10;   /* neun Agenten, einer frei */
+
+  var cv = document.getElementById('feld');
+  var gl = cv.getContext('webgl2', { alpha:false, antialias:false, premultipliedAlpha:false, preserveDrawingBuffer:false })
+        || cv.getContext('webgl',  { alpha:false, antialias:false, premultipliedAlpha:false, preserveDrawingBuffer:false });
+  if (!gl) { document.getElementById('hinweis').textContent = 'WebGL fehlt'; return; }
+
+  /* ---------------------------------------------------------------- Shader */
+  var vsFaden =
+    'attribute vec2 aPos;' +
+    'attribute vec4 aPar;' +
+    'attribute float aGr;' +
+    'attribute float aHl;' +            /* x = Helligkeit, y = Hitze */
+    'uniform vec2 uRes;' +
+    'uniform float uPunkt;' +
+    'varying float vA; varying float vH; varying float vAuf; varying float vTon;' +
+    'varying float vGr; varying float vHl;' +
+    'void main(){' +
+    '  vec2 n = (aPos / uRes) * 2.0 - 1.0;' +
+    '  gl_Position = vec4(n.x, -n.y, 0.0, 1.0);' +
+    '  gl_PointSize = uPunkt * (1.0 + aGr * 0.9);' +
+    '  vA = aPar.x; vH = aPar.y; vAuf = aPar.z; vTon = aPar.w; vGr = aGr; vHl = aHl;' +
+    '}';
+
+  var fsFaden =
+    'precision mediump float;' +
+    'varying float vA; varying float vH; varying float vAuf; varying float vTon;' +
+    'varying float vGr; varying float vHl;' +
+    'uniform float uStaerke; uniform float uPunktModus; uniform float uHitzeTor;' +
+    'uniform float uFarbwahl; uniform float uKurve;' +
+    'void main(){' +
+    /* Die Farbe ist die Identität. In Resonanz wählte vTon zwischen zwei
+       Familien; hier läuft es um den ganzen Kreis, damit neun Agenten
+       unterscheidbar bleiben. Die Hitze bleibt, was sie war: Sie entscheidet
+       über Sättigung und Helligkeit, nicht über den Ton. Ein kalter Faden ist
+       fast grau — die Farbe eines Agenten wird erst sichtbar, wo er wirkt. */
+    '  float h = fract(vTon);' +
+    '  vec3 rad = clamp(abs(fract(h + vec3(0.0, 0.6667, 0.3333)) * 6.0 - 3.0) - 1.0, 0.0, 1.0);' +
+    '  rad = rad * rad * (3.0 - 2.0 * rad);' +
+    '  float glut = clamp(vH * 0.80 + (vHl - 0.45) * 0.55, 0.0, 1.0);' +
+    '  float satt = 0.30 + 0.70 * clamp(glut * 1.5, 0.0, 1.0);' +
+    '  vec3 c = mix(vec3(0.62, 0.66, 0.76), rad, satt);' +
+    '  c *= 0.30 + 1.25 * glut;' +
+    '  c = mix(c, vec3(1.0, 0.97, 0.90), clamp((glut - 0.62) * 1.7, 0.0, 1.0));' +
+    /* Korn war unbedingt weiß — Faktor 1,0, an nichts gebunden. Für Funken
+       ist das richtig: Sie sind weißglühend. Aber damit kann kein Korn je
+       eine Farbe haben, und ein goldener Ball aus Korn ist unmöglich.
+       Jetzt hängt das Weiß an der HITZE statt an der Art: Weißglühend wird,
+       was weißglühend ist. Funken liegen bei Hitze 0,9 und kommen damit auf
+       94 % Weiß — praktisch unverändert. Darunter bleibt die Farbe. */
+    '  c = mix(c, vec3(1.0, 0.98, 0.95),' +
+    '          step(0.001, vGr) * smoothstep(0.55, 0.95, vH));' +
+    '  float a = vA * uStaerke * mix(1.0, vH * vAuf, uHitzeTor);' +
+    '  if (uPunktModus > 0.5) {' +
+    '    float d = length(gl_PointCoord - vec2(0.5));' +
+    '    if (vGr > 0.001) { a *= smoothstep(0.34, 0.0, d) * (0.9 + vGr * 1.6); }' +
+    '    else { a *= smoothstep(0.5, 0.0, d) * 0.55; }' +
+    '  }' +
+    '  gl_FragColor = vec4(c * a, a);' +
+    '}';
+
+  var vsQuad =
+    'attribute vec2 aXY; varying vec2 vUV;' +
+    'void main(){ vUV = aXY * 0.5 + 0.5; gl_Position = vec4(aXY, 0.0, 1.0); }';
+  var fsQuad =
+    'precision mediump float; varying vec2 vUV; uniform sampler2D uTex;' +
+    'void main(){ gl_FragColor = texture2D(uTex, vUV); }';
+
+  /* Was liegen bleibt, soll nicht alles liegen bleiben. Schwaches verblasst,
+     Starkes steht. Die Grenze läuft über die Helligkeit: Ein Schmier von 0,04
+     ist in Sekunden fort, ein Wirbelarm von 0,30 bleibt. Damit räumt sich das
+     Bild selbst auf, ohne dass das Werk verschwindet. */
+  var fsBlass =
+    'precision mediump float; varying vec2 vUV; uniform sampler2D uTex;' +
+    'uniform float uSchwach, uStark, uAbzug, uMindest;' +
+    'void main(){' +
+    '  vec4 c = texture2D(uTex, vUV);' +
+    '  float L = max(max(c.r, c.g), c.b);' +
+    '  float g = smoothstep(0.04, 0.30, L);' +      /* 0 = schwach, 1 = stark */
+    '  float f = mix(uSchwach, uStark, g);' +
+    /* Multiplizieren allein kommt bei 8 Bit nie an: Ein Pixel bei 0,4 mal
+       0,9962 rundet auf sich selbst zurück. Beim Schwachen räumt ein kleiner
+       Abzug auf — und wo auch das Starke vergehen SOLL, muss er überall
+       greifen, sonst friert das Bild auf halbem Weg ein und rührt sich nie
+       wieder. Steht das Starke auf „für immer", ist uMindest null. */
+    '  vec3 o = c.rgb * f - ((1.0 - g) * uAbzug + uMindest);' +
+    '  gl_FragColor = vec4(max(o, vec3(0.0)), 1.0);' +
+    '}';
+
+  function shader(typ, quelle) {
+    var s = gl.createShader(typ); gl.shaderSource(s, quelle); gl.compileShader(s);
+    if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s));
+    return s;
+  }
+  function programm(vs, fs) {
+    var p = gl.createProgram();
+    gl.attachShader(p, shader(gl.VERTEX_SHADER, vs));
+    gl.attachShader(p, shader(gl.FRAGMENT_SHADER, fs));
+    gl.linkProgram(p);
+    if (!gl.getProgramParameter(p, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(p));
+    return p;
+  }
+
+  var pFaden = programm(vsFaden, fsFaden), pQuad = programm(vsQuad, fsQuad);
+  var lPos = gl.getAttribLocation(pFaden, 'aPos'), lPar = gl.getAttribLocation(pFaden, 'aPar'),
+    lGr = gl.getAttribLocation(pFaden, 'aGr'),
+    lHl = gl.getAttribLocation(pFaden, 'aHl');
+  var uRes = gl.getUniformLocation(pFaden, 'uRes'),
+      uPunkt = gl.getUniformLocation(pFaden, 'uPunkt'),
+      uStaerke = gl.getUniformLocation(pFaden, 'uStaerke'),
+      uPunktModus = gl.getUniformLocation(pFaden, 'uPunktModus'),
+      uHitzeTor = gl.getUniformLocation(pFaden, 'uHitzeTor'),
+      uFarbwahl = gl.getUniformLocation(pFaden, 'uFarbwahl'),
+      uKurve = gl.getUniformLocation(pFaden, 'uKurve');
+  var lXY = gl.getAttribLocation(pQuad, 'aXY'), uTex = gl.getUniformLocation(pQuad, 'uTex');
+  var pBlass = programm(vsQuad, fsBlass);
+  var lXY2 = gl.getAttribLocation(pBlass, 'aXY'), uTex2 = gl.getUniformLocation(pBlass, 'uTex'),
+      uSchwach = gl.getUniformLocation(pBlass, 'uSchwach'),
+      uStark = gl.getUniformLocation(pBlass, 'uStark'),
+      uAbzug = gl.getUniformLocation(pBlass, 'uAbzug'),
+      uMindest = gl.getUniformLocation(pBlass, 'uMindest');
+
+  var vboFaden = gl.createBuffer();
+  var vboQuad = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, vboQuad);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 3,-1, -1,3]), gl.STATIC_DRAW);
+
+  /* ------------------------------------------------------ Niederschlag-FBO */
+  var fbo = null, tex = null, fbo2 = null, tex2 = null, BW = 0, BH = 0;
+  function zielBauen(w, h) {
+    var t = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, t);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, w, h, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    var f = gl.createFramebuffer();
+    gl.bindFramebuffer(gl.FRAMEBUFFER, f);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, t, 0);
+    gl.clearColor(0, 0, 0, 1); gl.clear(gl.COLOR_BUFFER_BIT);
+    return { f: f, t: t };
+  }
+  function fboBauen(w, h, erhalten) {
+    var altTex = tex, altFbo = fbo, altTex2 = tex2, altFbo2 = fbo2;
+    var a = zielBauen(w, h); fbo = a.f; tex = a.t;
+    if (1) { var b2 = zielBauen(w, h); fbo2 = b2.f; tex2 = b2.t; }
+    gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
+
+    /* Beim Drehen des iPads wird der Puffer neu angelegt. Das Bild soll das
+       überleben — es ist das Werk, nicht ein Zwischenstand. */
+    if (erhalten && altTex) {
+      gl.viewport(0, 0, w, h);
+      gl.disable(gl.BLEND);
+      gl.useProgram(pQuad);
+      gl.bindBuffer(gl.ARRAY_BUFFER, vboQuad);
+      gl.enableVertexAttribArray(lXY); gl.vertexAttribPointer(lXY, 2, gl.FLOAT, false, 0, 0);
+      gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, altTex);
+      gl.uniform1i(uTex, 0);
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+    }
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    if (altTex) { gl.deleteTexture(altTex); gl.deleteFramebuffer(altFbo); }
+    if (altTex2) { gl.deleteTexture(altTex2); gl.deleteFramebuffer(altFbo2); }
+    BW = w; BH = h;
+  }
+
+  /* Halbwertszeiten in Sekunden: was schwach ist, was stark ist.
+     1e9 heißt: bleibt für immer. */
+  var blassAkku = 0, abklingen = 0;
+  /* Für die Schicht darüber: Räum die Fläche über so viele Sekunden.
+     Der einzige Weg, ein Stück zu beenden und wieder von vorn beginnen zu
+     lassen — ohne diesen Hahn bleibt der Niederschlag für immer, und das
+     ist im laufenden Betrieb richtig, am Ende aber falsch. */
+  window.__abklingen = function (sek) { abklingen = sek; };
+  function verblassen(dt) {
+    blassAkku += dt;
+    if (blassAkku < 0.25) return;            /* höchstens viermal je Sekunde */
+    var d = blassAkku; blassAkku = 0;
+    puls('verblassen');
+    /* Vergeht auch, was das Bild über sich selbst weiß? Ohne diese Zeile
+       erinnert sich das Feld immer — und „alles vergeht" wäre in Wahrheit
+       „das Sichtbare vergeht, das Feld erinnert sich". Die beiden Versuche
+       wären derselbe. */
+    if (!1) {
+      var vg = Math.pow(0.5, d / (25));
+      for (var gq = 0; gq < GX * GY; gq++) {
+        dich[gq] *= vg; if (dich[gq] < 0.004) dich[gq] = 0;
+        dichG[gq] *= vg; if (dichG[gq] < 0.004) dichG[gq] = 0;
+      }
+    }
+    gl.bindFramebuffer(gl.FRAMEBUFFER, fbo2);
+    gl.viewport(0, 0, BW, BH);
+    gl.disable(gl.BLEND);
+    gl.useProgram(pBlass);
+    /* Der Ausklang: Für eine begrenzte Zeit vergeht auch das Starke, und
+       der Abzug greift überall — sonst friert das Bild auf halbem Weg ein,
+       denn Multiplizieren erreicht bei 8 Bit die Null nie. */
+    var starkHalb = 1e9, mindest = 0;
+    if (abklingen > 0) {
+      abklingen -= d;
+      starkHalb = 2.4; mindest = Math.min(0.02, d * 2.5 / 255);
+    }
+    gl.uniform1f(uSchwach, Math.pow(0.5, d / (25)));
+    gl.uniform1f(uStark, Math.pow(0.5, d / starkHalb));
+    gl.uniform1f(uAbzug, Math.min(0.02, d * 1.5 / 255));
+    /* 590 statt einer Million: Im Pult ist der Anschlag „für immer" 600 s.
+       Mit der alten Schwelle hätte dort auch das Starke vergehen lassen,
+       was für immer bleiben soll. */
+    gl.uniform1f(uMindest, mindest);
+    gl.bindBuffer(gl.ARRAY_BUFFER, vboQuad);
+    gl.enableVertexAttribArray(lXY2); gl.vertexAttribPointer(lXY2, 2, gl.FLOAT, false, 0, 0);
+    gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, tex);
+    gl.uniform1i(uTex2, 0);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    var tf = fbo; fbo = fbo2; fbo2 = tf;
+    var tt = tex; tex = tex2; tex2 = tt;
+  }
+
+  /* ------------------------------------------------------------- Das Medium */
+  var px = new Float32Array(N), py = new Float32Array(N),
+      qx = new Float32Array(N), qy = new Float32Array(N),
+      vx = new Float32Array(N), vy = new Float32Array(N),
+      hz = new Float32Array(N), lf = new Float32Array(N), lm = new Float32Array(N),
+      tn = new Float32Array(N), fest = new Uint8Array(N), korn = new Float32Array(N),
+      /* Woher ein Faden kommt: 0 Medium · 1 Strang · 2 Knoten · 3 Korn · 4 Funke.
+         Der Niederschlag ist ein Bild, kein Protokoll — wer weiß, wer etwas gemalt
+         hat, muss es beim Auftragen wissen, nachher nicht mehr. */
+      art = new Uint8Array(N),
+      /* Wieviel DIESER Faden hinterlässt. Die Art allein reicht nicht:
+         Eine Frage und ein Beschluss sind beide Stränge. */
+      abg = new Float32Array(N),
+      ABGABE = window.ABGABE || (window.ABGABE = [1, 1, 1, 1, 1]),
+      /* wieviel jede Art hinterlässt, 0 = nichts — draußen sichtbar,
+         damit das Pult daran greifen kann */
+      hl = new Float32Array(N);
+  var daten = new Float32Array(N * 16);  /* je (x,y,a,h,auf,ton,größe,tempo) */
+
+  var W = 0, H = 0, dpr = 1;
+
+  function saeen() {
+    for (var i = 0; i < N; i++) {
+      /* Das Medium schreibt NICHT. In Resonanz tut es das, denn dort ist es
+         der Stoff, den die Hand auftraegt. Hier ist es das Feld, in dem die
+         Nachrichten fliegen — und wenn es selbst schreibt, schreibt jeder
+         Wirbel, der stark genug ist, das Tor aufzustossen. Dann hinterlaesst
+         auch eine Nachricht eine Spur, die laut Gesetz keine hinterlassen
+         darf. Gemessen: 41 von 255 bei einem Beitrag mit Abgabe null. */
+      abg[i] = 0;
+      px[i] = qx[i] = rnd() * W;
+      py[i] = qy[i] = rnd() * H;
+      vx[i] = vy[i] = 0; hz[i] = 0; tn[i] = 0; fest[i] = 0; hl[i] = 0.45;
+      lm[i] = 2.6 + rnd() * 3.6; lf[i] = rnd() * lm[i];
+      korn[i] = 0; art[i] = 0; abg[i] = 0;
+    }
+  }
+
+  /* Ein leeres Blatt. Nicht nur der Niederschlag muss weg — auch was das Bild
+     über sich selbst weiß (das Dichteraster), was in der Luft liegt (das
+     Strömungsfeld) und die Wirbel selbst. Sonst lenkt ein unsichtbarer Rest
+     den nächsten Zug, und man hält das für die Einstellung, die man gerade
+     verstellt hat. */
+  window.__flaecheLeeren = function () {
+    var alt = gl.getParameter(gl.FRAMEBUFFER_BINDING);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
+    gl.viewport(0, 0, BW, BH);
+    gl.clearColor(0, 0, 0, 1); gl.clear(gl.COLOR_BUFFER_BIT);
+    if (fbo2) { gl.bindFramebuffer(gl.FRAMEBUFFER, fbo2);
+                gl.clear(gl.COLOR_BUFFER_BIT); }
+    gl.bindFramebuffer(gl.FRAMEBUFFER, alt);
+    for (var k = 0; k < GX * GY; k++) { dich[k] = 0; dichG[k] = 0; sfx[k] = 0; sfy[k] = 0; }
+    for (var c = 0; c < kerne.length; c++) {
+      var K = kerne[c];
+      K.s = 0; K.fest = 0; K.om = 0; K.dvx = 0; K.dvy = 0; K.r = 170;
+    }
+    aktiverKern = null; wach = 0; blassAkku = 0;
+    saeen();
+  };
+
+  /* ---------------------------------------------------- Das Bild als Feld --
+     Was liegt, ist bisher totes Pigment. Hier bekommt es eine Wirkung: ein
+     grobes Dichteraster, das beim Auftragen mitgeschrieben wird. Daraus
+     folgen zwei Regeln — die Fäden fließen an vorhandenen Strähnen ENTLANG
+     statt quer darüber, und wo schon viel liegt, nimmt die Fläche weniger an.
+     Damit reagiert das System auf seinen eigenen bisherigen Zustand und nicht
+     nur auf die Hand. Das Raster ist grob und in Zellen gedacht; eine
+     Größenänderung des Fensters lässt es deshalb unangetastet. */
+  var GX = 80, GY = 60;
+  var dich = new Float32Array(GX * GY);
+  var dichG = new Float32Array(GX * GY);   /* geglättet, dafür stabile Gefälle */
+
+  /* --------------------------------------------------------- Strömungsfeld
+     Der gerade Zug hatte bisher nur einen Schub im Umkreis von 150 px um den
+     Finger: höchstens ein Viertel des Handtempos, und nur solange der Finger
+     dort ist. Wer nicht kreist, bewegte damit fast nichts.
+     Das Feld ist die Verallgemeinerung: Die Hand streicht ihre Bewegung in ein
+     Raster, das Raster wirkt auf das Medium, und es klingt über etwa anderthalb
+     Sekunden ab. Damit wirkt ein Zug nach — und weil das Feld in der Mitte
+     schnell und daneben still ist, rollt sich der Rand von selbst ein. */
+  var sfx = new Float32Array(GX * GY), sfy = new Float32Array(GX * GY);
+  /* Pinselbreite der Hand im Feld und Abklingzeit — als Ausdruck, damit das
+     Pult sie im Lauf verstellen kann; in den festen Fassungen sind es
+     Konstanten, die der Übersetzer wegrechnet. */
+
+  function feldStreichen(x, y, vx0, vy0, dt) {
+    puls('stroemung');
+    var FELD_R = 180;
+    var ru = FELD_R / W * GX, rv = FELD_R / H * GY;
+    var u0 = Math.max(0, Math.floor(x / W * GX - ru)), u1 = Math.min(GX - 1, Math.ceil(x / W * GX + ru));
+    var v0 = Math.max(0, Math.floor(y / H * GY - rv)), v1 = Math.min(GY - 1, Math.ceil(y / H * GY + rv));
+    var rate = 1 - Math.exp(-9 * dt);
+    for (var j = v0; j <= v1; j++) {
+      for (var i = u0; i <= u1; i++) {
+        var cx = (i + 0.5) / GX * W, cy = (j + 0.5) / GY * H;
+        var ex = cx - x, ey = cy - y, d2 = ex*ex + ey*ey;
+        if (d2 > FELD_R * FELD_R) continue;
+        var g = 1 - Math.sqrt(d2) / FELD_R; g = g * g;
+        var k = j * GX + i, w = rate * g;
+        sfx[k] += (vx0 - sfx[k]) * w;
+        sfy[k] += (vy0 - sfy[k]) * w;
+      }
+    }
+  }
+
+  function feldAbklingen(dt) {
+    var f = Math.exp(-dt / (1.5));
+    for (var k = 0; k < GX * GY; k++) { sfx[k] *= f; sfy[k] *= f; }
+  }
+  var glaettZaehler = 0;
+
+  function dichteAbtasten(x, y) {
+    var u = x / W * GX - 0.5, v = y / H * GY - 0.5;
+    var i = Math.floor(u), j = Math.floor(v);
+    if (i < 1 || j < 1 || i >= GX - 2 || j >= GY - 2) return null;
+    var fu = u - i, fv = v - j, k = j * GX + i;
+    var d00 = dichG[k], d10 = dichG[k+1], d01 = dichG[k+GX], d11 = dichG[k+GX+1];
+    var d = (d00*(1-fu) + d10*fu)*(1-fv) + (d01*(1-fu) + d11*fu)*fv;
+    if (d < 0.004) return null;
+    return { d: d,
+             gx: (dichG[k+1] - dichG[k-1]) * 0.5,
+             gy: (dichG[k+GX] - dichG[k-GX]) * 0.5 };
+  }
+
+  function rasterGlaetten() {
+    for (var j = 1; j < GY - 1; j++) {
+      for (var i = 1; i < GX - 1; i++) {
+        var k = j * GX + i;
+        dichG[k] = (dich[k] * 4 + dich[k-1] + dich[k+1] + dich[k-GX] + dich[k+GX]) / 8;
+      }
+    }
+  }
+
+  /* -------------------------------------------------------------- Die Kerne */
+  function Kern() { this.x=0; this.y=0; this.om=0; this.s=0; this.r=170; this.fest=0; this.ton=0; this.dvx=0; this.dvy=0; this.hell=0.45; }
+  var kerne = []; for (var k = 0; k < KERNE_MAX; k++) kerne.push(new Kern());
+
+  /* Was die Schicht darüber braucht. Sie bekommt keinen eigenen Zugang zum
+     Medium — nur die Maße der Fläche und denselben Wirbel-Hahn, den der
+     Finger benutzt. */
+  window.__feld = {
+    get W() { return W; }, get H() { return H; },
+    kern: function (x, y) { return kernWaehlen(x, y); },
+
+    /* Ein Strang: dieselben verankerten Fäden, die in Resonanz der gerade Zug
+       legt. Nur kommt die Farbe hier nicht vom Wirbel unter dem Finger,
+       sondern vom Absender der Nachricht. */
+    strang: function (x, y, gx, gy, hitze, dauer, ton, abgabe) {
+      var i = spawnZeiger++; if (spawnZeiger >= N) spawnZeiger = 0;
+      px[i] = x; py[i] = y; vx[i] = gx; vy[i] = gy;
+      hz[i] = hitze; tn[i] = ton; hl[i] = Math.min(1, 0.3 + hitze * 0.7);
+      fest[i] = 1; korn[i] = 0; lm[i] = dauer; lf[i] = dauer; art[i] = 1;
+      abg[i] = abgabe;
+    },
+
+    /* Ein Knoten: der Lichtpunkt, der in Resonanz beim Verweilen entsteht.
+       Hier ist er das Ankommen — die Stelle, an der eine Nachricht landet. */
+    knoten: function (x, y, hitze, ton, abgabe, wieviele, dauer) {
+      var n2 = wieviele || 18, dd = dauer || 2.0;
+      for (var m = 0; m < n2; m++) {
+        var w = rnd() * 6.2832, rr = 2 + 14 * Math.sqrt(rnd());
+        var i = spawnZeiger++; if (spawnZeiger >= N) spawnZeiger = 0;
+        px[i] = x + Math.cos(w) * rr; py[i] = y + Math.sin(w) * rr;
+        vx[i] = Math.cos(w) * 9; vy[i] = Math.sin(w) * 9;
+        hz[i] = hitze; tn[i] = ton; hl[i] = 0.85;
+        fest[i] = 1; korn[i] = 0;
+        /* Wie lange der Knoten leuchtet, ist nicht Beiwerk: Ein Knoten
+           trägt jedes Bild Farbe auf, also entscheidet seine Dauer, ob der
+           Fleck in die starke Hälfte des Verblassens gerät und damit für
+           immer bleibt. Nachgemessen: Ein Knoten über 2 Sekunden sättigt
+           auf 225 von 255 — weit über der Schwelle 76, ab der das
+           Verblassen nichts mehr wegnimmt. Mit der Abgabe allein war
+           deshalb kein Unterschied zwischen „bleibt" und „verblasst"
+           herzustellen; der Unterschied sah gleich aus. */
+        lm[i] = dd * (0.75 + 0.5 * rnd()); lf[i] = lm[i]; art[i] = 2;
+        abg[i] = abgabe;
+      }
+    },
+
+    /* Eine kleine Explosion: Aus einer Nachricht wird mehreres. Kein Fehler —
+       ein Auseinandergehen. Funken fliegen, und für jede Folge geht ein
+       kurzer Pfeil in eine eigene Richtung. */
+    austreiben: function (x, y, ton, wieviele, abgabe) {
+      for (var k = 0; k < wieviele; k++) {
+        var w = (k / wieviele) * 6.2832 + rnd() * 0.5;
+        for (var m = 0; m < 16; m++) {
+          var f = m / 16;
+          var i = spawnZeiger++; if (spawnZeiger >= N) spawnZeiger = 0;
+          var L = 10 + f * 54;
+          px[i] = x + Math.cos(w) * L + (rnd() - 0.5) * 5;
+          py[i] = y + Math.sin(w) * L + (rnd() - 0.5) * 5;
+          vx[i] = Math.cos(w) * (210 - f * 120); vy[i] = Math.sin(w) * (210 - f * 120);
+          hz[i] = 0.85 * (1 - f * 0.72); tn[i] = ton; hl[i] = 0.9;
+          fest[i] = 1; korn[i] = 0;
+          lm[i] = 0.8 + 0.7 * rnd(); lf[i] = lm[i]; art[i] = 1;
+          abg[i] = abgabe;
+        }
+      }
+    },
+
+    /* Der Sonnenball: ein Körper, keine Spur. Alles andere hier legt Fäden,
+       die man als Bahn liest; eine Aufgabe soll man als DING sehen, das
+       geworfen wird und Masse hat.
+
+       Dafür nimmt er Korn statt Faden. Das ist keine Verzierung: Resonanz
+       zeichnet Korn mit `korn > 1.2` als Punkt ohne Schweif und mit
+       Deckkraft 0,86 statt 0,24 — also rund und dicht, wo ein Faden
+       gestrichelt und durchscheinend ist. Dieselbe Maschine, der andere
+       Modus.
+
+       Golden wird er, ohne dass eine Farbe hinzugefügt werden muss: Ton
+       0,115 ist im Farbkreis Amber, und bei großer Hitze zieht der Shader
+       von sich aus ins warme Weiß (`mix(c, vec3(1.0,0.97,0.90), …)`). Gold
+       ist hier also keine neue Farbe, sondern Amber bei Weißglut — und es
+       ist fast genau Peters Ton (0,11), was richtig ist: Die Aufgabe kommt
+       von ihm. */
+    sonne: function (x, y, gx, gy, r, hitze, ton, abgabe, wieviele) {
+      for (var m = 0; m < wieviele; m++) {
+        var w = rnd() * 6.2832;
+        /* Wurzel, damit die Punkte gleichmäßig über die Fläche liegen und
+           sich nicht in der Mitte ballen — sonst sieht der Ball aus wie ein
+           Stern mit Hof statt wie eine Kugel. */
+        var rr = r * Math.sqrt(rnd());
+        var i = spawnZeiger++; if (spawnZeiger >= N) spawnZeiger = 0;
+        px[i] = x + Math.cos(w) * rr; py[i] = y + Math.sin(w) * rr;
+        /* Der Ball dreht sich, während er fliegt: Die Punkte am Rand laufen
+           quer zur Flugrichtung mit. */
+        vx[i] = gx * 0.55 - Math.sin(w) * rr * 3.4;
+        vy[i] = gy * 0.55 + Math.cos(w) * rr * 3.4;
+        /* Innen heiß, außen kühler — das gibt den Rand, ohne ihn zu malen. */
+        var k = 1 - (rr / r) * 0.45;
+        hz[i] = hitze * k; tn[i] = ton;
+        /* Die Helligkeit niedrig halten, obwohl der Ball hell ist. Grund,
+           nachgerechnet im Shader: Die Glut ist `hz * 0.80 + (hl - 0.45) *
+           0.55`, und ab Glut 0,62 mischt der Shader ins warme Weiß. Mit
+           hl = 0,95 saß der Ball bei Glut 0,85 und kam als WEISSE Kugel
+           heraus — gemessen rgb(213, 209, 202). Gold liegt bei Glut um
+           0,71, also muss die Helligkeit herunter, damit die Hitze oben
+           bleiben darf. */
+        hl[i] = 0.70;
+        fest[i] = 1;
+        /* 1,0 und nicht 1,6, und das ist der ganze Unterschied zwischen
+           einem Ball und einem Igel: Resonanz lässt in der Einsammelstelle
+           jeden sterbenden Faden mit `korn > 1.2` und Hitze über 0,30 mit
+           34 % Wahrscheinlichkeit Funken sprühen. Mit 1,6 sprühte also JEDER
+           DRITTE Ballpunkt — bei 42 Punkten je Bild ein Dauerregen, der sich
+           am Abwurfort, wo der Ball noch fast steht, zum Strahlenkranz
+           sammelte. Unter 1,2 ist der Punkt genauso rund und dicht, aber er
+           zerfällt still. Funken soll der Ball nur beim Aufschlag. */
+        korn[i] = 1.0;
+        /* Lang genug, dass sich die Punkte bei JEDER Bildrate überlappen.
+           Bei 0,22 s und neun Punkten je Bild stand auf dem Prüfrechner
+           (12 Bilder je Sekunde) eine Handvoll verstreuter Tupfen statt
+           einer Kugel. */
+        /* Kurz: Was vom vorigen Bild noch liegt, ist der Schweif — und ein
+           Schweif soll kurz sein. Mit 0,30 + 0,18 stand über die halbe
+           Flugstrecke ein Band. */
+        lm[i] = 0.20 + 0.10 * rnd(); lf[i] = lm[i]; art[i] = 3;
+        abg[i] = abgabe;
+      }
+    },
+
+    /* Die Strömung: Die Nachricht streicht ihre Bewegung in die Fläche, und
+       das Medium läuft ihr nach — auch noch, wenn sie längst angekommen ist. */
+    stroemung: function (x, y, gx, gy, dt) { feldStreichen(x, y, gx, gy, dt); }
+  };
+
+  function kernWaehlen(x, y) {
+    var beste = null, dist = 1e9;
+    for (var i = 0; i < kerne.length; i++) {
+      var K = kerne[i];
+      if (K.s < 0.02) continue;
+      var d = Math.hypot(K.x - x, K.y - y);
+      if (d < dist) { dist = d; beste = K; }
+    }
+    if (beste && dist < 120) return beste;
+    for (var j = 0; j < kerne.length; j++) if (kerne[j].s < 0.02) {
+      var N2 = kerne[j];
+      N2.x = x; N2.y = y; N2.om = 0; N2.s = 0.001; N2.fest = 0; N2.ton = 0.5; N2.dvx = 0; N2.dvy = 0; N2.hell = 0.45;
+      return N2;
+    }
+    var schwach = kerne[0];
+    for (var m = 1; m < kerne.length; m++) if (kerne[m].s < schwach.s) schwach = kerne[m];
+    schwach.x = x; schwach.y = y; schwach.om = 0; schwach.s = 0.001; schwach.fest = 0; schwach.ton = 0.5; schwach.dvx = 0; schwach.dvy = 0; schwach.hell = 0.45;
+    return schwach;
+  }
+
+  /* -------------------------------------------------------------- Eingabe */
+  var unten = false, hx = 0, hy = 0, hvx = 0, hvy = 0, letzteZeit = 0, druck = 1;
+  var mx = 0, my = 0, m1x = 0, m1y = 0;   /* Mitte der Bewegung, geglättet */
+  var drehrate = 0, letzterWinkel = NaN;  /* wie schnell die Richtung kringelt */
+  var schleife = 120;                     /* wie groß die Schleifen sind (px) */
+  var bogen = 0, bogenVZ = 1;             /* aufsummierter Drehwinkel seit dem
+                                             letzten Richtungswechsel */
+  /* Kurzes Gedächtnis der Handbahn: Woher kam sie in der letzten halben
+     Sekunde? Das ist der Zug, und er braucht keine Glättung. */
+  var BAHN = 176, bahnX = new Float32Array(BAHN), bahnY = new Float32Array(BAHN),
+      bahnT = new Float64Array(BAHN), bahnI = 0, bahnN = 0, zugBeginn = 0;
+  var aktiverKern = null;
+  var zeigerId = null;              /* der führende Finger */
+  var offen = 0;                    /* wie viele Finger liegen */
+
+  function anfassen(e) {
+    offen++;
+    if (offen === 2) zweiZeit2 = performance.now();
+    if (zeigerId !== null) { e.preventDefault(); return; }   /* stört nicht */
+    zeigerId = e.pointerId;
+    try { cv.setPointerCapture(e.pointerId); } catch (x) {}
+    unten = true; hx = e.clientX; hy = e.clientY; hvx = hvy = 0;
+    mx = m1x = hx; my = m1y = hy;
+    drehrate = 0; letzterWinkel = NaN; schleife = 120;
+    bogen = 0; bahnI = 0; bahnN = 0; zugBeginn = performance.now();
+    letzteZeit = performance.now();
+    aktiverKern = kernWaehlen(hx, hy);
+    verstecken();
+    e.preventDefault();
+  }
+  function bewegen(e) {
+    if (e.pointerId !== zeigerId) { e.preventDefault(); return; }
+    /* Vorsicht: Bei einem künstlich erzeugten Ereignis gibt
+       getCoalescedEvents() eine LEERE Liste zurück — und ein leeres Feld ist
+       wahr. Ohne diese Prüfung liefe die Schleife über nichts. */
+    var pkte = (e.getCoalescedEvents && e.getCoalescedEvents()) || [];
+    if (!pkte.length) pkte = [e];
+    for (var i = 0; i < pkte.length; i++) {
+      var t = performance.now();
+      var dt = (t - letzteZeit) / 1000;
+      if (dt <= 0.0008) continue;
+      if (dt > 0.05) dt = 0.05;
+      letzteZeit = t;
+      var nx = pkte[i].clientX, ny = pkte[i].clientY;
+      var ivx = (nx - hx) / dt, ivy = (ny - hy) / dt;
+      hvx += (ivx - hvx) * 0.4; hvy += (ivy - hvy) * 0.4;
+      hx = nx; hy = ny;
+      if (1) feldStreichen(nx, ny, hvx, hvy, dt);
+      bahnX[bahnI] = nx; bahnY[bahnI] = ny; bahnT[bahnI] = t;
+      bahnI = (bahnI + 1) % BAHN; if (bahnN < BAHN) bahnN++;
+
+      /* Wie schnell dreht sich die Bewegungsrichtung? Für eine Kreisbahn ist
+         das genau die Kreisfrequenz — nur braucht es dafür keinen Mittelpunkt.
+         Damit kann der Wirbel unter dem Finger sitzen statt daneben. */
+      var tempo = Math.sqrt(ivx*ivx + ivy*ivy);
+      if (tempo > 60) {
+        var w = Math.atan2(ivy, ivx);
+        if (!isNaN(letzterWinkel)) {
+          var dth = w - letzterWinkel;
+          while (dth >  Math.PI) dth -= 2*Math.PI;
+          while (dth < -Math.PI) dth += 2*Math.PI;
+          var roh = dth / dt;
+          if (roh >  25) roh =  25; if (roh < -25) roh = -25;
+          drehrate += (roh - drehrate) * Math.min(1, dt / 0.12);
+          /* Krümmungsradius der Bahn: kleine Kringel malen fein,
+             große Kreise malen breit. Pinselbreite aus der Geste. */
+          var rr = tempo / Math.max(Math.abs(roh), 0.7);
+          if (rr > 420) rr = 420; if (rr < 12) rr = 12;
+          schleife += (rr - schleife) * Math.min(1, dt / 0.45);
+
+          /* Wieviel Kreis ist es schon? Ein Vorzeichenwechsel setzt zurück,
+             eine gerade Strecke lässt den Bogen verfallen. Unter einer vollen
+             Umdrehung ist es ein begonnener Kreis, darüber ein geschlossener. */
+          var vz = drehrate >= 0 ? 1 : -1;
+          if (vz !== bogenVZ) { bogen = 0; bogenVZ = vz; }
+          bogen += Math.abs(dth) - bogen * 0.55 * dt;
+          if (bogen > 30) bogen = 30; if (bogen < 0) bogen = 0;
+        }
+        letzterWinkel = w;
+      }
+    }
+    /* Druck ist Zugabe, nie Voraussetzung — ein Finger liefert auf dem iPad
+       keine Kraft, nur der Pencil. */
+    druck = (e.pointerType === 'pen' && e.pressure > 0) ? (0.7 + 0.6 * e.pressure) : 1;
+    e.preventDefault();
+  }
+  function vollbild() {
+    try {
+      var d = document, el = d.documentElement;
+      if (d.fullscreenElement || d.webkitFullscreenElement) {
+        (d.exitFullscreen || d.webkitExitFullscreen || function(){}).call(d);
+      } else {
+        (el.requestFullscreen || el.webkitRequestFullscreen || function(){}).call(el);
+      }
+    } catch (x) { /* im Rahmen oft nicht erlaubt - dann eben nicht */ }
+  }
+
+  var zweiZeit2 = 0;
+  function loslassen(e) {
+    var vorher = offen;
+    offen = Math.max(0, offen - 1);
+    if (vorher === 2 && performance.now() - zweiZeit2 < 600) vollbild();
+    if (e.pointerId !== zeigerId) { e.preventDefault(); return; }
+    if (1 && aktiverKern) {
+      /* Ein begonnener Kreis nimmt Fahrt mit: Je weniger vollendet die Drehung
+         ist, desto mehr Zug erbt der Wirbel — und trägt ihn weiter, wenn die
+         Hand ihn loslässt. Ein geschlossener Kreis bleibt stehen. Das setzt
+         fort, was der Benutzer begonnen hat; von selbst beginnt nichts. */
+      var q = Math.min(1, Math.max(0, (bogen / 6.2832 - 0.72) / 0.28));
+      var offen = 1 - q * q * (3 - 2 * q);
+      /* Das Fenster muss mindestens eine ganze Schleife umfassen, sonst misst
+         man eine Sehne statt der Wanderung: Bei 0,9 Umdrehungen kamen so 25 px
+         heraus, wo 150 richtig waren. Es reicht vom Beginn des Zuges bis
+         jetzt, höchstens 1,1 Sekunden. */
+      var jetzt = performance.now(), bx = hx, by = hy, bt = jetzt;
+      var fenster = Math.min(1100, jetzt - zugBeginn);
+      for (var b2 = 0; b2 < bahnN; b2++) {
+        var k2 = (bahnI - 1 - b2 + 2 * BAHN) % BAHN;
+        bx = bahnX[k2]; by = bahnY[k2]; bt = bahnT[k2];
+        if (jetzt - bt >= fenster) break;
+      }
+      var sp = Math.max(0.12, (jetzt - bt) / 1000);
+      var dX = ((hx - bx) / sp) * 2.4 * offen, dY = ((hy - by) / sp) * 2.4 * offen;
+      var vd = Math.sqrt(dX*dX + dY*dY);
+      if (vd > 620) { dX *= 620/vd; dY *= 620/vd; }
+      aktiverKern.dvx = dX; aktiverKern.dvy = dY;
+      if (vd > 30) puls('wurf');
+    }
+    try { cv.releasePointerCapture(e.pointerId); } catch (x) {}
+    zeigerId = null; unten = false; hvx = hvy = 0; aktiverKern = null;
+    e.preventDefault();
+  }
+  cv.addEventListener('pointerdown', anfassen, {passive:false});
+  cv.addEventListener('pointermove', bewegen, {passive:false});
+  cv.addEventListener('pointerup', loslassen, {passive:false});
+  cv.addEventListener('pointercancel', loslassen, {passive:false});
+  document.addEventListener('gesturestart', function(e){ e.preventDefault(); });
+  /* Ohne das rutscht auf dem iPad die Seite unter dem Finger weg, statt dass
+     der Finger das Feld anregt — besonders innerhalb eines eingebetteten
+     Rahmens. Der Zug muss hier verbraucht werden. */
+  document.addEventListener('touchmove', function (e) {
+    /* Nur die Fläche darf nicht wegrutschen. Eine Liste, die über dem Bild
+       liegt, muss sich weiter mit dem Finger schieben lassen — sonst endet
+       sie am unteren Bildrand, und man hält das für alles, was es gibt.
+       Am Mausrad fällt das nie auf; mit dem Finger sofort. */
+    var z = e.target;
+    while (z && z !== document.body) {
+      if (z.hasAttribute && z.hasAttribute('data-rollbar')) return;
+      z = z.parentNode;
+    }
+    e.preventDefault();
+  }, { passive:false });
+
+  var hinweis = document.getElementById('hinweis'), versteckt = false;
+  function verstecken(){ if(!versteckt){versteckt=true;hinweis.style.opacity='0';} }
+
+  /* --------------------------------------------------- Filament und Knoten --
+     Der gerichtete, wenig gekrümmte Zug tat bisher nichts. Er ist die zweite
+     Handschrift: Ein dünner Strang aus Fäden legt sich entlang der Bahn und
+     lässt sich vom Wirbelfeld kaum verbiegen. Wer auf dieser Bahn verweilt,
+     setzt einen Knoten — einen Lichtpunkt, der auf dem Strang sitzt.
+     Beides ist verdient, nicht geschenkt: gerade heißt gerade, und Verweilen
+     heißt wirklich anhalten. */
+  var wach = 0;   /* wieviel Leben gerade im Feld ist, 0 bis 1 */
+  /* Ein Boden unter der Wachheit, für eine begrenzte Zeit. Die Schicht
+     darüber braucht ihn am Ende eines Stücks: Dort sollen die Wirbel
+     aufhören und das Fertige trotzdem leuchten. Ohne ihn ginge beides nur
+     zusammen, denn `wach` folgt der größten Wirbelstärke und multipliziert
+     die Deckkraft jedes Fadens.
+     Er sitzt hier und nicht in der Schicht, weil `wach` hier lebt — der
+     erste Versuch griff aus der Schicht auf einen Wirbel zu, den es dort
+     nicht gibt, und fror damit das ganze Stück ein. */
+  var wachBoden = 0, wachBodenZeit = 0;
+  window.__wachHalten = function (wert, sek) {
+    wachBoden = wert || 0; wachBodenZeit = sek || 0;
+  };
+  var KX = 45, KY = 35, kzelle = new Int32Array(KX * KY);
+
+  function kornRasterFuellen() {
+    kzelle.fill(-1);
+    for (var i = 0; i < N; i++) {
+      if (korn[i] <= 0.9 || lf[i] <= 0 || lm[i] - lf[i] < 0.45) continue;
+      var u = (px[i] / W * KX) | 0, v = (py[i] / H * KY) | 0;
+      if (u >= 0 && v >= 0 && u < KX && v < KY) kzelle[v * KX + u] = i;
+    }
+  }
+  var spawnZeiger = 0, knotenLadung = 0, letzteHX = 0, letzteHY = 0;
+  var linienWert = 0, knotenAktiv = 0, linieHer = 9;
+
+  /* Ein Lichtpunkt entsteht dort, wo ein Strahl war: Er übernimmt Ort, Hitze
+     und Farbe eines hellen Fadens und bleibt liegen. Vorher war das Korn ein
+     über die ganze Fläche verstreutes Raster, das bei jeder Regung überall
+     zugleich anging — das sah nach Eigenleben aus, weil es genau das war. */
+  function kornSetzen(quelle) {
+    var i = spawnZeiger++; if (spawnZeiger >= N) spawnZeiger = 0;
+    if (i === quelle) return;
+    px[i] = px[quelle] + (rnd() - 0.5) * 5;
+    py[i] = py[quelle] + (rnd() - 0.5) * 5;
+    vx[i] = vx[quelle] * 0.05; vy[i] = vy[quelle] * 0.05;
+    hz[i] = hz[quelle] * (0.75 + 0.4 * rnd());
+    tn[i] = tn[quelle]; hl[i] = hl[quelle];
+    korn[i] = rnd() < 0.085 ? 1.7 + 1.1 * rnd() : 0.15 + 0.7 * rnd();
+    art[i] = 3; puls('korn');
+    fest[i] = 1;
+    lm[i] = 1.9 + 2.6 * rnd(); lf[i] = lm[i];
+  }
+
+  function funken(i) {
+    /* Ein großer Lichtpunkt verlöscht nicht, er zerspringt. Das ist kein
+       Eigenleben: Der Punkt existiert nur, weil ihn jemand erzeugt hat, und
+       sein Ende gehört zu seinem Leben wie der Nachhall zum Wirbel. Funken
+       sind selbst kein Korn und können deshalb nicht weiterzünden. */
+    puls('funken');
+    var n = 9 + ((rnd() * 7) | 0);
+    for (var k = 0; k < n; k++) {
+      var j = spawnZeiger++; if (spawnZeiger >= N) spawnZeiger = 0;
+      if (j === i) continue;
+      var w = rnd() * 6.2832, v = 150 + 300 * rnd();
+      px[j] = px[i] + Math.cos(w) * 3; py[j] = py[i] + Math.sin(w) * 3;
+      vx[j] = Math.cos(w) * v; vy[j] = Math.sin(w) * v;
+      hz[j] = Math.min(1, hz[i] * 1.25 + 0.2);
+      tn[j] = tn[i]; hl[j] = Math.min(1, hl[i] + 0.3);
+      korn[j] = 0; fest[j] = 1; art[j] = 4;
+      lm[j] = 0.30 + 0.35 * rnd(); lf[j] = lm[j];
+    }
+  }
+
+  /* Für die Schicht darüber: ein Bersten an einer Stelle, ohne dass dort
+     vorher ein Lichtpunkt sein musste. Ein Fehler zerspringt. */
+  window.__funkeAn = function (x, y, ton) {
+    for (var q = 0; q < 3; q++) {
+      var i = spawnZeiger++; if (spawnZeiger >= N) spawnZeiger = 0;
+      abg[i] = 0;                 /* Funken sind Ereignis, nicht Spur */
+      px[i] = x; py[i] = y; vx[i] = 0; vy[i] = 0;
+      hz[i] = 0.9; tn[i] = ton; hl[i] = 0.8;
+      korn[i] = 1.6; fest[i] = 1; lm[i] = 0.5; lf[i] = 0.5; art[i] = 3;
+      funken(i);
+      lf[i] = 0; korn[i] = 0;
+    }
+  };
+
+  function korngeben(dt) {
+    if (wach < 0.05) return;
+    var n = Math.round(24 * wach);
+    for (var k = 0; k < n; k++) {
+      var q = (rnd() * N) | 0;
+      if (korn[q] > 0) continue;                 /* nicht aus Korn Korn machen */
+      if (hz[q] < 0.20) continue;      /* nur dort, wo es leuchtet   */
+      kornSetzen(q);
+    }
+  }
+
+  function setzen(x, y, gx, gy, hitze, dauer, welche) {
+    var i = spawnZeiger++; if (spawnZeiger >= N) spawnZeiger = 0;
+    px[i] = x; py[i] = y; vx[i] = gx; vy[i] = gy;
+    hz[i] = hitze; tn[i] = aktiverKern ? aktiverKern.ton : 0.5;
+    hl[i] = Math.min(1, Math.sqrt(hvx*hvx + hvy*hvy) / 900);
+    fest[i] = 1; korn[i] = 0; lm[i] = dauer; lf[i] = dauer;
+    art[i] = welche;
+  }
+
+  function filamente(dt) {
+    if (!unten) { knotenLadung = 0; linienWert = 0; knotenAktiv = 0; linieHer = 9;
+                  letzteHX = hx; letzteHY = hy; return; }
+
+    var tempoH = Math.sqrt(hvx*hvx + hvy*hvy);
+    var gerade = 1 - Math.min(1, Math.abs(drehrate) / 1.7);
+    var bewegt = Math.min(1, tempoH / 190);
+    linienWert = gerade * bewegt;
+
+    linieHer += dt;
+    if (linienWert > 0.34) {
+      linieHer = 0;
+      puls('strang');
+      var n = Math.round(30 * linienWert);
+      for (var k = 0; k < n; k++) {
+        var u = k / n;
+        var sx = letzteHX + (hx - letzteHX) * u + (rnd() - 0.5) * 3.5;
+        var sy = letzteHY + (hy - letzteHY) * u + (rnd() - 0.5) * 3.5;
+        setzen(sx, sy, hvx * (0.90 + 0.14 * rnd()), hvy * (0.90 + 0.14 * rnd()),
+               0.26 + 0.26 * linienWert, 1.3 + 0.7 * rnd(), 1);   /* Strang */
+      }
+    }
+
+    /* Verweilen: wirklich anhalten, nicht nur langsamer werden. */
+    if (tempoH < 55 && gerade > 0.3 && linieHer < 0.6) knotenLadung += dt;
+    else knotenLadung = 0;
+    knotenAktiv = knotenLadung > 0.14 ? 1 : 0;
+    if (knotenAktiv) {
+      puls('knoten');
+      for (var m = 0; m < 16; m++) {
+        var w = rnd() * 6.2832, rr = 3 + 15 * Math.sqrt(rnd());
+        setzen(hx + Math.cos(w) * rr, hy + Math.sin(w) * rr,
+               Math.cos(w) * 9, Math.sin(w) * 9, 0.94, 1.6 + 0.8 * rnd(), 2);   /* Knoten */
+      }
+    }
+    letzteHX = hx; letzteHY = hy;
+  }
+
+  /* ------------------------------------------------------------- Mechanik */
+  var schreibt = 0;
+
+  function kerneRechnen(dt) {
+    if (unten && performance.now() - letzteZeit > 80) {
+      var ab = Math.exp(-6 * dt); hvx *= ab; hvy *= ab; drehrate *= ab;
+      bogen *= Math.exp(-2.2 * dt);
+    }
+    if (unten) {
+      var g = Math.min(1, dt / 0.6);
+      m1x += (hx - m1x) * g; m1y += (hy - m1y) * g;
+      if (0.6 > 0) {
+        var g2 = Math.min(1, dt / 0.6);
+        mx += (m1x - mx) * g2; my += (m1y - my) * g2;
+      } else { mx = m1x; my = m1y; }
+
+    }
+    if (unten && aktiverKern) {
+      var K = aktiverKern;
+      var omH, treiben, d;
+      if (1) {
+        /* Der Wirbel sitzt unter dem Finger. Getaktet wird mit dem Kringeln —
+           der Drehrate der eigenen Bewegungsrichtung. Damit braucht es keinen
+           Mittelpunkt, den man umkreisen muss, und die Farbe ist dort, wo die
+           Hand ist. Wer die Kringelbewegung aufgibt, dem versiegt sie. */
+        omH = drehrate;
+        treiben = Math.sqrt(hvx*hvx + hvy*hvy) > 60;
+        d = K.r;
+      } else {
+        var rx = hx - K.x, ry = hy - K.y;
+        d = Math.sqrt(rx*rx + ry*ry);
+        treiben = d > 14 && d < 420;
+        omH = treiben ? (hvx * (-ry / d) + hvy * (rx / d)) / d : 0;
+      }
+      if (treiben) {
+
+        /* Übereinstimmung mit dem Takt, den der Wirbel schon hat. Solange
+           wenig Energie da ist, nimmt er fast jeden Takt an — der erste
+           Kreis setzt das Tempo. Mit wachsender Energie wird er wählerisch. */
+        var delta = omH - K.om;
+        var breite = STIMMUNG.sigma * (1.0 + 2.6 * Math.exp(-6.0 * K.s));
+        var treffer = Math.exp(-(delta * delta) / (2 * breite * breite));
+
+        K.om += (omH - K.om) * Math.min(1, 7.0 * treffer * dt);
+        if (K.om > 22) K.om = 22; if (K.om < -22) K.om = -22;
+
+        var antrieb = Math.min(Math.abs(omH), 12) * 0.12 * druck;
+        K.s += (STIMMUNG.aufbau * treffer * antrieb
+              - STIMMUNG.stoerung * (1 - treffer) * K.s
+              - STIMMUNG.zerfall * K.s) * dt;
+
+        /* Der Kern zieht zur Mitte der Bewegung, nicht zur Hand — sonst
+           eiert er beim Kreisen mit. Und je mehr Energie er hat, desto
+           weniger lässt er sich noch verschieben: ein starker Wirbel steht. */
+        if (K.s > K.fest) K.fest = K.s;
+        var folge = 9.0;
+        var zx = 1 ? hx : mx, zy = 1 ? hy : my;
+        K.x += (zx - K.x) * folge * dt;
+        K.y += (zy - K.y) * folge * dt;
+        if (1) {
+          /* Das Tempo der Hand bestimmt, wo auf der Farbskala der Wirbel
+             liegt: langsam die tiefen, satten Töne, schnell die hellen.
+             Die Helligkeit selbst bleibt der Resonanz vorbehalten — sonst
+             kämpfen zwei Bedeutungen um dieselbe Anzeige. */
+          var tp = Math.min(1, Math.sqrt(hvx*hvx + hvy*hvy) / 900);
+          if (tp > 0.04) puls('tempo');
+          K.hell += (tp - K.hell) * 1.6 * dt;
+        }
+        if (1 && Math.abs(omH) > 0.8) {
+          /* Die Drehrichtung ist die zweite Stimme: links und rechts herum
+             werden zwei Farbfamilien. Der Wechsel läuft weich, damit ein
+             Richtungswechsel mitten im Zug den Ton wandern lässt. */
+          K.ton += ((omH > 0 ? 1 : 0) - K.ton) * 1.6 * dt;
+          puls('stimmen');
+        }
+        var rZiel = !1 ? Math.min(0.13 * Math.min(W, H), Math.max(90, d * 1.25))
+                  : (1
+                      ? Math.max(0.045 * Math.min(W, H),
+                          Math.min(0.26 * Math.min(W, H), schleife * 1.15))
+                      : 0.13 * Math.min(W, H));
+        if (1 && Math.abs(rZiel - K.r) > 1.5) puls('schleife');
+        K.r += (rZiel - K.r) * 0.25 * dt * 1.0;
+      } else {
+        K.s -= STIMMUNG.zerfall * K.s * dt;
+      }
+      if (K.s > 1) K.s = 1;
+    }
+
+    var maxS = 0;
+    for (var i = 0; i < kerne.length; i++) {
+      var Q = kerne[i];
+      if (Q !== aktiverKern || !unten) {
+        /* Nachhall: der Wirbel läuft weiter und klingt ab. Er beginnt nie
+           von selbst etwas Neues — ohne Anregung geht alles zur Ruhe. */
+        var vd2 = 1 ? Math.sqrt(Q.dvx*Q.dvx + Q.dvy*Q.dvy) : 0;
+        Q.s -= (STIMMUNG.zerfall * (vd2 > 40 ? 0.85 : 1.25)) * Q.s * dt;
+        Q.om *= (1 - 0.16 * dt);
+        if (1) {
+          Q.x += Q.dvx * dt; Q.y += Q.dvy * dt;
+          var br = Math.exp(-0.28 * dt); Q.dvx *= br; Q.dvy *= br;
+        }
+        if (Q.s < 0.0008) { Q.s = 0; Q.fest = 0; }
+      }
+      if (Q.s > maxS) maxS = Q.s;
+    }
+    var zielWach = Math.max(maxS, unten ? 0.8 : 0);
+    wach += (zielWach - wach) * (zielWach > wach ? 2.4 : 0.45) * dt;
+    if (wachBodenZeit > 0) {
+      wachBodenZeit -= dt;
+      if (wach < wachBoden) wach = wachBoden;
+    }
+    if (wach < 0.0015) wach = 0;
+
+    schreibt = (maxS > STIMMUNG.schwelle || (1 && (linienWert > 0.34 || knotenAktiv))) ? 1 : 0;
+  }
+
+  function mediumRechnen(dt) {
+    var handTempo = unten ? Math.sqrt(hvx*hvx + hvy*hvy) : 0;
+    var reib = Math.exp(-0.85 * dt);
+    var schub = 0.26;
+    var zug = 2.2;   /* wie stark das Wirbelfeld die Fäden mitnimmt */
+
+    for (var i = 0; i < N; i++) {
+      lf[i] -= dt;
+      if (lf[i] <= 0) {
+        if (1 && korn[i] > 1.2 && hz[i] > 0.30 && rnd() < 0.34) funken(i);
+        /* Beim Einsammeln die Abgabe mit zuruecksetzen: Der Platz wird
+           weitergegeben, und ohne diese Zeile erbte ein Mediumfaden die
+           Abgabe der Nachricht, die vorher darauf lag. */
+        fest[i] = 0; art[i] = 0; abg[i] = 0;
+        if (rnd() < 0.34) {
+          var j = (rnd() * N) | 0;
+          px[i] = px[j] + (rnd() - 0.5) * 26; py[i] = py[j] + (rnd() - 0.5) * 26;
+          vx[i] = vx[j] * 0.8; vy[i] = vy[j] * 0.8; hz[i] = hz[j];
+        } else {
+          px[i] = rnd() * W; py[i] = rnd() * H;
+          vx[i] = 0; vy[i] = 0; hz[i] = 0;
+        }
+        lm[i] = 2.6 + rnd() * 3.6; lf[i] = lm[i];
+        korn[i] = 0;
+      }
+      var x = px[i], y = py[i];
+      var ax = 0, ay = 0, nah = -1;
+
+      for (var c = 0; c < kerne.length; c++) {
+        var K = kerne[c];
+        if (K.s < 0.01) continue;
+        var rx = x - K.x, ry = y - K.y;
+        var d2 = rx*rx + ry*ry;
+        if (d2 > 640000) continue;             /* 800 px Reichweite */
+        var d = Math.sqrt(d2) + 0.001;
+        /* Differentielle Rotation: die Winkelgeschwindigkeit fällt nach
+           außen ab. Genau daraus wickeln sich die Arme auf — ein starrer
+           Wirbel dreht nur, er zeichnet nichts. */
+        var om = K.om * K.r * K.r / (d2 + K.r * K.r);
+        var vt = om * d * K.s * zug;
+        ax += (-ry / d) * vt - (rx / d) * vt * 0.09;   /* Tangential + wenig Sog */
+        ay += ( rx / d) * vt - (ry / d) * vt * 0.09;
+        if (d < 7 && K.s > 0.05) { nah = c; }
+      }
+
+      /* Die Hand schiebt immer, unabhängig von jeder Resonanz. Das ist die
+         Rückmeldung, die dem ersten Prüfstück gefehlt hat. */
+      if (1) {
+        if (!fest[i]) {
+          var fu = (x / W * GX) | 0, fv = (y / H * GY) | 0;
+          if (fu >= 0 && fv >= 0 && fu < GX && fv < GY) {
+            var fk = fv * GX + fu;
+            ax += sfx[fk] * 1.1; ay += sfy[fk] * 1.1;
+          }
+        }
+      } else if (unten && !fest[i]) {
+        var dx = x - hx, dy = y - hy;
+        var dd = dx*dx + dy*dy;
+        if (dd < 22500) {
+          var f = (1 - dd / 22500) * schub;
+          ax += hvx * f; ay += hvy * f;
+        }
+      }
+
+      if (nah >= 0) {
+        /* Im Kern verschluckt: aussen wieder aussetzen. So entsteht ein
+           dauernder Strom hinein statt eines leergefegten Lochs. */
+        var K2 = kerne[nah];
+        var w = rnd() * 6.2832, rr = K2.r * (1.4 + 1.6 * rnd());
+        px[i] = K2.x + Math.cos(w) * rr; py[i] = K2.y + Math.sin(w) * rr;
+        var vt0 = K2.om * K2.r * 0.55 * K2.s;
+        vx[i] = -Math.sin(w) * vt0; vy[i] = Math.cos(w) * vt0; hz[i] = 0;
+        lf[i] = lm[i];
+        continue;
+      }
+
+      if (fest[i]) { ax *= 0.14; ay *= 0.14; }
+      var zaeh = 1;
+      if (1) {
+        var F = dichteAbtasten(x, y);
+        if (F) {
+          var gl2 = Math.sqrt(F.gx*F.gx + F.gy*F.gy);
+          if (gl2 > 1e-5) {
+            /* Entlang der Höhenlinie, nicht quer dazu: neue Züge flechten
+               sich in vorhandene ein, statt sie zu überfahren. Die Richtung
+               folgt dem, was der Faden ohnehin vorhat — sonst kämpfen Bild
+               und Wirbel gegeneinander. */
+            var tx = -F.gy / gl2, ty = F.gx / gl2;
+            if (tx * vx[i] + ty * vy[i] < 0) { tx = -tx; ty = -ty; }
+            var st = 520 * Math.min(1, F.d);
+            ax += tx * st; ay += ty * st;
+          }
+          zaeh = Math.exp(-2.5 * Math.min(1, F.d) * dt);   /* dicke Farbe bremst */
+        }
+      }
+
+      if (1 && korn[i] <= 0 && !fest[i]) {
+        /* Ein Faden trifft einen Lichtpunkt. */
+        var vs2 = vx[i]*vx[i] + vy[i]*vy[i];
+        if (vs2 > 67600) {
+          var u3 = (x / W * KX) | 0, v3 = (y / H * KY) | 0;
+          if (u3 >= 0 && v3 >= 0 && u3 < KX && v3 < KY) {
+            var t3 = kzelle[v3 * KX + u3];
+            if (t3 >= 0 && lf[t3] > 0 && korn[t3] > 0.9) {
+              puls('stoss'); funken(t3); lf[t3] = 0; korn[t3] = 0; kzelle[v3 * KX + u3] = -1;
+            }
+          }
+        }
+      }
+      if (korn[i] > 0) {
+        ax = 0; ay = 0;                        /* zuletzt, sonst schiebt das Bild */
+        if (1 && korn[i] > 0.9 && lm[i] - lf[i] > 0.45) {
+          var zer = 0;
+          if (unten && handTempo > 130) {
+            var hx2 = x - hx, hy2 = y - hy;
+            if (hx2*hx2 + hy2*hy2 < 900) zer = 1;
+          }
+          if (!zer) for (var c2 = 0; c2 < kerne.length; c2++) {
+            var W2 = kerne[c2];
+            if (W2.s < 0.12) continue;
+            var dv2 = W2.dvx*W2.dvx + W2.dvy*W2.dvy;
+            if (dv2 < 4900) continue;            /* nur ein geworfener Wirbel */
+            var kx2 = x - W2.x, ky2 = y - W2.y, rr2 = W2.r * 0.5;
+            if (kx2*kx2 + ky2*ky2 < rr2*rr2) { zer = 1; break; }
+          }
+          if (zer) { puls('stoss'); funken(i); lf[i] = 0; korn[i] = 0; continue; }
+        }
+      }
+      var nvx = (vx[i] + (ax - vx[i]) * 4.2 * dt) * reib * zaeh;
+      var nvy = (vy[i] + (ay - vy[i]) * 4.2 * dt) * reib * zaeh;
+      if (korn[i] > 0) { var kb = Math.exp(-7 * dt); nvx *= kb; nvy *= kb; }
+      vx[i] = nvx; vy[i] = nvy;
+
+      qx[i] = x; qy[i] = y;
+      x += nvx * dt; y += nvy * dt;
+
+      if (korn[i] > 0) {
+        if (x < 0 || x > W || y < 0 || y > H) { lf[i] = 0; }
+      } else if (0) {
+        if (x < 0) { x += W; qx[i] = x; puls('umlauf'); }
+        else if (x > W) { x -= W; qx[i] = x; puls('umlauf'); }
+        if (y < 0) { y += H; qy[i] = y; puls('umlauf'); }
+        else if (y > H) { y -= H; qy[i] = y; puls('umlauf'); }
+      } else {
+        /* Was hinausfliegt, ist fort. Nicht hart an der Kante — ein Rand von
+           18 % lässt den Faden sichtbar davonfliegen statt an einer Wand zu
+           verschwinden. Danach kommt er still und kalt irgendwo wieder herein,
+           damit das Feld nicht ausdünnt und die Ruhebewegung bleibt. */
+        if (x < -W * 0.18 || x > W * 1.18 || y < -H * 0.18 || y > H * 1.18) {
+          x = rnd() * W; y = rnd() * H;
+          vx[i] = 0; vy[i] = 0; hz[i] = 0;
+          qx[i] = x; qy[i] = y;
+        }
+      }
+      px[i] = x; py[i] = y;
+    }
+  }
+
+  /* ---------------------------------------------------------- Darstellung */
+  function puffern() {
+    var j = 0;
+    for (var i = 0; i < N; i++) {
+      /* Hitze: nah an einem starken Kern wird es hell. */
+      var h = 0, tonZiel = -1, hellZiel = -1, nahBest = 0;
+      if (fest[i]) { h = hz[i]; }
+      else
+      for (var c = 0; c < kerne.length; c++) {
+        var K = kerne[c];
+        if (K.s < 0.05) continue;
+        var ex = px[i] - K.x, ey = py[i] - K.y;
+        var d = Math.sqrt(ex*ex + ey*ey);
+        var nah = 1 - Math.min(1, d / (K.r * 1.35));
+        var w = K.s * nah * nah;
+        if (w > h) { h = w; tonZiel = K.ton; }
+        if (nah > nahBest) { nahBest = nah; hellZiel = K.hell; }
+      }
+      if (!fest[i]) hz[i] += (h - hz[i]) * 0.16;
+      if (tonZiel >= 0) tn[i] += (tonZiel - tn[i]) * 0.10;
+      if (hellZiel >= 0) hl[i] += (hellZiel - hl[i]) * 0.10;
+
+      var sx = vx[i], sy = vy[i];
+      var tempo = Math.sqrt(sx*sx + sy*sy);
+      var a = tempo / 380; if (a > 1) a = 1;
+      a = a * a * (3 - 2 * a);
+      a += hz[i] * 0.85; if (a > 1) a = 1;
+      if (korn[i] > 0) {
+        var ak = (korn[i] > 1.2 ? 0.86 + 0.14 * hz[i] : 0.24 + 0.72 * hz[i]) * wach;
+        if (ak > a) a = ak;
+      }
+      /* Ein- und Ausblenden, damit nichts aufpoppt. Die Blende war fest
+         0,6 s lang — das ist richtig für einen Faden, der mehrere Sekunden
+         lebt, und falsch für alles Kurze: Ein Punkt mit 0,30 s Lebensdauer
+         steckt die ganze Zeit in BEIDEN Blenden und kommt in seiner
+         Lebensmitte auf 0,25 x 0,25, also ein Sechzehntel seiner
+         Helligkeit. Mehr Material half dagegen nichts, es wurde nur
+         gleichmäßig matt.
+         Jetzt ist die Blende ein Drittel der eigenen Lebensdauer, höchstens
+         aber 0,6 s. Für alles, was länger als 1,8 s lebt, ändert sich damit
+         nichts. */
+      var rest = lf[i], alt2 = lm[i] - lf[i];
+      var blende = lm[i] < 1.8 ? lm[i] * 0.333 : 0.6;
+      if (rest < blende) a *= rest / blende;
+      if (alt2 < blende) a *= alt2 / blende;
+      var sf = korn[i] > 0 ? 0 : SCHWEIF;
+      var tx = px[i] - sx * sf, ty = py[i] - sy * sf;
+
+      /* Wie viel Farbe nimmt die Fläche hier noch an? Wo schon viel liegt,
+         wenig — sonst läuft alles zu. Und was aufgetragen wird, wandert ins
+         Raster, damit es beim nächsten Zug lenkt. */
+      var auf = ABGABE[art[i]] * abg[i];
+      if (1 && schreibt) {
+        var gu = (px[i] / W * GX) | 0, gv = (py[i] / H * GY) | 0;
+        if (gu >= 0 && gv >= 0 && gu < GX && gv < GY) {
+          var gk = gv * GX + gu;
+          /* Das Aufnahme-Tor gehört zur sichtbaren Schicht: Es verhindert, dass
+             das Bild zuläuft. Wo das Sichtbare vergeht, gibt es nichts zu
+             schützen — dann verweigerte eine leer aussehende Stelle nur die
+             Farbe, und das läse sich als Fehler statt als Geschichte. */
+          var bremse = 1 ? Math.min(0.92, dich[gk] * 1.1) : 0;
+          if (bremse > 0.12) puls('sog');
+          auf *= 1 - bremse;
+          if ((i & 7) === 0) {
+            dich[gk] += a * hz[i] * auf * 0.115;
+            if (dich[gk] > 1.6) dich[gk] = 1.6;
+          }
+        }
+      }
+
+      daten[j++] = tx * dpr; daten[j++] = ty * dpr; daten[j++] = a * 0.20; daten[j++] = hz[i]; daten[j++] = auf; daten[j++] = tn[i]; daten[j++] = korn[i]; daten[j++] = hl[i];
+      daten[j++] = px[i] * dpr; daten[j++] = py[i] * dpr; daten[j++] = a;   daten[j++] = hz[i]; daten[j++] = auf; daten[j++] = tn[i]; daten[j++] = korn[i]; daten[j++] = hl[i];
+    }
+    gl.bindBuffer(gl.ARRAY_BUFFER, vboFaden);
+    gl.bufferData(gl.ARRAY_BUFFER, daten, gl.DYNAMIC_DRAW);
+    gl.enableVertexAttribArray(lPos); gl.vertexAttribPointer(lPos, 2, gl.FLOAT, false, 32, 0);
+    gl.enableVertexAttribArray(lPar); gl.vertexAttribPointer(lPar, 4, gl.FLOAT, false, 32, 8);
+    if (lGr >= 0) { gl.enableVertexAttribArray(lGr); gl.vertexAttribPointer(lGr, 1, gl.FLOAT, false, 32, 24); }
+    if (lHl >= 0) { gl.enableVertexAttribArray(lHl); gl.vertexAttribPointer(lHl, 1, gl.FLOAT, false, 32, 28); }
+  }
+
+  function faedenZeichnen(staerke, punkt, tor) {
+    gl.useProgram(pFaden);
+    gl.uniform2f(uRes, BW, BH);
+    gl.uniform1f(uStaerke, staerke);
+    gl.uniform1f(uPunkt, punkt);
+    gl.uniform1f(uPunktModus, punkt > 1.5 ? 1 : 0);
+    gl.uniform1f(uHitzeTor, tor || 0);
+    gl.uniform1f(uFarbwahl, 0.0);
+    gl.uniform1f(uKurve, 1.0);
+    gl.drawArrays(punkt > 1.5 ? gl.POINTS : gl.LINES, 0, N * 2);
+  }
+
+  function zeichnen() {
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.ONE, gl.ONE);            /* additiv, Farbe ist vormultipliziert */
+    puffern();
+
+    /* 1) Niederschlag: nur solange der Wirbel in Resonanz ist. */
+    if (schreibt) {
+      gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
+      gl.viewport(0, 0, BW, BH);
+      gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);   /* deckend, nicht addierend */
+      faedenZeichnen(0.1400, 1.0, 1);
+      faedenZeichnen(0.1400 * 0.5, 5.0, 1);        /* weicher Auftrag daneben */
+      gl.blendFunc(gl.ONE, gl.ONE);
+      gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    }
+
+    if (1) verblassen(rahmenDt);
+
+    /* 2) Bildschirm: erst das Liegengebliebene, dann das Lebendige. */
+    gl.viewport(0, 0, BW, BH);
+    gl.disable(gl.BLEND);
+    gl.clearColor(0.020, 0.027, 0.047, 1); gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.useProgram(pQuad);
+    gl.bindBuffer(gl.ARRAY_BUFFER, vboQuad);
+    gl.enableVertexAttribArray(lXY); gl.vertexAttribPointer(lXY, 2, gl.FLOAT, false, 0, 0);
+    gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, tex);
+    gl.uniform1i(uTex, 0);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.ONE, gl.ONE);
+    gl.bindBuffer(gl.ARRAY_BUFFER, vboFaden);
+    gl.enableVertexAttribArray(lPos); gl.vertexAttribPointer(lPos, 2, gl.FLOAT, false, 32, 0);
+    gl.enableVertexAttribArray(lPar); gl.vertexAttribPointer(lPar, 4, gl.FLOAT, false, 32, 8);
+    if (lGr >= 0) { gl.enableVertexAttribArray(lGr); gl.vertexAttribPointer(lGr, 1, gl.FLOAT, false, 32, 24); }
+    if (lHl >= 0) { gl.enableVertexAttribArray(lHl); gl.vertexAttribPointer(lHl, 1, gl.FLOAT, false, 32, 28); }
+    faedenZeichnen(0.55, 1.0, 0);  /* Fäden  */
+    faedenZeichnen(0.22, 7.0, 0);  /* Glühen */
+  }
+
+  /* -------------------------------------------------------------- Schleife */
+  var letzterRahmen = performance.now(), rest = 0, rahmenDt = 0;
+  function rahmen(t) {
+    var dt = Math.min(0.05, (t - letzterRahmen) / 1000);
+    letzterRahmen = t; rahmenDt = dt;
+    rest += dt;
+    if (window.__agSchritt) window.__agSchritt(dt);
+    var n = 0;
+    while (rest >= DT && n < MAX_SUB) { if (1) feldAbklingen(DT); kerneRechnen(DT); if (1) filamente(DT);
+      if (1) korngeben(DT);
+      if (1) kornRasterFuellen(); mediumRechnen(DT); rest -= DT; n++; }
+    if (n === MAX_SUB) rest = 0;
+    if (1 && (glaettZaehler++ % 20) === 0) rasterGlaetten();
+    zeichnen();
+    if (window.__abzugBitte) {
+      var pw = cv.width, ph = cv.height, roh = new Uint8Array(pw * ph * 4);
+      gl.readPixels(0, 0, pw, ph, gl.RGBA, gl.UNSIGNED_BYTE, roh);
+      window.__abzug = { w: pw, h: ph, d: roh };
+      window.__abzugBitte = 0;
+    }
+    requestAnimationFrame(rahmen);
+  }
+
+  function messen() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    var w = cv.clientWidth, h = cv.clientHeight;
+    if (w === W && h === H) return false;
+    W = w; H = h;
+    cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+    return true;
+  }
+
+  /* Gerechnet wird durchgehend in CSS-Punkten; erst beim Puffern wird auf
+     Gerätepunkte skaliert. Sonst müsste jede Konstante zweimal stimmen. */
+  function aufbauen(erhalten) {
+    messen();
+    fboBauen(cv.width, cv.height, erhalten);
+    saeen();
+  }
+  aufbauen(false);
+
+  window.addEventListener('resize', function () {
+    if (cv.clientWidth === W && cv.clientHeight === H) return;
+    aufbauen(true);
+  });
+
+  requestAnimationFrame(rahmen);
+})();
+</script>
+
+
+
+</body>
+</html>

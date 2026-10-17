@@ -1,0 +1,295 @@
+{
+  "fall": "05",
+  "titel": "Parallele Aufgaben, exakt versionierte Artefakte, Review und QA",
+  "prueft": [
+    "§7 Feldvokabular",
+    "§8 Done nur durch Statuswechsel"
+  ],
+  "erwartung": [
+    {
+      "regel": "R-12",
+      "soll": "Jedes review_result und test_result nennt artifact_id, version, criteria_ref und outcome."
+    },
+    {
+      "regel": "R-11",
+      "soll": "Done entsteht AUSSCHLIESSLICH durch kind=status_change mit task_id, from, to und monotoner item_revision. W5 (review pass auf ART-11 v1) setzt NICHTS auf Done."
+    },
+    {
+      "regel": "R-20",
+      "soll": "Ein Pass auf v1 gilt NICHT fuer v2: W7 prueft ART-11 v2 erneut und hat ein eigenes outcome."
+    },
+    {
+      "regel": "R-22",
+      "soll": "supersedes verweist von ART-11 v2 auf v1; die Vorgeschichte wird nicht geloescht."
+    },
+    {
+      "regel": "R-11b",
+      "soll": "Done verlangt einen versionsgebundenen Erfuellungsnachweis: outcome pass auf genau (artifact_id, version) VOR dem Statuswechsel, oder eine ausdruecklich autorisierte Abweichung. Befund B2."
+    },
+    {
+      "regel": "R-28",
+      "soll": "Die Revisionskette wird ueber die Ereignisfolge nachgerechnet: item_revision steigt je Aufgabe streng, previous_transition_id zeigt auf die vorige schreibende Transition, beim ersten Mal null. Befund B2."
+    },
+    {
+      "regel": "R-21",
+      "soll": "UMBENANNT und tatsaechlich geprueft: zwei Aufgaben haben sich SCHNEIDENDE Zeitfenster belegter Ereignisse. Das ist keine aktive Arbeitsdauer und keine Zusammenarbeit -- nur eine Ueberlappung belegter Zeitpunkte. In V2 wurden nur zwei task_ids gezaehlt; Befund B3."
+    },
+    {
+      "regel": "R-29",
+      "soll": "Der Referenz-Reducer rechnet zustand_am_cursor_soll aus den Ereignissen nach. Ein falsch behaupteter Zustand faellt damit auf. Befund B3."
+    },
+    {
+      "regel": "R-36",
+      "soll": "Der Done-Nachweis haengt an (task_id, artifact_id, version, criteria_ref). Ein Pass unter einer anderen Kriterienfassung oder fuer eine andere Aufgabe erlaubt Done NICHT. R2."
+    },
+    {
+      "regel": "R-37",
+      "soll": "Nur kind=status_change schreibt Status. W1 und W2 sind daher Statuswechsel, nicht Anfragen mit Zustandsfeldern. R1."
+    }
+  ],
+  "daten": {
+    "stream_id": "AG-NEU/AG-NEU-R1",
+    "ereignisse": [
+      {
+        "id": "W1",
+        "project_id": "AG-NEU",
+        "run_id": "AG-NEU-R1",
+        "task_id": "AG-NEU-031",
+        "actor": "atlas",
+        "kind": "status_change",
+        "title": "Aufgabe 031 eroeffnet (Statuswechsel)",
+        "caused_by": [],
+        "occurred_at": "2026-10-15T11:00:00Z",
+        "recorded_at": "2026-10-15T11:00:01Z",
+        "fictional": false,
+        "work_item_type": "story",
+        "item_revision": 1,
+        "from": null,
+        "to": "offen",
+        "previous_transition_id": null
+      },
+      {
+        "id": "W2",
+        "project_id": "AG-NEU",
+        "run_id": "AG-NEU-R1",
+        "task_id": "AG-NEU-032",
+        "actor": "atlas",
+        "kind": "status_change",
+        "title": "Aufgabe 032 eroeffnet (Statuswechsel)",
+        "caused_by": [],
+        "occurred_at": "2026-10-15T11:00:30Z",
+        "recorded_at": "2026-10-15T11:00:31Z",
+        "fictional": false,
+        "work_item_type": "story",
+        "item_revision": 1,
+        "from": null,
+        "to": "offen",
+        "previous_transition_id": null
+      },
+      {
+        "id": "W3",
+        "project_id": "AG-NEU",
+        "run_id": "AG-NEU-R1",
+        "task_id": "AG-NEU-031",
+        "actor": "forge",
+        "kind": "artifact",
+        "title": "ART-11 v1 geliefert",
+        "caused_by": [
+          "W1"
+        ],
+        "occurred_at": "2026-10-15T11:40:00Z",
+        "recorded_at": "2026-10-15T11:40:02Z",
+        "fictional": false,
+        "artifact_id": "ART-11",
+        "version": "v1",
+        "result_ref": "previews/ART-11-v1.html"
+      },
+      {
+        "id": "W4",
+        "project_id": "AG-NEU",
+        "run_id": "AG-NEU-R1",
+        "task_id": "AG-NEU-032",
+        "actor": "nova",
+        "kind": "contribution",
+        "title": "Beitrag zu 032, parallel zu 031",
+        "caused_by": [
+          "W2"
+        ],
+        "occurred_at": "2026-10-15T11:41:00Z",
+        "recorded_at": "2026-10-15T11:41:01Z",
+        "fictional": false,
+        "recipient": "atlas"
+      },
+      {
+        "id": "W5",
+        "project_id": "AG-NEU",
+        "run_id": "AG-NEU-R1",
+        "task_id": "AG-NEU-031",
+        "actor": "argus",
+        "kind": "review_result",
+        "title": "ART-11 v1 geprueft",
+        "caused_by": [
+          "W3"
+        ],
+        "occurred_at": "2026-10-15T12:05:00Z",
+        "recorded_at": "2026-10-15T12:05:01Z",
+        "fictional": false,
+        "artifact_id": "ART-11",
+        "version": "v1",
+        "criteria_ref": "AG-PROC-REVIEW-001@v1",
+        "outcome": "pass"
+      },
+      {
+        "id": "W6",
+        "project_id": "AG-NEU",
+        "run_id": "AG-NEU-R1",
+        "task_id": "AG-NEU-031",
+        "actor": "forge",
+        "kind": "artifact",
+        "title": "ART-11 v2 ersetzt v1",
+        "caused_by": [
+          "W5"
+        ],
+        "occurred_at": "2026-10-15T12:30:00Z",
+        "recorded_at": "2026-10-15T12:30:02Z",
+        "fictional": false,
+        "artifact_id": "ART-11",
+        "version": "v2",
+        "supersedes": "ART-11@v1",
+        "result_ref": "previews/ART-11-v2.html"
+      },
+      {
+        "id": "W7",
+        "project_id": "AG-NEU",
+        "run_id": "AG-NEU-R1",
+        "task_id": "AG-NEU-031",
+        "actor": "sentinel",
+        "kind": "test_result",
+        "title": "ART-11 v2 geprueft - der Pass auf v1 gilt hier nicht",
+        "caused_by": [
+          "W6"
+        ],
+        "occurred_at": "2026-10-15T12:50:00Z",
+        "recorded_at": "2026-10-15T12:50:01Z",
+        "fictional": false,
+        "artifact_id": "ART-11",
+        "version": "v2",
+        "criteria_ref": "AG-VISUAL-004-testability@v1",
+        "outcome": "fail"
+      },
+      {
+        "id": "W7b",
+        "project_id": "AG-NEU",
+        "run_id": "AG-NEU-R1",
+        "task_id": "AG-NEU-031",
+        "actor": "sentinel",
+        "kind": "test_result",
+        "title": "ART-11 v2 nach Nacharbeit bestanden",
+        "caused_by": [
+          "W7"
+        ],
+        "occurred_at": "2026-10-15T13:05:00Z",
+        "recorded_at": "2026-10-15T13:05:01Z",
+        "fictional": false,
+        "artifact_id": "ART-11",
+        "version": "v2",
+        "criteria_ref": "AG-VISUAL-004-testability@v1",
+        "outcome": "pass"
+      },
+      {
+        "id": "W8",
+        "project_id": "AG-NEU",
+        "run_id": "AG-NEU-R1",
+        "task_id": "AG-NEU-031",
+        "actor": "atlas",
+        "kind": "status_change",
+        "title": "031 auf Done - ausdruecklich, revisionsgebunden",
+        "caused_by": [
+          "W7b"
+        ],
+        "occurred_at": "2026-10-15T13:20:00Z",
+        "recorded_at": "2026-10-15T13:20:01Z",
+        "fictional": false,
+        "from": "offen",
+        "to": "done",
+        "item_revision": 2,
+        "previous_transition_id": "W1",
+        "artifact_id": "ART-11",
+        "version": "v2",
+        "criteria_ref": "AG-VISUAL-004-testability@v1",
+        "nachweis_ref": "W7b"
+      }
+    ],
+    "abgeleitet": {
+      "done_aufgaben": [
+        "AG-NEU-031"
+      ],
+      "nicht_done": [
+        "AG-NEU-032"
+      ],
+      "begruendung": "031 hat W8 (status_change, item_revision 2) und einen Nachweis unter GENAU (task_id AG-NEU-031, artifact_id ART-11, version v2, criteria_ref AG-VISUAL-004-testability@v1): das ist W7b mit outcome pass, von W8 als nachweis_ref genannt. Vorher nannte W8 AG-PROC-REVIEW-001@v1 - eine andere Kriterienfassung, unter der nie etwas bestanden hatte. Befund R2."
+    },
+    "zustand_am_cursor_soll": {
+      "cursor": 9,
+      "aufgaben": [
+        {
+          "task_id": "AG-NEU-031",
+          "parent_task_id": null,
+          "work_item_type": "story",
+          "status": "done",
+          "item_revision": 2,
+          "letzte_transition_id": "W8",
+          "owner": null
+        },
+        {
+          "task_id": "AG-NEU-032",
+          "parent_task_id": null,
+          "work_item_type": "story",
+          "status": "offen",
+          "item_revision": 1,
+          "letzte_transition_id": "W2",
+          "owner": null
+        }
+      ],
+      "artefakte": [
+        {
+          "artifact_id": "ART-11",
+          "version": "v1",
+          "supersedes": null,
+          "pruefungen": [
+            {
+              "kind": "review_result",
+              "task_id": "AG-NEU-031",
+              "criteria_ref": "AG-PROC-REVIEW-001@v1",
+              "outcome": "pass",
+              "event_id": "W5"
+            }
+          ]
+        },
+        {
+          "artifact_id": "ART-11",
+          "version": "v2",
+          "supersedes": "ART-11@v1",
+          "pruefungen": [
+            {
+              "kind": "test_result",
+              "task_id": "AG-NEU-031",
+              "criteria_ref": "AG-VISUAL-004-testability@v1",
+              "outcome": "fail",
+              "event_id": "W7"
+            },
+            {
+              "kind": "test_result",
+              "task_id": "AG-NEU-031",
+              "criteria_ref": "AG-VISUAL-004-testability@v1",
+              "outcome": "pass",
+              "event_id": "W7b"
+            }
+          ]
+        }
+      ],
+      "blockaden": [],
+      "abdeckung": "complete"
+    }
+  }
+}

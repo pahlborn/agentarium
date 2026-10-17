@@ -1,0 +1,122 @@
+{
+  "schema": "agentarium.handoff.v0",
+  "task_id": "AG-VISUAL-005-INTERFACE-REREVIEW",
+  "version": 1,
+  "created": "2026-10-15T18:53:09Z",
+  "sender": "Atlas",
+  "recipient": "Schnittstellenagent",
+  "status": "REREVIEW_COMPLETED_SPECIFICATION_DELIVERED",
+  "repository": "pahlborn/agentarium",
+  "branch": "claude/agentarium-visualisierung",
+  "source_commit": "54ab4785f993df7770c8dd35fd1a7d3749e20452",
+  "reviewed": [
+    {
+      "path": "handoffs/AG-VISUAL-005-INTERFACE-reply-v1.md",
+      "blob": "56fed8bda3768d42043be28e7f1f94e91d6d781d"
+    },
+    {
+      "path": "governance/AG-VISUAL-005-INTERFACE-review-v1.md",
+      "blob": "994cb2f89ef2c47418d6b232e8696305e5ee46ae"
+    }
+  ],
+  "evidence": [
+    {
+      "role": "argus",
+      "agent_id": "/root/argus_interface_rereview",
+      "signal": "AG-VISUAL-005-INTERFACE-REREVIEW:RA:RA_REVIEW:V1",
+      "verdict": "PASS_WITH_NOTES"
+    },
+    {
+      "role": "sentinel",
+      "agent_id": "/root/sentinel_interface_rereview",
+      "signal": "AG-VISUAL-005-INTERFACE-REREVIEW:SENTINEL:QA_REPORT:V1",
+      "verdict": "FAIL_TESTABILITY_ONLY"
+    }
+  ],
+  "consolidated_review": "governance/AG-VISUAL-005-INTERFACE-rereview-team-v1.md",
+  "human_handoff": "handoffs/AG-VISUAL-005-INTERFACE-rereview-team-v1.md",
+  "authorization": {
+    "source": "Peter",
+    "scope": "Team-Re-Review auf GitHub hinterlegen und Korrekturkommando fuer den Schnittstellenagenten bereitstellen.",
+    "limits": [
+      "Keine Implementierung.",
+      "Keine Architekturaktivierung.",
+      "Keine kostenpflichtigen Testlaeufe.",
+      "Kein Merge, Release oder Veroeffentlichung."
+    ]
+  },
+  "required_decisions": {
+    "discovery": "Team-Lifecycle-/Katalogstrom fuer Projekt- und Laufereignisse; fachliche Arbeitsstroeme je Projekt/Lauf; eigener Sequenzraum je Strom.",
+    "run_view": "Live oder Archiv wird aus dem Laufzustand abgeleitet; Simulation/Fiktion ist Herkunft; Steuerung ist Berechtigung.",
+    "authentication": "Sichere Cookie-Sitzung bei kontrolliertem gleichem Ursprung, andernfalls fetch-Streaming mit Authorization und eigenem Reconnect; kein einmaliges verbindungsgebundenes URL-Ticket.",
+    "heartbeat": "Empfangbares fluechtiges Heartbeat-Ereignis alle 5 Sekunden; stale nach 20 Sekunden; keine Persistierung oder Sequenzwirkung.",
+    "timeline": "zeitachse complete|partial|none; bei partial und none sichtbare Schrittfolge ohne erfundene Dauern.",
+    "access": "read und command serverseitig trennen; Wandansicht read-only.",
+    "costs": "Kostenfeld bleibt sichtbar. Bei unvollstaendiger Gesamterfassung ausschliesslich Status 'Kosten nicht vollständig ermittelbar.'; keine Betraege, Teilsummen, Gesamtsumme oder Null-Ersatzwerte. Kostenwerte erst bei vollstaendiger belegter Gesamterfassung.",
+    "vocabulary": "Ist-Felder, additive AG-REPORT-001-Felder und neue V2-Vertragsfelder getrennt ausweisen; erledigt entfällt; run_id additiv."
+  },
+  "delivery": [
+    "Versionierter Prosa-Vertrag V2.",
+    "Maschinenpruefbare Schemas.",
+    "Zusammengehoerige Beispieldaten fuer die benannten Abnahmefaelle.",
+    "Exakte Pfade, Versionen und Blob-Hashes.",
+    "Status je Punkt: spezifiziert, implementiert, getestet oder blockiert."
+  ],
+  "runtime": {
+    "recipient_started": true,
+    "recipient_receipt": {
+      "path": "handoffs/AG-VISUAL-005-INTERFACE-rereview-quittung-v1.md",
+      "blob": "139a71f0768f98234a13ff0332dcde74b856094b",
+      "received_at": "2026-10-16T16:30:00Z",
+      "worker_session_id": "session_01SvS2FzU7U5JmX6fr8JAfPo",
+      "environment_id": "env_01TvdjoYnYVEv6c3NDZNZPef",
+      "configured_model": "claude-opus-5",
+      "actual_model": "claude-opus-5",
+      "effort": "high",
+      "cli_version": "2.1.263",
+      "result": "SPECIFICATION_AND_DATA_TESTS_DELIVERED",
+      "exact_commits": {
+        "v2": "b0a08c1cd54b21424837cf51dc6d8dda083699cb",
+        "v2_1": "8feefe2a98eca444b5352c9c9c3f0d52069304e2",
+        "v2_1_1": "903f7b57627b199e6a3eb69234388ad58ab1653f",
+        "v2_1_2": "d2ceca168cbd2f4cacaf2311412622d968e2edb4"
+      }
+    },
+    "implementation_started": false
+  },
+  "updated": "2026-10-16T16:30:00Z",
+  "revision": 3,
+  "decision_update": {
+    "source": "Peter",
+    "decided_at": "2026-10-15T19:01:52Z",
+    "supersedes": "Bisherige Ausblendung des Kostenfelds.",
+    "independent_rereview": false
+  },
+  "verification": {
+    "rerun_at": "2026-10-16",
+    "v2": "38 Form, 59 Regeln, Fälle 01-09 bestanden; Gegenprobe 21/21",
+    "v2_1": "57 Form, 110 Regeln, 25 Negativproben, Fälle 01-12 bestanden; Gegenprobe 52/52",
+    "tested_scope": "Datenvertrag, Schemas, Beispieldaten und Gegenproben",
+    "not_tested": [
+      "Server",
+      "SSE",
+      "Browser",
+      "serverseitige Rechte",
+      "Laufzeit-Nebenwirkungsfreiheit"
+    ]
+  },
+  "cost_note": {
+    "attribution": "NOT_DETERMINABLE",
+    "reason": "Die gemeldete Sitzung umfasst mehrere Projekte; der Anteil dieses Auftrags ist nicht belastbar ermittelbar.",
+    "ui_rule": "Keine Kosten oder Token dieses Auftrags ausweisen."
+  },
+  "open_decisions": [
+    "O-1 Aktionen",
+    "O-2 Ursprung/Streaming",
+    "O-3 Replaygrenze",
+    "O-4 Kostenabschluss",
+    "O-5 parallele Läufe",
+    "O-6 catalog.changed",
+    "O-7 Partitur-Vertragsnutzung"
+  ]
+}

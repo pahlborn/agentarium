@@ -1,0 +1,69 @@
+--- a/fixtures/AG-VISUAL-005-beispiele-v2-1/12-zustandsschutz.json
++++ b/fixtures/AG-VISUAL-005-beispiele-v2-1/12-zustandsschutz.json
+@@ -255,6 +255,66 @@
+         },
+         "soll_cursor_verbrauch": 1,
+         "bemerkung": "Verglichen wird der fachliche Zustand ohne Cursor; der Cursor ist Verbrauchsstand (siehe abgrenzung)."
++      },
++      {
++        "name": "revision_nicht_steigend_nicht_done",
++        "warum": "Ungueltige Kette auf einen Status OHNE Done (in_arbeit). Hier kann pruefe_done den Fehler nicht verdecken: nur die K1-Kandidatenpruefung (R-28) haelt den Zustand.",
++        "ereignisse": [
++          {
++            "id": "A",
++            "project_id": "AG-NEU",
++            "run_id": "AG-NEU-R1",
++            "task_id": "T-1",
++            "actor": "atlas",
++            "kind": "status_change",
++            "title": "Statuswechsel A",
++            "caused_by": [],
++            "occurred_at": "2026-10-16T09:00:00Z",
++            "recorded_at": "2026-10-16T09:00:01Z",
++            "fictional": false,
++            "from": null,
++            "to": "offen",
++            "item_revision": 1,
++            "previous_transition_id": null
++          },
++          {
++            "id": "B",
++            "project_id": "AG-NEU",
++            "run_id": "AG-NEU-R1",
++            "task_id": "T-1",
++            "actor": "atlas",
++            "kind": "status_change",
++            "title": "Statuswechsel B",
++            "caused_by": [],
++            "occurred_at": "2026-10-16T09:00:00Z",
++            "recorded_at": "2026-10-16T09:00:01Z",
++            "fictional": false,
++            "from": "offen",
++            "to": "in_arbeit",
++            "item_revision": 1,
++            "previous_transition_id": "A"
++          }
++        ],
++        "soll_verstoss": true,
++        "soll_kein_done": true,
++        "soll_fachzustand": {
++          "aufgaben": [
++            {
++              "task_id": "T-1",
++              "parent_task_id": null,
++              "work_item_type": null,
++              "status": "offen",
++              "item_revision": 1,
++              "letzte_transition_id": "A",
++              "owner": null
++            }
++          ],
++          "artefakte": [],
++          "blockaden": [],
++          "abdeckung": "complete"
++        },
++        "soll_cursor_verbrauch": 2,
++        "bemerkung": "Verglichen wird der fachliche Zustand ohne Cursor; der Cursor ist Verbrauchsstand (siehe abgrenzung)."
+       }
+     ],
+     "k3_faelle": [

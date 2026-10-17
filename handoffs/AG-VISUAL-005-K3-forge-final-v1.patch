@@ -1,0 +1,217 @@
+--- a/fixtures/AG-VISUAL-005-beispiele-v2-1/12-zustandsschutz.json
++++ b/fixtures/AG-VISUAL-005-beispiele-v2-1/12-zustandsschutz.json
+@@ -348,6 +348,110 @@
+         "soll_done_beanstandet": true
+       }
+     ],
++    "k3_done_faelle": [
++      {
++        "name": "exakter_nachweis_pass_ergibt_done",
++        "warum": "Voller Schluessel, pass, richtiger nachweis_ref: Done wird uebernommen.",
++        "ereignisse": [
++          {"id": "A", "project_id": "AG-NEU", "run_id": "AG-NEU-R1", "task_id": "T-1", "actor": "atlas", "kind": "status_change", "title": "Statuswechsel A", "caused_by": [], "occurred_at": "2026-10-16T09:00:00Z", "recorded_at": "2026-10-16T09:00:01Z", "fictional": false, "from": null, "to": "offen", "item_revision": 1, "previous_transition_id": null},
++          {"id": "P", "project_id": "AG-NEU", "run_id": "AG-NEU-R1", "task_id": "T-1", "actor": "sentinel", "kind": "test_result", "title": "Pruefung P", "caused_by": [], "occurred_at": "2026-10-16T09:00:00Z", "recorded_at": "2026-10-16T09:00:01Z", "fictional": false, "artifact_id": "ART-1", "version": "v1", "criteria_ref": "KRIT@v1", "outcome": "pass"},
++          {"id": "D", "project_id": "AG-NEU", "run_id": "AG-NEU-R1", "task_id": "T-1", "actor": "atlas", "kind": "status_change", "title": "Statuswechsel D", "caused_by": [], "occurred_at": "2026-10-16T09:00:00Z", "recorded_at": "2026-10-16T09:00:01Z", "fictional": false, "from": "offen", "to": "done", "item_revision": 2, "previous_transition_id": "A", "artifact_id": "ART-1", "version": "v1", "criteria_ref": "KRIT@v1", "nachweis_ref": "P"}
++        ],
++        "soll_status": "done",
++        "soll_diagnose": false
++      },
++      {
++        "name": "kein_nachweis_kein_done",
++        "warum": "Done ohne jede Pruefung unter der Referenz.",
++        "ereignisse": [
++          {"id": "A", "project_id": "AG-NEU", "run_id": "AG-NEU-R1", "task_id": "T-1", "actor": "atlas", "kind": "status_change", "title": "Statuswechsel A", "caused_by": [], "occurred_at": "2026-10-16T09:00:00Z", "recorded_at": "2026-10-16T09:00:01Z", "fictional": false, "from": null, "to": "offen", "item_revision": 1, "previous_transition_id": null},
++          {"id": "D", "project_id": "AG-NEU", "run_id": "AG-NEU-R1", "task_id": "T-1", "actor": "atlas", "kind": "status_change", "title": "Statuswechsel D", "caused_by": [], "occurred_at": "2026-10-16T09:00:00Z", "recorded_at": "2026-10-16T09:00:01Z", "fictional": false, "from": "offen", "to": "done", "item_revision": 2, "previous_transition_id": "A", "artifact_id": "ART-1", "version": "v1", "criteria_ref": "KRIT@v1"}
++        ],
++        "soll_status": "offen",
++        "soll_diagnose": true
++      },
++      {
++        "name": "fremder_nachweis_kein_done",
++        "warum": "Ein Pass einer anderen Aufgabe zaehlt nicht.",
++        "ereignisse": [
++          {"id": "A", "project_id": "AG-NEU", "run_id": "AG-NEU-R1", "task_id": "T-1", "actor": "atlas", "kind": "status_change", "title": "Statuswechsel A", "caused_by": [], "occurred_at": "2026-10-16T09:00:00Z", "recorded_at": "2026-10-16T09:00:01Z", "fictional": false, "from": null, "to": "offen", "item_revision": 1, "previous_transition_id": null},
++          {"id": "P", "project_id": "AG-NEU", "run_id": "AG-NEU-R1", "task_id": "T-2", "actor": "sentinel", "kind": "test_result", "title": "Pruefung P", "caused_by": [], "occurred_at": "2026-10-16T09:00:00Z", "recorded_at": "2026-10-16T09:00:01Z", "fictional": false, "artifact_id": "ART-1", "version": "v1", "criteria_ref": "KRIT@v1", "outcome": "pass"},
++          {"id": "D", "project_id": "AG-NEU", "run_id": "AG-NEU-R1", "task_id": "T-1", "actor": "atlas", "kind": "status_change", "title": "Statuswechsel D", "caused_by": [], "occurred_at": "2026-10-16T09:00:00Z", "recorded_at": "2026-10-16T09:00:01Z", "fictional": false, "from": "offen", "to": "done", "item_revision": 2, "previous_transition_id": "A", "artifact_id": "ART-1", "version": "v1", "criteria_ref": "KRIT@v1"}
++        ],
++        "soll_status": "offen",
++        "soll_diagnose": true
++      },
++      {
++        "name": "falsche_kriterienfassung_kein_done",
++        "warum": "Pass unter KRIT@v0 erlaubt kein Done unter KRIT@v1.",
++        "ereignisse": [
++          {"id": "A", "project_id": "AG-NEU", "run_id": "AG-NEU-R1", "task_id": "T-1", "actor": "atlas", "kind": "status_change", "title": "Statuswechsel A", "caused_by": [], "occurred_at": "2026-10-16T09:00:00Z", "recorded_at": "2026-10-16T09:00:01Z", "fictional": false, "from": null, "to": "offen", "item_revision": 1, "previous_transition_id": null},
++          {"id": "P", "project_id": "AG-NEU", "run_id": "AG-NEU-R1", "task_id": "T-1", "actor": "sentinel", "kind": "test_result", "title": "Pruefung P", "caused_by": [], "occurred_at": "2026-10-16T09:00:00Z", "recorded_at": "2026-10-16T09:00:01Z", "fictional": false, "artifact_id": "ART-1", "version": "v1", "criteria_ref": "KRIT@v0", "outcome": "pass"},
++          {"id": "D", "project_id": "AG-NEU", "run_id": "AG-NEU-R1", "task_id": "T-1", "actor": "atlas", "kind": "status_change", "title": "Statuswechsel D", "caused_by": [], "occurred_at": "2026-10-16T09:00:00Z", "recorded_at": "2026-10-16T09:00:01Z", "fictional": false, "from": "offen", "to": "done", "item_revision": 2, "previous_transition_id": "A", "artifact_id": "ART-1", "version": "v1", "criteria_ref": "KRIT@v1"}
++        ],
++        "soll_status": "offen",
++        "soll_diagnose": true
++      },
++      {
++        "name": "spaeteres_fail_kein_done",
++        "warum": "Ein spaeteres Fail auf dieselbe Referenz sperrt Done.",
++        "ereignisse": [
++          {"id": "A", "project_id": "AG-NEU", "run_id": "AG-NEU-R1", "task_id": "T-1", "actor": "atlas", "kind": "status_change", "title": "Statuswechsel A", "caused_by": [], "occurred_at": "2026-10-16T09:00:00Z", "recorded_at": "2026-10-16T09:00:01Z", "fictional": false, "from": null, "to": "offen", "item_revision": 1, "previous_transition_id": null},
++          {"id": "P1", "project_id": "AG-NEU", "run_id": "AG-NEU-R1", "task_id": "T-1", "actor": "sentinel", "kind": "test_result", "title": "Pruefung P1", "caused_by": [], "occurred_at": "2026-10-16T09:00:00Z", "recorded_at": "2026-10-16T09:00:01Z", "fictional": false, "artifact_id": "ART-1", "version": "v1", "criteria_ref": "KRIT@v1", "outcome": "pass"},
++          {"id": "P2", "project_id": "AG-NEU", "run_id": "AG-NEU-R1", "task_id": "T-1", "actor": "sentinel", "kind": "test_result", "title": "Pruefung P2", "caused_by": [], "occurred_at": "2026-10-16T09:00:00Z", "recorded_at": "2026-10-16T09:00:01Z", "fictional": false, "artifact_id": "ART-1", "version": "v1", "criteria_ref": "KRIT@v1", "outcome": "fail"},
++          {"id": "D", "project_id": "AG-NEU", "run_id": "AG-NEU-R1", "task_id": "T-1", "actor": "atlas", "kind": "status_change", "title": "Statuswechsel D", "caused_by": [], "occurred_at": "2026-10-16T09:00:00Z", "recorded_at": "2026-10-16T09:00:01Z", "fictional": false, "from": "offen", "to": "done", "item_revision": 2, "previous_transition_id": "A", "artifact_id": "ART-1", "version": "v1", "criteria_ref": "KRIT@v1"}
++        ],
++        "soll_status": "offen",
++        "soll_diagnose": true
++      },
++      {
++        "name": "falscher_nachweis_ref_kein_done",
++        "warum": "Pass vorhanden, aber Done nennt einen anderen Nachweis.",
++        "ereignisse": [
++          {"id": "A", "project_id": "AG-NEU", "run_id": "AG-NEU-R1", "task_id": "T-1", "actor": "atlas", "kind": "status_change", "title": "Statuswechsel A", "caused_by": [], "occurred_at": "2026-10-16T09:00:00Z", "recorded_at": "2026-10-16T09:00:01Z", "fictional": false, "from": null, "to": "offen", "item_revision": 1, "previous_transition_id": null},
++          {"id": "P", "project_id": "AG-NEU", "run_id": "AG-NEU-R1", "task_id": "T-1", "actor": "sentinel", "kind": "test_result", "title": "Pruefung P", "caused_by": [], "occurred_at": "2026-10-16T09:00:00Z", "recorded_at": "2026-10-16T09:00:01Z", "fictional": false, "artifact_id": "ART-1", "version": "v1", "criteria_ref": "KRIT@v1", "outcome": "pass"},
++          {"id": "D", "project_id": "AG-NEU", "run_id": "AG-NEU-R1", "task_id": "T-1", "actor": "atlas", "kind": "status_change", "title": "Statuswechsel D", "caused_by": [], "occurred_at": "2026-10-16T09:00:00Z", "recorded_at": "2026-10-16T09:00:01Z", "fictional": false, "from": "offen", "to": "done", "item_revision": 2, "previous_transition_id": "A", "artifact_id": "ART-1", "version": "v1", "criteria_ref": "KRIT@v1", "nachweis_ref": "ANDERE"}
++        ],
++        "soll_status": "offen",
++        "soll_diagnose": true
++      }
++    ],
++    "k3_snapshot_faelle": [
++      {
++        "name": "snapshot_mit_pass_ergibt_done",
++        "warum": "Der Nachweis steht nur im initial_state; Snapshot+Tail muss wie der Volllauf Done ergeben.",
++        "initial_state": {
++          "cursor": 1,
++          "aufgaben": [{"task_id": "T-1", "parent_task_id": null, "work_item_type": null, "status": "offen", "item_revision": 1, "letzte_transition_id": "A", "owner": null}],
++          "artefakte": [{"artifact_id": "ART-1", "version": "v1", "supersedes": null, "pruefungen": [{"kind": "test_result", "task_id": "T-1", "criteria_ref": "KRIT@v1", "outcome": "pass", "event_id": "P"}]}],
++          "blockaden": [],
++          "abdeckung": "complete"
++        },
++        "tail": [
++          {"id": "D", "project_id": "AG-NEU", "run_id": "AG-NEU-R1", "task_id": "T-1", "actor": "atlas", "kind": "status_change", "title": "Statuswechsel D", "caused_by": [], "occurred_at": "2026-10-16T09:00:00Z", "recorded_at": "2026-10-16T09:00:01Z", "fictional": false, "stream_sequence": 2, "from": "offen", "to": "done", "item_revision": 2, "previous_transition_id": "A", "artifact_id": "ART-1", "version": "v1", "criteria_ref": "KRIT@v1", "nachweis_ref": "P"}
++        ],
++        "soll_status": "done",
++        "soll_diagnose": false,
++        "soll_cursor": 2
++      },
++      {
++        "name": "snapshot_mit_fail_kein_done",
++        "warum": "Der Snapshot enthaelt ein Fail; Done darf nicht uebernommen werden, der Cursor zaehlt weiter.",
++        "initial_state": {
++          "cursor": 1,
++          "aufgaben": [{"task_id": "T-1", "parent_task_id": null, "work_item_type": null, "status": "offen", "item_revision": 1, "letzte_transition_id": "A", "owner": null}],
++          "artefakte": [{"artifact_id": "ART-1", "version": "v1", "supersedes": null, "pruefungen": [{"kind": "test_result", "task_id": "T-1", "criteria_ref": "KRIT@v1", "outcome": "fail", "event_id": "P"}]}],
++          "blockaden": [],
++          "abdeckung": "complete"
++        },
++        "tail": [
++          {"id": "D", "project_id": "AG-NEU", "run_id": "AG-NEU-R1", "task_id": "T-1", "actor": "atlas", "kind": "status_change", "title": "Statuswechsel D", "caused_by": [], "occurred_at": "2026-10-16T09:00:00Z", "recorded_at": "2026-10-16T09:00:01Z", "fictional": false, "stream_sequence": 2, "from": "offen", "to": "done", "item_revision": 2, "previous_transition_id": "A", "artifact_id": "ART-1", "version": "v1", "criteria_ref": "KRIT@v1"}
++        ],
++        "soll_status": "offen",
++        "soll_diagnose": true,
++        "soll_cursor": 2
++      }
++    ],
+     "k3_profil": {
+       "abweichung_aktiv": false,
+       "begruendung": "Solange kein maschinenpruefbarer Autorisierungsnachweis definiert ist, bleibt der Weg abgeschaltet. Wird einer definiert, wird eine Pruefung eingehaengt - nicht ein Schalter umgelegt. Keine neue Authentifizierungs- oder Freigabeinfrastruktur."
+--- a/tests/AG-VISUAL-005-referenz-reducer.py
++++ b/tests/AG-VISUAL-005-referenz-reducer.py
+@@ -119,6 +119,42 @@
+     return kandidat, b
+ 
+ 
++def pruefe_done(e, artefakte):
++    """K3: prueft den Done-Nachweis eines Statuswechsels gegen die bereits
++    UEBERNOMMENEN Pruefungen (initial_state und fruehere Ereignisse).
++    Gibt Beanstandungen zurueck; veraendert NICHTS. Nichtleer = Done nicht
++    uebernehmen."""
++    if (e.get('to') or '').lower() not in DONE_STATUS:
++        return []
++    eid = e.get('id')
++    if e.get('abweichung_autorisiert_durch') and e.get('abweichung_grund'):
++        if not ABWEICHUNG_AKTIV:
++            return ['%s: Abweichungsweg ist im aktuellen Profil DEAKTIVIERT - '
++                    'freie Zeichenketten sind kein Nachweis; Done nicht '
++                    'uebernommen, Aufgabe bleibt unveraendert' % eid]
++    k = nachweisschluessel(e)
++    if not all(k):
++        return ['%s: Done ohne vollstaendige Nachweisreferenz (task_id, '
++                'artifact_id, version, criteria_ref): %r - Done nicht '
++                'uebernommen' % (eid, k)]
++    art = artefakte.get((k[1], k[2]))
++    letzte = None
++    for p in (art or {}).get('pruefungen', []):
++        if p.get('task_id') == k[0] and p.get('criteria_ref') == k[3]:
++            letzte = p                    # spaeteste passende Pruefung gewinnt
++    if letzte is None:
++        return ['%s: Done fuer %s ohne akzeptierten Nachweis unter genau dieser '
++                'Referenz - Done nicht uebernommen' % (eid, k)]
++    if letzte.get('outcome') != 'pass':
++        return ['%s: Done fuer %s, letztes Ergebnis %r (%s) statt pass - Done '
++                'nicht uebernommen' % (eid, k, letzte.get('outcome'),
++                                       letzte.get('event_id'))]
++    if e.get('nachweis_ref') and e['nachweis_ref'] != letzte.get('event_id'):
++        return ['%s: nennt Nachweis %r, massgeblich ist aber %r - Done nicht '
++                'uebernommen' % (eid, e['nachweis_ref'], letzte.get('event_id'))]
++    return []
++
++
+ def pruefe_ereignis(e):
+     """Vorgelagerte Pruefung. Gibt Beanstandungen zurueck; eine nichtleere
+     Liste heisst: dieses Ereignis veraendert den Zustand nicht."""
+@@ -214,6 +250,9 @@
+             kandidat, vb = pruefe_statuswechsel(e, aufgaben)
+             if vb:
+                 return vb                 # K1: nichts uebernehmen
++            vd = pruefe_done(e, artefakte)
++            if vd:
++                return vd                 # K3: Done ohne Nachweis, nichts uebernehmen
+             aufgaben[kandidat['task_id']] = kandidat
+ 
+         if art == 'artifact':             # R5
+--- a/tests/AG-VISUAL-005-vertrag-v2-1-pruefen.py
++++ b/tests/AG-VISUAL-005-vertrag-v2-1-pruefen.py
+@@ -509,10 +509,42 @@
+         b = RED.done_nachweise(f['ereignisse'])
+         regel('R-45', bool(b) == f['soll_done_beanstandet'],
+               '%s: freie Autorisierung schaltet Done frei (K3)' % f['name'])
+-        z, _ = RED.reduziere(f['ereignisse'])
+-        regel('R-45', any(a['status'] == 'done' for a in z['aufgaben']),
+-              '%s: Vorbedingung der Probe stimmt nicht - der Statuswechsel '
+-              'selbst ist gueltig, nur der NACHWEIS fehlt' % f['name'])
++        # K3 (autoritativer Reducer): Done ohne Nachweis wird NICHT uebernommen.
++        z, v = RED.reduziere(f['ereignisse'])
++        regel('R-45', all(a['status'] != 'done' for a in z['aufgaben']),
++              '%s: Done steht im Reducer-Zustand trotz fehlendem Nachweis (K3)'
++              % f['name'])
++        regel('R-45', [a['status'] for a in z['aufgaben']] == ['offen'],
++              '%s: Aufgabenstatus nicht unveraendert offen (K3): %r'
++              % (f['name'], [a['status'] for a in z['aufgaben']]))
++        regel('R-45', bool(v), '%s: keine Diagnose zur abgelehnten Done-Transition (K3)'
++              % f['name'])
++
++    # K3: gueltiger exakter Nachweis => Done; alles andere => kein Done.
++    for f in d['k3_done_faelle']:
++        z, v = RED.reduziere(f['ereignisse'])
++        st = [a['status'] for a in z['aufgaben']]
++        regel('R-47', st == [f['soll_status']],
++              '%s: Status %r statt %r (K3)' % (f['name'], st, [f['soll_status']]))
++        regel('R-47', bool(v) == f['soll_diagnose'],
++              '%s: Diagnose-Erwartung %r verfehlt (K3): %s'
++              % (f['name'], f['soll_diagnose'], '; '.join(v)))
++        regel('R-47', z['cursor'] == len(f['ereignisse']),
++              '%s: Cursor %r statt Verbrauchsstand %d (K3)'
++              % (f['name'], z['cursor'], len(f['ereignisse'])))
++
++    # K3: Nachweis aus initial_state; Snapshot+Tail und Volllauf stimmen ueberein.
++    for f in d['k3_snapshot_faelle']:
++        z, v = RED.reduziere(f['tail'], initial_state=f['initial_state'],
++                             cursor=f['initial_state']['cursor'])
++        st = [a['status'] for a in z['aufgaben']]
++        regel('R-48', st == [f['soll_status']],
++              '%s: Status %r statt %r (K3 Snapshot)' % (f['name'], st, [f['soll_status']]))
++        regel('R-48', bool(v) == f['soll_diagnose'],
++              '%s: Diagnose-Erwartung verfehlt (K3 Snapshot)' % f['name'])
++        regel('R-48', z['cursor'] == f['soll_cursor'],
++              '%s: Cursor %r statt %r (K3 Snapshot)' % (f['name'], z['cursor'],
++                                                       f['soll_cursor']))
+ 
+ 
+ def main():

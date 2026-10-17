@@ -1,6 +1,6 @@
 {
   "schema": "agentarium.requirement-cost-register.v1",
-  "version": 3,
+  "version": 17,
   "created_at": "2026-10-14T04:15:27.033Z",
   "currency": "USD",
   "scope": "Known NACHTPOST-003/VISUAL-004 calls plus explicit earlier failure gaps. This is not the full project bill.",
@@ -261,6 +261,17 @@
         "AG-VISUAL-004-FORGE"
       ],
       "allocation": "Shared task cost, not individually separable"
+    },
+    {
+      "epic": "AG-VISUAL-005",
+      "version": "K3-FINAL-V1",
+      "criterion_id": "K3",
+      "text": "Done only after a valid accepted proof; invalid Done does not change the task state.",
+      "source_ref": "handoffs/AG-VISUAL-005-K3-forge-final-v1.json",
+      "associated_attempts": [
+        "AG-VISUAL-005-K3-FORGE-FINAL-V1"
+      ],
+      "allocation": "One coding attempt; independent ChatGPT review/QA amounts unavailable"
     }
   ],
   "calls": [
@@ -559,6 +570,412 @@
       "token_usage": [],
       "token_status": "NOT_AVAILABLE_IN_PRESERVED_EVIDENCE",
       "token_evidence_ref": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6150760833"
+    },
+    {
+      "attempt_id": "AG-VISUAL-005-K3-FORGE-FINAL-V1",
+      "session": "1292d0c3-75dc-492b-881c-75df1593ceb9",
+      "role": "forge",
+      "actual_model": "claude-sonnet-5-5",
+      "requested_model": "sonnet",
+      "requested_reasoning": "medium",
+      "actual_reasoning": "unconfirmed",
+      "reported_usage_cost_usd": 0.22442469999999998,
+      "cost_source": "Claude CLI terminal metadata even though error_max_turns; not reconciled with invoice",
+      "status": "TURN_LIMIT_PATCH_RECOVERED_INDEPENDENT_QA_PASS_AFTER_TEST_FOLLOWUP",
+      "run": "https://github.com/pahlborn/agentarium/actions/runs/38878383344",
+      "evidence_ref": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6212103126",
+      "requirement_refs": [
+        "handoffs/AG-VISUAL-005-K3-forge-final-v1.json",
+        "governance/AG-VISUAL-005-INTERFACE-v2-1-2-team-review-v1.md"
+      ],
+      "cost_allocation": "Whole bounded K3 attempt; no invented per-assertion allocation",
+      "token_status": "PROVIDER_REPORTED",
+      "token_usage": [
+        {
+          "actual_model": "claude-sonnet-5-5",
+          "input_tokens": 18,
+          "output_tokens": 11131,
+          "cache_read_input_tokens": 141812,
+          "cache_creation_input_tokens": 39559,
+          "thinking_tokens": 2234,
+          "provider_reported_model_cost_usd": 0.22442469999999998,
+          "raw_usage": {
+            "inputTokens": 18,
+            "outputTokens": 11131,
+            "cacheReadInputTokens": 141812,
+            "cacheCreationInputTokens": 39559,
+            "webSearchRequests": 0,
+            "costUSD": 0.22442469999999998,
+            "contextWindow": 1000000,
+            "maxOutputTokens": 128000,
+            "thinkingTokens": 2234
+          }
+        }
+      ],
+      "token_evidence_ref": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6212103126",
+      "patch_sha256": "bb88fef8ca09ede0e28e91c2487a8c5dcb18d7141d3c2f6856e95df3dd02af45",
+      "acceptance_status": "VERIFIED_ON_WORK_BRANCH",
+      "accepted_commit": "da860fd19f38e9938ed201546f2a6e5b4cc765f8"
+    },
+    {
+      "attempt_id": "AG-VISUAL-005-K1-COUNTERPROBE-V1",
+      "session": "a307250d-4104-4843-9043-54903e526889",
+      "role": "forge",
+      "actual_model": "claude-sonnet-5-5",
+      "actual_reasoning": "unconfirmed",
+      "reported_usage_cost_usd": 0.1315362,
+      "cost_source": "Claude CLI runtime metadata, not invoice reconciled",
+      "status": "SUCCESS_INDEPENDENT_QA_PASS",
+      "run": "https://github.com/pahlborn/agentarium/actions/runs/38884452318",
+      "evidence_ref": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6213044280",
+      "requirement_refs": [
+        "AG-VISUAL-005-K3-QA-01",
+        "handoffs/AG-VISUAL-005-K1-counterprobe-v1.json"
+      ],
+      "patch_sha256": "a3adb15e673951f5a12c1c7b2c6d2e8459829b21a547d05927fd53b4beb1f6d7",
+      "token_status": "PROVIDER_REPORTED",
+      "token_usage": [
+        {
+          "actual_model": "claude-sonnet-5-5",
+          "input_tokens": 14,
+          "output_tokens": 3013,
+          "cache_read_input_tokens": 91457,
+          "cache_creation_input_tokens": 36893,
+          "thinking_tokens": 262,
+          "provider_reported_model_cost_usd": 0.1315362,
+          "raw_usage": {
+            "inputTokens": 14,
+            "outputTokens": 3013,
+            "cacheReadInputTokens": 91457,
+            "cacheCreationInputTokens": 36893,
+            "webSearchRequests": 0,
+            "costUSD": 0.1315362,
+            "contextWindow": 1000000,
+            "maxOutputTokens": 128000,
+            "thinkingTokens": 262,
+            "canonicalModel": "claude-sonnet-5-5",
+            "provider": "firstParty",
+            "costBasis": "list"
+          }
+        }
+      ],
+      "acceptance_status": "VERIFIED_ON_WORK_BRANCH",
+      "accepted_commit": "da860fd19f38e9938ed201546f2a6e5b4cc765f8"
+    },
+    {
+      "attempt_id": "AG-PILOT-001-LOCAL-TRANSPORT-V1",
+      "session": "f0f7d565-326a-423e-960a-2cec7efe0990",
+      "role": "forge",
+      "actual_model": "claude-sonnet-5-5",
+      "requested_model": "sonnet",
+      "actual_reasoning": "unconfirmed",
+      "reported_usage_cost_usd": 0.16888330000000001,
+      "cost_source": "Claude CLI terminal runtime; not invoice reconciled",
+      "status": "SUCCESS_WORKER_RUNTIME_QA_FAIL_CANONICAL_INPUT",
+      "run": "https://github.com/pahlborn/agentarium/actions/runs/38885877232",
+      "evidence_ref": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6213264341",
+      "requirement_refs": [
+        "handoffs/AG-PILOT-001-local-transport-v1.json"
+      ],
+      "patch_sha256": "439236f2a2079aa3a59f9ec4ac909bd4b68abf43ef7d478dc3ac56b325d980fe",
+      "token_status": "PROVIDER_REPORTED",
+      "token_usage": [
+        {
+          "actual_model": "claude-sonnet-5-5",
+          "input_tokens": 16,
+          "output_tokens": 10277,
+          "cache_read_input_tokens": 72913,
+          "cache_creation_input_tokens": 23516,
+          "thinking_tokens": 2824,
+          "raw_usage": {
+            "inputTokens": 16,
+            "outputTokens": 10277,
+            "cacheReadInputTokens": 72913,
+            "cacheCreationInputTokens": 23516,
+            "webSearchRequests": 0,
+            "costUSD": 0.16888330000000001,
+            "contextWindow": 1000000,
+            "maxOutputTokens": 128000,
+            "thinkingTokens": 2824,
+            "canonicalModel": "claude-sonnet-5-5",
+            "provider": "firstParty",
+            "costBasis": "list"
+          }
+        }
+      ],
+      "followup_ref": "AG-PILOT-001-LOCAL-TRANSPORT-V2"
+    },
+    {
+      "attempt_id": "AG-PILOT-001-LOCAL-TRANSPORT-V2",
+      "session": "fdace86d-8201-4d5c-b69a-5c54b85e6848",
+      "role": "forge",
+      "actual_model": "claude-sonnet-5-5",
+      "actual_reasoning": "unconfirmed",
+      "reported_usage_cost_usd": 0.1286485,
+      "cost_source": "Claude CLI terminal metadata, no invoice reconciliation",
+      "status": "SUCCESS_LOCAL_RUNTIME_QA_PASS_18_OF_18",
+      "run": "https://github.com/pahlborn/agentarium/actions/runs/38886371918",
+      "evidence_ref": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6213328234",
+      "requirement_refs": [
+        "AG-PILOT-001-LOCAL-F01",
+        "AG-PILOT-001-LOCAL-F02",
+        "AG-PILOT-001-LOCAL-F03",
+        "AG-PILOT-001-LOCAL-F04"
+      ],
+      "patch_sha256": "32786f83c193399da7876a5b7a0b9b87c1404df1eff966bdbdec98179be24e05",
+      "token_status": "PROVIDER_REPORTED",
+      "token_usage": [
+        {
+          "actual_model": "claude-sonnet-5-5",
+          "input_tokens": 10,
+          "output_tokens": 6459,
+          "cache_read_input_tokens": 30310,
+          "cache_creation_input_tokens": 24403,
+          "thinking_tokens": 760,
+          "raw_usage": {
+            "inputTokens": 10,
+            "outputTokens": 6459,
+            "cacheReadInputTokens": 30310,
+            "cacheCreationInputTokens": 24403,
+            "webSearchRequests": 0,
+            "costUSD": 0.1286485,
+            "contextWindow": 1000000,
+            "maxOutputTokens": 128000,
+            "thinkingTokens": 760,
+            "canonicalModel": "claude-sonnet-5-5",
+            "provider": "firstParty",
+            "costBasis": "list"
+          }
+        }
+      ],
+      "accepted_commit": "19463534defa6f9c6b48812eeebf56433fa28e89",
+      "acceptance_scope": "Synthetic local transport only; no real pilot, auth, durable storage or field"
+    },
+    {
+      "attempt_id": "AG-PILOT-001-ACTIVITY-V1",
+      "session": "d9d5ef20-4dfb-496c-8174-441a90af03f4",
+      "role": "forge",
+      "actual_model": "claude-sonnet-5-5",
+      "actual_reasoning": "unconfirmed",
+      "reported_usage_cost_usd": 0.3843575,
+      "cost_source": "Claude CLI terminal metadata preserved under failure.terminal_usage; not invoice reconciled",
+      "status": "TURN_LIMIT_PATCH_PRESERVED_ACTIVITY_QA_FAIL_11_OF_14",
+      "run": "https://github.com/pahlborn/agentarium/actions/runs/38890028971",
+      "evidence_ref": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6213943285",
+      "requirement_refs": [
+        "specifications/AG-PILOT-001-activity-acceptance-v1.md",
+        "handoffs/AG-PILOT-001-activity-v1.json"
+      ],
+      "patch_sha256": "ae90437d6be200bc139dee46164085e39697a46fa32387e56020c7af2f062a48",
+      "token_status": "PROVIDER_REPORTED",
+      "token_usage": [
+        {
+          "actual_model": "claude-sonnet-5-5",
+          "input_tokens": 18,
+          "output_tokens": 27697,
+          "cache_read_input_tokens": 105215,
+          "cache_creation_input_tokens": 38732,
+          "thinking_tokens": 6134,
+          "raw_usage": {
+            "inputTokens": 18,
+            "outputTokens": 27697,
+            "cacheReadInputTokens": 105215,
+            "cacheCreationInputTokens": 38732,
+            "webSearchRequests": 0,
+            "costUSD": 0.3843575,
+            "contextWindow": 1000000,
+            "maxOutputTokens": 128000,
+            "thinkingTokens": 6134
+          }
+        }
+      ],
+      "followup_ref": "AG-PILOT-001-ACTIVITY-V2"
+    },
+    {
+      "attempt_id": "AG-PILOT-001-ACTIVITY-V2",
+      "session": "3ba53364-aa95-4ab7-990c-a23e77da4a99",
+      "role": "forge",
+      "actual_model": "claude-sonnet-5-5",
+      "actual_reasoning": "unconfirmed",
+      "reported_usage_cost_usd": 0.20881909999999998,
+      "cost_source": "Claude CLI terminal metadata; not invoice reconciled",
+      "status": "COMPONENT_QA_PASS_AFTER_EDITORIAL_DOC_FIX_BROWSER_NOT_TESTED",
+      "run": "https://github.com/pahlborn/agentarium/actions/runs/38890845816",
+      "evidence_ref": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6214054273",
+      "requirement_refs": [
+        "AG-PILOT-001-ACTIVITY-AF1",
+        "AG-PILOT-001-ACTIVITY-AF2",
+        "AG-PILOT-001-ACTIVITY-AF3",
+        "AG-PILOT-001-ACTIVITY-AF4"
+      ],
+      "patch_sha256": "66786b8a121688e03bf71c0ac455a5f9e5b561de7588f9b58db6746090052e57",
+      "token_status": "PROVIDER_REPORTED",
+      "token_usage": [
+        {
+          "actual_model": "claude-sonnet-5-5",
+          "input_tokens": 16,
+          "output_tokens": 13026,
+          "cache_read_input_tokens": 86446,
+          "cache_creation_input_tokens": 27953,
+          "thinking_tokens": 2503,
+          "raw_usage": {
+            "inputTokens": 16,
+            "outputTokens": 13026,
+            "cacheReadInputTokens": 86446,
+            "cacheCreationInputTokens": 27953,
+            "webSearchRequests": 0,
+            "costUSD": 0.20881909999999998,
+            "contextWindow": 1000000,
+            "maxOutputTokens": 128000,
+            "thinkingTokens": 2503,
+            "canonicalModel": "claude-sonnet-5-5",
+            "provider": "firstParty",
+            "costBasis": "list"
+          }
+        }
+      ],
+      "accepted_commit": "22ee82b48239082eca89a533db4645a9dc16d523",
+      "acceptance_scope": "Local state derivation and HTTP. Activity14/14, transport18/18; source JS expiry inspection. No browser/end-to-end/live coverage guarantee."
+    },
+    {
+      "attempt_id": "AG-PILOT-001-SOURCE-HOOK-V1",
+      "session": "bf2aa07d-a3cb-44f7-9d5e-9b032fa733fa",
+      "role": "forge",
+      "actual_model": "claude-sonnet-5-5",
+      "actual_reasoning": "unconfirmed",
+      "reported_usage_cost_usd": 0.30678419999999995,
+      "cost_source": "Claude CLI terminal runtime, not invoice reconciled",
+      "status": "SENTINEL_PASS_SOURCE_CAPTURE_COMPONENT",
+      "run": "https://github.com/pahlborn/agentarium/actions/runs/38905283794",
+      "evidence_ref": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6216191294",
+      "requirement_refs": [
+        "handoffs/AG-PILOT-001-source-hook-v1.json"
+      ],
+      "patch_sha256": "70bad8cf119ce11af60602efc9abe412ec7b78923b89f23043b4dbc7522f8b73",
+      "token_status": "PROVIDER_REPORTED",
+      "token_usage": [
+        {
+          "actual_model": "claude-sonnet-5-5",
+          "input_tokens": 16,
+          "output_tokens": 20838,
+          "cache_read_input_tokens": 111997,
+          "cache_creation_input_tokens": 34869,
+          "thinking_tokens": 8202,
+          "raw_usage": {
+            "inputTokens": 16,
+            "outputTokens": 20838,
+            "cacheReadInputTokens": 111997,
+            "cacheCreationInputTokens": 34869,
+            "webSearchRequests": 0,
+            "costUSD": 0.30678419999999995,
+            "contextWindow": 1000000,
+            "maxOutputTokens": 128000,
+            "thinkingTokens": 8202,
+            "canonicalModel": "claude-sonnet-5-5",
+            "provider": "firstParty",
+            "costBasis": "list"
+          }
+        }
+      ],
+      "signal_note": "execution.signals scanned generated stdout; BUDGET_EXCEEDED/RATE_LIMITED not treated as credit failure when terminal success/is_error false. No account balance inferred."
+    },
+    {
+      "attempt_id": "AG-PILOT-001-FIELD-ADAPTER-V1",
+      "session": "b7b2bb73-1510-49b8-9016-560fa910c2a6",
+      "role": "forge",
+      "actual_model": "claude-sonnet-5-5",
+      "actual_reasoning": "unconfirmed",
+      "reported_usage_cost_usd": 0.09127579999999999,
+      "cost_source": "Claude CLI terminal runtime, not invoice reconciled",
+      "status": "PARTIAL_CA_QUESTION_ROUTE_QA_PASS_FIELD_ADAPTER_MISSING",
+      "run": "https://github.com/pahlborn/agentarium/actions/runs/38906425847",
+      "evidence_ref": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6216323172",
+      "requirement_refs": [
+        "handoffs/AG-PILOT-001-field-adapter-v1.json"
+      ],
+      "patch_sha256": "3e40b5b245e8eb01d4c9e47a2b491b3a0cfd5e8ac68de5db7852ef7522979e33",
+      "token_status": "PROVIDER_REPORTED",
+      "token_usage": [
+        {
+          "actual_model": "claude-sonnet-5-5",
+          "input_tokens": 16,
+          "output_tokens": 3097,
+          "cache_read_input_tokens": 59438,
+          "cache_creation_input_tokens": 21732,
+          "thinking_tokens": 635,
+          "raw_usage": {
+            "inputTokens": 16,
+            "outputTokens": 3097,
+            "cacheReadInputTokens": 59438,
+            "cacheCreationInputTokens": 21732,
+            "webSearchRequests": 0,
+            "costUSD": 0.09127579999999999,
+            "contextWindow": 1000000,
+            "maxOutputTokens": 128000,
+            "thinkingTokens": 635,
+            "canonicalModel": "claude-sonnet-5-5",
+            "provider": "firstParty",
+            "costBasis": "list"
+          }
+        }
+      ],
+      "scope_note": "Only optional /field route and README; CA_QUESTION. Actual source capture/HTTP witness succeeded, field rendering not delivered."
+    },
+    {
+      "attempt_id": "AG-PILOT-001-FIELD-ADAPTER-V2",
+      "session": "7cedd45b-6ad5-4d11-ac8a-baee1ab394e1",
+      "role": "forge",
+      "actual_model": "claude-sonnet-5-5",
+      "actual_reasoning": "unconfirmed",
+      "reported_usage_cost_usd": 0.154038,
+      "cost_source": "Claude CLI terminal runtime, not invoice reconciled",
+      "status": "FAILED_MAX_TURNS_NO_NEW_FIELD_ADAPTER",
+      "run": "https://github.com/pahlborn/agentarium/actions/runs/38933558617",
+      "evidence_ref": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6220189114",
+      "requirement_refs": [
+        "handoffs/AG-PILOT-001-field-adapter-v2.json"
+      ],
+      "patch_sha256": "3e40b5b245e8eb01d4c9e47a2b491b3a0cfd5e8ac68de5db7852ef7522979e33",
+      "token_status": "PROVIDER_REPORTED",
+      "token_usage": [
+        {
+          "actual_model": "claude-sonnet-5-5",
+          "input_tokens": 18,
+          "output_tokens": 3334,
+          "cache_read_input_tokens": 142795,
+          "cache_creation_input_tokens": 42553,
+          "thinking_tokens": 1403
+        }
+      ],
+      "scope_note": "Public-repository guard passed and real worker ran. error_max_turns after9turns; no non-empty adapter or field hook delivered. No automatic retry."
+    },
+    {
+      "attempt_id": "AG-PILOT-001-FIELD-ADAPTER-V3",
+      "session": "065336d2-8af6-40c4-8a55-7135c70441f5",
+      "role": "forge",
+      "actual_model": "claude-sonnet-5-5",
+      "actual_reasoning": "unconfirmed",
+      "reported_usage_cost_usd": 0.4518881,
+      "cost_source": "Claude CLI terminal runtime, not invoice reconciled",
+      "status": "SUCCESS_SENTINEL_PASS_WITH_LIMITS_BROWSER_NOT_TESTED",
+      "run": "https://github.com/pahlborn/agentarium/actions/runs/38934352513",
+      "evidence_ref": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6220343563",
+      "requirement_refs": [
+        "handoffs/AG-PILOT-001-field-adapter-v3.json"
+      ],
+      "patch_sha256": "73571f323424aec6442358015d578b73998341da82a9f8fece05e7fd06fa3458",
+      "token_status": "PROVIDER_REPORTED",
+      "token_usage": [
+        {
+          "actual_model": "claude-sonnet-5-5",
+          "input_tokens": 30,
+          "output_tokens": 25193,
+          "cache_read_input_tokens": 355181,
+          "cache_creation_input_tokens": 65752,
+          "thinking_tokens": 12244
+        }
+      ],
+      "scope_note": "No turn cutoff; one bounded run,24turns. Exact patch independently QA PASS_WITH_LIMITS. Browser DOM NOT_TESTED."
     }
   ],
   "unknown_cost_attempts": [
@@ -587,7 +1004,19 @@
     "approved_pool_usd": 2,
     "overrun_usd": 0.2630638,
     "historical_issue2_known_usage_cost_usd": 2.8882656,
-    "historical_issue2_scope": "Distinct sessions found in register + Issue #2. Excludes unknown failures and any older sessions without preserved monetary evidence; not full project bill."
+    "historical_issue2_scope": "Distinct sessions found in register + Issue #2. Excludes unknown failures and any older sessions without preserved monetary evidence; not full project bill.",
+    "historical_totals_note": "Existing numeric totals above retain their historical scope/cutoff; new K3 attempt is recorded separately, no complete project total is claimed.",
+    "additional_k3_attempt_cost_usd": 0.22442469999999998,
+    "additional_k1_counterprobe_cost_usd": 0.1315362,
+    "additional_pilot_local_cost_usd": 0.16888330000000001,
+    "additional_pilot_local_v2_cost_usd": 0.1286485,
+    "additional_activity_v1_cost_usd": 0.3843575,
+    "additional_activity_v2_cost_usd": 0.20881909999999998,
+    "additional_source_hook_v1_cost_usd": 0.30678419999999995,
+    "additional_field_adapter_v1_cost_usd": 0.09127579999999999,
+    "additional_field_adapter_v2_cost_usd": 0.154038,
+    "additional_field_adapter_v3_cost_usd": 0.4518881,
+    "source_and_field_integration_calls_usd": 1.0039861
   },
   "other_costs": {
     "chatgpt": "Subscription usage; per-agent monetary allocation unavailable here, not recorded as zero",
@@ -634,7 +1063,7 @@
     "Acceptance outcome and cost per accepted deliverable (unknown if none accepted)",
     "Provider-reported input/output/cache-read/cache-write/thinking tokens for every agent, or explicit unavailable"
   ],
-  "updated_at": "2026-10-14T04:41:33.432Z",
+  "updated_at": "2026-10-16",
   "agent_token_coverage": [
     {
       "agent": "Atlas",
@@ -722,13 +1151,14 @@
       "Usage cost vs billed cash vs plan allocation distinguished",
       "Costs supported by runtime/provider evidence and clear reporting cutoff"
     ],
-    "missing_state": "Kosten noch nicht vollständig erfasst",
+    "missing_state": "Kosten nicht vollständig ermittelbar.",
     "unknown_is_neither_zero_nor_estimate": true,
     "internal_register": "Partial evidence remains available for accounting/research; never promoted to complete product total",
     "fictional_demo": "Existing mocks show labelled fictional costs; never substitute these for actual project usage",
     "implementation_owner": "Forge",
     "implementation_blocker": "Paid implementation not started; existing authorization exhausted",
-    "acceptance_test": "Given one missing agent/attempt cost, actual project total is absent; after complete scoped accounting it may appear with scope/cutoff."
+    "acceptance_test": "Given one missing agent/attempt cost, actual project total is absent; after complete scoped accounting it may appear with scope/cutoff.",
+    "field_remains_visible": true
   },
   "cost_work_status": {
     "status": "PAUSED_BY_PETER",
@@ -736,6 +1166,20 @@
     "scope": "Cost feature/visualization and further cost-work development",
     "resume_condition": "Overall costs can be determined",
     "historical_records": "Retained",
-    "runtime_spending_authorization": "No expansion; no new paid execution authorized by this pause"
+    "runtime_spending_authorization": "No expansion; no new paid execution authorized by this pause",
+    "last_execution": "FIELD_ADAPTER_V3_SUCCESS_SENTINEL_PASS_WITH_LIMITS_BROWSER_OPEN",
+    "skipped_field_adapter_v2": {
+      "run": "https://github.com/pahlborn/agentarium/actions/runs/38913485148",
+      "conclusion": "skipped",
+      "steps": [],
+      "anthropic_call_started": false,
+      "cost_amount": null,
+      "reason": "Repository now public; existing job requires private=true. No bypass."
+    },
+    "exact_authorization": {
+      "source": "Peter",
+      "decided_at": "2026-10-16T18:43:29+02:00",
+      "scope": "One Forge V3 run without turn cutoff; 900-second technical timeout; no automatic retry"
+    }
   }
 }
