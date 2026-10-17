@@ -1,0 +1,6 @@
+{
+  "task_id": "AG-BALL-LIVE-001-ORIGINAL-REAL-VERIFY-V1",
+  "authorized": true,
+  "candidate_commit": "c7a8da04d9b06d83edcd110f210c0cf84d4aa8ba",
+  "scope": "Synthetic components first, then exactly one real source process to already-open Original; no deployment"
+}
