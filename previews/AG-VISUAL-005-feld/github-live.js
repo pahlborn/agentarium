@@ -20,7 +20,7 @@
 */
 (function () {
   'use strict';
-  var ADAPTER = 'AG-GH-LIVE-001-v1';
+  var ADAPTER = 'AG-GH-LIVE-001-v1.1';
   var ENDPOINT = 'https://api.github.com/repos/pahlborn/agentarium/issues/2/comments?per_page=100';
   var MARKER = '<!-- AGENTARIUM_EVENT_V1 -->';
   var SCHEMA = 'agentarium.github-event.v1';
@@ -73,6 +73,34 @@
     while (log.length > MAX_LOG) log.shift();
   }
 
+  /* Ablaufdatum ist Geraete-Metadatum, niemals der Lesetoken. */
+  var ABLAUF_KEY = 'agentarium.github.tokenExpiry';
+  function heuteUtcTag() {
+    var d = new Date();
+    return Date.UTC(d.getFullYear(), d.getMonth(), d.getDate());
+  }
+  function gueltigesDatum(s) {
+    return /^\d{4}-\d\d-\d\d$/.test(s) &&
+      !isNaN(Date.parse(s + 'T00:00:00Z')) &&
+      new Date(s + 'T00:00:00Z').toISOString().slice(0, 10) === s;
+  }
+  var ablaufDatum = '';
+  try { ablaufDatum = localStorage.getItem(ABLAUF_KEY) || ''; } catch (x) {}
+  if (!gueltigesDatum(ablaufDatum)) {
+    ablaufDatum = new Date(heuteUtcTag() + 90 * 86400000).toISOString().slice(0, 10);
+    try { localStorage.setItem(ABLAUF_KEY, ablaufDatum); } catch (x) {}
+  }
+  function ablaufStand() {
+    if (!gueltigesDatum(ablaufDatum)) return { tage: null, text: 'Token-Ablaufdatum fehlt', warnung: '' };
+    var n = Math.round((Date.parse(ablaufDatum + 'T00:00:00Z') - heuteUtcTag()) / 86400000);
+    var datum = ablaufDatum.slice(8, 10) + '.' + ablaufDatum.slice(5, 7) + '.' + ablaufDatum.slice(0, 4);
+    var warn = n < 0 ? 'Token laut Datum abgelaufen — bitte erneuern'
+      : n === 0 ? 'Token läuft heute ab — bitte erneuern'
+      : n <= 10 ? 'Token läuft in ' + n + ' Tagen ab — bitte erneuern' : '';
+    return { tage: n, text: 'Token gültig bis ' + datum + ' · ' +
+      (n < 0 ? 'seit ' + (-n) + ' Tagen abgelaufen' : 'noch ' + n + ' Tage'), warnung: warn };
+  }
+
   /* ---------------------------------------------------------- Tafel */
   function el(tag, attr, text) {
     var e = document.createElement(tag);
@@ -113,12 +141,28 @@
   var knAn = el('button', { id: 'agGhAn', type: 'button' }, 'Verbinden');
   var knAus = el('button', { id: 'agGhAus', type: 'button' }, 'Trennen');
   zeile.appendChild(lab); zeile.appendChild(feld); zeile.appendChild(knAn); zeile.appendChild(knAus);
+  var ablaufZeile = el('div', { 'class': 'ghZ' });
+  var ablaufLabel = el('label', { 'for': 'agGhAblauf' }, 'Token gültig bis');
+  var ablaufInput = el('input', { id: 'agGhAblauf', type: 'date' });
+  ablaufInput.value = ablaufDatum;
+  var ablaufText = el('div', { id: 'agGhAblaufText' });
+  var ablaufHilfe = el('small', {}, 'Nur das Datum wird auf diesem Gerät gespeichert. ' +
+    'Vorgabe für einen neuen Token: 90 Tage ab heute; tatsächliches Ablaufdatum bitte prüfen.');
+  ablaufZeile.appendChild(ablaufLabel); ablaufZeile.appendChild(ablaufInput);
+  ablaufInput.addEventListener('change', function () {
+    ablaufDatum = gueltigesDatum(ablaufInput.value) ? ablaufInput.value : '';
+    try {
+      if (ablaufDatum) localStorage.setItem(ABLAUF_KEY, ablaufDatum);
+      else localStorage.removeItem(ABLAUF_KEY);
+    } catch (x) {}
+    anzeigen();
+  });
   var letztesEl = el('div', { id: 'agGhLetztes' }, 'Noch kein neues Ereignis.');
   var zahlEl = el('div', { id: 'agGhZahlen' });
   var grundEl = el('div', { id: 'agGhGrund' });
   var fuss = el('small', {}, 'Token nur im Arbeitsspeicher dieser Seite, nur an api.github.com. ' +
                 'Kosten: nicht verfügbar. Fortschritt ist kein Abschluss. ' + ADAPTER);
-  [kopf, zeile, letztesEl, zahlEl, grundEl, fuss].forEach(function (x) { auf.appendChild(x); });
+  [kopf, zeile, ablaufZeile, ablaufText, ablaufHilfe, letztesEl, zahlEl, grundEl, fuss].forEach(function (x) { auf.appendChild(x); });
   tafel.appendChild(auf);
   document.body.appendChild(tafel);
   /* Die Tafel ruehrt nicht im Feld und blendet keine Knoepfe ein. */
@@ -138,9 +182,13 @@
   function anzeigen(text) {
     if (text != null) Z.fehler = text;
     var p = PHASE[Z.phase] || Z.phase;
+    var ablauf = ablaufStand();
+    ablaufText.textContent = ablauf.text;
+    ablaufText.style.color = ablauf.warnung ? '#ffc58f' : '';
     statusEl.textContent = 'GitHub-Live · ' + p +
       (Z.pausiert && Z.phase === 'verbunden' ? ' · pausiert (Tab verborgen)' : '') +
-      (Z.fehler ? ' · ' + Z.fehler : '');
+      (Z.fehler ? ' · ' + Z.fehler : '') +
+      (ablauf.warnung ? ' · ' + ablauf.warnung : '');
     tafel.setAttribute('data-phase', Z.phase);
     zahlEl.textContent =
       (Z.schnittIso ? 'Basis bis ' + Z.schnittIso + ' (Geräteuhr): ' + zahl.basisKommentare +
@@ -154,6 +202,9 @@
     knAus.disabled = !token;
   }
   anzeigen();
+
+  setInterval(function () { anzeigen(); }, 60000);
+  document.addEventListener('visibilitychange', function () { anzeigen(); });
 
   /* ---------------------------------------------------------- Pruefen */
   function nein(g) { return { art: 'abgewiesen', grund: g }; }
@@ -465,6 +516,7 @@
     stand: function () {
       return JSON.parse(JSON.stringify({
         phase: Z.phase, verbunden: Z.phase === 'verbunden', hatToken: !!token,
+        ablaufDatum: ablaufDatum, ablaufTage: ablaufStand().tage,
         seite: Z.seite, anzahl: Z.anzahl, schnitt: Z.schnittIso, intervall: Z.intervall,
         pausiert: Z.pausiert, fehler: Z.fehler, grund: letzterGrund, zahl: zahl,
         letztes: letztes, bekannteIds: bekannte.groesse(), log: log }));
