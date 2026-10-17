@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE svg
+  PUBLIC '-//W3C//DTD SVG 1.0//EN'
+  'http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd'>
+<svg width="1600" height="1120" preserveAspectRatio="xMinYMin meet" viewBox="0 0 1600 1120" xmlns="http://www.w3.org/2000/svg" version="1.0" fill-rule="evenodd" xmlns:xlink="http://www.w3.org/1999/xlink">
+	<title>...</title>
+	<desc>...</desc>
+	<clipPath id="clip">
+		<rect x="0" y="0" width="1600" height="1120"/>
+	</clipPath>
+	<g id="group" transform="scale(1,-1) translate(0,-1120)" style="clip-path: url(#clip)">
+		<g transform="">
+			<rect x="0" y="0" width="1600" height="1120" style="stroke: none; stroke-linecap: butt; stroke-width: 1.4; fill: rgb(100%,100%,100%); fill-rule: evenodd;"/>
+			<text x="60" y="1072" style="font-family: DejaVu-Bold; font-size: 16px;fill: rgb(40%,28%,72%); stroke:none;" transform="translate(0,2144) scale(1,-1)">AGENTARIUM  /  SOFTWAREARCHITEKTUR</text>
+			<text x="60" y="1019" style="font-family: DejaVu-Bold; font-size: 35px;fill: rgb(7%,16%,27%); stroke:none;" transform="translate(0,2038) scale(1,-1)">Gesamtarchitektur und Ausführungsorte</text>
+			<text x="60" y="983" style="font-family: DejaVu; font-size: 17px;fill: rgb(32%,40%,48%); stroke:none;" transform="translate(0,1966) scale(1,-1)">C4-orientierte Verteilungsansicht mit Softwarebausteinen. Bestand, MVP-Kandidat und offene Erweiterungen.</text>
+			<text x="1387.18017578125" y="1072" style="font-family: DejaVu; font-size: 13px;fill: rgb(32%,40%,48%); stroke:none;" transform="translate(0,2144) scale(1,-1)">AG-ARCH-001 · V1 · 1/2</text>
+			<rect x="60" y="914" width="1480" height="44" rx="7" ry="7" style="stroke: none; stroke-linecap: butt; stroke-width: 1.4; fill: rgb(94%,92%,98%); fill-rule: evenodd;"/>
+			<text x="78" y="930" style="font-family: DejaVu; font-size: 15px;fill: rgb(40%,28%,72%); stroke:none;" transform="translate(0,1860) scale(1,-1)">Leseregel: durchgezogen = belegt  |  gestrichelt = offen / vorgesehen  |  M = MVP-Umfang, kein Erfolgsstatus</text>
+			<rect x="60" y="630" width="400" height="255" rx="12" ry="12" style="stroke: rgb(79%,83%,87%); stroke-linecap: butt; stroke-width: 1.4; fill: rgb(95%,96%,98%); fill-rule: evenodd;"/>
+			<text x="78" y="856" style="font-family: DejaVu-Bold; font-size: 19px;fill: rgb(7%,16%,27%); stroke:none;" transform="translate(0,1712) scale(1,-1)">ChatGPT Work</text>
+			<text x="78" y="832" style="font-family: DejaVu; font-size: 13px;fill: rgb(32%,40%,48%); stroke:none;" transform="translate(0,1664) scale(1,-1)">OpenAI-Laufzeit; nicht Peters iPad</text>
+			<rect x="82" y="658" width="356" height="155" rx="8" ry="8" style="stroke: rgb(40%,28%,72%); stroke-linecap: butt; stroke-width: 2.2; fill: rgb(100%,100%,100%); fill-rule: evenodd;"/>
+			<text x="98" y="786" style="font-family: DejaVu-Bold; font-size: 18px;fill: rgb(7%,16%,27%); stroke:none;" transform="translate(0,1572) scale(1,-1)">Atlas und Fachagenten</text>
+			<text x="98" y="764" style="font-family: DejaVu; font-size: 13px;fill: rgb(32%,40%,48%); stroke:none;" transform="translate(0,1528) scale(1,-1)">Orchestrierung · ChatGPT / Tools</text>
+			<text x="98" y="736" style="font-family: DejaVu; font-size: 15px;fill: rgb(32%,40%,48%); stroke:none;" transform="translate(0,1472) scale(1,-1)">Atlas koordiniert reale Subagenten.</text>
+			<text x="98" y="714" style="font-family: DejaVu; font-size: 15px;fill: rgb(32%,40%,48%); stroke:none;" transform="translate(0,1428) scale(1,-1)">Nova, Scout, Argus und Sentinel</text>
+			<text x="98" y="692" style="font-family: DejaVu; font-size: 15px;fill: rgb(32%,40%,48%); stroke:none;" transform="translate(0,1384) scale(1,-1)">liefern begrenzte Fachbeiträge.</text>
+			<rect x="396" y="801" width="30" height="25" rx="4" ry="4" style="stroke: none; stroke-linecap: butt; stroke-width: 1.4; fill: rgb(40%,28%,72%); fill-rule: evenodd;"/>
+			<text x="404.53173828125" y="808" style="font-family: DejaVu-Bold; font-size: 13px;fill: rgb(100%,100%,100%); stroke:none;" transform="translate(0,1616) scale(1,-1)">M</text>
+			<text x="98" y="671" style="font-family: DejaVu-Bold; font-size: 10px;fill: rgb(7%,47%,43%); stroke:none;" transform="translate(0,1342) scale(1,-1)">BELEGT</text>
+			<rect x="565" y="430" width="520" height="455" rx="12" ry="12" style="stroke: rgb(79%,83%,87%); stroke-linecap: butt; stroke-width: 1.4; fill: rgb(95%,96%,98%); fill-rule: evenodd;"/>
+			<text x="583" y="856" style="font-family: DejaVu-Bold; font-size: 19px;fill: rgb(7%,16%,27%); stroke:none;" transform="translate(0,1712) scale(1,-1)">GitHub</text>
+			<text x="583" y="832" style="font-family: DejaVu; font-size: 13px;fill: rgb(32%,40%,48%); stroke:none;" transform="translate(0,1664) scale(1,-1)">Kontroll-/Nachweisebene und statisches Hosting</text>
+			<rect x="590" y="687" width="470" height="126" rx="8" ry="8" style="stroke: rgb(40%,28%,72%); stroke-linecap: butt; stroke-width: 2.2; fill: rgb(100%,100%,100%); fill-rule: evenodd;"/>
+			<text x="606" y="786" style="font-family: DejaVu-Bold; font-size: 18px;fill: rgb(7%,16%,27%); stroke:none;" transform="translate(0,1572) scale(1,-1)">Projekt-Repository</text>
+			<text x="606" y="764" style="font-family: DejaVu; font-size: 13px;fill: rgb(32%,40%,48%); stroke:none;" transform="translate(0,1528) scale(1,-1)">Git · pahlborn/agentarium</text>
+			<text x="606" y="736" style="font-family: DejaVu; font-size: 15px;fill: rgb(32%,40%,48%); stroke:none;" transform="translate(0,1472) scale(1,-1)">Quellcode, Aufträge, Handbacks, Belege.</text>
+			<text x="606" y="714" style="font-family: DejaVu; font-size: 15px;fill: rgb(32%,40%,48%); stroke:none;" transform="translate(0,1428) scale(1,-1)">MVP: Export genau eines echten Ereignisses.</text>
+			<rect x="1018" y="801" width="30" height="25" rx="4" ry="4" style="stroke: none; stroke-linecap: butt; stroke-width: 1.4; fill: rgb(40%,28%,72%); fill-rule: evenodd;"/>
+			<text x="1026.53173828125" y="808" style="font-family: DejaVu-Bold; font-size: 13px;fill: rgb(100%,100%,100%); stroke:none;" transform="translate(0,1616) scale(1,-1)">M</text>
+			<text x="606" y="700" style="font-family: DejaVu-Bold; font-size: 10px;fill: rgb(7%,47%,43%); stroke:none;" transform="translate(0,1400) scale(1,-1)">BELEGT</text>
+			<rect x="590" y="435" width="220" height="160" rx="8" ry="8" style="stroke: rgb(79%,83%,87%); stroke-linecap: butt; stroke-width: 1.4; fill: rgb(100%,100%,100%); fill-rule: evenodd;"/>
+			<text x="606" y="568" style="font-family: DejaVu-Bold; font-size: 18px;fill: rgb(7%,16%,27%); stroke:none;" transform="translate(0,1136) scale(1,-1)">Actions + Relay</text>
+			<text x="606" y="546" style="font-family: DejaVu; font-size: 13px;fill: rgb(32%,40%,48%); stroke:none;" transform="translate(0,1092) scale(1,-1)">Ausführung · Python / CLI</text>
+			<text x="606" y="518" style="font-family: DejaVu; font-size: 15px;fill: rgb(32%,40%,48%); stroke:none;" transform="translate(0,1036) scale(1,-1)">Startet Claude Code.</text>
+			<text x="606" y="496" style="font-family: DejaVu; font-size: 15px;fill: rgb(32%,40%,48%); stroke:none;" transform="translate(0,992) scale(1,-1)">Forge, Archibald,</text>
+			<text x="606" y="474" style="font-family: DejaVu; font-size: 15px;fill: rgb(32%,40%,48%); stroke:none;" transform="translate(0,948) scale(1,-1)">Cadence je Auftrag.</text>
+			<text x="606" y="448" style="font-family: DejaVu-Bold; font-size: 10px;fill: rgb(7%,47%,43%); stroke:none;" transform="translate(0,896) scale(1,-1)">BELEGT</text>
+			<rect x="840" y="435" width="220" height="160" rx="8" ry="8" style="stroke: rgb(40%,28%,72%); stroke-linecap: butt; stroke-width: 2.2; fill: rgb(100%,100%,100%); fill-rule: evenodd;"/>
+			<text x="856" y="568" style="font-family: DejaVu-Bold; font-size: 18px;fill: rgb(7%,16%,27%); stroke:none;" transform="translate(0,1136) scale(1,-1)">GitHub Pages</text>
+			<text x="856" y="546" style="font-family: DejaVu; font-size: 13px;fill: rgb(32%,40%,48%); stroke:none;" transform="translate(0,1092) scale(1,-1)">Statischer HTTPS-Host</text>
+			<text x="856" y="518" style="font-family: DejaVu; font-size: 15px;fill: rgb(32%,40%,48%); stroke:none;" transform="translate(0,1036) scale(1,-1)">Liefert HTML, JS, JSON.</text>
+			<text x="856" y="496" style="font-family: DejaVu; font-size: 15px;fill: rgb(32%,40%,48%); stroke:none;" transform="translate(0,992) scale(1,-1)">Keine Agentenausführung.</text>
+			<rect x="1018" y="583" width="30" height="25" rx="4" ry="4" style="stroke: none; stroke-linecap: butt; stroke-width: 1.4; fill: rgb(40%,28%,72%); fill-rule: evenodd;"/>
+			<text x="1026.53173828125" y="590" style="font-family: DejaVu-Bold; font-size: 13px;fill: rgb(100%,100%,100%); stroke:none;" transform="translate(0,1180) scale(1,-1)">M</text>
+			<text x="856" y="448" style="font-family: DejaVu-Bold; font-size: 10px;fill: rgb(65%,38%,4%); stroke:none;" transform="translate(0,896) scale(1,-1)">ORIGINAL BELEGT; MVP OFFEN</text>
+			<rect x="1160" y="660" width="380" height="225" rx="12" ry="12" style="stroke: rgb(79%,83%,87%); stroke-linecap: butt; stroke-width: 1.4; fill: rgb(95%,96%,98%); fill-rule: evenodd;"/>
+			<text x="1178" y="856" style="font-family: DejaVu-Bold; font-size: 19px;fill: rgb(7%,16%,27%); stroke:none;" transform="translate(0,1712) scale(1,-1)">Anthropic</text>
+			<text x="1178" y="832" style="font-family: DejaVu; font-size: 13px;fill: rgb(32%,40%,48%); stroke:none;" transform="translate(0,1664) scale(1,-1)">Externer Modelldienst</text>
+			<rect x="1182" y="687" width="336" height="126" rx="8" ry="8" style="stroke: rgb(79%,83%,87%); stroke-linecap: butt; stroke-width: 1.4; fill: rgb(100%,100%,100%); fill-rule: evenodd;"/>
+			<text x="1198" y="786" style="font-family: DejaVu-Bold; font-size: 18px;fill: rgb(7%,16%,27%); stroke:none;" transform="translate(0,1572) scale(1,-1)">Claude API</text>
+			<text x="1198" y="764" style="font-family: DejaVu; font-size: 13px;fill: rgb(32%,40%,48%); stroke:none;" transform="translate(0,1528) scale(1,-1)">Inference · HTTPS API</text>
+			<text x="1198" y="736" style="font-family: DejaVu; font-size: 15px;fill: rgb(32%,40%,48%); stroke:none;" transform="translate(0,1472) scale(1,-1)">Claude Code ruft das Modell auf.</text>
+			<text x="1198" y="714" style="font-family: DejaVu; font-size: 15px;fill: rgb(32%,40%,48%); stroke:none;" transform="translate(0,1428) scale(1,-1)">Schlüssel bleibt in der Laufzeit.</text>
+			<text x="1198" y="700" style="font-family: DejaVu-Bold; font-size: 10px;fill: rgb(7%,47%,43%); stroke:none;" transform="translate(0,1400) scale(1,-1)">BELEGT</text>
+			<rect x="1160" y="300" width="380" height="290" rx="12" ry="12" style="stroke: rgb(79%,83%,87%); stroke-linecap: butt; stroke-width: 1.4; fill: rgb(95%,96%,98%); fill-rule: evenodd;"/>
+			<text x="1178" y="561" style="font-family: DejaVu-Bold; font-size: 19px;fill: rgb(7%,16%,27%); stroke:none;" transform="translate(0,1122) scale(1,-1)">Peters Gerät / Browser</text>
+			<text x="1178" y="537" style="font-family: DejaVu; font-size: 13px;fill: rgb(32%,40%,48%); stroke:none;" transform="translate(0,1074) scale(1,-1)">iPad: Safari mit erforderlichem WebGL</text>
+			<rect x="1182" y="325" width="336" height="193" rx="8" ry="8" style="stroke: rgb(40%,28%,72%); stroke-linecap: butt; stroke-width: 2.2; fill: rgb(100%,100%,100%); fill-rule: evenodd;"/>
+			<text x="1198" y="491" style="font-family: DejaVu-Bold; font-size: 18px;fill: rgb(7%,16%,27%); stroke:none;" transform="translate(0,982) scale(1,-1)">Originales Agentarium</text>
+			<text x="1198" y="469" style="font-family: DejaVu; font-size: 13px;fill: rgb(32%,40%,48%); stroke:none;" transform="translate(0,938) scale(1,-1)">Browseranwendung · JavaScript / WebGL</text>
+			<text x="1198" y="441" style="font-family: DejaVu; font-size: 15px;fill: rgb(32%,40%,48%); stroke:none;" transform="translate(0,882) scale(1,-1)">Zeichnet das Feld auf dem Gerät.</text>
+			<text x="1198" y="419" style="font-family: DejaVu; font-size: 15px;fill: rgb(32%,40%,48%); stroke:none;" transform="translate(0,838) scale(1,-1)">Bestehend: __agLauf / __agEreignis.</text>
+			<text x="1198" y="397" style="font-family: DejaVu; font-size: 15px;fill: rgb(32%,40%,48%); stroke:none;" transform="translate(0,794) scale(1,-1)">MVP: einmaliger JSON-Leser.</text>
+			<text x="1198" y="375" style="font-family: DejaVu; font-size: 15px;fill: rgb(32%,40%,48%); stroke:none;" transform="translate(0,750) scale(1,-1)">PWA / Service Worker: lokaler Cache.</text>
+			<rect x="1476" y="506" width="30" height="25" rx="4" ry="4" style="stroke: none; stroke-linecap: butt; stroke-width: 1.4; fill: rgb(40%,28%,72%); fill-rule: evenodd;"/>
+			<text x="1484.53173828125" y="513" style="font-family: DejaVu-Bold; font-size: 13px;fill: rgb(100%,100%,100%); stroke:none;" transform="translate(0,1026) scale(1,-1)">M</text>
+			<text x="1198" y="338" style="font-family: DejaVu-Bold; font-size: 10px;fill: rgb(65%,38%,4%); stroke:none;" transform="translate(0,676) scale(1,-1)">ORIGINAL BELEGT; LESER KANDIDAT</text>
+			<rect x="60" y="356" width="400" height="144" rx="8" ry="8" style="stroke: rgb(79%,83%,87%); stroke-linecap: butt; stroke-width: 1.4; fill: rgb(100%,100%,100%); fill-rule: evenodd;"/>
+			<text x="76" y="473" style="font-family: DejaVu-Bold; font-size: 18px;fill: rgb(7%,16%,27%); stroke:none;" transform="translate(0,946) scale(1,-1)">Peter</text>
+			<text x="76" y="451" style="font-family: DejaVu; font-size: 13px;fill: rgb(32%,40%,48%); stroke:none;" transform="translate(0,902) scale(1,-1)">Person · Auftraggeber</text>
+			<text x="76" y="423" style="font-family: DejaVu; font-size: 15px;fill: rgb(32%,40%,48%); stroke:none;" transform="translate(0,846) scale(1,-1)">Gibt Auftrag, Budgetrahmen und Freigaben.</text>
+			<text x="76" y="401" style="font-family: DejaVu; font-size: 15px;fill: rgb(32%,40%,48%); stroke:none;" transform="translate(0,802) scale(1,-1)">Öffnet die veröffentlichte Anwendung.</text>
+			<text x="76" y="369" style="font-family: DejaVu-Bold; font-size: 10px;fill: rgb(7%,47%,43%); stroke:none;" transform="translate(0,738) scale(1,-1)">BELEGT</text>
+			<path d="M 260,500 L 260,630 Z" style="stroke: rgb(32%,42%,51%); stroke-linecap: butt; stroke-width: 1.8;"/>
+			<polygon points="260 630, 263.9147 621.896, 256.0853 621.896" style="stroke: none; stroke-linecap: butt; stroke-width: 1; fill: rgb(32%,42%,51%); fill-rule: evenodd;"/>
+			<rect x="75" y="570" width="221.7705078125" height="20" rx="2" ry="2" style="stroke: none; stroke-linecap: butt; stroke-width: 1.4; fill: rgb(100%,100%,100%); fill-rule: evenodd;"/>
+			<text x="80" y="575" style="font-family: DejaVu; font-size: 14px;fill: rgb(32%,42%,51%); stroke:none;" transform="translate(0,1150) scale(1,-1)">Auftrag / Rückfrage / Freigabe</text>
+			<rect x="75" y="550" width="214.88671875" height="20" rx="2" ry="2" style="stroke: none; stroke-linecap: butt; stroke-width: 1.4; fill: rgb(100%,100%,100%); fill-rule: evenodd;"/>
+			<text x="80" y="555" style="font-family: DejaVu; font-size: 14px;fill: rgb(32%,42%,51%); stroke:none;" transform="translate(0,1110) scale(1,-1)">über die ChatGPT-Oberfläche</text>
+			<path d="M 438,760 L 590,760 Z" style="stroke: rgb(32%,42%,51%); stroke-linecap: butt; stroke-width: 1.8;"/>
+			<polygon points="590 760, 581.896 756.0853, 581.896 763.9147" style="stroke: none; stroke-linecap: butt; stroke-width: 1; fill: rgb(32%,42%,51%); fill-rule: evenodd;"/>
+			<rect x="443" y="802" width="159.87109375" height="20" rx="2" ry="2" style="stroke: none; stroke-linecap: butt; stroke-width: 1.4; fill: rgb(100%,100%,100%); fill-rule: evenodd;"/>
+			<text x="448" y="807" style="font-family: DejaVu; font-size: 14px;fill: rgb(32%,42%,51%); stroke:none;" transform="translate(0,1614) scale(1,-1)">Connector: schreiben</text>
+			<rect x="443" y="782" width="104.5888671875" height="20" rx="2" ry="2" style="stroke: none; stroke-linecap: butt; stroke-width: 1.4; fill: rgb(100%,100%,100%); fill-rule: evenodd;"/>
+			<text x="448" y="787" style="font-family: DejaVu; font-size: 14px;fill: rgb(32%,42%,51%); stroke:none;" transform="translate(0,1574) scale(1,-1)">HTTPS / REST</text>
+			<path d="M 590,719 L 438,719 Z" style="stroke: rgb(32%,42%,51%); stroke-linecap: butt; stroke-width: 1.8;"/>
+			<polygon points="438 719, 446.104 722.9147, 446.104 715.0853" style="stroke: none; stroke-linecap: butt; stroke-width: 1; fill: rgb(32%,42%,51%); fill-rule: evenodd;"/>
+			<rect x="443" y="726" width="155.6328125" height="20" rx="2" ry="2" style="stroke: none; stroke-linecap: butt; stroke-width: 1.4; fill: rgb(100%,100%,100%); fill-rule: evenodd;"/>
+			<text x="448" y="731" style="font-family: DejaVu; font-size: 14px;fill: rgb(32%,42%,51%); stroke:none;" transform="translate(0,1462) scale(1,-1)">Quellen / Rückgaben</text>
+			<path d="M 640,687 L 640,595 Z" style="stroke: rgb(32%,42%,51%); stroke-linecap: butt; stroke-width: 1.8;"/>
+			<polygon points="640 595, 636.0853 603.104, 643.9147 603.104" style="stroke: none; stroke-linecap: butt; stroke-width: 1; fill: rgb(32%,42%,51%); fill-rule: evenodd;"/>
+			<rect x="577" y="649" width="108.9296875" height="20" rx="2" ry="2" style="stroke: none; stroke-linecap: butt; stroke-width: 1.4; fill: rgb(100%,100%,100%); fill-rule: evenodd;"/>
+			<text x="582" y="654" style="font-family: DejaVu; font-size: 14px;fill: rgb(32%,42%,51%); stroke:none;" transform="translate(0,1308) scale(1,-1)">freigegebener</text>
+			<rect x="577" y="629" width="98.8740234375" height="20" rx="2" ry="2" style="stroke: none; stroke-linecap: butt; stroke-width: 1.4; fill: rgb(100%,100%,100%); fill-rule: evenodd;"/>
+			<text x="582" y="634" style="font-family: DejaVu; font-size: 14px;fill: rgb(32%,42%,51%); stroke:none;" transform="translate(0,1268) scale(1,-1)">Push-Trigger</text>
+			<path d="M 770,595 L 770,687 Z" style="stroke: rgb(32%,42%,51%); stroke-linecap: butt; stroke-width: 1.8;"/>
+			<polygon points="770 687, 773.9147 678.896, 766.0853 678.896" style="stroke: none; stroke-linecap: butt; stroke-width: 1; fill: rgb(32%,42%,51%); fill-rule: evenodd;"/>
+			<rect x="715" y="649" width="133.361328125" height="20" rx="2" ry="2" style="stroke: none; stroke-linecap: butt; stroke-width: 1.4; fill: rgb(100%,100%,100%); fill-rule: evenodd;"/>
+			<text x="720" y="654" style="font-family: DejaVu; font-size: 14px;fill: rgb(32%,42%,51%); stroke:none;" transform="translate(0,1308) scale(1,-1)">Handback / Beleg</text>
+			<rect x="715" y="629" width="123.1826171875" height="20" rx="2" ry="2" style="stroke: none; stroke-linecap: butt; stroke-width: 1.4; fill: rgb(100%,100%,100%); fill-rule: evenodd;"/>
+			<text x="720" y="634" style="font-family: DejaVu; font-size: 14px;fill: rgb(32%,42%,51%); stroke:none;" transform="translate(0,1268) scale(1,-1)">REST + Artefakt</text>
+			<path d="M 810,545 L 825,545 Z" style="stroke: rgb(32%,42%,51%); stroke-linecap: butt; stroke-width: 1.8;"/>
+			<path d="M 825,545 L 825,610 Z" style="stroke: rgb(32%,42%,51%); stroke-linecap: butt; stroke-width: 1.8;"/>
+			<path d="M 825,610 L 1115,610 Z" style="stroke: rgb(32%,42%,51%); stroke-linecap: butt; stroke-width: 1.8;"/>
+			<path d="M 1115,610 L 1115,750 Z" style="stroke: rgb(32%,42%,51%); stroke-linecap: butt; stroke-width: 1.8;"/>
+			<path d="M 1115,750 L 1182,750 Z" style="stroke: rgb(32%,42%,51%); stroke-linecap: butt; stroke-width: 1.8;"/>
+			<polygon points="1182 750, 1173.896 746.0853, 1173.896 753.9147" style="stroke: none; stroke-linecap: butt; stroke-width: 1; fill: rgb(32%,42%,51%); fill-rule: evenodd;"/>
+			<rect x="1120" y="634" width="133.8056640625" height="20" rx="2" ry="2" style="stroke: none; stroke-linecap: butt; stroke-width: 1.4; fill: rgb(100%,100%,100%); fill-rule: evenodd;"/>
+			<text x="1125" y="639" style="font-family: DejaVu; font-size: 14px;fill: rgb(32%,42%,51%); stroke:none;" transform="translate(0,1278) scale(1,-1)">Claude-API-Aufruf</text>
+			<rect x="1120" y="614" width="54.9599609375" height="20" rx="2" ry="2" style="stroke: none; stroke-linecap: butt; stroke-width: 1.4; fill: rgb(100%,100%,100%); fill-rule: evenodd;"/>
+			<text x="1125" y="619" style="font-family: DejaVu; font-size: 14px;fill: rgb(32%,42%,51%); stroke:none;" transform="translate(0,1238) scale(1,-1)">HTTPS</text>
+			<path d="M 950,687 L 950,595 Z" style="stroke: rgb(65%,38%,4%); stroke-linecap: butt; stroke-width: 1.8; stroke-dasharray: 7, 5;"/>
+			<polygon points="950 595, 946.0853 603.104, 953.9147 603.104" style="stroke: none; stroke-linecap: butt; stroke-width: 1; fill: rgb(65%,38%,4%); fill-rule: evenodd;"/>
+			<rect x="895" y="649" width="136.24609375" height="20" rx="2" ry="2" style="stroke: none; stroke-linecap: butt; stroke-width: 1.4; fill: rgb(100%,100%,100%); fill-rule: evenodd;"/>
+			<text x="900" y="654" style="font-family: DejaVu; font-size: 14px;fill: rgb(65%,38%,4%); stroke:none;" transform="translate(0,1308) scale(1,-1)">Build / Publikation</text>
+			<rect x="895" y="629" width="126.6962890625" height="20" rx="2" ry="2" style="stroke: none; stroke-linecap: butt; stroke-width: 1.4; fill: rgb(100%,100%,100%); fill-rule: evenodd;"/>
+			<text x="900" y="634" style="font-family: DejaVu; font-size: 14px;fill: rgb(65%,38%,4%); stroke:none;" transform="translate(0,1268) scale(1,-1)">nur mit Freigabe</text>
+			<path d="M 1060,500 L 1182,455 Z" style="stroke: rgb(32%,42%,51%); stroke-linecap: butt; stroke-width: 1.8;"/>
+			<polygon points="1182 455, 1173.042 454.1317, 1175.751 461.4773" style="stroke: none; stroke-linecap: butt; stroke-width: 1; fill: rgb(32%,42%,51%); fill-rule: evenodd;"/>
+			<rect x="1071" y="496" width="54.9599609375" height="20" rx="2" ry="2" style="stroke: none; stroke-linecap: butt; stroke-width: 1.4; fill: rgb(100%,100%,100%); fill-rule: evenodd;"/>
+			<text x="1076" y="501" style="font-family: DejaVu; font-size: 14px;fill: rgb(32%,42%,51%); stroke:none;" transform="translate(0,1002) scale(1,-1)">HTTPS</text>
+			<rect x="1071" y="476" width="75.5908203125" height="20" rx="2" ry="2" style="stroke: none; stroke-linecap: butt; stroke-width: 1.4; fill: rgb(100%,100%,100%); fill-rule: evenodd;"/>
+			<text x="1076" y="481" style="font-family: DejaVu; font-size: 14px;fill: rgb(32%,42%,51%); stroke:none;" transform="translate(0,962) scale(1,-1)">HTML / JS</text>
+			<path d="M 1060,445 L 1182,402 Z" style="stroke: rgb(40%,28%,72%); stroke-linecap: butt; stroke-width: 1.8; stroke-dasharray: 7, 5;"/>
+			<polygon points="1182 402, 1173.056 401.0018, 1175.658 408.386" style="stroke: none; stroke-linecap: butt; stroke-width: 1; fill: rgb(40%,28%,72%); fill-rule: evenodd;"/>
+			<rect x="1071" y="411" width="83.7734375" height="20" rx="2" ry="2" style="stroke: none; stroke-linecap: butt; stroke-width: 1.4; fill: rgb(100%,100%,100%); fill-rule: evenodd;"/>
+			<text x="1076" y="416" style="font-family: DejaVu; font-size: 14px;fill: rgb(40%,28%,72%); stroke:none;" transform="translate(0,832) scale(1,-1)">MVP: JSON</text>
+			<rect x="1071" y="391" width="70.2587890625" height="20" rx="2" ry="2" style="stroke: none; stroke-linecap: butt; stroke-width: 1.4; fill: rgb(100%,100%,100%); fill-rule: evenodd;"/>
+			<text x="1076" y="396" style="font-family: DejaVu; font-size: 14px;fill: rgb(40%,28%,72%); stroke:none;" transform="translate(0,792) scale(1,-1)">einmalig</text>
+			<path d="M 460,395 L 515,395 Z" style="stroke: rgb(32%,42%,51%); stroke-linecap: butt; stroke-width: 1.8;"/>
+			<path d="M 515,395 L 515,265 Z" style="stroke: rgb(32%,42%,51%); stroke-linecap: butt; stroke-width: 1.8;"/>
+			<path d="M 515,265 L 1350,265 Z" style="stroke: rgb(32%,42%,51%); stroke-linecap: butt; stroke-width: 1.8;"/>
+			<path d="M 1350,265 L 1350,300 Z" style="stroke: rgb(32%,42%,51%); stroke-linecap: butt; stroke-width: 1.8;"/>
+			<polygon points="1350 300, 1353.915 291.896, 1346.085 291.896" style="stroke: none; stroke-linecap: butt; stroke-width: 1; fill: rgb(32%,42%,51%); fill-rule: evenodd;"/>
+			<rect x="695" y="270" width="194.296875" height="20" rx="2" ry="2" style="stroke: none; stroke-linecap: butt; stroke-width: 1.4; fill: rgb(100%,100%,100%); fill-rule: evenodd;"/>
+			<text x="700" y="275" style="font-family: DejaVu; font-size: 14px;fill: rgb(32%,42%,51%); stroke:none;" transform="translate(0,550) scale(1,-1)">öffnet die Seite per HTTPS</text>
+			<rect x="565" y="309" width="520" height="81" rx="8" ry="8" style="stroke: rgb(79%,83%,87%); stroke-linecap: butt; stroke-width: 1.4; fill: rgb(95%,96%,98%); fill-rule: evenodd;"/>
+			<text x="583" y="363" style="font-family: DejaVu-Bold; font-size: 17px;fill: rgb(7%,16%,27%); stroke:none;" transform="translate(0,726) scale(1,-1)">Recherche und externe Werkzeuge</text>
+			<text x="583" y="337" style="font-family: DejaVu; font-size: 13px;fill: rgb(32%,40%,48%); stroke:none;" transform="translate(0,674) scale(1,-1)">Web-/App-Tools der Laufzeit; keine automatische Feldanbindung.</text>
+			<path d="M 438,670 L 490,670 Z" style="stroke: rgb(32%,42%,51%); stroke-linecap: butt; stroke-width: 1.8;"/>
+			<path d="M 490,670 L 490,350 Z" style="stroke: rgb(32%,42%,51%); stroke-linecap: butt; stroke-width: 1.8;"/>
+			<path d="M 490,350 L 565,350 Z" style="stroke: rgb(32%,42%,51%); stroke-linecap: butt; stroke-width: 1.8;"/>
+			<polygon points="565 350, 556.896 346.0853, 556.896 353.9147" style="stroke: none; stroke-linecap: butt; stroke-width: 1; fill: rgb(32%,42%,51%); fill-rule: evenodd;"/>
+			<rect x="490" y="414" width="148.8994140625" height="20" rx="2" ry="2" style="stroke: none; stroke-linecap: butt; stroke-width: 1.4; fill: rgb(100%,100%,100%); fill-rule: evenodd;"/>
+			<text x="495" y="419" style="font-family: DejaVu; font-size: 14px;fill: rgb(32%,42%,51%); stroke:none;" transform="translate(0,838) scale(1,-1)">Toolaufruf / Quellen</text>
+			<rect x="490" y="394" width="135.904296875" height="20" rx="2" ry="2" style="stroke: none; stroke-linecap: butt; stroke-width: 1.4; fill: rgb(100%,100%,100%); fill-rule: evenodd;"/>
+			<text x="495" y="399" style="font-family: DejaVu; font-size: 14px;fill: rgb(32%,42%,51%); stroke:none;" transform="translate(0,798) scale(1,-1)">über Laufzeittools</text>
+			<rect x="60" y="86" width="1480" height="134" rx="8" ry="8" style="stroke: rgb(47%,52%,58%); stroke-linecap: butt; stroke-width: 1.4; fill: rgb(95%,96%,98%); fill-rule: evenodd; stroke-dasharray: 7, 5;"/>
+			<text x="78" y="195" style="font-family: DejaVu-Bold; font-size: 15px;fill: rgb(32%,40%,48%); stroke:none;" transform="translate(0,390) scale(1,-1)">SPÄTERE GESAMTPERSPEKTIVE · Konzept, nicht beschlossen oder durchgängig implementiert</text>
+			<rect x="80" y="107" width="300" height="69" rx="5" ry="5" style="stroke: rgb(47%,52%,58%); stroke-linecap: butt; stroke-width: 1.4; fill: rgb(100%,100%,100%); fill-rule: evenodd; stroke-dasharray: 5, 4;"/>
+			<text x="92" y="151" style="font-family: DejaVu-Bold; font-size: 16px;fill: rgb(7%,16%,27%); stroke:none;" transform="translate(0,302) scale(1,-1)">Runtime-Erfassung</text>
+			<text x="92" y="127" style="font-family: DejaVu; font-size: 13px;fill: rgb(32%,40%,48%); stroke:none;" transform="translate(0,254) scale(1,-1)">Hooks / begrenzte Metadaten</text>
+			<rect x="450" y="107" width="310" height="69" rx="5" ry="5" style="stroke: rgb(47%,52%,58%); stroke-linecap: butt; stroke-width: 1.4; fill: rgb(100%,100%,100%); fill-rule: evenodd; stroke-dasharray: 5, 4;"/>
+			<text x="462" y="151" style="font-family: DejaVu-Bold; font-size: 16px;fill: rgb(7%,16%,27%); stroke:none;" transform="translate(0,302) scale(1,-1)">Datenanbindung / Journal</text>
+			<text x="462" y="127" style="font-family: DejaVu; font-size: 13px;fill: rgb(32%,40%,48%); stroke:none;" transform="translate(0,254) scale(1,-1)">Transport und Betriebsort offen</text>
+			<rect x="830" y="107" width="300" height="69" rx="5" ry="5" style="stroke: rgb(47%,52%,58%); stroke-linecap: butt; stroke-width: 1.4; fill: rgb(100%,100%,100%); fill-rule: evenodd; stroke-dasharray: 5, 4;"/>
+			<text x="842" y="151" style="font-family: DejaVu-Bold; font-size: 16px;fill: rgb(7%,16%,27%); stroke:none;" transform="translate(0,302) scale(1,-1)">Projektarchive</text>
+			<text x="842" y="127" style="font-family: DejaVu; font-size: 13px;fill: rgb(32%,40%,48%); stroke:none;" transform="translate(0,254) scale(1,-1)">Versionierte Ereignisdateien</text>
+			<rect x="1200" y="107" width="310" height="69" rx="5" ry="5" style="stroke: rgb(47%,52%,58%); stroke-linecap: butt; stroke-width: 1.4; fill: rgb(100%,100%,100%); fill-rule: evenodd; stroke-dasharray: 5, 4;"/>
+			<text x="1212" y="151" style="font-family: DejaVu-Bold; font-size: 16px;fill: rgb(7%,16%,27%); stroke:none;" transform="translate(0,302) scale(1,-1)">Weitere Verbraucher</text>
+			<text x="1212" y="127" style="font-family: DejaVu; font-size: 13px;fill: rgb(32%,40%,48%); stroke:none;" transform="translate(0,254) scale(1,-1)">Partitur und Reports</text>
+			<path d="M 380,140 L 450,140 Z" style="stroke: rgb(47%,52%,58%); stroke-linecap: butt; stroke-width: 1.8; stroke-dasharray: 7, 5;"/>
+			<polygon points="450 140, 441.896 136.0853, 441.896 143.9147" style="stroke: none; stroke-linecap: butt; stroke-width: 1; fill: rgb(47%,52%,58%); fill-rule: evenodd;"/>
+			<text x="387" y="151" style="font-family: DejaVu; font-size: 10px;fill: rgb(32%,40%,48%); stroke:none;" transform="translate(0,302) scale(1,-1)">erfasst</text>
+			<path d="M 760,140 L 830,140 Z" style="stroke: rgb(47%,52%,58%); stroke-linecap: butt; stroke-width: 1.8; stroke-dasharray: 7, 5;"/>
+			<polygon points="830 140, 821.896 136.0853, 821.896 143.9147" style="stroke: none; stroke-linecap: butt; stroke-width: 1; fill: rgb(47%,52%,58%); fill-rule: evenodd;"/>
+			<text x="767" y="151" style="font-family: DejaVu; font-size: 10px;fill: rgb(32%,40%,48%); stroke:none;" transform="translate(0,302) scale(1,-1)">archiviert</text>
+			<path d="M 1130,140 L 1200,140 Z" style="stroke: rgb(47%,52%,58%); stroke-linecap: butt; stroke-width: 1.8; stroke-dasharray: 7, 5;"/>
+			<polygon points="1200 140, 1191.896 136.0853, 1191.896 143.9147" style="stroke: none; stroke-linecap: butt; stroke-width: 1; fill: rgb(47%,52%,58%); fill-rule: evenodd;"/>
+			<text x="1137" y="151" style="font-family: DejaVu; font-size: 10px;fill: rgb(32%,40%,48%); stroke:none;" transform="translate(0,302) scale(1,-1)">liest</text>
+			<text x="60" y="50" style="font-family: DejaVu; font-size: 12px;fill: rgb(32%,40%,48%); stroke:none;" transform="translate(0,100) scale(1,-1)">Quellen: AGENTS.md / Rollenregister @407abc1; Forge-Lauf 39006658377; AG-DATA-001 ist nur Konzept. Pages-Publikationskonfiguration nicht verifiziert.</text>
+			<text x="60" y="27" style="font-family: DejaVu; font-size: 12px;fill: rgb(32%,40%,48%); stroke:none;" transform="translate(0,54) scale(1,-1)">Stand 17.10.2026 · Atlas; Notationsrecherche: Scout · Kein Merge und keine Veröffentlichung durch diese Zeichnung.</text>
+			<text x="1532.365234375" y="27" style="font-family: DejaVu; font-size: 12px;fill: rgb(32%,40%,48%); stroke:none;" transform="translate(0,54) scale(1,-1)">1</text>
+			<text x="60" y="72" style="font-family: DejaVu; font-size: 12px;fill: rgb(32%,40%,48%); stroke:none;" transform="translate(0,144) scale(1,-1)">Notationsbasis: c4model.com/diagrams/deployment und /notation. M markiert fachlichen MVP-Umfang, nicht alle Entwicklungswerkzeuge.</text>
+		</g>
+	</g>
+</svg>
