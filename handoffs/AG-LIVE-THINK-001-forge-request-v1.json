@@ -1,0 +1,71 @@
+{
+  "schema": "agentarium.handoff.v0",
+  "task_id": "AG-LIVE-THINK-001-FORGE-V1",
+  "worker_role": "coding-agent",
+  "mode": "read-only architecture/advice",
+  "source_commit": "55bb6997503284cfb77c0a50bb4905240b3b13b4",
+  "goal": "Peter wants conceptual alternatives starting from the actual goal, not another premature transport implementation: genuine distributed team activity, communications, waiting and problems appear nearly as they occur in the already open ORIGINAL Agentarium; work starts and continues independently of the viewer. No demo/replay/substitute monitor.",
+  "authority": "Peter explicitly requested team thinking and best appropriate LLM, not cost minimisation (2026-10-17). This authorizes one bounded professional architecture contribution; NO product implementation, tests, infrastructure activation, merge or publication. No model benchmark/retry/fallback.",
+  "model_routing": {
+    "task_complexity": "K",
+    "risk": "high",
+    "role_default": "sonnet/medium",
+    "requested_model": "best",
+    "requested_reasoning": "xhigh",
+    "reason": "Repeated failure of critical live requirement; latest user requests best appropriate LLM. Official current CLI documentation defines best as strongest available Fable else Opus; exact session model must be proven from modelUsage.",
+    "override_authorization": "Peter's explicit current best-LLM instruction; task-only model/effort override. Existing role definition unchanged.",
+    "actual_model": "unconfirmed",
+    "actual_reasoning": "unconfirmed",
+    "budget": "One bounded read-only advice session; no arbitrary tiny USD/turn cap; stop on credit/key/quota error. Account balance unknown."
+  },
+  "required_reading": [
+    "AGENTS.md",
+    "governance/agentarium-rulebook-v1.2.md",
+    "governance/agentarium-process-v1.2.md",
+    "governance/product-development-practice-v1.md",
+    "handoffs/AG-LIVE-THINK-001-team-input-v1.md"
+  ],
+  "question": "Give your OWN goal-driven alternatives. Challenge both Atlas and the team, including the three examples in the input: they are not a closed option list. If we are solving the wrong problem say so. Consider what work runtime makes observable, how publication originates while work runs, path reachability, actual transport, monitor existing hooks, freshness and separate archive; identify a path for CURRENT ChatGPT Work+Claude AND a more radical option changing execution/observation rather than merely providers. Are hooks necessary? Can orchestration itself be the source? Does a common tool/MCP endpoint offer a concrete way to emit while otherwise isolated runtimes continue? What would observability loss mean? Do not prescribe product rebuild.",
+  "facts_and_limits": [
+    "Current public Pages original can ingest window.__agEreignis({actor,kind,title,recipient,...}) and __agLauf({project_id,run_id,titel}); actual one-event runtime review result was loaded and visible but proves NO continuous live capture.",
+    "Your earlier CA_QUESTION in issue comment6230543885 used 5s as target. That was Atlas's proposed test target, NOT Peter's SLA. 60/h precludes sustainable unauth5s polling, not every bounded burst; distinguish technical fact and inference.",
+    "ChatGPT current tool contract has spawn/followup/send_message/list_agents+returns. No documented automatic export of all child tools/tokens/heartbeat. No permission/secret/network access to arbitrary endpoint has yet been demonstrated. A new relay alone does not create telemetry or source write ability.",
+    "Claude host currently uses run_json with subprocess.run(capture_output=True); terminal result JSON appears at end. This host is under our repository control; changing it remains a later separately authorized implementation.",
+    "Only thinking now. The old no-new-infrastructure/no-dependencies constraints do not forbid PROPOSING wider alternatives; any material adoption awaits decision.",
+    "Strong runtime observations are not the same as productive progress. Lack of report != inactive or blocked. No promised seconds until measured. No full specs, prototype, end-to-end tests, code or deployment now."
+  ],
+  "available_tools": [
+    "Read",
+    "Glob",
+    "Grep"
+  ],
+  "forbidden_actions": [
+    "Edit",
+    "Write",
+    "Bash",
+    "Agent",
+    "network access",
+    "model retries",
+    "product implementation",
+    "publishing"
+  ],
+  "official_evidence": [
+    {
+      "url": "https://code.claude.com/docs/en/hooks",
+      "fact": "Official lifecycle hooks include SessionStart, UserPromptSubmit, PreToolUse, PostToolUse, PostToolUseFailure, SubagentStart/Stop, Stop, SessionEnd. Availability in docs != currently installed."
+    },
+    {
+      "url": "https://openai.github.io/openai-agents-python/streaming/",
+      "fact": "Controlled Agents SDK runs expose streamed model/run/handoff events; this is NOT export access to current ChatGPT Work."
+    },
+    {
+      "url": "https://openai.github.io/openai-agents-python/tracing/",
+      "fact": "SDK tracing exposes tool/handoff/generation traces, custom processors; trace flushing is not automatically a measured low-latency path."
+    },
+    {
+      "url": "https://code.claude.com/docs/en/model-config",
+      "fact": "Current docs define best strongest Fable where available otherwise Opus; startup model choice is request, actual modelUsage is evidence."
+    }
+  ],
+  "expected_result": "In German, max about900 useful words: state goal, 3-4 genuinely different complete routes (source+publisher+transport+original monitor), each decisive prerequisite and blocker/unknown; own recommendation WITH main disadvantage, what from existing work reused, smallest discriminating technical question before coding. Comment on team disagreement. Separate confirmed sources/read code vs proposal vs unknown. Return CA_ADVICE or exact CA_QUESTION. Do not claim tests; stop after advice."
+}
