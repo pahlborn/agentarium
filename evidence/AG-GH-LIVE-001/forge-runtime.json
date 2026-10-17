@@ -1,0 +1,79 @@
+{
+  "task_id": "AG-GH-LIVE-001-FORGE-V1",
+  "request_commit": "09036bee96d95fdde89d86ff24420dd34d0a53a2",
+  "product_baseline": "eb73b5d07c99586cf9d8e2c46f694b2c4dbe9f5b",
+  "generator_baseline": "61d02292a6bd6c822980f91c36363b6601ecaf6f",
+  "run": "https://github.com/pahlborn/agentarium/actions/runs/39066853084",
+  "session_id": "b0d3a4be-4cbe-4121-b04f-242d09856c29",
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 66,
+      "outputTokens": 93474,
+      "cacheReadInputTokens": 3745338,
+      "cacheCreationInputTokens": 221171,
+      "webSearchRequests": 0,
+      "costUSD": 3.7246665999999995,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 48016,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "usage": {
+    "input_tokens": 66,
+    "cache_creation_input_tokens": 221171,
+    "cache_read_input_tokens": 3745338,
+    "output_tokens": 93474,
+    "output_tokens_details": {
+      "thinking_tokens": 48016
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 0,
+      "ephemeral_5m_input_tokens": 221171
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 2083,
+        "cache_read_input_tokens": 217433,
+        "cache_creation_input_tokens": 3738,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 3738,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "total_cost_usd": 3.7246665999999995,
+  "requested_model": "opus",
+  "requested_effort": "high",
+  "actual_effort": "unconfirmed",
+  "elapsed_seconds": 910.012485817,
+  "changed_paths": [
+    "handoffs/AG-GH-LIVE-001-forge-pilot.md",
+    "previews/AG-VISUAL-005-feld/bauen.py",
+    "previews/AG-VISUAL-005-feld/github-live.js",
+    "previews/AG-VISUAL-005-feld/pages.py",
+    "previews/AG-VISUAL-005-feld/schicht.py",
+    "tests/AG-GH-LIVE-001.cjs"
+  ],
+  "unauthorized_paths": [],
+  "failure": null,
+  "source_returncode": 0,
+  "terminal_observed_ns": 954566180038,
+  "events_posted": 24,
+  "patch_sha256": "1af15abce54822503f42c3fc6ed356d415b77f073ba172bc6fd654b6cf9cbc8b",
+  "tests_run": false,
+  "product_published": false
+}

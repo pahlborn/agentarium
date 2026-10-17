@@ -1,0 +1,5 @@
+{"test":"X-Poll-Interval 600s","status":"passed","expectedMs":600000,"actualMs":600000}
+{"test":"Retry-After 7200s","status":"passed","expectedMs":7200000,"actualMs":7200000}
+{"test":"Retry-After HTTP-date +120s","status":"passed","expectedMs":120000,"actualMs":120000}
+{"test":"bootstrap-error-recovery","status":"passed","initialCutoff":"2026-10-17T12:00:00.000Z","finalCutoff":"2026-10-17T12:00:00.000Z","shown":["ARRIVAL-1"],"requests":4}
+4/4 passed — synthetic adapter behavior only
