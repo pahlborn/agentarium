@@ -1,0 +1,86 @@
+{
+  "task_id": "AG-PILOT-001-ONE-EVENT-V1",
+  "source_commit": "56059ef3d098594dc5a751aa96dfc6d31f4d252c",
+  "definition_blob": "38d9747018bd4bfc5299a2dd9aeded9659337e77",
+  "run": "https://github.com/pahlborn/agentarium/actions/runs/39006658377",
+  "cli_version": "2.1.302 (Claude Code)",
+  "requested_model": "sonnet",
+  "requested_effort": "medium",
+  "actual_reasoning": "unconfirmed",
+  "session_id": "1392f06b-b18f-488b-aa2c-7ddda60fdad7",
+  "total_cost_usd": 0.3635843,
+  "modelUsage": {
+    "claude-sonnet-5-5": {
+      "inputTokens": 26,
+      "outputTokens": 10026,
+      "cacheReadInputTokens": 508348,
+      "cacheCreationInputTokens": 84975,
+      "webSearchRequests": 0,
+      "costUSD": 0.3635843,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 2867,
+      "canonicalModel": "claude-sonnet-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "usage": {
+    "input_tokens": 26,
+    "cache_creation_input_tokens": 84975,
+    "cache_read_input_tokens": 508348,
+    "output_tokens": 10026,
+    "output_tokens_details": {
+      "thinking_tokens": 2867
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 0,
+      "ephemeral_5m_input_tokens": 84975
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 3073,
+        "cache_read_input_tokens": 84203,
+        "cache_creation_input_tokens": 772,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 772,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "num_turns": 22,
+  "execution": {
+    "kind": "SUCCESS",
+    "detail": "SUCCESS",
+    "returncode": 0,
+    "elapsed_seconds": 78.523,
+    "timeout_seconds": 900,
+    "stdout_bytes": 7969,
+    "stderr_bytes": 0,
+    "stdout_sha256": "ed18263bde086e35dce1fdefb962891029c647f6cbabb8cc0b12e871e16e7f8b",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "signals": []
+  },
+  "failure": null,
+  "changed_paths": [
+    "previews/AG-VISUAL-005-feld/schicht.py"
+  ],
+  "unauthorized_paths": [],
+  "patch_sha256": "69442975acc315f73b88190dc7f5dfb86ca494fc1cbb5dc65e88d974b9784f61",
+  "product_published": false,
+  "tests_run_by_forge": false,
+  "result_ref": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6230238654",
+  "independent_qa": "PENDING",
+  "published_original_acceptance": "NOT_TESTED"
+}
