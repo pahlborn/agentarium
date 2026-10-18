@@ -1,0 +1,238 @@
+/* AG-PLATZ-001 — Nachweis: Agenten lassen sich verschieben, und zwar so,
+   dass es das Neuladen und das Drehen übersteht.
+
+   Start:  node previews/AG-PLATZ-001/pruefen.js
+   Eigener Browser:  AG_CHROMIUM=/pfad/zur/datei node previews/...
+
+   Rückgabe 0 = alles wie vereinbart, 1 = Abweichung, 2 = ungeprüft. */
+'use strict';
+const fs = require('fs'), path = require('path'), http = require('http');
+
+/* Ziel und Speicherschluessel sind einstellbar, damit dieselbe Pruefung auch
+   die Probefassung unter pilot/platz-probe/ messen kann -- eine Regel, ein
+   Ort, statt eines zweiten Skripts, das auseinanderlaeuft.
+     AG_ZIEL=pilot/platz-probe  AG_SCHLUESSEL=agentarium-PROBE-plaetze-v1 \
+     AG_PROBE=1  node previews/AG-PLATZ-001/pruefen.js                        */
+const ZIEL = process.env.AG_ZIEL || path.join('pilot', 'github-live');
+const SCHLUESSEL = process.env.AG_SCHLUESSEL || 'agentarium-plaetze-v1';
+const ISTPROBE = process.env.AG_PROBE === '1';
+const WURZEL = path.resolve(__dirname, '..', '..', ...ZIEL.split('/'));
+let fehler = 0;
+function zeile(w, ist, soll) {
+  const ok = ist === soll;
+  if (!ok) fehler++;
+  console.log('  ' + (ok ? 'ok  ' : 'FEHL') + '  ' + w.padEnd(34) + String(ist).padEnd(26) +
+              (ok ? '' : '(erwartet ' + soll + ')'));
+}
+
+function ausfuehrbareDatei(p) {
+  if (!p) return false;
+  try {
+    const s = fs.statSync(p);
+    if (!s.isFile()) return false;
+    fs.accessSync(p, fs.constants.X_OK);
+    return true;
+  } catch (e) { return false; }
+}
+function chromiumPfad(chromium) {
+  /* Erst der Starter, dann der Pfad -- ein eigener Browserpfad ersetzt den
+     Pfad, nicht den Starter (AG-EVENT-ID-001, Argus R3). */
+  if (!chromium) return { grund: 'playwright fehlt, daher ist kein Browser zu starten' };
+  const g = process.env.AG_CHROMIUM;
+  if (g) return ausfuehrbareDatei(g) ? { pfad: g }
+    : { grund: 'AG_CHROMIUM zeigt nicht auf eine ausfuehrbare Datei: ' + g };
+  let p = null;
+  try { p = chromium.executablePath(); } catch (e) {
+    return { grund: 'playwright meldet keinen Browserpfad: ' + e.message };
+  }
+  return ausfuehrbareDatei(p) ? { pfad: p }
+    : { grund: 'von playwright gemeldete Datei fehlt oder ist nicht ausfuehrbar: ' + p };
+}
+
+const TYPEN = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8',
+                '.json': 'application/json', '.png': 'image/png',
+                '.webmanifest': 'application/manifest+json' };
+
+(async () => {
+  console.log('AG-PLATZ-001 — Nachweis des Verschiebens');
+  console.log('Geprüft wird: ' + WURZEL + '\n');
+
+  let chromium = null;
+  try { chromium = require('playwright').chromium; } catch (e) {}
+  const browser = chromiumPfad(chromium);
+  if (browser.grund) {
+    console.log('UNGEPRÜFT: ' + browser.grund);
+    console.log('Mit AG_CHROMIUM=/pfad/zur/ausfuehrbaren/datei angeben.');
+    process.exit(2);
+  }
+  console.log('Browser: ' + browser.pfad + '\n');
+
+  const srv = http.createServer((q, a) => {
+    const rein = decodeURIComponent(q.url.split('?')[0]);
+    const f = path.join(WURZEL, rein === '/' ? 'index.html' : rein);
+    if (!f.startsWith(WURZEL)) { a.writeHead(403).end(); return; }
+    fs.readFile(f, (e, d) => {
+      if (e) { a.writeHead(404).end(); return; }
+      a.writeHead(200, { 'Content-Type': TYPEN[path.extname(f)] || 'application/octet-stream' });
+      a.end(d);
+    });
+  });
+  await new Promise(r => srv.listen(0, '127.0.0.1', r));
+  const adr = 'http://127.0.0.1:' + srv.address().port + '/';
+
+  const b = await chromium.launch({ executablePath: browser.pfad,
+                                    args: ['--no-sandbox', '--disable-dev-shm-usage'] });
+  /* Die Schilder wechseln sich mit der Rolle ab (rolleUhr). Über den Text
+     gewählt findet man sie deshalb nur in der Hälfte der Zeit. Gewählt wird
+     über die Reihenfolge, in der AGENTEN sie anlegt:
+     0 peter, 1 nova, 2 atlas, 3 cadence, 4 scout, 5 forge, 6 sentinel,
+     7 archibald, 8 argus. */
+  const WER = { peter: 0, nova: 1, atlas: 2, cadence: 3, scout: 4,
+                forge: 5, sentinel: 6, archibald: 7, argus: 8 };
+  async function mitte(seite, name) {
+    const r = await seite.$$eval('.agName', (e, i) => {
+      const k = e[i].getBoundingClientRect();
+      return { x: Math.round(k.x + k.width / 2), y: Math.round(k.y + k.height / 2) };
+    }, WER[name]);
+    return r;
+  }
+
+  try {
+    /* ---------------------------------------------------- A: Entkopplung */
+    console.log('A — Ort und Bedeutung getrennt (ohne Zug)');
+    console.log('    erwartet: nur peter ist „aussen", und das hängt nicht mehr an nah\n');
+    const q = await b.newContext({ viewport: { width: 1194, height: 834 } });
+    const s = await q.newPage();
+    const konsole = [];
+    s.on('console', m => { if (m.type() === 'error') konsole.push(m.text()); });
+    s.on('pageerror', e => konsole.push(String(e)));
+    await s.goto(adr, { waitUntil: 'load' });
+    await s.waitForTimeout(900);
+
+    const draussen = await s.$$eval('.agName.agDraussen', e => e.map(x => x.textContent));
+    zeile('als draußen gezeichnet', draussen.join(',') || '(keine)', 'peter');
+    const anzahl = await s.$$eval('.agName', e => e.length);
+    zeile('Namen im Feld', anzahl, 9);
+    const knopfVor = await s.$eval('#agPlatz', e => e.hidden);
+    zeile('Knopf „Plätze zurück" verborgen', knopfVor, true);
+
+    /* ------------------------------------------------------- B: Ziehen */
+    console.log('\nB — Ziehen, Merken, Neuladen, Zurückstellen');
+    console.log('    erwartet: Platz wandert, übersteht Neuladen, Knopf stellt ihn zurück\n');
+
+    const vor = await mitte(s, 'forge');
+
+    const ziel = { x: 620, y: 230 };
+    await s.mouse.move(vor.x, vor.y);
+    await s.mouse.down();
+    for (let i = 1; i <= 12; i++) {
+      await s.mouse.move(vor.x + (ziel.x - vor.x) * i / 12,
+                         vor.y + (ziel.y - vor.y) * i / 12);
+      await s.waitForTimeout(16);
+    }
+    await s.mouse.up();
+    await s.waitForTimeout(400);
+
+    const nach = await mitte(s, 'forge');
+    const gewandert = Math.abs(nach.x - vor.x) + Math.abs(nach.y - vor.y);
+    zeile('forge ist gewandert (px)', gewandert > 60 ? 'ja, ' + gewandert : 'nein, ' + gewandert,
+          'ja, ' + gewandert);
+    zeile('nahe am Ziel (px Abstand)',
+          Math.abs(nach.x - ziel.x) + Math.abs(nach.y - ziel.y) < 40 ? 'ja' : 'nein', 'ja');
+
+    const abl = await s.evaluate(k => localStorage.getItem(k), SCHLUESSEL);
+    let gespeichert = null;
+    try { gespeichert = JSON.parse(abl); } catch (e) {}
+    zeile('im Gerät gemerkt', gespeichert && gespeichert.forge ? 'ja, nur forge' : 'nein',
+          'ja, nur forge');
+    zeile('nichts anderes gemerkt', gespeichert ? Object.keys(gespeichert).join(',') : '-', 'forge');
+    const knopfNach = await s.$eval('#agPlatz', e => e.hidden);
+    zeile('Knopf erscheint', knopfNach, false);
+
+    /* Neuladen */
+    await s.reload({ waitUntil: 'load' });
+    await s.waitForTimeout(900);
+    const nachLaden = await mitte(s, 'forge');
+    zeile('übersteht Neuladen (px Abw.)',
+          Math.abs(nachLaden.x - nach.x) + Math.abs(nachLaden.y - nach.y) < 20 ? 'ja' : 'nein', 'ja');
+
+    /* Drehen: Hochformat. Der Platz ist polar, also bleibt er sinnvoll. */
+    await s.setViewportSize({ width: 834, height: 1194 });
+    await s.waitForTimeout(700);
+    const imBild = await s.$$eval('.agName', (e, g) => e.every(x => {
+      const r = x.getBoundingClientRect();
+      return r.left >= -2 && r.top >= -2 && r.right <= g.w + 2 && r.bottom <= g.h + 2;
+    }), { w: 834, h: 1194 });
+    zeile('nach dem Drehen alle im Bild', imBild, true);
+    await s.setViewportSize({ width: 1194, height: 834 });
+    await s.waitForTimeout(700);
+
+    /* Zurückstellen */
+    await s.click('#agPlatz');
+    await s.waitForTimeout(500);
+    const zurueck = await mitte(s, 'forge');
+    zeile('Platz wieder wie ab Werk',
+          Math.abs(zurueck.x - vor.x) + Math.abs(zurueck.y - vor.y) < 20 ? 'ja' : 'nein', 'ja');
+    const ablLeer = await s.evaluate(k => localStorage.getItem(k), SCHLUESSEL);
+    zeile('Ablage wieder leer', ablLeer === null ? 'ja' : 'nein, ' + ablLeer, 'ja');
+    const knopfWeg = await s.$eval('#agPlatz', e => e.hidden);
+    zeile('Knopf verschwindet', knopfWeg, true);
+
+    /* ------------------------------------------------- C: Tipp bleibt Tipp */
+    console.log('\nC — Tippen öffnet weiter den Steckbrief');
+    console.log('    erwartet: ein Tipp unter der Schwelle wird nicht als Zug gelesen\n');
+    const t = await mitte(s, 'argus');
+    await s.mouse.move(t.x, t.y);
+    await s.mouse.down();
+    await s.mouse.move(t.x + 2, t.y + 1);   /* unter der Schwelle von 6 */
+    await s.mouse.up();
+    await s.waitForTimeout(400);
+    const steckAuf = await s.evaluate(() => {
+      const e = document.querySelector('.agSteck, #agSteck');
+      return !!(e && e.classList.contains('auf'));
+    });
+    zeile('Steckbrief offen nach Tipp', steckAuf, true);
+    const nachTipp = await s.evaluate(k => localStorage.getItem(k), SCHLUESSEL);
+    zeile('Tipp hat nichts verschoben', nachTipp === null ? 'ja' : 'nein', 'ja');
+
+    zeile('Konsolenfehler', konsole.length ? konsole.slice(0, 2).join(' | ') : 'keine', 'keine');
+
+    /* ------------------------------------------- D: Sicherungen der Probe */
+    if (ISTPROBE) {
+      console.log('\nD — Sicherungen der Probefassung (zur Laufzeit gemessen)');
+      console.log('    erwartet: kein Worker, kein Vorrat, Schlüssel der echten App unberührt\n');
+      const w = await s.evaluate(async () => {
+        const regs = navigator.serviceWorker
+          ? await navigator.serviceWorker.getRegistrations() : [];
+        let vorrat = [];
+        try { vorrat = await caches.keys(); } catch (e) {}
+        return { regs: regs.length, ctrl: !!(navigator.serviceWorker &&
+                 navigator.serviceWorker.controller), vorrat: vorrat };
+      });
+      zeile('angemeldete Worker', w.regs, 0);
+      zeile('Seite von Worker bedient', w.ctrl, false);
+      zeile('angelegte Vorräte', w.vorrat.length ? w.vorrat.join(',') : 'keine', 'keine');
+      const fremd = await s.evaluate(() => ({
+        echt: localStorage.getItem('agentarium-plaetze-v1'),
+        hell: localStorage.getItem('agentarium.hell')
+      }));
+      zeile('Schlüssel der echten App: Plätze', fremd.echt === null ? 'unberührt' : 'BERÜHRT',
+            'unberührt');
+      zeile('Schlüssel der echten App: Helligkeit', fremd.hell === null ? 'unberührt' : 'BERÜHRT',
+            'unberührt');
+      const mark = await s.evaluate(() =>
+        [...document.querySelectorAll('div')].some(d => /PLATZ-PROBE/.test(d.textContent)));
+      zeile('als Probe gekennzeichnet', mark, true);
+    }
+
+    await q.close();
+  } finally {
+    await b.close();
+    srv.close();
+  }
+
+  console.log('');
+  if (fehler) { console.log('ABWEICHUNG in ' + fehler + ' Prüfung(en).'); process.exit(1); }
+  console.log('ALLES WIE VEREINBART — keine Abweichung.');
+  console.log('Synthetisch geprüft. Keine Abnahme auf Peters iPad.');
+})().catch(e => { console.error('\nFEHLER im Prüflauf: ' + (e && e.message)); process.exit(1); });
