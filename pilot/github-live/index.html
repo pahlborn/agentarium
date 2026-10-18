@@ -194,6 +194,13 @@
   #agTitel{display:none;}
   #agLaeuft{font:400 12px/1.45 -apple-system,system-ui,sans-serif;}
   .agAuf{margin-bottom:11px; transition:opacity .8s ease;}
+  /* AG-EVENT-ID-001: Die Kurzreferenz ordnet, sie draengt sich nicht vor.
+     Festbreite, damit untereinander die Ziffern fluchten. */
+  .agKurz{font:inherit; font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+    font-size:.82em; letter-spacing:.06em; opacity:.52; background:none;
+    border:0; padding:0; margin-right:.35em;}
+  .agAuf small.agHerkunft{cursor:pointer;}
+  .agAuf small.agHerkunft.kopiert{opacity:1;}
   /* Ein offener Auftrag steht hell. Was geschehen ist, steht blass — die
      Liste sagt damit zweierlei zugleich, wofür es vorher zwei brauchte. */
   .agAuf.offen{opacity:1;}
@@ -2722,7 +2729,7 @@
     }
 
     stromZeile(E, m);
-    melden(E.von, E.an, E.art, E.text, m, E.beobachtet ? spurWort(E) : '');
+    melden(E.von, E.an, E.art, E.text, m, E.beobachtet ? spurWort(E) : '', E.kurz);
   }
 
   /* Eine Nachricht ist kein Punkt, der fliegt, sondern eine Spur, die
@@ -4721,7 +4728,9 @@
     e.__nr = ++stromNr;
     e.__wer = E.an; e.__auftrag = auftrag;
     var zu = zustandVon(m);
-    e.innerHTML = auftrag
+    /* Die Kurzreferenz steht vorn, vor allem anderen. */
+    var kurzHtml = E.kurz ? '<kbd class="agKurz">' + esc(E.kurz) + '</kbd>' : '';
+    e.innerHTML = kurzHtml + (auftrag
       ? ('<u style="color:' + hex(B.farbe) + '">' + esc(E.kommando || '') +
          '</u> <b style="color:' + hex(B.farbe) + '">' + esc(E.an) + '</b>' +
          (E.modell ? ' <i class="agMotor">' + esc(E.modell) + '</i>' : '') +
@@ -4730,7 +4739,7 @@
          (B ? ' <b style="color:' + hex(B.farbe) + '">→ ' + esc(E.an) + '</b>' : '') +
          ' <s class="z-' + zu[0] + '">' + esc(E.art) + '</s>' +
          '<br><span>' + esc(E.text) + '</span>' +
-         (E.spur ? '<br><small class="agHerkunft">' + esc(spurWort(E)) + '</small>' : ''));
+         (E.spur ? '<br><small class="agHerkunft">' + esc(spurWort(E)) + '</small>' : '')));
     if (MODUS === 'live' && E.id) e.setAttribute('data-ereignis', String(E.id).slice(0, 120));
     laeuftEl.appendChild(e);
     strom.push(e);
@@ -4739,6 +4748,39 @@
        wo man im Vorbeigehen noch mitliest. Der älteste fällt oben weg. */
     var zeilen = klein() ? 2 : 4;
     while (strom.length > zeilen) { var w = strom.shift(); if (w.parentNode) w.remove(); }
+  }
+
+  /* AG-EVENT-ID-001: Die Herkunftszeile traegt die vollstaendige
+     technische ID und den Quellbezug. Antippen legt sie in die
+     Zwischenablage -- damit ist "zugaenglich und kopierbar" erfuellt,
+     ohne eine neue Flaeche aufzumachen. Schlaegt das Kopieren fehl
+     (aeltere Umgebungen verweigern es), wird der Text stattdessen
+     markiert; eine Luege steht nie da. */
+  if (laeuftEl) laeuftEl.addEventListener('click', function (ev) {
+    var h = ev.target && ev.target.closest ? ev.target.closest('.agHerkunft') : null;
+    if (!h) return;
+    var t = h.textContent || '';
+    function sagen(w) {
+      var alt = h.getAttribute('data-alt');
+      if (alt === null) h.setAttribute('data-alt', t);
+      h.textContent = w; h.classList.add('kopiert');
+      setTimeout(function () {
+        h.textContent = h.getAttribute('data-alt') || t;
+        h.classList.remove('kopiert');
+      }, 1400);
+    }
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText)
+        navigator.clipboard.writeText(t).then(function () { sagen('kopiert'); },
+                                              function () { markieren(h); });
+      else markieren(h);
+    } catch (x) { markieren(h); }
+  });
+  function markieren(h) {
+    try {
+      var r = document.createRange(); r.selectNodeContents(h);
+      var sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r);
+    } catch (x) {}
   }
 
   /* Wenn ein Auftrag erledigt ist, hört seine Zeile auf, hell zu sein. */
@@ -4880,7 +4922,7 @@
     return { top: parseFloat(e.style.top), rest: 1 };
   }
 
-  function melden(von, an, art, text, m, zusatz) {
+  function melden(von, an, art, text, m, zusatz, kurz) {
     var A = nachName[an] || nachName[von];
     if (!A || !nachName[von]) return;
     var o = heimat(A);
@@ -4911,7 +4953,12 @@
       ',' + (Math.sin(zm) > 0 ? '0' : '-100%') + ')';
     e.style.textAlign = Math.cos(zm) < -0.25 ? 'right' : 'left';
     var zu = zustandVon(m);
-    e.innerHTML = '<u style="color:' + hex(nachName[von].farbe) + '">' +
+    /* AG-EVENT-ID-001: Die Kurzreferenz steht in der KOPFZEILE der Blase,
+       nicht im Fliesstext. Die Blase ist 210 px breit und bricht um; in
+       der kurzen Kopfzeile ist Platz, ohne dass sie eine Zeile waechst --
+       gemessen, nicht geraten. Sie verschwindet mit der Blase. */
+    e.innerHTML = (kurz ? '<kbd class="agKurz">' + esc(kurz) + '</kbd>' : '') +
+                  '<u style="color:' + hex(nachName[von].farbe) + '">' +
                   esc(von) + '</u> <s class="z-' + zu[0] + '">' + esc(art) + '</s>' +
                   '<br><span>' + esc(text) + '</span>' +
                   (zusatz ? '<br><small class="agHerkunft">' + esc(zusatz) + '</small>' : '');
@@ -5144,6 +5191,20 @@
     return { angenommen: true, projekt: STUECK.projekt };
   };
 
+  /* AG-EVENT-ID-001 -- dieselbe Rueckprobe wie im Adapter, hier noch
+     einmal: Die Aufnahme prueft selbst und verlaesst sich nicht darauf,
+     dass vorgelagert schon geprueft wurde. Ein Muster wie ^ID[0-9]{4,}$
+     liesse ID00001 durch, also eine zweite Schreibweise derselben Zahl.
+     Stellenzahl vor der Umwandlung begrenzt. */
+  function kurzKanonisch(s) {
+    if (typeof s !== 'string' || !/^ID[0-9]{1,12}$/.test(s)) return '';
+    var n = Number(s.slice(2));
+    if (!(n >= 1)) return '';
+    var soll = 'ID' + (n < 10000 ? ('000' + n).slice(-4) : String(n));
+    return (soll === s) ? s : '';
+  }
+  var kurzAbgewiesen = 0, kurzLetzterGrund = '';
+
   window.__agEreignis = function (e) {
     function nein(g) { return { angenommen: false, grund: g }; }
     if (MODUS !== 'live') return nein('nicht im Live-Betrieb');
@@ -5186,6 +5247,18 @@
     var E = { id: (typeof e.id === 'string' && e.id) ? e.id : ('L' + (++liveNr)),
               t: zeit, von: von, an: an || '', art: art, text: text,
               folgen: 1, gross: 1.0 };
+
+    /* AG-EVENT-ID-001: short_ref ist optional. Fehlt sie, bleibt alles
+       wie bisher. Ist NUR sie ungueltig, faellt die Kurzreferenz weg --
+       das Ereignis wird weiter verarbeitet. Keine eigene Vergabe, keine
+       Umnummerierung, kein Ersatz aus der Zeile oder dem Lauf. */
+    if (typeof e.short_ref !== 'undefined') {
+      var kz = kurzKanonisch(e.short_ref);
+      if (kz) E.kurz = kz;
+      else { kurzAbgewiesen++;
+             kurzLetzterGrund = 'short_ref nicht kanonisch: ' +
+               String(e.short_ref).slice(0, 24); }
+    }
 
     /* VERBRAUCH: GENAU DIE FELDER DES VERTRAGS, KEINE ERFUNDENEN.
 
@@ -5911,6 +5984,11 @@
       /* AG-GH-LIVE-004: Zusage an den Adapter, dass handoff/contribution
          hier nur beobachtet werden. Fehlt sie, reicht er sie nicht weiter. */
       kommunikation: 'beobachtet-v1',
+      /* AG-EVENT-ID-001: Versionierte Empfaengerfaehigkeit. Ein Erzeuger
+         erkennt hieran, dass dieser GELADENE Stand short_ref kennt. Ein
+         alter offener Tab hat den Eintrag nicht -- und sein Adapter weist
+         ein Ereignis MIT dem Feld vollstaendig ab. */
+      kurzreferenz: 'short_ref-v1',
       akteure: AGENTEN.map(function (a) { return a.name; }),
       istLive: function () { return MODUS === 'live'; }
     };

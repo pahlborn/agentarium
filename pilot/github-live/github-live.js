@@ -26,7 +26,7 @@
 */
 (function () {
   'use strict';
-  var ADAPTER = 'AG-GH-LIVE-001-v1.3';
+  var ADAPTER = 'AG-GH-LIVE-001-v1.4';
   var ENDPOINT = 'https://api.github.com/repos/pahlborn/agentarium/issues/2/comments?per_page=100';
   var MARKER = '<!-- AGENTARIUM_EVENT_V1 -->';
   var SCHEMA = 'agentarium.github-event.v1';
@@ -35,10 +35,29 @@
   var MAX_KOERPER = 65536, MAX_SEITEN = 100, MAX_TITEL = 200;
   var FELDER = ['schema', 'id', 'project_id', 'run_id', 'task_id', 'actor', 'kind',
                 'title', 'occurred_at', 'source_evidence', 'source_tool_id'];
-  var OPTIONAL = ['recipient'];                  /* nie Pflicht fuer progress */
+  var OPTIONAL = ['recipient', 'short_ref'];     /* nie Pflicht; short_ref: AG-EVENT-ID-001 */
   var ARTEN = { progress: 1, handoff: 1, contribution: 1 };
   var KOMM = { handoff: 1, contribution: 1 };    /* nur beobachtet, kein Zustand */
   var KENNUNG = /^[A-Za-z0-9][A-Za-z0-9._:\/-]{0,119}$/;
+
+  /* AG-EVENT-ID-001 -- KANONISCHE SCHREIBWEISE EINER KURZREFERENZ.
+
+     ID0001 .. ID9999, danach ID10000 ohne Auffuellung. Ein blosses Muster
+     wie ^ID[0-9]{4,}$ liesse ID00001 durch -- eine zweite Schreibweise
+     derselben Zahl. Genau dann waere Peters Rueckmeldung "ID1234" nicht
+     mehr eindeutig aufloesbar. Deshalb Rueckprobe statt Muster: Die
+     Eingabe muss ihrer eigenen kanonischen Form entsprechen.
+
+     Die Stellenzahl ist VOR der Umwandlung begrenzt -- keine ungesicherte
+     Ganzzahlkonvertierung. Zwoelf Stellen liegen sicher im darstellbaren
+     Bereich. Rueckgabe: die Kurzreferenz, oder '' wenn sie nicht gilt. */
+  function kurzKanonisch(s) {
+    if (typeof s !== 'string' || !/^ID[0-9]{1,12}$/.test(s)) return '';
+    var n = Number(s.slice(2));
+    if (!(n >= 1)) return '';
+    var soll = 'ID' + (n < 10000 ? ('000' + n).slice(-4) : String(n));
+    return (soll === s) ? s : '';
+  }
   var ISO = /^\d{4}-\d\d-\d\dT\d\d:\d\d(:\d\d(\.\d{1,9})?)?(Z|[+-]\d\d:\d\d)$/;
   var STEUER = /[\u0000-\u001f\u007f-\u009f\u2028\u2029\u202a-\u202e\u2066-\u2069]/;
   var HERKUNFT = { runtime_stream: 1, reported_checkpoint: 1 };
@@ -78,7 +97,9 @@
             schnitt: 0, schnittIso: '', intervall: TAKT, fehlerFolge: 0, nichtVor: 0,
             fehler: '', pausiert: false };
   var zahl = { anfragen: 0, n200: 0, n304: 0, basisKommentare: 0, basisMarkiert: 0,
-               waehrendAufbau: 0, gezeigt: 0, duplikate: 0, abgewiesen: 0, ohneMarker: 0 };
+               waehrendAufbau: 0, gezeigt: 0, duplikate: 0, abgewiesen: 0, ohneMarker: 0,
+               kurzUngueltig: 0 };
+  var letzterKurzGrund = '';
   var letztes = null, letzterGrund = '', log = [], aktuellerLauf = '';
 
   function vermerk(t) {
@@ -226,7 +247,8 @@
       'neu gezeigt ' + zahl.gezeigt + (zahl.waehrendAufbau ? ' (davon während Aufbau ' +
         zahl.waehrendAufbau + ')' : '') +
       ' · doppelt ' + zahl.duplikate + ' · abgewiesen ' + zahl.abgewiesen +
-      ' · ohne Marker ' + zahl.ohneMarker + ' · Anfragen ' + zahl.anfragen +
+      ' · ohne Marker ' + zahl.ohneMarker +
+      (zahl.kurzUngueltig ? ' · Kurzref ungueltig ' + zahl.kurzUngueltig : '') + ' · Anfragen ' + zahl.anfragen +
       ' (304: ' + zahl.n304 + ') · Seite ' + Z.seite;
     grundEl.textContent = letzterGrund ? 'Zuletzt abgewiesen: ' + letzterGrund : '';
     knAus.disabled = !token;
@@ -275,7 +297,20 @@
     if (STEUER.test(titel)) return nein('title enthält Steuerzeichen');
     if (!ISO.test(d.occurred_at) || isNaN(Date.parse(d.occurred_at))) return nein('occurred_at ungültig');
     if (!HERKUNFT[d.source_evidence]) return nein('source_evidence nicht erlaubt');
-    return { art: 'ok', ev: { id: d.id, project_id: d.project_id, run_id: d.run_id,
+    /* short_ref ist optional. Ist NUR sie ungueltig, faellt die
+       Kurzreferenz weg und das Ereignis bleibt gueltig -- so steht es im
+       vereinbarten Empfaengervertrag. Der Grund bleibt abrufbar. */
+    var kurz = '';
+    if (Object.prototype.hasOwnProperty.call(d, 'short_ref')) {
+      kurz = kurzKanonisch(d.short_ref);
+      if (!kurz) {
+        zahl.kurzUngueltig++;
+        letzterKurzGrund = 'short_ref nicht kanonisch: ' +
+          String(d.short_ref).slice(0, 24) + ' (Ereignis ' + d.id + ')';
+        vermerk(letzterKurzGrund);
+      }
+    }
+    return { art: 'ok', ev: { short_ref: kurz, id: d.id, project_id: d.project_id, run_id: d.run_id,
       task_id: d.task_id, actor: d.actor, kind: d.kind,
       recipient: hatEmpf ? d.recipient : '', title: titel, occurred_at: d.occurred_at,
       source_evidence: d.source_evidence, source_tool_id: d.source_tool_id,
@@ -307,6 +342,7 @@
       fictional: false, gh_beobachtet: true, project_id: ev.project_id,
       run_id: ev.run_id, task_id: ev.task_id, source_tool_id: ev.source_tool_id };
     if (ev.recipient) aus.recipient = ev.recipient;
+    if (ev.short_ref) aus.short_ref = ev.short_ref;
     var r = window.__agEreignis(aus);
     if (!r || !r.angenommen) { abweisen('Original wies ab: ' + (r ? r.grund : '?')); return; }
     zahl.gezeigt++;
@@ -314,7 +350,8 @@
                 title: ev.title, herkunft: ev.source_evidence,
                 project_id: ev.project_id, run_id: ev.run_id, task_id: ev.task_id,
                 source_tool_id: ev.source_tool_id, wie: wie };
-    letztesEl.textContent = 'Neu (' + wie + '): ' + ev.kind + ' · ' + ev.id + ' · ' +
+    letztesEl.textContent = 'Neu (' + wie + '): ' +
+      (ev.short_ref ? ev.short_ref + ' · ' : '') + ev.kind + ' · ' + ev.id + ' · ' +
       (ev.recipient ? ev.actor + ' → ' + ev.recipient : ev.actor) + ' · ' +
       ev.title + ' · ' + (ev.source_evidence === 'reported_checkpoint'
         ? 'reported_checkpoint — gemeldet, kein Laufzeitbeleg' : 'runtime_stream') +
@@ -561,13 +598,18 @@
   /* Nur zum Nachsehen (Tests, iPad ohne Konsole). Enthaelt nie das Token. */
   window.__agGithub = Object.freeze({
     version: ADAPTER,
+    /* Versionierte Empfaengerfaehigkeit: woran ein Erzeuger erkennt, dass
+       dieser geladene Stand das optionale Feld kennt. Ein alter Adapter
+       hat diesen Eintrag nicht -- und weist ein Ereignis MIT dem Feld
+       vollstaendig ab. */
+    kann: Object.freeze(['short_ref']),
     endpoint: ENDPOINT,
     stand: function () {
       return JSON.parse(JSON.stringify({
         phase: Z.phase, verbunden: Z.phase === 'verbunden', hatToken: !!token,
         ablaufDatum: ablaufDatum, ablaufTage: ablaufStand().tage,
         seite: Z.seite, anzahl: Z.anzahl, schnitt: Z.schnittIso, intervall: Z.intervall,
-        pausiert: Z.pausiert, fehler: Z.fehler, grund: letzterGrund, zahl: zahl,
+        pausiert: Z.pausiert, fehler: Z.fehler, grund: letzterGrund, kurzGrund: letzterKurzGrund, zahl: zahl,
         letztes: letztes, bekannteIds: bekannte.groesse(), log: log }));
     }
   });
