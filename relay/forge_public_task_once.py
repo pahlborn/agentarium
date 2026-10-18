@@ -4,7 +4,6 @@ import datetime
 import hashlib
 import json
 import os
-import re
 import stat
 import subprocess
 import sys
@@ -217,9 +216,9 @@ def run_task():
                 env.pop(key, None)
             start = time.monotonic()
             result = None
-            with (OUT / "stream.jsonl").open("w") as raw:
+            with (OUT / "stream.jsonl").open("w") as raw, (OUT / "stderr.txt").open("w") as errors:
                 process = subprocess.Popen(command, cwd=tmp, env=env, stdout=subprocess.PIPE,
-                                           stderr=subprocess.PIPE, text=True, bufsize=1)
+                                           stderr=errors, text=True, bufsize=1)
                 for line in process.stdout:
                     raw.write(line)
                     raw.flush()
@@ -230,7 +229,6 @@ def run_task():
                     if item.get("type") == "result":
                         result = item
                 process.wait(timeout=30)
-                (OUT / "stderr.txt").write_text(process.stderr.read())
             if process.returncode or not result or result.get("is_error"):
                 raise RuntimeError("Claude process failed or returned no valid result")
 
