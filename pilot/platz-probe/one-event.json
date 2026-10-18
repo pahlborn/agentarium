@@ -1,0 +1,33 @@
+{
+  "task_id": "AG-PILOT-001-ONE-EVENT",
+  "version": 1,
+  "status": "SOURCE_READY_NOT_CONNECTED",
+  "run": {
+    "project_id": "agentarium",
+    "run_id": "AG-PILOT-RECOVERY-20261017",
+    "titel": "Ein reales Argus-Reviewergebnis"
+  },
+  "event": {
+    "id": "AG-PILOT-RECOVERY-20261017-RA-REVIEW-V1",
+    "actor": "argus",
+    "kind": "review_result",
+    "recipient": "atlas",
+    "title": "Argus: FAIL für eine behauptete Live-Abnahme; kein Einwand gegen den präzisierten Ein-Ereignis-Piloten.",
+    "fictional": false,
+    "verbrauch": {
+      "belegt": false
+    }
+  },
+  "evidence": {
+    "source": "actual collaboration subagent final handback in this session",
+    "agent_identity": "/root/argus_pilot_recovery",
+    "signal": "[AGENTARIUM:AG-PILOT-RECOVERY-20261017:RA:RA_REVIEW:V1]",
+    "received_recorded_at": "2026-10-17T05:24:50Z",
+    "limits": "Product display and read path not tested by Argus. Model, tokens, monetary cost and separate session UUID unavailable.",
+    "observed_review_findings": [
+      "Review transport repair record is stale; three Claude handbacks actually received in PR #6.",
+      "Activity probe used test values and does not establish live product integration.",
+      "Test exactly one real event in original field, no scope expansion."
+    ]
+  }
+}

@@ -8,7 +8,15 @@
 'use strict';
 const fs = require('fs'), path = require('path'), http = require('http');
 
-const WURZEL = path.resolve(__dirname, '..', '..', 'pilot', 'github-live');
+/* Ziel und Speicherschluessel sind einstellbar, damit dieselbe Pruefung auch
+   die Probefassung unter pilot/platz-probe/ messen kann -- eine Regel, ein
+   Ort, statt eines zweiten Skripts, das auseinanderlaeuft.
+     AG_ZIEL=pilot/platz-probe  AG_SCHLUESSEL=agentarium-PROBE-plaetze-v1 \
+     AG_PROBE=1  node previews/AG-PLATZ-001/pruefen.js                        */
+const ZIEL = process.env.AG_ZIEL || path.join('pilot', 'github-live');
+const SCHLUESSEL = process.env.AG_SCHLUESSEL || 'agentarium-plaetze-v1';
+const ISTPROBE = process.env.AG_PROBE === '1';
+const WURZEL = path.resolve(__dirname, '..', '..', ...ZIEL.split('/'));
 let fehler = 0;
 function zeile(w, ist, soll) {
   const ok = ist === soll;
@@ -132,7 +140,7 @@ const TYPEN = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; ch
     zeile('nahe am Ziel (px Abstand)',
           Math.abs(nach.x - ziel.x) + Math.abs(nach.y - ziel.y) < 40 ? 'ja' : 'nein', 'ja');
 
-    const abl = await s.evaluate(() => localStorage.getItem('agentarium-plaetze-v1'));
+    const abl = await s.evaluate(k => localStorage.getItem(k), SCHLUESSEL);
     let gespeichert = null;
     try { gespeichert = JSON.parse(abl); } catch (e) {}
     zeile('im Gerät gemerkt', gespeichert && gespeichert.forge ? 'ja, nur forge' : 'nein',
@@ -165,7 +173,7 @@ const TYPEN = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; ch
     const zurueck = await mitte(s, 'forge');
     zeile('Platz wieder wie ab Werk',
           Math.abs(zurueck.x - vor.x) + Math.abs(zurueck.y - vor.y) < 20 ? 'ja' : 'nein', 'ja');
-    const ablLeer = await s.evaluate(() => localStorage.getItem('agentarium-plaetze-v1'));
+    const ablLeer = await s.evaluate(k => localStorage.getItem(k), SCHLUESSEL);
     zeile('Ablage wieder leer', ablLeer === null ? 'ja' : 'nein, ' + ablLeer, 'ja');
     const knopfWeg = await s.$eval('#agPlatz', e => e.hidden);
     zeile('Knopf verschwindet', knopfWeg, true);
@@ -266,10 +274,38 @@ const TYPEN = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; ch
       return !!(e && e.classList.contains('auf'));
     });
     zeile('Steckbrief offen nach Tipp', steckAuf, true);
-    const nachTipp = await s.evaluate(() => localStorage.getItem('agentarium-plaetze-v1'));
+    const nachTipp = await s.evaluate(k => localStorage.getItem(k), SCHLUESSEL);
     zeile('Tipp hat nichts verschoben', nachTipp === null ? 'ja' : 'nein', 'ja');
 
     zeile('Konsolenfehler', konsole.length ? konsole.slice(0, 2).join(' | ') : 'keine', 'keine');
+
+    /* ------------------------------------------- D: Sicherungen der Probe */
+    if (ISTPROBE) {
+      console.log('\nD — Sicherungen der Probefassung (zur Laufzeit gemessen)');
+      console.log('    erwartet: kein Worker, kein Vorrat, Schlüssel der echten App unberührt\n');
+      const w = await s.evaluate(async () => {
+        const regs = navigator.serviceWorker
+          ? await navigator.serviceWorker.getRegistrations() : [];
+        let vorrat = [];
+        try { vorrat = await caches.keys(); } catch (e) {}
+        return { regs: regs.length, ctrl: !!(navigator.serviceWorker &&
+                 navigator.serviceWorker.controller), vorrat: vorrat };
+      });
+      zeile('angemeldete Worker', w.regs, 0);
+      zeile('Seite von Worker bedient', w.ctrl, false);
+      zeile('angelegte Vorräte', w.vorrat.length ? w.vorrat.join(',') : 'keine', 'keine');
+      const fremd = await s.evaluate(() => ({
+        echt: localStorage.getItem('agentarium-plaetze-v1'),
+        hell: localStorage.getItem('agentarium.hell')
+      }));
+      zeile('Schlüssel der echten App: Plätze', fremd.echt === null ? 'unberührt' : 'BERÜHRT',
+            'unberührt');
+      zeile('Schlüssel der echten App: Helligkeit', fremd.hell === null ? 'unberührt' : 'BERÜHRT',
+            'unberührt');
+      const mark = await s.evaluate(() =>
+        [...document.querySelectorAll('div')].some(d => /PLATZ-PROBE/.test(d.textContent)));
+      zeile('als Probe gekennzeichnet', mark, true);
+    }
 
     await q.close();
   } finally {
