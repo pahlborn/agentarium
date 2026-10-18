@@ -75,8 +75,8 @@ def main():
                     except ValueError:continue
                     if d.get('type')=='result':result=d;terminal=time.monotonic_ns()
                     e=d.get('event',{});b=e.get('content_block',{})
-                    if d.get('type')=='stream_event' and e.get('type')=='content_block_start' and b.get('type')=='tool_use' and b.get('name') in ('Read','Edit') and proc.poll() is None and time.monotonic()-last_post>=10 and len(events)<25:
-                        last_post=time.monotonic(); seq=len(events)+1
+                    if d.get('type')=='stream_event' and e.get('type')=='content_block_start' and b.get('type')=='tool_use' and b.get('name') in ('Read','Edit') and proc.poll() is None and time.monotonic()-last_post>=10 and sum(1 for x in events if x['event']['kind']=='progress')<25:
+                        last_post=time.monotonic(); seq=1+sum(1 for x in events if x['event']['kind']=='progress')
                         event={'schema':'agentarium.github-event.v1','id':'GH-'+run+'-'+str(seq),'project_id':'agentarium','run_id':monitor_run,'task_id':TASK,'actor':'forge','kind':'progress','title':'Forge · '+b['name']+' · Arbeitsschritt '+str(seq),'occurred_at':now(),'source_evidence':'runtime_stream','source_tool_id':b.get('id')}
                         captured=time.monotonic_ns()
                         try:
