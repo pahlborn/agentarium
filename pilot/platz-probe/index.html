@@ -2349,7 +2349,7 @@
 
      Der Speicher liegt im Gerät und geht nirgends hin. Niemand außer dem
      Betrachter sieht seine Anordnung. */
-  var PLATZ = 'agentarium-PROBE-plaetze-v1';   /* eigener Speicher, siehe unten */
+  var PLATZ = 'agentarium-PROBE-plaetze-v1';   /* eigener Speicher */
   AGENTEN.forEach(function (a) {
     a.aussen = (a.nah || 1) > 1.05;
     a.heim = { winkel: a.winkel, nah: a.nah };
@@ -2362,9 +2362,10 @@
         var w = Number(q.w), n = Number(q.n);
         /* Grenzen, damit eine beschädigte Ablage niemanden aus dem Bild
            wirft. Fehlt oder stimmt etwas nicht, bleibt die Werksstellung. */
-        if (isFinite(w) && isFinite(n) && n >= 0.08 && n <= 2.2) {
+        if (isFinite(w) && isFinite(n) && n >= 0.02 && n <= 40) {
           a.winkel = ((w % 360) + 360) % 360;
           a.nah = n;
+          a.eigen = 1;        /* selbst hingelegt — siehe KLEMMUNG unten */
         }
       });
     } catch (e) {}
@@ -2383,8 +2384,24 @@
     var k = document.getElementById('agPlatz');
     if (k) k.hidden = !eigen;
   }
+  /* Wie weit darf `nah` gehen? So weit, dass die entfernteste Ecke des
+     Fensters erreichbar ist — gemessen im selben gestauchten Maß, das
+     `heimat()` benutzt (y nimmt R * 0,92). Hängt von Fenstergröße, Band
+     und Kopfhöhe ab und wird deshalb bei jedem Zug neu gefragt. */
+  function nahGrenze() {
+    var cx = mx(), cy = my(), r = ringR(), g = 0;
+    [[0, 0], [W(), 0], [0, H()], [W(), H()]].forEach(function (c) {
+      var ex = c[0] - cx, ey = (c[1] - cy) / 0.92;
+      var d = Math.sqrt(ex * ex + ey * ey) / r;
+      if (d > g) g = d;
+    });
+    return g;
+  }
+
   function plaetzeHeim() {
-    AGENTEN.forEach(function (a) { a.winkel = a.heim.winkel; a.nah = a.heim.nah; });
+    AGENTEN.forEach(function (a) {
+      a.winkel = a.heim.winkel; a.nah = a.heim.nah; a.eigen = 0;
+    });
     plaetzeSchreiben();
     if (window.__agRing) window.__agRing();
   }
@@ -5556,7 +5573,16 @@
               dy = (ev.clientY - my()) / 0.92,
               n  = Math.sqrt(dx * dx + dy * dy) / ringR(),
               w  = Math.atan2(dy, dx) * 180 / Math.PI;
-          A.nah = Math.max(0.08, Math.min(2.2, n));
+          /* Die obere Grenze wird GERECHNET, nicht geraten. Erst stand hier
+             2,2 — eine Zahl, die ich mir ausgedacht hatte. Gemessen am
+             18.10.: die Ecken eines 1194x834-Fensters brauchen bis 2,56,
+             und ein Ablegen bei x=90 landete deshalb bei x=166. Peter sah
+             genau das: „der Agent bleibt nicht genau dort liegen, wo ich
+             ihn ablege."
+             Die Grenze ist jetzt die weiteste Fensterecke, im gestauchten
+             Maß gemessen — damit ist jeder Punkt des Fensters erreichbar
+             und keiner darüber hinaus. */
+          A.nah = Math.max(0.02, Math.min(nahGrenze(), n));
           A.winkel = ((w % 360) + 360) % 360;
           var q = heimat(A);
           el.style.left = q[0] + 'px'; el.style.top = q[1] + 'px';
@@ -5568,6 +5594,7 @@
           el.classList.remove('faengt');
           if (!war) return;
           el.__gezogen = 1;
+          A.eigen = 1;
           plaetzeSchreiben();
           if (window.__agRing) window.__agRing();
         }
@@ -5584,12 +5611,35 @@
       e.style.animationDelay = (-((((12 - i * 1.6) % 4) + 4) % 4)).toFixed(2) + 's';
       ring.appendChild(e);
       /* Nachmessen und hereinholen, erst wenn das Schild im Dokument steht
-         — vorher hat es keine Breite. */
-      var k = e.getBoundingClientRect(), halb = k.width / 2;
-      if (k.left < bandL() + 4)
+         — vorher hat es keine Breite.
+
+         KLEMMUNG, UND WANN SIE NICHT GILT.
+         Ab Werk wird ins Band geklemmt: Peter steht mit 1,28 Radien auf der
+         linken Kante, sein Schild ist um seinen Platz zentriert und ragte
+         zur Hälfte in die Liste.
+
+         Hat der Betrachter das Schild aber SELBST hingelegt, ist das Band
+         nicht mehr zuständig — dann ist dort sein Platz. Gemessen am
+         18.10., ohne diese Unterscheidung: abgelegt bei x=1130 landete das
+         Schild bei 822, abgelegt bei x=90 landete es bei 374. Es sprang um
+         rund 300 Pixel zurück, und beim nächsten Rollenwechsel noch einmal
+         ein paar, weil die Klemmung mit der jeweiligen Textbreite rechnet.
+         Peter: „der Agent bleibt nicht genau dort liegen, wo ich ihn
+         ablege, manchmal sucht er sich einen anderen Ort."
+
+         Statt des Bandes gilt dann das FENSTER: ganz verschwinden darf ein
+         Schild nicht, sonst ist es unauffindbar. */
+      var k = e.getBoundingClientRect(), halb = k.width / 2, hoch = k.height / 2;
+      if (a.eigen) {
+        if (k.left < 4) e.style.left = (halb + 4) + 'px';
+        else if (k.right > W() - 4) e.style.left = (W() - halb - 4) + 'px';
+        if (k.top < 4) e.style.top = (hoch + 4) + 'px';
+        else if (k.bottom > H() - 4) e.style.top = (H() - hoch - 4) + 'px';
+      } else if (k.left < bandL() + 4) {
         e.style.left = (bandL() + halb + 4) + 'px';
-      else if (k.right > bandR() - 4)
+      } else if (k.right > bandR() - 4) {
         e.style.left = (bandR() - halb - 4) + 'px';
+      }
     });
   }
 
@@ -5885,10 +5935,24 @@
          passt eine Lage, die für das eine Wort stimmt, für das andere
          nicht. Beim ersten Versuch wurde nur einmal beim Aufbau geklemmt —
          und das Schild rutschte beim Umschlag wieder in die Liste. */
-      e.style.left = heimat(A)[0] + 'px';
-      var kk = e.getBoundingClientRect(), hb = kk.width / 2;
-      if (kk.left < bandL() + 4) e.style.left = (bandL() + hb + 4) + 'px';
-      else if (kk.right > bandR() - 4) e.style.left = (bandR() - hb - 4) + 'px';
+      var hp = heimat(A);
+      e.style.left = hp[0] + 'px';
+      /* Selbst hingelegte Schilder behalten auch ihre Hoehe. Hier stand
+         vorher nur `left`; fuer die Werksstellung genuegt das, weil `top`
+         aus ringZeichnen stimmt. */
+      if (A.eigen) e.style.top = hp[1] + 'px';
+      var kk = e.getBoundingClientRect(), hb = kk.width / 2, hh = kk.height / 2;
+      if (A.eigen) {
+        /* Nicht ins Band, nur ins Fenster — siehe KLEMMUNG in ringZeichnen. */
+        if (kk.left < 4) e.style.left = (hb + 4) + 'px';
+        else if (kk.right > W() - 4) e.style.left = (W() - hb - 4) + 'px';
+        if (kk.top < 4) e.style.top = (hh + 4) + 'px';
+        else if (kk.bottom > H() - 4) e.style.top = (H() - hh - 4) + 'px';
+      } else if (kk.left < bandL() + 4) {
+        e.style.left = (bandL() + hb + 4) + 'px';
+      } else if (kk.right > bandR() - 4) {
+        e.style.left = (bandR() - hb - 4) + 'px';
+      }
       e.classList.remove('agGuss');
       void e.offsetWidth;                    /* Animation neu anstoßen */
       e.classList.add('agGuss');
@@ -6215,11 +6279,9 @@
 })();
 </script>
 <!-- PROBEFASSUNG: Hier stand die Anmeldung des Service Workers. Sie ist
-     ENTFERNT, nicht stillgelegt. Begruendung, nachgemessen am 18.10.:
-     pilot/github-live/sw.js loescht in seinem `activate` JEDEN Vorrat, der
-     mit `agentarium-v` anfaengt und nicht der eigene ist. Eine Probefassung
-     mit eigenem Worker nimmt der laufenden App damit ihren Offline-Vorrat.
-     Diese Seite laeuft nur online; das ist ihr Zweck. sw.js ist auch nicht
-     mitkopiert, es gibt also nichts anzumelden. -->
+     ENTFERNT, nicht stillgelegt. pilot/github-live/sw.js loescht in seinem
+     `activate` JEDEN Vorrat, der mit `agentarium-v` anfaengt und nicht der
+     eigene ist -- eine Probefassung mit eigenem Worker nimmt der laufenden
+     App ihren Offline-Vorrat. sw.js ist auch nicht mitkopiert. -->
 </body>
 </html>
