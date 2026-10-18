@@ -206,6 +206,49 @@ const TYPEN = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; ch
     zeile('nach 18 s unverändert (Abw. px)',
           Math.abs(nachRuhe.x - vorRuhe.x) + Math.abs(nachRuhe.y - vorRuhe.y), 0);
 
+    /* Vor B3 zuruecksetzen -- SONST MISST DER TEST SICH SELBST.
+       B2 legt `forge` auf (600,420). Legte B3 Peter auf (597,417), lagen
+       zwei Schilder auf demselben Punkt, und der naechste Griff erwischte
+       ueber elementFromPoint das obenaufliegende: gezogen wurde forge,
+       Peter blieb liegen, gemeldet wurden 401 px Abweichung. Einzeln
+       geprueft ist dieselbe Fahrt viermal fehlerfrei. Ein Messartefakt,
+       kein Produktfehler -- und das fuenfte an diesem Tag. */
+    await s.click('#agPlatz'); await s.waitForTimeout(400);
+
+    /* ------------------------------------------- B3: PETER, der Sonderfall --
+       Peter ist der einzige mit `agDraussen`: gesperrte Schrift, deutlich
+       breiteres Schild (73 px quer gegen 40 px bei `forge`), und seit der
+       Entkopplung behaelt er das an jedem Ort. Er war genau der Fall, den
+       der erste Nachweis NICHT pruefte -- und der erste, den Peter am
+       echten Geraet anfasste. Nachgeholt am 18.10.
+
+       Am aeussersten Rand bleibt eine Abweichung, und sie ist gewollt: die
+       Fensterklemmung holt ein breites Schild so weit herein, dass es ganz
+       sichtbar bleibt. Geprueft wird deshalb die SICHTBARKEIT, nicht die
+       Punktgleichheit -- und in der Mitte, oben und unten die Punktgleichheit. */
+    console.log('\nB3 — Peter, das breiteste Schild');
+    console.log('    erwartet: mittig/oben/unten genau; am Rand ganz im Bild\n');
+    const bp = await s.evaluate(() => {
+      const e = document.querySelectorAll('.agName')[0];
+      return { w: Math.round(e.getBoundingClientRect().width), k: e.className };
+    });
+    zeile('Peter trägt agDraussen', /agDraussen/.test(bp.k), true);
+    zeile('Mitte (Abw. px)', await ablegen('peter', 597, 417), 0);
+    zeile('oben (Abw. px)', await ablegen('peter', 597, 16), 0);
+    zeile('unten (Abw. px)', await ablegen('peter', 597, 818), 0);
+    await ablegen('peter', 1164, 250);
+    const randR = await s.evaluate(() => {
+      const k = document.querySelectorAll('.agName')[0].getBoundingClientRect();
+      return k.right <= innerWidth && k.left >= 0;
+    });
+    zeile('rechter Rand: ganz im Bild', randR, true);
+    await ablegen('peter', 22, 584);
+    const randL = await s.evaluate(() => {
+      const k = document.querySelectorAll('.agName')[0].getBoundingClientRect();
+      return k.left >= 0 && k.right <= innerWidth;
+    });
+    zeile('linker Rand: ganz im Bild', randL, true);
+
     /* Zuruecksetzen, damit Teil C von der Werksstellung ausgeht. */
     await s.click('#agPlatz'); await s.waitForTimeout(400);
 
