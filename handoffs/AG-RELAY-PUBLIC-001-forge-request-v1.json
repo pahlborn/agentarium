@@ -1,0 +1,17 @@
+{
+  "schema": "agentarium.handoff.v0",
+  "task_id": "AG-RELAY-PUBLIC-001-FORGE-V1",
+  "monitor_run_id": "AG-RELAY-PUBLIC-001-20261018",
+  "authority": "Peter authorized repair and pilot of the public Agentarium team relay. This assignment requests architecture advice only; it does not authorize implementation, merge or publication.",
+  "goal": "Assess the current public-repository Forge relay path and specify the smallest safe, task-capable repair that can carry future bounded technical work without reviving the old identity probe.",
+  "allowed_paths": [
+    "handoffs/AG-RELAY-PUBLIC-001-forge-handback-v1.md"
+  ],
+  "requirements": [
+    "Read CLAUDE.md, AGENTS.md, the current Forge profile, Rulebook and Process V1.2, the old forge-relay workflow and wrapper, and the proposed public run workflow and host.",
+    "State the critical assumption, simplest viable route, concrete alternatives, security boundaries, required negative tests and the smallest observable end-to-end proof.",
+    "Explicitly distinguish source commit, activation commit, workflow run, individual job, Claude session and handback. A green workflow alone is not proof that Forge ran.",
+    "Do not implement or modify product, relay or governance files. Write only the allowed handback. Report unresolved blockers rather than filling gaps.",
+    "Return at most 700 German words with verdict FEASIBLE, FEASIBLE_WITH_CHANGES or BLOCKED and the next exact owner/action."
+  ]
+}
