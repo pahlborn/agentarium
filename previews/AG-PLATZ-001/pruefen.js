@@ -178,6 +178,88 @@ const TYPEN = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; ch
     const knopfWeg = await s.$eval('#agPlatz', e => e.hidden);
     zeile('Knopf verschwindet', knopfWeg, true);
 
+    /* ------------------------------- B2: Ablegen AUSSERHALB des Bandes ----
+       Peters Befund vom 18.10.: „der Agent bleibt nicht genau dort liegen,
+       wo ich ihn ablege, manchmal sucht er sich einen anderen Ort."
+       Zwei Ursachen, beide gemessen und behoben:
+         - die Klemmung ins Band zog ein selbst hingelegtes Schild zurueck
+           (abgelegt bei x=1130 landete es bei 822, bei x=90 bei 374)
+         - die obere Grenze fuer `nah` war mit 2,2 geraten; die Ecken eines
+           1194x834-Fensters brauchen bis 2,56 */
+    console.log('\nB2 — Ablegen außerhalb des Bandes, und Ruhe danach');
+    console.log('    erwartet: liegt genau dort, auch rechts in der Kopfspalte');
+    console.log('              und links in der Liste; wandert danach nicht\n');
+
+    async function ablegen(name, zx, zy) {
+      const m = await mitte(s, name);
+      await s.mouse.move(m.x, m.y); await s.mouse.down();
+      for (let i = 1; i <= 12; i++) {
+        await s.mouse.move(m.x + (zx - m.x) * i / 12, m.y + (zy - m.y) * i / 12);
+        await s.waitForTimeout(16);
+      }
+      await s.mouse.up(); await s.waitForTimeout(400);
+      const n2 = await mitte(s, name);
+      return Math.abs(n2.x - zx) + Math.abs(n2.y - zy);
+    }
+    zeile('mitten im Band (Abw. px)', await ablegen('forge', 600, 420), 0);
+    zeile('rechts in der Kopfspalte (Abw. px)', await ablegen('scout', 1130, 300), 0);
+    zeile('links in der Liste (Abw. px)', await ablegen('nova', 90, 500), 0);
+
+    /* Und bleibt es liegen, wenn das Schild zwischen Name und Rolle
+       umschlaegt? Der Wechsel kommt je Agent alle 16 s, um 1,6 s versetzt;
+       18 s treffen also mindestens einen. */
+    const vorRuhe = await mitte(s, 'nova');
+    await s.waitForTimeout(18000);
+    const nachRuhe = await mitte(s, 'nova');
+    zeile('nach 18 s unverändert (Abw. px)',
+          Math.abs(nachRuhe.x - vorRuhe.x) + Math.abs(nachRuhe.y - vorRuhe.y), 0);
+
+    /* Vor B3 zuruecksetzen -- SONST MISST DER TEST SICH SELBST.
+       B2 legt `forge` auf (600,420). Legte B3 Peter auf (597,417), lagen
+       zwei Schilder auf demselben Punkt, und der naechste Griff erwischte
+       ueber elementFromPoint das obenaufliegende: gezogen wurde forge,
+       Peter blieb liegen, gemeldet wurden 401 px Abweichung. Einzeln
+       geprueft ist dieselbe Fahrt viermal fehlerfrei. Ein Messartefakt,
+       kein Produktfehler -- und das fuenfte an diesem Tag. */
+    await s.click('#agPlatz'); await s.waitForTimeout(400);
+
+    /* ------------------------------------------- B3: PETER, der Sonderfall --
+       Peter ist der einzige mit `agDraussen`: gesperrte Schrift, deutlich
+       breiteres Schild (73 px quer gegen 40 px bei `forge`), und seit der
+       Entkopplung behaelt er das an jedem Ort. Er war genau der Fall, den
+       der erste Nachweis NICHT pruefte -- und der erste, den Peter am
+       echten Geraet anfasste. Nachgeholt am 18.10.
+
+       Am aeussersten Rand bleibt eine Abweichung, und sie ist gewollt: die
+       Fensterklemmung holt ein breites Schild so weit herein, dass es ganz
+       sichtbar bleibt. Geprueft wird deshalb die SICHTBARKEIT, nicht die
+       Punktgleichheit -- und in der Mitte, oben und unten die Punktgleichheit. */
+    console.log('\nB3 — Peter, das breiteste Schild');
+    console.log('    erwartet: mittig/oben/unten genau; am Rand ganz im Bild\n');
+    const bp = await s.evaluate(() => {
+      const e = document.querySelectorAll('.agName')[0];
+      return { w: Math.round(e.getBoundingClientRect().width), k: e.className };
+    });
+    zeile('Peter trägt agDraussen', /agDraussen/.test(bp.k), true);
+    zeile('Mitte (Abw. px)', await ablegen('peter', 597, 417), 0);
+    zeile('oben (Abw. px)', await ablegen('peter', 597, 16), 0);
+    zeile('unten (Abw. px)', await ablegen('peter', 597, 818), 0);
+    await ablegen('peter', 1164, 250);
+    const randR = await s.evaluate(() => {
+      const k = document.querySelectorAll('.agName')[0].getBoundingClientRect();
+      return k.right <= innerWidth && k.left >= 0;
+    });
+    zeile('rechter Rand: ganz im Bild', randR, true);
+    await ablegen('peter', 22, 584);
+    const randL = await s.evaluate(() => {
+      const k = document.querySelectorAll('.agName')[0].getBoundingClientRect();
+      return k.left >= 0 && k.right <= innerWidth;
+    });
+    zeile('linker Rand: ganz im Bild', randL, true);
+
+    /* Zuruecksetzen, damit Teil C von der Werksstellung ausgeht. */
+    await s.click('#agPlatz'); await s.waitForTimeout(400);
+
     /* ------------------------------------------------- C: Tipp bleibt Tipp */
     console.log('\nC — Tippen öffnet weiter den Steckbrief');
     console.log('    erwartet: ein Tipp unter der Schwelle wird nicht als Zug gelesen\n');
