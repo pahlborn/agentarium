@@ -16,18 +16,26 @@ jobs:
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
-          ref: c40b4cb5155b62bc31d0bb35a9d2ceb023530b17
+          ref: b5dcabb47802c6c9b401e6d429040979aaf9ffc5
           persist-credentials: false
       - name: Rebuild exact Original candidate
-        run: python3 previews/AG-VISUAL-005-feld/bauen.py /tmp/ag-gh-built --stuecke-aus feld/index.html --vergleich feld/index.html --gebaut 2026-10-18T03:20Z --icons feld --one-event feld/one-event.json
+        run: python3 previews/AG-VISUAL-005-feld/bauen.py /tmp/ag-gh-built --stuecke-aus feld/index.html --vergleich feld/index.html --gebaut 2026-10-18T03:45Z --icons feld --one-event feld/one-event.json
       - name: Install test browser
         run: |
           npm install --prefix "$RUNNER_TEMP/ag-gh-browser" playwright@1.62.1
           node "$RUNNER_TEMP/ag-gh-browser/node_modules/playwright/cli.js" install --with-deps chromium
-      - name: Independent Sentinel expiry browser acceptance
+      - name: Synthetic component and Original regression checks
         env:
           NODE_PATH: ${{ runner.temp }}/ag-gh-browser/node_modules
-        run: node tests/AG-GH-LIVE-003-browser.cjs /tmp/ag-gh-built c40b4cb5155b62bc31d0bb35a9d2ceb023530b17 artifacts/sentinel-expiry-results
+        run: node tests/AG-GH-LIVE-001.cjs /tmp/ag-gh-built
+      - name: Forge parser and expiry component checks
+        run: |
+          node tests/AG-GH-LIVE-004-forge.cjs
+          node tests/AG-GH-LIVE-001-expiry.cjs /tmp/ag-gh-built/github-live.js
+      - name: Independent Sentinel communication acceptance
+        env:
+          NODE_PATH: ${{ runner.temp }}/ag-gh-browser/node_modules
+        run: node tests/AG-GH-LIVE-004-browser.cjs /tmp/ag-gh-built b5dcabb47802c6c9b401e6d429040979aaf9ffc5 artifacts/sentinel-communication-results
       - name: Preserve candidate and test output
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
