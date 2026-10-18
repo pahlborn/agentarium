@@ -1,0 +1,20 @@
+# AG-GH-LIVE-004-DIAG-V1 — Sentinel
+
+**Verdict: Diagnose eingegrenzt; kein Live-Abnahme-PASS.** 18.10.2026, 04:09Z. Echter QA-Subagent, bestehender Sentinel-Skill. Ein tatsächlicher Lese-Fortschritt wurde intern an Atlas gemeldet; keine externen Änderungen, keine bezahlten Läufe, kein Replay auf Peters Monitor.
+
+1. **Belegte Lücke: Meine Arbeit bekam bisher kein Arbeitszeichen.** Im beanstandeten Ablauf wurden nur Atlas→Sentinel `handoff` und Sentinel→Atlas `contribution` veröffentlicht. Während meiner Dokumentenprüfung gab es keine Sentinel-`progress`-Meldung. Übergabe/Rückgabe sind in F51 ausdrücklich Kommunikation: kein Arbeitsring, kein behauptetes andauerndes Arbeiten. Ein laufender Forge-Werkzeugschritt und meine Prüfung wurden daher unterschiedlich dargestellt. Das erklärt die fehlende laufende Sentinel-Arbeitsanzeige; es erklärt noch nicht, ob die zwei Kommunikationsflüge angekommen oder übersehen worden sind. Rohe ChatGPT-Werkzeug-Telemetrie steht hier nicht zur Verfügung. Der tatsächlich gemeldete Lese-Checkpoint dieses Diagnoseauftrags ist ehrlich als `progress`/`reported_checkpoint` darstellbar, nicht als `runtime_stream`.
+
+2. **Die zwei echten Kommentare sind F51-konform; Mischversion ist nur eine Hypothese.** GitHub-Kommentare `6245451460` und `6245461337` direkt aus der API gelesen: Autor jeweils pahlborn, Marker/JSON vorhanden, erlaubte Rollen, bekannte Empfänger, Herkunft `reported_checkpoint`, gültige IDs. Den vollständigen unveränderten F51-Adapter SHA256 `625bb3d814bf08cbfe81f2f8655696962dc9cef422a3a9fd1e148ecdf027b114` in vorhandener NodeVM-Umgebung ausgeführt — keine nachgeschriebene Parserlogik. Die tatsächlichen Kommentare wurden nur lokal als Antworten des simulierten Live-Abrufs eingespeist: mit F51-Capability beide weitergereicht, 2 gezeigt/0 abgewiesen; mit fehlender F51-Capability beide abgewiesen (`Original kennt beobachtete Kommunikation nicht`); alter F50-Adapter weist beide bereits wegen `unbekanntes Feld recipient` ab. Fake Transport/DOM und Stub des Originals prüfen Filter/Weitergabe, keine Kundendarstellung. Eine ältere oder gemischte Kundenversion könnte also Forge-`progress` zeigen und beide Sentinel-Kommunikationen verwerfen. Dass Peters Browser tatsächlich alt/gemischt ist, ist NICHT belegt. Auch Empfang, Wiederverbindung/Basisschnitt und nur kurz sichtbare/überlagerte Texte bleiben unbekannt.
+
+3. **Kleinster nächster Test: ein neuer echter gemeldeter Sentinel-Schritt, dann diese echte Rückgabe.** Den bereits vollzogenen Lese-Checkpoint als neues `progress`/`reported_checkpoint` und anschließend diesen echten Diagnosebericht als neue `contribution` zeigen; keine alten Ereignisse erneut senden. Monitor geöffnet lassen. Benötigte Kundeninfo, ohne Token: angezeigte Agentarium-Fassung **und** Adapterkennung unten im aufgeklappten GitHub-Live-Bereich; danach Werte `neu gezeigt`, `abgewiesen` und gegebenenfalls `Zuletzt abgewiesen`, plus ob das neue Sentinel-Arbeitszeichen bzw. der Rückflug sichtbar war. Damit trennt man fehlende Arbeitsmeldung, inkompatiblen Consumer und angekommenen, aber schlecht erkennbaren Flug. Ohne diese Beobachtung ist kein Grund für einen Codefix nachgewiesen.
+
+Nachweise: `sentinel-communication-qa/diag-real-comments.json` (echte API-Antworten), `sentinel-communication-qa/diag-parser-results.json` (lokale vollständige Adapterläufe). Ein erster NodeVM-Aufruf war wegen im äußeren Harness fehlendem URL-Global ungültig; nach Bereitstellung des standardmäßigen URL-Globals liefen die drei Umgebungen ohne Produktänderung. Keine Browser-/Windows-/Safari-Probe in diesem Diagnoseauftrag. Nächster Owner Atlas; Sentinel stoppt hier.
+
+
+## Atlas — Kundenrückmeldung und laufender Nachweis
+
+Peter meldet Forge sichtbar, Sentinel nicht sichtbar. Mehrrollen-Kundenabnahme NICHT ERTEILT; frühere Veröffentlichung ist kein Empfangsnachweis. Diagnose offen.
+
+Echter neuer Sentinel-Lesecheckpoint: https://github.com/pahlborn/agentarium/issues/2#issuecomment-6245504998
+Echte Diagnoserückgabe: https://github.com/pahlborn/agentarium/issues/2#issuecomment-6245518675
+Beide reported_checkpoint, keine rohe ChatGPT-Werkzeugtelemetrie. Keine Produktänderung.
