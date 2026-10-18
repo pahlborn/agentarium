@@ -11,11 +11,18 @@
  *     durch dieses Skript)
  *   • eine BEREITS VORHANDENE lokale Chromium-Laufzeit
  *
- * Der Pfad zur Chromium-Laufzeit wird in dieser Reihenfolge gesucht:
- *   1. Umgebungsvariable  AG_CHROMIUM=/pfad/zu/chromium
- *   2. $PLAYWRIGHT_BROWSERS_PATH/chromium
- *   3. /opt/pw-browsers/chromium
- * Fehlt sie, bricht das Skript mit einer Meldung ab und meldet Rückgabe 2 --
+ * Der Pfad zur Chromium-Laufzeit wird so bestimmt:
+ *   1. AG_CHROMIUM, falls gesetzt -- muss eine vorhandene, AUSFÜHRBARE DATEI
+ *      sein. Ist sie es nicht, endet der Lauf mit Rückgabe 2; es wird NICHT
+ *      heimlich ein anderer Browser genommen.
+ *   2. sonst die von Playwright selbst gemeldete ausführbare Datei
+ *      (`chromium.executablePath()`), ebenfalls geprüft.
+ *
+ * Geraten wird nichts mehr. Frühere Fassungen nahmen
+ * `$PLAYWRIGHT_BROWSERS_PATH/chromium` bzw. `/opt/pw-browsers/chromium` --
+ * das sind je nach Installation VERZEICHNISSE, und ein Verzeichnis als
+ * `executablePath` ergibt EACCES statt eines sauberen „ungeprüft".
+ * Fehlt die Laufzeit, bricht das Skript ab und meldet Rückgabe 2 --
  * NICHT als bestanden und nicht als durchgefallen, sondern als ungeprüft.
  * Genau daran ist Sentinels Lauf gescheitert; das soll sichtbar bleiben.
  *
@@ -31,13 +38,34 @@ const WURZEL = path.resolve(__dirname, '..', '..');
 const PILOT  = path.join(WURZEL, 'pilot', 'github-live');
 const PORT   = Number(process.env.AG_PORT || 8090);
 
-function chromiumPfad() {
-  const k = [process.env.AG_CHROMIUM,
-             process.env.PLAYWRIGHT_BROWSERS_PATH
-               ? path.join(process.env.PLAYWRIGHT_BROWSERS_PATH, 'chromium') : null,
-             '/opt/pw-browsers/chromium'].filter(Boolean);
-  for (const p of k) { try { if (fs.existsSync(p)) return p; } catch (e) {} }
-  return null;
+/* Eine vorhandene, ausfuehrbare DATEI -- kein Verzeichnis, kein blosses
+   "existiert". Genau daran scheiterte die erste Fassung. */
+function ausfuehrbareDatei(p) {
+  if (!p) return false;
+  try {
+    const s = fs.statSync(p);
+    if (!s.isFile()) return false;
+    fs.accessSync(p, fs.constants.X_OK);
+    return true;
+  } catch (e) { return false; }
+}
+
+/* Rueckgabe: { pfad } oder { grund } -- nie ein ungeprueftes Versprechen. */
+function chromiumPfad(chromium) {
+  const gesetzt = process.env.AG_CHROMIUM;
+  if (gesetzt) {
+    return ausfuehrbareDatei(gesetzt)
+      ? { pfad: gesetzt }
+      : { grund: 'AG_CHROMIUM zeigt nicht auf eine ausfuehrbare Datei: ' + gesetzt };
+  }
+  if (!chromium) return { grund: 'playwright fehlt, daher auch kein Browserpfad' };
+  let p = null;
+  try { p = chromium.executablePath(); } catch (e) {
+    return { grund: 'playwright meldet keinen Browserpfad: ' + e.message };
+  }
+  return ausfuehrbareDatei(p)
+    ? { pfad: p }
+    : { grund: 'von playwright gemeldete Datei fehlt oder ist nicht ausfuehrbar: ' + p };
 }
 
 /* ---------------------------------------------------------------- Urteil */
@@ -133,14 +161,20 @@ async function imBrowser(chromium, exe) {
         if (typeof v !== 'undefined') ev.short_ref = v;
         const a = window.__agEreignis(ev);
         return {fall: n, angenommen: !!(a && a.angenommen), id: (a && a.id) || '',
+                sollId: 'K-' + i,
                 hinweis: (a && a.hinweis) || '', sollHinweis: soll};
       });
     });
+    /* Die zurueckgegebene ID wird EXAKT mit der gesendeten verglichen.
+       Vorher wurde nur auf "nicht leer" geprueft -- eine falsche ID waere
+       gruen geblieben. Ein Test, der milder ist als sein Gegenstand, ist
+       keiner. */
     for (const x of r) {
       const ist = (x.angenommen ? 'angenommen' : 'ABGEWIESEN') +
-                  ', ID ' + (x.id ? 'erhalten' : 'FEHLT') +
+                  ', ID ' + (x.id === x.sollId ? x.sollId : 'FALSCH(' + x.id + ')') +
                   ', Hinweis ' + (x.hinweis ? 'ja' : 'nein');
-      zeile(x.fall, ist, 'angenommen, ID erhalten, Hinweis ' + (x.sollHinweis ? 'ja' : 'nein'));
+      zeile(x.fall, ist, 'angenommen, ID ' + x.sollId +
+            ', Hinweis ' + (x.sollHinweis ? 'ja' : 'nein'));
     }
     /* Begrenzung und Maskierung nachweisen */
     const lang = r.find(x => x.fall === '62 Zeichen');
@@ -192,20 +226,20 @@ async function imBrowser(chromium, exe) {
   console.log('AG-EVENT-ID-001 — Nachweis des Empfängerkandidaten');
   console.log('Geprüft wird: ' + PILOT);
 
-  let chromium, exe = chromiumPfad();
-  try { chromium = require('playwright').chromium; }
-  catch (e) {
-    console.log('\nUNGEPRÜFT: Das npm-Paket `playwright` fehlt.');
-    console.log('Teil A läuft trotzdem; B und C brauchen einen Browser.\n');
-  }
+  let chromium = null;
+  try { chromium = require('playwright').chromium; } catch (e) {}
+  const browser = chromiumPfad(chromium);
+
   teilA();
-  if (!chromium || !exe) {
-    console.log('\nUNGEPRÜFT: ' + (!chromium ? 'playwright fehlt.' :
-      'keine Chromium-Laufzeit gefunden. Mit AG_CHROMIUM=/pfad/zu/chromium angeben.'));
+
+  if (!browser.pfad) {
+    console.log('\nUNGEPRÜFT: ' + browser.grund);
     console.log('Teil B und C wurden NICHT ausgeführt. Das ist kein Bestehen.');
+    console.log('Mit AG_CHROMIUM=/pfad/zur/ausfuehrbaren/datei angeben.');
     process.exit(2);
   }
-  await imBrowser(chromium, exe);
+  console.log('\nBrowser: ' + browser.pfad);
+  await imBrowser(chromium, browser.pfad);
 
   console.log('\n' + (abweichungen === 0
     ? 'ALLES WIE VEREINBART — keine Abweichung.'

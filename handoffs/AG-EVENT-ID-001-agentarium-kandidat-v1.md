@@ -177,8 +177,13 @@ Das Skript **installiert nichts** und lädt nichts herunter. Es setzt voraus:
 - das npm-Paket `playwright` (nur die Bibliothek)
 - eine **bereits vorhandene lokale Chromium-Laufzeit**
 
-Pfad in dieser Reihenfolge gesucht: `AG_CHROMIUM`,
-`$PLAYWRIGHT_BROWSERS_PATH/chromium`, `/opt/pw-browsers/chromium`.
+Der Pfad wird so bestimmt — **geraten wird nichts**:
+
+1. `AG_CHROMIUM`, falls gesetzt. Muss eine vorhandene, **ausführbare Datei**
+   sein. Ist sie es nicht, endet der Lauf mit Rückgabe 2; es wird *nicht*
+   heimlich ein anderer Browser genommen.
+2. sonst die von Playwright selbst gemeldete ausführbare Datei
+   (`chromium.executablePath()`), ebenso geprüft.
 
 **Fehlt die Laufzeit, endet das Skript mit Rückgabe 2 — „ungeprüft".** Nicht
 bestanden und nicht durchgefallen. Genau daran ist Sentinels Lauf gescheitert,
@@ -210,6 +215,32 @@ maskiert.
 
 **Teil C** — Anzeige auf 1440×900, 1194×834, 834×1194, 844×390: Kurzreferenz
 `ID0042` sichtbar, kein Querlauf, keine Konsolenfehler.
+
+## Nachtrag V4 — zwei Korrekturen am Skript (Atlas-Re-Review `e4b2b9d`)
+
+**1 — Teil B vergleicht die zurückgegebene ID jetzt exakt.** Vorher wurde nur
+auf „nicht leer" geprüft; eine falsche ID wäre grün geblieben. Ein Test, der
+milder ist als sein Gegenstand, ist keiner. Jede Zeile nennt nun die erwartete
+ID (`K-0` … `K-10`), und die Ausgabe zeigt sie.
+
+**2 — Die Browserauflösung übergibt kein Verzeichnis mehr.** Die erste Fassung
+riet `$PLAYWRIGHT_BROWSERS_PATH/chromium` und `/opt/pw-browsers/chromium`.
+Beides sind je nach Installation **Verzeichnisse** — als `executablePath`
+ergibt das `EACCES` statt eines sauberen „ungeprüft". Jetzt wird auf
+**Datei und Ausführbarkeit** geprüft (`statSync().isFile()` plus
+`accessSync(X_OK)`), und bei Fehlschlag endet der Lauf mit Rückgabe 2.
+
+Nachgemessen, Rückgabewerte ohne Pipe ermittelt:
+
+| Fall | Rückgabe |
+|---|---|
+| `AG_CHROMIUM` zeigt auf ein Verzeichnis | **2** |
+| `AG_CHROMIUM` zeigt ins Leere | **2** |
+| `AG_CHROMIUM` zeigt auf eine nicht ausführbare Datei | **2** |
+| ohne `AG_CHROMIUM`, Browser vorhanden | **0** |
+
+In allen drei Fehlerfällen läuft Teil A weiter durch (14/14) und die Meldung
+nennt den Grund. Kein `EACCES`.
 
 ## Keine Produktänderung
 Das Skript liegt unter `previews/`, wird von nichts geladen und ändert weder
