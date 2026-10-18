@@ -139,47 +139,78 @@ Einwände an seiner Steuerung: Cadence kritisiert den einzügigen Auftrag, der
 eine eigene Regel- und Repo-Prüfung verhinderte; Forge verlangt klare
 Testverantwortung und maschinenprüfbare Handbacks.
 
-**Die Gegenprobe ist der eigentliche Befund.** Issue #2 führt 100 Kommentare
-vom 13. bis 16.10. Davon tragen **genau drei** eine Rolle, alle drei vom
-**13.10., 16:55 bis 16:57** — ein einziger Lauf, drei Minuten. Am 14., 15.
-und 16.10.: keiner.
+**Meine Gegenprobe dazu war falsch, und Atlas hat sie widerlegt.**
 
-```
-Verteilung der rollentragenden Kommentare über die Tage
-  2026-10-13   3
-  2026-10-14   —
-  2026-10-15   —
-  2026-10-16   —
-```
+Ich schrieb: Issue #2 führe 100 Kommentare, davon genau drei rollentragend,
+alle vom 13.10. — danach keiner. **Beides ist falsch.** Issue #2 führt
+**209 Kommentare** (100 + 100 + 9, bis 18.10. 05:25:36 UTC). Ich hatte eine
+Seite abgerufen und sie für die Liste gehalten.
 
-Damit hat Peters Beobachtung vom 17.10. — *„er verläuft sich immer wieder,
-obwohl er ein Team hat"* — eine **Ursache mit Datum**, und sie ist keine
-Charakterfrage:
+Der Alarm stand in meinem eigenen Aufruf: Ich setzte `perPage: 100` und bekam
+**genau 100** zurück. **Eine Trefferzahl, die exakt der Seitengröße
+entspricht, ist ein Abschneidesignal, kein Gesamtwert.**
 
-1. Am 13.10. lief die Teamrückkopplung. Einmal, und sie funktionierte.
-2. Zwischen dem 13. und 16.10. wurde das Repository öffentlich.
-3. Seither überspringen die bezahlten Jobs der drei Relais ihre Bedingung
-   `repository.private == true` — **und ein übersprungener Job meldet sich
-   als erfolgreicher Lauf.**
-4. Atlas hat das am 16.10. für einen Lauf selbst festgestellt
-   (`AG-REVIEW-20261016-TEAM-blockade-atlas-v1.md`) und am 18.10. für alle
-   drei bestätigt.
+Zweiter Fehler im selben Satz: Mein Filter suchte nur das JSON-Feld `role`.
+Der neuere Weg benutzt `actor` und `recipient` im Agentarium-Schema oder trägt
+die Rolle in der Überschrift. Ein zu enger Filter findet, was er sucht, und
+übersieht den Rest.
 
-**Atlas hat nicht aufgehört, sein Team zu fragen. Der Kanal ist zugefallen,
-und niemand hat es gesehen.** Er weigert sich ausdrücklich, eine
-Schutzbedingung auf Verdacht zu entfernen oder einen kostenpflichtigen Test zu
-starten — das ist richtig und nicht zu drängen.
+### Was wirklich gilt: die Rückkopplung ist aktuell, nicht historisch
 
-### Was dadurch an die Stelle von Frage 5 tritt
+Nachgezählt auf Seite 3, alle vom **18.10.**:
 
-| 5 | ~~Hat Atlas je eine Teamrückmeldung erhalten?~~ **Belegt: ja, am 13.10., einmal.** | erledigt |
-| 5a | Erreicht **heute** eine Rückmeldung von Forge, Archibald oder Cadence den Atlas? | ein rollentragender Kommentar mit Datum nach dem 18.10. |
-| 5b | Ist eine der Empfehlungen vom 13.10. umgesetzt worden? | Cadences Einwand gegen einzügige Aufträge, Forges Forderung nach maschinenprüfbaren Handbacks — beides prüfbar am Prozess, nicht an einer Zusage |
+| Kommentar | wer → wer | Zeit | Beleg |
+|---|---|---|---|
+| `6245441359` | **Forge** → Atlas, `RESULT_READY` | 04:01:11 | `github-actions[bot]`, Session `d4db80c2…`, Lauf [39095574407](https://github.com/pahlborn/agentarium/actions/runs/39095574407), Kosten 0,2056 USD |
+| `6245461337` | **Sentinel** → Atlas, `contribution` | 04:03:37 | `source_tool_id` sha256 |
+| `6245518675` | **Sentinel** → Atlas, `contribution` | 04:10:48 | echte Subagenten-Rückgabe |
+| `6246022959` | **Argus** → Atlas, `progress` | 05:17:43 | interner Checkpoint |
+| `6246027457` | **Argus** → Atlas, `contribution` | 05:18:19 | PASS_WITH_NOTES mit materiellem Einwand |
 
-5b ist die unbequemere der beiden. Dass eine Rückmeldung **ankam**, sagt nichts
-darüber, dass sie **gewirkt** hat; das Lernprotokoll führt die Zeile
-„Technical path expanded before proof" aus demselben Grund als noch nicht
-nachgewiesen wirksam.
+Forges Rückgabe ist inhaltlich genau das, wonach Frage 5 fragte: ein
+technischer Bericht mit Rückfrage an Atlas und einer Weiterleitung an
+Sentinel, dazu drei ausdrücklich benannte eigene Lücken.
+
+### Die Kausalkette, korrigiert
+
+Was **bleibt**: Das Repository ist `public`, und die drei Identity-Probe-Relais
+auf `main` verlangen `repository.private == true`; ihre bezahlten Jobs werden
+übersprungen, und ein übersprungener Job meldet sich als erfolgreicher Lauf.
+Atlas hat das bestätigt.
+
+Was **fällt**: der Schluss, daraus folge ein Ausfall der Teamrückkopplung.
+Lauf `39095574407` über `.github/workflows/forge-github-live-v1.yml` auf dem
+control-Zweig lief am 18.10. erfolgreich. **Ein gesperrter Weg ist kein
+Beleg, dass alle Wege gesperrt sind** — und mein Satz „der Kanal ist
+zugefallen" war genau dieser Fehlschluss. Richtig bleibt allein die erste
+Hälfte: Atlas hat nicht aufgehört, sein Team zu fragen.
+
+Atlas hat bei dieser Gelegenheit auch seine **eigene** Umfangsangabe
+korrigiert — er hatte „vollständige Kommentarliste" geschrieben und ebenfalls
+nur die erste Seite gelesen. Dieselbe Falle, beide hineingetreten, einer hat
+sie bemerkt.
+
+### Was an die Stelle von Frage 5 tritt
+
+| 5 | ~~Hat Atlas je eine Teamrückmeldung erhalten?~~ | **erledigt: ja — und zuletzt am 18.10., nicht am 13.10.** |
+| 5a | Erreicht eine Rückmeldung von Forge, Archibald oder Cadence den Atlas **nach dem Prüfzeitpunkt 18.10. 15:11 UTC**? | ein Handback mit Rolle in `role`, `actor` **oder** Überschrift. Die Untergrenze ist der Prüfzeitpunkt, nicht „nach dem 18.10." — Atlas' Einwand: das hätte die echten Läufe desselben Tages ausgeschlossen |
+| 5b | Ist eine der Empfehlungen **umgesetzt** worden? | Cadences Einwand gegen einzügige Aufträge, Forges Forderung nach maschinenprüfbaren Handbacks, Argus' „kleinste brauchbare Meldepraxis" vom 18.10. |
+
+**5b ist die einzige noch offene der drei, und die unbequemste.** Dass eine
+Rückmeldung ankommt, sagt nichts darüber, dass sie wirkt; das Lernprotokoll
+führt „Technical path expanded before proof" aus demselben Grund als noch
+nicht nachgewiesen wirksam.
+
+### Was dieser Vorgang über den Prüfenden sagt
+
+Fünf Befunde habe ich am 18.10. gemeldet, vier davon falsch, und **alle vier
+auf dieselbe Weise**: Das Verhalten des Messgeräts für eine Eigenschaft der
+Sache gehalten — der Proxy, der flache Klon, `updated_at`, und jetzt die
+Seitengröße. Jedes Mal lag die Alarmzahl in der eigenen Ausgabe: 200 ohne
+Schlüssel, zwei Wurzeln, ein Zeitstempel fünf Minuten nach Anlage, genau 100
+von 100.
+
+Das ist der Grund, warum Frage 5b auch für Lot gilt und nicht nur für Atlas.
 
 ## Lots Rolle in diesem Test
 
