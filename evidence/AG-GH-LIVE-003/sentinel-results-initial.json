@@ -1,0 +1,93 @@
+{
+  "task": "AG-GH-LIVE-003",
+  "commit": "5b00fe269ea6a100706095e9c147bcd4e022057d",
+  "checkedAt": "2026-10-18T03:21:46.313Z",
+  "environment": {
+    "node": "v22.23.3",
+    "playwright": "1.62.1",
+    "browser": "Chromium headless; synthetic date/network; not Safari/iPad"
+  },
+  "results": [
+    {
+      "id": "WARN-10-320-success",
+      "status": "passed",
+      "ms": 1944
+    },
+    {
+      "id": "WARN-10-320-network",
+      "status": "passed",
+      "ms": 1770
+    },
+    {
+      "id": "WARN-10-375-success",
+      "status": "passed",
+      "ms": 1747
+    },
+    {
+      "id": "WARN-10-375-network",
+      "status": "passed",
+      "ms": 1884
+    },
+    {
+      "id": "WARN-10-390-success",
+      "status": "passed",
+      "ms": 1747
+    },
+    {
+      "id": "WARN-10-390-network",
+      "status": "passed",
+      "ms": 1801
+    },
+    {
+      "id": "WARN-10-768-success",
+      "status": "passed",
+      "ms": 2094
+    },
+    {
+      "id": "WARN-10-768-network",
+      "status": "passed",
+      "ms": 2099
+    },
+    {
+      "id": "BOUNDARY-11-no-warning",
+      "status": "passed",
+      "ms": 1810
+    },
+    {
+      "id": "SINGULAR-1",
+      "status": "passed",
+      "ms": 1659
+    },
+    {
+      "id": "MISSING-not-confirmed-reload",
+      "status": "passed",
+      "ms": 1300
+    },
+    {
+      "id": "DELETED-not-recreated-on-reload",
+      "status": "passed",
+      "ms": 1411
+    },
+    {
+      "id": "SAVED-date-preserved-reload",
+      "status": "passed",
+      "ms": 1096
+    },
+    {
+      "id": "EXPIRY-2026-10-18",
+      "status": "passed",
+      "ms": 1526
+    },
+    {
+      "id": "EXPIRY-2026-10-17",
+      "status": "passed",
+      "ms": 1561
+    },
+    {
+      "id": "TOKEN-RAM-only-and-cleared",
+      "status": "failed",
+      "error": "locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('#agGhAus')\n    - locator resolved to <button id=\"agGhAus\" type=\"button\">Trennen</button>\n  - attempting click action\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n      - waiting 100ms\n    43 × waiting for element to be visible, enabled and stable\n       - element is not visible\n     - retrying click action\n       - waiting 500ms\n\n    at /home/runner/work/agentarium/agentarium/tests/AG-GH-LIVE-003-browser.cjs:46:752\n    at async test (/home/runner/work/agentarium/agentarium/tests/AG-GH-LIVE-003-browser.cjs:18:55)\n    at async /home/runner/work/agentarium/agentarium/tests/AG-GH-LIVE-003-browser.cjs:46:1",
+      "ms": 31559
+    }
+  ]
+}

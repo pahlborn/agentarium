@@ -1,0 +1,92 @@
+{
+  "task": "AG-GH-LIVE-003",
+  "commit": "c40b4cb5155b62bc31d0bb35a9d2ceb023530b17",
+  "checkedAt": "2026-10-18T03:24:32.106Z",
+  "environment": {
+    "node": "v22.23.3",
+    "playwright": "1.62.1",
+    "browser": "Chromium headless; synthetic date/network; not Safari/iPad"
+  },
+  "results": [
+    {
+      "id": "WARN-10-320-success",
+      "status": "passed",
+      "ms": 2292
+    },
+    {
+      "id": "WARN-10-320-network",
+      "status": "passed",
+      "ms": 2199
+    },
+    {
+      "id": "WARN-10-375-success",
+      "status": "passed",
+      "ms": 2224
+    },
+    {
+      "id": "WARN-10-375-network",
+      "status": "passed",
+      "ms": 2266
+    },
+    {
+      "id": "WARN-10-390-success",
+      "status": "passed",
+      "ms": 2146
+    },
+    {
+      "id": "WARN-10-390-network",
+      "status": "passed",
+      "ms": 2532
+    },
+    {
+      "id": "WARN-10-768-success",
+      "status": "passed",
+      "ms": 3332
+    },
+    {
+      "id": "WARN-10-768-network",
+      "status": "passed",
+      "ms": 3247
+    },
+    {
+      "id": "BOUNDARY-11-no-warning",
+      "status": "passed",
+      "ms": 2166
+    },
+    {
+      "id": "SINGULAR-1",
+      "status": "passed",
+      "ms": 1940
+    },
+    {
+      "id": "MISSING-not-confirmed-reload",
+      "status": "passed",
+      "ms": 1552
+    },
+    {
+      "id": "DELETED-not-recreated-on-reload",
+      "status": "passed",
+      "ms": 1672
+    },
+    {
+      "id": "SAVED-date-preserved-reload",
+      "status": "passed",
+      "ms": 1286
+    },
+    {
+      "id": "EXPIRY-2026-10-18",
+      "status": "passed",
+      "ms": 1910
+    },
+    {
+      "id": "EXPIRY-2026-10-17",
+      "status": "passed",
+      "ms": 1916
+    },
+    {
+      "id": "TOKEN-RAM-only-and-cleared",
+      "status": "passed",
+      "ms": 3161
+    }
+  ]
+}

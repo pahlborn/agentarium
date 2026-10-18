@@ -1,0 +1,93 @@
+{
+  "task_id": "AG-GH-LIVE-003",
+  "implementation": {
+    "candidate": "5b00fe269ea6a100706095e9c147bcd4e022057d",
+    "source_js_blob": "45776b04a01e05e841adae535339ab11de85a643",
+    "index_blob": "7538b40cfaf80989acb350a4cc1f01a5882a47ee",
+    "author": "Forge",
+    "publisher": "Atlas",
+    "run": 39092987541
+  },
+  "qa": {
+    "regression_run": 39093218740,
+    "regression_browser_passed": 39,
+    "node_vm_expiry": "passed",
+    "first_independent_browser": {
+      "passed": 15,
+      "invalid_harness_case": "TOKEN-RAM-only-and-cleared: Disconnect clicked while details collapsed"
+    },
+    "corrected_test_only_candidate": "c40b4cb5155b62bc31d0bb35a9d2ceb023530b17",
+    "repeat_run": 39093437217,
+    "repeat_job": 117574819330,
+    "independent_browser_passed": 16,
+    "product_files_changed_on_repeat": false,
+    "environment": "Playwright 1.62.1 Chromium headless, synthetic GitHub and date fixtures; not Safari/iPad"
+  },
+  "known_limits": [
+    "320/375/390px live-panel overlaps original header; no such overlap observed in 768px screenshot. Open responsive UI finding; no all-phone acceptance.",
+    "Legacy dates auto-stored by v1.1 cannot be distinguished from user-confirmed dates. Preserved; user must compare once with actual GitHub expiry.",
+    "No new actual-iPad expiry warning observation. Customer's live-transport acceptance is separate and recorded for Fassung49."
+  ],
+  "artifacts": [
+    {
+      "id": 12123228950,
+      "node_id": "MDg6QXJ0aWZhY3QxMjEyMzIyODk1MA==",
+      "name": "forge-github-live-output",
+      "size_in_bytes": 372331,
+      "url": "https://api.github.com/repos/pahlborn/agentarium/actions/artifacts/12123228950",
+      "archive_download_url": "https://api.github.com/repos/pahlborn/agentarium/actions/artifacts/12123228950/zip",
+      "expired": false,
+      "digest": "sha256:1774c3ec7334414bb9b755bdce9f34007d63978ffd0c7aa64656e65c26ee8cfc",
+      "created_at": "2026-10-18T03:18:02Z",
+      "updated_at": "2026-10-18T03:18:02Z",
+      "expires_at": "2026-11-01T03:18:01Z",
+      "workflow_run": {
+        "id": 39092987541,
+        "repository_id": 1416666885,
+        "head_repository_id": 1416666885,
+        "head_branch": "agent/ball-live-concept-20261017",
+        "head_sha": "9b2519297b8cfdfca5a45212c1685e375c854c8f"
+      }
+    },
+    {
+      "id": 12124110146,
+      "node_id": "MDg6QXJ0aWZhY3QxMjEyNDExMDE0Ng==",
+      "name": "github-live-browser-evidence",
+      "size_in_bytes": 434546,
+      "url": "https://api.github.com/repos/pahlborn/agentarium/actions/artifacts/12124110146",
+      "archive_download_url": "https://api.github.com/repos/pahlborn/agentarium/actions/artifacts/12124110146/zip",
+      "expired": false,
+      "digest": "sha256:06ca93699f62fa96451ba328a77f1aad874d75896f996067668b5b45304c4422",
+      "created_at": "2026-10-18T03:21:47Z",
+      "updated_at": "2026-10-18T03:21:47Z",
+      "expires_at": "2026-11-01T03:21:46Z",
+      "workflow_run": {
+        "id": 39093218740,
+        "repository_id": 1416666885,
+        "head_repository_id": 1416666885,
+        "head_branch": "agent/ball-live-concept-20261017",
+        "head_sha": "661df04fd2c5b0e7c629f2e17730f8126a805dfb"
+      }
+    },
+    {
+      "id": 12123592467,
+      "node_id": "MDg6QXJ0aWZhY3QxMjEyMzU5MjQ2Nw==",
+      "name": "github-live-browser-evidence",
+      "size_in_bytes": 433889,
+      "url": "https://api.github.com/repos/pahlborn/agentarium/actions/artifacts/12123592467",
+      "archive_download_url": "https://api.github.com/repos/pahlborn/agentarium/actions/artifacts/12123592467/zip",
+      "expired": false,
+      "digest": "sha256:da89dc2467dd18e07a8d87635bcd9ca0f08d04b437a78867603b22516988fd7e",
+      "created_at": "2026-10-18T03:24:33Z",
+      "updated_at": "2026-10-18T03:24:33Z",
+      "expires_at": "2026-11-01T03:24:32Z",
+      "workflow_run": {
+        "id": 39093437217,
+        "repository_id": 1416666885,
+        "head_repository_id": 1416666885,
+        "head_branch": "agent/ball-live-concept-20261017",
+        "head_sha": "da6152a5642b795cec7277ec42a17f334acca2df"
+      }
+    }
+  ]
+}
