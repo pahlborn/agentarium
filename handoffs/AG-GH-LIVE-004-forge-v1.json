@@ -1,0 +1,24 @@
+{
+  "schema": "agentarium.handoff.v0",
+  "task_id": "AG-GH-LIVE-004-FORGE-V1",
+  "authority": "Peter approved 2026-10-18 05:33 Europe/Berlin next real multi-role handoff slice after confirmed real iPad live breakthrough. Existing isolated pilot publication authorized. No normal feld changes or merge. Windows question is not an instruction to change Windows behavior.",
+  "product_baseline": "caebbbebd4b0a5a3c04bab97c0441ccb67f0b5fc",
+  "generator_baseline": "c40b4cb5155b62bc31d0bb35a9d2ceb023530b17",
+  "goal": "Small next slice: actual Atlas→Forge→Sentinel communication can fly in the ORIGINAL already-open GitHub monitor as handoff/contribution alongside existing observed progress. No claim that messages prove ongoing work, successful acceptance, model or done.",
+  "allowed_paths": [
+    "previews/AG-VISUAL-005-feld/github-live.js",
+    "previews/AG-VISUAL-005-feld/schicht.py",
+    "tests/AG-GH-LIVE-004-forge.cjs",
+    "handoffs/AG-GH-LIVE-004-forge-result.md"
+  ],
+  "requirements": [
+    "First read this bounded goal, current adapter and relevant Original hooks. Give your own critical assumption, simplest technically viable path and one alternative in handback; challenge a consequential contradiction. If within authorized scope implement smallest safe route in same session; return CA_QUESTION only if a real decision is missing.",
+    "Current adapter schema agentarium.github-event.v1 and existing marker/author rules. Extend only accepted kind set to progress/handoff/contribution. recipient required known actor for handoff/contribution. Old progress comments without recipient remain valid; new optional fields must not become required for old records. All existing strict text/identity/security/pagination/ETag/baseline/token handling stays. Unknown kinds including test_result/artifact rejected, never guessed.",
+    "Preserve full (project_id,run_id,task_id), event id, actor, recipient, source_evidence and source_tool_id through validated adapter into Original-readable line. Do not drop task/run metadata at __agEreignis. IDs and provenance must be visible for all three kinds, plus sender→recipient for both communications; safe escaping/textContent only. 'reported_checkpoint' must remain visibly identified as reported, not raw model runtime. source_tool_id is the producer evidence reference, no new secret or network.",
+    "Argus/Sentinel confirmed trap: Original schritt() calls auftragFertig for handoff/contribution; auftragFertig falls back to oldest even when explicit task ID unknown. handoff arrival calls arbeitAn and can assume model; test_result can auto-abnehmen oldest artifact. DECISION: this GitHub slice's handoff/contribution are OBSERVED COMMUNICATION ONLY, not task/state events. Reuse Original ball/flight/label rendering but bypass all assignment/start/finish/acceptance/default-model effects for these GitHub communications. Do not start work rings or increment open/done just because a message arrived. A contribution with QA PASS or FAIL is a returned report, no approval. Existing progress pulses still prove only an observed work step. Do not fix/redefine all Original/demo task semantics.",
+    "Guards MUST be limited to genuine GitHub ingress mode/marked incoming communications. Preserve Original demo/archive and other existing manual hooks. Two task IDs plus a foreign return and different run/project must not touch any pre-existing work or artifact. Keep full keys for traceability even though no task state mutation in this slice. Avoid adding persistent busy or success state.",
+    "Only generator source, never edit built feld/index. Set Fassung51 and adapter AG-GH-LIVE-001-v1.3 for cache busting. Minimal existing UI extension; no new panel, new architecture, dependencies, polling loop, device restrictions or cost feature. Device policy is documented separately; do not implement the known phone-header fix or any Windows special case now.",
+    "Create small meaningful executable NodeVM/component test only if it tests the changed parser/forwarding/provenance independently; all shell/browser tests are NOT_RUN by you (Read/Edit only). Sentinel supplies independent actual-browser/Original movement/state checks later. Read source offsets using HOST_CODE_MAP if useful, avoid rereading entire huge generator unnecessarily. New files placeholders already exist.",
+    "Do not synthesize real team output or emit paid worker events yourself. Host already observes real tool starts, and Atlas will orchestrate actual live proof AFTER new consumer deployed and customer monitor ready. No merge/publication by you; deliver <=700word handback plus exact changed paths, findings/limits, tests NOT_RUN, next owner."
+  ]
+}
