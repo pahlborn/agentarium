@@ -2608,7 +2608,9 @@
   function wirf(E) {
     /* Handelt jemand, waehrend noch ein Ball zu ihm unterwegs ist, landet
        der zuerst. Im Stueck verhinderte das der Blick nach vorn. */
-    if (MODUS === 'live') baelleEinholen(E.von);
+    /* Beobachtete Beitraege sind nur Mitteilung: sie duerfen keinen noch
+       fliegenden Ball zum Absender vorzeitig landen lassen. */
+    if (MODUS === 'live' && !E.beobachtet) baelleEinholen(E.von);
     var A = nachName[E.von], B = nachName[E.an] || A;
     var p = heimat(A), z = heimat(B);
     var m = ARTEN[E.art] || ARTEN.handoff;
