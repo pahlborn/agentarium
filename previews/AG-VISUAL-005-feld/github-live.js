@@ -17,10 +17,16 @@
             Retry-After, Ratelimit-Reset), ETag je Seitenadresse, 304 = nichts.
             Versteckter Tab pausiert, Rueckkehr holt nach.
    Kosten:  nicht verfuegbar. Fortschritt schliesst nichts ab.
+   v1.3 (AG-GH-LIVE-004): Arten progress | handoff | contribution. handoff
+            und contribution verlangen `recipient` (bekannter Akteur) und
+            sind BEOBACHTETE KOMMUNIKATION: kein Auftrag, kein Arbeitsbeginn,
+            kein Abschluss, keine Abnahme. Weitergereicht nur, wenn das
+            Original das ausdruecklich kann (Bruecke.kommunikation).
+            Alte progress-Kommentare ohne recipient bleiben gueltig.
 */
 (function () {
   'use strict';
-  var ADAPTER = 'AG-GH-LIVE-001-v1.2';
+  var ADAPTER = 'AG-GH-LIVE-001-v1.3';
   var ENDPOINT = 'https://api.github.com/repos/pahlborn/agentarium/issues/2/comments?per_page=100';
   var MARKER = '<!-- AGENTARIUM_EVENT_V1 -->';
   var SCHEMA = 'agentarium.github-event.v1';
@@ -29,6 +35,9 @@
   var MAX_KOERPER = 65536, MAX_SEITEN = 100, MAX_TITEL = 200;
   var FELDER = ['schema', 'id', 'project_id', 'run_id', 'task_id', 'actor', 'kind',
                 'title', 'occurred_at', 'source_evidence', 'source_tool_id'];
+  var OPTIONAL = ['recipient'];                  /* nie Pflicht fuer progress */
+  var ARTEN = { progress: 1, handoff: 1, contribution: 1 };
+  var KOMM = { handoff: 1, contribution: 1 };    /* nur beobachtet, kein Zustand */
   var KENNUNG = /^[A-Za-z0-9][A-Za-z0-9._:\/-]{0,119}$/;
   var ISO = /^\d{4}-\d\d-\d\dT\d\d:\d\d(:\d\d(\.\d{1,9})?)?(Z|[+-]\d\d:\d\d)$/;
   var STEUER = /[\u0000-\u001f\u007f-\u009f\u2028\u2029\u202a-\u202e\u2066-\u2069]/;
@@ -44,6 +53,10 @@
   }
   var AKTEURE = Object.create(null);
   (B.akteure || []).forEach(function (n) { AKTEURE[n] = 1; });
+  /* Ein aelteres Original (Fassung <= 50) wuerde handoff/contribution als
+     Auftrag/Abschluss behandeln. Ohne diese Zusage wird nichts davon
+     weitergereicht. */
+  var KANN_KOMM = B.kommunikation === 'beobachtet-v1';
 
   function Menge(max) {
     var o = Object.create(null), q = [];
@@ -137,7 +150,7 @@
     '#agGithub small{opacity:.7}' +
     '#agGithub[data-phase="fehler"] summary{color:#f0a0a0}' +
     '.agName.agGhPuls{text-shadow:0 0 8px currentColor,0 0 18px currentColor}' +
-    '#agRufe .agHerkunft{opacity:.75;font-size:10px}';
+    '#agRufe .agHerkunft,#agLaeuft .agHerkunft{opacity:.75;font-size:10px;overflow-wrap:anywhere}';
   document.head.appendChild(stil);
 
   var tafel = el('section', { id: 'agGithub', 'aria-label': 'GitHub-Live', 'data-phase': 'getrennt' });
@@ -176,7 +189,8 @@
   var zahlEl = el('div', { id: 'agGhZahlen' });
   var grundEl = el('div', { id: 'agGhGrund' });
   var fuss = el('small', {}, 'Token nur im Arbeitsspeicher dieser Seite, nur an api.github.com. ' +
-                'Kosten: nicht verfügbar. Fortschritt ist kein Abschluss. ' + ADAPTER);
+                'Kosten: nicht verfügbar. Fortschritt ist kein Abschluss. ' +
+                'Übergabe/Beitrag: beobachtete Kommunikation, keine Annahme, keine Abnahme. ' + ADAPTER);
   [kopf, zeile, ablaufZeile, ablaufText, ablaufHilfe, letztesEl, zahlEl, grundEl, fuss].forEach(function (x) { auf.appendChild(x); });
   tafel.appendChild(auf);
   document.body.appendChild(tafel);
@@ -239,22 +253,31 @@
     if (!d || typeof d !== 'object' || Array.isArray(d)) return nein('kein JSON-Objekt');
     var ks = Object.keys(d);
     for (var a = 0; a < ks.length; a++)
-      if (FELDER.indexOf(ks[a]) < 0) return nein('unbekanntes Feld ' + ks[a].slice(0, 40));
+      if (FELDER.indexOf(ks[a]) < 0 && OPTIONAL.indexOf(ks[a]) < 0)
+        return nein('unbekanntes Feld ' + ks[a].slice(0, 40));
     for (var b = 0; b < FELDER.length; b++)
       if (typeof d[FELDER[b]] !== 'string') return nein('Feld fehlt oder kein Text: ' + FELDER[b]);
     if (d.schema !== SCHEMA) return nein('schema falsch');
-    if (d.kind !== 'progress') return nein('kind nicht unterstützt: ' + d.kind.slice(0, 40));
+    if (!Object.prototype.hasOwnProperty.call(ARTEN, d.kind))
+      return nein('kind nicht unterstützt: ' + d.kind.slice(0, 40));
+    var hatEmpf = Object.prototype.hasOwnProperty.call(d, 'recipient');
+    if (hatEmpf && typeof d.recipient !== 'string') return nein('recipient kein Text');
+    if (KOMM[d.kind] && !hatEmpf) return nein('recipient fehlt bei ' + d.kind);
     var ids = ['id', 'project_id', 'run_id', 'task_id', 'source_tool_id'];
     for (var q = 0; q < ids.length; q++)
       if (!KENNUNG.test(d[ids[q]])) return nein(ids[q] + ' ungültig');
     if (!AKTEURE[d.actor]) return nein('actor unbekannt');
+    if (hatEmpf && !AKTEURE[d.recipient]) return nein('recipient unbekannt');
+    if (KOMM[d.kind] && !KANN_KOMM)
+      return nein('Original kennt beobachtete Kommunikation nicht (' + d.kind + ')');
     var titel = d.title.trim();
     if (!titel || titel.length > MAX_TITEL) return nein('title leer oder länger als ' + MAX_TITEL);
     if (STEUER.test(titel)) return nein('title enthält Steuerzeichen');
     if (!ISO.test(d.occurred_at) || isNaN(Date.parse(d.occurred_at))) return nein('occurred_at ungültig');
     if (!HERKUNFT[d.source_evidence]) return nein('source_evidence nicht erlaubt');
     return { art: 'ok', ev: { id: d.id, project_id: d.project_id, run_id: d.run_id,
-      task_id: d.task_id, actor: d.actor, title: titel, occurred_at: d.occurred_at,
+      task_id: d.task_id, actor: d.actor, kind: d.kind,
+      recipient: hatEmpf ? d.recipient : '', title: titel, occurred_at: d.occurred_at,
       source_evidence: d.source_evidence, source_tool_id: d.source_tool_id,
       kommentar: String(c.id) } };
   }
@@ -277,17 +300,27 @@
                                  ablage: 'GitHub · pahlborn/agentarium #2' });
       if (r0 && r0.angenommen) aktuellerLauf = lauf;
     }
-    var r = window.__agEreignis({ id: ev.id, actor: ev.actor, kind: 'progress',
+    /* Volle Schluessel und Herkunft gehen mit; `gh_beobachtet` sagt dem
+       Original: aus GitHub, nur beobachtet, keine Zustandsaenderung. */
+    var aus = { id: ev.id, actor: ev.actor, kind: ev.kind,
       title: ev.title, occurred_at: ev.occurred_at, source_evidence: ev.source_evidence,
-      fictional: false });
+      fictional: false, gh_beobachtet: true, project_id: ev.project_id,
+      run_id: ev.run_id, task_id: ev.task_id, source_tool_id: ev.source_tool_id };
+    if (ev.recipient) aus.recipient = ev.recipient;
+    var r = window.__agEreignis(aus);
     if (!r || !r.angenommen) { abweisen('Original wies ab: ' + (r ? r.grund : '?')); return; }
     zahl.gezeigt++;
-    letztes = { id: ev.id, actor: ev.actor, title: ev.title, herkunft: ev.source_evidence,
-                task_id: ev.task_id, wie: wie };
-    letztesEl.textContent = 'Neu (' + wie + '): ' + ev.id + ' · ' + ev.actor + ' · ' +
+    letztes = { id: ev.id, kind: ev.kind, actor: ev.actor, recipient: ev.recipient,
+                title: ev.title, herkunft: ev.source_evidence,
+                project_id: ev.project_id, run_id: ev.run_id, task_id: ev.task_id,
+                source_tool_id: ev.source_tool_id, wie: wie };
+    letztesEl.textContent = 'Neu (' + wie + '): ' + ev.kind + ' · ' + ev.id + ' · ' +
+      (ev.recipient ? ev.actor + ' → ' + ev.recipient : ev.actor) + ' · ' +
       ev.title + ' · ' + (ev.source_evidence === 'reported_checkpoint'
         ? 'reported_checkpoint — gemeldet, kein Laufzeitbeleg' : 'runtime_stream') +
-      ' · Aufgabe ' + ev.task_id;
+      ' · ' + ev.project_id + ' / ' + ev.run_id + ' / ' + ev.task_id +
+      ' · Werkzeug ' + ev.source_tool_id +
+      (KOMM[ev.kind] ? ' · beobachtete Kommunikation, keine Annahme/Abnahme' : '');
     vermerk('gezeigt ' + ev.id + ' (' + wie + ')');
   }
 

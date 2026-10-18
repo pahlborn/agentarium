@@ -149,7 +149,7 @@ const feld = (page) => page.evaluate(() => window.__agStand());
     check('demo: default mode demo, autostart running', d.modus === 'demo' && d.s.zeit > 0 && d.s.ereignisse > 0);
     check('demo: no GitHub panel', !d.panel);
     check('demo: both pieces in original order', JSON.stringify(d.stuecke) === '["NACHTPOST V1","NACHTPOST V2"]', JSON.stringify(d.stuecke));
-    check('page version 50 shown', d.fassung.indexOf('Fassung 50') >= 0);
+    check('page version 51 shown', d.fassung.indexOf('Fassung 51') >= 0);
     await p0.evaluate(() => document.querySelector('#agWas li[data-modus="archiv"]').click());
     const ar = await p0.evaluate(() => ({ m: document.body.getAttribute('data-modus'), h: document.getElementById('agHalt').textContent }));
     check('archive: switchable, waits for start', ar.m === 'archiv' && ar.h === 'Starten', JSON.stringify(ar));

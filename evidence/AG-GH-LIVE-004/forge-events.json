@@ -1,0 +1,222 @@
+[
+  {
+    "event": {
+      "schema": "agentarium.github-event.v1",
+      "id": "GH-39094257735-1",
+      "project_id": "agentarium",
+      "run_id": "gha:39094257735",
+      "task_id": "AG-GH-LIVE-004-FORGE-V1",
+      "actor": "forge",
+      "kind": "progress",
+      "title": "Forge \u00b7 Read \u00b7 Arbeitsschritt 1",
+      "occurred_at": "2026-10-18T03:37:21.659223+00:00",
+      "source_evidence": "runtime_stream",
+      "source_tool_id": "toolu_01MfdHh2Q9Y2bNtwyTfzbeSP"
+    },
+    "comment_id": 6245259806,
+    "url": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6245259806",
+    "captured_ns": 41945741469,
+    "posted_ns": 42391917444,
+    "process_alive_after_post": true
+  },
+  {
+    "event": {
+      "schema": "agentarium.github-event.v1",
+      "id": "GH-39094257735-2",
+      "project_id": "agentarium",
+      "run_id": "gha:39094257735",
+      "task_id": "AG-GH-LIVE-004-FORGE-V1",
+      "actor": "forge",
+      "kind": "progress",
+      "title": "Forge \u00b7 Read \u00b7 Arbeitsschritt 2",
+      "occurred_at": "2026-10-18T03:37:34.385742+00:00",
+      "source_evidence": "runtime_stream",
+      "source_tool_id": "toolu_01Smai3n9vtiKWweJvGEWNhz"
+    },
+    "comment_id": 6245261692,
+    "url": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6245261692",
+    "captured_ns": 54672256149,
+    "posted_ns": 55105420986,
+    "process_alive_after_post": true
+  },
+  {
+    "event": {
+      "schema": "agentarium.github-event.v1",
+      "id": "GH-39094257735-3",
+      "project_id": "agentarium",
+      "run_id": "gha:39094257735",
+      "task_id": "AG-GH-LIVE-004-FORGE-V1",
+      "actor": "forge",
+      "kind": "progress",
+      "title": "Forge \u00b7 Read \u00b7 Arbeitsschritt 3",
+      "occurred_at": "2026-10-18T03:37:44.983687+00:00",
+      "source_evidence": "runtime_stream",
+      "source_tool_id": "toolu_01J3DRak2ZbRGSLKvVNghqcb"
+    },
+    "comment_id": 6245263318,
+    "url": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6245263318",
+    "captured_ns": 65270202014,
+    "posted_ns": 65719055698,
+    "process_alive_after_post": true
+  },
+  {
+    "event": {
+      "schema": "agentarium.github-event.v1",
+      "id": "GH-39094257735-4",
+      "project_id": "agentarium",
+      "run_id": "gha:39094257735",
+      "task_id": "AG-GH-LIVE-004-FORGE-V1",
+      "actor": "forge",
+      "kind": "progress",
+      "title": "Forge \u00b7 Edit \u00b7 Arbeitsschritt 4",
+      "occurred_at": "2026-10-18T03:39:40.027835+00:00",
+      "source_evidence": "runtime_stream",
+      "source_tool_id": "toolu_01JXigxBNPu6iJB6VxABY9ZG"
+    },
+    "comment_id": 6245277847,
+    "url": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6245277847",
+    "captured_ns": 180314349891,
+    "posted_ns": 180747402020,
+    "process_alive_after_post": true
+  },
+  {
+    "event": {
+      "schema": "agentarium.github-event.v1",
+      "id": "GH-39094257735-5",
+      "project_id": "agentarium",
+      "run_id": "gha:39094257735",
+      "task_id": "AG-GH-LIVE-004-FORGE-V1",
+      "actor": "forge",
+      "kind": "progress",
+      "title": "Forge \u00b7 Edit \u00b7 Arbeitsschritt 5",
+      "occurred_at": "2026-10-18T03:39:50.319654+00:00",
+      "source_evidence": "runtime_stream",
+      "source_tool_id": "toolu_01R6quFLR2jVuKFkaFfU4vfR"
+    },
+    "comment_id": 6245279135,
+    "url": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6245279135",
+    "captured_ns": 190606169461,
+    "posted_ns": 191017728725,
+    "process_alive_after_post": true
+  },
+  {
+    "event": {
+      "schema": "agentarium.github-event.v1",
+      "id": "GH-39094257735-6",
+      "project_id": "agentarium",
+      "run_id": "gha:39094257735",
+      "task_id": "AG-GH-LIVE-004-FORGE-V1",
+      "actor": "forge",
+      "kind": "progress",
+      "title": "Forge \u00b7 Edit \u00b7 Arbeitsschritt 6",
+      "occurred_at": "2026-10-18T03:40:10.677337+00:00",
+      "source_evidence": "runtime_stream",
+      "source_tool_id": "toolu_01ExAuW1NxN3rGqM28kT7AQF"
+    },
+    "comment_id": 6245281722,
+    "url": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6245281722",
+    "captured_ns": 210963857213,
+    "posted_ns": 211585992127,
+    "process_alive_after_post": true
+  },
+  {
+    "event": {
+      "schema": "agentarium.github-event.v1",
+      "id": "GH-39094257735-7",
+      "project_id": "agentarium",
+      "run_id": "gha:39094257735",
+      "task_id": "AG-GH-LIVE-004-FORGE-V1",
+      "actor": "forge",
+      "kind": "progress",
+      "title": "Forge \u00b7 Edit \u00b7 Arbeitsschritt 7",
+      "occurred_at": "2026-10-18T03:40:20.978942+00:00",
+      "source_evidence": "runtime_stream",
+      "source_tool_id": "toolu_013oygeWbEagCe4trGKKVQwH"
+    },
+    "comment_id": 6245282996,
+    "url": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6245282996",
+    "captured_ns": 221265463402,
+    "posted_ns": 221959511606,
+    "process_alive_after_post": true
+  },
+  {
+    "event": {
+      "schema": "agentarium.github-event.v1",
+      "id": "GH-39094257735-8",
+      "project_id": "agentarium",
+      "run_id": "gha:39094257735",
+      "task_id": "AG-GH-LIVE-004-FORGE-V1",
+      "actor": "forge",
+      "kind": "progress",
+      "title": "Forge \u00b7 Edit \u00b7 Arbeitsschritt 8",
+      "occurred_at": "2026-10-18T03:40:35.228446+00:00",
+      "source_evidence": "runtime_stream",
+      "source_tool_id": "toolu_01GZGiUjmZbtZ7Yp1bMTGJoZ"
+    },
+    "comment_id": 6245284849,
+    "url": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6245284849",
+    "captured_ns": 235514968123,
+    "posted_ns": 236072721632,
+    "process_alive_after_post": true
+  },
+  {
+    "event": {
+      "schema": "agentarium.github-event.v1",
+      "id": "GH-39094257735-9",
+      "project_id": "agentarium",
+      "run_id": "gha:39094257735",
+      "task_id": "AG-GH-LIVE-004-FORGE-V1",
+      "actor": "forge",
+      "kind": "progress",
+      "title": "Forge \u00b7 Edit \u00b7 Arbeitsschritt 9",
+      "occurred_at": "2026-10-18T03:40:50.134695+00:00",
+      "source_evidence": "runtime_stream",
+      "source_tool_id": "toolu_01Mdhy7vyGafHbkSz3teFLCu"
+    },
+    "comment_id": 6245286698,
+    "url": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6245286698",
+    "captured_ns": 250421214227,
+    "posted_ns": 250913110834,
+    "process_alive_after_post": true
+  },
+  {
+    "event": {
+      "schema": "agentarium.github-event.v1",
+      "id": "GH-39094257735-10",
+      "project_id": "agentarium",
+      "run_id": "gha:39094257735",
+      "task_id": "AG-GH-LIVE-004-FORGE-V1",
+      "actor": "forge",
+      "kind": "progress",
+      "title": "Forge \u00b7 Edit \u00b7 Arbeitsschritt 10",
+      "occurred_at": "2026-10-18T03:41:44.017206+00:00",
+      "source_evidence": "runtime_stream",
+      "source_tool_id": "toolu_01XVzueJ7UmZTGeF9cvNXXPE"
+    },
+    "comment_id": 6245293593,
+    "url": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6245293593",
+    "captured_ns": 304303720151,
+    "posted_ns": 304908666543,
+    "process_alive_after_post": true
+  },
+  {
+    "event": {
+      "schema": "agentarium.github-event.v1",
+      "id": "GH-39094257735-11",
+      "project_id": "agentarium",
+      "run_id": "gha:39094257735",
+      "task_id": "AG-GH-LIVE-004-FORGE-V1",
+      "actor": "forge",
+      "kind": "progress",
+      "title": "Forge \u00b7 Read \u00b7 Arbeitsschritt 11",
+      "occurred_at": "2026-10-18T03:41:54.874477+00:00",
+      "source_evidence": "runtime_stream",
+      "source_tool_id": "toolu_01T9oTebBod2Y7asVfPVjRBW"
+    },
+    "comment_id": 6245294996,
+    "url": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6245294996",
+    "captured_ns": 315160991266,
+    "posted_ns": 315649716837,
+    "process_alive_after_post": true
+  }
+]

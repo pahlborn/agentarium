@@ -2222,7 +2222,7 @@
 
      Der Bauzeitpunkt kommt beim Bauen aus der Uhr. Von Hand gepflegte
      Datumsangaben sind nach der zweiten Änderung falsch. */
-  var FASSUNG = '50', GEBAUT = '2026-10-18T03:20Z';
+  var FASSUNG = '51', GEBAUT = '2026-10-18T03:45Z';
 
   /* AG-GH-LIVE-001: JEDE TEXTSENKE MASKIERT.
      Seit Live-Daten von aussen kommen (GitHub-Kommentare, one-event.json),
@@ -2639,7 +2639,9 @@
        am Namensschild dessen, der es wirft. Das ist der sichtbare
        Unterschied zwischen „noch ein Ball" und „ein Stück von DEM Ball". */
     var gross = m.gross || 1;
-    if (m.gestalt === 'sonne' && derBall && derBall.bei === E.von) {
+    /* AG-GH-LIVE-004: Beobachtete GitHub-Kommunikation fasst den Ball
+       (die Aufgabe) nicht an -- weder Abwurfort noch Rueckgabe. */
+    if (!E.beobachtet && m.gestalt === 'sonne' && derBall && derBall.bei === E.von) {
       p = ballOrt();
       /* Zurück an den, der sie angeworfen hat: Dann fliegt der Ball selbst,
          nicht ein Stück. */
@@ -2669,6 +2671,8 @@
          den Daten für jede ein `erledigt` stand. Die Felder waren da, die
          Übergabe fehlte. */
       aufgabe: E.aufgabe || '',
+      /* AG-GH-LIVE-004: nur Flug und Beschriftung, kein Zustand. */
+      beobachtet: !!E.beobachtet,
       ganz: (m.gestalt === 'sonne' && (E.gross != null ? E.gross : gross) > 0.85),
       gegen:   m.gestalt === 'gegen',
       wurf:    m.gestalt === 'wurf' || m.gestalt === 'sonne',
@@ -2716,7 +2720,7 @@
     }
 
     stromZeile(E, m);
-    melden(E.von, E.an, E.art, E.text, m);
+    melden(E.von, E.an, E.art, E.text, m, E.beobachtet ? spurWort(E) : '');
   }
 
   /* Eine Nachricht ist kein Punkt, der fliegt, sondern eine Spur, die
@@ -2767,7 +2771,7 @@
     /* Kurz vor dem Ankommen: Der Empfänger macht sich bereit. Nur beim
        Ball, und nur wenn jemand ihn auch bekommt — sonst zuckte bei jeder
        der 34 Nachrichten jemand, und aus Aufmerksamkeit würde Zappeln. */
-    if (b.sonne && b.an && b.an !== b.von && nachName[b.an] && !b.ende) {
+    if (b.sonne && !b.beobachtet && b.an && b.an !== b.von && nachName[b.an] && !b.ende) {
       var vor = Math.min(0.45, b.dauer * 0.30) / b.dauer;
       if (b.u > 1 - vor) {
         var st = Math.min(1, (b.u - (1 - vor)) / vor);
@@ -2962,11 +2966,13 @@
       if (b.bersten && window.__funkeAn) window.__funkeAn(b.zx, b.zy, b.tonZ);
 
       /* Der Ball ist angekommen: Jetzt arbeitet, wer ihn hat. */
-      if (b.sonne) arbeitAn(b.an, b.text, b.kommando, b.modell, b);
+      /* AG-GH-LIVE-004: Eine beobachtete GitHub-Uebergabe ist kein
+         Arbeitsbeginn -- kein Ring, kein Zaehler, kein Vorgabemodell. */
+      if (b.sonne && !b.beobachtet) arbeitAn(b.an, b.text, b.kommando, b.modell, b);
       /* Ein ganzer Ball bleibt liegen — der Empfänger HAT jetzt die
          Aufgabe. Ein abgeworfenes Stück wird aufgenommen und ist weg: Es
          ist Arbeit daran, nicht die Aufgabe selbst. */
-      if (b.ganz)
+      if (b.ganz && !b.beobachtet)
         derBall = { bei: b.an, ursprung: derBall ? derBall.ursprung : b.von,
                     t: 0, kommando: b.kommando };
 
@@ -4370,8 +4376,20 @@
         if (E.art === 'progress') {
           stromZeile(E, FORTSCHRITT);
           melden(E.von, '', 'progress', E.text, FORTSCHRITT,
-                 E.id + ' \u00b7 ' + herkunftWort(E.herkunft));
+                 E.spur ? spurWort(E) : (E.id + ' \u00b7 ' + herkunftWort(E.herkunft)));
           pulsAn(E.von);
+          tunStill = 0;
+          continue;
+        }
+        /* AG-GH-LIVE-004: handoff/contribution aus GitHub sind BEOBACHTETE
+           KOMMUNIKATION. Derselbe Flug, dieselbe Beschriftung -- aber kein
+           auftragFertig (das fiele ohne passende ID auf den aeltesten
+           Auftrag zurueck), kein Tisch, keine Abnahme, kein Stopper. Ein
+           Beitrag mit "QA PASS" ist ein zurueckgegebener Bericht, keine
+           Freigabe. Gesetzt wird `beobachtet` NUR in __agEreignis fuer
+           markierte Ereignisse im GitHub-Livebetrieb. */
+        if (E.beobachtet) {
+          wirf(E);
           tunStill = 0;
           continue;
         }
@@ -4694,7 +4712,8 @@
   function stromZeile(E, m) {
     var A = nachName[E.von], B = nachName[E.an];
     if (!A) return;
-    var auftrag = (m.gestalt === 'sonne' && E.an && E.an !== E.von);
+    /* Beobachtete GitHub-Uebergabe: keine "offene Auftrag"-Zeile. */
+    var auftrag = (!E.beobachtet && m.gestalt === 'sonne' && E.an && E.an !== E.von);
     var e = document.createElement('div');
     e.className = 'agAuf' + (auftrag ? ' offen' : ' tat');
     e.__nr = ++stromNr;
@@ -4708,7 +4727,8 @@
       : ('<u style="color:' + hex(A.farbe) + '">' + esc(E.von) + '</u>' +
          (B ? ' <b style="color:' + hex(B.farbe) + '">→ ' + esc(E.an) + '</b>' : '') +
          ' <s class="z-' + zu[0] + '">' + esc(E.art) + '</s>' +
-         '<br><span>' + esc(E.text) + '</span>');
+         '<br><span>' + esc(E.text) + '</span>' +
+         (E.spur ? '<br><small class="agHerkunft">' + esc(spurWort(E)) + '</small>' : ''));
     if (MODUS === 'live' && E.id) e.setAttribute('data-ereignis', String(E.id).slice(0, 120));
     laeuftEl.appendChild(e);
     strom.push(e);
@@ -5053,6 +5073,29 @@
     if (h === 'runtime_stream') return 'runtime_stream \u00b7 GitHub-Kommentar';
     return 'Herkunft unbekannt';
   }
+
+  /* ============ AG-GH-LIVE-004: BEOBACHTETE KOMMUNIKATION AUS GITHUB ============
+     Nur Ereignisse mit `gh_beobachtet: true` im GitHub-Livebetrieb. Sie
+     tragen ihre vollen Schluessel (project_id, run_id, task_id), die
+     Ereignis-ID und die Herkunft (source_evidence, source_tool_id) bis in
+     die Zeile. Die Schluessel werden gezeigt, aber an KEINE Aufgabe, keinen
+     Tisch und keinen Ball gebunden. Demo, Archiv, ?mvp=1 und unmarkierte
+     Aufrufe von __agEreignis verhalten sich wie bisher. */
+  var GH_ARTEN = { progress: 1, handoff: 1, contribution: 1 };
+  var GH_KENNUNG = new RegExp('^[A-Za-z0-9][A-Za-z0-9._:/-]{0,119}$');
+  function ghKenn(x) { return (typeof x === 'string' && GH_KENNUNG.test(x)) ? x : ''; }
+  function spurWort(E) {
+    var s = E.spur;
+    if (!s) return '';
+    var t = (E.beobachtet ? E.von + ' \u2192 ' + E.an + ' \u00b7 ' : '') +
+            E.id + ' \u00b7 ' + s.project_id + ' / ' + s.run_id + ' / ' + s.task_id +
+            ' \u00b7 ' + herkunftWort(s.herkunft) + ' \u00b7 Werkzeug ' + s.source_tool_id;
+    if (E.art === 'handoff')
+      t += ' \u00b7 beobachtete \u00dcbergabe \u2014 keine Annahme, kein Arbeitsbeginn';
+    else if (E.art === 'contribution')
+      t += ' \u00b7 beobachteter Bericht \u2014 keine Abnahme';
+    return t;
+  }
   /* Ein kurzer Puls am Platz des Meldenden. Knoten und Faeden ohne Abgabe:
      sichtbar, und nach einer Sekunde nichts mehr. */
   function pulsAn(name) {
@@ -5110,13 +5153,25 @@
 
     var art = (typeof e.kind === 'string') ? e.kind.trim() : '';
     if (!art) return nein('kind fehlt');
+    /* AG-GH-LIVE-004: markiertes GitHub-Ereignis -- nur im GitHub-
+       Livebetrieb und nur in den drei erlaubten Arten. */
+    var gh = (e.gh_beobachtet === true);
+    if (gh && !ghLive) return nein('GitHub-Ereignis nur im GitHub-Livebetrieb');
+    if (gh && !GH_ARTEN[art]) return nein('kind fuer GitHub nicht erlaubt: ' + art);
     var fortschritt = (ghLive && art === 'progress');
     if (!ARTEN[art] && !fortschritt) return nein('kind unbekannt: ' + art);
     var herkunft = '';
-    if (fortschritt) {
+    if (fortschritt || gh) {
       herkunft = (e.source_evidence === 'runtime_stream' ||
                   e.source_evidence === 'reported_checkpoint') ? e.source_evidence : '';
-      if (!herkunft) return nein('source_evidence fehlt bei progress');
+      if (!herkunft) return nein('source_evidence fehlt bei ' + art);
+    }
+    var spur = null;
+    if (gh) {
+      spur = { project_id: ghKenn(e.project_id), run_id: ghKenn(e.run_id),
+               task_id: ghKenn(e.task_id), source_tool_id: ghKenn(e.source_tool_id),
+               herkunft: herkunft };
+      for (var sf in spur) if (!spur[sf]) return nein(sf + ' fehlt oder ungueltig');
     }
 
     var text = (typeof e.title === 'string') ? e.title.trim() : '';
@@ -5148,8 +5203,15 @@
        anderes als null, und das Feld zeigt dafuer "keine Kostenangabe". */
     /* Fortschritt traegt keinen Verbrauch und kein Modell: Aus solchen
        Angaben darf weder Arbeit noch Abschluss gemacht werden. */
-    var v = fortschritt ? null : e.verbrauch;
+    var v = (fortschritt || gh) ? null : e.verbrauch;
     if (fortschritt) E.herkunft = herkunft;
+    if (gh) {
+      E.spur = spur;
+      /* Kein ganzer Ball (Groesse wie ein abgeworfenes Stueck) und vor
+         allem: `beobachtet` schaltet in schritt/wirf/ballSchritt jede
+         Zustandsfolge ab. */
+      if (art !== 'progress') { E.beobachtet = true; E.gross = ARTEN[art].gross || 0.5; }
+    }
     if (v && typeof v === 'object' && v.belegt === true) {
       var tk = {};
       if (typeof v.output_tokens === 'number') tk.aus = v.output_tokens;
@@ -5844,6 +5906,9 @@
     modusSetzen('live');
     window.__agGithubBruecke = {
       fassung: FASSUNG,
+      /* AG-GH-LIVE-004: Zusage an den Adapter, dass handoff/contribution
+         hier nur beobachtet werden. Fehlt sie, reicht er sie nicht weiter. */
+      kommunikation: 'beobachtet-v1',
       akteure: AGENTEN.map(function (a) { return a.name; }),
       istLive: function () { return MODUS === 'live'; }
     };
