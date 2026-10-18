@@ -20,7 +20,7 @@
 */
 (function () {
   'use strict';
-  var ADAPTER = 'AG-GH-LIVE-001-v1.1';
+  var ADAPTER = 'AG-GH-LIVE-001-v1.2';
   var ENDPOINT = 'https://api.github.com/repos/pahlborn/agentarium/issues/2/comments?per_page=100';
   var MARKER = '<!-- AGENTARIUM_EVENT_V1 -->';
   var SCHEMA = 'agentarium.github-event.v1';
@@ -84,21 +84,28 @@
       !isNaN(Date.parse(s + 'T00:00:00Z')) &&
       new Date(s + 'T00:00:00Z').toISOString().slice(0, 10) === s;
   }
+  function deutsch(iso) { return iso.slice(8, 10) + '.' + iso.slice(5, 7) + '.' + iso.slice(0, 4); }
+  /* v1.2: KEINE automatische Vorgabe. Fehlt das Datum (oder wurde es
+     geloescht), bleibt es fehlend -- auch nach Neuladen. Ein gespeichertes
+     gueltiges Datum wird unveraendert uebernommen. Geschrieben wird nur,
+     wenn der Mensch es im Datumsfeld eintraegt. */
   var ablaufDatum = '';
   try { ablaufDatum = localStorage.getItem(ABLAUF_KEY) || ''; } catch (x) {}
-  if (!gueltigesDatum(ablaufDatum)) {
-    ablaufDatum = new Date(heuteUtcTag() + 90 * 86400000).toISOString().slice(0, 10);
-    try { localStorage.setItem(ABLAUF_KEY, ablaufDatum); } catch (x) {}
-  }
+  if (!gueltigesDatum(ablaufDatum)) ablaufDatum = '';
   function ablaufStand() {
-    if (!gueltigesDatum(ablaufDatum)) return { tage: null, text: 'Token-Ablaufdatum fehlt', warnung: '' };
+    if (!ablaufDatum) {
+      var vorschlag = new Date(heuteUtcTag() + 90 * 86400000).toISOString().slice(0, 10);
+      return { tage: null, warnung: '', text: 'Token-Ablaufdatum fehlt · Vorschlag (unbestätigt, ' +
+        'nicht gespeichert): 90 Tage ab heute wäre ' + deutsch(vorschlag) +
+        ' — tatsächliches Datum aus GitHub eintragen' };
+    }
     var n = Math.round((Date.parse(ablaufDatum + 'T00:00:00Z') - heuteUtcTag()) / 86400000);
-    var datum = ablaufDatum.slice(8, 10) + '.' + ablaufDatum.slice(5, 7) + '.' + ablaufDatum.slice(0, 4);
-    var warn = n < 0 ? 'Token laut Datum abgelaufen — bitte erneuern'
+    var m = Math.abs(n), dat = m + (m === 1 ? ' Tag' : ' Tagen'), akk = m + (m === 1 ? ' Tag' : ' Tage');
+    var warn = n < 0 ? 'Token laut Datum seit ' + dat + ' abgelaufen — bitte erneuern'
       : n === 0 ? 'Token läuft heute ab — bitte erneuern'
-      : n <= 10 ? 'Token läuft in ' + n + ' Tagen ab — bitte erneuern' : '';
-    return { tage: n, text: 'Token gültig bis ' + datum + ' · ' +
-      (n < 0 ? 'seit ' + (-n) + ' Tagen abgelaufen' : 'noch ' + n + ' Tage'), warnung: warn };
+      : n <= 10 ? 'Token läuft in ' + dat + ' ab — bitte erneuern' : '';
+    return { tage: n, text: 'Token gültig bis ' + deutsch(ablaufDatum) + ' · ' +
+      (n < 0 ? 'seit ' + dat + ' abgelaufen' : n === 0 ? 'läuft heute ab' : 'noch ' + akk), warnung: warn };
   }
 
   /* ---------------------------------------------------------- Tafel */
@@ -115,7 +122,12 @@
     'font:11px/1.35 ui-monospace,SFMono-Regular,Menlo,monospace;color:#cfe3d6;' +
     'background:rgba(5,7,12,.84);border:1px solid rgba(150,170,200,.25);' +
     'border-radius:6px;padding:3px 8px;pointer-events:auto}' +
-    '#agGithub summary{cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}' +
+    '#agGithub summary{cursor:pointer}' +
+    /* Status darf gekuerzt werden, die Ablaufwarnung nie: eigene Zeile, bricht um. */
+    '#agGhStatus{display:inline-block;max-width:calc(100% - 1.4em);vertical-align:bottom;' +
+    'white-space:nowrap;overflow:hidden;text-overflow:ellipsis}' +
+    '#agGhWarnung{display:block;white-space:normal;overflow-wrap:anywhere;' +
+    'color:#ffc58f;font-weight:bold;margin:1px 0}' +
     '#agGithub .ghZ{display:flex;gap:4px;align-items:center;margin:4px 0;flex-wrap:wrap}' +
     '#agGithub input{font:inherit;width:12em;background:#0b1018;color:#e8f0ea;' +
     'border:1px solid #3a4658;border-radius:3px;padding:3px 4px}' +
@@ -133,7 +145,10 @@
   var kopf = el('summary');
   var statusEl = el('span', { id: 'agGhStatus', role: 'status', 'aria-live': 'polite' },
                     'GitHub-Live · getrennt');
+  var warnEl = el('span', { id: 'agGhWarnung', role: 'status', 'aria-live': 'polite' });
+  warnEl.style.display = 'none';
   kopf.appendChild(statusEl);
+  kopf.appendChild(warnEl);
   var zeile = el('div', { 'class': 'ghZ' });
   var lab = el('label', { 'for': 'agGhToken' }, 'Lesetoken');
   var feld = el('input', { id: 'agGhToken', type: 'password', autocomplete: 'off',
@@ -146,8 +161,8 @@
   var ablaufInput = el('input', { id: 'agGhAblauf', type: 'date' });
   ablaufInput.value = ablaufDatum;
   var ablaufText = el('div', { id: 'agGhAblaufText' });
-  var ablaufHilfe = el('small', {}, 'Nur das Datum wird auf diesem Gerät gespeichert. ' +
-    'Vorgabe für einen neuen Token: 90 Tage ab heute; tatsächliches Ablaufdatum bitte prüfen.');
+  var ablaufHilfe = el('small', {}, 'Nur das Datum wird auf diesem Gerät gespeichert, ' +
+    'und erst wenn du es hier einträgst. Keine automatische Vorgabe.');
   ablaufZeile.appendChild(ablaufLabel); ablaufZeile.appendChild(ablaufInput);
   ablaufInput.addEventListener('change', function () {
     ablaufDatum = gueltigesDatum(ablaufInput.value) ? ablaufInput.value : '';
@@ -187,8 +202,9 @@
     ablaufText.style.color = ablauf.warnung ? '#ffc58f' : '';
     statusEl.textContent = 'GitHub-Live · ' + p +
       (Z.pausiert && Z.phase === 'verbunden' ? ' · pausiert (Tab verborgen)' : '') +
-      (Z.fehler ? ' · ' + Z.fehler : '') +
-      (ablauf.warnung ? ' · ' + ablauf.warnung : '');
+      (Z.fehler ? ' · ' + Z.fehler : '');
+    if (warnEl.textContent !== ablauf.warnung) warnEl.textContent = ablauf.warnung;
+    warnEl.style.display = ablauf.warnung ? '' : 'none';
     tafel.setAttribute('data-phase', Z.phase);
     zahlEl.textContent =
       (Z.schnittIso ? 'Basis bis ' + Z.schnittIso + ' (Geräteuhr): ' + zahl.basisKommentare +
