@@ -1,0 +1,84 @@
+{
+  "task": "AG-GH-LIVE-004",
+  "commit": "b5dcabb47802c6c9b401e6d429040979aaf9ffc5",
+  "checkedAt": "2026-10-18T03:51:04.413Z",
+  "environment": {
+    "node": "v22.23.3",
+    "playwright": "1.62.1",
+    "browser": "Linux Chromium headless; synthetic transport, not physical Windows/Safari"
+  },
+  "results": [
+    {
+      "id": "1180-history-not-replayed",
+      "status": "passed"
+    },
+    {
+      "id": "1180-handoff-original-flight-identity-no-state",
+      "status": "passed"
+    },
+    {
+      "id": "1180-contribution-original-return-no-state",
+      "status": "passed"
+    },
+    {
+      "id": "1180-legacy-progress-identities-no-flight",
+      "status": "passed"
+    },
+    {
+      "id": "1180-parallel-seed-and-foreign-returns-no-state",
+      "status": "passed"
+    },
+    {
+      "id": "1180-recipient-and-kind-rejects-no-state",
+      "status": "passed"
+    },
+    {
+      "id": "1180-injection-dedupe-and-safe-display",
+      "status": "passed"
+    },
+    {
+      "id": "1180-mixed-unmarked-flight-not-captured-by-observed-return",
+      "status": "passed"
+    },
+    {
+      "id": "1180-token-ram-only-disconnect",
+      "status": "passed"
+    },
+    {
+      "id": "768-history-not-replayed",
+      "status": "passed"
+    },
+    {
+      "id": "768-handoff-original-flight-identity-no-state",
+      "status": "passed"
+    },
+    {
+      "id": "768-contribution-original-return-no-state",
+      "status": "passed"
+    },
+    {
+      "id": "768-legacy-progress-identities-no-flight",
+      "status": "passed"
+    },
+    {
+      "id": "768-parallel-seed-and-foreign-returns-no-state",
+      "status": "passed"
+    },
+    {
+      "id": "768-recipient-and-kind-rejects-no-state",
+      "status": "passed"
+    },
+    {
+      "id": "768-injection-dedupe-and-safe-display",
+      "status": "passed"
+    },
+    {
+      "id": "768-mixed-unmarked-flight-not-captured-by-observed-return",
+      "status": "passed"
+    },
+    {
+      "id": "768-token-ram-only-disconnect",
+      "status": "passed"
+    }
+  ]
+}

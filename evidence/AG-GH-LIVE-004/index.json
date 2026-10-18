@@ -1,0 +1,85 @@
+{
+  "task_id": "AG-GH-LIVE-004",
+  "candidate": "b5dcabb47802c6c9b401e6d429040979aaf9ffc5",
+  "consumer_qa": "PASS_WITH_LIMITS",
+  "real_multi_role_customer_acceptance": "PENDING",
+  "validation_run": 39094881747,
+  "validation_job": 117579144059,
+  "checks": {
+    "existing_browser": 39,
+    "independent_browser": 18,
+    "forge_components": 24,
+    "expiry_vm": "passed"
+  },
+  "artifacts": [
+    {
+      "id": 12123808579,
+      "node_id": "MDg6QXJ0aWZhY3QxMjEyMzgwODU3OQ==",
+      "name": "forge-github-live-output",
+      "size_in_bytes": 1482745,
+      "url": "https://api.github.com/repos/pahlborn/agentarium/actions/artifacts/12123808579",
+      "archive_download_url": "https://api.github.com/repos/pahlborn/agentarium/actions/artifacts/12123808579/zip",
+      "expired": false,
+      "digest": "sha256:f583a1cf183d349349e0dc005ef2e2c4abf3a4b9db285959cc036f4404153010",
+      "created_at": "2026-10-18T03:42:40Z",
+      "updated_at": "2026-10-18T03:42:40Z",
+      "expires_at": "2026-11-01T03:42:39Z",
+      "workflow_run": {
+        "id": 39094257735,
+        "repository_id": 1416666885,
+        "head_repository_id": 1416666885,
+        "head_branch": "agent/ball-live-concept-20261017",
+        "head_sha": "36a049aec84cbe957202052c8b3a494c6775672c"
+      }
+    },
+    {
+      "id": 12123524852,
+      "node_id": "MDg6QXJ0aWZhY3QxMjEyMzUyNDg1Mg==",
+      "name": "forge-github-live-output",
+      "size_in_bytes": 171593,
+      "url": "https://api.github.com/repos/pahlborn/agentarium/actions/artifacts/12123524852",
+      "archive_download_url": "https://api.github.com/repos/pahlborn/agentarium/actions/artifacts/12123524852/zip",
+      "expired": false,
+      "digest": "sha256:06115d9e3f7a9f59f25c5e0d50f8d9b21f7ce889565c77b8972e23ddddf05688",
+      "created_at": "2026-10-18T03:46:26Z",
+      "updated_at": "2026-10-18T03:46:26Z",
+      "expires_at": "2026-11-01T03:46:25Z",
+      "workflow_run": {
+        "id": 39094760434,
+        "repository_id": 1416666885,
+        "head_repository_id": 1416666885,
+        "head_branch": "agent/ball-live-concept-20261017",
+        "head_sha": "1479b30a2ebbe0ff70b3cadd84163fd79f4410ff"
+      }
+    },
+    {
+      "id": 12124222803,
+      "node_id": "MDg6QXJ0aWZhY3QxMjEyNDIyMjgwMw==",
+      "name": "github-live-browser-evidence",
+      "size_in_bytes": 514224,
+      "url": "https://api.github.com/repos/pahlborn/agentarium/actions/artifacts/12124222803",
+      "archive_download_url": "https://api.github.com/repos/pahlborn/agentarium/actions/artifacts/12124222803/zip",
+      "expired": false,
+      "digest": "sha256:a111fce8cc1f7767ccdbef0d19d11ce2502355ce832d030c04513ca9fe8ca4f2",
+      "created_at": "2026-10-18T03:51:05Z",
+      "updated_at": "2026-10-18T03:51:05Z",
+      "expires_at": "2026-11-01T03:51:04Z",
+      "workflow_run": {
+        "id": 39094881747,
+        "repository_id": 1416666885,
+        "head_repository_id": 1416666885,
+        "head_branch": "agent/ball-live-concept-20261017",
+        "head_sha": "cc78521c536672f60b88e72692d6737fbf5c2f93"
+      }
+    }
+  ],
+  "authors": {
+    "implementation": "Forge",
+    "review": "/root/argus_live_handoffs",
+    "qa": "/root/sentinel_expiry_fixes",
+    "build_publisher": "Atlas"
+  },
+  "observed_claude_api_cost_usd": 1.8589456,
+  "total_project_cost_known": false,
+  "inactive_probe_control": "e368ea81a778fd4f1b14d5bf052fa2158589c91a"
+}

@@ -1,0 +1,77 @@
+{
+  "task_id": "AG-GH-LIVE-004-FORGE-V1",
+  "request_commit": "36a049aec84cbe957202052c8b3a494c6775672c",
+  "product_baseline": "caebbbebd4b0a5a3c04bab97c0441ccb67f0b5fc",
+  "generator_baseline": "c40b4cb5155b62bc31d0bb35a9d2ceb023530b17",
+  "run": "https://github.com/pahlborn/agentarium/actions/runs/39094257735",
+  "session_id": "a600efdd-1b9c-449f-8d85-98ed3189a88a",
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 32,
+      "outputTokens": 35766,
+      "cacheReadInputTokens": 1305509,
+      "cacheCreationInputTokens": 161934,
+      "webSearchRequests": 0,
+      "costUSD": 1.7862198,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 15163,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "usage": {
+    "input_tokens": 32,
+    "cache_creation_input_tokens": 161934,
+    "cache_read_input_tokens": 1305509,
+    "output_tokens": 35766,
+    "output_tokens_details": {
+      "thinking_tokens": 15163
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 0,
+      "ephemeral_5m_input_tokens": 161934
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 1830,
+        "cache_read_input_tokens": 159302,
+        "cache_creation_input_tokens": 2632,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 2632,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "total_cost_usd": 1.7862198,
+  "requested_model": "opus",
+  "requested_effort": "high",
+  "actual_effort": "unconfirmed",
+  "elapsed_seconds": 320.661644061,
+  "changed_paths": [
+    "handoffs/AG-GH-LIVE-004-forge-result.md",
+    "previews/AG-VISUAL-005-feld/github-live.js",
+    "previews/AG-VISUAL-005-feld/schicht.py",
+    "tests/AG-GH-LIVE-004-forge.cjs"
+  ],
+  "unauthorized_paths": [],
+  "failure": null,
+  "source_returncode": 0,
+  "terminal_observed_ns": 358838254305,
+  "events_posted": 11,
+  "patch_sha256": "6ace38265870bfa78ba1b0c9f81d378f0aefb2addb50726883d3fd7c6960a472",
+  "tests_run": false,
+  "product_published": false
+}

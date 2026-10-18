@@ -1,0 +1,75 @@
+{
+  "task_id": "AG-GH-LIVE-004-FORGE-R1",
+  "request_commit": "1479b30a2ebbe0ff70b3cadd84163fd79f4410ff",
+  "product_baseline": "caebbbebd4b0a5a3c04bab97c0441ccb67f0b5fc",
+  "generator_baseline": "1d5293205aa65390673e72308558270d926418ab",
+  "run": "https://github.com/pahlborn/agentarium/actions/runs/39094760434",
+  "session_id": "1c7228a5-0cf4-452c-9b67-32ab17b6aab0",
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 12,
+      "outputTokens": 2483,
+      "cacheReadInputTokens": 21114,
+      "cacheCreationInputTokens": 3759,
+      "webSearchRequests": 0,
+      "costUSD": 0.07272580000000001,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 228,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "usage": {
+    "input_tokens": 12,
+    "cache_creation_input_tokens": 3759,
+    "cache_read_input_tokens": 21114,
+    "output_tokens": 2483,
+    "output_tokens_details": {
+      "thinking_tokens": 228
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 0,
+      "ephemeral_5m_input_tokens": 3759
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 640,
+        "cache_read_input_tokens": 5600,
+        "cache_creation_input_tokens": 672,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 672,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "total_cost_usd": 0.07272580000000001,
+  "requested_model": "opus",
+  "requested_effort": "high",
+  "actual_effort": "unconfirmed",
+  "elapsed_seconds": 24.01484820600001,
+  "changed_paths": [
+    "handoffs/AG-GH-LIVE-004-forge-r1-result.md",
+    "previews/AG-VISUAL-005-feld/schicht.py"
+  ],
+  "unauthorized_paths": [],
+  "failure": null,
+  "source_returncode": 0,
+  "terminal_observed_ns": 363227913468,
+  "events_posted": 2,
+  "patch_sha256": "7c368faddbae47d396ba0cdd2f02a8de47ec86a5f97ccf3334e641f786e9d1fc",
+  "tests_run": false,
+  "product_published": false
+}

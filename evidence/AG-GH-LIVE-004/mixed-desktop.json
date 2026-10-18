@@ -1,0 +1,78 @@
+{
+  "before": {
+    "zeit": 39.726699999999965,
+    "ausklang": 0,
+    "naechstes": 11,
+    "ereignisse": 11,
+    "dauer": 120,
+    "bausteine": 0,
+    "visionen": 0,
+    "aufgabenAuf": 2,
+    "aufgabenZu": 0,
+    "register": 0,
+    "bandL": 348,
+    "bandR": 840,
+    "ringR": 210.25641025641028,
+    "geraten": 0,
+    "ratEinzeln": {
+      "auftrag": 0,
+      "abnahme": 0,
+      "gegen": 0,
+      "antwort": 0
+    },
+    "ball": "forge",
+    "fliegend": [
+      {
+        "von": "atlas",
+        "an": "forge",
+        "u": 0,
+        "dauer": 2.61
+      }
+    ],
+    "still": 0.001,
+    "arbeiten": [
+      "forge:2"
+    ]
+  },
+  "after": {
+    "zeit": 39.72769999999996,
+    "ausklang": 0,
+    "naechstes": 12,
+    "ereignisse": 12,
+    "dauer": 120,
+    "bausteine": 0,
+    "visionen": 0,
+    "aufgabenAuf": 2,
+    "aufgabenZu": 0,
+    "register": 0,
+    "bandL": 348,
+    "bandR": 840,
+    "ringR": 210.25641025641028,
+    "geraten": 0,
+    "ratEinzeln": {
+      "auftrag": 0,
+      "abnahme": 0,
+      "gegen": 0,
+      "antwort": 0
+    },
+    "ball": "forge",
+    "fliegend": [
+      {
+        "von": "atlas",
+        "an": "forge",
+        "u": 0.001,
+        "dauer": 2.61
+      },
+      {
+        "von": "forge",
+        "an": "atlas",
+        "u": 0.001,
+        "dauer": 1.436
+      }
+    ],
+    "still": 0.001,
+    "arbeiten": [
+      "forge:2"
+    ]
+  }
+}
