@@ -1,0 +1,16 @@
+{
+  "schema": "agentarium.handoff.v0",
+  "task_id": "AG-GH-LIVE-004-FORGE-R1",
+  "authority": "Correction within Peter's approved AG-GH-LIVE-004 scope before isolated pilot publication.",
+  "generator_baseline": "1d5293205aa65390673e72308558270d926418ab",
+  "goal": "Close Argus confirmed MAJOR mixed-path side effect, no expansion.",
+  "allowed_paths": [
+    "previews/AG-VISUAL-005-feld/schicht.py",
+    "handoffs/AG-GH-LIVE-004-forge-r1-result.md"
+  ],
+  "requirements": [
+    "Read only schicht.py around lines590-620 initially, and relevant helpers if necessary; do not reread whole generator. Your V1 passed parser checks, but Argus independently reproduced real wirf/baelleEinholen helper functions: pre-existing unmarked task ball toward Forge duration4s becomes0.28s when observed contribution from Forge invokes wirf. This can cause earlier old-path work start/ownership despite communication-only guards.",
+    "Apply smallest safe correction: prevent baelleEinholen(E.von) for E.beobachtet while preserving ordinary live/manual, demo/archive behavior. Keep Fassung51, adapter unchanged. No unrelated fixes, test redesign, architecture, merge/publication. Sentinel independently adds actual-browser mixed-path regression; no Bash available so tests NOT_RUN.",
+    "Write <=200word handback, exact changed paths and own brief judgment. Existing seeded baseline is commit given above. No simulated reviews."
+  ]
+}

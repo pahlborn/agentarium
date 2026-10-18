@@ -4,10 +4,10 @@ import datetime, difflib, hashlib, json, os, selectors, subprocess, tempfile, ti
 from pathlib import Path
 from forge_one_shot import api, API
 
-TASK='AG-GH-LIVE-004-FORGE-V1'
+TASK='AG-GH-LIVE-004-FORGE-R1'
 BRANCH='agent/ball-live-concept-20261017'
 PRODUCT='caebbbebd4b0a5a3c04bab97c0441ccb67f0b5fc'
-GENERATOR='c40b4cb5155b62bc31d0bb35a9d2ceb023530b17'
+GENERATOR='1d5293205aa65390673e72308558270d926418ab'
 PROFILE='38d9747018bd4bfc5299a2dd9aeded9659337e77'
 OUT=Path('forge-github-live-output').resolve()
 
@@ -29,7 +29,7 @@ def main():
     else: raise RuntimeError('Incomplete history')
     profile=src(head,'.claude/agents/coding-agent.md')
     if hashlib.sha1(b'blob '+str(len(profile)).encode()+b'\0'+profile).hexdigest()!=PROFILE: raise RuntimeError('Role mismatch')
-    packet=json.loads(src(head,'handoffs/AG-GH-LIVE-004-forge-v1.json'))
+    packet=json.loads(src(head,'handoffs/AG-GH-LIVE-004-forge-r1.json'))
     allowed=set(packet['allowed_paths']); OUT.mkdir(exist_ok=True)
     run=os.environ['GITHUB_RUN_ID']; runurl='https://github.com/pahlborn/agentarium/actions/runs/'+run
     post('## '+TASK+' — HOST_RECEIVED\n'+runurl+'\nAuthorized direct GitHub Original pilot implementation. Safe runtime work events will be posted while Claude runs. No merge/publication.')
