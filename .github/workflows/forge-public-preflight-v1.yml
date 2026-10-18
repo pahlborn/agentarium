@@ -1,0 +1,32 @@
+name: Forge public relay preflight
+on:
+  push:
+    branches: [agent/ag-relay-public-001]
+    paths:
+      - 'relay/forge_public_task_once.py'
+      - 'handoffs/AG-RELAY-PUBLIC-001-forge-request-v1.json'
+      - '.github/workflows/forge-public-preflight-v1.yml'
+permissions:
+  contents: read
+concurrency:
+  group: ag-relay-public-001-preflight
+  cancel-in-progress: false
+jobs:
+  preflight:
+    if: github.repository == 'pahlborn/agentarium' && github.actor_id == '277496791' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Compile and negative self-test
+        run: |
+          python3 -m py_compile relay/forge_public_task_once.py
+          python3 relay/forge_public_task_once.py --self-test
+      - name: Resolve current CLI version without model credentials
+        run: |
+          CLI_VERSION="$(npm view @anthropic-ai/claude-code version)"
+          test -n "$CLI_VERSION"
+          printf 'RESOLVED_CLAUDE_CLI_VERSION=%s\n' "$CLI_VERSION"
