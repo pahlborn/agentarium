@@ -43,9 +43,25 @@ meldet, hat sonst eine weiße Seite neben einem unsichtbaren Feld.
 
 **Erst messen, dann bauen.** Die entscheidende Unsicherheit wird gemessen,
 bevor jemand darauf baut — auf dem **Zielgerät**, nicht im Container eines
-Agenten. Der Container dieser Sitzungen hat einen Proxy, der GitHub-Zugangs-
-daten ersetzt; eine Messung von dort kann zuversichtlich falsch sein. Siehe
-[`governance/measurement-environment-finding-2026-10-18.md`](governance/).
+Agenten.
+
+**Die eigene Laufzeit ist der erste Verdächtige.** Zweimal hat sie eine
+Messung still verfälscht, und beide Male sah das Ergebnis vernünftig aus:
+
+- Der Proxy dieser Sitzungen ersetzt GitHub-Zugangsdaten. Ein Abruf von
+  `api.github.com` antwortet dann mit 200, wo GitHub 401 schickt.
+- Der Klon ist **flach**. `git merge-base` gibt dann leer zurück und
+  `git rev-list --max-parents=0` nennt die Abschneidekante als Wurzel —
+  ohne Fehler, ohne Warnung. So entstand die falsche Behauptung, zwei
+  Zweige hätten keine gemeinsame Historie.
+
+Vor jeder Aussage über Git-Historie also `git rev-parse
+--is-shallow-repository`, bei `true` erst `git fetch --unshallow origin`.
+Ein leeres `merge-base` ist im flachen Klon der Normalfall, kein Befund.
+Und: **gehen zwei Zahlen aus derselben Messung auseinander, ist das ein
+Alarm, kein Detail.** Siehe
+[`governance/measurement-environment-finding-2026-10-17.md`](governance/measurement-environment-finding-2026-10-17.md)
+und [`governance/AG-STRUKTUR-001-zwei-getrennte-geschichten-2026-10-18.md`](governance/).
 
 **Versionsorte ziehen gemeinsam um.** Im Piloten hängen drei Stellen
 zusammen:
