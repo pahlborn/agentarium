@@ -5203,7 +5203,17 @@
     var soll = 'ID' + (n < 10000 ? ('000' + n).slice(-4) : String(n));
     return (soll === s) ? s : '';
   }
-  var kurzAbgewiesen = 0, kurzLetzterGrund = '';
+  /* AG-EVENT-ID-001 (PR#17-Review): Die Diagnose geht als Hinweis mit der
+     ERFOLGREICHEN Rueckgabe zurueck. Vorher standen hier zwei private
+     Variablen -- geschrieben, aber von aussen unerreichbar. Argus und
+     Sentinel haben das unabhaengig als Pflichtverstoss bestaetigt: eine
+     Diagnose, die niemand lesen kann, ist keine.
+
+     Begrenzt und maskiert: hoechstens 24 Zeichen, nur sichtbares ASCII.
+     Was ein Erzeuger schickt, darf die Diagnose nicht faerben. */
+  function kurzMaskiert(v) {
+    return String(v).replace(/[^\x20-\x7E]/g, '.').slice(0, 24);
+  }
 
   window.__agEreignis = function (e) {
     function nein(g) { return { angenommen: false, grund: g }; }
@@ -5252,12 +5262,12 @@
        wie bisher. Ist NUR sie ungueltig, faellt die Kurzreferenz weg --
        das Ereignis wird weiter verarbeitet. Keine eigene Vergabe, keine
        Umnummerierung, kein Ersatz aus der Zeile oder dem Lauf. */
+    var kurzHinweis = '';
     if (typeof e.short_ref !== 'undefined') {
       var kz = kurzKanonisch(e.short_ref);
       if (kz) E.kurz = kz;
-      else { kurzAbgewiesen++;
-             kurzLetzterGrund = 'short_ref nicht kanonisch: ' +
-               String(e.short_ref).slice(0, 24); }
+      else kurzHinweis = 'short_ref verworfen (nicht kanonisch): ' +
+                         kurzMaskiert(e.short_ref);
     }
 
     /* VERBRAUCH: GENAU DIE FELDER DES VERTRAGS, KEINE ERFUNDENEN.
@@ -5308,7 +5318,10 @@
        auf der Tafel, und so ist es jetzt auch. */
     if (!laeuft) laeuft = true;
     stromZeigen();
-    return { angenommen: true, id: E.id };
+    /* Fehlt short_ref oder ist sie gueltig, entsteht KEIN Hinweis --
+       sonst waere er Rauschen statt Diagnose. */
+    return kurzHinweis ? { angenommen: true, id: E.id, hinweis: kurzHinweis }
+                       : { angenommen: true, id: E.id };
   };
 
   function uhrZeigen() {

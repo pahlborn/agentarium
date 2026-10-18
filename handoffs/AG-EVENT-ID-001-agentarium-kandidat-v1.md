@@ -91,3 +91,65 @@ wieder her. Schlägt das Kopieren fehl, wird markiert statt gelogen.
    sichtbar, nicht ungefährlich.
 4. `ADAPTER` auf v1.4 gesetzt (additiv, rückwärtsverträglich) — bitte
    bestätigen, falls die Nummernvergabe woanders liegt.
+
+---
+
+# Nachtrag V2 — Korrektur nach Atlas-Review von PR #17
+18.10.2026 · Review `9e7bc03` zu Kandidat `2a8fa7f`
+
+## Der Befund war berechtigt
+Die Aufnahme schrieb den Grund einer verworfenen Kurzreferenz in zwei
+**private** Variablen, `kurzAbgewiesen` und `kurzLetzterGrund`. Geschrieben,
+aber von außen unerreichbar — weder über Rückgabe, Getter, Brücke noch
+Oberfläche. Argus und Sentinel haben das unabhängig bestätigt.
+
+Eine Diagnose, die niemand lesen kann, ist keine. Ich hatte sie geschrieben
+und die Tür dazu vergessen.
+
+## Korrektur
+Die beiden privaten Variablen sind **entfernt**. Der Hinweis geht jetzt mit
+der **erfolgreichen Rückgabe** von `__agEreignis` zurück:
+
+```js
+return kurzHinweis ? { angenommen: true, id: E.id, hinweis: kurzHinweis }
+                   : { angenommen: true, id: E.id };
+```
+
+Begrenzt und maskiert: höchstens 24 Zeichen, nur sichtbares ASCII.
+
+```js
+function kurzMaskiert(v) {
+  return String(v).replace(/[^\x20-\x7E]/g, '.').slice(0, 24);
+}
+```
+
+Keine neue Oberfläche, kein neuer Dienst, keine weitere Produktänderung.
+
+## Prüfung — wiederholbar
+`node test_hinweis.js` gegen den Piloten auf `127.0.0.1`, direkter Aufruf
+von `window.__agEreignis`:
+
+| Fall | angenommen | ID erhalten | Hinweis |
+|---|---|---|---|
+| ohne Feld | ja | ja | — |
+| `ID0001` · `ID9999` · `ID10000` | ja | ja | — |
+| `ID00001` · `ID0000` · `ID1` | ja | ja | ja |
+| Zahl `4711` · leer | ja | ja | ja |
+| mit Steuerzeichen | ja | ja | ja, maskiert zu `ID00.01` |
+| 62 Zeichen lang | ja | ja | ja, auf 24 gekürzt |
+
+**11 von 11 wie vereinbart**, keine Konsolenfehler.
+
+**Unverändert nachgeprüft:** Rückprobe 14/14 in Adapter und Aufnahme
+identisch; Anzeige auf vier Größen ohne Querlauf; `feld/` F47 und
+`pilot/github-live/sw.js` ohne jede Änderung.
+
+## Versionen
+`ADAPTER` bleibt `AG-GH-LIVE-001-v1.4` (bestätigt). `FASSUNG` bleibt 51,
+`GEBAUT` und `VORRAT` unverändert — die Veröffentlichungsnummer nimmt dieser
+Zweig nicht vorweg.
+
+## Grenze, die bestehen bleibt
+Alles synthetisch. Sentinels Browserregression war mangels Chromium-Laufzeit
+blockiert; meine Browserprüfungen sind damit **nicht unabhängig bestätigt**.
+Es gibt weiterhin keinen Browser- oder Kunden-Live-PASS.
