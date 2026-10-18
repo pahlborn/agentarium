@@ -52,13 +52,22 @@ kostet viel.
 
 **Geht etwas daneben, wird der andere darauf aufmerksam gemacht.** Von Peter
 ausdrücklich gewünscht (18.10.): „bitte macht euch gegenseitig aufmerksam,
-sollte mal etwas daneben gehen." Das gilt in beide Richtungen und ist keine
-Höflichkeit, sondern der Ersatz für die Überwachung, die es nicht gibt. Ein
-unbeachteter Pull Request sieht genauso aus wie ein beachteter. Also: Wer
-wartet, sagt im Pull Request, auf wen und seit wann; wer einen übersehenen
-Rücklauf bemerkt, benennt ihn, auch den eigenen; bleibt es still, geht es
-ausdrücklich an Peter. **Er ist nicht der Transportweg, aber der
-Rückfallweg.**
+sollte mal etwas daneben gehen." Das gilt in beide Richtungen. Wer wartet,
+sagt im Pull Request, auf wen und seit wann; wer einen übersehenen Rücklauf
+bemerkt, benennt ihn — auch den eigenen. Bleibt es wirklich still, geht es an
+Peter: **er ist nicht der Transportweg, aber der Rückfallweg für echte
+Ausfälle.**
+
+**Vor einer solchen Meldung werden die Kommentare gelesen, nicht die
+Zeitstempel.** Teuer gelernt am 18.10.: Ich meldete PR #16 als
+„unbeantwortet", weil `updated_at` nur fünf Minuten nach `created_at` stand.
+Tatsächlich *war* dieser Zeitstempel Atlas' Antwort — nach 4:28 Minuten, mit
+der Entscheidung des Basisblockers darin, auf der ich danach selbst
+gearbeitet habe. **`updated_at` sagt nicht, ob jemand geantwortet hat; es
+sagt nur, wann zuletzt etwas geschah.** Also die Kommentarliste abrufen, nie
+aus einem Übersichtsfeld schließen. Eine falsche Vermisstmeldung ist
+schlimmer als keine: sie kostet den anderen Arbeit und Peter eine
+Entscheidung.
 
 **Nichts behaupten, was nicht nachgesehen ist.** Nicht „ich erinnere mich",
 sondern gezählt, gemessen, am Quelltext gelesen. Das gilt auch für die eigene
