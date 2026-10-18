@@ -1,67 +1,101 @@
-# AG-STRUKTUR-001 — Atlas und Lot arbeiten in zwei getrennten Geschichten
+# AG-STRUKTUR-001 — Divergenz der Bäume (korrigierte Fassung)
 
-**Stand:** 2026-10-18 · **Gemessen, nicht vermutet** · **Entscheidung: Atlas**
+**Stand:** 2026-10-18 · **Fassung 2, korrigiert** · **Entscheidung: Atlas**
 
-Peter hat gefragt, ob wir in derselben Struktur arbeiten. Die Antwort ist nein,
-und zwar nicht im Sinne „verschiedene Zweige", sondern im Sinne **verschiedene
-Wurzeln**. Das erklärt mehrere Vorfälle der letzten zwei Tage, die bisher als
-Einzelfehler behandelt wurden.
+> **Widerruf des Kernbefunds.** Fassung 1 dieser Datei behauptete, `main` und
+> `agent/ball-live-concept-20261017` hätten **keinen gemeinsamen Vorfahren**.
+> **Das war falsch.** Atlas und Argus haben widersprochen, und sie haben recht.
+> Ursache: Mein Arbeitsverzeichnis war ein **flacher Klon**. Beleg und Lehre
+> stehen unten; der Rest des Befunds ist nachgemessen und bleibt.
 
-## Der Befund in einem Satz
+## Was falsch war und warum
 
-`agent/ball-live-concept-20261017` und `main` haben **keinen gemeinsamen
-Vorfahren**. Es sind zwei unverbundene Geschichten im selben Repository.
+Gemessen nach `git fetch --unshallow`:
 
 ```
+$ git rev-parse --is-shallow-repository
+true                       ← VOR dem Nachladen
+2                          ← Zeilen in .git/shallow
+
+$ git fetch --unshallow origin && git rev-parse --is-shallow-repository
+false
+
 $ git merge-base origin/main origin/agent/ball-live-concept-20261017
-(leer, Rückgabewert 1)
+bf16648a4197895fca7e77e41d562d5e0bbc04c6
+  bf16648  2026-10-13  Initial commit
 
 $ git rev-list --max-parents=0 origin/main
-46dac35bccd3d1b6bb6db7ae80f245ed8f3e2b1a
+bf16648a4197895fca7e77e41d562d5e0bbc04c6        ← eine einzige Wurzel
 
-$ git rev-list --max-parents=0 origin/agent/ball-live-concept-20261017
-4872a0ecc01ec471552e136b17ce45942e96a281
+$ git rev-list --left-right --count origin/main...origin/agent/ball-live-concept-20261017
+24      445
 ```
 
-Zwei verschiedene Wurzelcommits. Abstand:
+Atlas' Zahlen sind damit **Zeichen für Zeichen bestätigt**: gemeinsamer
+Vorfahr `bf16648a`, Status `diverged`, 445 voraus / 24 zurück. Es sind **nicht**
+zwei Geschichten, sondern eine, die sich am ersten Commit des Repositorys
+gegabelt hat.
 
-| | |
-|---|---|
-| Commits auf Atlas' Zweig, nicht auf `main` | **311** |
-| Commits auf `main`, nicht auf Atlas' Zweig | **18** |
-| Unterschied im Baum | **455 Dateien**, +4 482 / −50 739 Zeilen |
+**Wodurch der Fehler entstand.** In einem flachen Klon lügen zwei Befehle,
+ohne zu warnen:
 
-## Was das konkret bedeutet
+| Befehl | flach | vollständig |
+|---|---|---|
+| `git merge-base main control` | leer, Rückgabewert 1 | `bf16648a` |
+| `git rev-list --max-parents=0 main` | `46dac35` | `bf16648a` |
+| `git rev-list --max-parents=0 control` | `4872a0e` | `bf16648a` |
 
-### 1. Der Live-Pilot existiert auf Atlas' Zweig nicht
+`46dac35` und `4872a0e` sind die **Abschneidekanten** des Klons, nicht Wurzeln.
+Git behandelt sie wie elternlose Commits, weil die Eltern lokal fehlen; es gibt
+keine Fehlermeldung und keinen Hinweis. Ein leeres `merge-base` las ich als
+Befund, statt es als Messfehler zu verdächtigen — obwohl genau dieser Verdacht
+die Aufgabe eines Lots ist.
+
+**Was mir hätte auffallen müssen:** Die Zahlen waren schon in Fassung 1 nicht
+stimmig. Ich meldete „311 Commits bei Atlas, 18 bei main"; der Server sagt
+445/24. Zwei Zählungen, die beide aus derselben Messung stammen und
+auseinandergehen, sind ein Alarm, kein Detail.
+
+## Die Lehre, die bleibt
+
+Das ist derselbe Fehler wie der Proxy-Befund vom 17.10., nur eine Ebene tiefer:
+**die Laufzeit des prüfenden Agenten verfälscht die Messung, und das Ergebnis
+sagt nicht, dass es verfälscht ist.** Dort ersetzte ein Proxy GitHub-Zugangs-
+daten; hier schneidet ein flacher Klon die Historie ab. Beides liefert eine
+plausible Antwort ohne Warnung.
+
+Vorschlag für `governance/measurement-environment-finding-…`, ein Satz:
+
+> Vor jeder Aussage über Git-Historie — Vorfahren, Wurzeln, Abstand, Merge-
+> Fähigkeit — wird `git rev-parse --is-shallow-repository` geprüft und bei
+> `true` mit `git fetch --unshallow` nachgeladen. Ein leeres `merge-base` ist
+> in einem flachen Klon der Normalfall, nicht ein Befund.
+
+## Was nachgemessen bleibt
+
+### 1. Der Live-Pilot liegt nur auf `main`
 
 ```
 Verzeichnisse oberste Ebene
   main        .claude .github AGENTS.md README.md evidence feld
               governance handoffs pilot probe relay tests
-  Atlas       .claude .github .gitignore AGENTS.md README.md concepts
+  control     .claude .github .gitignore AGENTS.md README.md concepts
               docs evidence feld fixtures governance handoffs index.html
               previews relay specifications tests vision visual-stage
 ```
 
-`pilot/` kommt auf Atlas' Zweig **nicht vor**. Damit ist die Lage bei den
-Fassungsnummern diese:
-
-| Ort | `main` | Atlas' Zweig |
+| Ort | `main` | control |
 |---|---|---|
 | `pilot/github-live/index.html` | **51**, 2026-10-18T03:45Z | existiert nicht |
 | `feld/index.html` | 47, 2026-10-17T05:40Z | **46**, 2026-10-16T19:16Z |
 | `pilot/github-live/github-live.js` | Adapter **v1.3** | existiert nicht |
 
-Atlas' eigene Arbeitsanweisung sagt: *„Die führende Basis ist geklärt: Fassung
-51 im Live-Piloten."* **Fassung 51 ist von seinem Zweig aus nicht sichtbar.**
-Die höchste Fassung, die sein Baum enthält, ist `feld/` 46 — eine Fassung
-hinter dem, was auf `main` liegt, und vier hinter der, auf die sich der Auftrag
-bezieht.
+Fassung 51, die die Arbeitsanweisung als führende Basis nennt, ist vom
+control-Zweig aus nicht sichtbar. Das bleibt der praktisch wichtigste Punkt.
 
-### 2. Die Dokumente zu AG-EVENT-ID-001 liegen nur auf einer Seite
+### 2. Auftrag und Lieferung liegen in keinem gemeinsamen Baum
 
-| Datei | Atlas' Zweig | `main` | Kandidat |
+| Datei | control | `main` | Kandidat |
 |---|---|---|---|
 | `handoffs/AG-EVENT-ID-001-arbeitsanweisung-v1.md` | ja | — | — |
 | `handoffs/AG-EVENT-ID-001-atlas-entscheidung-v1.md` | ja | — | — |
@@ -70,91 +104,59 @@ bezieht.
 | `pilot/github-live/github-live.js` (Adapter v1.4) | — | — | ja |
 | `previews/AG-EVENT-ID-001/pruefen.js` | — | — | ja |
 
-**Es gibt keinen Baum, in dem Auftrag und Lieferung zugleich liegen.** Wer von
-`main` aus arbeitet, kann die Arbeitsanweisung nicht lesen; wer von Atlas'
-Zweig aus prüft, kann den Kandidaten nicht auschecken. Dass Atlas im Re-Review
-schrieb, das Nachweisskript sei „bereits mit Commit `e4b2b9d` angelegt" und
-dürfe nicht neu angelegt werden, war richtig — aber in seinem Arbeitsbaum ist
-`previews/AG-EVENT-ID-001/pruefen.js` nicht vorhanden. Die Aufforderung, es
-„nicht erneut anzulegen", kam deshalb zweimal.
+Das erklärt die doppelte Aufforderung, `pruefen.js` nicht erneut anzulegen: in
+Atlas' Arbeitsbaum ist die Datei tatsächlich nicht vorhanden.
 
-### 3. 31 Arbeitsläufe liegen nur auf Atlas' Zweig
+### 3. Arbeitsläufe — meine Folgerung war ebenfalls falsch
+
+31 Arbeitsläufe liegen nur im control-Zweig, 6 auf `main`. Fassung 1 folgerte
+daraus, sie seien womöglich nicht anstoßbar, und verknüpfte das mit Peters
+Beobachtung vom 17.10. **Diese Folgerung ist zurückgezogen.** Nachgezählt an
+den Dateien:
 
 ```
-Nur auf Atlas' Zweig (31):
-  archibald-ball-live-spec-v1.yml, archibald-ball-live-spec-correction-v1.yml,
-  archibald-ball-live-spec-correction-recovery-v1.yml,
-  archibald-visual-spec-v1.yml, ball-original-live-verification-v1.yml,
-  cadence-model-review-v1.yml, forge-ball-live-arch-v1.yml,
-  forge-ball-live-e1-v1.yml, forge-ball-live-original-v1.yml,
-  forge-ball-live-original-c2-v1.yml, forge-github-live-v1.yml,
-  forge-live-thinking-v1.yml, forge-mocks-v1.yml,
-  forge-mock-correction-v1.yml, forge-motion-v1.yml, forge-motion-v2.yml,
-  forge-nachtpost-v1.yml, forge-nachtpost-v2.yml, forge-nachtpost-v3.yml,
-  forge-one-event-v1.yml, forge-relay-diag-v1.yml,
-  forge-ten-live-events-v1.yml, forge-visual-revision-v1.yml,
-  github-live-verify-v1.yml, nachtpost-browser-qa-v1.yml,
-  one-event-browser-qa-v1.yml, published-original-qa-v1.yml,
-  relay-diagnostics-test.yml, team-process-review-v1.yml,
-  team-task-once-v2.yml, team-task-once-v3.yml
-
-Auf main (6):
-  agentarium-relay.yml, archibald-relay.yml, forge-relay.yml,
-  relay-offline-tests.yml, team-review-20261016.yml, team-smoke-offline.yml
+nur im control-Zweig: 31
+  mit push-Trigger:          31
+  mit workflow_dispatch:      1   (relay-diagnostics-test.yml)
 ```
 
-Das ist eine **Dateifeststellung**, keine Ursachenbehauptung. Sie ist trotzdem
-zu klären, denn GitHub dokumentiert für `workflow_dispatch`: der Arbeitslauf
-wird nur ausgelöst, wenn die Datei **auf dem Standardzweig** liegt. Peters
-Beobachtung am 17.10. („es sind keine Arbeitsläufe aktiv", „ich sehe immer noch
-Nachtpost v1, keine neuen eigenen Arbeiten des Teams") passt dazu. **Frage an
-Atlas: Lassen sich diese 31 Läufe derzeit überhaupt anstoßen?** Wenn nein, ist
-das keine Teamträgheit, sondern ein Ortsfehler.
+Die Standardzweig-Bedingung gilt für `workflow_dispatch`, nicht für Push-Läufe.
+Alle 31 tragen `push`. Der Ort allein belegt also nicht, dass sie nicht laufen —
+Atlas' Korrektur ist zutreffend, und meine Verknüpfung mit Peters Beobachtung
+war eine Vermutung im Gewand eines Befunds.
 
-### 4. Zusammenführen ist kein normaler Merge
+### 4. Merge: technisch möglich, fachlich offen
 
-Ohne gemeinsamen Vorfahren verweigert `git merge` die Arbeit; es ginge nur mit
-`--allow-unrelated-histories`, und dann kollidiert jede der 455 Dateien
-einzeln. Ein Pull Request von Atlas' Zweig nach `main` ist in diesem Zustand
-nicht sinnvoll bearbeitbar. **Solange das so bleibt, kann die Arbeit des Teams
-nicht auf `main` landen — und GitHub Pages liefert nur `main`.** Also kommt sie
-auch nicht auf Peters iPad an.
+Mit gemeinsamem Vorfahren ist ein normaler Abgleich möglich; `--allow-unrelated-histories`
+ist nicht nötig. Fassung 1 behauptete das Gegenteil. Offen bleibt allein, ob ein
+Vollmerge **sinnvoll** ist — bei 445 Commits und teils veralteter Dateidifferenz.
 
-## Drei Wege, mit einer Empfehlung
+## Weg nach vorn
 
-**A — Atlas' Zweig wird die Wahrheit, `main` wird ersetzt.**
-Kostet den veröffentlichten Piloten: Fassung 51, der Adapter, `probe/` und
-`pilot/` liegen nur auf `main`. Pages liefert `main`; ein Ersetzen nähme Peter
-die laufende Ansicht. **Nicht empfohlen.**
+Fassung 1 bot drei Wege und empfahl B (Vollimport in einem Commit). **Argus'
+Empfehlung ist besser, und ich schließe mich ihr an:** `main` bleibt Produkt-
+und Integrationsstamm; der control-Zweig wird für neue Änderungen eingefroren,
+aber nicht gelöscht; die benötigten Inhalte werden inventarisiert und
+**paketweise** über frische, `main`-basierte Zweige übernommen und je Paket
+geprüft. Kein Vollimport der 445 Commits.
 
-**B — `main` bleibt der Stamm, Atlas' Inhalte werden einmalig eingebracht.**
-Ein Commit, der die 311 Commits als Dateistand nach `main` holt (Geschichte
-geht verloren, Inhalt nicht), danach wird `agent/ball-live-concept-20261017`
-stillgelegt und das Team arbeitet von `main` aus. Die Arbeitsläufe liegen dann
-am dokumentierten Ort. **Empfohlen** — es ist der einzige Weg, bei dem danach
-alle im selben Baum stehen.
-
-**C — Beide bleiben, mit ausdrücklicher Grenze.**
-Atlas' Zweig führt Teamdokumente, `main` führt das Produkt. Billig, aber die
-Doppelung bleibt: `feld/` 46 gegen 47, zwei `index.html`, und genau dieser
-Vorfall wiederholt sich. Das ist auch der Kern von **Issue #14**.
+Mein Weg B hätte 455 Dateien in einem Zug bewegt und damit genau die Prüfbarkeit
+zerstört, auf die es hier ankommt.
 
 ## Was ich nicht tue
 
-Ich führe nichts zusammen, lege nichts still und veröffentliche nichts. Die
-Struktur des Teamrepositorys gehört Atlas; dies ist ein Befund mit drei Wegen,
-keine Änderung. Der Kandidat zu AG-EVENT-ID-001 bleibt unverändert auf
-`claude/ag-event-id-001-kandidat`, Stand `1d490df`.
+Nichts zusammenführen, nichts stilllegen, nichts veröffentlichen. Der Kandidat
+zu AG-EVENT-ID-001 bleibt unverändert auf `claude/ag-event-id-001-kandidat`,
+Stand `1d490df`.
 
 ## Nachrechnen
 
 ```
-git fetch origin '+refs/heads/*:refs/remotes/origin/*'
-git merge-base origin/main origin/agent/ball-live-concept-20261017   # leer
+git rev-parse --is-shallow-repository      # true? dann zuerst:
+git fetch --unshallow origin
+git merge-base origin/main origin/agent/ball-live-concept-20261017
 git rev-list --max-parents=0 origin/main
-git rev-list --max-parents=0 origin/agent/ball-live-concept-20261017
-git rev-list --count origin/main..origin/agent/ball-live-concept-20261017
-git diff --stat origin/agent/ball-live-concept-20261017 origin/main
+git rev-list --left-right --count origin/main...origin/agent/ball-live-concept-20261017
 git ls-tree --name-only origin/agent/ball-live-concept-20261017
 ```
 
