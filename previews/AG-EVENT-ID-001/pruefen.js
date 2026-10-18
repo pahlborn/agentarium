@@ -52,13 +52,18 @@ function ausfuehrbareDatei(p) {
 
 /* Rueckgabe: { pfad } oder { grund } -- nie ein ungeprueftes Versprechen. */
 function chromiumPfad(chromium) {
+  /* Erst der Starter, dann der Pfad. Argus R3: Stand die Pfadpruefung
+     vorn, nahm ein gueltiges AG_CHROMIUM den Vorrang, obwohl ohne
+     playwright gar nichts zu starten ist -- chromium.launch lief dann
+     auf null und brach mit Rueckgabe 1 ab, statt sauber mit 2 zu enden.
+     Ein eigener Browserpfad ersetzt den Pfad, nicht den Starter. */
+  if (!chromium) return { grund: 'playwright fehlt, daher ist kein Browser zu starten' };
   const gesetzt = process.env.AG_CHROMIUM;
   if (gesetzt) {
     return ausfuehrbareDatei(gesetzt)
       ? { pfad: gesetzt }
       : { grund: 'AG_CHROMIUM zeigt nicht auf eine ausfuehrbare Datei: ' + gesetzt };
   }
-  if (!chromium) return { grund: 'playwright fehlt, daher auch kein Browserpfad' };
   let p = null;
   try { p = chromium.executablePath(); } catch (e) {
     return { grund: 'playwright meldet keinen Browserpfad: ' + e.message };
