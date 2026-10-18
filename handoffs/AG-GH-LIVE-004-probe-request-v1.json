@@ -1,0 +1,16 @@
+{
+  "schema": "agentarium.handoff.v0",
+  "task_id": "AG-GH-LIVE-004-PROBE-V1",
+  "monitor_run_id": "AG-GH-LIVE-004-PROBE-20261018",
+  "authority": "Peter authorized a real multi-role handoff proof. Do not activate until he confirms the published Fassung51 monitor connected; Atlas owns activation.",
+  "goal": "Useful real small task: explain what changes when the same GitHub reader token is used on another device, especially RAM-only token and device-local expiry date. Give accurate user guidance without inventing Windows QA.",
+  "generator_baseline": "b5dcabb47802c6c9b401e6d429040979aaf9ffc5",
+  "allowed_paths": [
+    "handoffs/AG-GH-LIVE-004-probe-forge-result.md"
+  ],
+  "requirements": [
+    "Read previews/AG-VISUAL-005-feld/github-live.js lines75-115 and relevant token/connect lines if needed, and governance/AG-DEVICE-001-policy-v1.md. Return exactly two short German user instructions for changing devices and one concrete checkable failure case. Total <=200words.",
+    "Do not implement anything, no tests run by you (no Bash/browser), no claims that Windows or Safari were tested. Local expiry metadata is not token validity or shared storage across devices. Verify instructions against actual source; explicitly note a decisive ambiguity if any.",
+    "Write only allowed handback file. Final text asks Sentinel to verify these device-switch instructions against source and existing expiry QA evidence, via Atlas routing. One complete real source-based contribution; no artificial delays or invented work."
+  ]
+}
