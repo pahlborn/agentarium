@@ -47,14 +47,80 @@ beobachtet hat.
 Frage 4 ist die einzige, die wirklich zählt. Die ersten drei sind die
 Voraussetzungen dafür.
 
-## Frist
+## Wann gefragt wird — keine Frist
 
-**Vorschlag: 2026-10-25, eine Woche.** Peter setzt sie fest oder ändert sie;
-eine Frist, die nicht von ihm kommt, ist keine.
+Fassung 1 dieser Datei schlug den 25.10. vor. **Peter hat gefragt, wofür die
+Frist sei, und die Frage ist berechtigt:** Eine Frist ohne Folge ist
+Dekoration — es stand nicht darin, was am Stichtag geschieht. Und eine Uhr auf
+jemanden zu stellen, den Peter am 17.10. selbst als *überfordert* beschrieben
+hat, ist eine schlechte Maßnahme: Zeitdruck verbessert kein Verlaufen, er
+beschleunigt es.
 
-Steht am Stichtag 1 bis 3 und ist 4 sichtbar, lag das Misstrauen vom 17.10.
-falsch — nachweisbar, nicht nach Eindruck. Steht es nicht, weiß man es ebenso,
-und zwar an Zahlen statt an Gefühl.
+Stattdessen hängen die vier Fragen an einem **Ereignis**, nicht an einem Datum:
+
+> Sobald Atlas das Aufräumen als abgeschlossen meldet — oder sobald Issue #14
+> geschlossen wird —, werden die vier Fragen gestellt und beantwortet. Vorher
+> nicht, nachher nicht später.
+
+Damit kann der Test ausgehen, ohne dass jemand gehetzt wird. Ob zusätzlich ein
+Datum nötig ist, entscheidet Peter; von mir kommt keines mehr.
+
+Steht dann 1 bis 3 und ist 4 sichtbar, lag das Misstrauen vom 17.10. falsch —
+nachweisbar, nicht nach Eindruck. Steht es nicht, weiß man es ebenso, und zwar
+an Zahlen statt an Gefühl.
+
+## Der Test gilt dem Team, nicht Atlas allein
+
+Peters Einwand vom 18.10., wörtlich: *„eigentlich sollte sein Team auch ihm
+entsprechend Rückmeldung geben, helfen den richtigen Weg zu finden. Nur die
+Teamleistung ist entscheidend, nicht die eines Einzelnen, auch wenn er
+Hauptakteur ist. Ich folge ebenso Ratschlägen und brauche Feedback, ansonsten
+kann ich keine Entscheidungen treffen. So sollte das auch für Atlas gelten."*
+
+Das ändert die Fragestellung, und es gibt dafür einen Befund.
+
+**Atlas prüft sich derzeit selbst.** `handoffs/AG-REVIEW-20261016-TEAM-blockade-atlas-v1.md`
+sagt das in seiner dritten Zeile:
+
+> *„This is Atlas's technical verification, not a statement by Forge, Archibald
+> or Cadence."*
+
+**Und der Weg, auf dem das Team ihm antworten soll, ist technisch tot.**
+Nachgemessen am 18.10.:
+
+```
+Repository-Sichtbarkeit:  public
+
+Auf main, Bedingung „if: github.event.repository.private == true":
+  agentarium-relay.yml   (Cadence)     VERLANGT PRIVAT
+  archibald-relay.yml                  VERLANGT PRIVAT
+  forge-relay.yml                      VERLANGT PRIVAT
+  relay-offline-tests.yml              —
+  team-review-20261016.yml             —
+  team-smoke-offline.yml               —
+
+Auf dem control-Zweig:  15 von 33 Arbeitsläufen verlangen ein privates Repository
+
+team-process-review-v1.yml (der Team-Review-Lauf) ist doppelt gesperrt:
+  if: repository.private == true  UND  push auf feature/visual-stage-v0
+```
+
+Die Bedingung war richtig, solange das Repository privat war. Sie ist jetzt
+falsch, und **ein übersprungener Job meldet sich als erfolgreicher Lauf** —
+niemand sieht etwas. Genau diese Bauart hatten heute alle vier Fehler: die
+Zahl stimmt, ihre Bedeutung nicht.
+
+**Grenze dieses Befunds:** Er sagt, dass *diese Arbeitsläufe* nicht laufen. Er
+sagt nicht, dass die Agenten überhaupt nicht arbeiten — Atlas, Argus und
+Sentinel haben am 18.10. nachweislich geantwortet, offenbar auf einem anderen
+Weg, der von hier aus nicht sichtbar ist. Die Frage ist also nicht „arbeitet
+das Team", sondern: **auf welchem Weg erreicht eine Rückmeldung von Forge,
+Archibald oder Cadence den Atlas — und ist dieser Weg je benutzt worden?**
+
+Das ist eine Frage an Atlas, keine Behauptung von mir. Sie gehört zu den
+vier oben als **fünfte**:
+
+| 5 | Hat Atlas zu einer eigenen Entscheidung eine Rückmeldung des Teams erhalten — von Forge, Archibald oder Cadence, nicht von sich selbst? | ein Dokument oder Kommentar, das nicht von Atlas verfasst ist |
 
 ## Lots Rolle in diesem Test
 
