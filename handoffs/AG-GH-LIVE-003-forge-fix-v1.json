@@ -1,0 +1,19 @@
+{
+  "schema": "agentarium.handoff.v0",
+  "task_id": "AG-GH-LIVE-003-FORGE-FIX-V1",
+  "authority": "Peter approved on 2026-10-18 05:14 Europe/Berlin: record successful actual iPad live pilot and fix small identified expiry defects. Implementation within isolated pilot only, no merge/release.",
+  "goal": "Fix only your F1/F2/F3 findings from AG-GH-LIVE-002, preserving live/demo/archive behavior.",
+  "allowed_paths": [
+    "previews/AG-VISUAL-005-feld/github-live.js",
+    "previews/AG-VISUAL-005-feld/schicht.py",
+    "tests/AG-GH-LIVE-001-expiry.cjs",
+    "handoffs/AG-GH-LIVE-003-forge-result.md"
+  ],
+  "requirements": [
+    "Read current adapter source. Fix expiry warning so complete urgent warning is visibly present when details folded at narrow 320/375px widths and iPad widths; not hidden by long network error. Keep existing compact panel/controls functional; don't cover unrelated UI more than needed. Prefer separate wrapping warning in summary, safe textContent, accessible status.",
+    "Missing or explicitly cleared expiry date must remain missing after reload and must never be silently saved/shown as actual validity 90 days later. Simplest: no automatic default; provide clearly unconfirmed 90-day suggestion only if useful, user confirms through date input. Existing saved valid dates migrate/preserve, editable date persists only. Actual token stays closure RAM and is never persisted/logged.",
+    "Correct singular 1 Tag in future/past/count text. Adapter v1.2, generator Fassung50 cache invalidation only. Don't change transport, event contract, pricing, normal demo/archive UI.",
+    "Update existing NodeVM expiry test to verify absent initial date/no automatic storage, clear/reopen missing, existing saved date preserved, 11 vs10 days boundary, today, overdue, singular and token storage constraints. No shell/browser tests available to you: NOT_RUN, host/Sentinel tests later. All files seeded, Read/Edit only.",
+    "Read your own F3 as hypothesis requiring browser verification, not observed defect. Keep handback <=500 words, actual changed paths, tests NOT_RUN and any consequential concern. No unrelated improvements, merge/publication, or artificial delays."
+  ]
+}
