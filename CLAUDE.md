@@ -100,9 +100,11 @@ schon gar nicht, wenn das Werkzeug beschnitten ist.
    Wurzelcommits" war der Hinweis — ein Repository hat fast immer eine.
 3. **Zwei Zahlen aus derselben Messung, die auseinandergehen → anhalten.**
    Gemeldet 311/18, der Server sagte 445/24. Keine Ausnahme.
-4. **Trefferzahl gleich Seitengröße heißt abgeschnitten.** `perPage: 100`
-   gesetzt und genau 100 zurückbekommen ist kein Gesamtwert. Es waren 209.
-   Also weiterblättern, bis eine Seite kürzer ist als die Seitengröße.
+4. **Trefferzahl gleich Seitengröße: Vollständigkeit ist nicht belegt.**
+   `perPage: 100` gesetzt und genau 100 zurückbekommen *kann* die ganze Menge
+   sein — bewiesen ist es nicht. Es waren 209. Also weiterblättern, bis eine
+   Seite **kürzer** ist als die Seitengröße oder der Cursor endet. (Atlas,
+   18.10.: „abgeschnitten" war hier selbst zu absolut.)
 5. **Ein zu enger Filter findet nur, was er sucht.** Die Suche nach dem Feld
    `role` übersah dieselbe Sache als `actor`/`recipient` und in Überschriften.
    Vor dem Schluss „es gibt keine" den Filter weiten oder von Hand gegenlesen.
@@ -116,13 +118,19 @@ Diese Liste wächst. Wer ein neues findet, schreibt es dazu.
 | Ausgangsproxy dieser Sitzungen | `200` ohne Schlüssel von `api.github.com` | der Proxy hat geantwortet, nicht GitHub. Auf dem **Zielgerät** messen |
 | flacher Klon | `merge-base` leer, Abschneidekante als Wurzel | `git rev-parse --is-shallow-repository`, bei `true` erst `git fetch --unshallow origin` |
 | `updated_at` eines Pull Requests | ein Zeitstempel | wann **zuletzt** etwas geschah — nicht, ob geantwortet wurde. Kommentarliste abrufen |
-| Seitengröße einer API | genau `perPage` Treffer | wahrscheinlich abgeschnitten. Weiterblättern |
+| Seitengröße einer API | genau `perPage` Treffer | Vollständigkeit **nicht belegt**. Blättern bis zur kürzeren Seite oder zum Cursor-Ende |
 | ein Feldfilter | „keine Treffer" | keine Treffer **dieser Form**. Andere Formen prüfen |
-| übersprungener Arbeitslauf | „erfolgreich" | lief nie. Die `if`-Bedingung lesen |
+| ein erfolgreicher Arbeitslauf | `success` | sagt nichts über den **einzelnen Job**: ein Lauf kann grün sein, während nur der entscheidende Job übersprungen wurde. Jobstatus und Schritte lesen und den Job benennen — die `if`-Bedingung allein belegt die Ausführung **nicht** |
 
 Belege: [`governance/measurement-environment-finding-2026-10-17.md`](governance/measurement-environment-finding-2026-10-17.md),
 [`governance/AG-STRUKTUR-001-zwei-getrennte-geschichten-2026-10-18.md`](governance/)
 und [`governance/AG-TRUST-001-pruefkriterien-aufraeumen-2026-10-18.md`](governance/).
+
+**Arbeitslauf und Job sind nicht dasselbe.** Ein Lauf kann `success` melden,
+weil seine Offline-Jobs durchliefen, während der bezahlte Claude-Job an einer
+`if`-Bedingung hängen blieb. Also immer den **Job** nennen, nicht den Lauf —
+und seinen Status lesen, nicht die Bedingung. Dass die Bedingung ein
+Überspringen *erklären* würde, heißt nicht, dass es geschehen ist.
 
 **Und das Unbequeme:** Drei der vier Fehler hat **Atlas** gefunden, nicht ich.
 Eine Gegenmaßnahme, die darauf baut, dass jemand anders nachrechnet, ist
