@@ -114,7 +114,7 @@
      Der Wechsel Name <-> Rolle fällt in das Tal dieses Atems, deshalb
      sieht man kein Umspringen, sondern nur, dass beim Hellwerden etwas
      anderes dasteht. */
-  .agName{position:absolute; transform:translate(-50%,-50%);
+  .agName{position:absolute; transform:translate(-50%,-50%); touch-action:none;
     font:400 var(--agNameGr,14px)/1 ui-monospace, SFMono-Regular, Menlo, monospace;
     letter-spacing:.2em; text-transform:uppercase;
     white-space:nowrap; opacity:.7;
@@ -856,7 +856,8 @@
 <div id="agTasten"><button id="agListe" type="button" class="an">Was geschieht</button><button id="agMotor" type="button">LLM &amp; Kosten</button>
 <button id="agLeg" type="button">Gesetz</button>
 <button id="agHalt" type="button">Halt</button>
-<button id="agVorn" type="button">Von vorn</button></div>
+<button id="agVorn" type="button">Von vorn</button>
+<button id="agPlatz" type="button" hidden>Plätze zurück</button></div>
 <div id="agGesetz"></div>
 <p id="hinweis">Du darfst mitrühren</p>
 <script>
@@ -2324,6 +2325,65 @@
   var nachName = {};
   AGENTEN.forEach(function (a) { nachName[a.name] = a; });
 
+  /* ============================== EIGENE PLÄTZE ==========================
+
+     Wer hier zusieht, baut sich sein Bild: Namen lassen sich mit dem Finger
+     verschieben. Gespeichert wird nur, was ein Agent von sich aus braucht —
+     `winkel` und `nah` —, denn `heimat()` rechnet den Ort bei jedem Bild
+     daraus neu. Darum übersteht eine eigene Anordnung das Drehen des iPads,
+     während gespeicherte Bildpunkte es nicht täten.
+
+     ORT UND BEDEUTUNG SIND GETRENNT, und das ist der wichtigere Teil.
+     Vorher hing an `nah` zweierlei: wer als „draußen" gezeichnet wird
+     (> 1,05) und wessen Wurf ein EINWURF ist (> 1,1). Ein verschobener
+     Peter hätte damit still aufgehört einzuwerfen — die Animation hätte
+     ihren Sinn geändert, ohne dass es jemand merkt. `aussen` wird deshalb
+     EINMAL aus der Werksstellung abgeleitet und vom Ziehen nicht mehr
+     angefasst.
+
+     Der Speicher liegt im Gerät und geht nirgends hin. Niemand außer dem
+     Betrachter sieht seine Anordnung. */
+  var PLATZ = 'agentarium-plaetze-v1';
+  AGENTEN.forEach(function (a) {
+    a.aussen = (a.nah || 1) > 1.05;
+    a.heim = { winkel: a.winkel, nah: a.nah };
+  });
+  function plaetzeLesen() {
+    try {
+      var r = JSON.parse(localStorage.getItem(PLATZ) || '{}');
+      AGENTEN.forEach(function (a) {
+        var q = r[a.name]; if (!q) return;
+        var w = Number(q.w), n = Number(q.n);
+        /* Grenzen, damit eine beschädigte Ablage niemanden aus dem Bild
+           wirft. Fehlt oder stimmt etwas nicht, bleibt die Werksstellung. */
+        if (isFinite(w) && isFinite(n) && n >= 0.08 && n <= 2.2) {
+          a.winkel = ((w % 360) + 360) % 360;
+          a.nah = n;
+        }
+      });
+    } catch (e) {}
+  }
+  function plaetzeSchreiben() {
+    var r = {}, eigen = 0;
+    AGENTEN.forEach(function (a) {
+      if (a.winkel === a.heim.winkel && a.nah === a.heim.nah) return;
+      r[a.name] = { w: +a.winkel.toFixed(2), n: +a.nah.toFixed(4) };
+      eigen++;
+    });
+    try {
+      if (eigen) localStorage.setItem(PLATZ, JSON.stringify(r));
+      else localStorage.removeItem(PLATZ);
+    } catch (e) {}
+    var k = document.getElementById('agPlatz');
+    if (k) k.hidden = !eigen;
+  }
+  function plaetzeHeim() {
+    AGENTEN.forEach(function (a) { a.winkel = a.heim.winkel; a.nah = a.heim.nah; });
+    plaetzeSchreiben();
+    if (window.__agRing) window.__agRing();
+  }
+  plaetzeLesen();
+
   /* Die Heimat jedes Agenten: ein Platz auf einem Ring. Er bleibt, auch wenn
      der Agent schweigt — damit man lernt, wer wo wohnt. */
   /* Doppelt gesichert: Sollte die Maschine je halb eingerichtet sein,
@@ -2684,8 +2744,10 @@
       aufTisch: !!aufTisch, zielNr: zielNr,
       quert: quert(E.von, E.an), durch: 0,
       /* Hereingeworfen oder zurückgegeben: beides quert den Spielfeldrand. */
-      einwurf: (nachName[E.von] && nachName[E.von].nah > 1.1) ||
-               (nachName[E.an] && nachName[E.an].nah > 1.1),
+      /* `aussen` statt `nah`: siehe EIGENE PLÄTZE. Wer verschoben wird,
+         behält seine Rolle im Wurf. */
+      einwurf: (nachName[E.von] && nachName[E.von].aussen) ||
+               (nachName[E.an] && nachName[E.an].aussen),
       art: E.art, text: E.text, von: E.von, an: E.an, kern: null, ende: 0, kopf: 0
     });
     /* Der Einsatz. Atlas sitzt am ersten Pult, und ein Konzertmeister
@@ -5431,7 +5493,7 @@
     ring.innerHTML = '';
     AGENTEN.forEach(function (a, i) {
       var p = heimat(a), e = document.createElement('div');
-      e.className = 'agName' + (a.nah && a.nah > 1.05 ? ' agDraussen' : '');
+      e.className = 'agName' + (a.aussen ? ' agDraussen' : '');
       e.style.left = p[0] + 'px'; e.style.top = p[1] + 'px';
       e.style.color = hex(a.farbe);
       e.textContent = a.name;
@@ -5451,9 +5513,60 @@
         el.addEventListener('mouseleave', steckWeg);
         el.addEventListener('click', function (ev) {
           ev.stopPropagation();
+          /* Nach einem Zug ist der Tipp verbraucht, sonst springt beim
+             Loslassen der Steckbrief auf. */
+          if (el.__gezogen) { el.__gezogen = 0; return; }
           if (steckEl.classList.contains('auf') && steckEl.__wer === A.name) steckWeg();
           else { steckEl.__wer = A.name; steckbrief(A, ort()); }
         });
+
+        /* ZIEHEN. Zwei Dinge sind daran nicht offensichtlich:
+
+           1. Die Schwelle von sechs Bildpunkten trennt Tippen von Ziehen.
+              Ohne sie öffnet jeder Zug am Ende den Steckbrief, und auf
+              einem Finger gibt es keinen Zug ohne ein Zittern.
+           2. Hier wird NICHT neu gezeichnet. `ringZeichnen` leert
+              `ring.innerHTML` — ein Neuzeichnen mitten im Zug vernichtete
+              das Element unter dem Finger samt Zeigerfang. Also wandert
+              das Schild direkt, und das ganze Feld wird erst beim
+              Loslassen neu gesetzt. Die Fäden folgen trotzdem sofort, denn
+              sie fragen `heimat(A)` in jedem Bild. */
+        var ab = null;
+        el.addEventListener('pointerdown', function (ev) {
+          ab = { x: ev.clientX, y: ev.clientY, zieht: 0 };
+          el.__gezogen = 0;
+          try { el.setPointerCapture(ev.pointerId); } catch (x) {}
+        });
+        el.addEventListener('pointermove', function (ev) {
+          if (!ab) return;
+          if (!ab.zieht) {
+            if (Math.abs(ev.clientX - ab.x) + Math.abs(ev.clientY - ab.y) < 6) return;
+            ab.zieht = 1; steckWeg(); el.classList.add('faengt');
+          }
+          /* Die Umkehrung von `heimat`: dieselbe Mitte, dieselbe Stauchung
+             von 0,92. Stünde hier ein anderer Wert, wanderte der Name
+             unter dem Finger weg. */
+          var dx = ev.clientX - mx(),
+              dy = (ev.clientY - my()) / 0.92,
+              n  = Math.sqrt(dx * dx + dy * dy) / ringR(),
+              w  = Math.atan2(dy, dx) * 180 / Math.PI;
+          A.nah = Math.max(0.08, Math.min(2.2, n));
+          A.winkel = ((w % 360) + 360) % 360;
+          var q = heimat(A);
+          el.style.left = q[0] + 'px'; el.style.top = q[1] + 'px';
+          ev.preventDefault();
+        });
+        function los() {
+          if (!ab) return;
+          var war = ab.zieht; ab = null;
+          el.classList.remove('faengt');
+          if (!war) return;
+          el.__gezogen = 1;
+          plaetzeSchreiben();
+          if (window.__agRing) window.__agRing();
+        }
+        el.addEventListener('pointerup', los);
+        el.addEventListener('pointercancel', los);
       })(a, e);
       /* Jeder Name atmet, und der Wechsel Name <-> Rolle fällt in die
          DUNKELSTE Stelle dieses Atems. Dadurch ist der Umschlag nicht zu
@@ -5791,6 +5904,13 @@
   window.addEventListener('resize', function () {
     setTimeout(function () { ringZeichnen(); knoepfeSetzen(); }, 120);
   });
+
+  /* „Plätze zurück" erscheint erst, wenn wirklich etwas verschoben ist —
+     ein Knopf, der nichts zu tun hat, kostet mehr als er nützt. Dieselbe
+     Regel wie bei „Halt" und „Von vorn". */
+  var platzKnopf = document.getElementById('agPlatz');
+  if (platzKnopf) platzKnopf.addEventListener('click', plaetzeHeim);
+  plaetzeSchreiben();
 
   document.getElementById('agHalt').addEventListener('click', function () {
     laeuft = !laeuft;
