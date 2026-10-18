@@ -56,9 +56,16 @@
 > kein belegter Auftrag etwas anderes vorgibt. Die Veröffentlichungsnummer
 > gehört dem, der veröffentlicht; ein Kandidatenzweig belegt sie nicht.
 >
-> **Grenzen:** kein Merge, keine Veröffentlichung, keine Architekturänderung
-> und keine Implementierung ohne ausdrückliche Freigabe. Keine
-> Modellbezeichnung in Commits, Pull Requests oder Dateien. Eine
+> **Grenzen:** kein Merge und keine Veröffentlichung ohne Peter, auch dann
+> nicht, wenn alles grün ist. **Eine Freigabe braucht neuer Umfang** — eine
+> Architekturänderung, ein neues Werkzeug, ein Eingriff, den niemand
+> bestellt hat. **Was in einem belegten Auftrag liegt, läuft weiter:** eine
+> freigegebene Epic, ein Review-Befund auf einem eigenen Pull Request, ein
+> Folgeauftrag von Atlas innerhalb seiner Aufgabenautorität — das wird
+> erledigt, nicht rückgefragt. Maßgeblich sind Rulebook 1.2 und die
+> konkrete Aufgabenautorität, nicht dieser Satz.
+>
+> Keine Modellbezeichnung in Commits, Pull Requests oder Dateien. Eine
 > Rollenbezeichnung ist kein Beleg für einen geladenen Agenten — wer eine
 > Rückmeldung von Argus oder Sentinel zitiert, nennt den Nachweis dazu.
 >
