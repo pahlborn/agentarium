@@ -153,3 +153,64 @@ Zweig nicht vorweg.
 Alles synthetisch. Sentinels Browserregression war mangels Chromium-Laufzeit
 blockiert; meine Browserprüfungen sind damit **nicht unabhängig bestätigt**.
 Es gibt weiterhin keinen Browser- oder Kunden-Live-PASS.
+
+---
+
+# Nachtrag V3 — Nachweisskript im Zweig
+18.10.2026 · auf Anforderung von Atlas, PR #17
+
+## Datei und Aufruf
+```
+previews/AG-EVENT-ID-001/pruefen.js
+```
+
+Startbefehl, aus der Wurzel des Repositorys:
+
+```
+node previews/AG-EVENT-ID-001/pruefen.js
+```
+
+## Voraussetzung — ausdrücklich genannt
+Das Skript **installiert nichts** und lädt nichts herunter. Es setzt voraus:
+
+- Node.js
+- das npm-Paket `playwright` (nur die Bibliothek)
+- eine **bereits vorhandene lokale Chromium-Laufzeit**
+
+Pfad in dieser Reihenfolge gesucht: `AG_CHROMIUM`,
+`$PLAYWRIGHT_BROWSERS_PATH/chromium`, `/opt/pw-browsers/chromium`.
+
+**Fehlt die Laufzeit, endet das Skript mit Rückgabe 2 — „ungeprüft".** Nicht
+bestanden und nicht durchgefallen. Genau daran ist Sentinels Lauf gescheitert,
+und das soll sichtbar bleiben statt als Erfolg durchzugehen. Teil A läuft auch
+ohne Browser.
+
+## Rückgabewerte
+| | |
+|---|---|
+| `0` | alles wie vereinbart |
+| `1` | Abweichung |
+| `2` | ungeprüft (Browser fehlt) |
+
+## Erwartbare Ausgabe
+19 Zeilen, alle mit `ok`, danach:
+
+```
+ALLES WIE VEREINBART — keine Abweichung.
+Alle Prüfungen sind synthetisch. Keine Kunden-Live-Abnahme.
+```
+
+**Teil A** — kanonische Rückprobe in Adapter und Aufnahme, ohne Browser:
+`14 von 14 richtig und identisch`.
+
+**Teil B** — elf direkte `__agEreignis`-Aufrufe: alle angenommen, technische
+ID erhalten, Hinweis nur bei ungültiger Kurzreferenz. Dazu zwei Messungen:
+62 Zeichen werden auf **24** gekürzt, ein Steuerzeichen wird zu **`ID00.01`**
+maskiert.
+
+**Teil C** — Anzeige auf 1440×900, 1194×834, 834×1194, 844×390: Kurzreferenz
+`ID0042` sichtbar, kein Querlauf, keine Konsolenfehler.
+
+## Keine Produktänderung
+Das Skript liegt unter `previews/`, wird von nichts geladen und ändert weder
+den Piloten noch `feld/` noch den Service Worker.
