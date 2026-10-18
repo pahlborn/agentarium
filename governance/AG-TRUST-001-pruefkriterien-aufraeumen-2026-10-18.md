@@ -117,10 +117,69 @@ Weg, der von hier aus nicht sichtbar ist. Die Frage ist also nicht „arbeitet
 das Team", sondern: **auf welchem Weg erreicht eine Rückmeldung von Forge,
 Archibald oder Cadence den Atlas — und ist dieser Weg je benutzt worden?**
 
-Das ist eine Frage an Atlas, keine Behauptung von mir. Sie gehört zu den
-vier oben als **fünfte**:
+Das war eine Frage an Atlas, keine Behauptung von mir. **Er hat sie am 18.10.
+beantwortet, mit Belegen, und sie ist damit erledigt — aber das Ergebnis ist
+schärfer als die Frage.**
 
-| 5 | Hat Atlas zu einer eigenen Entscheidung eine Rückmeldung des Teams erhalten — von Forge, Archibald oder Cadence, nicht von sich selbst? | ein Dokument oder Kommentar, das nicht von Atlas verfasst ist |
+### Frage 5: beantwortet, und die Antwort hat ein Datum
+
+Atlas nannte drei Rückläufe in Issue #2. Nachgeprüft, alle drei vorhanden:
+
+| Kommentar | Rolle im Nutzlast-JSON | Publisher | Zeit |
+|---|---|---|---|
+| `6150728851` | `"role": "archibald"` | `github-actions[bot]` | 13.10. 16:55 |
+| `6150740099` | `"role": "forge"` | `github-actions[bot]` | 13.10. 16:56 |
+| `6150760833` | `"role": "cadence"` | `github-actions[bot]` | 13.10. 16:57 |
+
+**Besser belegt, als Atlas selbst beansprucht hat.** Er schrieb vorsichtig, der
+Publisher eines Kommentars sei nicht mit dem Verfasser des Handbacks
+gleichzusetzen — richtig, aber hier steht die Rolle **im Nutzlast-JSON** und
+der Publisher ist die Automatik, kein Mensch. Inhaltlich sind es echte
+Einwände an seiner Steuerung: Cadence kritisiert den einzügigen Auftrag, der
+eine eigene Regel- und Repo-Prüfung verhinderte; Forge verlangt klare
+Testverantwortung und maschinenprüfbare Handbacks.
+
+**Die Gegenprobe ist der eigentliche Befund.** Issue #2 führt 100 Kommentare
+vom 13. bis 16.10. Davon tragen **genau drei** eine Rolle, alle drei vom
+**13.10., 16:55 bis 16:57** — ein einziger Lauf, drei Minuten. Am 14., 15.
+und 16.10.: keiner.
+
+```
+Verteilung der rollentragenden Kommentare über die Tage
+  2026-10-13   3
+  2026-10-14   —
+  2026-10-15   —
+  2026-10-16   —
+```
+
+Damit hat Peters Beobachtung vom 17.10. — *„er verläuft sich immer wieder,
+obwohl er ein Team hat"* — eine **Ursache mit Datum**, und sie ist keine
+Charakterfrage:
+
+1. Am 13.10. lief die Teamrückkopplung. Einmal, und sie funktionierte.
+2. Zwischen dem 13. und 16.10. wurde das Repository öffentlich.
+3. Seither überspringen die bezahlten Jobs der drei Relais ihre Bedingung
+   `repository.private == true` — **und ein übersprungener Job meldet sich
+   als erfolgreicher Lauf.**
+4. Atlas hat das am 16.10. für einen Lauf selbst festgestellt
+   (`AG-REVIEW-20261016-TEAM-blockade-atlas-v1.md`) und am 18.10. für alle
+   drei bestätigt.
+
+**Atlas hat nicht aufgehört, sein Team zu fragen. Der Kanal ist zugefallen,
+und niemand hat es gesehen.** Er weigert sich ausdrücklich, eine
+Schutzbedingung auf Verdacht zu entfernen oder einen kostenpflichtigen Test zu
+starten — das ist richtig und nicht zu drängen.
+
+### Was dadurch an die Stelle von Frage 5 tritt
+
+| 5 | ~~Hat Atlas je eine Teamrückmeldung erhalten?~~ **Belegt: ja, am 13.10., einmal.** | erledigt |
+| 5a | Erreicht **heute** eine Rückmeldung von Forge, Archibald oder Cadence den Atlas? | ein rollentragender Kommentar mit Datum nach dem 18.10. |
+| 5b | Ist eine der Empfehlungen vom 13.10. umgesetzt worden? | Cadences Einwand gegen einzügige Aufträge, Forges Forderung nach maschinenprüfbaren Handbacks — beides prüfbar am Prozess, nicht an einer Zusage |
+
+5b ist die unbequemere der beiden. Dass eine Rückmeldung **ankam**, sagt nichts
+darüber, dass sie **gewirkt** hat; das Lernprotokoll führt die Zeile
+„Technical path expanded before proof" aus demselben Grund als noch nicht
+nachgewiesen wirksam.
 
 ## Lots Rolle in diesem Test
 
