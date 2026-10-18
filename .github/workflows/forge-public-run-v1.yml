@@ -1,0 +1,50 @@
+name: Forge public relay one-shot
+
+on:
+  push:
+    branches: [agent/ag-relay-public-001]
+    paths:
+      - 'handoffs/AG-RELAY-PUBLIC-001-activate.json'
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: ag-relay-public-001-forge-v1
+  cancel-in-progress: false
+
+jobs:
+  forge:
+    if: github.repository == 'pahlborn/agentarium' && github.actor_id == '277496791' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Verify host before installing the task runtime
+        run: |
+          python3 -m py_compile relay/forge_public_task_once.py
+          python3 relay/forge_public_task_once.py --self-test
+
+      - name: Install pinned task runtime
+        run: npm install --global @anthropic-ai/claude-code@2.1.302
+
+      - name: Run bounded Forge architecture handoff
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          AG_CLAUDE_CLI_VERSION: '2.1.302'
+        run: python3 relay/forge_public_task_once.py
+
+      - name: Preserve host evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: ag-relay-public-001-forge-v1-${{ github.run_id }}
+          path: forge-public-output/
+          if-no-files-found: error
+          retention-days: 30
