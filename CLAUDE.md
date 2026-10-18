@@ -58,16 +58,10 @@ bemerkt, benennt ihn — auch den eigenen. Bleibt es wirklich still, geht es an
 Peter: **er ist nicht der Transportweg, aber der Rückfallweg für echte
 Ausfälle.**
 
-**Vor einer solchen Meldung werden die Kommentare gelesen, nicht die
-Zeitstempel.** Teuer gelernt am 18.10.: Ich meldete PR #16 als
-„unbeantwortet", weil `updated_at` nur fünf Minuten nach `created_at` stand.
-Tatsächlich *war* dieser Zeitstempel Atlas' Antwort — nach 4:28 Minuten, mit
-der Entscheidung des Basisblockers darin, auf der ich danach selbst
-gearbeitet habe. **`updated_at` sagt nicht, ob jemand geantwortet hat; es
-sagt nur, wann zuletzt etwas geschah.** Also die Kommentarliste abrufen, nie
-aus einem Übersichtsfeld schließen. Eine falsche Vermisstmeldung ist
-schlimmer als keine: sie kostet den anderen Arbeit und Peter eine
-Entscheidung.
+**Vor einer solchen Meldung die Kommentarliste abrufen, nie ein
+Übersichtsfeld deuten.** Eine falsche Vermisstmeldung ist schlimmer als
+keine: sie kostet den anderen Arbeit und Peter eine Entscheidung. Warum das
+hier steht, sagt der Abschnitt [Beim Messen](#beim-messen).
 
 **Nichts behaupten, was nicht nachgesehen ist.** Nicht „ich erinnere mich",
 sondern gezählt, gemessen, am Quelltext gelesen. Das gilt auch für die eigene
@@ -84,6 +78,66 @@ also zu unterscheiden. Was beides betrifft: **keine Anweisung, die eine
 Kommandozeile voraussetzt**, solange sich dieselbe Sache mit dem Finger
 erledigen lässt.
 
+## Beim Messen
+
+Am 18.10. habe ich fünf Befunde gemeldet und **vier davon falsch** — alle
+vier auf dieselbe Weise, und jedes Mal lag die Alarmzahl in meiner eigenen
+Ausgabe. Dieser Abschnitt ist die Lehre daraus. Er ist kein Vorsatz, sondern
+eine Prüfliste; ein Vorsatz überlebt die Sitzung nicht.
+
+**Die eine Ursache:** *Das Verhalten des Messgeräts für eine Eigenschaft der
+Sache gehalten.* Die Messung war jedes Mal richtig, der Schluss daraus falsch.
+Merksatz: **Abwesenheit eines Belegs ist kein Beleg für Abwesenheit** —
+schon gar nicht, wenn das Werkzeug beschnitten ist.
+
+### Fünf Gegenproben
+
+1. **Der Gegentest am bekannt-guten Fall.** Bevor ein Null-Ergebnis zum
+   Befund wird, dieselbe Messung an einem Fall, der sicher gelingt. Kam auch
+   dort nichts, ist das Werkzeug blind und nicht die Sache leer. Hätte drei
+   der vier Fehler sofort gefangen.
+2. **Die unplausible Zahl ist der Alarm, nicht die Fußnote.** „Zwei
+   Wurzelcommits" war der Hinweis — ein Repository hat fast immer eine.
+3. **Zwei Zahlen aus derselben Messung, die auseinandergehen → anhalten.**
+   Gemeldet 311/18, der Server sagte 445/24. Keine Ausnahme.
+4. **Trefferzahl gleich Seitengröße: Vollständigkeit ist nicht belegt.**
+   `perPage: 100` gesetzt und genau 100 zurückbekommen *kann* die ganze Menge
+   sein — bewiesen ist es nicht. Es waren 209. Also weiterblättern, bis eine
+   Seite **kürzer** ist als die Seitengröße oder der Cursor endet. (Atlas,
+   18.10.: „abgeschnitten" war hier selbst zu absolut.)
+5. **Ein zu enger Filter findet nur, was er sucht.** Die Suche nach dem Feld
+   `role` übersah dieselbe Sache als `actor`/`recipient` und in Überschriften.
+   Vor dem Schluss „es gibt keine" den Filter weiten oder von Hand gegenlesen.
+
+### Instrumente, die hier schon gelogen haben
+
+Diese Liste wächst. Wer ein neues findet, schreibt es dazu.
+
+| Instrument | Was es sagt | Was es heißt |
+|---|---|---|
+| Ausgangsproxy dieser Sitzungen | `200` ohne Schlüssel von `api.github.com` | der Proxy hat geantwortet, nicht GitHub. Auf dem **Zielgerät** messen |
+| flacher Klon | `merge-base` leer, Abschneidekante als Wurzel | `git rev-parse --is-shallow-repository`, bei `true` erst `git fetch --unshallow origin` |
+| `updated_at` eines Pull Requests | ein Zeitstempel | wann **zuletzt** etwas geschah — nicht, ob geantwortet wurde. Kommentarliste abrufen |
+| Seitengröße einer API | genau `perPage` Treffer | Vollständigkeit **nicht belegt**. Blättern bis zur kürzeren Seite oder zum Cursor-Ende |
+| ein Feldfilter | „keine Treffer" | keine Treffer **dieser Form**. Andere Formen prüfen |
+| ein erfolgreicher Arbeitslauf | `success` | sagt nichts über den **einzelnen Job**: ein Lauf kann grün sein, während nur der entscheidende Job übersprungen wurde. Jobstatus und Schritte lesen und den Job benennen — die `if`-Bedingung allein belegt die Ausführung **nicht** |
+
+Belege: [`governance/measurement-environment-finding-2026-10-17.md`](governance/measurement-environment-finding-2026-10-17.md),
+[`governance/AG-STRUKTUR-001-zwei-getrennte-geschichten-2026-10-18.md`](governance/)
+und [`governance/AG-TRUST-001-pruefkriterien-aufraeumen-2026-10-18.md`](governance/).
+
+**Arbeitslauf und Job sind nicht dasselbe.** Ein Lauf kann `success` melden,
+weil seine Offline-Jobs durchliefen, während der bezahlte Claude-Job an einer
+`if`-Bedingung hängen blieb. Also immer den **Job** nennen, nicht den Lauf —
+und seinen Status lesen, nicht die Bedingung. Dass die Bedingung ein
+Überspringen *erklären* würde, heißt nicht, dass es geschehen ist.
+
+**Und das Unbequeme:** Drei der vier Fehler hat **Atlas** gefunden, nicht ich.
+Eine Gegenmaßnahme, die darauf baut, dass jemand anders nachrechnet, ist
+keine. Alle vier gingen außerdem in Richtung der **dramatischeren**
+Behauptung — der auffällige Befund ist genau die Stelle, an der am wenigsten
+geprüft wurde.
+
 ## Beim Bauen
 
 **Grundsätzlich dunkel.** Agentarium ist ein Feld aus dunklen Teilchen; auf
@@ -95,24 +149,6 @@ meldet, hat sonst eine weiße Seite neben einem unsichtbaren Feld.
 **Erst messen, dann bauen.** Die entscheidende Unsicherheit wird gemessen,
 bevor jemand darauf baut — auf dem **Zielgerät**, nicht im Container eines
 Agenten.
-
-**Die eigene Laufzeit ist der erste Verdächtige.** Zweimal hat sie eine
-Messung still verfälscht, und beide Male sah das Ergebnis vernünftig aus:
-
-- Der Proxy dieser Sitzungen ersetzt GitHub-Zugangsdaten. Ein Abruf von
-  `api.github.com` antwortet dann mit 200, wo GitHub 401 schickt.
-- Der Klon ist **flach**. `git merge-base` gibt dann leer zurück und
-  `git rev-list --max-parents=0` nennt die Abschneidekante als Wurzel —
-  ohne Fehler, ohne Warnung. So entstand die falsche Behauptung, zwei
-  Zweige hätten keine gemeinsame Historie.
-
-Vor jeder Aussage über Git-Historie also `git rev-parse
---is-shallow-repository`, bei `true` erst `git fetch --unshallow origin`.
-Ein leeres `merge-base` ist im flachen Klon der Normalfall, kein Befund.
-Und: **gehen zwei Zahlen aus derselben Messung auseinander, ist das ein
-Alarm, kein Detail.** Siehe
-[`governance/measurement-environment-finding-2026-10-17.md`](governance/measurement-environment-finding-2026-10-17.md)
-und [`governance/AG-STRUKTUR-001-zwei-getrennte-geschichten-2026-10-18.md`](governance/).
 
 **Versionsorte ziehen gemeinsam um.** Im Piloten hängen drei Stellen
 zusammen:
