@@ -1,0 +1,86 @@
+[
+  {
+    "event": {
+      "schema": "agentarium.github-event.v1",
+      "id": "GH-39095574407-handoff",
+      "project_id": "agentarium",
+      "run_id": "AG-GH-LIVE-004-PROBE-20261018",
+      "task_id": "AG-GH-LIVE-004-PROBE-V1",
+      "actor": "atlas",
+      "kind": "handoff",
+      "recipient": "forge",
+      "title": "Atlas uebergibt den Fachauftrag an Forge (gemeldet)",
+      "occurred_at": "2026-10-18T04:00:27.126046+00:00",
+      "source_evidence": "reported_checkpoint",
+      "source_tool_id": "dispatch:gha:39095574407"
+    },
+    "comment_id": 6245435538,
+    "url": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6245435538",
+    "captured_ns": 90674500764,
+    "posted_ns": 91304813769,
+    "evidence_kind": "host_observed_checkpoint",
+    "process_alive_after_post": null
+  },
+  {
+    "event": {
+      "schema": "agentarium.github-event.v1",
+      "id": "GH-39095574407-1",
+      "project_id": "agentarium",
+      "run_id": "AG-GH-LIVE-004-PROBE-20261018",
+      "task_id": "AG-GH-LIVE-004-PROBE-V1",
+      "actor": "forge",
+      "kind": "progress",
+      "title": "Forge \u00b7 Read \u00b7 Arbeitsschritt 1",
+      "occurred_at": "2026-10-18T04:00:29.657284+00:00",
+      "source_evidence": "runtime_stream",
+      "source_tool_id": "toolu_01CuZH5e2KNVqPxZRXTGAnLB"
+    },
+    "comment_id": 6245435899,
+    "url": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6245435899",
+    "captured_ns": 93205741972,
+    "posted_ns": 94489155894,
+    "process_alive_after_post": true
+  },
+  {
+    "event": {
+      "schema": "agentarium.github-event.v1",
+      "id": "GH-39095574407-2",
+      "project_id": "agentarium",
+      "run_id": "AG-GH-LIVE-004-PROBE-20261018",
+      "task_id": "AG-GH-LIVE-004-PROBE-V1",
+      "actor": "forge",
+      "kind": "progress",
+      "title": "Forge \u00b7 Edit \u00b7 Arbeitsschritt 2",
+      "occurred_at": "2026-10-18T04:00:55.287661+00:00",
+      "source_evidence": "runtime_stream",
+      "source_tool_id": "toolu_01M1KUc9MJKeLMwApQEehkns"
+    },
+    "comment_id": 6245439187,
+    "url": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6245439187",
+    "captured_ns": 118836117493,
+    "posted_ns": 119519512591,
+    "process_alive_after_post": true
+  },
+  {
+    "event": {
+      "schema": "agentarium.github-event.v1",
+      "id": "GH-39095574407-contribution",
+      "project_id": "agentarium",
+      "run_id": "AG-GH-LIVE-004-PROBE-20261018",
+      "task_id": "AG-GH-LIVE-004-PROBE-V1",
+      "actor": "forge",
+      "kind": "contribution",
+      "recipient": "atlas",
+      "title": "Forge gibt seinen Fachbericht zurueck (gemeldet)",
+      "occurred_at": "2026-10-18T04:01:10.667503+00:00",
+      "source_evidence": "reported_checkpoint",
+      "source_tool_id": "result:d4db80c2-46b1-4ffd-be40-00f6fba823bc"
+    },
+    "comment_id": 6245441267,
+    "url": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-6245441267",
+    "captured_ns": 134215956260,
+    "posted_ns": 134744435877,
+    "evidence_kind": "host_observed_checkpoint",
+    "process_alive_after_post": null
+  }
+]

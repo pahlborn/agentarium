@@ -1,0 +1,74 @@
+{
+  "task_id": "AG-GH-LIVE-004-PROBE-V1",
+  "request_commit": "52e2d4fbf5fca2d30f5d6b8641cc374af27a7740",
+  "product_baseline": "caebbbebd4b0a5a3c04bab97c0441ccb67f0b5fc",
+  "generator_baseline": "b5dcabb47802c6c9b401e6d429040979aaf9ffc5",
+  "run": "https://github.com/pahlborn/agentarium/actions/runs/39095574407",
+  "session_id": "d4db80c2-46b1-4ffd-be40-00f6fba823bc",
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 8,
+      "outputTokens": 4167,
+      "cacheReadInputTokens": 23452,
+      "cacheCreationInputTokens": 23508,
+      "webSearchRequests": 0,
+      "costUSD": 0.20560240000000002,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 2331,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "usage": {
+    "input_tokens": 8,
+    "cache_creation_input_tokens": 23508,
+    "cache_read_input_tokens": 23452,
+    "output_tokens": 4167,
+    "output_tokens_details": {
+      "thinking_tokens": 2331
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 0,
+      "ephemeral_5m_input_tokens": 23508
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 827,
+        "cache_read_input_tokens": 20324,
+        "cache_creation_input_tokens": 3184,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 3184,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "total_cost_usd": 0.20560240000000002,
+  "requested_model": "opus",
+  "requested_effort": "high",
+  "actual_effort": "unconfirmed",
+  "elapsed_seconds": 44.07041133199999,
+  "changed_paths": [
+    "handoffs/AG-GH-LIVE-004-probe-forge-result.md"
+  ],
+  "unauthorized_paths": [],
+  "failure": null,
+  "source_returncode": 0,
+  "terminal_observed_ns": 133760539391,
+  "events_posted": 4,
+  "patch_sha256": "c98689eaedd957365841b430f2f0babfe9d2b2894c427a0e8a7696366bba8388",
+  "tests_run": false,
+  "product_published": false
+}
