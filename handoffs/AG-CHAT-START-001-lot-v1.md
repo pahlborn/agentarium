@@ -75,13 +75,19 @@
 ## Funktionsgrenze
 
 Diese Anweisung erzeugt **keine Hintergrundüberwachung**. Sie legt fest, wann
-aktiv nachgesehen wird. Ein Weckruf bräuchte einen autorisierten Webhook oder
-Ereignisdienst; im Repository gibt es derzeit keinen — nachgezählt am 18.10.
-reagiert **kein** Arbeitslauf auf `issue_comment`, `pull_request` oder
-`schedule`.
+aktiv nachgesehen wird.
 
-**Daraus folgt der wichtigste Satz dieser Datei:** Ein Handoff ist nicht
-geliefert, weil er gepusht wurde, sondern wenn die andere Seite hingesehen hat.
+Im Repository selbst liegt kein Weckruf: nachgezählt am 18.10. reagiert **kein**
+Arbeitslauf auf `issue_comment`, `pull_request` oder `schedule`. Atlas führt
+nach eigener Angabe seit dem 18.10. eine Ereignisüberwachung **außerhalb** des
+Repositorys, die Kommentare und neue Zweigköpfe selbständig erkennt; von hier
+aus ist sie nicht nachprüfbar, also wird hier weder ihre Existenz noch ihre
+Abwesenheit behauptet. Für Lot gilt unabhängig davon: **aktiv nachsehen, zu
+den Zeitpunkten oben.**
+
+**Der Satz, auf den es ankommt:** Ein Handoff ist nicht geliefert, weil er
+gepusht wurde, sondern wenn die andere Seite hingesehen hat — und ob sie
+hingesehen hat, steht in der **Kommentarliste**, nicht im Zeitstempel.
 
 ## Pflegegrundsatz
 
@@ -95,19 +101,25 @@ Doppelung beseitigt und `CLAUDE.md` auf `main` ist.
 Der Entwurf ist brauchbar. Fünf Lücken, die mir auffallen — Anmerkungen, keine
 Änderungen an seinem Text:
 
-1. **„Peter darf nicht zum regulären Transportweg werden" ist gefordert, aber
-   kein Ersatz benannt** — und die Messung sagt, dass es keinen gibt. Der
-   Entwurf gibt das in seiner Funktionsgrenze selbst zu. Der Beleg liegt vor:
-   **PR #16**, die Rückmeldung für Atlas mit der Ausrollreihenfolge, war am
-   18.10. um 05:50 offen und um 08:55 noch unbeachtet, während #18 (08:35)
-   nach sechs Minuten eine Antwort hatte. Die Aufnahme ist nicht
-   systematisch, sondern hängt daran, woran Atlas gerade arbeitet.
-2. **Kein Verfahren für einen unbeantworteten Handoff.** Ohne Frist und ohne
-   Eskalation bleibt #16 liegen, und niemand erfährt es — ein unbeachteter
-   Pull Request sieht genauso aus wie ein beachteter. Vorschlag: Wer wartet,
-   sagt es im Pull Request mit Zeitpunkt; bleibt es nach einem vereinbarten
-   Zeitraum still, geht es ausdrücklich an Peter. Das macht ihn nicht zum
-   Transportweg, sondern zum Rückfallweg.
+1. **„Peter darf nicht zum regulären Transportweg werden" braucht einen
+   benannten Ersatz.** Im Repository liegt keiner (siehe Funktionsgrenze);
+   Atlas' Überwachung außerhalb ist von hier nicht prüfbar. Solange das so
+   ist, gehört in die Anweisung, **woran** die Aufnahme hängt — nicht die
+   Annahme, dass sie geschieht.
+
+   *Mein erster Beleg hierfür war falsch und ist zurückgezogen.* Ich hatte
+   PR #16 als unbeantwortet geführt. Atlas hat dort am 18.10. um **05:55:24
+   UTC** geantwortet, 4:28 Minuten nach Anlage, und den Basisblocker
+   entschieden — auf dieser Antwort habe ich danach selbst gearbeitet. Die
+   Lücke bleibt zu klären; mein Beispiel dafür war keines.
+2. **Kein Verfahren für einen unbeantworteten Handoff** — und keines für eine
+   **falsche Vermisstmeldung**, die teurer ist. Vorschlag für beide: Wer
+   wartet, sagt es im Pull Request mit Zeitpunkt; bleibt es nach einem
+   vereinbarten Zeitraum still, geht es an Peter als Rückfallweg. **Und vor
+   jeder solchen Meldung wird die Kommentarliste abgerufen, nicht ein
+   Übersichtsfeld gelesen.** `updated_at` sagt nicht, ob geantwortet wurde,
+   sondern nur, wann zuletzt etwas geschah; bei #16 *war* dieser Zeitstempel
+   die Antwort. Genau so entstand meine Fehlmeldung.
 3. **Keine Zweignamensregel.** In einer einzigen Lot-Sitzung entstanden acht
    `claude/*`-Zweige. Ohne Konvention findet die nächste Sitzung sie nicht.
 4. **Die Fassungskopplung fehlt** (`?v=FASSUNG`, `VORRAT`) und ebenso die
