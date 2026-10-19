@@ -94,6 +94,23 @@
   #agSteck .schaetz{color:#9A8A62;}
   /* Was ein Auftrag verbraucht hat — erscheint beim Erledigen, verebbt. */
   #agKostenEbene{position:fixed; inset:0; z-index:5; pointer-events:none;}
+  /* DIE GRIFFE. Sie liegen in einer eigenen Schicht ueber den Bloecken,
+     nicht in ihnen: #agTasten hat overflow:hidden und wuerde einen Griff
+     im Inneren abschneiden. So bleibt jeder Block unangetastet, und
+     Knoepfe, Regler und Liste sind weiter voll bedienbar. */
+  #agGriffe{position:fixed; inset:0; z-index:12; pointer-events:none;}
+  #agGriffe .agGriff{position:absolute; width:22px; height:22px;
+    pointer-events:auto; cursor:grab; touch-action:none;
+    border-radius:4px; opacity:.28; transition:opacity .25s ease;
+    background:
+      radial-gradient(circle at 6px 6px,  rgba(201,162,39,.95) 1.4px, transparent 1.6px),
+      radial-gradient(circle at 12px 6px, rgba(201,162,39,.95) 1.4px, transparent 1.6px),
+      radial-gradient(circle at 6px 12px, rgba(201,162,39,.95) 1.4px, transparent 1.6px),
+      radial-gradient(circle at 12px 12px,rgba(201,162,39,.95) 1.4px, transparent 1.6px);}
+  #agGriffe .agGriff:hover,
+  #agGriffe .agGriff.faengt{opacity:1; cursor:grabbing;
+    background-color:rgba(201,162,39,.14);}
+  #agGriffe.leise{opacity:0; pointer-events:none;}
   .agKosten{position:absolute; transform:translate(-50%,-100%);
     font:400 10px/1 ui-monospace,SFMono-Regular,Menlo,monospace;
     letter-spacing:.12em; white-space:nowrap;
@@ -843,6 +860,7 @@
 <div id="agRufe"></div>
 <div id="agSteck"></div>
 <div id="agKostenEbene"></div>
+<div id="agGriffe"></div>
 <div id="agWerk"></div>
 <div id="agMarke"><b>Agentarium</b><em title="BALL — Bio-Agent &amp; LLM Logistics">See intelligence move. Powered by BALL</em><small id="agFassung"></small><label id="agRegler"><u>Helligkeit <i id="agHellWert">100 %</i></u><input id="agHell" type="range" min="60" max="190" step="2" value="100" aria-label="Helligkeit"></label></div>
 <div id="agRechts"><div id="agKopf"><i id="agProjekt"></i><s id="agPuls"></s><span id="agUhr">00:00</span><em id="agStromWort"></em></div></div>
@@ -2325,6 +2343,80 @@
   var nachName = {};
   AGENTEN.forEach(function (a) { nachName[a.name] = a; });
 
+  /* ============================ EIGENE BLÖCKE ============================
+
+     Dieselbe Freiheit wie bei den Agenten, eine Ebene hoeher: Wer zusieht,
+     schiebt die Anzeigebloecke dorthin, wo er sie haben will.
+
+     ZWEI ENTSCHEIDUNGEN, BEIDE BENANNT STATT VERSTECKT.
+
+     1. Gespeichert wird als ANTEIL des Fensters, nicht als Bildpunkt. Beim
+        Drehen des iPads bleibt die Lage dadurch sinnvoll statt zu
+        verrutschen -- dieselbe Ueberlegung wie bei winkel/nah.
+
+     2. Das Band, in dem der Ring steht, MISST erst dann, wenn wirklich ein
+        Block verschoben wurde. Vorher gelten die bisherigen Formeln
+        unveraendert. Sie sind auf drei Schirmgroessen eingemessen; sie
+        durch eine Messung zu ersetzen wuerde das Bild bei JEDEM aendern,
+        auch bei dem, der nie etwas anfasst. Wer nichts verschiebt, sieht
+        nichts Neues. */
+  var BLOCK_SPEICHER = 'agentarium-bloecke-v1';
+  var BLOECKE = [
+    { id: 'agMarke',    wort: 'Name und Helligkeit' },
+    { id: 'agEcke',     wort: 'Was geschieht' },
+    { id: 'agRechts',   wort: 'Kopf' },
+    { id: 'agWas',      wort: 'Ereignis' },
+    { id: 'agWerkName', wort: 'Werkname' },
+    { id: 'agTasten',   wort: 'Knöpfe' }
+  ];
+  var bloeckeLage = {};          /* id -> {x, y} als Anteil 0..1 */
+
+  function bloeckeLesen() {
+    try {
+      var r = JSON.parse(localStorage.getItem(BLOCK_SPEICHER) || '{}');
+      BLOECKE.forEach(function (b) {
+        var q = r[b.id]; if (!q) return;
+        var x = Number(q.x), y = Number(q.y);
+        /* Grenzen, damit eine beschaedigte Ablage keinen Block aus dem
+           Bild wirft. Die Fensterklemmung holt den Rest herein. */
+        if (isFinite(x) && isFinite(y) && x >= -0.1 && x <= 1.1 &&
+            y >= -0.1 && y <= 1.1) bloeckeLage[b.id] = { x: x, y: y };
+      });
+    } catch (e) {}
+  }
+  function bloeckeSchreiben() {
+    try {
+      var n = 0; for (var k in bloeckeLage) if (bloeckeLage[k]) n++;
+      if (n) localStorage.setItem(BLOCK_SPEICHER, JSON.stringify(bloeckeLage));
+      else localStorage.removeItem(BLOCK_SPEICHER);
+    } catch (e) {}
+  }
+  function bloeckeEigen() { for (var k in bloeckeLage) if (bloeckeLage[k]) return 1; return 0; }
+
+  /* Die gespeicherte Lage auf die Bloecke legen. right/bottom muessen auf
+     auto, sonst zieht die CSS-Verankerung am anderen Ende weiter mit. */
+  function bloeckeSetzen() {
+    BLOECKE.forEach(function (b) {
+      var e = document.getElementById(b.id); if (!e) return;
+      var q = bloeckeLage[b.id];
+      if (!q) { e.style.left = e.style.top = e.style.right = e.style.bottom = ''; return; }
+      e.style.left = Math.round(q.x * W()) + 'px';
+      e.style.top  = Math.round(q.y * H()) + 'px';
+      e.style.right = 'auto'; e.style.bottom = 'auto';
+    });
+    /* Ins Fenster holen, erst nachdem die Lage steht -- vorher hat der
+       Block an der neuen Stelle noch keine Masse. */
+    BLOECKE.forEach(function (b) {
+      if (!bloeckeLage[b.id]) return;
+      var e = document.getElementById(b.id); if (!e) return;
+      var k = e.getBoundingClientRect();
+      if (k.left < 2) e.style.left = '2px';
+      else if (k.right > W() - 2) e.style.left = Math.max(2, W() - k.width - 2) + 'px';
+      if (k.top < 2) e.style.top = '2px';
+      else if (k.bottom > H() - 2) e.style.top = Math.max(2, H() - k.height - 2) + 'px';
+    });
+  }
+
   /* ============================== EIGENE PLÄTZE ==========================
 
      Wer hier zusieht, baut sich sein Bild: Namen lassen sich mit dem Finger
@@ -2375,8 +2467,25 @@
       if (eigen) localStorage.setItem(PLATZ, JSON.stringify(r));
       else localStorage.removeItem(PLATZ);
     } catch (e) {}
+    platzKnopfSetzen();
+  }
+
+  /* EIN Knopf fuer beides. Zwei Knoepfe -- einer fuer Namen, einer fuer
+     Bloecke -- waeren zwei Knoepfe mehr, als jemand sucht, der sich verirrt
+     hat. Er erscheint, sobald irgendetwas von Hand steht. */
+  /* HEISST ABSICHTLICH NICHT knopfSetzen. Gemessen am 19.10.: Der Blockzug
+     rief `knoepfeSetzen()` -- alle Knoepfe, ein Buchstabe daneben -- und der
+     Platz-Knopf erfuhr nie, dass ein Block von Hand steht. Kein Fehler in
+     der Konsole, beide liegen in derselben Huelle. Zwei Namen, die sich um
+     einen Umlaut unterscheiden, sind eine Falle; also traegt dieser hier
+     dazu, wozu er gehoert. */
+  function platzKnopfSetzen() {
     var k = document.getElementById('agPlatz');
-    if (k) k.hidden = !eigen;
+    if (!k) return;
+    var agenten = AGENTEN.some(function (a) {
+      return a.winkel !== a.heim.winkel || a.nah !== a.heim.nah;
+    });
+    k.hidden = !(agenten || bloeckeEigen());
   }
   /* Wie weit darf `nah` gehen? So weit, dass die entfernteste Ecke des
      Fensters erreichbar ist — gemessen im selben gestauchten Maß, das
@@ -2390,6 +2499,109 @@
       if (d > g) g = d;
     });
     return g;
+  }
+
+  /* ============================== DIE GRIFFE =============================
+
+     Ein Griff je Block, in einer eigenen Schicht DARUEBER statt darin.
+     Grund, nachgesehen: #agTasten hat overflow:hidden -- ein Griff im
+     Inneren waere abgeschnitten. So bleibt jeder Block unangetastet, und
+     Knoepfe, Helligkeitsregler und Liste sind weiter voll bedienbar.
+
+     Der Griff sitzt in der oberen linken Ecke seines Blocks und wird nach
+     jeder Lageaenderung neu gesetzt -- er hat keine eigene Wahrheit, er
+     folgt dem Block. */
+  var griffeEl = document.getElementById('agGriffe');
+
+  function griffeSetzen() {
+    if (!griffeEl) return;
+    BLOECKE.forEach(function (b) {
+      var e = document.getElementById(b.id), g = griffeEl.querySelector('[data-fuer="' + b.id + '"]');
+      if (!e || !g) return;
+      var k = e.getBoundingClientRect();
+      /* Unsichtbar oder ohne Masse: auch der Griff verschwindet. Ein Griff
+         ohne Block waere ein Knopf, der nichts tut. */
+      if (!k.width || !k.height || e.classList.contains('leise')) { g.hidden = true; return; }
+      g.hidden = false;
+      g.style.left = Math.round(k.left + 2) + 'px';
+      g.style.top  = Math.round(k.top + 2) + 'px';
+    });
+  }
+
+  function griffeBauen() {
+    if (!griffeEl) return;
+    BLOECKE.forEach(function (b) {
+      var g = document.createElement('div');
+      g.className = 'agGriff';
+      g.setAttribute('data-fuer', b.id);
+      g.setAttribute('role', 'button');
+      g.setAttribute('aria-label', b.wort + ' verschieben');
+      g.title = b.wort + ' verschieben';
+      var ab = null;
+      g.addEventListener('pointerdown', function (ev) {
+        var e = document.getElementById(b.id); if (!e) return;
+        var k = e.getBoundingClientRect();
+        ab = { zx: ev.clientX - k.left, zy: ev.clientY - k.top };
+        g.classList.add('faengt');
+        try { g.setPointerCapture(ev.pointerId); } catch (x) {}
+        ev.preventDefault();
+      });
+      g.addEventListener('pointermove', function (ev) {
+        if (!ab) return;
+        var e = document.getElementById(b.id); if (!e) return;
+        var k = e.getBoundingClientRect();
+        /* Ins Fenster halten: verschwinden darf ein Block nicht, sonst ist
+           er unauffindbar. Wo im Fenster er liegt, entscheidet der Zuseher. */
+        var x = Math.max(2, Math.min(W() - k.width - 2, ev.clientX - ab.zx));
+        var y = Math.max(2, Math.min(H() - k.height - 2, ev.clientY - ab.zy));
+        e.style.left = Math.round(x) + 'px';
+        e.style.top  = Math.round(y) + 'px';
+        e.style.right = 'auto'; e.style.bottom = 'auto';
+        bloeckeLage[b.id] = { x: x / W(), y: y / H() };
+        griffeSetzen();
+        ev.preventDefault();
+      });
+      function los() {
+        if (!ab) return;
+        ab = null; g.classList.remove('faengt');
+        bloeckeSchreiben();
+        /* Erst jetzt neu rechnen: das Band haengt an den Bloecken, und der
+           Ring haengt am Band. Waehrend des Zuges waere das Flackern. */
+        if (window.__agRing) window.__agRing();
+        griffeSetzen();
+        knoepfeSetzen();      /* Lage der Knoepfe haengt am Band */
+        platzKnopfSetzen();   /* und „Plaetze zurueck" am Zugstand */
+      }
+      g.addEventListener('pointerup', los);
+      g.addEventListener('pointercancel', los);
+      griffeEl.appendChild(g);
+    });
+    griffeSetzen();
+    /* DIE GRIFFE MUESSEN FOLGEN, NICHT EINMAL ABGELEGT WERDEN.
+       Gemessen am 19.10., beim ersten Versuch: Der Griff der Liste blieb
+       verborgen, weil der Block beim Start 0 hoch war und erst mit den
+       Ereignissen wuchs. Der Griff des Werknamens sass 136 Pixel zu tief,
+       weil der Block von unten verankert ist und beim Wachsen nach oben
+       rueckt. Und die Knoepfe verblassen nach einigen Sekunden, ihr Griff
+       blieb stehen.
+       Die Bloecke aendern Groesse und Sichtbarkeit fortwaehrend -- ein
+       Griff, der nur beim Start gesetzt wird, zeigt ins Leere. Also alle
+       250 ms nachfuehren: vierundzwanzig Kastenabfragen je Sekunde sind
+       billiger als ein Griff, der nicht dort ist, wo er hingehoert. */
+    setInterval(griffeSetzen, 250);
+  }
+
+  function bloeckeHeim() {
+    bloeckeLage = {};
+    bloeckeSchreiben();
+    bloeckeSetzen();
+    if (window.__agRing) window.__agRing();
+    griffeSetzen();
+    knoepfeSetzen();
+    /* Zuletzt, und das ist die Reihenfolge: `plaetzeHeim()` laeuft vor uns
+       und fragt den Knopf, da stehen die Bloecke noch. Erst hier sind beide
+       daheim -- erst hier darf der Knopf gehen. */
+    platzKnopfSetzen();
   }
 
   function plaetzeHeim() {
@@ -2488,7 +2700,29 @@
     return H() > W() ? Math.min(W() * 0.34, 240)
                      : Math.min(W() * 0.42, 330);
   }
+  /* Das gemessene Band. Gefragt wird, was WIRKLICH am Rand liegt, nicht wo
+     ein Block laut Formel liegen sollte. Ein Block, den jemand in die Mitte
+     zieht, haelt keinen Rand mehr frei -- das ist seine Entscheidung, und
+     die Folge sieht er sofort. Belehrt wird nicht.
+       Gemessen wird nur, was sichtbar ist: ein ausgeblendeter Block (leise,
+     display:none) reserviert nichts. */
+  function bandGemessen() {
+    var l = 12, r = W() - 12, mitte = W() / 2;
+    BLOECKE.forEach(function (b) {
+      var e = document.getElementById(b.id); if (!e) return;
+      if (e.classList.contains('leise')) return;
+      var k = e.getBoundingClientRect();
+      if (!k.width || !k.height) return;
+      var km = k.left + k.width / 2;
+      if (km < mitte) { if (k.right + 18 > l) l = k.right + 18; }
+      else            { if (k.left - 18 < r) r = k.left - 18; }
+    });
+    if (r - l < 140) { l = 12; r = W() - 12; }   /* Notnagel: nie erdruecken */
+    return { l: l, r: r };
+  }
+
   function bandL() {
+    if (bloeckeEigen()) return bandGemessen().l;
     /* Quer steht die Marke oben links UND der Ring reicht bis an den
        linken Rand -- gemessen lag "sentinel" unter der Marke. Auf dem
        Schreibtisch haelt die Listenspalte diesen Platz frei; quer muss
@@ -2498,6 +2732,7 @@
     return klein() ? 12 : listeBreite() + 18;
   }
   function bandR() {
+    if (bloeckeEigen()) return bandGemessen().r;
     /* Rechts stehen drei Dinge übereinander: Kopf, Produkt, Stand der
        Arbeit. Sie teilen sich eine Spalte, und die muss breit genug für
        den längsten Projekttitel sein. Auf dem Telefon gibt es diese
@@ -5966,14 +6201,28 @@
      das Groessenmerkmal am Koerper neu setzen -- vorher wurde nur der Ring
      neu gezeichnet, und `data-gross` blieb auf dem Stand vom Start. */
   window.addEventListener('resize', function () {
-    setTimeout(function () { ringZeichnen(); knoepfeSetzen(); }, 120);
+    setTimeout(function () {
+      /* Reihenfolge zaehlt: erst die Bloecke an ihren Anteil setzen, dann
+         den Ring -- denn das Band misst die Bloecke. Umgekehrt rechnete der
+         Ring mit den Lagen von vor dem Drehen. */
+      bloeckeSetzen();
+      ringZeichnen();
+      knoepfeSetzen();
+      griffeSetzen();
+    }, 120);
   });
 
   /* „Plätze zurück" erscheint erst, wenn wirklich etwas verschoben ist —
      ein Knopf, der nichts zu tun hat, kostet mehr als er nützt. Dieselbe
      Regel wie bei „Halt" und „Von vorn". */
   var platzKnopf = document.getElementById('agPlatz');
-  if (platzKnopf) platzKnopf.addEventListener('click', plaetzeHeim);
+  if (platzKnopf) platzKnopf.addEventListener('click', function () {
+    plaetzeHeim();          /* die Namen */
+    bloeckeHeim();          /* und die Bloecke */
+  });
+  bloeckeLesen();
+  bloeckeSetzen();
+  griffeBauen();
   plaetzeSchreiben();
 
   document.getElementById('agHalt').addEventListener('click', function () {
