@@ -162,6 +162,16 @@ meldet, hat sonst eine weiße Seite neben einem unsichtbaren Feld.
 bevor jemand darauf baut — auf dem **Zielgerät**, nicht im Container eines
 Agenten.
 
+### Am Zielgerät abgenommen
+
+Diese Liste wächst, und sie ist etwas anderes als ein grüner Prüflauf: hier
+steht, was **Peter auf dem iPad in der Hand hatte**. Wer einen dieser Werte
+ändert, ändert einen abgenommenen Befund und nicht eine Schätzung.
+
+| Fassung | Was | Abnahme |
+|---|---|---|
+| 54, 19.10. | **Griffgröße 28 px** (mit Rand 30) für die Blockgriffe, dazu die sichtbare Platte statt `:hover` | „Sehr gut, griff klappt." Apples Mindestmaß ist 44; 28 ist damit **am Gerät belegt**, nicht trotz der Richtlinie geraten. Grenze der Abnahme: gemessen ist *finden und fassen*, nicht Drehen mit Blöcken am Rand, nicht zwei Blöcke übereinander, nicht die 140-px-Notbremse des Bandes |
+
 **Versionsorte ziehen gemeinsam um.** Im Piloten hängen drei Stellen
 zusammen:
 
