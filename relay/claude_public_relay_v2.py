@@ -416,9 +416,8 @@ def ensure_fallback() -> None:
             return
         except Exception:
             pass
-    for child in RESULT.iterdir():
-        if child.is_file():
-            child.unlink()
+    shutil.rmtree(RESULT)
+    RESULT.mkdir()
     meta = base_metadata(context, "blocked")
     meta.update(stopped_at=now(), failure="RUN_JOB_NO_RESULT", secret_scan="blocked")
     (RESULT / "BLOCKED.txt").write_text("Run job produced no publishable result.\n")
@@ -515,7 +514,11 @@ def validate_result(meta: dict, context: dict, result_root: Path) -> None:
         if not finite_number(meta.get("total_cost_usd")) or meta["total_cost_usd"] < 0:
             raise RuntimeError("ready result lacks valid cost")
     else:
-        if (result_root / "handback.md").exists() or not (result_root / "BLOCKED.txt").is_file():
+        package_files = {
+            str(path.relative_to(result_root))
+            for path in result_root.rglob("*") if path.is_file()
+        }
+        if package_files != {"metadata.json", "BLOCKED.txt"}:
             raise RuntimeError("blocked result package inconsistent")
         if meta["changed_paths"] or meta.get("handback_sha256") is not None:
             raise RuntimeError("blocked result carries output")
@@ -605,15 +608,17 @@ def self_test() -> None:
         blocked_meta = base_metadata(context, "blocked")
         blocked_meta.update(stopped_at=now(), failure="RUN_JOB_NO_RESULT", secret_scan="blocked")
         (result_root / "BLOCKED.txt").write_text("Run job produced no publishable result.\n")
+        (result_root / "metadata.json").write_text(json.dumps(blocked_meta))
         validate_result(blocked_meta, context, result_root)
-        (result_root / "handback.md").write_text("stale output")
-        try:
-            validate_result(blocked_meta, context, result_root)
-        except RuntimeError:
-            pass
-        else:
-            raise AssertionError("blocked result with handback negative test failed")
-        (result_root / "handback.md").unlink()
+        for stale_name in ("handback.md", "stream.jsonl", "stderr.txt"):
+            (result_root / stale_name).write_text("stale output")
+            try:
+                validate_result(blocked_meta, context, result_root)
+            except RuntimeError:
+                pass
+            else:
+                raise AssertionError("blocked result with output negative test failed: " + stale_name)
+            (result_root / stale_name).unlink()
         blank_session = dict(ready); blank_session["session_id"] = "   "
         (result_root / "handback.md").write_bytes(payload)
         try:
@@ -649,7 +654,7 @@ def self_test() -> None:
                 pass
             else:
                 raise AssertionError("write isolation negative test failed")
-    print("SELF_TEST_OK: 32 security checks; no model/API call")
+    print("SELF_TEST_OK: 34 security checks; no model/API call")
 
 
 def main() -> None:
