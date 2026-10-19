@@ -1,0 +1,12 @@
+{
+  "schema": "agentarium.relay-activation.v2",
+  "task_id": "AG-RELAY-CANARY-003",
+  "authorized": true,
+  "source_commit": "489374a7db7ff475a784290a457511b0b309a7e7",
+  "role": "coding-agent",
+  "request": "handoffs/AG-RELAY-CANARY-003-forge-request-v1.json",
+  "handback": "handoffs/AG-RELAY-CANARY-003-forge-result-v1.md",
+  "model": "opus",
+  "max_turns": 4,
+  "max_budget_usd": 5
+}
