@@ -37,6 +37,25 @@ Kurz, ein paar Zeilen, mit dem **Link zur Datei in GitHub**. Von Peter
 mehrfach ausdrücklich verlangt: „es reicht eine Mini-Ansprache mit dem Link
 zu deiner Datei in GitHub."
 
+**Wie Peter es hören will — am 19.10. ausdrücklich erbeten, nachdem ich ihm
+zu viel hingelegt hatte („Mir ist das alles zu viel und zu technisch. Bitte
+langsam nacheinander"). Vier Punkte, und sie gelten für den Chat, nicht für
+GitHub:**
+
+1. **Melden, wenn etwas fertig ist oder etwas schiefgeht.** Nicht bei jedem
+   Zwischenschritt, aber auch nicht erst, wenn es brennt.
+2. **Drei bis vier Zeilen, in normalen Worten.** Was ist jetzt anders, was
+   soll er ansehen, was brauche ich von ihm. Keine Befundnummern, keine
+   Tabellen, kein Quelltext.
+3. **Die Einzelheiten liegen daneben, nicht davor.** Fragt er nach, hole ich
+   sie. In GitHub steht ohnehin alles.
+4. **Eine Sache pro Nachricht.** Fünf offene Punkte in einer Antwort sind
+   keine Übersicht, sondern eine Zumutung.
+
+Das gilt **nur dem Chat**. Pull Requests, `governance/`-Dateien und
+Rückmeldungen an Atlas bleiben ausführlich und mit Fundstellen — dort ist
+Genauigkeit der Zweck. Zu unterscheiden ist der Leser, nicht die Sorgfalt.
+
 **Sie ist nicht der Transportweg, sie ist Peters Einblick.** Lot und Atlas
 lesen und beantworten ihre Rückläufe selbst, direkt in GitHub; Peter ist
 nicht der Bote. Er soll aber ohne Nachfragen sehen können, was zwischen uns
