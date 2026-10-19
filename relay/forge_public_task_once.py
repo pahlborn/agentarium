@@ -129,6 +129,7 @@ def make_read_only(work, writable_file):
             path.chmod(stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH)
         elif path.is_dir():
             path.chmod(stat.S_IRUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IXOTH)
+    work.chmod(stat.S_IRUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IXOTH)
     writable_file.chmod(stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH)
 
 
