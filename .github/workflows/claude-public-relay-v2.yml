@@ -40,6 +40,12 @@ jobs:
           include-hidden-files: true
           if-no-files-found: error
           retention-days: 2
+      - name: Announce receipt after successful bundle upload
+        # A lost HTTP acknowledgement must not prevent terminal publication.
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 relay-prepared/relay_driver.py announce
 
   run:
     needs: prepare
@@ -93,3 +99,4 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: python3 relay-prepared/relay_driver.py publish
+
