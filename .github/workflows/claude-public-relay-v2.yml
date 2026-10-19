@@ -79,9 +79,13 @@ jobs:
           name: relay-prepared-${{ github.run_id }}
           path: relay-prepared/
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        id: result_download
+        continue-on-error: true
         with:
           name: relay-result-${{ github.run_id }}
           path: relay-result/
+      - name: Materialize fixed BLOCKED fallback when run produced no result
+        run: python3 relay-prepared/relay_driver.py fallback
       - name: Publish sanitized result only
         env:
           GH_TOKEN: ${{ github.token }}
