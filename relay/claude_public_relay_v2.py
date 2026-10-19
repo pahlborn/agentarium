@@ -233,8 +233,16 @@ def prepare() -> None:
     }}, indent=2))
     shutil.copy2(Path(__file__).resolve(), PREPARED / "relay_driver.py")
     (PREPARED / "manifest.json").write_text(json.dumps(manifest(PREPARED), indent=2))
-    run_url = f"https://github.com/{REPO}/actions/runs/{os.environ.get('GITHUB_RUN_ID', '')}"
-    run_id = str(os.environ.get("GITHUB_RUN_ID", "unknown"))
+
+
+def announce() -> None:
+    """Announce receipt only after the workflow uploaded the prepared bundle."""
+    verify_manifest(PREPARED)
+    context = json.loads((PREPARED / "control/context.json").read_text())
+    a = context["activation"]
+    parent, head = context["source_commit"], context["head"]
+    run_id = str(context["run_id"])
+    run_url = f"https://github.com/{REPO}/actions/runs/{run_id}"
     post_issue(marker(a["task_id"], parent, "HOST_RECEIVED", head, run_id) +
                f"\n## {a['task_id']} — HOST_RECEIVED\n{run_url}\n"
                "Vorbereitung geprüft; der Claude-Lauf hat keinen GitHub-Schlüssel.")
@@ -659,11 +667,12 @@ def self_test() -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("mode", choices=("prepare", "run", "fallback", "publish", "self-test"))
+    parser.add_argument("mode", choices=("prepare", "announce", "run", "fallback", "publish", "self-test"))
     args = parser.parse_args()
-    {"prepare": prepare, "run": run_model, "fallback": ensure_fallback,
+    {"prepare": prepare, "announce": announce, "run": run_model, "fallback": ensure_fallback,
      "publish": publish, "self-test": self_test}[args.mode]()
 
 
 if __name__ == "__main__":
     main()
+
