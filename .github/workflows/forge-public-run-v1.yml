@@ -4,14 +4,14 @@ on:
   push:
     branches: [agent/ag-relay-public-001]
     paths:
-      - 'handoffs/AG-RELAY-PUBLIC-001-activate.json'
+      - 'handoffs/AG-RELAY-PUBLIC-002-activate.json'
 
 permissions:
   contents: read
   issues: write
 
 concurrency:
-  group: ag-relay-public-001-forge-v1
+  group: ag-relay-public-002-forge-review-v1
   cancel-in-progress: false
 
 jobs:
@@ -44,7 +44,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: ag-relay-public-001-forge-v1-${{ github.run_id }}
+          name: ag-relay-public-002-forge-review-v1-${{ github.run_id }}
           path: forge-public-output/
           if-no-files-found: error
           retention-days: 30
