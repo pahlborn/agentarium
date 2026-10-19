@@ -1,0 +1,19 @@
+{
+  "schema": "agentarium.handoff.v0",
+  "task_id": "AG-RELAY-PUBLIC-002-FORGE-REVIEW-V1",
+  "monitor_run_id": "AG-RELAY-PUBLIC-002-20261019",
+  "authority": "Peter authorized this corrected Forge architecture assessment. This assignment requests analysis only; it does not authorize implementation, merge or publication.",
+  "goal": "Assess the actual proposed public-repository Forge relay workflow and host at the exact supplied paths and specify the smallest safe reusable relay for bounded work by Forge, Archibald and Cadence, including lifecycle-event emission for Agentarium.",
+  "allowed_paths": [
+    "handoffs/AG-RELAY-PUBLIC-002-forge-handback-v1.md"
+  ],
+  "requirements": [
+    "Read every path in runtime_context.readable_paths. In particular, the proposed workflow is .github/workflows/forge-public-run-v1.yml and the proposed host is relay/forge_public_task_once.py. Do not guess paths; Glob and Grep are unavailable.",
+    "Evaluate the code actually supplied at runtime_context.source_commit, not the previous blocked assessment.",
+    "State the critical assumption, simplest viable reusable route, concrete alternatives, security boundaries, required negative tests and the smallest observable end-to-end proof.",
+    "Explain how an authorized run can emit the existing agentarium.github-event.v1 lifecycle without exposing credentials or granting product publication rights.",
+    "Explicitly distinguish source commit, activation commit, workflow run, individual job, Claude session and handback. A green workflow alone is not proof that Forge ran.",
+    "Do not implement or modify product, relay or governance files. Write only the allowed handback. Report unresolved blockers rather than filling gaps.",
+    "Return at most 700 German words with verdict FEASIBLE, FEASIBLE_WITH_CHANGES or BLOCKED and the next exact owner/action."
+  ]
+}
