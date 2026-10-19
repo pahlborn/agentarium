@@ -82,6 +82,21 @@ const TYPEN = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; ch
   await new Promise(r => srv.listen(0, '127.0.0.1', r));
   const basis = 'http://127.0.0.1:' + srv.address().port;
 
+  /* Ohne Probefassung gibt es nichts nebeneinanderzustellen. Das ist kein
+     Fehler: Die Probe war befristet und ist nach Peters Abnahme der Fassung
+     52 abgeraeumt worden. Das Skript bleibt, weil die Technik wiederkommt --
+     zwei Apps an einem Ursprung, die echte zuerst installiert -- und endet
+     sauber mit 2 statt gruen oder rot fuer den falschen Grund zu melden. */
+  if (!fs.existsSync(path.join(PILOT, 'platz-probe', 'index.html'))) {
+    console.log('UNGEPRÜFT: pilot/platz-probe/ ist nicht vorhanden.');
+    console.log('Die Probefassung war befristet und wurde nach der Abnahme');
+    console.log('von Fassung 52 abgeraeumt. Dieses Skript prueft eine Probe');
+    console.log('gegen die installierte App; ohne Probe gibt es nichts zu');
+    console.log('messen. Legt jemand wieder eine an, laeuft es unveraendert.');
+    srv.close();
+    process.exit(2);
+  }
+
   const b = await chromium.launch({ executablePath: br.pfad,
                                     args: ['--no-sandbox', '--disable-dev-shm-usage'] });
   try {

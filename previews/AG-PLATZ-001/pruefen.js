@@ -11,8 +11,11 @@ const fs = require('fs'), path = require('path'), http = require('http');
 /* Ziel und Speicherschluessel sind einstellbar, damit dieselbe Pruefung auch
    die Probefassung unter pilot/platz-probe/ messen kann -- eine Regel, ein
    Ort, statt eines zweiten Skripts, das auseinanderlaeuft.
-     AG_ZIEL=pilot/platz-probe  AG_SCHLUESSEL=agentarium-PROBE-plaetze-v1 \
-     AG_PROBE=1  node previews/AG-PLATZ-001/pruefen.js                        */
+     AG_ZIEL=<verzeichnis>  AG_SCHLUESSEL=<schluessel>  AG_PROBE=1 \
+       node previews/AG-PLATZ-001/pruefen.js
+   Die Probefassung unter pilot/platz-probe/ war befristet und ist nach
+   Peters Abnahme der Fassung 52 abgeraeumt; die Parameter bleiben, weil die
+   naechste Probe sie wieder braucht.                                        */
 const ZIEL = process.env.AG_ZIEL || path.join('pilot', 'github-live');
 const SCHLUESSEL = process.env.AG_SCHLUESSEL || 'agentarium-plaetze-v1';
 const ISTPROBE = process.env.AG_PROBE === '1';
