@@ -4,7 +4,7 @@ on:
     branches: [agent/ag-relay-public-001]
     paths:
       - 'relay/forge_public_task_once.py'
-      - 'handoffs/AG-RELAY-PUBLIC-001-forge-request-v1.json'
+      - 'handoffs/AG-RELAY-PUBLIC-002-forge-request-v1.json'
       - '.github/workflows/forge-public-run-v1.yml'
       - '.github/workflows/forge-public-preflight-v1.yml'
 permissions:
