@@ -58,3 +58,24 @@ wurde daraufhin ohne Aktivierung und ohne Modellaufruf nachgebessert:
 
 Kostenlose lokale Rückprüfung: Python-Syntax, `git diff --check` und
 `SELF_TEST_OK: 17 security checks; no model/API call`.
+
+## Korrektur nach Argus V2 und Sentinel V2
+
+Die unabhängige Gegenprobe fand am Head `034256e` ein unvollständiges
+Erfolgspaket: formal gültige `RESULT_READY`-Metadaten konnten ohne Handback
+bestehen bleiben. Außerdem konnte ein fremder Kommentar im öffentlichen
+Repository einen terminalen Marker vortäuschen.
+
+Die Nachbesserung behandelt Metadaten und Handback jetzt als untrennbares
+Paket: reguläre Datei, 64-stelliger SHA-256, passender Inhaltshash und erneute
+Secret-Prüfung sind Voraussetzung für `RESULT_READY`. Andernfalls ersetzt der
+Fallback das Teilresultat vollständig durch `BLOCKED`. Terminale Historienmarker
+werden nur vom erwarteten Repository-Eigentümerkonto berücksichtigt.
+
+Zusätzlich erzwingt das Schema für `BLOCKED` einen nichtleeren Fehlergrund,
+`secret_scan=blocked` und leere Sitzungs-, Nutzungs- und Kostenfelder. Zahlen
+müssen endlich, nichtnegativ und echte Zahlen statt boolescher Werte sein.
+
+Kostenlose Rückprüfung: `SELF_TEST_OK: 21 security checks; no model/API call`
+sowie eine separate Paketprobe `FALLBACK_PACKAGE_TEST_OK`. Delta-Review und
+Sentinel-Nachprüfung des neuen exakten Heads bleiben Voraussetzung.
