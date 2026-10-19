@@ -2,7 +2,7 @@ name: Claude public relay v2
 
 on:
   push:
-    branches: [agent/ag-relay-canary-002]
+    branches: [agent/ag-relay-canary-003]
     paths:
       - 'handoffs/activate/AG-RELAY-PUBLIC-SEC-001.json'
 
