@@ -38,6 +38,7 @@ TOKEN_KEYS = (
     "GH_TOKEN", "GITHUB_TOKEN", "ACTIONS_RUNTIME_TOKEN",
     "ACTIONS_ID_TOKEN_REQUEST_TOKEN", "ACTIONS_CACHE_URL",
 )
+GITHUB_ACTIONS_BOT_ID = "41898282"
 SUSPICIOUS = re.compile(rb"(?:gh[pousr]_[A-Za-z0-9_]{20,}|github_pat_[A-Za-z0-9_]{20,}|sk-ant-[A-Za-z0-9_-]{20,})")
 
 
@@ -97,9 +98,10 @@ def validate_activation(a: dict, parent: str) -> dict:
         raise ValueError("request and handback must differ")
     if not isinstance(a["model"], str) or not a["model"]:
         raise ValueError("model must be explicit")
-    if not isinstance(a["max_turns"], int) or not 1 <= a["max_turns"] <= 64:
+    if isinstance(a["max_turns"], bool) or not isinstance(a["max_turns"], int) or not 1 <= a["max_turns"] <= 64:
         raise ValueError("max_turns outside 1..64")
-    if not isinstance(a["max_budget_usd"], (int, float)) or not 0.05 <= float(a["max_budget_usd"]) <= 25:
+    if (not finite_number(a["max_budget_usd"]) or
+            not 0.05 <= float(a["max_budget_usd"]) <= 25):
         raise ValueError("max_budget_usd outside safety range")
     return a
 
@@ -143,23 +145,34 @@ def post_issue(body: str):
     return api("/issues/2/comments", {"body": body})
 
 
-def marker(task_id: str, source_commit: str, phase: str, run_id: str) -> str:
-    return MARKER_PREFIX + ":".join((task_id, source_commit, phase, run_id)) + " -->"
+def marker(task_id: str, source_commit: str, phase: str,
+           activation_commit: str, run_id: str) -> str:
+    return MARKER_PREFIX + ":".join(
+        (task_id, source_commit, phase, activation_commit, run_id)) + " -->"
 
 
-def trusted_terminal_row(row: object, prefix: str) -> bool:
-    return (isinstance(row, dict) and prefix in str(row.get("body", "")) and
-            str((row.get("user") or {}).get("id")) == "277496791")
+def trusted_terminal_row(row: object, task_id: str, source_commit: str) -> bool:
+    if not isinstance(row, dict) or str((row.get("user") or {}).get("id")) != GITHUB_ACTIONS_BOT_ID:
+        return False
+    body = str(row.get("body", ""))
+    first = body.splitlines()[0] if body else ""
+    pattern = re.compile(
+        r"^" + re.escape(MARKER_PREFIX + task_id + ":" + source_commit + ":RESULT_READY:") +
+        r"([0-9a-f]{40}):([0-9]+) -->$")
+    match = pattern.fullmatch(first)
+    if not match:
+        return False
+    run_id = match.group(2)
+    return f"https://github.com/{REPO}/actions/runs/{run_id}" in body
 
 
 def history_contains_terminal(task_id: str, source_commit: str) -> bool:
-    prefix = MARKER_PREFIX + task_id + ":" + source_commit + ":RESULT_READY:"
     page = 1
     while True:
         rows = api(f"/issues/2/comments?per_page=100&page={page}")
         if not isinstance(rows, list):
             raise RuntimeError("invalid comment history")
-        if any(trusted_terminal_row(row, prefix) for row in rows):
+        if any(trusted_terminal_row(row, task_id, source_commit) for row in rows):
             return True
         if len(rows) < 100:
             return False
@@ -221,7 +234,7 @@ def prepare() -> None:
     (PREPARED / "manifest.json").write_text(json.dumps(manifest(PREPARED), indent=2))
     run_url = f"https://github.com/{REPO}/actions/runs/{os.environ.get('GITHUB_RUN_ID', '')}"
     run_id = str(os.environ.get("GITHUB_RUN_ID", "unknown"))
-    post_issue(marker(a["task_id"], parent, "HOST_RECEIVED", run_id) +
+    post_issue(marker(a["task_id"], parent, "HOST_RECEIVED", head, run_id) +
                f"\n## {a['task_id']} — HOST_RECEIVED\n{run_url}\n"
                "Vorbereitung geprüft; der Claude-Lauf hat keinen GitHub-Schlüssel.")
 
@@ -415,6 +428,32 @@ def finite_number(value: object) -> bool:
     return not isinstance(value, bool) and isinstance(value, (int, float)) and math.isfinite(value)
 
 
+def valid_usage(value: object) -> bool:
+    if isinstance(value, bool):
+        return False
+    if isinstance(value, (int, float)):
+        return finite_number(value) and value >= 0
+    if isinstance(value, str) or value is None:
+        return True
+    if isinstance(value, list):
+        return all(valid_usage(item) for item in value)
+    if isinstance(value, dict):
+        return all(isinstance(key, str) and valid_usage(item) for key, item in value.items())
+    return False
+
+
+def parse_time(value: object) -> dt.datetime:
+    if not isinstance(value, str) or not value:
+        raise RuntimeError("invalid timestamp")
+    try:
+        parsed = dt.datetime.fromisoformat(value)
+    except ValueError as exc:
+        raise RuntimeError("invalid timestamp") from exc
+    if parsed.tzinfo is None:
+        raise RuntimeError("timestamp lacks timezone")
+    return parsed
+
+
 def validate_result(meta: dict, context: dict, result_root: Path) -> None:
     if set(meta) != RESULT_KEYS or meta.get("schema") != "agentarium.relay-result.v2":
         raise RuntimeError("result schema mismatch")
@@ -432,6 +471,11 @@ def validate_result(meta: dict, context: dict, result_root: Path) -> None:
                      "started_at", "stopped_at", "secret_scan")
     if any(not isinstance(meta.get(key), str) or not meta[key] for key in string_fields):
         raise RuntimeError("invalid result string field")
+    if not re.fullmatch(r"[0-9]+", meta["run_id"]):
+        raise RuntimeError("invalid run id")
+    started, stopped = parse_time(meta["started_at"]), parse_time(meta["stopped_at"])
+    if stopped < started:
+        raise RuntimeError("result timestamps reversed")
     if meta.get("elapsed_seconds") is not None and (
             not finite_number(meta["elapsed_seconds"]) or meta["elapsed_seconds"] < 0):
         raise RuntimeError("invalid elapsed_seconds")
@@ -461,6 +505,14 @@ def validate_result(meta: dict, context: dict, result_root: Path) -> None:
             raise RuntimeError("ready handback missing or mismatched")
         if meta.get("secret_scan") != "passed" or meta.get("failure") is not None:
             raise RuntimeError("ready result not clean")
+        if not finite_number(meta.get("elapsed_seconds")) or meta["elapsed_seconds"] < 0:
+            raise RuntimeError("ready result lacks valid elapsed time")
+        if not isinstance(meta.get("session_id"), str) or not meta["session_id"]:
+            raise RuntimeError("ready result lacks session id")
+        if not isinstance(meta.get("usage"), dict) or not valid_usage(meta["usage"]):
+            raise RuntimeError("ready result lacks valid usage")
+        if not finite_number(meta.get("total_cost_usd")) or meta["total_cost_usd"] < 0:
+            raise RuntimeError("ready result lacks valid cost")
     else:
         if meta["changed_paths"] or meta.get("handback_sha256") is not None:
             raise RuntimeError("blocked result carries output")
@@ -482,8 +534,10 @@ def publish() -> None:
         raise RuntimeError("publish metadata secret check failed")
     task_id = meta["task_id"]
     phase_label = "RESULT_READY" if meta["phase"] == "result_ready" else "BLOCKED"
-    body = marker(task_id, meta["source_commit"], phase_label, meta["run_id"])
-    body += f"\n## {task_id} — {phase_label} / STOPPED\n```json\n{serialized}\n```"
+    body = marker(task_id, meta["source_commit"], phase_label,
+                  meta["activation_commit"], meta["run_id"])
+    run_url = f"https://github.com/{REPO}/actions/runs/{meta['run_id']}"
+    body += f"\n## {task_id} — {phase_label} / STOPPED\n{run_url}\n```json\n{serialized}\n```"
     handback = RESULT / "handback.md"
     if meta["phase"] == "result_ready" and handback.exists():
         data = handback.read_bytes()
@@ -503,7 +557,9 @@ def self_test() -> None:
             "model": "sonnet", "max_turns": 8, "max_budget_usd": 5.0}
     validate_activation(dict(good), parent)
     for key, bad in (("source_commit", "b" * 40), ("request", "../secret"),
-                     ("handback", "/tmp/out"), ("max_turns", 0)):
+                     ("handback", "/tmp/out"), ("max_turns", 0),
+                     ("max_turns", True), ("max_budget_usd", True),
+                     ("max_budget_usd", float("nan"))):
         value = dict(good); value[key] = bad
         try:
             validate_activation(value, parent)
@@ -525,7 +581,9 @@ def self_test() -> None:
         (result_root / "handback.md").write_bytes(payload)
         ready = base_metadata(context, "result_ready")
         ready.update(stopped_at=now(), changed_paths=[good["handback"]],
-                     handback_sha256=sha256(payload), secret_scan="passed")
+                     handback_sha256=sha256(payload), secret_scan="passed",
+                     elapsed_seconds=1.25, session_id="session-1",
+                     usage={"input_tokens": 10, "output_tokens": 5}, total_cost_usd=0.01)
         validate_result(ready, context, result_root)
         wrong = dict(ready); wrong["source_commit"] = "d" * 40
         try:
@@ -545,11 +603,18 @@ def self_test() -> None:
         blocked_meta.update(stopped_at=now(), failure="RUN_JOB_NO_RESULT", secret_scan="blocked")
         validate_result(blocked_meta, context, result_root)
     assert secret_hit(json.dumps({"session_id": "sk-ant-ABCDEFGHIJKLMNOPQRSTUVWXYZ012345"}).encode())
-    terminal_prefix = MARKER_PREFIX + good["task_id"] + ":" + parent + ":RESULT_READY:"
-    assert trusted_terminal_row({"body": terminal_prefix + "42 -->", "user": {"id": 277496791}},
-                                terminal_prefix)
-    assert not trusted_terminal_row({"body": terminal_prefix + "42 -->", "user": {"id": 999}},
-                                    terminal_prefix)
+    terminal = marker(good["task_id"], parent, "RESULT_READY", "b" * 40, "42")
+    terminal_body = terminal + f"\nhttps://github.com/{REPO}/actions/runs/42"
+    assert trusted_terminal_row({"body": terminal_body, "user": {"id": 41898282}},
+                                good["task_id"], parent)
+    assert not trusted_terminal_row({"body": terminal_body, "user": {"id": 277496791}},
+                                    good["task_id"], parent)
+    assert not trusted_terminal_row({"body": terminal_body.replace("runs/42", "runs/43"),
+                                     "user": {"id": 41898282}}, good["task_id"], parent)
+    assert valid_usage({"input_tokens": 1, "cache": [0, "ephemeral"]})
+    assert not valid_usage({"input_tokens": float("nan")})
+    assert not valid_usage({"input_tokens": -1})
+    assert not valid_usage({"input_tokens": True})
     with tempfile.TemporaryDirectory(prefix="relay-v2-test-") as tmp:
         root = Path(tmp); trusted = root / "input.txt"; trusted.write_text("trusted")
         out = root / "handoffs/result.md"; out.parent.mkdir(); out.write_text("empty")
@@ -562,7 +627,7 @@ def self_test() -> None:
                 pass
             else:
                 raise AssertionError("write isolation negative test failed")
-    print("SELF_TEST_OK: 21 security checks; no model/API call")
+    print("SELF_TEST_OK: 29 security checks; no model/API call")
 
 
 def main() -> None:
