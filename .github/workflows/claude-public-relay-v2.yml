@@ -1,0 +1,92 @@
+name: Claude public relay v2
+
+on:
+  push:
+    branches: [agent/ag-relay-public-sec-001]
+    paths:
+      - 'handoffs/activate/AG-RELAY-PUBLIC-SEC-001.json'
+
+concurrency:
+  group: ag-relay-public-sec-001
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    if: github.repository == 'pahlborn/agentarium' && github.actor_id == '277496791' && github.event_name == 'push'
+    permissions:
+      contents: read
+      issues: write
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Free relay security tests
+        run: |
+          python3 -m py_compile relay/claude_public_relay_v2.py
+          python3 relay/claude_public_relay_v2.py self-test
+      - name: Prepare immutable least-privilege bundle
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 relay/claude_public_relay_v2.py prepare
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: relay-prepared-${{ github.run_id }}
+          path: relay-prepared/
+          if-no-files-found: error
+          retention-days: 2
+
+  run:
+    needs: prepare
+    permissions:
+      actions: read
+      contents: none
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: relay-prepared-${{ github.run_id }}
+          path: relay-prepared/
+      - name: Install pinned Claude runtime
+        run: npm install --global @anthropic-ai/claude-code@2.1.302
+      - name: Run isolated Claude worker
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python3 relay-prepared/relay_driver.py run
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: relay-result-${{ github.run_id }}
+          path: relay-result/
+          if-no-files-found: error
+          retention-days: 30
+
+  publish:
+    if: always() && needs.prepare.result == 'success'
+    needs: [prepare, run]
+    permissions:
+      actions: read
+      issues: write
+      contents: none
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: relay-prepared-${{ github.run_id }}
+          path: relay-prepared/
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        id: result_download
+        continue-on-error: true
+        with:
+          name: relay-result-${{ github.run_id }}
+          path: relay-result/
+      - name: Materialize fixed BLOCKED fallback when run produced no result
+        run: python3 relay-prepared/relay_driver.py fallback
+      - name: Publish sanitized result only
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 relay-prepared/relay_driver.py publish
