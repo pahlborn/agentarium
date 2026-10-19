@@ -97,3 +97,20 @@ nichtendliche und negative Zahlen werden verworfen. Dieselbe Bool-/NaN-Lücke
 ist auch für `max_turns` und `max_budget_usd` der Aktivierung geschlossen.
 
 Kostenlose Rückprüfung: `SELF_TEST_OK: 29 security checks; no model/API call`.
+
+## Korrektur nach Argus V4
+
+Die vierte Gegenprobe zeigte zwei verbleibende Paket- und Bindungslücken. Die
+Actions-URL wird nun als vollständige eigene Kommentarzeile verglichen; eine
+Lauf-ID `42` passt daher nicht mehr irrtümlich auf `/actions/runs/420`.
+
+Ein `BLOCKED`-Ergebnis ist nur noch gültig, wenn `BLOCKED.txt` als reguläre
+Datei vorhanden und `handback.md` vollständig abwesend ist. Ein liegen
+gebliebener Handback macht das Teilpaket ungültig, worauf `ensure_fallback()`
+alle Dateien entfernt und den festen neutralen Fallback neu erzeugt. Für ein
+Erfolgsergebnis muss die Sitzungskennung nach Entfernen von Leerraum nichtleer
+sein.
+
+Kostenlose Rückprüfung: Python-Syntax, `git diff --check` und
+`SELF_TEST_OK: 32 security checks; no model/API call`. Ein echter Actions- oder
+Claude-Lauf wurde weiterhin nicht gestartet.
