@@ -79,3 +79,21 @@ müssen endlich, nichtnegativ und echte Zahlen statt boolescher Werte sein.
 Kostenlose Rückprüfung: `SELF_TEST_OK: 21 security checks; no model/API call`
 sowie eine separate Paketprobe `FALLBACK_PACKAGE_TEST_OK`. Delta-Review und
 Sentinel-Nachprüfung des neuen exakten Heads bleiben Voraussetzung.
+
+## Korrektur nach Argus V3
+
+Der dritte Review zeigte, dass Workflow-Kommentare nicht unter Peters
+Benutzer-ID, sondern als `github-actions[bot]` (ID `41898282`) erscheinen. Der
+Vertrauensanker wurde auf diesen tatsächlichen Publisher korrigiert. Ein
+terminaler Marker muss nun die vollständige erste Zeile mit Aufgaben-ID,
+Quellcommit, Phase, Aktivierungscommit und numerischer Lauf-ID bilden; dieselbe
+Lauf-ID muss zusätzlich in der Actions-URL des Kommentars stehen. Fremde oder
+nur teilweise passende Kommentare werden ignoriert.
+
+Für `RESULT_READY` sind jetzt außerdem eine parsebare chronologische Start-/
+Stoppzeit, endliche nichtnegative Laufdauer und Kosten, eine nichtleere
+Sitzungs-ID sowie rekursiv geprüfte Nutzungsdaten Pflicht. Boolesche,
+nichtendliche und negative Zahlen werden verworfen. Dieselbe Bool-/NaN-Lücke
+ist auch für `max_turns` und `max_budget_usd` der Aktivierung geschlossen.
+
+Kostenlose Rückprüfung: `SELF_TEST_OK: 29 security checks; no model/API call`.
