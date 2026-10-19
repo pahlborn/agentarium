@@ -2,12 +2,14 @@ name: Claude public relay v2
 
 on:
   push:
-    branches: [agent/ag-relay-public-sec-001]
+    branches:
+      - 'agent/ag-relay-task-*'
+      - '!agent/ag-relay-task-'
     paths:
       - 'handoffs/activate/AG-RELAY-PUBLIC-SEC-001.json'
 
 concurrency:
-  group: ag-relay-public-sec-001
+  group: ag-relay-public-v2
   cancel-in-progress: false
 
 jobs:
@@ -35,6 +37,7 @@ jobs:
         with:
           name: relay-prepared-${{ github.run_id }}
           path: relay-prepared/
+          include-hidden-files: true
           if-no-files-found: error
           retention-days: 2
 
