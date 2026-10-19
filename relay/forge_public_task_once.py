@@ -15,11 +15,11 @@ from pathlib import Path
 REPO = "pahlborn/agentarium"
 API = "https://api.github.com/repos/" + REPO
 BRANCH = "agent/ag-relay-public-001"
-TASK = "AG-RELAY-PUBLIC-001-FORGE-V1"
-ACTIVATION = "handoffs/AG-RELAY-PUBLIC-001-activate.json"
-REQUEST = "handoffs/AG-RELAY-PUBLIC-001-forge-request-v1.json"
-HANDBACK = "handoffs/AG-RELAY-PUBLIC-001-forge-handback-v1.md"
-MARKER = "<!-- AG_RELAY_PUBLIC_001_FORGE_V1 -->"
+TASK = "AG-RELAY-PUBLIC-002-FORGE-REVIEW-V1"
+ACTIVATION = "handoffs/AG-RELAY-PUBLIC-002-activate.json"
+REQUEST = "handoffs/AG-RELAY-PUBLIC-002-forge-request-v1.json"
+HANDBACK = "handoffs/AG-RELAY-PUBLIC-002-forge-handback-v1.md"
+MARKER = "<!-- AG_RELAY_PUBLIC_002_FORGE_REVIEW_V1 -->"
 PROFILE_SHA = "38d9747018bd4bfc5299a2dd9aeded9659337e77"
 OUT = Path("forge-public-output").resolve()
 
@@ -217,6 +217,14 @@ def run_task():
                 ".github/workflows/forge-public-run-v1.yml",
                 "relay/forge_public_task_once.py", REQUEST,
             ]
+            packet["runtime_context"] = {
+                "repository": REPO,
+                "source_commit": parent,
+                "readable_paths": paths,
+                "writable_paths": [HANDBACK],
+                "effective_tools": ["Read", "Edit"],
+                "note": "No Glob/Grep tools are available; use these exact paths.",
+            }
             before = {}
             for name in paths:
                 data = src(parent, name)
