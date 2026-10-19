@@ -34,3 +34,27 @@ schreiben. Nur ein exakt benannter, vorab angelegter Handback ist beschreibbar.
 
 Der Aktivierungspfad ist absichtlich noch nicht vorhanden:
 `handoffs/activate/AG-RELAY-PUBLIC-SEC-001.json`.
+
+## Korrektur nach Argus V1
+
+Argus meldete am Head `558eb9d` einen BLOCKER und einen MAJOR. Der Kandidat
+wurde daraufhin ohne Aktivierung und ohne Modellaufruf nachgebessert:
+
+- Vorprüfungen, Startfehler und Modelllauf liegen nun gemeinsam im fail-closed
+  Ergebnisweg. Fehlt nach Abbruch oder Timeout ein verwertbares Resultat,
+  erzeugt der getrennte Publisher aus dem unveränderten Prepare-Kontext einen
+  festen `BLOCKED`-Datensatz.
+- Der Result-Download ist fehlertolerant; erst danach wird der feste Fallback
+  materialisiert. Ein fehlendes Artefakt verhindert damit nicht mehr die
+  sichtbare Abschlussmeldung.
+- Dedupliziert wird auf `(task_id, source_commit, RESULT_READY)`. Ein bloßes
+  `HOST_RECEIVED` sperrt eine berechtigte Wiederholung nach `BLOCKED` nicht.
+- Das Resultat besitzt ein striktes Schema und ist an Aufgabe, Quellcommit,
+  Aktivierungscommit und Lauf-ID gebunden. Finale Metadaten, Handback und der
+  vollständig serialisierte Kommentar werden vor Veröffentlichung erneut auf
+  Secret-Muster geprüft.
+- Verdächtige Metadaten werden nicht durchgereicht, sondern in einen neutralen
+  `BLOCKED`-Datensatz ohne Sitzung, Nutzung, Kosten oder Handback verwandelt.
+
+Kostenlose lokale Rückprüfung: Python-Syntax, `git diff --check` und
+`SELF_TEST_OK: 17 security checks; no model/API call`.
