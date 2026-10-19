@@ -163,7 +163,8 @@ def trusted_terminal_row(row: object, task_id: str, source_commit: str) -> bool:
     if not match:
         return False
     run_id = match.group(2)
-    return f"https://github.com/{REPO}/actions/runs/{run_id}" in body
+    expected_run_url = f"https://github.com/{REPO}/actions/runs/{run_id}"
+    return expected_run_url in body.splitlines()[1:]
 
 
 def history_contains_terminal(task_id: str, source_commit: str) -> bool:
@@ -507,13 +508,15 @@ def validate_result(meta: dict, context: dict, result_root: Path) -> None:
             raise RuntimeError("ready result not clean")
         if not finite_number(meta.get("elapsed_seconds")) or meta["elapsed_seconds"] < 0:
             raise RuntimeError("ready result lacks valid elapsed time")
-        if not isinstance(meta.get("session_id"), str) or not meta["session_id"]:
+        if not isinstance(meta.get("session_id"), str) or not meta["session_id"].strip():
             raise RuntimeError("ready result lacks session id")
         if not isinstance(meta.get("usage"), dict) or not valid_usage(meta["usage"]):
             raise RuntimeError("ready result lacks valid usage")
         if not finite_number(meta.get("total_cost_usd")) or meta["total_cost_usd"] < 0:
             raise RuntimeError("ready result lacks valid cost")
     else:
+        if (result_root / "handback.md").exists() or not (result_root / "BLOCKED.txt").is_file():
+            raise RuntimeError("blocked result package inconsistent")
         if meta["changed_paths"] or meta.get("handback_sha256") is not None:
             raise RuntimeError("blocked result carries output")
         if not isinstance(meta.get("failure"), str) or not meta["failure"]:
@@ -601,7 +604,24 @@ def self_test() -> None:
             raise AssertionError("missing handback negative test failed")
         blocked_meta = base_metadata(context, "blocked")
         blocked_meta.update(stopped_at=now(), failure="RUN_JOB_NO_RESULT", secret_scan="blocked")
+        (result_root / "BLOCKED.txt").write_text("Run job produced no publishable result.\n")
         validate_result(blocked_meta, context, result_root)
+        (result_root / "handback.md").write_text("stale output")
+        try:
+            validate_result(blocked_meta, context, result_root)
+        except RuntimeError:
+            pass
+        else:
+            raise AssertionError("blocked result with handback negative test failed")
+        (result_root / "handback.md").unlink()
+        blank_session = dict(ready); blank_session["session_id"] = "   "
+        (result_root / "handback.md").write_bytes(payload)
+        try:
+            validate_result(blank_session, context, result_root)
+        except RuntimeError:
+            pass
+        else:
+            raise AssertionError("blank session negative test failed")
     assert secret_hit(json.dumps({"session_id": "sk-ant-ABCDEFGHIJKLMNOPQRSTUVWXYZ012345"}).encode())
     terminal = marker(good["task_id"], parent, "RESULT_READY", "b" * 40, "42")
     terminal_body = terminal + f"\nhttps://github.com/{REPO}/actions/runs/42"
@@ -610,6 +630,8 @@ def self_test() -> None:
     assert not trusted_terminal_row({"body": terminal_body, "user": {"id": 277496791}},
                                     good["task_id"], parent)
     assert not trusted_terminal_row({"body": terminal_body.replace("runs/42", "runs/43"),
+                                     "user": {"id": 41898282}}, good["task_id"], parent)
+    assert not trusted_terminal_row({"body": terminal_body.replace("runs/42", "runs/420"),
                                      "user": {"id": 41898282}}, good["task_id"], parent)
     assert valid_usage({"input_tokens": 1, "cache": [0, "ephemeral"]})
     assert not valid_usage({"input_tokens": float("nan")})
@@ -627,7 +649,7 @@ def self_test() -> None:
                 pass
             else:
                 raise AssertionError("write isolation negative test failed")
-    print("SELF_TEST_OK: 29 security checks; no model/API call")
+    print("SELF_TEST_OK: 32 security checks; no model/API call")
 
 
 def main() -> None:
