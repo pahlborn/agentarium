@@ -90,6 +90,15 @@ def self_test():
         raise AssertionError("source-commit negative test failed")
     validate_request({"schema": "agentarium.handoff.v0", "task_id": TASK,
                       "monitor_run_id": "test", "allowed_paths": [HANDBACK]})
+    with tempfile.TemporaryDirectory(prefix="ag-relay-permissions-") as tmp:
+        work = Path(tmp)
+        trusted = work / REQUEST
+        trusted.parent.mkdir(parents=True, exist_ok=True)
+        trusted.write_text("trusted input")
+        writable = work / HANDBACK
+        writable.write_text("# Forge handback\n")
+        make_read_only(work, writable)
+        assert_write_isolation(work, writable, trusted)
     print("SELF_TEST_OK: no model or paid API used")
 
 
@@ -120,8 +129,28 @@ def make_read_only(work, writable_file):
             path.chmod(stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH)
         elif path.is_dir():
             path.chmod(stat.S_IRUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IXOTH)
-    writable_file.parent.chmod(stat.S_IRWXU | stat.S_IRGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IXOTH)
     writable_file.chmod(stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH)
+
+
+def assert_write_isolation(work, writable_file, trusted_file):
+    """Prove before the paid run that only the existing handback is writable."""
+    original = trusted_file.read_bytes()
+    writable_file.write_text("# Forge handback\n\nwrite probe\n")
+    forbidden = [
+        ("replace trusted input", lambda: trusted_file.write_text("replaced")),
+        ("delete trusted input", trusted_file.unlink),
+        ("create sibling", lambda: (writable_file.parent / "forbidden.md").write_text("x")),
+        ("replace handback path", writable_file.unlink),
+        ("create top-level file", lambda: (work / "forbidden.txt").write_text("x")),
+    ]
+    for label, operation in forbidden:
+        try:
+            operation()
+        except PermissionError:
+            continue
+        raise RuntimeError("Write-isolation negative test failed: " + label)
+    if trusted_file.read_bytes() != original:
+        raise RuntimeError("Write-isolation test altered trusted input")
 
 
 def run_task():
@@ -195,6 +224,7 @@ def run_task():
             writable.write_text("# Forge handback\n")
             before[HANDBACK] = writable.read_bytes()
             make_read_only(work, writable)
+            assert_write_isolation(work, writable, work / REQUEST)
 
             config = {"coding-agent": {
                 "description": "Forge architecture and feasibility review",
