@@ -104,13 +104,14 @@ Die vierte Gegenprobe zeigte zwei verbleibende Paket- und Bindungslücken. Die
 Actions-URL wird nun als vollständige eigene Kommentarzeile verglichen; eine
 Lauf-ID `42` passt daher nicht mehr irrtümlich auf `/actions/runs/420`.
 
-Ein `BLOCKED`-Ergebnis ist nur noch gültig, wenn `BLOCKED.txt` als reguläre
-Datei vorhanden und `handback.md` vollständig abwesend ist. Ein liegen
-gebliebener Handback macht das Teilpaket ungültig, worauf `ensure_fallback()`
-alle Dateien entfernt und den festen neutralen Fallback neu erzeugt. Für ein
+Ein `BLOCKED`-Ergebnis ist nur noch gültig, wenn sein Paket exakt aus
+`metadata.json` und der regulären Datei `BLOCKED.txt` besteht. Ein liegen
+gebliebener Handback, Rohstrom, Fehlerstrom oder eine sonstige Ausgabedatei
+macht das Teilpaket ungültig, worauf `ensure_fallback()` das Ergebnisverzeichnis
+vollständig ersetzt und den festen neutralen Fallback neu erzeugt. Für ein
 Erfolgsergebnis muss die Sitzungskennung nach Entfernen von Leerraum nichtleer
 sein.
 
 Kostenlose Rückprüfung: Python-Syntax, `git diff --check` und
-`SELF_TEST_OK: 32 security checks; no model/API call`. Ein echter Actions- oder
+`SELF_TEST_OK: 34 security checks; no model/API call`. Ein echter Actions- oder
 Claude-Lauf wurde weiterhin nicht gestartet.
