@@ -1,0 +1,26 @@
+{
+  "schema": "agentarium.handoff.v0",
+  "task_id": "AG-RELAY-CANARY-003",
+  "role": "Forge",
+  "technical_agent": "coding-agent",
+  "goal": "Führe den minimalen realen Canary des sicheren öffentlichen Claude-Relais aus und liefere einen kurzen, überprüfbaren Handback.",
+  "readable_paths": [
+    "AGENTS.md",
+    "CLAUDE.md",
+    ".claude/agents/coding-agent.md",
+    "handoffs/AG-RELAY-CANARY-003-forge-request-v1.json",
+    ".github/workflows/claude-public-relay-v2.yml"
+  ],
+  "allowed_paths": [
+    "handoffs/AG-RELAY-CANARY-003-forge-result-v1.md"
+  ],
+  "instructions": [
+    "Lies die freigegebenen Dateien tatsächlich.",
+    "Schreibe ausschließlich in den erlaubten Handback.",
+    "Nenne im Handback die drei Workflow-Jobs in Reihenfolge.",
+    "Bestätige aus dem gelesenen Workflow, ob der run-Job einen Checkout-Schritt enthält und ob dem Claude-Unterprozess ein GitHub-Token als Umgebungsvariable übergeben wird.",
+    "Nenne als Evidenz die gelesenen Dateipfade; keine externen Quellen und keine weiteren Änderungen."
+  ],
+  "expected_result": "Kurzer Markdown-Handback mit Status, beobachteten Fakten, Evidenzpfaden und STOPPED.",
+  "stop_condition": "Handback geschrieben oder ein exakter Blocker dokumentiert."
+}
