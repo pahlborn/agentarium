@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - 'agent/ag-relay-task-*'
+      - '!agent/ag-relay-task-'
     paths:
       - 'handoffs/activate/AG-RELAY-PUBLIC-SEC-001.json'
 
