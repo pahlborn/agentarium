@@ -255,6 +255,49 @@ function vergleichsfassung() {
         (await s.evaluate(k => localStorage.getItem(k), SCHLUESSEL)) === null ? 'ja' : 'nein', 'ja');
   zeile('Knopf verschwindet', await s.$eval('#agPlatz', e => e.hidden), true);
 
+  console.log('\nF — SICHTBAR OHNE HOVER (der Fehler vom 19.10.)');
+  console.log('    Peter: „Ich kann nicht entdecken wo ich anfassen soll."');
+  console.log('    Ein Finger hat kein :hover. Also messen, waehrend der');
+  console.log('    Zeiger WOANDERS steht — und nicht auf dem Griff.\n');
+  /* Der Zeiger muss weg von jedem Griff, sonst messe ich wieder den
+     aufgeleuchteten Zustand, den es auf dem iPad nicht gibt. Mitte des
+     Feldes, dort liegt kein Block. */
+  await s.mouse.move(Math.round(1194/2), Math.round(834/2));
+  await s.waitForTimeout(600);
+  const sicht = await s.evaluate(() => {
+    const g = document.querySelector('#agGriffe .agGriff:not([hidden])');
+    if (!g) return { da: 0 };
+    const cs = getComputedStyle(g);
+    const schicht = getComputedStyle(document.getElementById('agGriffe'));
+    const k = g.getBoundingClientRect();
+    return { da: 1,
+             deck: Math.round(parseFloat(cs.opacity) * 100),
+             schichtDeck: Math.round(parseFloat(schicht.opacity) * 100),
+             rand: cs.borderTopWidth,
+             grund: cs.backgroundColor,
+             kante: Math.round(k.width),
+             unterZeiger: document.elementFromPoint(597, 417) === g };
+  });
+  zeile('ein Griff ist da', sicht.da ? 'ja' : 'nein', 'ja');
+  zeile('Zeiger liegt NICHT auf dem Griff', sicht.unterZeiger === false ? 'ja' : 'nein', 'ja');
+  zeile('Deckkraft des Griffs (≥ 90 %)', sicht.deck >= 90 ? 'ja, ' + sicht.deck + '%' : 'nein, nur ' + sicht.deck + '%', 'ja, ' + sicht.deck + '%');
+  zeile('Deckkraft der Schicht (≥ 90 %)', sicht.schichtDeck >= 90 ? 'ja, ' + sicht.schichtDeck + '%' : 'nein, nur ' + sicht.schichtDeck + '%', 'ja, ' + sicht.schichtDeck + '%');
+  zeile('trägt einen Rand', sicht.rand !== '0px' ? 'ja, ' + sicht.rand : 'nein', 'ja, ' + sicht.rand);
+  zeile('trägt eine Platte, nicht nur Punkte',
+        /rgba?\(/.test(sicht.grund) && !/, *0\)$/.test(sicht.grund) ? 'ja' : 'nein, ' + sicht.grund, 'ja');
+  zeile('Kantenlänge (≥ 28 px)', sicht.kante >= 28 ? 'ja, ' + sicht.kante : 'nein, nur ' + sicht.kante, 'ja, ' + sicht.kante);
+  /* Und die Kehrseite: nach langer Ruhe darf er verblassen -- der Monitor
+     soll das Feld zeigen, nicht seine Bedienung. 12 s plus Luft. */
+  await s.waitForTimeout(13000);
+  const geruht = await s.evaluate(() =>
+    document.getElementById('agGriffe').classList.contains('leise'));
+  zeile('verblasst nach Ruhe', geruht, true);
+  await s.mouse.move(600, 700);
+  await s.waitForTimeout(500);
+  const geweckt = await s.evaluate(() =>
+    !document.getElementById('agGriffe').classList.contains('leise'));
+  zeile('eine Berührung weckt ihn wieder', geweckt, true);
+
   console.log('\nE — Bedienen geht weiter');
   console.log('    erwartet: ein Griff nimmt dem Block nicht seinen Knopf\n');
   await s.mouse.move(600, 700);
