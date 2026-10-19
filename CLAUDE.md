@@ -131,6 +131,7 @@ Diese Liste wächst. Wer ein neues findet, schreibt es dazu.
 | Seitengröße einer API | genau `perPage` Treffer | Vollständigkeit **nicht belegt**. Blättern bis zur kürzeren Seite oder zum Cursor-Ende |
 | ein Feldfilter | „keine Treffer" | keine Treffer **dieser Form**. Andere Formen prüfen |
 | ein Abonnement auf einen Pull Request | „ich werde benachrichtigt" | nur für **diesen** Pull Request, und es **endet beim Merge**. Ein Kommentar auf einem geschlossenen Pull Request erreicht mich auf keinem Weg von selbst (19.10., Argus auf #24). Was ich nicht abonniert habe, muss ich abrufen |
+| ein Browsertest mit `mouse.*` | „der Griff ist sichtbar und greifbar" | gemessen im **Hover**-Zustand, den ein Finger nie erzeugt. Fassung 53 zeigte die Griffe bei 28 % Deckkraft und hob sie erst bei `:hover` — auf dem iPad unsichtbar, im Prüflauf jedes Mal grün (19.10., Peter: „Ich kann nicht entdecken wo ich anfassen soll."). Eine Bedienhilfe wird gemessen, **während der Zeiger woanders steht**, und das wird im Prüflauf nachgewiesen, nicht angenommen |
 | ein erfolgreicher Arbeitslauf | `success` | sagt nichts über den **einzelnen Job**: ein Lauf kann grün sein, während nur der entscheidende Job übersprungen wurde. Jobstatus und Schritte lesen und den Job benennen — die `if`-Bedingung allein belegt die Ausführung **nicht** |
 
 Belege: [`governance/measurement-environment-finding-2026-10-17.md`](governance/measurement-environment-finding-2026-10-17.md),
