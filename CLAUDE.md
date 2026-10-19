@@ -50,6 +50,16 @@ dieselben Pull Requests, manchmal Minuten auseinander. Ein `git fetch` und
 zwei Zeilen Antwort kosten nichts; eine zweite Fassung derselben Arbeit
 kostet viel.
 
+**Und der Zeitpunkt dazu, denn eine Regel ohne Zeitpunkt greift nicht:**
+*Vor dem Öffnen eines Pull Requests und vor jeder Veröffentlichung die
+Kommentarlisten aller Pull Requests abrufen, in denen eine Frage von mir
+offen ist — auch der geschlossenen.* Am 19.10. hat Argus sein Lesereview zu
+#24 um 10:29Z abgelegt; ich habe um 10:40Z #29 eröffnet, ohne nachzusehen,
+und Peter musste mich darauf bringen. Die Regel darüber stand bereits und
+hat nicht geholfen, weil sie keinen Augenblick nannte. Zwei Abrufe hätten
+genügt. Und es ist der Augenblick, in dem ein Review am meisten wert ist:
+danach ist es veröffentlicht.
+
 **Geht etwas daneben, wird der andere darauf aufmerksam gemacht.** Von Peter
 ausdrücklich gewünscht (18.10.): „bitte macht euch gegenseitig aufmerksam,
 sollte mal etwas daneben gehen." Das gilt in beide Richtungen. Wer wartet,
@@ -120,6 +130,7 @@ Diese Liste wächst. Wer ein neues findet, schreibt es dazu.
 | `updated_at` eines Pull Requests | ein Zeitstempel | wann **zuletzt** etwas geschah — nicht, ob geantwortet wurde. Kommentarliste abrufen |
 | Seitengröße einer API | genau `perPage` Treffer | Vollständigkeit **nicht belegt**. Blättern bis zur kürzeren Seite oder zum Cursor-Ende |
 | ein Feldfilter | „keine Treffer" | keine Treffer **dieser Form**. Andere Formen prüfen |
+| ein Abonnement auf einen Pull Request | „ich werde benachrichtigt" | nur für **diesen** Pull Request, und es **endet beim Merge**. Ein Kommentar auf einem geschlossenen Pull Request erreicht mich auf keinem Weg von selbst (19.10., Argus auf #24). Was ich nicht abonniert habe, muss ich abrufen |
 | ein erfolgreicher Arbeitslauf | `success` | sagt nichts über den **einzelnen Job**: ein Lauf kann grün sein, während nur der entscheidende Job übersprungen wurde. Jobstatus und Schritte lesen und den Job benennen — die `if`-Bedingung allein belegt die Ausführung **nicht** |
 
 Belege: [`governance/measurement-environment-finding-2026-10-17.md`](governance/measurement-environment-finding-2026-10-17.md),
