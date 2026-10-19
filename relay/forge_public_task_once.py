@@ -136,6 +136,7 @@ def make_read_only(work, writable_file):
 def assert_write_isolation(work, writable_file, trusted_file):
     """Prove before the paid run that only the existing handback is writable."""
     original = trusted_file.read_bytes()
+    original_handback = writable_file.read_bytes()
     writable_file.write_text("# Forge handback\n\nwrite probe\n")
     forbidden = [
         ("replace trusted input", lambda: trusted_file.write_text("replaced")),
@@ -152,6 +153,9 @@ def assert_write_isolation(work, writable_file, trusted_file):
         raise RuntimeError("Write-isolation negative test failed: " + label)
     if trusted_file.read_bytes() != original:
         raise RuntimeError("Write-isolation test altered trusted input")
+    writable_file.write_bytes(original_handback)
+    if writable_file.read_bytes() != original_handback:
+        raise RuntimeError("Write-isolation test did not restore handback")
 
 
 def run_task():
@@ -226,6 +230,8 @@ def run_task():
             before[HANDBACK] = writable.read_bytes()
             make_read_only(work, writable)
             assert_write_isolation(work, writable, work / REQUEST)
+            if writable.read_bytes() != before[HANDBACK]:
+                raise RuntimeError("Handback changed before Forge execution")
 
             config = {"coding-agent": {
                 "description": "Forge architecture and feasibility review",
