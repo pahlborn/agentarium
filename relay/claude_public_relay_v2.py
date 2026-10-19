@@ -142,17 +142,18 @@ def post_issue(body: str):
     return api("/issues/2/comments", {"body": body})
 
 
-def marker(task_id: str) -> str:
-    return MARKER_PREFIX + task_id + " -->"
+def marker(task_id: str, source_commit: str, phase: str, run_id: str) -> str:
+    return MARKER_PREFIX + ":".join((task_id, source_commit, phase, run_id)) + " -->"
 
 
-def history_contains(task_id: str) -> bool:
+def history_contains_terminal(task_id: str, source_commit: str) -> bool:
+    prefix = MARKER_PREFIX + task_id + ":" + source_commit + ":RESULT_READY:"
     page = 1
     while True:
         rows = api(f"/issues/2/comments?per_page=100&page={page}")
         if not isinstance(rows, list):
             raise RuntimeError("invalid comment history")
-        if any(marker(task_id) in str(row.get("body", "")) for row in rows):
+        if any(prefix in str(row.get("body", "")) for row in rows):
             return True
         if len(rows) < 100:
             return False
@@ -183,8 +184,8 @@ def prepare() -> None:
     if changes != ["A\t" + ACTIVATION]:
         raise RuntimeError("activation commit must add only " + ACTIVATION)
     a = validate_activation(load_json_bytes(source(head, ACTIVATION), "activation"), parent)
-    if history_contains(a["task_id"]):
-        raise RuntimeError("task already received")
+    if history_contains_terminal(a["task_id"], parent):
+        raise RuntimeError("task/source already completed")
     packet = load_json_bytes(source(parent, a["request"]), "request")
     paths = validate_request(packet, a)
 
@@ -213,7 +214,9 @@ def prepare() -> None:
     shutil.copy2(Path(__file__).resolve(), PREPARED / "relay_driver.py")
     (PREPARED / "manifest.json").write_text(json.dumps(manifest(PREPARED), indent=2))
     run_url = f"https://github.com/{REPO}/actions/runs/{os.environ.get('GITHUB_RUN_ID', '')}"
-    post_issue(marker(a["task_id"]) + f"\n## {a['task_id']} — HOST_RECEIVED\n{run_url}\n"
+    run_id = str(os.environ.get("GITHUB_RUN_ID", "unknown"))
+    post_issue(marker(a["task_id"], parent, "HOST_RECEIVED", run_id) +
+               f"\n## {a['task_id']} — HOST_RECEIVED\n{run_url}\n"
                "Vorbereitung geprüft; der Claude-Lauf hat keinen GitHub-Schlüssel.")
 
 
@@ -253,33 +256,69 @@ def secret_hit(data: bytes, exact: bytes | None = None) -> bool:
     return bool((exact and exact in data) or SUSPICIOUS.search(data))
 
 
-def run_model() -> None:
-    verify_manifest(PREPARED)
-    context = json.loads((PREPARED / "control/context.json").read_text())
+RESULT_KEYS = {
+    "schema", "task_id", "source_commit", "activation_commit", "run_id",
+    "phase", "started_at", "stopped_at", "elapsed_seconds", "session_id",
+    "usage", "total_cost_usd", "failure", "changed_paths", "secret_scan",
+    "handback_sha256",
+}
+
+
+def base_metadata(context: dict, phase: str = "running") -> dict:
     a = context["activation"]
+    return {
+        "schema": "agentarium.relay-result.v2",
+        "task_id": a["task_id"],
+        "source_commit": context["source_commit"],
+        "activation_commit": context["head"],
+        "run_id": str(context.get("run_id") or "unknown"),
+        "phase": phase,
+        "started_at": now(),
+        "stopped_at": None,
+        "elapsed_seconds": None,
+        "session_id": None,
+        "usage": None,
+        "total_cost_usd": None,
+        "failure": None,
+        "changed_paths": [],
+        "secret_scan": "pending",
+        "handback_sha256": None,
+    }
+
+
+def write_scanned_metadata(meta: dict, exact: bytes | None = None) -> None:
+    encoded = json.dumps(meta, indent=2, ensure_ascii=False).encode()
+    if secret_hit(encoded, exact):
+        raise RuntimeError("secret scan blocked metadata")
+    (RESULT / "metadata.json").write_bytes(encoded)
+
+
+def run_model() -> None:
     if RESULT.exists():
         shutil.rmtree(RESULT)
     RESULT.mkdir()
-    meta = {"task_id": a["task_id"], "phase": "running", "started_at": now(),
-            "session_id": None, "usage": None, "total_cost_usd": None,
-            "failure": None, "changed_paths": [], "secret_scan": "pending"}
-    (RESULT / "metadata.json").write_text(json.dumps(meta, indent=2))
-    work = PREPARED / "workspace"
-    handback = work / a["handback"]
-    before = {str(p.relative_to(work)): p.read_bytes() for p in work.rglob("*") if p.is_file()}
-    make_read_only(work, handback)
-    command = claude_command(context, PREPARED / "control/settings.json")
-    if "Read" in command[command.index("--allowedTools") + 1].split(","):
-        raise RuntimeError("bare Read permission forbidden")
     api_key = os.environ.get("ANTHROPIC_API_KEY", "").encode()
-    if not api_key:
-        raise RuntimeError("Missing ANTHROPIC_API_KEY")
     start = time.monotonic()
     raw_tmp = RESULT / "stream.pending"
     err_tmp = RESULT / "stderr.pending"
     result = None
     blocked = None
+    meta = None
     try:
+        verify_manifest(PREPARED)
+        context = json.loads((PREPARED / "control/context.json").read_text())
+        a = context["activation"]
+        meta = base_metadata(context)
+        write_scanned_metadata(meta, api_key or None)
+        work = PREPARED / "workspace"
+        handback = work / a["handback"]
+        before = {str(p.relative_to(work)): p.read_bytes() for p in work.rglob("*") if p.is_file()}
+        make_read_only(work, handback)
+        command = claude_command(context, PREPARED / "control/settings.json")
+        if "Read" in command[command.index("--allowedTools") + 1].split(","):
+            raise RuntimeError("bare Read permission forbidden")
+        if not api_key:
+            raise RuntimeError("Missing ANTHROPIC_API_KEY")
         with raw_tmp.open("w") as raw, err_tmp.open("w") as errors:
             proc = subprocess.Popen(command, cwd=work, env=child_environment(), stdout=subprocess.PIPE,
                                     stderr=errors, text=True, bufsize=1)
@@ -312,26 +351,120 @@ def run_model() -> None:
     except Exception as exc:
         raw_tmp.unlink(missing_ok=True)
         err_tmp.unlink(missing_ok=True)
-        meta.update(phase="blocked", stopped_at=now(), failure=f"{type(exc).__name__}: {exc}",
+        if meta is None:
+            try:
+                context = json.loads((PREPARED / "control/context.json").read_text())
+                meta = base_metadata(context)
+            except Exception:
+                meta = {key: None for key in RESULT_KEYS}
+                meta.update(schema="agentarium.relay-result.v2", task_id="AG-RELAY-INFRA",
+                            source_commit="unknown", activation_commit="unknown",
+                            run_id=str(os.environ.get("GITHUB_RUN_ID", "unknown")),
+                            started_at=now(), changed_paths=[])
+        meta.update(phase="blocked", stopped_at=now(), elapsed_seconds=time.monotonic() - start,
+                    failure=type(exc).__name__, session_id=None, usage=None,
+                    total_cost_usd=None, handback_sha256=None,
                     secret_scan="blocked")
         (RESULT / "BLOCKED.txt").write_text("Result withheld by relay safety checks.\n")
         blocked = exc
-    (RESULT / "metadata.json").write_text(json.dumps(meta, indent=2, ensure_ascii=False))
+    try:
+        write_scanned_metadata(meta, api_key or None)
+    except RuntimeError as exc:
+        for name in ("handback.md", "stream.jsonl", "stderr.txt"):
+            (RESULT / name).unlink(missing_ok=True)
+        meta.update(phase="blocked", stopped_at=now(), elapsed_seconds=time.monotonic() - start,
+                    failure="MetadataSecretBlocked", session_id=None, usage=None,
+                    total_cost_usd=None, changed_paths=[], handback_sha256=None,
+                    secret_scan="blocked")
+        (RESULT / "BLOCKED.txt").write_text("Result withheld by relay safety checks.\n")
+        write_scanned_metadata(meta)
+        blocked = exc
     if blocked is not None:
         raise RuntimeError("relay blocked; sanitized evidence prepared") from blocked
 
 
+def ensure_fallback() -> None:
+    """Create a fixed BLOCKED result after job timeout/crash or absent artifact."""
+    verify_manifest(PREPARED)
+    context = json.loads((PREPARED / "control/context.json").read_text())
+    RESULT.mkdir(parents=True, exist_ok=True)
+    existing = RESULT / "metadata.json"
+    if existing.exists():
+        try:
+            current = json.loads(existing.read_text())
+            validate_result(current, context)
+            return
+        except Exception:
+            pass
+    for child in RESULT.iterdir():
+        if child.is_file():
+            child.unlink()
+    meta = base_metadata(context, "blocked")
+    meta.update(stopped_at=now(), failure="RUN_JOB_NO_RESULT", secret_scan="blocked")
+    (RESULT / "BLOCKED.txt").write_text("Run job produced no publishable result.\n")
+    write_scanned_metadata(meta)
+
+
+def validate_result(meta: dict, context: dict) -> None:
+    if set(meta) != RESULT_KEYS or meta.get("schema") != "agentarium.relay-result.v2":
+        raise RuntimeError("result schema mismatch")
+    expected = {
+        "task_id": context["activation"]["task_id"],
+        "source_commit": context["source_commit"],
+        "activation_commit": context["head"],
+        "run_id": str(context.get("run_id") or "unknown"),
+    }
+    if any(meta.get(key) != value for key, value in expected.items()):
+        raise RuntimeError("result/context binding mismatch")
+    if meta.get("phase") not in ("result_ready", "blocked"):
+        raise RuntimeError("invalid result phase")
+    string_fields = ("task_id", "source_commit", "activation_commit", "run_id",
+                     "started_at", "stopped_at", "secret_scan")
+    if any(not isinstance(meta.get(key), str) or not meta[key] for key in string_fields):
+        raise RuntimeError("invalid result string field")
+    if meta.get("elapsed_seconds") is not None and not isinstance(meta["elapsed_seconds"], (int, float)):
+        raise RuntimeError("invalid elapsed_seconds")
+    if meta.get("session_id") is not None and not isinstance(meta["session_id"], str):
+        raise RuntimeError("invalid session_id")
+    if meta.get("usage") is not None and not isinstance(meta["usage"], dict):
+        raise RuntimeError("invalid usage")
+    if meta.get("total_cost_usd") is not None and not isinstance(meta["total_cost_usd"], (int, float)):
+        raise RuntimeError("invalid total_cost_usd")
+    if meta.get("failure") is not None and not isinstance(meta["failure"], str):
+        raise RuntimeError("invalid failure")
+    if not isinstance(meta.get("changed_paths"), list) or not all(
+            isinstance(path, str) for path in meta["changed_paths"]):
+        raise RuntimeError("invalid changed_paths")
+    handback = context["activation"]["handback"]
+    if meta["phase"] == "result_ready":
+        if meta["changed_paths"] != [handback] or not isinstance(meta.get("handback_sha256"), str):
+            raise RuntimeError("invalid ready result")
+        if meta.get("secret_scan") != "passed" or meta.get("failure") is not None:
+            raise RuntimeError("ready result not clean")
+    elif meta["changed_paths"] or meta.get("handback_sha256") is not None:
+        raise RuntimeError("blocked result carries output")
+
+
 def publish() -> None:
+    verify_manifest(PREPARED)
+    context = json.loads((PREPARED / "control/context.json").read_text())
     meta = json.loads((RESULT / "metadata.json").read_text())
+    validate_result(meta, context)
+    serialized = json.dumps(meta, indent=2, ensure_ascii=False)
+    if secret_hit(serialized.encode()):
+        raise RuntimeError("publish metadata secret check failed")
     task_id = meta["task_id"]
-    body = marker(task_id) + f"\n## {task_id} — {meta['phase'].upper()} / STOPPED\n```json\n"
-    body += json.dumps(meta, indent=2, ensure_ascii=False) + "\n```"
+    phase_label = "RESULT_READY" if meta["phase"] == "result_ready" else "BLOCKED"
+    body = marker(task_id, meta["source_commit"], phase_label, meta["run_id"])
+    body += f"\n## {task_id} — {phase_label} / STOPPED\n```json\n{serialized}\n```"
     handback = RESULT / "handback.md"
     if meta["phase"] == "result_ready" and handback.exists():
         data = handback.read_bytes()
         if secret_hit(data) or sha256(data) != meta.get("handback_sha256"):
             raise RuntimeError("publish integrity/secret check failed")
         body += "\n\n" + data.decode(errors="replace")[:4000]
+    if secret_hit(body.encode()):
+        raise RuntimeError("final comment secret check failed")
     post_issue(body)
 
 
@@ -358,6 +491,22 @@ def self_test() -> None:
     assert not any(key in child_environment() for key in TOKEN_KEYS)
     assert secret_hit(b"prefix github_pat_ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 suffix")
     assert not secret_hit(b"ordinary handback")
+    context = {"activation": good, "source_commit": parent, "head": "b" * 40, "run_id": "42"}
+    ready = base_metadata(context, "result_ready")
+    ready.update(stopped_at=now(), changed_paths=[good["handback"]],
+                 handback_sha256="c" * 64, secret_scan="passed")
+    validate_result(ready, context)
+    wrong = dict(ready); wrong["source_commit"] = "d" * 40
+    try:
+        validate_result(wrong, context)
+    except RuntimeError:
+        pass
+    else:
+        raise AssertionError("result binding negative test failed")
+    blocked_meta = base_metadata(context, "blocked")
+    blocked_meta.update(stopped_at=now(), failure="RUN_JOB_NO_RESULT", secret_scan="blocked")
+    validate_result(blocked_meta, context)
+    assert secret_hit(json.dumps({"session_id": "sk-ant-ABCDEFGHIJKLMNOPQRSTUVWXYZ012345"}).encode())
     with tempfile.TemporaryDirectory(prefix="relay-v2-test-") as tmp:
         root = Path(tmp); trusted = root / "input.txt"; trusted.write_text("trusted")
         out = root / "handoffs/result.md"; out.parent.mkdir(); out.write_text("empty")
@@ -370,14 +519,15 @@ def self_test() -> None:
                 pass
             else:
                 raise AssertionError("write isolation negative test failed")
-    print("SELF_TEST_OK: 12 security checks; no model/API call")
+    print("SELF_TEST_OK: 17 security checks; no model/API call")
 
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("mode", choices=("prepare", "run", "publish", "self-test"))
+    parser.add_argument("mode", choices=("prepare", "run", "fallback", "publish", "self-test"))
     args = parser.parse_args()
-    {"prepare": prepare, "run": run_model, "publish": publish, "self-test": self_test}[args.mode]()
+    {"prepare": prepare, "run": run_model, "fallback": ensure_fallback,
+     "publish": publish, "self-test": self_test}[args.mode]()
 
 
 if __name__ == "__main__":
