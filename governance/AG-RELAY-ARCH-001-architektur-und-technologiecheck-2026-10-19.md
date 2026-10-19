@@ -301,6 +301,31 @@ schlechter als die Sache ist:
 | 5 | **B6** entscheiden: drei alte Relais entfernen statt stilllegen | Entscheidung | Atlas/Peter |
 | 6 | **B5** notieren und datieren, nichts bauen | — | — |
 
+## Nachtrag bei der Aufnahme, 19.10. abends
+
+Zwischen dem Schreiben und der Aufnahme ist **PR #33 gemergt** (`3304625`).
+Zwei Stellen oben sind damit überholt, und das gehört dazu, statt den Text
+stillschweigend stimmig zu machen:
+
+- Der Zweig des bewiesenen Canary 003 löst **jetzt tatsächlich** nicht mehr
+  aus; in B4 stand es als Folge eines noch offenen Kandidaten.
+- Vor dem Merge habe ich einen **Fehlalarm** fast gemeldet: Ein Zwei-Punkt-Diff
+  (`git diff main zweig`) zeigte, dass #33 Fassung 54, den Hover-Fix der
+  Griffe, Teil F des Blocknachweises und drei `CLAUDE.md`-Abschnitte löscht.
+  Das war falsch — der Zweig lag nur hinter `main`, und ein Merge spielt nur
+  die Änderungen ab der Merge-Basis ein. **Gemessen** per Probemerge vor dem
+  Merge und erneut am gemergten `main` danach: Fassung 54, `agentarium-v54`,
+  der 28-px-Griff, Teil F und alle drei Abschnitte sind unverändert da.
+  Es war der zweite Fehlalarm des Tages in Richtung der dramatischeren
+  Behauptung.
+
+Das Instrument gehört in die Tabelle in `CLAUDE.md`, ist dort aber noch nicht
+eingetragen: *Ein Zwei-Punkt-Diff auf einem Zweig, der hinter `main` liegt,
+sagt „diese Zeilen würden gelöscht" — er sagt nur, dass der Zweig alt ist.
+Drei Punkte nehmen, oder probemergen.*
+
+**B1 bis B3, B5 und B6 sind von #33 unberührt** und stehen unverändert.
+
 ## Grenze dieses Checks
 
 Gelesen, nicht gelaufen. Kein Arbeitslauf gestartet, kein Modell gerufen,
