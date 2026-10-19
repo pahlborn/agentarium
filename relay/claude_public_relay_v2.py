@@ -11,6 +11,7 @@ import argparse
 import datetime as dt
 import hashlib
 import json
+import math
 import os
 import re
 import shutil
@@ -146,6 +147,11 @@ def marker(task_id: str, source_commit: str, phase: str, run_id: str) -> str:
     return MARKER_PREFIX + ":".join((task_id, source_commit, phase, run_id)) + " -->"
 
 
+def trusted_terminal_row(row: object, prefix: str) -> bool:
+    return (isinstance(row, dict) and prefix in str(row.get("body", "")) and
+            str((row.get("user") or {}).get("id")) == "277496791")
+
+
 def history_contains_terminal(task_id: str, source_commit: str) -> bool:
     prefix = MARKER_PREFIX + task_id + ":" + source_commit + ":RESULT_READY:"
     page = 1
@@ -153,7 +159,7 @@ def history_contains_terminal(task_id: str, source_commit: str) -> bool:
         rows = api(f"/issues/2/comments?per_page=100&page={page}")
         if not isinstance(rows, list):
             raise RuntimeError("invalid comment history")
-        if any(prefix in str(row.get("body", "")) for row in rows):
+        if any(trusted_terminal_row(row, prefix) for row in rows):
             return True
         if len(rows) < 100:
             return False
@@ -392,7 +398,7 @@ def ensure_fallback() -> None:
     if existing.exists():
         try:
             current = json.loads(existing.read_text())
-            validate_result(current, context)
+            validate_result(current, context, RESULT)
             return
         except Exception:
             pass
@@ -405,7 +411,11 @@ def ensure_fallback() -> None:
     write_scanned_metadata(meta)
 
 
-def validate_result(meta: dict, context: dict) -> None:
+def finite_number(value: object) -> bool:
+    return not isinstance(value, bool) and isinstance(value, (int, float)) and math.isfinite(value)
+
+
+def validate_result(meta: dict, context: dict, result_root: Path) -> None:
     if set(meta) != RESULT_KEYS or meta.get("schema") != "agentarium.relay-result.v2":
         raise RuntimeError("result schema mismatch")
     expected = {
@@ -422,13 +432,15 @@ def validate_result(meta: dict, context: dict) -> None:
                      "started_at", "stopped_at", "secret_scan")
     if any(not isinstance(meta.get(key), str) or not meta[key] for key in string_fields):
         raise RuntimeError("invalid result string field")
-    if meta.get("elapsed_seconds") is not None and not isinstance(meta["elapsed_seconds"], (int, float)):
+    if meta.get("elapsed_seconds") is not None and (
+            not finite_number(meta["elapsed_seconds"]) or meta["elapsed_seconds"] < 0):
         raise RuntimeError("invalid elapsed_seconds")
     if meta.get("session_id") is not None and not isinstance(meta["session_id"], str):
         raise RuntimeError("invalid session_id")
     if meta.get("usage") is not None and not isinstance(meta["usage"], dict):
         raise RuntimeError("invalid usage")
-    if meta.get("total_cost_usd") is not None and not isinstance(meta["total_cost_usd"], (int, float)):
+    if meta.get("total_cost_usd") is not None and (
+            not finite_number(meta["total_cost_usd"]) or meta["total_cost_usd"] < 0):
         raise RuntimeError("invalid total_cost_usd")
     if meta.get("failure") is not None and not isinstance(meta["failure"], str):
         raise RuntimeError("invalid failure")
@@ -437,19 +449,34 @@ def validate_result(meta: dict, context: dict) -> None:
         raise RuntimeError("invalid changed_paths")
     handback = context["activation"]["handback"]
     if meta["phase"] == "result_ready":
-        if meta["changed_paths"] != [handback] or not isinstance(meta.get("handback_sha256"), str):
+        digest = meta.get("handback_sha256")
+        output = result_root / "handback.md"
+        if meta["changed_paths"] != [handback] or not isinstance(digest, str) or not re.fullmatch(
+                r"[0-9a-f]{64}", digest):
             raise RuntimeError("invalid ready result")
+        if not output.is_file():
+            raise RuntimeError("ready handback missing or mismatched")
+        output_bytes = output.read_bytes()
+        if sha256(output_bytes) != digest or secret_hit(output_bytes):
+            raise RuntimeError("ready handback missing or mismatched")
         if meta.get("secret_scan") != "passed" or meta.get("failure") is not None:
             raise RuntimeError("ready result not clean")
-    elif meta["changed_paths"] or meta.get("handback_sha256") is not None:
-        raise RuntimeError("blocked result carries output")
+    else:
+        if meta["changed_paths"] or meta.get("handback_sha256") is not None:
+            raise RuntimeError("blocked result carries output")
+        if not isinstance(meta.get("failure"), str) or not meta["failure"]:
+            raise RuntimeError("blocked result lacks failure")
+        if meta.get("secret_scan") != "blocked":
+            raise RuntimeError("blocked result scan state invalid")
+        if any(meta.get(key) is not None for key in ("session_id", "usage", "total_cost_usd")):
+            raise RuntimeError("blocked result carries model metadata")
 
 
 def publish() -> None:
     verify_manifest(PREPARED)
     context = json.loads((PREPARED / "control/context.json").read_text())
     meta = json.loads((RESULT / "metadata.json").read_text())
-    validate_result(meta, context)
+    validate_result(meta, context, RESULT)
     serialized = json.dumps(meta, indent=2, ensure_ascii=False)
     if secret_hit(serialized.encode()):
         raise RuntimeError("publish metadata secret check failed")
@@ -492,21 +519,37 @@ def self_test() -> None:
     assert secret_hit(b"prefix github_pat_ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 suffix")
     assert not secret_hit(b"ordinary handback")
     context = {"activation": good, "source_commit": parent, "head": "b" * 40, "run_id": "42"}
-    ready = base_metadata(context, "result_ready")
-    ready.update(stopped_at=now(), changed_paths=[good["handback"]],
-                 handback_sha256="c" * 64, secret_scan="passed")
-    validate_result(ready, context)
-    wrong = dict(ready); wrong["source_commit"] = "d" * 40
-    try:
-        validate_result(wrong, context)
-    except RuntimeError:
-        pass
-    else:
-        raise AssertionError("result binding negative test failed")
-    blocked_meta = base_metadata(context, "blocked")
-    blocked_meta.update(stopped_at=now(), failure="RUN_JOB_NO_RESULT", secret_scan="blocked")
-    validate_result(blocked_meta, context)
+    with tempfile.TemporaryDirectory(prefix="relay-result-test-") as tmp:
+        result_root = Path(tmp)
+        payload = b"verified handback"
+        (result_root / "handback.md").write_bytes(payload)
+        ready = base_metadata(context, "result_ready")
+        ready.update(stopped_at=now(), changed_paths=[good["handback"]],
+                     handback_sha256=sha256(payload), secret_scan="passed")
+        validate_result(ready, context, result_root)
+        wrong = dict(ready); wrong["source_commit"] = "d" * 40
+        try:
+            validate_result(wrong, context, result_root)
+        except RuntimeError:
+            pass
+        else:
+            raise AssertionError("result binding negative test failed")
+        (result_root / "handback.md").unlink()
+        try:
+            validate_result(ready, context, result_root)
+        except RuntimeError:
+            pass
+        else:
+            raise AssertionError("missing handback negative test failed")
+        blocked_meta = base_metadata(context, "blocked")
+        blocked_meta.update(stopped_at=now(), failure="RUN_JOB_NO_RESULT", secret_scan="blocked")
+        validate_result(blocked_meta, context, result_root)
     assert secret_hit(json.dumps({"session_id": "sk-ant-ABCDEFGHIJKLMNOPQRSTUVWXYZ012345"}).encode())
+    terminal_prefix = MARKER_PREFIX + good["task_id"] + ":" + parent + ":RESULT_READY:"
+    assert trusted_terminal_row({"body": terminal_prefix + "42 -->", "user": {"id": 277496791}},
+                                terminal_prefix)
+    assert not trusted_terminal_row({"body": terminal_prefix + "42 -->", "user": {"id": 999}},
+                                    terminal_prefix)
     with tempfile.TemporaryDirectory(prefix="relay-v2-test-") as tmp:
         root = Path(tmp); trusted = root / "input.txt"; trusted.write_text("trusted")
         out = root / "handoffs/result.md"; out.parent.mkdir(); out.write_text("empty")
@@ -519,7 +562,7 @@ def self_test() -> None:
                 pass
             else:
                 raise AssertionError("write isolation negative test failed")
-    print("SELF_TEST_OK: 17 security checks; no model/API call")
+    print("SELF_TEST_OK: 21 security checks; no model/API call")
 
 
 def main() -> None:
