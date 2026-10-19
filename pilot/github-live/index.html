@@ -99,17 +99,31 @@
      im Inneren abschneiden. So bleibt jeder Block unangetastet, und
      Knoepfe, Regler und Liste sind weiter voll bedienbar. */
   #agGriffe{position:fixed; inset:0; z-index:12; pointer-events:none;}
-  #agGriffe .agGriff{position:absolute; width:22px; height:22px;
+  /* EIN FINGER HAT KEIN HOVER. Die erste Fassung zeigte vier Punkte von
+     1,4 px bei 28 % Deckkraft und wurde erst bei `:hover` sichtbar -- auf
+     einer Maus zu finden, auf dem iPad nie. Peter, 19.10.: "Ich kann nicht
+     entdecken wo ich anfassen soll." Der Griff traegt deshalb jetzt eine
+     sichtbare Platte mit Rand, und `:hover` ist nur noch eine Zugabe fuer
+     Zeigegeraete, die das koennen -- nicht die Bedingung, ueberhaupt
+     gesehen zu werden. 28 px statt 22: ein Daumen ist kein Mauszeiger.
+     Apples Mindestmass ist 44; so gross wuerde der Griff den Block
+     verdecken, den er bewegt, also bleibt es bei 28 und wird am Geraet
+     entschieden. */
+  #agGriffe .agGriff{position:absolute; width:28px; height:28px;
     pointer-events:auto; cursor:grab; touch-action:none;
-    border-radius:4px; opacity:.28; transition:opacity .25s ease;
-    background:
-      radial-gradient(circle at 6px 6px,  rgba(201,162,39,.95) 1.4px, transparent 1.6px),
-      radial-gradient(circle at 12px 6px, rgba(201,162,39,.95) 1.4px, transparent 1.6px),
-      radial-gradient(circle at 6px 12px, rgba(201,162,39,.95) 1.4px, transparent 1.6px),
-      radial-gradient(circle at 12px 12px,rgba(201,162,39,.95) 1.4px, transparent 1.6px);}
-  #agGriffe .agGriff:hover,
-  #agGriffe .agGriff.faengt{opacity:1; cursor:grabbing;
-    background-color:rgba(201,162,39,.14);}
+    border-radius:6px; opacity:1; transition:opacity .25s ease;
+    border:1px solid rgba(201,162,39,.55);
+    background-color:rgba(12,14,18,.55);
+    background-image:
+      radial-gradient(circle at 10px 10px, rgba(201,162,39,.95) 2px, transparent 2.3px),
+      radial-gradient(circle at 18px 10px, rgba(201,162,39,.95) 2px, transparent 2.3px),
+      radial-gradient(circle at 10px 18px, rgba(201,162,39,.95) 2px, transparent 2.3px),
+      radial-gradient(circle at 18px 18px, rgba(201,162,39,.95) 2px, transparent 2.3px);
+    box-shadow:0 0 0 1px rgba(0,0,0,.45);}
+  @media (hover:hover){
+    #agGriffe .agGriff:hover{background-color:rgba(201,162,39,.18);}}
+  #agGriffe .agGriff.faengt{cursor:grabbing;
+    background-color:rgba(201,162,39,.18);}
   #agGriffe.leise{opacity:0; pointer-events:none;}
   .agKosten{position:absolute; transform:translate(-50%,-100%);
     font:400 10px/1 ui-monospace,SFMono-Regular,Menlo,monospace;
@@ -2241,7 +2255,7 @@
 
      Der Bauzeitpunkt kommt beim Bauen aus der Uhr. Von Hand gepflegte
      Datumsangaben sind nach der zweiten Änderung falsch. */
-  var FASSUNG = '53', GEBAUT = '2026-10-19T10:50Z';
+  var FASSUNG = '54', GEBAUT = '2026-10-19T14:10Z';
 
   /* AG-GH-LIVE-001: JEDE TEXTSENKE MASKIERT.
      Seit Live-Daten von aussen kommen (GitHub-Kommentare, one-event.json),
@@ -6414,6 +6428,24 @@
       if (document.getElementById('agWas').classList.contains('auf')) return;
       tasten.classList.add('leise');
     }, 3000);
+    griffeWecken();
+  }
+
+  /* DIE GRIFFE FOLGEN DEN KNOEPFEN, ABER TRAEGER. Dieselbe Sprache -- eine
+     Beruehrung holt die Bedienung hervor, Ruhe laesst sie verblassen --,
+     aber nicht dieselbe Frist: Ein Knopf ist ein Tipp, ein Griff muss erst
+     gefunden und erreicht werden. Und auf einem Tastgeraet weckt nur die
+     Beruehrung selbst: `pointermove` ohne Kontakt gibt es dort nicht, die
+     drei Sekunden der Knoepfe liefen also mitten im Hinlangen ab.
+     Zwoelf Sekunden sind gemessen am Weg eines Daumens, nicht geraten:
+     Tippen, hinsehen, hinfassen. */
+  var griffeUhr = null;
+  function griffeWecken() {
+    var g = document.getElementById('agGriffe');
+    if (!g) return;
+    g.classList.remove('leise');
+    if (griffeUhr) clearTimeout(griffeUhr);
+    griffeUhr = setTimeout(function () { g.classList.add('leise'); }, 12000);
   }
   window.addEventListener('pointerdown', function () { steckWeg(); });
   ['pointermove', 'pointerdown', 'wheel', 'keydown'].forEach(function (n) {
