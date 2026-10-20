@@ -98,32 +98,53 @@
      nicht in ihnen: #agTasten hat overflow:hidden und wuerde einen Griff
      im Inneren abschneiden. So bleibt jeder Block unangetastet, und
      Knoepfe, Regler und Liste sind weiter voll bedienbar. */
-  #agGriffe{position:fixed; inset:0; z-index:12; pointer-events:none;}
-  /* EIN FINGER HAT KEIN HOVER. Die erste Fassung zeigte vier Punkte von
-     1,4 px bei 28 % Deckkraft und wurde erst bei `:hover` sichtbar -- auf
-     einer Maus zu finden, auf dem iPad nie. Peter, 19.10.: "Ich kann nicht
-     entdecken wo ich anfassen soll." Der Griff traegt deshalb jetzt eine
-     sichtbare Platte mit Rand, und `:hover` ist nur noch eine Zugabe fuer
-     Zeigegeraete, die das koennen -- nicht die Bedingung, ueberhaupt
-     gesehen zu werden. 28 px statt 22: ein Daumen ist kein Mauszeiger.
-     Apples Mindestmass ist 44; so gross wuerde der Griff den Block
-     verdecken, den er bewegt, also bleibt es bei 28 und wird am Geraet
-     entschieden. */
-  #agGriffe .agGriff{position:absolute; width:28px; height:28px;
+  /* 13, NICHT 12, UND DAS IST GEMESSEN. Ein gelesener Block nimmt z-index 12
+     (siehe "WO DIE HELLIGKEIT WIRKT" weiter unten). Bei gleichem Wert
+     entscheidet die Reihenfolge im Dokument, und die Bloecke stehen SPAETER
+     als diese Schicht -- der vergroesserte Block lag also ueber seinem
+     eigenen Griff, und ein Druck darauf traf den Block. Der Zug begann nie;
+     im Nachweis sah es aus wie "Block bewegt sich nicht". */
+  #agGriffe{position:fixed; inset:0; z-index:13; pointer-events:none;}
+  /* EIN DREIECK IN DER ECKE, UND NUR SOLANGE DER BLOCK VERGROESSERT IST.
+
+     Drei Fassungen, drei Lehren, und alle drei stehen hier, damit die
+     naechste nicht bei Nummer eins anfaengt:
+     53 -- vier Punkte bei 28 % Deckkraft, sichtbar erst bei `:hover`. Ein
+        Finger hat kein Hover; auf dem iPad war nichts zu finden.
+     54 -- sichtbare Platte, 28 px fest. Peter am 20.10.: "im Browser auf dem
+        laptop sind die anfasser fast zu klein, im ipad jedoch zu groß. sie
+        skalieren also nicht mit der anzeige." Richtig, und die Ursache war
+        die einzige feste Zahl in einer Oberflaeche, die sonst durchweg am
+        Fenster gemessen ist.
+     55 -- ein Dreieck, am Fenster gemessen, und es erscheint nur, wenn der
+        Block ohnehin vergroessert ist. Im Betrieb ist das Bild damit leer.
+
+     KASTEN UND BILD SIND VERSCHIEDEN GROSS, UND DAS IST ABSICHT: Der Kasten
+     nimmt den Zeiger und ist so gross wie der Daumen braucht; das Dreieck
+     darin ist das, was man sieht. Ein Dreieck, das so gross waere wie sein
+     Tastbereich, waere wieder ein Moebel.
+     Untergrenze 20 px, damit auf dem iPad genug zum Fassen bleibt;
+     Obergrenze 34, damit es auf einem breiten Schirm nicht gross wird,
+     sondern nur mitwaechst. */
+  #agGriffe .agGriff{position:absolute;
+    width:clamp(20px, 1.7vw, 34px); height:clamp(20px, 1.7vw, 34px);
     pointer-events:auto; cursor:grab; touch-action:none;
-    border-radius:6px; opacity:1; transition:opacity .25s ease;
-    border:1px solid rgba(201,162,39,.55);
-    background-color:rgba(12,14,18,.55);
-    background-image:
-      radial-gradient(circle at 10px 10px, rgba(201,162,39,.95) 2px, transparent 2.3px),
-      radial-gradient(circle at 18px 10px, rgba(201,162,39,.95) 2px, transparent 2.3px),
-      radial-gradient(circle at 10px 18px, rgba(201,162,39,.95) 2px, transparent 2.3px),
-      radial-gradient(circle at 18px 18px, rgba(201,162,39,.95) 2px, transparent 2.3px);
-    box-shadow:0 0 0 1px rgba(0,0,0,.45);}
+    opacity:0; transition:opacity .2s ease;
+    background:linear-gradient(135deg, rgba(201,162,39,.92) 0%,
+                                       rgba(201,162,39,.62) 62%,
+                                       rgba(201,162,39,0) 63%);
+    -webkit-clip-path:polygon(0 0, 100% 0, 0 100%);
+    clip-path:polygon(0 0, 100% 0, 0 100%);}
+  /* `wach` setzt die Nachfuehrung, nicht der Mauszeiger: die Schicht liegt
+     ueber dem Block, ein `:hover` des Blocks erreicht sie nicht. */
+  #agGriffe .agGriff.wach{opacity:.9;}
   @media (hover:hover){
-    #agGriffe .agGriff:hover{background-color:rgba(201,162,39,.18);}}
-  #agGriffe .agGriff.faengt{cursor:grabbing;
-    background-color:rgba(201,162,39,.18);}
+    #agGriffe .agGriff.wach:hover{opacity:1;}}
+  #agGriffe .agGriff.faengt{opacity:1; cursor:grabbing;}
+  /* Schlaegt jede Vergroesserung, auch die mit `:hover` -- deshalb hier und
+     nicht in der Gruppe oben, und deshalb mit `!important`: `:hover` auf
+     einer ID ist spezifischer als eine Klasse. */
+  .ziehtGerade{transform:none !important;}
   #agGriffe.leise{opacity:0; pointer-events:none;}
   .agKosten{position:absolute; transform:translate(-50%,-100%);
     font:400 10px/1 ui-monospace,SFMono-Regular,Menlo,monospace;
@@ -540,6 +561,19 @@
   #agWerkName:hover, #agWerkName.lesen{transform:scale(1.28);}
   /* Die Marke waechst weniger: Sie muss nicht gelesen werden, sie steht da. */
   #agMarke:hover, #agMarke.lesen{transform:scale(1.10);}
+  /* DIE LISTE WAECHST NUR AM ZEIGEGERAET, UND DAS IST KEINE SCHLAMPEREI.
+     `#agEcke` traegt `pointer-events:none`, weil sie die untere linke Ecke
+     des Feldes bedeckt -- mit Zeigerereignissen schluckte sie jeden Tipp auf
+     einen Agenten, der dort steht (peter liegt auf 180 Grad, also links).
+     Unter `hover:hover` gibt es einen Zeiger, der nur zeigt statt zu tippen;
+     dort kostet es nichts. Auf einem Tastgeraet bliebe nur die Wahl zwischen
+     "Liste verschiebbar" und "Agenten links antippbar", und die zweite ist
+     mehr wert. Peter weiss es; es ist seine Entscheidung, nicht meine. */
+  @media (hover:hover){
+    #agEcke{pointer-events:auto; transform-origin:left bottom;
+      transition:transform .3s ease, filter .3s ease, opacity .45s ease;}
+    #agEcke:hover{transform:scale(1.10); filter:brightness(1.6) saturate(1.05);
+      z-index:12;}}
   #agWerkName:hover, #agWerkName.lesen{opacity:1;}
   /* Die Auskunft zum Namen: nur beim Zeigen, sonst nimmt sie Platz weg,
      den das Feld braucht. */
@@ -2255,7 +2289,7 @@
 
      Der Bauzeitpunkt kommt beim Bauen aus der Uhr. Von Hand gepflegte
      Datumsangaben sind nach der zweiten Änderung falsch. */
-  var FASSUNG = '54', GEBAUT = '2026-10-19T14:10Z';
+  var FASSUNG = '55', GEBAUT = '2026-10-20T05:10Z';
 
   /* AG-GH-LIVE-001: JEDE TEXTSENKE MASKIERT.
      Seit Live-Daten von aussen kommen (GitHub-Kommentare, one-event.json),
@@ -2375,14 +2409,38 @@
         auch bei dem, der nie etwas anfasst. Wer nichts verschiebt, sieht
         nichts Neues. */
   var BLOCK_SPEICHER = 'agentarium-bloecke-v1';
+  /* WELCHE BLOECKE BEWEGLICH SIND, UND WORAN MAN DAS SIEHT.
+
+     `id`   -- der Block, der bewegt wird.
+     `wach` -- der Block, an dem man ablesen kann, dass er gerade dran ist;
+               beim Kopf ist das ein anderer als der bewegte, weil die
+               Vergroesserung am inneren `#agKopf` haengt und nicht an der
+               Spalte `#agRechts`, die ihn traegt.
+     `wie`  -- der Zustand, der den Griff hervorholt.
+
+     Die Knoepfe sind NICHT dabei. Ein Knopf, der unter dem Finger waechst,
+     verschiebt sich dabei -- man drueckt daneben. Sie bleiben, wo sie sind;
+     das ist der kleinste Verlust von allen, und "Plaetze zurueck" wohnt dort.
+     Das Blatt `#agWas` traegt seinen Griff, solange es offen ist: offen ist
+     bei ihm dasselbe wie vergroessert bei den anderen. */
   var BLOECKE = [
-    { id: 'agMarke',    wort: 'Name und Helligkeit' },
-    { id: 'agEcke',     wort: 'Was geschieht' },
-    { id: 'agRechts',   wort: 'Kopf' },
-    { id: 'agWas',      wort: 'Ereignis' },
-    { id: 'agWerkName', wort: 'Werkname' },
-    { id: 'agTasten',   wort: 'Knöpfe' }
+    { id: 'agMarke',    wort: 'Name und Helligkeit', wach: 'agMarke',    wie: 'lesen' },
+    { id: 'agEcke',     wort: 'Was geschieht',       wach: 'agEcke',     wie: 'zeigen' },
+    { id: 'agRechts',   wort: 'Kopf',                wach: 'agKopf',     wie: 'lesen' },
+    { id: 'agWas',      wort: 'Blatt am Kopf',       wach: 'agWas',      wie: 'auf' },
+    { id: 'agWerkName', wort: 'Werkname',            wach: 'agWerkName', wie: 'lesen' }
   ];
+
+  /* Ist der Block gerade vergroessert, offen, oder liegt der Zeiger darauf?
+     `:hover` am Block erreicht die Griffschicht nicht -- sie liegt darueber.
+     Also hier fragen und die Klasse selbst setzen. */
+  function blockWach(b) {
+    var w = document.getElementById(b.wach || b.id);
+    if (!w) return false;
+    if (b.wie === 'auf') return w.classList.contains('auf');
+    if (w.classList.contains('lesen')) return true;
+    try { return w.matches(':hover'); } catch (x) { return false; }
+  }
   var bloeckeLage = {};          /* id -> {x, y} als Anteil 0..1 */
 
   function bloeckeLesen() {
@@ -2535,10 +2593,17 @@
       var k = e.getBoundingClientRect();
       /* Unsichtbar oder ohne Masse: auch der Griff verschwindet. Ein Griff
          ohne Block waere ein Knopf, der nichts tut. */
-      if (!k.width || !k.height || e.classList.contains('leise')) { g.hidden = true; return; }
+      if (!k.width || !k.height || e.classList.contains('leise')) {
+        g.hidden = true; g.classList.remove('wach'); return;
+      }
       g.hidden = false;
-      g.style.left = Math.round(k.left + 2) + 'px';
-      g.style.top  = Math.round(k.top + 2) + 'px';
+      /* Der Griff bleibt im Bild und nimmt den Zeiger -- aber zu sehen ist er
+         nur, wenn der Block dran ist. Waehrend eines Zuges bleibt er da,
+         sonst verlor man ihn mitten in der Bewegung, wenn der Zeiger den
+         Block verlaesst. */
+      g.classList.toggle('wach', g.classList.contains('faengt') || blockWach(b));
+      g.style.left = Math.round(k.left) + 'px';
+      g.style.top  = Math.round(k.top) + 'px';
     });
   }
 
@@ -2554,6 +2619,16 @@
       var ab = null;
       g.addEventListener('pointerdown', function (ev) {
         var e = document.getElementById(b.id); if (!e) return;
+        /* BEIM ZIEHEN ZEIGT DER BLOCK SEINE WAHRE GROESSE, UND ZWAR ZUERST.
+           Ein gelesener Block steht auf scale(1.28). Zieht man ihn so, misst
+           der Zug den vergroesserten Kasten, abgelegt wird aber der echte --
+           beim Loslassen schrumpft er und springt dabei weg. Gemessen am
+           20.10.: 145 Pixel daneben. Also die Vergroesserung VOR dem Messen
+           abschalten; was man dann zieht, liegt am Ende genau dort. */
+        var w = document.getElementById(b.wach || b.id);
+        if (w) w.classList.remove('lesen');
+        e.classList.add('ziehtGerade');
+        if (w && w !== e) w.classList.add('ziehtGerade');
         var k = e.getBoundingClientRect();
         ab = { zx: ev.clientX - k.left, zy: ev.clientY - k.top };
         g.classList.add('faengt');
@@ -2578,6 +2653,10 @@
       function los() {
         if (!ab) return;
         ab = null; g.classList.remove('faengt');
+        var e0 = document.getElementById(b.id);
+        var w0 = document.getElementById(b.wach || b.id);
+        if (e0) e0.classList.remove('ziehtGerade');
+        if (w0) w0.classList.remove('ziehtGerade');
         bloeckeSchreiben();
         /* Erst jetzt neu rechnen: das Band haengt an den Bloecken, und der
            Ring haengt am Band. Waehrend des Zuges waere das Flackern. */
@@ -6398,7 +6477,9 @@
   /* Berühren hellt auf, wie Zeigen — nur hört es von selbst wieder auf.
      Ohne das wäre die Regel am iPad, wo es kein Zeigen gibt, wirkungslos. */
   (function () {
-    ['agKopf', 'agWerkName'].forEach(function (id) {
+    /* `agMarke` gehoert dazu, seit sie einen Griff traegt: ohne Tippen waere
+       sie nur am Zeigegeraet beweglich, und das Zielgeraet ist ein iPad. */
+    ['agMarke', 'agKopf', 'agWerkName'].forEach(function (id) {
       var el = document.getElementById(id);
       if (!el) return;
       el.addEventListener('click', function (ev) {
@@ -6428,25 +6509,11 @@
       if (document.getElementById('agWas').classList.contains('auf')) return;
       tasten.classList.add('leise');
     }, 3000);
-    griffeWecken();
   }
-
-  /* DIE GRIFFE FOLGEN DEN KNOEPFEN, ABER TRAEGER. Dieselbe Sprache -- eine
-     Beruehrung holt die Bedienung hervor, Ruhe laesst sie verblassen --,
-     aber nicht dieselbe Frist: Ein Knopf ist ein Tipp, ein Griff muss erst
-     gefunden und erreicht werden. Und auf einem Tastgeraet weckt nur die
-     Beruehrung selbst: `pointermove` ohne Kontakt gibt es dort nicht, die
-     drei Sekunden der Knoepfe liefen also mitten im Hinlangen ab.
-     Zwoelf Sekunden sind gemessen am Weg eines Daumens, nicht geraten:
-     Tippen, hinsehen, hinfassen. */
-  var griffeUhr = null;
-  function griffeWecken() {
-    var g = document.getElementById('agGriffe');
-    if (!g) return;
-    g.classList.remove('leise');
-    if (griffeUhr) clearTimeout(griffeUhr);
-    griffeUhr = setTimeout(function () { g.classList.add('leise'); }, 12000);
-  }
+  /* Die eigene Weckuhr der Griffe ist entfallen. Sie war aus Fassung 54 und
+     hing an den Knoepfen; jetzt sagt jeder Block selbst, wann sein Griff
+     da ist -- vergroessert, offen oder unter dem Zeiger. Eine Frist weniger,
+     die auseinanderlaufen kann. */
   window.addEventListener('pointerdown', function () { steckWeg(); });
   ['pointermove', 'pointerdown', 'wheel', 'keydown'].forEach(function (n) {
     window.addEventListener(n, tastenZeigen, { passive: true });
