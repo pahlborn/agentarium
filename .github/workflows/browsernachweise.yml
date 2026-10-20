@@ -13,8 +13,22 @@
 # selbst tischen ihre Seiten auf 127.0.0.1 auf.
 name: Browsernachweise
 
+# PUSH NUR AUF `main`, PULL_REQUEST FUER JEDEN KANDIDATEN. Beides ohne
+# Einschraenkung ergab zwei Ereignisse fuer denselben Kopf; die Nebenlaufgruppe
+# unten brach dann eines davon ab -- und ein ABGEBROCHENER Pruefeintrag zaehlt
+# fuer GitHub nicht als gruen. Gemessen an #42 (Kopf cec69a3) und an #40
+# (Kopf 6dbbc1d): beide Kandidaten lasen danach `mergeable_state: unstable`,
+# obwohl der zustaendige Lauf gruen war und kein Nachweis fehlschlug. Der
+# Eintrag bleibt an dem Commit stehen, Warten half also nicht. So gibt es gar
+# keinen zweiten Lauf, der abgebrochen werden muesste.
+#
+# BEWUSST IN KAUF GENOMMEN: Ein Zweig ohne offenen Kandidaten wird nicht
+# geprueft. Die Nachweise entscheiden bei der Beurteilung eines Kandidaten und
+# auf `main` -- davor liest sie niemand.
 on:
   push:
+    branches:
+      - main
     paths:
       - 'previews/**'
       - 'pilot/github-live/**'
@@ -34,6 +48,11 @@ permissions:
 # verschiedene Gruppen fuer denselben Stand, also zwei Laeufe fuer dieselbe
 # Frage. Der Kopf ist dagegen in beiden Faellen derselbe.
 # Gefunden von Argus am 20.10.
+#
+# Die Gruppe bleibt, aber sie ist nicht mehr das Mittel gegen den Doppellauf
+# -- das steht jetzt oben im Ausloeser. Sie faengt noch den Fall, der uebrig
+# ist: denselben Kopf erneut angestossen (Wiederholung von Hand), wo der
+# aeltere Lauf nichts mehr beantwortet.
 concurrency:
   group: browsernachweise-${{ github.event.pull_request.head.sha || github.sha }}
   cancel-in-progress: true
