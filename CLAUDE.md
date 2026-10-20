@@ -218,8 +218,37 @@ Requests, nicht in Dateien. Das Schema führt ohnehin nur `platt`.
 
 ## Grenzen
 
-**Kein Merge und keine Veröffentlichung ohne Peter.** Auch dann nicht, wenn
-alles grün ist.
+**Was auf Peters Gerät landet, entscheidet Peter. Das Innenleben entscheide
+ich.** Am 20.10. hat er die alte Fassung dieser Regel zu Recht hinterfragt:
+„warum muss ich das mergen entscheiden?" Sie lautete „Kein Merge und keine
+Veröffentlichung ohne Peter, auch dann nicht, wenn alles grün ist" — und war
+damit grober als nötig. Bei Blatt und Malstudio steht das Gegenteil, dort
+merge ich selbst, ausdrücklich so gewünscht. Agentarium war die Ausnahme,
+ohne dass jemand sie begründet hatte.
+
+**Peter entscheidet:**
+
+- jede **Veröffentlichung** — eine neue Fassung, die sein iPad erreicht;
+- jede Änderung am **Bild**: Produkt, Monitor, Darstellung, Bedienung;
+- alles, was eine Abnahme am Zielgerät braucht.
+
+Grund, nicht Formalie: Er hat am 19. und 20.10. dreimal etwas gefunden, das
+mein Prüfstand nicht sah — den unsichtbaren Griff, die Größe, die nicht
+mitwuchs. Vor seinem Gerät endet mein Nachweis.
+
+**Ich entscheide, wenn es geprüft ist:**
+
+- Arbeitsläufe und Prüfskripte;
+- Dateien unter `governance/` und `handoffs/`;
+- diese Datei selbst, bei Nachträgen zu Belegen und Instrumenten.
+
+**Geprüft heißt:** grüne Prüfläufe, `mergeable_state` sauber, keine offene
+Anmerkung — und bei Arbeit, die ein Teamagent begutachtet hat, dessen
+Freigabe. Gemeldet wird es trotzdem, kurz. Im Zweifel, ob etwas das Bild
+berührt, gehört es Peter; der Zweifel entscheidet gegen mich.
+
+**Unverändert:** Keine Aktivierung, kein Modelllauf, keine Freigabe von
+Kosten ohne ihn.
 
 **Keine neue Arbeit ohne Freigabe — freigegebene Arbeit läuft weiter.**
 Vorschläge, Messungen und Berichte jederzeit. Was eine Freigabe braucht, ist
