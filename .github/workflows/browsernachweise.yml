@@ -29,9 +29,13 @@ on:
 permissions:
   contents: read
 
-# Ein Lauf je Zweig: push und pull_request treffen denselben Stand.
+# EIN LAUF JE KOPF, NICHT JE REF. `github.ref` ist bei push
+# `refs/heads/...` und bei pull_request `refs/pull/N/merge` -- zwei
+# verschiedene Gruppen fuer denselben Stand, also zwei Laeufe fuer dieselbe
+# Frage. Der Kopf ist dagegen in beiden Faellen derselbe.
+# Gefunden von Argus am 20.10.
 concurrency:
-  group: browsernachweise-${{ github.ref }}
+  group: browsernachweise-${{ github.event.pull_request.head.sha || github.sha }}
   cancel-in-progress: true
 
 jobs:
@@ -111,8 +115,18 @@ jobs:
             [ -e "$n" ] || continue
             gefunden=$((gefunden + 1))
             echo "::group::$n"
-            node "$n"
-            rc=$?
+            # ERREXIT-SICHER, UND ZWAR GEMESSEN. GitHub startet `run:` mit
+            # `bash --noprofile --norc -eo pipefail`; `set -uo pipefail` oben
+            # schaltet das `-e` NICHT ab. Ein nacktes `node "$n"` beendete den
+            # Schritt deshalb beim ersten Fehlschlag -- `rc=$?`, die eigene
+            # Fehlermeldung und die restlichen Nachweise wurden nie erreicht.
+            # Die Zusage "alle laufen, Fehler werden gesammelt" war damit
+            # falsch. Gefunden von Sentinel am 20.10.
+            # Mein Trockenlauf hatte es nicht gefangen, weil ich `bash lauf.sh`
+            # ohne `-e` benutzte -- dieselbe Logik, andere Shell. Nachgemessen
+            # in `bash --noprofile --norc -eo pipefail`: alt bricht nach dem
+            # ersten Nachweis ab, neu sammelt alle drei.
+            if node "$n"; then rc=0; else rc=$?; fi
             echo "::endgroup::"
             if [ "$rc" -eq 0 ]; then
               echo "  bestanden : $n"
