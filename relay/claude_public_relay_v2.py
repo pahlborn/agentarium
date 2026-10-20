@@ -39,6 +39,26 @@ TOKEN_KEYS = (
     "ACTIONS_ID_TOKEN_REQUEST_TOKEN", "ACTIONS_CACHE_URL",
 )
 GITHUB_ACTIONS_BOT_ID = "41898282"
+
+# ------------------------- AG-RELAY-LIVE-001: der Agentarium-Vertrag --------
+# Der Monitor (pilot/github-live/github-live.js, Adapter AG-GH-LIVE-001-v1.3)
+# liest Kommentare auf Issue #2 und nimmt NUR diesen Marker mit einem
+# unmittelbar folgenden JSON-Zaun. Vier Regeln von dort, jede davon verwirft
+# das Ereignis lautlos, wenn sie bricht:
+#   1. Der Marker darf im Koerper genau EINMAL vorkommen.
+#   2. Zwischen Marker und Zaun ist nur Leerraum erlaubt -- der Block gehoert
+#      deshalb ans ENDE des Kommentars, hinter den schon vorhandenen
+#      Metadaten-Zaun.
+#   3. Genau elf Felder, plus optional `recipient`. Jedes unbekannte Feld
+#      weist das ganze Ereignis ab.
+#   4. Alle Felder sind Text. Eine Zahl waere ein stiller Fehlschlag.
+AG_MARKER = "<!-- AGENTARIUM_EVENT_V1 -->"
+AG_SCHEMA = "agentarium.github-event.v1"
+AG_PROJECT = "agentarium"
+AG_TOOL = "relay/claude_public_relay_v2.py"
+AG_FIELDS = ("schema", "id", "project_id", "run_id", "task_id", "actor", "kind",
+             "title", "occurred_at", "source_evidence", "source_tool_id")
+AG_MAX_TITLE = 200
 SUSPICIOUS = re.compile(rb"(?:gh[pousr]_[A-Za-z0-9_]{20,}|github_pat_[A-Za-z0-9_]{20,}|sk-ant-[A-Za-z0-9_-]{20,})")
 
 
@@ -151,6 +171,87 @@ def marker(task_id: str, source_commit: str, phase: str,
         (task_id, source_commit, phase, activation_commit, run_id)) + " -->"
 
 
+def ag_block(task_id: str, run_id: str, phase: str, kind: str, actor: str,
+             title: str, evidence: str, recipient: str | None = None) -> str:
+    """Einen vertragsgueltigen Agentarium-Block bauen, oder gar keinen."""
+    event = {
+        "schema": AG_SCHEMA,
+        "id": f"{task_id}:{run_id}:{phase}",
+        "project_id": AG_PROJECT,
+        "run_id": str(run_id),
+        "task_id": str(task_id),
+        "actor": actor,
+        "kind": kind,
+        "title": title,
+        "occurred_at": now(),
+        "source_evidence": evidence,
+        "source_tool_id": AG_TOOL,
+    }
+    if recipient is not None:
+        event["recipient"] = recipient
+    # Hier scheitern statt im Browser: ein Feld zu viel oder eine Zahl statt
+    # Text wird vom Monitor abgewiesen, und zwar ohne sichtbaren Grund.
+    if set(event) - (set(AG_FIELDS) | {"recipient"}):
+        raise RuntimeError("agentarium event carries unknown field")
+    if set(AG_FIELDS) - set(event):
+        raise RuntimeError("agentarium event lacks a required field")
+    if any(not isinstance(value, str) or not value for value in event.values()):
+        raise RuntimeError("agentarium event field empty or not text")
+    if len(title) > AG_MAX_TITLE or AG_MARKER in title:
+        raise RuntimeError("agentarium title too long or carries the marker")
+    return AG_MARKER + "\n```json\n" + json.dumps(event, indent=2, ensure_ascii=False) + "\n```"
+
+
+def ag_control_in_handback(data: bytes) -> bool:
+    """Traegt der Handback die Steuerfolge des Monitors?
+
+    `in` statt Zeilenvergleich: der eingebettete Fall ("Beispiel:
+    <!-- AGENTARIUM_EVENT_V1 --> so sieht es aus") wirkt im Browser genauso
+    wie eine nackte Zeile -- der Monitor zaehlt Vorkommen, nicht Zeilen.
+    """
+    return AG_MARKER.encode() in data
+
+
+def ag_host_received(context: dict) -> str:
+    a = context["activation"]
+    return ag_block(a["task_id"], str(context["run_id"]), "HOST_RECEIVED",
+                    "handoff", "atlas",
+                    "Auftrag transportiert und empfangen — kein belegter Arbeitsbeginn",
+                    "runtime_stream", recipient="forge")
+
+
+def ag_terminal(meta: dict) -> str:
+    """Die Abschlussmeldung als Vertragsereignis.
+
+    KEIN `forge` BEI BLOCKED, UND DAS IST EINE ABWEICHUNG MIT GRUND.
+    Atlas hat belegbasiert entschieden: `session_id` vorhanden -> forge, sonst
+    atlas. Nachgesehen laesst sich das so nicht bauen: `validate_result()`
+    verlangt fuer `blocked` ausdruecklich leere Sitzungs-, Nutzungs- und
+    Kostenfelder ("blocked result carries model metadata"). Eine blockierte
+    Fassung kann also NIE eine Sitzung ausweisen, und `failure` trennt es auch
+    nicht: der Arbeiterpfad schreibt dort `type(exc).__name__`, und ein
+    fehlender Anthropic-Schluessel ergibt denselben `RuntimeError` wie ein
+    Abbruch nach echtem Modelllauf.
+    Es gibt im blockierten Datensatz also keinen Beleg, dass forge gearbeitet
+    hat. Der Akteur bleibt deshalb `atlas` -- die Hostseite meldet, was sie
+    beobachtet hat --, und die beiden unterscheidbaren Faelle stehen im Titel
+    statt in einer erfundenen Zuordnung. Das ist die treue Lesart von Atlas'
+    Absicht ("eine feste Forge-Zuordnung waere eine falsche
+    Tatsachenbehauptung"), nicht ihr Gegenteil.
+    """
+    task_id, run_id = meta["task_id"], meta["run_id"]
+    if meta["phase"] == "result_ready":
+        return ag_block(task_id, run_id, "RESULT_READY", "contribution", "forge",
+                        "Rücklauf liegt vor — keine Abnahme, keine Annahme",
+                        "reported_checkpoint", recipient="atlas")
+    if meta.get("failure") == "RUN_JOB_NO_RESULT":
+        titel = "Lauf lieferte kein Ergebnis — über forge ist nichts beobachtet"
+    else:
+        titel = "Lauf blockiert, Ergebnis zurückgehalten — über forge ist nichts belegt"
+    return ag_block(task_id, run_id, "BLOCKED", "progress", "atlas",
+                    titel, "reported_checkpoint")
+
+
 def trusted_terminal_row(row: object, task_id: str, source_commit: str) -> bool:
     if not isinstance(row, dict) or str((row.get("user") or {}).get("id")) != GITHUB_ACTIONS_BOT_ID:
         return False
@@ -243,9 +344,15 @@ def announce() -> None:
     parent, head = context["source_commit"], context["head"]
     run_id = str(context["run_id"])
     run_url = f"https://github.com/{REPO}/actions/runs/{run_id}"
-    post_issue(marker(a["task_id"], parent, "HOST_RECEIVED", head, run_id) +
-               f"\n## {a['task_id']} — HOST_RECEIVED\n{run_url}\n"
-               "Vorbereitung geprüft; der Claude-Lauf hat keinen GitHub-Schlüssel.")
+    body = (marker(a["task_id"], parent, "HOST_RECEIVED", head, run_id) +
+            f"\n## {a['task_id']} — HOST_RECEIVED\n{run_url}\n"
+            "Vorbereitung geprüft; der Claude-Lauf hat keinen GitHub-Schlüssel.")
+    # Ganz ans Ende, siehe Regel 2 beim Vertrag: zwischen Marker und Zaun darf
+    # nichts stehen, und der Kontrollmarker oben bleibt unveraendert.
+    body += "\n\n" + ag_host_received(context)
+    if secret_hit(body.encode()):
+        raise RuntimeError("announce comment secret check failed")
+    post_issue(body)
 
 
 def make_read_only(root: Path, writable: Path) -> None:
@@ -424,12 +531,24 @@ def ensure_fallback() -> None:
             return
         except Exception:
             pass
+    force_blocked(context, "RUN_JOB_NO_RESULT",
+                  "Run job produced no publishable result.\n")
+
+
+def force_blocked(context: dict, failure: str, note: str) -> dict:
+    """Das Ergebnisverzeichnis durch das feste, neutrale BLOCKED-Paket ersetzen.
+
+    Ein Weg fuer beide Anlaesse: der fehlende Lauf (`fallback`) und die
+    Kontrollfolge im Handback (`publish`). Zwei Kopien dieser sechs Zeilen
+    liefen garantiert auseinander, und `validate_result()` verlangt das Paket
+    exakt aus `metadata.json` und `BLOCKED.txt`. """
     shutil.rmtree(RESULT)
     RESULT.mkdir()
     meta = base_metadata(context, "blocked")
-    meta.update(stopped_at=now(), failure="RUN_JOB_NO_RESULT", secret_scan="blocked")
-    (RESULT / "BLOCKED.txt").write_text("Run job produced no publishable result.\n")
+    meta.update(stopped_at=now(), failure=failure, secret_scan="blocked")
+    (RESULT / "BLOCKED.txt").write_text(note)
     write_scanned_metadata(meta)
+    return meta
 
 
 def finite_number(value: object) -> bool:
@@ -543,6 +662,21 @@ def publish() -> None:
     context = json.loads((PREPARED / "control/context.json").read_text())
     meta = json.loads((RESULT / "metadata.json").read_text())
     validate_result(meta, context, RESULT)
+    # DER HANDBACK IST DER EINZIGE TEXT IM PFAD, DEN DAS MODELL SCHREIBT.
+    # Geprueft wird er bisher gegen Geheimnisse -- nicht gegen die
+    # Steuerfolgen des Empfaengers. Steht der Agentarium-Marker darin, traegt
+    # der Kommentar zwei Marker, und der Monitor verwirft das GANZE Ereignis
+    # ("Marker mehrfach"): der bezahlte Lauf waere unsichtbar, und der Grund
+    # stuende nur in einer Fusszeile, in die niemand sieht.
+    # Also behandeln wie ein Geheimnis: Handback nicht veroeffentlichen, feste
+    # neutrale Blockmeldung, keine bereinigte zweite Erfolgsmeldung.
+    # `in` faengt den eingebetteten Fall mit, nicht nur die nackte Zeile.
+    handback = RESULT / "handback.md"
+    if (meta["phase"] == "result_ready" and handback.is_file()
+            and ag_control_in_handback(handback.read_bytes())):
+        meta = force_blocked(context, "CONTROL_SEQUENCE_IN_HANDBACK",
+                             "Result withheld: control sequence in handback.\n")
+        validate_result(meta, context, RESULT)
     serialized = json.dumps(meta, indent=2, ensure_ascii=False)
     if secret_hit(serialized.encode()):
         raise RuntimeError("publish metadata secret check failed")
@@ -552,14 +686,16 @@ def publish() -> None:
                   meta["activation_commit"], meta["run_id"])
     run_url = f"https://github.com/{REPO}/actions/runs/{meta['run_id']}"
     body += f"\n## {task_id} — {phase_label} / STOPPED\n{run_url}\n```json\n{serialized}\n```"
-    handback = RESULT / "handback.md"
-    if meta["phase"] == "result_ready" and handback.exists():
+    if meta["phase"] == "result_ready" and handback.is_file():
         data = handback.read_bytes()
         if secret_hit(data) or sha256(data) != meta.get("handback_sha256"):
             raise RuntimeError("publish integrity/secret check failed")
         body += "\n\n" + data.decode(errors="replace")[:4000]
+    body += "\n\n" + ag_terminal(meta)
     if secret_hit(body.encode()):
         raise RuntimeError("final comment secret check failed")
+    if body.count(AG_MARKER) != 1:
+        raise RuntimeError("agentarium marker must appear exactly once")
     post_issue(body)
 
 
@@ -662,7 +798,49 @@ def self_test() -> None:
                 pass
             else:
                 raise AssertionError("write isolation negative test failed")
-    print("SELF_TEST_OK: 34 security checks; no model/API call")
+    # ---------------- AG-RELAY-LIVE-001: der Agentarium-Vertrag -----------
+    ctx = {"activation": {"task_id": "AG-RELAY-TEST-001", "handback": "handoffs/h.md"},
+           "run_id": "39266581121"}
+    block = ag_host_received(ctx)
+    payload = json.loads(block.split("```json\n", 1)[1].rsplit("\n```", 1)[0])
+    assert set(payload) == set(AG_FIELDS) | {"recipient"}, "contract field set"
+    assert all(isinstance(v, str) and v for v in payload.values()), "contract text"
+    assert block.count(AG_MARKER) == 1, "marker once"
+    assert block.startswith(AG_MARKER + "\n```json\n"), "fence directly after marker"
+    assert (payload["kind"], payload["actor"], payload["recipient"]) == (
+        "handoff", "atlas", "forge"), "host received mapping"
+    assert payload["source_evidence"] == "runtime_stream", "host received evidence"
+    assert payload["id"] == "AG-RELAY-TEST-001:39266581121:HOST_RECEIVED", "id form"
+    assert payload["project_id"] == AG_PROJECT, "project id"
+
+    base = {"task_id": "AG-RELAY-TEST-001", "run_id": "39266581121"}
+    ready = json.loads(ag_terminal({**base, "phase": "result_ready"})
+                       .split("```json\n", 1)[1].rsplit("\n```", 1)[0])
+    assert (ready["kind"], ready["actor"], ready["recipient"]) == (
+        "contribution", "forge", "atlas"), "result ready mapping"
+    assert ready["source_evidence"] == "reported_checkpoint", "result ready evidence"
+    for failure in ("RUN_JOB_NO_RESULT", "RuntimeError", "CONTROL_SEQUENCE_IN_HANDBACK"):
+        blocked = json.loads(ag_terminal({**base, "phase": "blocked", "failure": failure})
+                             .split("```json\n", 1)[1].rsplit("\n```", 1)[0])
+        assert blocked["kind"] == "progress", "blocked kind"
+        assert blocked["actor"] == "atlas", "blocked never claims forge"
+        assert "recipient" not in blocked, "blocked carries no recipient"
+    for bad in ("x" * (AG_MAX_TITLE + 1), "Beispiel " + AG_MARKER):
+        try:
+            ag_block("AG-T", "1", "P", "progress", "atlas", bad, "reported_checkpoint")
+        except RuntimeError:
+            pass
+        else:
+            raise AssertionError("title guard failed")
+    assert ag_control_in_handback(AG_MARKER.encode()), "exact marker caught"
+    assert ag_control_in_handback(
+        ("Beispiel: " + AG_MARKER + " so sieht es aus\n").encode()), "embedded marker caught"
+    assert not ag_control_in_handback(b"# Handback\nnichts besonderes\n"), "clean handback"
+
+    # 24 ausgefuehrte Pruefungen in diesem Block: 16 assert-Zeilen, davon drei
+    # im Dreierlauf (also neun), plus ein Negativtest ueber zwei Faelle.
+    # Die 34 oben sind nicht nachgezaehlt -- sie sind Atlas Zahl und bleiben es.
+    print("SELF_TEST_OK: 34 security checks + 24 contract checks; no model/API call")
 
 
 def main() -> None:
