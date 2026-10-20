@@ -37,11 +37,13 @@ concurrency:
 jobs:
   nachweise:
     runs-on: ubuntu-latest
-    # Gemessen dauern die beiden Nachweise auf main zusammen rund fuenf
-    # Minuten, davon ueber eine halbe Minute reine Wartezeiten (18 s Ruhe im
-    # Platznachweis, 6,6 s Ablauf im Blocknachweis). 25 Minuten lassen Luft
-    # fuer einen dritten Nachweis und einen langsamen Laeufer, ohne dass ein
-    # haengender Lauf eine Stunde kostet.
+    # GEMESSEN IM LAUF 39390390569, nicht geschaetzt: der Schritt mit beiden
+    # Nachweisen brauchte 118 Sekunden (08:01:29 bis 08:03:27), der ganze Job
+    # 2 min 25 s einschliesslich Browser-Download. Ich hatte vorher "rund
+    # fuenf Minuten" geschrieben -- das war geraten und um das Dreifache zu
+    # hoch; die Zahl steht jetzt so da, wie sie gemessen ist.
+    # 25 Minuten lassen also reichlich Luft fuer weitere Nachweise und einen
+    # langsamen Laeufer, ohne dass ein haengender Lauf eine Stunde kostet.
     timeout-minutes: 25
     steps:
       - name: Kandidat holen, nicht einen festen Ref
