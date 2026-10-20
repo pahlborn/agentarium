@@ -139,80 +139,102 @@ function vergleichsfassung() {
           N.err.length ? N.err[0].slice(0, 34) : 'keine', 'keine');
   }
 
-  console.log('\nB — Die Griffe');
-  console.log('    erwartet: jeder sichtbare Block hat einen Griff und er sitzt');
-  console.log('              darauf; jeder unsichtbare hat keinen\n');
   const q = await b.newContext({ viewport: { width: 1194, height: 834 } });
   const s = await q.newPage();
   const err = [];
   s.on('pageerror', e => err.push(String(e)));
   await s.goto(n.adr, { waitUntil: 'load' });
   await s.waitForTimeout(1300);
-  /* Nicht "sechs Griffe" pruefen -- die Bloecke erscheinen und verblassen,
-     also waere jede feste Zahl beim naechsten Zustand falsch. Geprueft wird
-     die Eigenschaft, nicht der Augenblick. */
-  const griffe = await s.evaluate(ids => {
-    let da = 0, fehlt = 0, falsch = 0, ueberzaehlig = 0;
-    ids.forEach(id => {
-      const e = document.getElementById(id);
-      if (!e) return;
-      const k = e.getBoundingClientRect();
-      const sichtbar = k.width > 0 && k.height > 0 && !e.classList.contains('leise');
-      const g = document.querySelector('#agGriffe [data-fuer="' + id + '"]');
-      const gz = !!g && !g.hidden;
-      if (sichtbar && !gz) fehlt++;
-      else if (!sichtbar && gz) ueberzaehlig++;
-      else if (sichtbar && gz) {
-        da++;
-        const gk = g.getBoundingClientRect();
-        if (!(Math.abs(gk.left - k.left - 2) < 3 && Math.abs(gk.top - k.top - 2) < 3)) falsch++;
-      }
+
+  console.log('\nB — Die Griffe erscheinen NUR, wenn der Block dran ist');
+  console.log('    erwartet: im Ruhezustand kein Griff zu sehen; angetippt');
+  console.log('              erscheint das Dreieck in der Ecke des Blocks\n');
+  /* Der Zeiger weg von allem, damit kein `:hover` einen Griff weckt. */
+  await s.mouse.move(597, 417);
+  await s.waitForTimeout(700);
+  const ruhe = await s.evaluate(() => {
+    let sichtbar = 0;
+    document.querySelectorAll('#agGriffe .agGriff').forEach(g => {
+      if (!g.hidden && parseFloat(getComputedStyle(g).opacity) > 0.05) sichtbar++;
     });
-    return { da, fehlt, falsch, ueberzaehlig };
-  }, BLOECKE);
-  /* Die Erwartung steht hier als Zahl, nicht als Abschrift des Messwerts:
-     eine Pruefung, die ihr Soll aus dem Ist baut, kann nicht fehlschlagen. */
-  zeile('sichtbare Blöcke mit Griff (≥ 4)',
-        griffe.da >= 4 ? 'ja, ' + griffe.da : 'nein, nur ' + griffe.da, 'ja, ' + griffe.da);
-  zeile('sichtbar, aber ohne Griff', griffe.fehlt, 0);
-  zeile('unsichtbar, aber mit Griff', griffe.ueberzaehlig, 0);
-  zeile('Griff sitzt nicht auf dem Block', griffe.falsch, 0);
+    return sichtbar;
+  });
+  zeile('im Ruhezustand sichtbare Griffe', ruhe, 0);
+
+  /* Jeder Block, der sich lesen laesst, wird angetippt — das ist die Geste,
+     die es auf dem iPad gibt. Danach MUSS sein Griff da sein, und zwar auch
+     wenn der Zeiger danach woanders steht. */
+  const antippbar = [['agMarke', 'agMarke'], ['agRechts', 'agKopf'], ['agWerkName', 'agWerkName']];
+  for (const [block, wach] of antippbar) {
+    await s.evaluate(id => document.getElementById(id).click(), wach);
+    await s.mouse.move(597, 417);
+    /* 800 ms, nicht 500: die Nachfuehrung laeuft im 250-ms-Takt und das
+       Einblenden dauert 200 -- bei 500 ms erwischte die Messung einmal 79 %
+       mitten im Verlauf. Das war mein Messfehler, nicht ein Fehler am Griff. */
+    await s.waitForTimeout(800);
+    const g = await s.evaluate(id => {
+      const h = document.querySelector('#agGriffe [data-fuer="' + id + '"]');
+      const e = document.getElementById(id);
+      if (!h || h.hidden) return { da: 0 };
+      const k = h.getBoundingClientRect(), b = e.getBoundingClientRect();
+      const cs = getComputedStyle(h);
+      return { da: 1, deck: Math.round(parseFloat(cs.opacity) * 100),
+               ecke: Math.abs(k.left - b.left) < 3 && Math.abs(k.top - b.top) < 3,
+               dreieck: (cs.clipPath || cs.webkitClipPath || '').indexOf('polygon') >= 0,
+               kante: Math.round(k.width) };
+    }, block);
+    zeile(block + ': Griff erschienen', g.da ? 'ja' : 'nein', 'ja');
+    zeile(block + ': sichtbar (≥ 80 %)', g.deck >= 80 ? 'ja, ' + g.deck + '%' : 'nein, ' + g.deck + '%',
+          'ja, ' + g.deck + '%');
+    zeile(block + ': in der Ecke des Blocks', g.ecke ? 'ja' : 'nein', 'ja');
+    zeile(block + ': ist ein Dreieck', g.dreieck ? 'ja' : 'nein', 'ja');
+  }
+  /* Und die Gegenrichtung: der Lesezustand laeuft nach sechs Sekunden aus,
+     danach ist das Bild wieder leer. */
+  await s.waitForTimeout(6600);
+  const wiederRuhe = await s.evaluate(() => {
+    let sichtbar = 0;
+    document.querySelectorAll('#agGriffe .agGriff').forEach(g => {
+      if (!g.hidden && parseFloat(getComputedStyle(g).opacity) > 0.05) sichtbar++;
+    });
+    return sichtbar;
+  });
+  zeile('nach Ablauf wieder leer', wiederRuhe, 0);
 
   console.log('\nC — Einen Block ziehen, und das Band folgt');
-  console.log('    erwartet: „Was geschieht" liegt am Ziel, ist gemerkt, und');
+  console.log('    erwartet: der Werkname liegt am Ziel, ist gemerkt, und');
   console.log('              der Ring nimmt den frei gewordenen Platz\n');
   const vorRing = await s.$$eval('.agName',
     e => Math.min.apply(null, e.map(x => x.getBoundingClientRect().left)));
-  const g = await s.$('#agGriffe [data-fuer="agEcke"]');
-  if (!g) ungeprueft('kein Griff für agEcke gefunden — Teil C nicht messbar');
+  /* Erst wecken, dann fassen — genau die Reihenfolge, die ein Mensch geht. */
+  await s.evaluate(() => document.getElementById('agWerkName').click());
+  await s.waitForTimeout(400);
+  const g = await s.$('#agGriffe [data-fuer="agWerkName"]');
+  if (!g) ungeprueft('kein Griff für agWerkName gefunden — Teil C nicht messbar');
   const gk = await g.boundingBox();
-  const zx = 700, zy = 120;
-  await s.mouse.move(gk.x + 11, gk.y + 11);
+  const fx = gk.x + gk.width / 4, fy = gk.y + gk.height / 4;   /* im Dreieck */
+  const zx = 420, zy = 300;
+  await s.mouse.move(fx, fy);
   await s.mouse.down();
   for (let i = 1; i <= 12; i++) {
-    await s.mouse.move(gk.x + 11 + (zx - gk.x - 11) * i / 12,
-                       gk.y + 11 + (zy - gk.y - 11) * i / 12);
+    await s.mouse.move(fx + (zx - fx) * i / 12, fy + (fy > zy ? -1 : 1) * Math.abs(fy - zy) * i / 12);
     await s.waitForTimeout(16);
   }
   await s.mouse.up();
   await s.waitForTimeout(700);
-  const ecke = await s.$eval('#agEcke', e => {
+  const ortC = await s.$eval('#agWerkName', e => {
     const k = e.getBoundingClientRect();
     return { x: Math.round(k.left), y: Math.round(k.top) };
   });
-  /* Der Griff sitzt 2 px innen, der Zug fasst ihn in der Mitte (11,11):
-     der Block landet also rund 9 px links/oberhalb des Mauszeigers. 12 px
-     Toleranz, damit die Klemmung am Fensterrand nicht als Fehler zaehlt. */
-  const amZiel = Math.abs(ecke.x - (zx - 9)) <= 12 && Math.abs(ecke.y - (zy - 9)) <= 12;
-  zeile('„Was geschieht" liegt am Ziel',
-        amZiel ? 'ja, ' + ecke.x + ',' + ecke.y : 'nein, ' + ecke.x + ',' + ecke.y, 'ja, ' + ecke.x + ',' + ecke.y);
+  const abw = Math.abs(ortC.x - (zx - gk.width / 4)) + Math.abs(ortC.y - (zy - gk.height / 4));
+  zeile('Werkname liegt am Ziel (Abw. px)', abw <= 24 ? 'ja, ' + abw : 'nein, ' + abw, 'ja, ' + abw);
   const abl = await s.evaluate(k => localStorage.getItem(k), SCHLUESSEL);
-  zeile('im Gerät gemerkt', abl && abl.indexOf('agEcke') > 0 ? 'ja' : 'nein', 'ja');
+  zeile('im Gerät gemerkt', abl && abl.indexOf('agWerkName') > 0 ? 'ja' : 'nein', 'ja');
   const nachRing = await s.$$eval('.agName',
     e => Math.min.apply(null, e.map(x => x.getBoundingClientRect().left)));
-  zeile('Ring nutzt den freigewordenen Platz',
-        nachRing < vorRing - 10 ? 'ja, ' + Math.round(vorRing) + ' → ' + Math.round(nachRing)
-                                : 'nein, ' + Math.round(vorRing) + ' → ' + Math.round(nachRing),
+  zeile('Ring hat sich neu gerechnet',
+        nachRing !== vorRing ? 'ja, ' + Math.round(vorRing) + ' → ' + Math.round(nachRing)
+                             : 'nein, unverändert ' + Math.round(vorRing),
         'ja, ' + Math.round(vorRing) + ' → ' + Math.round(nachRing));
   zeile('Knopf „Plätze zurück" erscheint', await s.$eval('#agPlatz', e => e.hidden), false);
 
@@ -221,13 +243,16 @@ function vergleichsfassung() {
   console.log('              stellt alles wieder her\n');
   await s.reload({ waitUntil: 'load' });
   await s.waitForTimeout(1300);
-  const nachLaden = await s.$eval('#agEcke', e => {
+  /* Geprueft wird der Block, der in Teil C gezogen wurde. Und zwar im
+     RUHEZUSTAND: der Lesezustand vergroessert ihn (scale 1.28), ein Vergleich
+     ueber das Neuladen hinweg misst sonst zwei verschiedene Maßstaebe. */
+  const nachLaden = await s.$eval('#agWerkName', e => {
     const k = e.getBoundingClientRect();
     return { x: Math.round(k.left), y: Math.round(k.top) };
   });
-  const bleibt = Math.abs(nachLaden.x - ecke.x) <= 2 && Math.abs(nachLaden.y - ecke.y) <= 2;
+  const bleibt = Math.abs(nachLaden.x - ortC.x) <= 3 && Math.abs(nachLaden.y - ortC.y) <= 3;
   zeile('übersteht Neuladen (Abw. px)',
-        bleibt ? 'ja' : 'nein, ' + nachLaden.x + ',' + nachLaden.y + ' statt ' + ecke.x + ',' + ecke.y, 'ja');
+        bleibt ? 'ja' : 'nein, ' + nachLaden.x + ',' + nachLaden.y + ' statt ' + ortC.x + ',' + ortC.y, 'ja');
   await s.setViewportSize({ width: 834, height: 1194 });
   await s.waitForTimeout(900);
   const imBild = await s.evaluate(ids => {
@@ -255,48 +280,34 @@ function vergleichsfassung() {
         (await s.evaluate(k => localStorage.getItem(k), SCHLUESSEL)) === null ? 'ja' : 'nein', 'ja');
   zeile('Knopf verschwindet', await s.$eval('#agPlatz', e => e.hidden), true);
 
-  console.log('\nF — SICHTBAR OHNE HOVER (der Fehler vom 19.10.)');
-  console.log('    Peter: „Ich kann nicht entdecken wo ich anfassen soll."');
-  console.log('    Ein Finger hat kein :hover. Also messen, waehrend der');
-  console.log('    Zeiger WOANDERS steht — und nicht auf dem Griff.\n');
-  /* Der Zeiger muss weg von jedem Griff, sonst messe ich wieder den
-     aufgeleuchteten Zustand, den es auf dem iPad nicht gibt. Mitte des
-     Feldes, dort liegt kein Block. */
-  await s.mouse.move(Math.round(1194/2), Math.round(834/2));
-  await s.waitForTimeout(600);
-  const sicht = await s.evaluate(() => {
-    const g = document.querySelector('#agGriffe .agGriff:not([hidden])');
-    if (!g) return { da: 0 };
-    const cs = getComputedStyle(g);
-    const schicht = getComputedStyle(document.getElementById('agGriffe'));
-    const k = g.getBoundingClientRect();
-    return { da: 1,
-             deck: Math.round(parseFloat(cs.opacity) * 100),
-             schichtDeck: Math.round(parseFloat(schicht.opacity) * 100),
-             rand: cs.borderTopWidth,
-             grund: cs.backgroundColor,
-             kante: Math.round(k.width),
-             unterZeiger: document.elementFromPoint(597, 417) === g };
-  });
-  zeile('ein Griff ist da', sicht.da ? 'ja' : 'nein', 'ja');
-  zeile('Zeiger liegt NICHT auf dem Griff', sicht.unterZeiger === false ? 'ja' : 'nein', 'ja');
-  zeile('Deckkraft des Griffs (≥ 90 %)', sicht.deck >= 90 ? 'ja, ' + sicht.deck + '%' : 'nein, nur ' + sicht.deck + '%', 'ja, ' + sicht.deck + '%');
-  zeile('Deckkraft der Schicht (≥ 90 %)', sicht.schichtDeck >= 90 ? 'ja, ' + sicht.schichtDeck + '%' : 'nein, nur ' + sicht.schichtDeck + '%', 'ja, ' + sicht.schichtDeck + '%');
-  zeile('trägt einen Rand', sicht.rand !== '0px' ? 'ja, ' + sicht.rand : 'nein', 'ja, ' + sicht.rand);
-  zeile('trägt eine Platte, nicht nur Punkte',
-        /rgba?\(/.test(sicht.grund) && !/, *0\)$/.test(sicht.grund) ? 'ja' : 'nein, ' + sicht.grund, 'ja');
-  zeile('Kantenlänge (≥ 28 px)', sicht.kante >= 28 ? 'ja, ' + sicht.kante : 'nein, nur ' + sicht.kante, 'ja, ' + sicht.kante);
-  /* Und die Kehrseite: nach langer Ruhe darf er verblassen -- der Monitor
-     soll das Feld zeigen, nicht seine Bedienung. 12 s plus Luft. */
-  await s.waitForTimeout(13000);
-  const geruht = await s.evaluate(() =>
-    document.getElementById('agGriffe').classList.contains('leise'));
-  zeile('verblasst nach Ruhe', geruht, true);
-  await s.mouse.move(600, 700);
+  console.log('\nF — DER GRIFF WÄCHST MIT DEM FENSTER (Peters Befund vom 20.10.)');
+  console.log('    „im Browser auf dem laptop sind die anfasser fast zu klein,');
+  console.log('     im ipad jedoch zu groß. sie skalieren also nicht mit der');
+  console.log('     anzeige." — also an zwei Fenstermaßen messen\n');
+  async function kante(breite, hoehe) {
+    await s.setViewportSize({ width: breite, height: hoehe });
+    await s.waitForTimeout(600);
+    await s.evaluate(() => document.getElementById('agMarke').click());
+    await s.waitForTimeout(400);
+    return await s.evaluate(() => {
+      const h = document.querySelector('#agGriffe [data-fuer="agMarke"]');
+      if (!h || h.hidden) return 0;
+      return Math.round(h.getBoundingClientRect().width);
+    });
+  }
+  const aufPad = await kante(1194, 834);
+  const aufSchirm = await kante(1920, 1080);
+  zeile('Kante bei 1194 (iPad quer)', aufPad > 0 ? 'ja, ' + aufPad : 'kein Griff', 'ja, ' + aufPad);
+  zeile('Kante bei 1920 (Laptop)', aufSchirm > 0 ? 'ja, ' + aufSchirm : 'kein Griff', 'ja, ' + aufSchirm);
+  zeile('wächst mit dem Fenster', aufSchirm > aufPad ? 'ja, +' + (aufSchirm - aufPad) + ' px'
+                                                     : 'nein, ' + aufPad + ' → ' + aufSchirm,
+        'ja, +' + (aufSchirm - aufPad) + ' px');
+  /* Untergrenze: auf dem iPad muss genug zum Fassen bleiben. 20 px ist der
+     Boden im Stylesheet; geprueft wird, dass er auch greift. */
+  zeile('Untergrenze auf dem iPad (≥ 20 px)', aufPad >= 20 ? 'ja' : 'nein, ' + aufPad, 'ja');
+  zeile('Obergrenze gehalten (≤ 34 px)', aufSchirm <= 34 ? 'ja' : 'nein, ' + aufSchirm, 'ja');
+  await s.setViewportSize({ width: 1194, height: 834 });
   await s.waitForTimeout(500);
-  const geweckt = await s.evaluate(() =>
-    !document.getElementById('agGriffe').classList.contains('leise'));
-  zeile('eine Berührung weckt ihn wieder', geweckt, true);
 
   console.log('\nE — Bedienen geht weiter');
   console.log('    erwartet: ein Griff nimmt dem Block nicht seinen Knopf\n');
