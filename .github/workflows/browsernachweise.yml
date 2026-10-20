@@ -1,0 +1,129 @@
+# AG-PROOF-CI-001 — die Browsernachweise laufen hier, nicht im Container eines Agenten.
+#
+# WARUM ES DIESEN LAUF GIBT. Zweimal hintereinander blieb ein fertiger
+# Kandidat liegen, weil der pruefende Agent kein ausfuehrbares Chromium hatte:
+# #17 seit dem 18.10., Kriterium 3 von #40 am 20.10. Der Nachweis war beide
+# Male in Ordnung -- nur konnte ihn ausser dem Autor niemand laufen lassen, und
+# ein Nachweis, den nur sein Autor ausfuehren kann, belegt Wiederholbarkeit
+# statt Unabhaengigkeit. Hier haengt er nicht mehr an einer Umgebung, sondern
+# am Commit, und jeder kann das Ergebnis nachlesen.
+#
+# WAS HIER NICHT PASSIERT: kein Modellaufruf, kein Geheimnis, keine
+# Aktivierung, kein Netz ausser npm und dem Browser-Download. Die Nachweise
+# selbst tischen ihre Seiten auf 127.0.0.1 auf.
+name: Browsernachweise
+
+on:
+  push:
+    paths:
+      - 'previews/**'
+      - 'pilot/github-live/**'
+      - '.github/workflows/browsernachweise.yml'
+  pull_request:
+    paths:
+      - 'previews/**'
+      - 'pilot/github-live/**'
+      - '.github/workflows/browsernachweise.yml'
+
+# Nur Lesen. Dieser Lauf schreibt nichts, nirgends.
+permissions:
+  contents: read
+
+# Ein Lauf je Zweig: push und pull_request treffen denselben Stand.
+concurrency:
+  group: browsernachweise-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  nachweise:
+    runs-on: ubuntu-latest
+    # Gemessen dauern die beiden Nachweise auf main zusammen rund fuenf
+    # Minuten, davon ueber eine halbe Minute reine Wartezeiten (18 s Ruhe im
+    # Platznachweis, 6,6 s Ablauf im Blocknachweis). 25 Minuten lassen Luft
+    # fuer einen dritten Nachweis und einen langsamen Laeufer, ohne dass ein
+    # haengender Lauf eine Stunde kostet.
+    timeout-minutes: 25
+    steps:
+      - name: Kandidat holen, nicht einen festen Ref
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          # DER TATSAECHLICH GEPRUEFTE COMMIT, und zwar ausdruecklich.
+          # `relay-offline-tests.yml` nagelt einen Ref von Hand fest
+          # (9bb7ce6, Stand 18.10.) und prueft damit seit Wochen denselben
+          # alten Baum -- gruen, egal was im Kandidaten steht. Genau das
+          # soll hier nicht passieren.
+          # Bei `pull_request` zeigt GITHUB_SHA auf den Mischcommit; der Kopf
+          # des Kandidaten ist `pull_request.head.sha`. Bei `push` ist beides
+          # dasselbe.
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          # Der Blocknachweis vergleicht gegen `origin/main` (`git show`).
+          # Ohne die Geschichte endet er mit Rueckgabe 2, also ungeprueft.
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Vergleichsstand bereitstellen
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin main:refs/remotes/origin/main
+          echo "geprüfter Commit : $(git rev-parse HEAD)"
+          echo "Vergleichsstand  : $(git rev-parse origin/main)"
+
+      # KEIN setup-node. Der Laeufer bringt Node mit, und ein Aktionspin
+      # weniger ist einer weniger, den jemand nachsehen muss -- ich haette
+      # seinen Commit-Hash aus dem Gedaechtnis geschrieben, und das ist in
+      # diesem Repository genau der Fehler, der nicht mehr vorkommen soll.
+      # Der Hash von actions/checkout oben ist nicht geraten: er steht so
+      # schon in `claude-public-relay-v2.yml` auf `main`.
+      - name: Playwright und Chromium, auf Fassung festgenagelt
+        run: |
+          set -euo pipefail
+          npm install --no-save --no-package-lock --no-audit --no-fund playwright@1.56.1
+          npx --no-install playwright install --with-deps chromium
+
+      - name: Browser nachweisen, bevor irgendetwas gruen werden kann
+        run: |
+          set -euo pipefail
+          # KEIN BROWSER DARF NIE ALS BESTANDEN DURCHGEHEN. Die Nachweise
+          # selbst enden dann mit Rueckgabe 2 ("ungeprueft") -- das faellt im
+          # Lauf ebenfalls durch, weil 2 nicht 0 ist. Diese Stufe faellt
+          # frueher und mit klarer Ursache, statt die Diagnose dem Leser zu
+          # ueberlassen.
+          PFAD="$(node -e "console.log(require('playwright').chromium.executablePath())")"
+          echo "Node       : $(node --version)"
+          echo "Playwright : $(node -e "console.log(require('playwright/package.json').version)")"
+          echo "Chromium   : $PFAD"
+          test -x "$PFAD" || { echo "::error::kein ausführbares Chromium unter $PFAD"; exit 1; }
+          "$PFAD" --version
+
+      - name: Alle Browsernachweise
+        run: |
+          set -uo pipefail
+          # Jeder `previews/*/pruefen.js` laeuft, und JEDE Rueckgabe ausser 0
+          # faellt durch -- auch die 2 fuer "ungeprueft". Ein Nachweis, der
+          # sich selbst fuer ungeprueft erklaert, ist kein bestandener.
+          # Gesammelt statt beim ersten Fehlschlag abgebrochen: wer drei
+          # Nachweise hat, will alle drei Ergebnisse sehen, nicht das erste.
+          gefunden=0
+          schlecht=0
+          for n in previews/*/pruefen.js; do
+            [ -e "$n" ] || continue
+            gefunden=$((gefunden + 1))
+            echo "::group::$n"
+            node "$n"
+            rc=$?
+            echo "::endgroup::"
+            if [ "$rc" -eq 0 ]; then
+              echo "  bestanden : $n"
+            else
+              echo "::error file=$n::Rückgabe $rc (0 = bestanden, 1 = Abweichung, 2 = ungeprüft)"
+              schlecht=$((schlecht + 1))
+            fi
+          done
+          # Kein Nachweis gefunden ist ebenfalls kein Erfolg: sonst waere ein
+          # verschobenes Verzeichnis ein gruener Lauf.
+          if [ "$gefunden" -eq 0 ]; then
+            echo "::error::kein previews/*/pruefen.js gefunden"
+            exit 1
+          fi
+          echo "gelaufen: $gefunden, davon durchgefallen: $schlecht"
+          [ "$schlecht" -eq 0 ]
