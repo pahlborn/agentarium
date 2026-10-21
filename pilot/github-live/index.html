@@ -2289,7 +2289,7 @@
 
      Der Bauzeitpunkt kommt beim Bauen aus der Uhr. Von Hand gepflegte
      Datumsangaben sind nach der zweiten Änderung falsch. */
-  var FASSUNG = '59', GEBAUT = '2026-10-21T08:35Z';
+  var FASSUNG = '60', GEBAUT = '2026-10-21T08:50Z';
 
   /* AG-GH-LIVE-001: JEDE TEXTSENKE MASKIERT.
      Seit Live-Daten von aussen kommen (GitHub-Kommentare, one-event.json),
@@ -3874,6 +3874,19 @@
      hier, dass es sie nicht gibt — erfunden wird nichts. */
   var register = [];
   function ratVermerk(was) { geraten[was]++; geraten.gesamt++; }
+
+  /* LUECKEN SIND NICHT RATEENTSCHEIDUNGEN. Im aufgezeichneten Stueck darf
+     der Monitor raten und es vermerken -- die Daten sind erfunden, und eine
+     Rateentscheidung ist dort eine Notloesung. Im Livebetrieb ist Raten
+     verboten: Ein `delivered` zu einer unbekannten Aufgabenkennung darf
+     keine FREMDE Aufgabe schliessen (Atlas, 21.10.: "unbekannte ID muss als
+     Luecke/Konflikt stehen bleiben"). Es bleibt also stehen, und die Luecke
+     wird gezaehlt statt verschwiegen. */
+  var luecken = { beginn: 0, lieferung: 0, abbruch: 0, gesamt: 0 };
+  function luecke(was) { luecken[was]++; luecken.gesamt++; }
+  function lueckenNull() {
+    luecken.beginn = luecken.lieferung = luecken.abbruch = luecken.gesamt = 0;
+  }
   function ratNull() {
     geraten.auftrag = geraten.abnahme = geraten.gegen =
       geraten.antwort = geraten.gesamt = 0;
@@ -3993,7 +4006,39 @@
      läuft; beim Stückwechsel auf null. */
   var verbrauch = {};
 
-  function arbeitAn(name, auftrag, kommando, modell, b) {
+  /* VERGABE: eine Aufgabe legt sich hin, ohne zu behaupten, dass daran
+     gearbeitet wird. Doppelte Vergabe derselben Kennung ist wirkungslos --
+     ein Transportduplikat darf keinen zweiten Ring erzeugen. */
+  function arbeitZuweisen(name, aufgabe, titel) {
+    if (!nachName[name]) return false;
+    var S = arbeit[name];
+    if (S && !S.aus && aufgabe) {
+      for (var q = 0; q < S.liste.length; q++)
+        if (S.liste[q].aufgabe === aufgabe) return false;
+    }
+    arbeitAn(name, titel || '', '', '', { aufgabe: aufgabe || '' }, 'zugewiesen');
+    return true;
+  }
+
+  /* BEGINN: genau die zugewiesene Aufgabe wird begonnen. Ist sie unbekannt,
+     wird KEINE angelegt und keine fremde umgestellt -- das waere ein
+     erfundener Beginn. Die Luecke wird gezaehlt. */
+  function arbeitBeginnen(name, aufgabe) {
+    var S = arbeit[name];
+    if (!S || S.aus || !aufgabe) { luecke('beginn'); return false; }
+    for (var q = 0; q < S.liste.length; q++) {
+      if (S.liste[q].aufgabe !== aufgabe) continue;
+      if (S.liste[q].zustand === 'zugewiesen') {
+        S.liste[q].zustand = 'begonnen';
+        S.liste[q].beginn = zeit;      /* die Dauer zaehlt ab dem Beginn */
+      }
+      return true;
+    }
+    luecke('beginn');
+    return false;
+  }
+
+  function arbeitAn(name, auftrag, kommando, modell, b, zustand) {
     if (!nachName[name]) return;
     var S = arbeit[name];
     if (!S || S.aus) { S = arbeit[name] = { t: 0, liste: [] }; }
@@ -4007,6 +4052,12 @@
          den ganzen Auftrag stabil und ist der Schlüssel, mit dem sich
          später sagen lässt, WELCHE Arbeit endet. */
       aufgabe: (b && b.aufgabe) || '',
+      /* ZUGEWIESEN IST NICHT BEGONNEN. Der Demopfad legt weiter sofort
+         `begonnen` an -- dort IST das Ankommen des Balls der Beginn, und
+         das bleibt unveraendert. Der Livepfad kann `zugewiesen` setzen:
+         dann steht der Ring still, statt zu kreisen. Ein stehender Ring
+         ist zaehlbar und behauptet keine Arbeit. */
+      zustand: zustand || 'begonnen',
       w: Math.random() * 6.2832, t: 0, beginn: zeit
     });
     /* Alle Aufträge bleiben in der Liste. Vorher flog der älteste
@@ -4018,7 +4069,7 @@
   /* Was beendet welchen Auftrag? Den ältesten offenen — wer liefert, wird
      das los, was am längsten liegt. Erst wenn keiner mehr offen ist, hört
      die Arbeit ganz auf. */
-  function auftragFertig(name, aufgabe) {
+  function auftragFertig(name, aufgabe, streng) {
     var S = arbeit[name];
     if (!S || S.aus) return;
     /* Sagen die Daten, WELCHE Aufgabe erledigt ist, wird genau die
@@ -4031,6 +4082,11 @@
         if (S.liste[q].aufgabe === aufgabe) { i = q; break; }
     }
     if (i < 0) {
+      /* STRENG HEISST: NICHTS SCHLIESSEN. Ohne diesen Zweig fiele eine
+         unbekannte Kennung auf den aeltesten Auftrag zurueck -- im
+         aufgezeichneten Stueck eine vermerkte Notloesung, im Livebetrieb
+         eine falsche Tatsachenbehauptung ueber eine fremde Aufgabe. */
+      if (streng) { luecke('lieferung'); return; }
       if (S.liste.length > 1) ratVermerk('auftrag');
       i = 0;
     }
@@ -4400,15 +4456,25 @@
       for (var q = 0; q < Math.min(S.liste.length, 4); q++) {
         var L = S.liste[q];
         L.t += dt;
-        L.w += (1.1 - q * 0.17) * dt;
+        /* EIN ZUGEWIESENER RING DREHT NICHT. Das ist der ganze Unterschied,
+           und er ist mit Absicht so klein: Dieselbe Gestalt, dieselbe
+           Zaehlbarkeit, nur ohne Bewegung und schwaecher. Wer zusieht, sieht
+           sofort, wer eine Aufgabe HAT und wer an ihr ARBEITET -- und es
+           kommt keine neue Form ins Bild.
+           Kreisen heisst in diesem Feld "dort entsteht etwas, und zwar nur,
+           solange man kreist". Ein stehender Kreis sagt also genau das
+           Richtige: liegt da, noch nichts entsteht. */
+        var ruht = (L.zustand === 'zugewiesen');
+        if (!ruht) L.w += (1.1 - q * 0.17) * dt;
         var r = grund * (0.68 + q * 0.46)
-              * (1 + 0.09 * Math.sin(L.t * 1.25 + q));
+              * (1 + (ruht ? 0.03 : 0.09) * Math.sin(L.t * 1.25 + q));
         for (var s = 0; s < 2; s++) {
           var w = L.w + s * Math.PI;
           window.__feld.strang(
             p[0] + Math.cos(w) * r, p[1] + Math.sin(w) * r,
-            -Math.sin(w) * r * 0.9, Math.cos(w) * r * 0.9,
-            (0.40 + 0.22 * atem) * staerke,
+            -Math.sin(w) * r * (ruht ? 0.25 : 0.9),
+            Math.cos(w) * r * (ruht ? 0.25 : 0.9),
+            (ruht ? 0.20 : (0.40 + 0.22 * atem)) * staerke,
             0.38 + 0.16 * Math.random(), A.farbe, 0);
         }
       }
@@ -4416,8 +4482,14 @@
       /* Der Herzschlag der Arbeit: Etwa jede anderthalb Sekunden ein kurzer
          Knoten in der Mitte. Ohne ihn ist das Kreisen gleichförmig, und
          gleichförmig liest man als Verzierung statt als Tätigkeit. */
+      /* Der Herzschlag gehoert zur ARBEIT, nicht zum Besitz. Liegen nur
+         zugewiesene Auftraege, schlaegt nichts -- sonst behauptete der
+         Takt eine Taetigkeit, die niemand gemeldet hat. */
+      var irgendBegonnen = false;
+      for (var hb = 0; hb < S.liste.length; hb++)
+        if (S.liste[hb].zustand !== 'zugewiesen') { irgendBegonnen = true; break; }
       S.schlag = (S.schlag || 0) - dt;
-      if (S.schlag <= 0 && !S.aus) {
+      if (S.schlag <= 0 && !S.aus && irgendBegonnen) {
         S.schlag = 1.5;
         window.__feld.knoten(p[0], p[1], 0.62, A.farbe, 0, 10, 0.75);
       }
@@ -4809,6 +4881,31 @@
            er trieb den Ball, ich hatte nur an `arbeitAn` gedacht.
            Gefunden vom eigenen Nachweis, nicht im Betrieb. */
         if (E.art === 'progress' || GH_LEBEN[E.art]) {
+          /* ===== DER ZUSTAND FOLGT DEM BELEG, NICHT DER ANIMATION =====
+
+             Welches Ereignis darf welchen Uebergang treiben? Die Regel hat
+             genau zwei Teile, und beide stehen in Atlas' Betriebskonzept:
+
+             1. "Jede tatsaechlich arbeitende Rolle meldet ihre eigenen
+                Uebergaenge" -- also treibt `received`, `started`,
+                `delivered`, `aborted` nur, wenn der Melder der Akteur ist
+                (`E.selbstauskunft`). Atlas ueber forge bleibt Beobachtung.
+             2. `assigned` ist die Ausnahme, und zwar notwendig: Eine
+                Vergabe meldet der Vergebende, nie der Empfaenger. Sie legt
+                deshalb eine Aufgabe als ZUGEWIESEN an -- und behauptet
+                keinen Beginn.
+
+             Was NICHT hier steht, ist Absicht: `blocked`/`resolved` und
+             `reviewed/accepted/merged/published` treiben noch nichts. Sie
+             kommen an und sind lesbar; einen Zustand bekommen sie, wenn sie
+             einen haben, den der Vertrag belegt. */
+          if (E.art === 'assigned' && E.an && E.spur && E.spur.task_id) {
+            arbeitZuweisen(E.an, E.spur.task_id, E.text);
+          } else if (E.selbstauskunft && E.spur && E.spur.task_id) {
+            if (E.art === 'started') arbeitBeginnen(E.von, E.spur.task_id);
+            else if (E.art === 'delivered' || E.art === 'aborted')
+              auftragFertig(E.von, E.spur.task_id, true);   /* streng */
+          }
           stromZeile(E, FORTSCHRITT);
           /* Die wahre Art steht in der Meldung, nicht "progress": `melden`
              benutzt sie ausschliesslich als Beschriftung (nachgesehen), und
@@ -4960,6 +5057,21 @@
              arbeiten: (function () { var r = [];
                for (var n in arbeit) if (!arbeit[n].aus && arbeit[n].liste.length)
                  r.push(n + ':' + arbeit[n].liste.length);
+               return r; })(),
+             /* AG-EVENT-JOURNAL-001: Luecken und die Zustaende je Aufgabe.
+                Ohne sie laesst sich von aussen nicht unterscheiden, ob eine
+                Aufgabe liegt oder bearbeitet wird -- und genau das ist der
+                Unterschied, um den es geht. Diagnose, keine Anzeige. */
+             luecken: luecken.gesamt,
+             lueckenEinzeln: { beginn: luecken.beginn,
+               lieferung: luecken.lieferung, abbruch: luecken.abbruch },
+             aufgaben: (function () { var r = [];
+               for (var n in arbeit) {
+                 if (arbeit[n].aus) continue;
+                 arbeit[n].liste.forEach(function (L) {
+                   r.push({ wer: n, aufgabe: L.aufgabe, zustand: L.zustand });
+                 });
+               }
                return r; })() };
   };
 

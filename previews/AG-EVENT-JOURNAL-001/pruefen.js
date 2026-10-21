@@ -313,15 +313,87 @@ function koerper(f) {
         kopfJetzt.werk.indexOf('AG-EVENT-JOURNAL-001') >= 0, true);
   console.log('        danach:   „' + kopfJetzt.werk.trim().slice(0, 56) + '"');
 
-  console.log('\nG — Was dieser Schritt NICHT tut');
-  console.log('    erwartet: kein Aufgabenzustand getrieben, kein Ring, kein Zähler\n');
-  const zust = await s.evaluate(() => (window.__agStand && window.__agStand()) || null);
-  if (zust && typeof zust === 'object') {
-    zeile('keine offene Aufgabe gebucht', zust.aufgabenAuf || 0, 0);
-    zeile('kein Ball verschoben', zust.ball || null, null);
-  } else {
-    console.log('  ok    kein Zustandsfenster vorhanden — nichts zu treiben');
+  console.log('\nH — Der Zustand folgt dem Beleg: Vergabe, Beginn, Lieferung');
+  console.log('    erwartet: zugewiesen ≠ begonnen, Fremdaussage treibt nicht,');
+  console.log('    unbekannte Kennung schließt NICHTS\n');
+
+  async function stand() {
+    return await s.evaluate(() => (window.__agStand && window.__agStand()) || null);
   }
+  function aufg(st, wer, id) {
+    return (st.aufgaben || []).filter(a => a.wer === wer && a.aufgabe === id)[0] || null;
+  }
+
+  /* Vergabe durch Atlas -- der Vergebende meldet, nicht der Empfaenger. */
+  await liefern('assigned', koerper({
+    id: 'AG-EVENT-JOURNAL-001:atlas:assigned:H1', task: 'AG-EVJ-H1',
+    actor: 'atlas', reporter: 'atlas', recipient: 'forge', kind: 'assigned',
+    title: 'Atlas vergibt H1 an forge'
+  }), 90101);
+  let st = await stand();
+  let a1 = aufg(st, 'forge', 'AG-EVJ-H1');
+  zeile('Vergabe legt eine Aufgabe an', !!a1, true);
+  zeile('und zwar als zugewiesen', a1 ? a1.zustand : null, 'zugewiesen');
+
+  /* Dieselbe Vergabe nochmal: ein Transportduplikat darf keinen zweiten
+     Ring erzeugen. Eigene Ereigniskennung, damit der Adapter sie nicht als
+     Duplikat abweist -- geprueft wird die Wirkung, nicht der Filter. */
+  await liefern('assigned-doppelt', koerper({
+    id: 'AG-EVENT-JOURNAL-001:atlas:assigned:H1b', task: 'AG-EVJ-H1',
+    actor: 'atlas', reporter: 'atlas', recipient: 'forge', kind: 'assigned',
+    title: 'Dieselbe Vergabe ein zweites Mal'
+  }), 90102);
+  st = await stand();
+  zeile('kein zweiter Ring für dieselbe Aufgabe',
+        (st.aufgaben || []).filter(a => a.aufgabe === 'AG-EVJ-H1').length, 1);
+
+  /* Fremdaussage: Atlas meldet den Beginn von forge. Darf NICHT treiben. */
+  await liefern('started-fremd', koerper({
+    id: 'AG-EVENT-JOURNAL-001:atlas:started:H1', task: 'AG-EVJ-H1',
+    actor: 'forge', reporter: 'atlas', kind: 'started',
+    title: 'Atlas behauptet den Beginn von forge'
+  }), 90103);
+  st = await stand();
+  a1 = aufg(st, 'forge', 'AG-EVJ-H1');
+  zeile('Fremdaussage ändert den Zustand nicht',
+        a1 ? a1.zustand : null, 'zugewiesen');
+
+  /* Selbstauskunft: forge meldet seinen eigenen Beginn. */
+  await liefern('started-selbst', koerper({
+    id: 'AG-EVENT-JOURNAL-001:forge:started:H1', task: 'AG-EVJ-H1',
+    actor: 'forge', reporter: 'forge', kind: 'started',
+    title: 'Forge meldet den eigenen Beginn'
+  }), 90104);
+  st = await stand();
+  a1 = aufg(st, 'forge', 'AG-EVJ-H1');
+  zeile('Selbstauskunft setzt auf begonnen', a1 ? a1.zustand : null, 'begonnen');
+
+  /* Lieferung zu einer UNBEKANNTEN Kennung: darf nichts schliessen. */
+  const vorLuecke = (await stand()).luecken || 0;
+  await liefern('delivered-unbekannt', koerper({
+    id: 'AG-EVENT-JOURNAL-001:forge:delivered:FREMD', task: 'AG-EVJ-GIBT-ES-NICHT',
+    actor: 'forge', reporter: 'forge', kind: 'delivered',
+    title: 'Lieferung zu einer Kennung, die hier niemand kennt'
+  }), 90105);
+  st = await stand();
+  zeile('unbekannte Kennung schließt nichts',
+        (st.aufgaben || []).filter(a => a.aufgabe === 'AG-EVJ-H1').length, 1);
+  zeile('und wird als Lücke gezählt', (st.luecken || 0) > vorLuecke, true);
+  zeile('nicht als Rateentscheidung', st.ratEinzeln ? st.ratEinzeln.auftrag : -1, 0);
+
+  /* Und die richtige Lieferung schliesst genau sie. */
+  await liefern('delivered-richtig', koerper({
+    id: 'AG-EVENT-JOURNAL-001:forge:delivered:H1', task: 'AG-EVJ-H1',
+    actor: 'forge', reporter: 'forge', kind: 'delivered',
+    title: 'Forge liefert H1 — Prüfung und Annahme bleiben getrennt'
+  }), 90106);
+  st = await stand();
+  zeile('Lieferung schließt genau diese Aufgabe',
+        (st.aufgaben || []).filter(a => a.aufgabe === 'AG-EVJ-H1').length, 0);
+
+  console.log('\nI — Was auch Schritt 2 noch NICHT tut');
+  console.log('    erwartet: kein Ballwechsel, blocked treibt nichts\n');
+  zeile('kein Ball verschoben', st.ball || null, null);
   zeile('keine Seitenfehler', pageErr.length, 0);
   if (pageErr.length) console.log('        ' + pageErr.join('\n        '));
 
@@ -333,9 +405,12 @@ function koerper(f) {
     process.exit(1);
   }
   console.log('\nALLES WIE VEREINBART — keine Abweichung.');
-  console.log('Schritt 1 von zwei: Der Vertrag trägt die Lebenszyklusarten, der');
-  console.log('Melder ist vom Akteur getrennt, Duplikat und Konflikt sind');
-  console.log('unterschieden. Kein Aufgabenzustand wird getrieben — das ist');
-  console.log('Schritt 2. Synthetische Körper, kein Relais, keine Abnahme am iPad.');
+  console.log('Vertrag und Zustände: Vergabe legt hin, Selbstauskunft beginnt,');
+  console.log('Lieferung schließt genau ihre Aufgabe — und eine unbekannte');
+  console.log('Kennung schließt nichts, sondern bleibt eine gezählte Lücke.');
+  console.log('Offen und sichtbar offen: blocked/resolved treiben nichts,');
+  console.log('reviewed/accepted/merged/published fehlen, und die dauerhafte');
+  console.log('Ereignisquelle samt Wiederherstellung ist der nächste Schnitt.');
+  console.log('Synthetische Körper, kein Relais, keine Abnahme am iPad.');
   process.exit(0);
 })().catch(e => { ungeprueft('Nachweis abgebrochen: ' + (e && e.message)); });
