@@ -249,3 +249,11 @@ Lots Originalprognose6320419135: 12–16 technische Arbeitsblöcke, jeweils abge
 Offen bleiben: echter Lebenszyklusproducer, Archibald-Route, nötige echte Ladebelege, Archivzeitachse und Zielgerät-/Veröffentlichungsnachweis. Bildänderungen/Veröffentlichung nach geltender Peter-Autorität; keine Freigabe aus technischen Prüfergebnissen.
 
 Sentinel wurde einmalig als realer Subagent /root/sentinel_package_alignment für begrenzte Prüfreife/Paketabhängigkeiten gestartet (Veröffentlichung vor Start: PR6320964370, Issue2/6320964665). Dies ist kein bereits bestandener TC001-Lauf und keine Ersatzspezifikation. Ergebnis wird als eigener Originalbericht nachgetragen.
+
+### Unabhängiger Prüfreifeabgleich — Sentinel QA_REPORT V1
+
+Realer Lauf /root/sentinel_package_alignment, Baseline df8cd4db0c987cac70b6c77276be247806840358, read-only beendet. Ergebnis: Gesamtprüfreife BLOCKED, Paketfolge grundsätzlich tragfähig. Keine TC-Ausführung. Quellen: Relay AG_FIELDS/Strictfelder (59–60,194–197), Verbraucher reporter-Pflicht (github-live.js534–538), Lots Originalrückgaben.
+
+Verbindliche Präzisierung zu PK001: zunächst begrenzter echter Transport-/Flug-/Puls-Machbarkeitsnachweis mit vorhandenen Feldern. Der vollständige TC001 verlangt schon die Elternkette und wird deshalb erst nach PK003 ausgeführt. PK001 darf keinen vollständigen TC001-PASS oder Storyabschluss behaupten. So entsteht keine zirkuläre Abhängigkeit zwischen Liveproof und Hierarchie.
+
+Sentinel bestätigt getrennte Prüfung der gelieferten TK011-Implementierung, Archibald-Blocker, offene Archivzeitachse und die getrennte Behandlung von TK019/020/013. Lots noch ungeklärte Winkelmessungsflakiness bleibt offener Prüfhinweis, trotz zwischenzeitlich berichteter grüner Wiederholungen. Nächster Owner Atlas für Quellen-/Spezifikationsroute, Lot für vorhandene Interfaceumsetzung.
