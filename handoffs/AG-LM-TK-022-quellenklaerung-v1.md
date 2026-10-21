@@ -55,14 +55,32 @@ blockierten Datensatz keinen Beleg gibt, dass forge gearbeitet hat"*.
 | Ausgabestelle | Abbildung möglich? | treibt Zustand? |
 |---|---|---|
 | `ag_host_received` → `assigned` | **ja** | **ja** — `assigned` ist die Ausnahme, die der Vergebende meldet |
-| `result_ready` → `delivered` | ja, als Fremdaussage | **nein** — `delivered` ist halter- und selbstauskunftsgebunden |
-| blockiert → `aborted` oder `blocked` | ja, als Fremdaussage | `aborted` **ja** (nicht halterbegebunden), `blocked` **nein** |
+| `result_ready` → `delivered` | ja, als Fremdaussage | **nein** |
+| blockiert → `aborted` | ja, als Fremdaussage | **nein** |
+| blockiert → `blocked` | ja, als Fremdaussage | **nein** |
+
+> **Berichtigung, von Atlas gefunden (Kommentar 6326130288).** Hier stand,
+> `aborted` treibe als Fremdaussage einen Zustand, weil es nicht
+> halterbegebunden ist. **Das ist falsch, und zwar am gelesenen Stand.**
+>
+> `aborted` liegt im Livepfad **innerhalb** von `else if (E.selbstauskunft …)`,
+> und die Faltung kehrt bei `if (!selbst) { fremdaussagen++; return; }`
+> zurück, bevor überhaupt ein Zustand verarbeitet wird. Nachgesehen, nicht
+> nachgegeben.
+>
+> **Nicht halterbegebunden heißt nicht von der Selbstauskunftsprüfung
+> ausgenommen.** Ich hatte zwei verschiedene Schranken verwechselt — die, die
+> sagt *wessen* Aufgabe getroffen wird, und die, die sagt *wer* melden darf.
+>
+> **Der Befund wird dadurch härter, nicht weicher:** Mit dem Relais würde
+> **einzig `assigned`** einen Zustand treiben. Alles andere bliebe
+> Fremdaussage.
 
 ## Was daraus folgt, und was nicht meine Entscheidung ist
 
-**Mit dem Eingriff allein entsteht ein halber Strom:** Vergabe ja, Abbruch ja,
-Empfang/Beginn/Lieferung nein. Genau die Stufen, die Peter als „tatsächliche
-Arbeit" sehen will, fehlen weiter.
+**Mit dem Eingriff allein entsteht ein Viertelstrom:** nur die Vergabe. Alles,
+was Peter als „tatsächliche Arbeit" sehen will — Empfang, Beginn, Lieferung —
+und auch der Abbruch blieben Fremdaussagen ohne Wirkung.
 
 Es gibt zwei Wege, und **beide sind Entscheidungen, nicht Umsetzungen**:
 
@@ -97,6 +115,37 @@ tatsächlich laufen, und das ist eine Freigabe von Peter.
 | Eingriff im Relais | **klein und benannt**, drei Stellen in einer Datei |
 | Wirkung prüfen | **pending_authority** — braucht einen echten Relaislauf, also Peters Freigabe |
 | Vollständiger Strom | **Entscheidung offen** — Weg A oder Weg B |
+
+## Weg A ist offen — für alle ausser mir
+
+Atlas hat Weg A zum nächsten operativen Schritt gemacht und mich gebeten, ihn
+beim nächsten autorisierten Arbeitsschritt für genau einen echten Fall zu
+gehen *oder die konkrete fehlende Schreibfähigkeit zu benennen*. Hier ist sie,
+und sie ist keine Rechtefrage:
+
+> **Der Monitor kennt `lot` nicht.**
+
+`AGENTEN` in `pilot/github-live/index.html` führt **neun** Akteure: `peter`,
+`nova`, `atlas`, `cadence`, `scout`, `forge`, `sentinel`, `archibald`,
+`argus`. Der Adapter prüft `if (!AKTEURE[d.actor]) return nein('actor
+unbekannt')`, und die Liste kommt aus genau diesem Feld.
+
+Ein Ereignis mit `actor: lot` wird also **abgewiesen**. Und unter einem fremden
+Namen zu melden wäre genau die erfundene Behauptung, gegen die dieser ganze
+Kandidat gebaut ist.
+
+**Ich habe den Monitor gebaut, der mich nicht zeigen kann.** Das ist keine
+Koketterie, sondern der Grund, warum ich Weg A nicht ausführen kann.
+
+**Was dagegen heute schon geht:** Weg A ist für die **acht gelisteten Rollen**
+offen, ohne jede Änderung. Atlas kann seine eigene Vergabe melden — `atlas` ist
+ein Akteur, `assigned` ist die Ausnahme, und beides ist im Nachweis geprüft.
+Eine Forge-Sitzung kann ihren eigenen Beginn melden. **Weg A braucht keinen
+Eingriff; er braucht nur, dass eine gelistete Rolle schreibt.**
+
+**Mich aufzunehmen wäre eine Änderung am Bild** — ein zehnter Agent auf der
+Bühne, mit Platz im Ring und eigener Farbe. Das entscheidet Peter, und ich
+schlage es nur vor.
 
 ## Was ich ausdrücklich nicht getan habe
 
