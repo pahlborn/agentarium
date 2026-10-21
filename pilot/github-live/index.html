@@ -2289,7 +2289,7 @@
 
      Der Bauzeitpunkt kommt beim Bauen aus der Uhr. Von Hand gepflegte
      Datumsangaben sind nach der zweiten Änderung falsch. */
-  var FASSUNG = '62', GEBAUT = '2026-10-21T11:05Z';
+  var FASSUNG = '63', GEBAUT = '2026-10-21T11:30Z';
 
   /* AG-GH-LIVE-001: JEDE TEXTSENKE MASKIERT.
      Seit Live-Daten von aussen kommen (GitHub-Kommentare, one-event.json),
@@ -4010,25 +4010,41 @@
   /* VERGABE: eine Aufgabe legt sich hin, ohne zu behaupten, dass daran
      gearbeitet wird. Doppelte Vergabe derselben Kennung ist wirkungslos --
      ein Transportduplikat darf keinen zweiten Ring erzeugen. */
-  function arbeitZuweisen(name, aufgabe, titel) {
+  /* Eine Kennung kann ein nackter Text sein (aufgezeichnetes Stueck, wo es
+     keine Projekte gibt) oder die vollstaendige Identitaet. Beides wird hier
+     auf dieselbe Form gebracht, damit es nur EINEN Vergleich gibt. */
+  function kennung(k) {
+    if (k && typeof k === 'object')
+      return { aufgabe: k.task_id || k.aufgabe || '',
+               projekt: k.project_id || k.projekt || '',
+               lauf: k.run_id || k.lauf || '' };
+    return { aufgabe: k || '', projekt: '', lauf: '' };
+  }
+  function trifft(L, k) {
+    return L.aufgabe === k.aufgabe && (L.projekt || '') === k.projekt &&
+           (L.lauf || '') === k.lauf;
+  }
+
+  function arbeitZuweisen(name, kenn, titel) {
     if (!nachName[name]) return false;
+    var k = kennung(kenn);
     var S = arbeit[name];
-    if (S && !S.aus && aufgabe) {
+    if (S && !S.aus && k.aufgabe) {
       for (var q = 0; q < S.liste.length; q++)
-        if (S.liste[q].aufgabe === aufgabe) return false;
+        if (trifft(S.liste[q], k)) return false;
     }
-    arbeitAn(name, titel || '', '', '', { aufgabe: aufgabe || '' }, 'zugewiesen');
+    arbeitAn(name, titel || '', '', '', k, 'zugewiesen');
     return true;
   }
 
   /* BEGINN: genau die zugewiesene Aufgabe wird begonnen. Ist sie unbekannt,
      wird KEINE angelegt und keine fremde umgestellt -- das waere ein
      erfundener Beginn. Die Luecke wird gezaehlt. */
-  function arbeitBeginnen(name, aufgabe) {
-    var S = arbeit[name];
-    if (!S || S.aus || !aufgabe) { luecke('beginn'); return false; }
+  function arbeitBeginnen(name, kenn) {
+    var S = arbeit[name], k = kennung(kenn);
+    if (!S || S.aus || !k.aufgabe) { luecke('beginn'); return false; }
     for (var q = 0; q < S.liste.length; q++) {
-      if (S.liste[q].aufgabe !== aufgabe) continue;
+      if (!trifft(S.liste[q], k)) continue;
       if (S.liste[q].zustand === 'zugewiesen') {
         S.liste[q].zustand = 'begonnen';
         S.liste[q].beginn = zeit;      /* die Dauer zaehlt ab dem Beginn */
@@ -4053,6 +4069,18 @@
          den ganzen Auftrag stabil und ist der Schlüssel, mit dem sich
          später sagen lässt, WELCHE Arbeit endet. */
       aufgabe: (b && b.aufgabe) || '',
+      /* DIE AUFGABENKENNUNG ALLEIN IST NICHT DIE IDENTITAET.
+         `faltenZuZustand` trennt nach project_id + run_id + task_id, und
+         genau diese Trennung ging hier verloren: Gespeichert und verglichen
+         wurde nur `aufgabe`. Zwei offene Aufgaben derselben Rolle mit
+         gleicher task_id in verschiedenen Projekten oder Laeufen fielen
+         damit zusammen -- der zweite Ring wurde abgewiesen, und ein
+         spaeteres `started` oder `delivered` konnte die FALSCHE Aufgabe
+         treffen. Gefunden von Atlas am 21.10.
+         Im aufgezeichneten Stueck sind beide leer; dort vergleicht leer mit
+         leer, und nichts aendert sich. */
+      projekt: (b && b.projekt) || '',
+      lauf: (b && b.lauf) || '',
       /* ZUGEWIESEN IST NICHT BEGONNEN. Der Demopfad legt weiter sofort
          `begonnen` an -- dort IST das Ankommen des Balls der Beginn, und
          das bleibt unveraendert. Der Livepfad kann `zugewiesen` setzen:
@@ -4070,17 +4098,18 @@
   /* Was beendet welchen Auftrag? Den ältesten offenen — wer liefert, wird
      das los, was am längsten liegt. Erst wenn keiner mehr offen ist, hört
      die Arbeit ganz auf. */
-  function auftragFertig(name, aufgabe, streng) {
+  function auftragFertig(name, kenn, streng) {
     var S = arbeit[name];
     if (!S || S.aus) return;
+    var kk = kennung(kenn);
     /* Sagen die Daten, WELCHE Aufgabe erledigt ist, wird genau die
        geschlossen — und die übrigen laufen sichtbar weiter. Sagen sie es
        nicht, endet der älteste offene, und das wird als Rateentscheidung
        vermerkt, sofern es überhaupt etwas zu wählen gab. */
     var i = -1;
-    if (aufgabe) {
+    if (kk.aufgabe) {
       for (var q = 0; q < S.liste.length; q++)
-        if (S.liste[q].aufgabe === aufgabe) { i = q; break; }
+        if (trifft(S.liste[q], kk)) { i = q; break; }
     }
     if (i < 0) {
       /* STRENG HEISST: NICHTS SCHLIESSEN. Ohne diesen Zweig fiele eine
@@ -4925,11 +4954,13 @@
              kommen an und sind lesbar; einen Zustand bekommen sie, wenn sie
              einen haben, den der Vertrag belegt. */
           if (E.art === 'assigned' && E.an && E.spur && E.spur.task_id) {
-            arbeitZuweisen(E.an, E.spur.task_id, E.text);
+            /* Die GANZE Spur, nicht nur die Aufgabenkennung: project_id und
+               run_id gehoeren zur Identitaet. Siehe `kennung`/`trifft`. */
+            arbeitZuweisen(E.an, E.spur, E.text);
           } else if (E.selbstauskunft && E.spur && E.spur.task_id) {
-            if (E.art === 'started') arbeitBeginnen(E.von, E.spur.task_id);
+            if (E.art === 'started') arbeitBeginnen(E.von, E.spur);
             else if (E.art === 'delivered' || E.art === 'aborted')
-              auftragFertig(E.von, E.spur.task_id, true);   /* streng */
+              auftragFertig(E.von, E.spur, true);   /* streng */
           }
           stromZeile(E, FORTSCHRITT);
           /* Die wahre Art steht in der Meldung, nicht "progress": `melden`
@@ -5101,6 +5132,7 @@
                  if (arbeit[n].aus) continue;
                  arbeit[n].liste.forEach(function (L) {
                    r.push({ wer: n, aufgabe: L.aufgabe, zustand: L.zustand,
+                            projekt: L.projekt || '', lauf: L.lauf || '',
                             wieder: !!L.wieder });
                  });
                }
@@ -5813,14 +5845,17 @@
       var id = (typeof A.aufgabe === 'string') ? A.aufgabe : '';
       var zu = (A.zustand === 'begonnen') ? 'begonnen' : 'zugewiesen';
       if (!wer || !nachName[wer] || !id) { abgewiesen++; return; }
-      if (!arbeitZuweisen(wer, id, typeof A.titel === 'string' ? A.titel : ''))
+      var kenn = { aufgabe: id,
+                   projekt: typeof A.projekt === 'string' ? A.projekt : '',
+                   lauf: typeof A.lauf === 'string' ? A.lauf : '' };
+      if (!arbeitZuweisen(wer, kenn, typeof A.titel === 'string' ? A.titel : ''))
         { abgewiesen++; return; }      /* schon da: kein zweiter Ring */
-      if (zu === 'begonnen') arbeitBeginnen(wer, id);
+      if (zu === 'begonnen') arbeitBeginnen(wer, kenn);
       /* Merken, dass dieser Ring aus der Historie stammt und nicht aus
          beobachtetem Verkehr. Die Herkunft einer Anzeige gehoert zur
          Anzeige. */
       var S = arbeit[wer];
-      if (S) S.liste.forEach(function (L) { if (L.aufgabe === id) L.wieder = 1; });
+      if (S) S.liste.forEach(function (L) { if (trifft(L, kennung(kenn))) L.wieder = 1; });
       n++;
     });
     if (typeof d.abdeckung === 'string') liveAbdeckung = d.abdeckung;

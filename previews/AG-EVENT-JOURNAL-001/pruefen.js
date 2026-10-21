@@ -89,7 +89,9 @@ function tischen(wurzel) {
 function koerper(f) {
   const ev = {
     schema: 'agentarium.github-event.v1',
-    id: f.id, project_id: 'agentarium', run_id: 'AG-EVENT-JOURNAL-001',
+    id: f.id,
+    project_id: f.projekt || 'agentarium',
+    run_id: f.lauf || 'AG-EVENT-JOURNAL-001',
     task_id: f.task, actor: f.actor, kind: f.kind,
     title: f.title, occurred_at: f.at || '2026-10-21T08:00:00Z',
     source_evidence: f.evidence || 'reported_checkpoint',
@@ -195,6 +197,25 @@ function koerper(f) {
          kind: 'started', title: 'Beginn ohne Vergabe' },
        '2026-10-20T13:00:00Z');
 
+  /* R6 UND R7: DIESELBE ROLLE, DIESELBE task_id, ZWEI PROJEKTE.
+     Von Atlas am 21.10. als Befund gemeldet: `arbeitZuweisen` verglich nur
+     die Aufgabenkennung, also fielen diese beiden zusammen -- der zweite
+     Ring wurde abgewiesen, und ein spaeteres `started` haette die FALSCHE
+     Aufgabe getroffen. Dieser Fall haelt die Trennung fest. */
+  hist({ id: 'R6:assigned', task: 'AG-EVJ-GLEICH', projekt: 'agentarium',
+         lauf: 'LAUF-A', actor: 'atlas', reporter: 'atlas',
+         recipient: 'forge', kind: 'assigned', title: 'gleiche Kennung, Projekt A' },
+       '2026-10-20T14:00:00Z');
+  hist({ id: 'R7:assigned', task: 'AG-EVJ-GLEICH', projekt: 'malstudio',
+         lauf: 'LAUF-B', actor: 'atlas', reporter: 'atlas',
+         recipient: 'forge', kind: 'assigned', title: 'gleiche Kennung, Projekt B' },
+       '2026-10-20T14:01:00Z');
+  /* Nur EINE der beiden wird begonnen -- die andere darf das nicht merken. */
+  hist({ id: 'R6:started', task: 'AG-EVJ-GLEICH', projekt: 'agentarium',
+         lauf: 'LAUF-A', actor: 'forge', reporter: 'forge',
+         kind: 'started', title: 'nur Projekt A beginnt' },
+       '2026-10-20T14:02:00Z');
+
   /* EIN ABBRUCH, DER SCHON DALIEGT, BEVOR VERBUNDEN WIRD. Das ist die
      zweite Haelfte von Argus' Befund: Der Zaehler stand ueber dem
      `basis`-Zweig und zaehlte damit auch Ereignisse von vorgestern als
@@ -261,7 +282,7 @@ function koerper(f) {
       zahlen: (document.getElementById('agGhZahlen') || {}).textContent || ''
     };
   });
-  zeile('drei offene Aufgaben übernommen', nachRestore.wieder, 3);
+  zeile('fünf offene Aufgaben übernommen', nachRestore.wieder, 5);
   zeile('R1 liegt bei scout', nachRestore.R1 ? nachRestore.R1.wer : null, 'scout');
   zeile('R1 ist begonnen', nachRestore.R1 ? nachRestore.R1.zustand : null, 'begonnen');
   zeile('R1 als wiederhergestellt gekennzeichnet',
@@ -279,6 +300,41 @@ function koerper(f) {
   zeile('Abdeckung partial, nie complete', nachRestore.abdeckung, 'partial');
   zeile('Fremdaussage ausgewiesen',
         /Fremdaussage/.test(nachRestore.zahlen), true);
+
+  console.log('\nA4 — Gleiche Rolle, gleiche Aufgabenkennung, zwei Projekte');
+  console.log('    erwartet: zwei getrennte Ringe, und der Beginn des einen');
+  console.log('    lässt den anderen unberührt\n');
+  const zwei = await s.evaluate(() => {
+    const st = (window.__agStand && window.__agStand()) || {};
+    const g = (st.aufgaben || []).filter(a => a.aufgabe === 'AG-EVJ-GLEICH');
+    const f = (pr) => g.filter(a => a.projekt === pr)[0] || null;
+    return { anzahl: g.length, A: f('agentarium'), B: f('malstudio') };
+  });
+  zeile('beide Aufgaben vorhanden', zwei.anzahl, 2);
+  zeile('A liegt bei forge', zwei.A ? zwei.A.wer : null, 'forge');
+  zeile('B liegt auch bei forge', zwei.B ? zwei.B.wer : null, 'forge');
+  zeile('A ist begonnen', zwei.A ? zwei.A.zustand : null, 'begonnen');
+  zeile('B ist davon unberührt', zwei.B ? zwei.B.zustand : null, 'zugewiesen');
+  zeile('A trägt seinen Lauf', zwei.A ? zwei.A.lauf : null, 'LAUF-A');
+  zeile('B trägt seinen Lauf', zwei.B ? zwei.B.lauf : null, 'LAUF-B');
+
+  /* Und die Gegenprobe im LIVEBETRIEB: Eine Lieferung in Projekt B darf
+     die Aufgabe in Projekt A nicht schliessen. */
+  await liefern('delivered-projektB', koerper({
+    id: 'AG-EVENT-JOURNAL-001:forge:delivered:B', task: 'AG-EVJ-GLEICH',
+    projekt: 'malstudio', lauf: 'LAUF-B',
+    actor: 'forge', reporter: 'forge', kind: 'delivered',
+    title: 'Projekt B liefert — Projekt A bleibt'
+  }), 90201);
+  const danach = await s.evaluate(() => {
+    const st = (window.__agStand && window.__agStand()) || {};
+    const g = (st.aufgaben || []).filter(a => a.aufgabe === 'AG-EVJ-GLEICH');
+    return { anzahl: g.length, projekte: g.map(a => a.projekt).sort().join(','),
+             luecken: st.lueckenEinzeln ? st.lueckenEinzeln.lieferung : -1 };
+  });
+  zeile('B geschlossen, A bleibt offen', danach.anzahl, 1);
+  zeile('und zwar A', danach.projekte, 'agentarium');
+  zeile('keine Lücke gezählt — die Kennung war bekannt', danach.luecken, 0);
 
   console.log('\nB — Je ein Fixture, dieselbe Schnittstelle');
   console.log('    forge ist eine Claude-Rolle, sentinel eine ChatGPT-Rolle\n');
