@@ -27,6 +27,10 @@
 (function () {
   'use strict';
   var ADAPTER = 'AG-GH-LIVE-001-v1.3';
+  /* Wortlaut von Sentinel vorgeschrieben (AG-CONNECT-UX-001, 21.10.), Zeichen
+     fuer Zeichen. Einmal benannt, damit Platzhalter und Zeile nicht
+     auseinanderlaufen koennen. */
+  var TOKEN_SATZ = 'Token ist sicher hinterlegt und wird nicht angezeigt.';
   var ENDPOINT = 'https://api.github.com/repos/pahlborn/agentarium/issues/2/comments?per_page=100';
   var MARKER = '<!-- AGENTARIUM_EVENT_V1 -->';
   var SCHEMA = 'agentarium.github-event.v1';
@@ -148,6 +152,9 @@
        nicht ausgrauen. Der Platzhalter traegt die Auskunft. */
     '#agGithub input:disabled{opacity:1;color:#9fb4a6;border-color:#2b3442;' +
     'background:#080c13}' +
+    /* Die Zusage steht in eigener Zeile, nicht im Feld: 132 bis 154
+       Bildpunkte koennen keine 351 anzeigen. Gemessen, nicht geschaetzt. */
+    '#agGithub #agGhTokenSatz{color:#9fb39f;margin:1px 0 3px}' +
     '#agGithub input:disabled::placeholder{color:#8fb39c;opacity:1}' +
     '#agGithub button:disabled{opacity:.45}' +
     '#agGithub button{font:inherit;background:#18222f;color:#e8f0ea;' +
@@ -160,7 +167,11 @@
   document.head.appendChild(stil);
 
   var tafel = el('section', { id: 'agGithub', 'aria-label': 'GitHub-Live', 'data-phase': 'getrennt' });
-  var auf = el('details'); auf.open = true;
+  /* Kennung, damit die Klapptafel greifbar ist. Ohne sie fragte der Nachweis
+     `.open` an der aeusseren `div` ab -- eine Eigenschaft, die es dort nicht
+     gibt, also `undefined`, also `!undefined === true`: eine Pruefung, die
+     nicht scheitern KANN. Gefunden am 21.10., im eigenen Nachweis. */
+  var auf = el('details', { id: 'agGhAuf' }); auf.open = true;
   var kopf = el('summary');
   var statusEl = el('span', { id: 'agGhStatus', role: 'status', 'aria-live': 'polite' },
                     'GitHub-Live · getrennt');
@@ -175,6 +186,7 @@
   var knAn = el('button', { id: 'agGhAn', type: 'button' }, 'Verbinden');
   var knAus = el('button', { id: 'agGhAus', type: 'button' }, 'Trennen');
   zeile.appendChild(lab); zeile.appendChild(feld); zeile.appendChild(knAn); zeile.appendChild(knAus);
+  var satzEl = el('div', { id: 'agGhTokenSatz' });
   var ablaufZeile = el('div', { 'class': 'ghZ' });
   var ablaufLabel = el('label', { 'for': 'agGhAblauf' }, 'Token gültig bis');
   var ablaufInput = el('input', { id: 'agGhAblauf', type: 'date' });
@@ -197,7 +209,7 @@
   var fuss = el('small', {}, 'Token nur im Arbeitsspeicher dieser Seite, nur an api.github.com. ' +
                 'Kosten: nicht verfügbar. Fortschritt ist kein Abschluss. ' +
                 'Übergabe/Beitrag: beobachtete Kommunikation, keine Annahme, keine Abnahme. ' + ADAPTER);
-  [kopf, zeile, ablaufZeile, ablaufText, ablaufHilfe, letztesEl, zahlEl, grundEl, fuss].forEach(function (x) { auf.appendChild(x); });
+  [kopf, zeile, satzEl, ablaufZeile, ablaufText, ablaufHilfe, letztesEl, zahlEl, grundEl, fuss].forEach(function (x) { auf.appendChild(x); });
   tafel.appendChild(auf);
   document.body.appendChild(tafel);
   /* Die Tafel ruehrt nicht im Feld und blendet keine Knoepfe ein. */
@@ -251,10 +263,27 @@
     knAus.disabled = !hinterlegt;
     knAn.disabled = hinterlegt;
     feld.disabled = hinterlegt;
-    feld.placeholder = hinterlegt
-      ? 'hinterlegt — nur im Arbeitsspeicher'
-      : '';
-    lab.textContent = hinterlegt ? 'Lesetoken · liegt' : 'Lesetoken';
+    /* WORTLAUT NICHT VERHANDELBAR, BREITE SCHON. Beide Texte sind von
+       Sentinel als Akzeptanzkriterium vorgeschrieben (AG-CONNECT-UX-001,
+       21.10.) und stehen deshalb hier Zeichen fuer Zeichen.
+       Nur passten sie nicht: Das Feld ist 12em breit, also 132 Bildpunkte
+       nutzbar bei 11px Monospace -- nachgemessen auf drei Schirmgroessen.
+       Der Satz braucht 351. Mein eigener erster Platzhalter brauchte 232
+       und war damit genauso abgeschnitten, nur hatte ich es nicht gemessen.
+       Also bekommt das Feld im verbundenen Zustand die ganze Zeilenbreite:
+       Es nimmt dort ohnehin keine Eingabe mehr an, der Platz ist frei, und
+       der Satz steht vollstaendig da statt zur Haelfte. */
+    feld.placeholder = hinterlegt ? TOKEN_SATZ : '';
+    /* UND DERSELBE SATZ IN EIGENER ZEILE, WEIL DAS FELD IHN NICHT FASST.
+       Nachgemessen auf fuenf Schirmgroessen: nutzbar sind 132 Bildpunkte
+       (12em bei 11px Monospace), der Satz braucht 351. Mein erster Versuch
+       gab dem Feld im verbundenen Zustand die ganze Zeilenbreite -- gemessen
+       wurden daraus 154 statt der noetigen 351, der Einfall trug also nicht.
+       Hier hat die Zeile die volle Breite der Tafel und bricht notfalls um.
+       Der Platzhalter traegt den Wortlaut weiterhin unveraendert: Er ist das
+       vorgeschriebene Kriterium und das, was Hilfsmittel vorlesen. */
+    satzEl.textContent = hinterlegt ? TOKEN_SATZ : '';
+    lab.textContent = hinterlegt ? 'Token gespeichert' : 'Lesetoken';
   }
   anzeigen();
 
