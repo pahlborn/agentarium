@@ -887,6 +887,89 @@ function koerper(f) {
   zeile('D unverändert offen', (st.aufgaben || []).filter(
     a => a.aufgabe === 'AG-EVJ-J2' && a.lauf === 'LAUF-D').length, 1);
 
+  console.log('\nK — Der Originalbeleg: wo die Angabe steht, nicht nur dass sie steht');
+  console.log('    Atlas verlangt den eindeutig auflösbaren Originalbeleg.');
+  console.log('    Als PFLICHTFELD des Senders kann es ihn nicht geben: Die');
+  console.log('    Kommentarnummer vergibt GitHub erst beim Schreiben, der');
+  console.log('    Melder kennt sie also nicht. Abgeleitet wird sie dort, wo');
+  console.log('    gelesen wird — und das ist nachprüfbar.\n');
+  /* An der Vergabe von J1 (Kommentar 90301) haengt der Beleg. */
+  st = await stand();
+  const jb = (st.aufgaben || []).filter(a => a.aufgabe === 'AG-EVJ-J1')[0] || null;
+  zeile('die Aufgabe trägt ihren Beleg', jb ? jb.beleg : null, '90301');
+  zeile('und die auflösbare Adresse dazu',
+        jb ? /^https:\/\/api\.github\.com\/repos\/pahlborn\/agentarium\/issues\/comments\/90301$/
+               .test(jb.belegRef) : null, true);
+  /* Die Adresse ist aus ENDPOINT gerechnet, nicht zweimal hingeschrieben:
+     Sie zeigt auf denselben Vorgang, aus dem gelesen wurde. */
+  zeile('Adresse endet genau auf diese Nummer',
+        jb ? jb.belegRef.slice(-6) === '/90301' : null, true);
+
+  /* IN DER TAFEL UND IN DER LISTE. Eine Nummer, die nur im Stand steht,
+     hilft dem nicht, der hinsieht. */
+  const belegBild = await s.evaluate(() => ({
+    letztes: (document.getElementById('agGhLetztes') || {}).textContent || '',
+    liste: Array.prototype.map.call(
+      document.querySelectorAll('.agHerkunft'), e => e.textContent).join(' | ')
+  }));
+  zeile('die Tafel nennt den Beleg',
+        /Beleg Kommentar \d+/.test(belegBild.letztes), true);
+  zeile('die Listenzeile nennt ihn auch',
+        /Beleg \d+/.test(belegBild.liste), true);
+
+  /* EIN FALSCH GEPAARTER BELEG WIRD VERWORFEN, NICHT ANGEZEIGT. Nummer und
+     Adresse muessen zusammengehoeren; sonst zeigte ein nachsehbar
+     AUSSEHENDER Beleg auf etwas anderes -- schlimmer als keiner.
+     Geprueft am Griff des Originals, denn der Adapter leitet die Adresse
+     selbst ab und koennte sie gar nicht falsch paaren. Genau deshalb muss
+     das Original es trotzdem pruefen: Es ist auch ohne ihn aufrufbar. */
+  const falsch = await s.evaluate(() => {
+    const r = window.__agEreignis({
+      id: 'AG-EVENT-JOURNAL-001:beleg-falsch', actor: 'forge', kind: 'progress',
+      title: 'Nummer und Adresse passen nicht zusammen',
+      occurred_at: '2026-10-21T12:00:00Z', source_evidence: 'runtime_stream',
+      gh_beobachtet: true, project_id: 'agentarium',
+      run_id: 'AG-EVENT-JOURNAL-001', task_id: 'AG-EVJ-BELEG',
+      source_tool_id: 'previews/AG-EVENT-JOURNAL-001/pruefen.js',
+      reporter: 'forge', gh_selbstauskunft: true,
+      source_comment: '90401',
+      source_ref: 'https://api.github.com/repos/pahlborn/agentarium/issues/comments/90999'
+    });
+    return { angenommen: !!(r && r.angenommen) };
+  });
+  zeile('Ereignis selbst bleibt gültig', falsch.angenommen, true);
+  await s.waitForTimeout(600);
+  const falschBild = await s.evaluate(() => Array.prototype.map.call(
+    document.querySelectorAll('.agHerkunft'), e => e.textContent).join(' | '));
+  /* Die NUMMER bleibt -- sie ist fuer sich genommen eine Angabe. Die
+     unpassende ADRESSE wird fallen gelassen, statt mitgeschleppt zu werden. */
+  zeile('die Nummer wird gezeigt', /Beleg 90401/.test(falschBild), true);
+  const refFalsch = await s.evaluate(() => {
+    const st = (window.__agStand && window.__agStand()) || {};
+    return (st.aufgaben || []).filter(a => a.aufgabe === 'AG-EVJ-BELEG').length;
+  });
+  zeile('und keine Aufgabe daraus erfunden', refFalsch, 0);
+
+  /* UND DER RESTORE: R8s Klemme kam aus der Historie und hat keine
+     Listenzeile. Ohne Beleg waere sie der einzige Teil der Anzeige, zu dem
+     es keinen Weg zurueck gibt. */
+  /* UND ZWAR DEN DER VERGABE, nicht den des letzten Ereignisses. R8 besteht
+     aus drei Kommentaren (Vergabe, Beginn, Klemme); live haengt die Aufgabe
+     am Kommentar der VERGABE. Wuerde der Restore den letzten nehmen, zeigte
+     dieselbe Lage je nach Weg auf zwei verschiedene Quellen -- genau das,
+     was Atlas ausschliesst. Die Nummern stehen in der Historie fest:
+     R8:assigned ist der erste der drei. */
+  zeile('R8 aus der Historie trägt ihren Beleg',
+        nachRestore.R8 && nachRestore.R8.beleg ? /^\d+$/.test(nachRestore.R8.beleg) : null,
+        true);
+  zeile('und es ist der Beleg der VERGABE, nicht der letzte',
+        (nachRestore.R8 && nachRestore.R8.klemmt[0])
+          ? Number(nachRestore.R8.beleg) < Number(nachRestore.R8.klemmt[0].beleg)
+          : null, true);
+  zeile('und die Klemme von R8 auch',
+        nachRestore.R8 && nachRestore.R8.klemmt[0]
+          ? /^\d+$/.test(nachRestore.R8.klemmt[0].beleg) : null, true);
+
   console.log('\nI — Was auch jetzt noch NICHT geschieht');
   console.log('    erwartet: kein Ballwechsel aus Lebenszyklusereignissen,');
   console.log('    und reviewed/accepted/merged/published fehlen weiter\n');

@@ -26,12 +26,26 @@
 */
 (function () {
   'use strict';
-  var ADAPTER = 'AG-GH-LIVE-001-v1.5';
+  var ADAPTER = 'AG-GH-LIVE-001-v1.6';
   /* Wortlaut von Sentinel vorgeschrieben (AG-CONNECT-UX-001, 21.10.), Zeichen
      fuer Zeichen. Einmal benannt, damit Platzhalter und Zeile nicht
      auseinanderlaufen koennen. */
   var TOKEN_SATZ = 'Token ist sicher hinterlegt und wird nicht angezeigt.';
   var ENDPOINT = 'https://api.github.com/repos/pahlborn/agentarium/issues/2/comments?per_page=100';
+  /* DER ORIGINALBELEG IST KEIN FELD DES SENDERS, UND ZWAR NICHT AUS
+     BEQUEMLICHKEIT. Atlas verlangt den "eindeutig aufloesbaren Originalbeleg
+     als eigenes Feld". Als Pflichtfeld im Vertrag kann es ihn nicht geben:
+     Ein Agent schreibt seinen Kommentar, und erst GitHub vergibt dabei die
+     Nummer -- er kann sie beim Schreiben nicht kennen. Jedes selbst
+     gesetzte "Beleg"-Feld waere also eine Behauptung ueber einen Ort, den
+     der Melder nicht kennt.
+     Der Beleg ist deshalb der Kommentar SELBST, und abgeleitet wird er dort,
+     wo er gelesen wird: hier. `c.id` kommt von GitHub, nicht vom Melder.
+     Die Adresse wird aus ENDPOINT gerechnet statt zweimal hingeschrieben --
+     sonst zeigt sie nach dem naechsten Umzug auf einen anderen Vorgang als
+     der, aus dem gelesen wurde. */
+  var BELEG_BASIS = ENDPOINT.replace(/\/issues\/\d+\/comments\b.*$/,
+                                     '/issues/comments/');
   var MARKER = '<!-- AGENTARIUM_EVENT_V1 -->';
   var SCHEMA = 'agentarium.github-event.v1';
   var LOGINS = { 'pahlborn': true, 'github-actions[bot]': true };
@@ -536,6 +550,13 @@
        -- hier wird nichts behauptet, nur weitergegeben. */
     if (ev.reporter) aus.reporter = ev.reporter;
     if (ev.blocker_id) aus.blocker_id = ev.blocker_id;
+    /* Der Beleg geht mit: die Nummer, die GitHub vergeben hat, und die
+       Adresse, unter der genau dieser Kommentar wieder auffindbar ist.
+       Beides abgeleitet, nichts behauptet. */
+    if (ev.kommentar) {
+      aus.source_comment = ev.kommentar;
+      aus.source_ref = BELEG_BASIS + ev.kommentar;
+    }
     aus.gh_selbstauskunft = !!ev.selbstauskunft;
     var r = window.__agEreignis(aus);
     if (!r || !r.angenommen) { abweisen('Original wies ab: ' + (r ? r.grund : '?')); return; }
@@ -560,6 +581,10 @@
       ' · ' + ev.project_id + ' / ' + ev.run_id + ' / ' + ev.task_id +
       ' · Werkzeug ' + ev.source_tool_id +
       (ev.blocker_id ? ' · Klemme ' + ev.blocker_id : '') +
+      /* WO ES STEHT, NICHT NUR DASS ES STEHT. `source_evidence` sagt die
+         ART des Belegs (Laufzeit oder gemeldet), nicht seinen ORT. Ohne
+         die Nummer ist eine Angabe in dieser Tafel nicht nachzusehen. */
+      (ev.kommentar ? ' · Beleg Kommentar ' + ev.kommentar : '') +
       (KOMM[ev.kind] ? ' · beobachtete Kommunikation, keine Annahme/Abnahme' : '');
     vermerk('gezeigt ' + ev.id + ' (' + wie + ')');
   }
@@ -767,7 +792,7 @@
         return p.kommentar - q.kommentar;
       });
       var halter = '', zustand = '', titel = '', zu = false, letzte = null,
-          klemmt = [];
+          klemmt = [], belegVergabe = 0;
       g.forEach(function (x) {
         var e = x.ev;
         var selbst = !!e.selbstauskunft;
@@ -782,7 +807,16 @@
         }
         if (e.kind === 'assigned' && e.recipient) {
           halter = e.recipient; zustand = 'zugewiesen';
-          titel = e.title; letzte = x; return;
+          titel = e.title; letzte = x;
+          /* DER BELEG DER AUFGABE IST DER, DER SIE VERGEBEN HAT -- genau wie
+             im Livepfad, wo `arbeitZuweisen` den Beleg des `assigned`
+             mitbekommt. Hier stand zuerst der Beleg des ZULETZT wirkenden
+             Ereignisses; damit haette dieselbe Lage je nach Weg (live oder
+             wiederhergestellt) auf zwei verschiedene Kommentare gezeigt.
+             Genau das schliesst Atlas' Bedingung aus. Der zuletzt wirkende
+             Beleg geht als eigene Angabe mit, statt den ersten zu ersetzen. */
+          if (!belegVergabe) belegVergabe = x.kommentar;
+          return;
         }
         if (!selbst) { basisGrenzen.fremdaussagen++; return; }
         if (e.kind === 'started' && halter && e.actor === halter) {
@@ -800,7 +834,8 @@
             e.blocker_id) {
           for (var bz = 0; bz < klemmt.length; bz++)
             if (klemmt[bz].id === e.blocker_id) return;   /* Duplikat */
-          klemmt.push({ id: e.blocker_id, grund: e.title });
+          /* Mit dem Beleg: WELCHER Kommentar die Klemme gemeldet hat. */
+          klemmt.push({ id: e.blocker_id, grund: e.title, beleg: x.kommentar });
           letzte = x; return;
         }
         if (e.kind === 'resolved' && halter && e.actor === halter &&
@@ -826,7 +861,9 @@
                      titel: titel, klemmt: klemmt,
                      occurred_at: letzte ? letzte.ev.occurred_at : '',
                      recorded_at: letzte ? letzte.recorded_at : '',
-                     beleg: letzte ? letzte.kommentar : 0 });
+                     beleg: belegVergabe,
+                     belegRef: belegVergabe ? BELEG_BASIS + belegVergabe : '',
+                     belegLetzte: letzte ? letzte.kommentar : 0 });
       }
     });
     basisGrenzen.konflikte += widersprueche;

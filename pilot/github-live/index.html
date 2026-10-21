@@ -2319,7 +2319,7 @@
 
      Der Bauzeitpunkt kommt beim Bauen aus der Uhr. Von Hand gepflegte
      Datumsangaben sind nach der zweiten Änderung falsch. */
-  var FASSUNG = '65', GEBAUT = '2026-10-21T12:25Z';
+  var FASSUNG = '66', GEBAUT = '2026-10-21T12:45Z';
 
   /* AG-GH-LIVE-001: JEDE TEXTSENKE MASKIERT.
      Seit Live-Daten von aussen kommen (GitHub-Kommentare, one-event.json),
@@ -4070,7 +4070,7 @@
            (L.lauf || '') === k.lauf;
   }
 
-  function arbeitZuweisen(name, kenn, titel) {
+  function arbeitZuweisen(name, kenn, titel, beleg) {
     if (!nachName[name]) return false;
     var k = kennung(kenn);
     var S = arbeit[name];
@@ -4078,7 +4078,9 @@
       for (var q = 0; q < S.liste.length; q++)
         if (trifft(S.liste[q], k)) return false;
     }
-    arbeitAn(name, titel || '', '', '', k, 'zugewiesen');
+    /* Der Beleg geht als EIGENES Stueck mit, nicht in der Kennung: `trifft`
+       vergleicht Identitaet, und ein Beleg ist keine. */
+    arbeitAn(name, titel || '', '', '', k, 'zugewiesen', beleg);
     return true;
   }
 
@@ -4119,7 +4121,7 @@
      ihre eigene Kennung (`blocker_id` im Vertrag). Ohne diese Kennung liesse
      sich "genau diese Blockade" nicht sagen; der Adapter weist ein
      `blocked`/`resolved` ohne sie ab, statt die aelteste zu nehmen. */
-  function arbeitKlemmt(name, kenn, klemme, grund) {
+  function arbeitKlemmt(name, kenn, klemme, grund, beleg) {
     var S = arbeit[name], k = kennung(kenn);
     if (!S || S.aus || !k.aufgabe || !klemme) { luecke('klemme'); return false; }
     for (var q = 0; q < S.liste.length; q++) {
@@ -4132,7 +4134,11 @@
       /* `w` und `t` standen hier zuerst mit und waren toter Zustand: Die
          Klemme bekommt absichtlich KEINEN eigenen Leuchtpunkt, also dreht
          sich an ihr auch nichts. */
-      L.klemmt.push({ id: klemme, grund: grund || '', seit: zeit });
+      /* Auch die Klemme traegt ihren Beleg: WELCHER Kommentar sie gemeldet
+         hat. Fuer eine wiederhergestellte Klemme ist das der einzige Weg
+         zurueck zur Quelle -- sie hat keine Listenzeile. */
+      L.klemmt.push({ id: klemme, grund: grund || '', seit: zeit,
+                      beleg: (beleg && beleg.nr) || '' });
       return true;
     }
     /* Keine Aufgabe dieser Kennung: Es wird KEINE angelegt. Eine Blockade
@@ -4183,7 +4189,7 @@
     return n;
   }
 
-  function arbeitAn(name, auftrag, kommando, modell, b, zustand) {
+  function arbeitAn(name, auftrag, kommando, modell, b, zustand, beleg) {
     if (!nachName[name]) return;
     var S = arbeit[name];
     if (!S || S.aus) { S = arbeit[name] = { t: 0, liste: [] }; }
@@ -4218,6 +4224,12 @@
       /* Die Klemmen dieser Aufgabe. Sie liegen NEBEN dem Zustand, nicht in
          ihm -- siehe `arbeitKlemmt`. Leer heisst: laeuft. */
       klemmt: [],
+      /* WOHER DIESE AUFGABE WEISS, DASS SIE DA IST. Die Nummer des
+         Kommentars, der sie vergeben hat, und die aufloesbare Adresse dazu.
+         Im aufgezeichneten Stueck bleibt beides leer -- dort gibt es keinen
+         Beleg, und ein erfundener waere schlimmer als keiner. */
+      beleg: (beleg && beleg.nr) || '',
+      belegRef: (beleg && beleg.ref) || '',
       w: Math.random() * 6.2832, t: 0, beginn: zeit
     });
     /* Alle Aufträge bleiben in der Liste. Vorher flog der älteste
@@ -5154,7 +5166,8 @@
           if (E.art === 'assigned' && E.an && E.spur && E.spur.task_id) {
             /* Die GANZE Spur, nicht nur die Aufgabenkennung: project_id und
                run_id gehoeren zur Identitaet. Siehe `kennung`/`trifft`. */
-            arbeitZuweisen(E.an, E.spur, E.text);
+            arbeitZuweisen(E.an, E.spur, E.text,
+                           { nr: E.beleg || '', ref: E.belegRef || '' });
           } else if (E.selbstauskunft && E.spur && E.spur.task_id) {
             if (E.art === 'started') arbeitBeginnen(E.von, E.spur);
             else if (E.art === 'delivered' || E.art === 'aborted')
@@ -5163,7 +5176,8 @@
                selbst. Atlas ueber forge bleibt Beobachtung -- sonst haengte
                eine Rolle an einer Klemme, die ein anderer behauptet hat. */
             else if (E.art === 'blocked')
-              arbeitKlemmt(E.von, E.spur, E.klemme, E.text);
+              arbeitKlemmt(E.von, E.spur, E.klemme, E.text,
+                           { nr: E.beleg || '' });
             else if (E.art === 'resolved')
               arbeitLoest(E.von, E.spur, E.klemme);
           }
@@ -5352,7 +5366,14 @@
                                hier ist er wenigstens abrufbar und messbar
                                statt unsichtbar. */
                             klemmt: (L.klemmt || []).map(function (K) {
-                              return { id: K.id, grund: K.grund }; }),
+                              return { id: K.id, grund: K.grund,
+                                       beleg: K.beleg || '' }; }),
+                            /* Der Originalbeleg der Aufgabe: Nummer und
+                               aufloesbare Adresse. Damit laesst sich von
+                               aussen pruefen, dass eine Anzeige an einer
+                               Quelle haengt und nicht in der Luft. */
+                            beleg: L.beleg || '',
+                            belegRef: L.belegRef || '',
                             /* Der Ringwinkel. Er steht hier, damit sich der
                                Effekt MESSEN laesst statt ihn zu behaupten:
                                Ein laufender Ring wird groesser, ein
@@ -5992,6 +6013,8 @@
     var t = (E.beobachtet ? E.von + ' \u2192 ' + E.an + ' \u00b7 ' : '') +
             E.id + ' \u00b7 ' + s.project_id + ' / ' + s.run_id + ' / ' + s.task_id +
             ' \u00b7 ' + herkunftWort(s.herkunft) + ' \u00b7 Werkzeug ' + s.source_tool_id;
+    /* Und WO es steht. Ohne diese Nummer ist die Zeile nicht nachzusehen. */
+    if (E.beleg) t += ' \u00b7 Beleg ' + E.beleg;
     if (E.art === 'handoff')
       t += ' \u00b7 beobachtete \u00dcbergabe \u2014 keine Annahme, kein Arbeitsbeginn';
     else if (E.art === 'contribution')
@@ -6087,7 +6110,19 @@
       var kenn = { aufgabe: id,
                    projekt: typeof A.projekt === 'string' ? A.projekt : '',
                    lauf: typeof A.lauf === 'string' ? A.lauf : '' };
-      if (!arbeitZuweisen(wer, kenn, typeof A.titel === 'string' ? A.titel : ''))
+      /* DER BELEG KOMMT MIT. Eine wiederhergestellte Aufgabe ohne ihn waere
+         eine Anzeige ohne Quelle -- und gerade sie hat keine Listenzeile, an
+         der man nachsehen koennte. Geprueft wie im Livepfad: Die Adresse
+         muss auf genau diese Nummer enden. */
+      var bnr = (typeof A.beleg === 'string' || typeof A.beleg === 'number')
+              ? String(A.beleg) : '';
+      if (!/^[0-9]{1,24}$/.test(bnr)) bnr = '';
+      var bref = '';
+      if (bnr && typeof A.belegRef === 'string' &&
+          A.belegRef.slice(-(bnr.length + 1)) === '/' + bnr)
+        bref = A.belegRef;
+      if (!arbeitZuweisen(wer, kenn, typeof A.titel === 'string' ? A.titel : '',
+                          { nr: bnr, ref: bref }))
         { abgewiesen++; return; }      /* schon da: kein zweiter Ring */
       if (zu === 'begonnen') arbeitBeginnen(wer, kenn);
       /* DIE KLEMMEN KOMMEN MIT, SONST ERGIBT DIE WIEDERHERSTELLUNG EINE
@@ -6105,8 +6140,12 @@
         A.klemmt.forEach(function (K) {
           var ki = (K && typeof K.id === 'string') ? K.id : '';
           if (!ki) { abgewiesen++; return; }
+          var kb = (K && (typeof K.beleg === 'string' || typeof K.beleg === 'number'))
+                 ? String(K.beleg) : '';
+          if (!/^[0-9]{1,24}$/.test(kb)) kb = '';
           if (arbeitKlemmt(wer, kenn, ki,
-                           (K && typeof K.grund === 'string') ? K.grund : ''))
+                           (K && typeof K.grund === 'string') ? K.grund : '',
+                           { nr: kb }))
             gelegt++;
         });
         /* Gezaehlt wird, was WIRKLICH gelegt wurde. Die Zahl in der Tafel
@@ -6221,6 +6260,26 @@
     if (typeof e.reporter === 'string' && e.reporter) E.melder = e.reporter;
     if (e.gh_selbstauskunft === true) E.selbstauskunft = true;
     if (klemme) E.klemme = klemme;
+    /* ======================= DER ORIGINALBELEG =======================
+
+       `source_evidence` sagt die ART des Belegs (Laufzeit oder gemeldet),
+       nicht seinen ORT. Wer eine Angabe im Bild nachsehen will, braucht die
+       Stelle, an der sie steht. Der Adapter leitet sie aus der Nummer ab,
+       die GitHub dem Kommentar gegeben hat -- ein Pflichtfeld des Senders
+       koennte das nicht sein, denn beim Schreiben kennt er sie nicht.
+
+       GEPRUEFT WIRD DER ZUSAMMENHANG, NICHT NUR DIE FORM: Die Adresse muss
+       auf GENAU diese Nummer enden. Ein Paar aus Nummer A und Adresse B
+       waere ein Beleg, der auf etwas anderes zeigt -- schlimmer als keiner,
+       weil er nachsehbar aussieht. */
+    var beleg = (typeof e.source_comment === 'string' && /^[0-9]{1,24}$/.test(e.source_comment))
+              ? e.source_comment : '';
+    var belegRef = '';
+    if (beleg && typeof e.source_ref === 'string' &&
+        /^https:\/\/[A-Za-z0-9.\-\/_]+$/.test(e.source_ref) &&
+        e.source_ref.slice(-(beleg.length + 1)) === '/' + beleg)
+      belegRef = e.source_ref;
+    if (beleg) { E.beleg = beleg; E.belegRef = belegRef; }
     if (v && typeof v === 'object' && v.belegt === true) {
       var tk = {};
       if (typeof v.output_tokens === 'number') tk.aus = v.output_tokens;
