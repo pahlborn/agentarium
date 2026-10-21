@@ -26,7 +26,7 @@
 */
 (function () {
   'use strict';
-  var ADAPTER = 'AG-GH-LIVE-001-v1.3';
+  var ADAPTER = 'AG-GH-LIVE-001-v1.4';
   var ENDPOINT = 'https://api.github.com/repos/pahlborn/agentarium/issues/2/comments?per_page=100';
   var MARKER = '<!-- AGENTARIUM_EVENT_V1 -->';
   var SCHEMA = 'agentarium.github-event.v1';
@@ -35,9 +35,29 @@
   var MAX_KOERPER = 65536, MAX_SEITEN = 100, MAX_TITEL = 200;
   var FELDER = ['schema', 'id', 'project_id', 'run_id', 'task_id', 'actor', 'kind',
                 'title', 'occurred_at', 'source_evidence', 'source_tool_id'];
-  var OPTIONAL = ['recipient'];                  /* nie Pflicht fuer progress */
-  var ARTEN = { progress: 1, handoff: 1, contribution: 1 };
+  /* AG-EVENT-JOURNAL-001: `reporter` ist WER MELDET, `actor` ist WER HANDELT.
+     Bisher gab es nur `actor`, und damit war beides dasselbe Feld. Atlas hat
+     am 21.10. den wunden Punkt genannt: Alle Rollen schreiben unter demselben
+     GitHub-Login, also beweist kein Feld eine Identitaet. Daraus folgt nicht,
+     dass die Trennung nutzlos ist -- sie macht aus einer Behauptung eine
+     PRUEFBARE Behauptung: Faellt `reporter` mit `actor` zusammen, ist es eine
+     Selbstauskunft der arbeitenden Rolle; sonst spricht einer ueber einen
+     anderen. Nur das Erste darf spaeter einen Aufgabenzustand treiben.
+     Verifiziert ist weiterhin allein der Login des Kommentars, und genau so
+     steht es im Fuss der Tafel. */
+  var OPTIONAL = ['recipient', 'reporter'];      /* nie Pflicht fuer progress */
+  var ARTEN = { progress: 1, handoff: 1, contribution: 1,
+                assigned: 1, received: 1, started: 1, delivered: 1,
+                blocked: 1, resolved: 1 };
   var KOMM = { handoff: 1, contribution: 1 };    /* nur beobachtet, kein Zustand */
+  /* Arten, die einen Aufgabenzustand treiben DUERFEN -- und nur bei
+     Selbstauskunft. `assigned` ist dabei die Ausnahme: Die Vergabe meldet
+     naturgemaess nicht der Empfaenger, sondern der Vergebende. Sie legt
+     deshalb eine Aufgabe als ZUGEWIESEN an und behauptet keinen Beginn. */
+  var LEBEN = { assigned: 1, received: 1, started: 1, delivered: 1,
+                blocked: 1, resolved: 1 };
+  var BRAUCHT_EMPF = { assigned: 1 };            /* an wen vergeben wurde */
+  var KANN_LEBEN_WORT = 'gemeldet-v1';
   var KENNUNG = /^[A-Za-z0-9][A-Za-z0-9._:\/-]{0,119}$/;
   var ISO = /^\d{4}-\d\d-\d\dT\d\d:\d\d(:\d\d(\.\d{1,9})?)?(Z|[+-]\d\d:\d\d)$/;
   var STEUER = /[\u0000-\u001f\u007f-\u009f\u2028\u2029\u202a-\u202e\u2066-\u2069]/;
@@ -57,6 +77,11 @@
      Auftrag/Abschluss behandeln. Ohne diese Zusage wird nichts davon
      weitergereicht. */
   var KANN_KOMM = B.kommunikation === 'beobachtet-v1';
+  /* Dieselbe Bauart wie die Zusage fuer beobachtete Kommunikation: Ein
+     Original, das den Lebenszyklus nicht kennt, verwirft die neuen Arten
+     ausdruecklich, statt sie halb anzuzeigen. Eine aeltere Fassung sagt
+     dieses Wort nicht und bekommt die Ereignisse deshalb gar nicht erst. */
+  var KANN_LEBEN = B.lebenszyklus === KANN_LEBEN_WORT;
 
   function Menge(max) {
     var o = Object.create(null), q = [];
@@ -78,7 +103,21 @@
             schnitt: 0, schnittIso: '', intervall: TAKT, fehlerFolge: 0, nichtVor: 0,
             fehler: '', pausiert: false };
   var zahl = { anfragen: 0, n200: 0, n304: 0, basisKommentare: 0, basisMarkiert: 0,
-               waehrendAufbau: 0, gezeigt: 0, duplikate: 0, abgewiesen: 0, ohneMarker: 0 };
+               waehrendAufbau: 0, gezeigt: 0, duplikate: 0, abgewiesen: 0, ohneMarker: 0,
+               konflikte: 0, abbrueche: 0 };
+  /* Fingerabdruck je Ereigniskennung, damit sich ein TRANSPORTDUPLIKAT von
+     einem KONFLIKT unterscheiden laesst: dieselbe Kennung mit demselben
+     Inhalt ist wirkungslos, dieselbe Kennung mit anderem Inhalt ist ein
+     Befund und wird abgewiesen statt stillschweigend verworfen.
+     Gedeckelt wie `bekannte`, damit eine lange Sitzung nicht waechst. */
+  var abdruck = Object.create(null), abdruckFolge = [];
+  function abdruckLegen(id, fa) {
+    if (abdruck[id] === undefined) {
+      abdruckFolge.push(id);
+      while (abdruckFolge.length > MAX_IDS) delete abdruck[abdruckFolge.shift()];
+    }
+    abdruck[id] = fa;
+  }
   var letztes = null, letzterGrund = '', log = [], aktuellerLauf = '';
 
   function vermerk(t) {
@@ -190,7 +229,12 @@
   var grundEl = el('div', { id: 'agGhGrund' });
   var fuss = el('small', {}, 'Token nur im Arbeitsspeicher dieser Seite, nur an api.github.com. ' +
                 'Kosten: nicht verfügbar. Fortschritt ist kein Abschluss. ' +
-                'Übergabe/Beitrag: beobachtete Kommunikation, keine Annahme, keine Abnahme. ' + ADAPTER);
+                'Übergabe/Beitrag: beobachtete Kommunikation, keine Annahme, keine Abnahme. ' +
+                /* Die Vertrauensgrenze steht da, wo die Zusagen stehen, und
+                   zwar vollstaendig: Alle Rollen schreiben unter demselben
+                   Login, also ist `actor` eine Angabe und kein Beweis. */
+                'Zustände sind gemeldet, nicht verifiziert: Rollen schreiben unter ' +
+                'demselben GitHub-Login, geprüft ist nur dieser. ' + ADAPTER);
   [kopf, zeile, ablaufZeile, ablaufText, ablaufHilfe, letztesEl, zahlEl, grundEl, fuss].forEach(function (x) { auf.appendChild(x); });
   tafel.appendChild(auf);
   document.body.appendChild(tafel);
@@ -225,7 +269,10 @@
         ' Kommentare, ' + zahl.basisMarkiert + ' markierte historisch, nicht abgespielt · ' : '') +
       'neu gezeigt ' + zahl.gezeigt + (zahl.waehrendAufbau ? ' (davon während Aufbau ' +
         zahl.waehrendAufbau + ')' : '') +
-      ' · doppelt ' + zahl.duplikate + ' · abgewiesen ' + zahl.abgewiesen +
+      ' · doppelt ' + zahl.duplikate + ' · Konflikt ' + zahl.konflikte +
+      (zahl.abbrueche ? ' · in dieser Sitzung beobachtet: ' + zahl.abbrueche +
+        ' Abbruch' + (zahl.abbrueche > 1 ? 'e' : '') + ' (Projektabdeckung: partial)' : '') +
+      ' · abgewiesen ' + zahl.abgewiesen +
       ' · ohne Marker ' + zahl.ohneMarker + ' · Anfragen ' + zahl.anfragen +
       ' (304: ' + zahl.n304 + ') · Seite ' + Z.seite;
     grundEl.textContent = letzterGrund ? 'Zuletzt abgewiesen: ' + letzterGrund : '';
@@ -263,13 +310,24 @@
     var hatEmpf = Object.prototype.hasOwnProperty.call(d, 'recipient');
     if (hatEmpf && typeof d.recipient !== 'string') return nein('recipient kein Text');
     if (KOMM[d.kind] && !hatEmpf) return nein('recipient fehlt bei ' + d.kind);
+    if (BRAUCHT_EMPF[d.kind] && !hatEmpf) return nein('recipient fehlt bei ' + d.kind);
+    var hatMeld = Object.prototype.hasOwnProperty.call(d, 'reporter');
+    if (hatMeld && typeof d.reporter !== 'string') return nein('reporter kein Text');
     var ids = ['id', 'project_id', 'run_id', 'task_id', 'source_tool_id'];
     for (var q = 0; q < ids.length; q++)
       if (!KENNUNG.test(d[ids[q]])) return nein(ids[q] + ' ungültig');
     if (!AKTEURE[d.actor]) return nein('actor unbekannt');
     if (hatEmpf && !AKTEURE[d.recipient]) return nein('recipient unbekannt');
+    if (hatMeld && !AKTEURE[d.reporter]) return nein('reporter unbekannt');
     if (KOMM[d.kind] && !KANN_KOMM)
       return nein('Original kennt beobachtete Kommunikation nicht (' + d.kind + ')');
+    if (LEBEN[d.kind] && !KANN_LEBEN)
+      return nein('Original kennt den Lebenszyklus nicht (' + d.kind + ')');
+    /* EIN LEBENSZYKLUSEREIGNIS MUSS SAGEN, WER ES MELDET. Ohne `reporter`
+       liesse sich Selbstauskunft nicht von Fremdaussage unterscheiden -- und
+       die Unterscheidung ist der ganze Zweck des Feldes. Lieber abweisen als
+       raten; geraten wird in diesem Monitor nichts mehr. */
+    if (LEBEN[d.kind] && !hatMeld) return nein('reporter fehlt bei ' + d.kind);
     var titel = d.title.trim();
     if (!titel || titel.length > MAX_TITEL) return nein('title leer oder länger als ' + MAX_TITEL);
     if (STEUER.test(titel)) return nein('title enthält Steuerzeichen');
@@ -279,6 +337,12 @@
       task_id: d.task_id, actor: d.actor, kind: d.kind,
       recipient: hatEmpf ? d.recipient : '', title: titel, occurred_at: d.occurred_at,
       source_evidence: d.source_evidence, source_tool_id: d.source_tool_id,
+      reporter: hatMeld ? d.reporter : '',
+      /* Die PRUEFBARE Aussage, nicht die bewiesene: Melder und Akteur fallen
+         zusammen. Verifiziert ist davon nichts ausser dem Login -- deshalb
+         heisst das Feld nicht `verifiziert`. */
+      selbstauskunft: !!(hatMeld && d.reporter === d.actor),
+      login: login,
       kommentar: String(c.id) } };
   }
 
@@ -307,6 +371,11 @@
       fictional: false, gh_beobachtet: true, project_id: ev.project_id,
       run_id: ev.run_id, task_id: ev.task_id, source_tool_id: ev.source_tool_id };
     if (ev.recipient) aus.recipient = ev.recipient;
+    /* AG-EVENT-JOURNAL-001: Melder und die daraus abgeleitete, PRUEFBARE
+       Aussage gehen mit. Das Original entscheidet selbst, was es damit tut
+       -- hier wird nichts behauptet, nur weitergegeben. */
+    if (ev.reporter) aus.reporter = ev.reporter;
+    aus.gh_selbstauskunft = !!ev.selbstauskunft;
     var r = window.__agEreignis(aus);
     if (!r || !r.angenommen) { abweisen('Original wies ab: ' + (r ? r.grund : '?')); return; }
     zahl.gezeigt++;
@@ -340,9 +409,24 @@
       if (p.art === 'ohne') { zahl.ohneMarker++; continue; }
       if (p.art !== 'ok') { abweisen(p.grund, cid); continue; }
       var ev = p.ev;
+      /* Der Fingerabdruck ist der Inhalt ohne die Kommentarnummer: Zweimal
+         dasselbe Ereignis in zwei Kommentaren ist ein Transportduplikat und
+         wirkungslos; dieselbe Kennung mit anderem Inhalt ist ein Konflikt
+         und ein Befund. */
+      var fa = [ev.project_id, ev.run_id, ev.task_id, ev.actor, ev.kind,
+                ev.recipient, ev.reporter, ev.title, ev.occurred_at,
+                ev.source_evidence, ev.source_tool_id].join('\u0001');
       if (bekannte.hat(ev.id) || (basisIds && basisIds.hat(ev.id))) {
+        var frueher = abdruck[ev.id];
+        if (frueher !== undefined && frueher !== fa) {
+          zahl.konflikte++;
+          abweisen('gleiche Kennung, anderer Inhalt: ' + ev.id, cid);
+          continue;
+        }
         zahl.duplikate++; vermerk('doppelt ' + ev.id); continue;
       }
+      abdruckLegen(ev.id, fa);
+      if (ev.kind === 'blocked') zahl.abbrueche++;
       if (modus === 'basis') {
         basisIds.add(ev.id);
         var t = Date.parse(c.created_at);

@@ -2289,7 +2289,7 @@
 
      Der Bauzeitpunkt kommt beim Bauen aus der Uhr. Von Hand gepflegte
      Datumsangaben sind nach der zweiten Änderung falsch. */
-  var FASSUNG = '55', GEBAUT = '2026-10-20T05:10Z';
+  var FASSUNG = '57', GEBAUT = '2026-10-21T08:15Z';
 
   /* AG-GH-LIVE-001: JEDE TEXTSENKE MASKIERT.
      Seit Live-Daten von aussen kommen (GitHub-Kommentare, one-event.json),
@@ -3475,7 +3475,15 @@
 
   function ballOrt() {
     if (!derBall) return null;
-    var p = heimat(nachName[derBall.bei]);
+    /* EIN BALL BEI NIEMANDEM IST KEIN BALL. Steht in `bei` ein Name, den es
+       nicht gibt, lag hier bisher `undefined.winkel` -- und das in der
+       Zeichenschleife, also in jedem Bild erneut. Der Ball wird deshalb
+       abgelegt statt der Lauf angehalten: Ein Ball ohne Halter ist nichts,
+       was man zeichnen koennte, und ein stehendes Bild ist schlimmer als
+       ein fehlender Ball. */
+    var halter = nachName[derBall.bei];
+    if (!halter) { derBall = null; return null; }
+    var p = heimat(halter);
     /* Etwas neben dem Namen, damit er nicht darunter liegt. */
     var zm = Math.atan2(my() - p[1], mx() - p[0]);
     var d = Math.min(W(), H()) * 0.055;
@@ -4782,9 +4790,22 @@
            Er beendet keinen Auftrag, eroeffnet keinen, blockiert nichts und
            hinterlaesst nichts -- ein kurzer Puls und eine lesbare Zeile.
            Diese Art gibt es nur im GitHub-Livebetrieb (siehe __agEreignis). */
-        if (E.art === 'progress') {
+        /* AG-EVENT-JOURNAL-001: Die Lebenszyklusarten gehen denselben Weg.
+           NICHT AUS BEQUEMLICHKEIT, SONDERN WEIL ES SONST KRACHT -- und zwar
+           gemessen: Ohne diesen Zweig fielen sie in den Flugpfad, galten
+           wegen `gross: 1.0` als GANZER Ball und setzten `derBall.bei` auf
+           den leeren Empfaenger. `ballOrt()` las dann `nachName['']`, also
+           `undefined.winkel`, und zwar in jedem Bild der Zeichenschleife.
+           Mein Kommentar behauptete da schon "treibt keinen Zustand" --
+           er trieb den Ball, ich hatte nur an `arbeitAn` gedacht.
+           Gefunden vom eigenen Nachweis, nicht im Betrieb. */
+        if (E.art === 'progress' || GH_LEBEN[E.art]) {
           stromZeile(E, FORTSCHRITT);
-          melden(E.von, '', 'progress', E.text, FORTSCHRITT,
+          /* Die wahre Art steht in der Meldung, nicht "progress": `melden`
+             benutzt sie ausschliesslich als Beschriftung (nachgesehen), und
+             ein `started`, das sich als Fortschritt ausgibt, waere genau
+             die Umdeutung, die der Auftrag verbietet. */
+          melden(E.von, '', E.art, E.text, FORTSCHRITT,
                  E.spur ? spurWort(E) : (E.id + ' \u00b7 ' + herkunftWort(E.herkunft)));
           pulsAn(E.von);
           tunStill = 0;
@@ -5490,7 +5511,19 @@
      die Zeile. Die Schluessel werden gezeigt, aber an KEINE Aufgabe, keinen
      Tisch und keinen Ball gebunden. Demo, Archiv, ?mvp=1 und unmarkierte
      Aufrufe von __agEreignis verhalten sich wie bisher. */
-  var GH_ARTEN = { progress: 1, handoff: 1, contribution: 1 };
+  /* AG-EVENT-JOURNAL-001: dazu die Lebenszyklusarten. Sie werden hier
+     ANGENOMMEN UND GEZEIGT, treiben aber in dieser Fassung noch keinen
+     Aufgabenzustand -- das ist Schritt 2 dieses Kandidaten. Angenommen und
+     nicht gezeigt waere eine stille Luege; getrieben und nicht geprueft
+     waere die groessere. */
+  var GH_ARTEN = { progress: 1, handoff: 1, contribution: 1,
+                   assigned: 1, received: 1, started: 1, delivered: 1,
+                   blocked: 1, resolved: 1 };
+  /* Arten, fuer die es im Bild noch keine eigene Gestalt gibt. Sie laufen
+     ueber denselben Weg wie `progress` -- eine Meldung am Platz des
+     Agenten, die vergeht -- und erfinden damit keinen Zustand. */
+  var GH_LEBEN = { assigned: 1, received: 1, started: 1, delivered: 1,
+                   blocked: 1, resolved: 1 };
   var GH_KENNUNG = new RegExp('^[A-Za-z0-9][A-Za-z0-9._:/-]{0,119}$');
   function ghKenn(x) { return (typeof x === 'string' && GH_KENNUNG.test(x)) ? x : ''; }
   function spurWort(E) {
@@ -5567,7 +5600,11 @@
     var gh = (e.gh_beobachtet === true);
     if (gh && !ghLive) return nein('GitHub-Ereignis nur im GitHub-Livebetrieb');
     if (gh && !GH_ARTEN[art]) return nein('kind fuer GitHub nicht erlaubt: ' + art);
-    var fortschritt = (ghLive && art === 'progress');
+    /* Die Lebenszyklusarten laufen auf demselben Weg wie `progress`: eine
+       Meldung am Platz des Agenten, die vergeht. Sie haben in dieser
+       Fassung absichtlich keine eigene Gestalt und keinen Verbrauch --
+       beides waere eine Behauptung ueber Arbeit, die hier nicht belegt ist. */
+    var fortschritt = (ghLive && (art === 'progress' || GH_LEBEN[art]));
     if (!ARTEN[art] && !fortschritt) return nein('kind unbekannt: ' + art);
     var herkunft = '';
     if (fortschritt || gh) {
@@ -5619,8 +5656,20 @@
       /* Kein ganzer Ball (Groesse wie ein abgeworfenes Stueck) und vor
          allem: `beobachtet` schaltet in schritt/wirf/ballSchritt jede
          Zustandsfolge ab. */
-      if (art !== 'progress') { E.beobachtet = true; E.gross = ARTEN[art].gross || 0.5; }
+      /* `GH_LEBEN` wird hier mitgefangen, und zwar nicht aus Bequemlichkeit:
+         Fuer diese Arten gibt es keinen Eintrag in `ARTEN`, also waere
+         `ARTEN[art].gross` ein Zugriff auf `undefined` und haette den
+         ganzen Aufruf geworfen. */
+      if (art !== 'progress' && !GH_LEBEN[art]) {
+        E.beobachtet = true; E.gross = ARTEN[art].gross || 0.5;
+      }
     }
+    /* Melder und die daraus abgeleitete Aussage werden mitgefuehrt, aber
+       NOCH NICHT ausgewertet. Schritt 2 treibt damit Aufgabenzustaende; bis
+       dahin steht hier Datenhaltung ohne Wirkung, und das ist der ehrlichere
+       Zwischenstand. */
+    if (typeof e.reporter === 'string' && e.reporter) E.melder = e.reporter;
+    if (e.gh_selbstauskunft === true) E.selbstauskunft = true;
     if (v && typeof v === 'object' && v.belegt === true) {
       var tk = {};
       if (typeof v.output_tokens === 'number') tk.aus = v.output_tokens;
@@ -6437,6 +6486,11 @@
       /* AG-GH-LIVE-004: Zusage an den Adapter, dass handoff/contribution
          hier nur beobachtet werden. Fehlt sie, reicht er sie nicht weiter. */
       kommunikation: 'beobachtet-v1',
+      /* AG-EVENT-JOURNAL-001: Zusage, dass die Lebenszyklusarten hier
+         ankommen duerfen. Dieselbe Bauart wie die Zeile darueber: Eine
+         Fassung, die dieses Wort nicht sagt, bekommt die Ereignisse gar
+         nicht erst -- lieber nichts als halb. */
+      lebenszyklus: 'gemeldet-v1',
       akteure: AGENTEN.map(function (a) { return a.name; }),
       istLive: function () { return MODUS === 'live'; }
     };
