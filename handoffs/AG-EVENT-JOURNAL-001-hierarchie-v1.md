@@ -1,8 +1,20 @@
 # AG-EVENT-JOURNAL-001 — Arbeitselement: Typ, Elternbezug, Fassung
 
 Stand Fassung 70 / Adapter `AG-GH-LIVE-001-v2.0` / Zusagewort `gemeldet-v5`.
-Schließt AG-LM-TK-021, Teil Vertrag und Anzeige.
+Gehört zum gemeinsamen Hierarchieanteil **AG-LM-TK-001 / TK-007 / TK-015**,
+Teil Vertrag und Anzeige.
 Maßgeblich ist der Quelltext, nicht diese Datei.
+
+> **Berichtigung, von Atlas verlangt (Kommentar 6321359599).** Hier stand
+> „Schließt AG-LM-TK-021". Das war falsch: **TK-021 ist der
+> Archibald-Spezifikationsauftrag**, und der bleibt `pending_route`. Ich hatte
+> zwei Dinge aus Atlas' Kommentar 6320323499 verwechselt — er hat dort im
+> selben Text die begrenzte Spezifikationsübergabe *und* die Vertragsarbeit an
+> mich genannt. Diese Datei beschreibt nur die Vertragsarbeit. **Sie schließt
+> TK-021 nicht und behauptet keine Archibald-Lieferung.**
+>
+> Ebenfalls offen und von dieser Lieferung **nicht** berührt: **AG-LM-TK-023 /
+> TC-011**, der tatsächliche Elternabschluss.
 
 ## Drei wahlfreie Felder — und bewusst kein viertes
 
@@ -44,7 +56,8 @@ Einträge, keiner aus dem anderen abgeleitet.
 
 Von unten gelesen gilt dasselbe: Der Beginn der Aufgabe lässt Story und Epic
 auf `zugewiesen`. **Ein Abschluss nach oben findet nicht statt** — das ist
-offener Umfang (AG-LM-TC-011), keine stille Ableitung.
+offener Umfang (**AG-LM-TK-023 / TC-011**), keine stille Ableitung. Er ist der
+grössere Teil der Hierarchie und bewusst nicht mitgeliefert.
 
 ## Live und Restore ergeben dieselbe Lage
 
