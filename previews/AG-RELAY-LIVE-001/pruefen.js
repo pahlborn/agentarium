@@ -128,7 +128,7 @@ function tischen(wurzel) {
     for (let w = 0; w < 24; w++) {
       const g = await s.evaluate(() => {
         const z = (document.getElementById('agGhZahlen') || {}).textContent || '';
-        const a = z.match(/angenommen (\d+)/), b = z.match(/gezeichnet (\d+)/);
+        const a = z.match(/angenommen (\d+)/), b = z.match(/verarbeitet (\d+)/);
         return (a && b) ? (a[1] === b[1]) : false;
       });
       if (g) break;
@@ -188,7 +188,7 @@ function tischen(wurzel) {
      dafuer, dass ein Nachweis die Unterscheidung uebersehen kann. Deshalb
      steht die zweite Zahl jetzt daneben. */
   zeile('vier angenommen, keiner mehr', /angenommen 4\b/.test(stand.zahlen) ? 'ja' : 'nein, ' + stand.zahlen.slice(0, 70), 'ja');
-  zeile('und vier auch gezeichnet', /gezeichnet 4\b/.test(stand.zahlen) ? 'ja' : 'nein, ' + stand.zahlen.slice(0, 70), 'ja');
+  zeile('und vier auch verarbeitet', /verarbeitet 4\b/.test(stand.zahlen) ? 'ja' : 'nein, ' + stand.zahlen.slice(0, 70), 'ja');
   zeile('bis hierher nichts abgewiesen', /abgewiesen 0\b/.test(stand.zahlen) ? 'ja' : 'nein, ' + stand.zahlen.slice(0, 70), 'ja');
 
   console.log('\nC — Und der ungeschützte Körper, mit dem richtigen Grund');
@@ -198,7 +198,7 @@ function tischen(wurzel) {
   zeile('abgewiesen', /Marker mehrfach/.test(stand.grund) ? 'ja' : 'nein, ' + stand.grund.slice(0, 40), 'ja');
   zeile('genau eine Abweisung', /abgewiesen 1\b/.test(stand.zahlen) ? 'ja' : 'nein, ' + stand.zahlen.slice(0, 70), 'ja');
   zeile('kein fünftes Ereignis angenommen', /angenommen 4\b/.test(stand.zahlen) ? 'ja' : 'nein', 'ja');
-  zeile('und keines zusätzlich gezeichnet', /gezeichnet 4\b/.test(stand.zahlen) ? 'ja' : 'nein', 'ja');
+  zeile('und keines zusätzlich verarbeitet', /verarbeitet 4\b/.test(stand.zahlen) ? 'ja' : 'nein', 'ja');
   zeile('letzte Meldung unverändert', stand.letztes === vorher ? 'ja' : 'nein', 'ja');
 
   console.log('\nD — Was der Schutz bewirkt hat');

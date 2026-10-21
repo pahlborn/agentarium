@@ -307,8 +307,14 @@
       (function () {
         try {
           var st = window.__agStand && window.__agStand();
+          /* NICHT "gezeichnet": Das behauptete mehr, als gemessen wird.
+             `verarbeitet` heisst "aus der Warteschlange genommen",
+             `ausgegeben` heisst "Meldung oder Flug angelegt". Gezeichnete
+             Bildpunkte beweist keine der beiden. Benannt von Atlas. */
           if (st && typeof st.verarbeitet === 'number')
-            return ' · gezeichnet ' + st.verarbeitet;
+            return ' · verarbeitet ' + st.verarbeitet +
+                   (typeof st.ausgegeben === 'number'
+                      ? ' · ausgegeben ' + st.ausgegeben : '');
         } catch (x) {}
         return '';
       })() +

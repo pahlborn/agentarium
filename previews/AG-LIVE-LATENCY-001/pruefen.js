@@ -6,32 +6,47 @@
 
    Rückgabe 0 = alles wie vereinbart, 1 = Abweichung, 2 = ungeprüft.
 
-   DER BEFUND, DEN DIESER NACHWEIS FESTHÄLT.
+   WAS DIESER NACHWEIS FESTHÄLT -- UND WAS NICHT.
    Peter sah am 21.10. „kein ball, keine aktivität. totenstille", während drei
-   echte Ereignisse von Atlas auf Vorgang #2 lagen. Gemessen wurde daraufhin
-   dasselbe zweimal, mit DENSELBEN DREI ECHTEN Kommentaren (hier als Fixture,
-   Zeichen für Zeichen aus der Schnittstelle geholt) gegen dieselbe Seite:
+   echte Ereignisse von Atlas auf Vorgang #2 lagen. Hier wird eine
+   KONSTELLATION REPRODUZIERT, die diese Stille erzeugt. Das ist keine
+   bewiesene Ursache auf seinem Gerät: Seine Schnitt- und Empfangsdaten
+   fehlen, und solange sie fehlen, bleibt auch ein Transportproblem möglich.
+   Von Atlas am 21.10. richtiggestellt, nachdem ich genau das behauptet
+   hatte. Gemessen wurde zweimal dasselbe, mit DENSELBEN DREI ECHTEN
+   Kommentaren (Fixture, Zeichen für Zeichen aus der Schnittstelle):
 
      A  lagen sie beim Verbinden schon da  ->  0 Meldungen, 0 Bälle
      B  kamen sie nach dem Verbinden       ->  3 Meldungen, 1 Flug
 
-   In BEIDEN Fällen wurde nichts abgewiesen. Es war also kein Transportfehler
-   und kein Vertragsfehler, sondern der Basisschnitt: Was beim Verbinden schon
-   da liegt, gilt als Geschichte und wird absichtlich nicht nachgespielt.
+   In BEIDEN Fällen wurde nichts abgewiesen. In DIESER Konstellation liegt es
+   also am Basisschnitt: Was beim Verbinden schon da liegt, gilt als
+   Geschichte und wird absichtlich nicht nachgespielt. Für Peters Gerät ist
+   damit eine Erklärung reproduziert, keine bewiesen.
+
+   UND EIN ZWEITES, DAS DIESER NACHWEIS NICHT LEISTET: Historische Ereignisse
+   heissen nicht, dass die Arbeit fertig ist. Ein `handoff`, der in der
+   Historie liegt, kann eine Aufgabe betreffen, die noch offen ist -- und der
+   Monitor zeigt davon nichts. Das Wiederherstellen offener Aufgaben bleibt
+   deshalb erforderlich und ist der nächste Schnitt, nicht hiermit erledigt.
 
    WAS DIESER NACHWEIS NICHT VERLANGT: dass die Historie abgespielt wird. Das
    Bild würde dann Arbeit zeigen, die vorbei ist. Verlangt wird, dass der
    Monitor SAGT, was er getan hat.
 
-   UND DIE UNTERSCHEIDUNG, DIE SENTINEL BENANNT HAT: Der Adapter zählt, sobald
-   das Original ein Ereignis ANNIMMT -- gezeichnet wird es erst, wenn die
-   Zeichenschleife es aus der Warteschlange nimmt. Ein Nachweis, der nur den
-   Adapterzähler liest, übersieht „angenommen, aber nie gezeichnet". Hier
-   werden beide Zahlen aus VERSCHIEDENEN Quellen gelesen und verglichen.
+   DREI ZAHLEN, DREI BEDEUTUNGEN -- benannt von Sentinel und von Atlas
+   geschärft:
+     angenommen   der Adapter hat es übergeben (liegt in `liveListe`)
+     verarbeitet  die Zeichenschleife hat es aus der Warteschlange genommen
+     ausgegeben   eine Meldung oder ein Flug wurde tatsächlich angelegt
+   Sie kommen aus zwei verschiedenen Quellen (Adapter / `__agStand()`), und
+   wo zwei auseinandergehen, steckt es dazwischen. Zuerst hiess die zweite
+   Zahl „gezeichnet"; das behauptete mehr als sie misst, denn sie stand am
+   ANFANG der Verarbeitung -- eine Ausnahme danach hätte mitgezählt.
 
-   GRENZE: Eine stehende Zeichenschleife wird hier nicht nachgestellt -- sie
-   liesse sich von aussen nur unzuverlässig erzwingen. Nachgewiesen ist die
-   ERKENNBARKEIT: zwei Zahlen aus zwei Quellen, die auseinandergehen würden. */
+   GRENZEN, die bleiben: Eine stehende Zeichenschleife ist nicht nachgestellt
+   (von aussen nicht zuverlässig erzwingbar). GEZEICHNETE BILDPUNKTE beweist
+   keine der drei Zahlen -- das wäre ein Bildvergleich und steht nicht hier. */
 'use strict';
 const fs = require('fs'), path = require('path'), http = require('http');
 
@@ -135,7 +150,7 @@ function tischen(wurzel) {
         await s.waitForTimeout(250);
         const g = await s.evaluate(() => {
           const z = (document.getElementById('agGhZahlen') || {}).textContent || '';
-          const a = z.match(/angenommen (\d+)/), b = z.match(/gezeichnet (\d+)/);
+          const a = z.match(/angenommen (\d+)/), b = z.match(/verarbeitet (\d+)/);
           return { a: a ? +a[1] : -1, b: b ? +b[1] : -1 };
         });
         if (g.a === 3 && g.b === 3) break;
@@ -151,12 +166,14 @@ function tischen(wurzel) {
         offen: !!(document.getElementById('agGhAuf') || {}).open,
         zahlen: z,
         angenommen: zahl(/angenommen (\d+)/),
-        gezeichnetAnzeige: zahl(/gezeichnet (\d+)/),
+        verarbeitetAnzeige: zahl(/verarbeitet (\d+)/),
+        ausgegebenAnzeige: zahl(/ausgegeben (\d+)/),
         historisch: zahl(/(\d+) markierte historisch/),
         abgewiesen: zahl(/abgewiesen (\d+)/),
         letztes: (document.getElementById('agGhLetztes') || {}).textContent || '',
         grund: (document.getElementById('agGhGrund') || {}).textContent || '',
         verarbeitet: typeof st.verarbeitet === 'number' ? st.verarbeitet : -1,
+        ausgegeben: typeof st.ausgegeben === 'number' ? st.ausgegeben : -1,
         fliegend: (st.fliegend || []).length,
         meldungen: document.querySelectorAll('.agRuf').length,
         werk: (document.getElementById('agWerkName') || {}).textContent || ''
@@ -196,11 +213,13 @@ function tischen(wurzel) {
   if (!A) { await b.close(); n.s.close(); ungeprueft('kein Livefach — ohne WebGL kein Monitor'); }
   const B = await lauf(false);
 
-  console.log('A — Peters Fall: die drei lagen beim Verbinden schon da');
-  console.log('    erwartet: still, NICHTS abgewiesen, und die Stille erklärt sich\n');
+  console.log('A — Reproduzierte Konstellation: die drei lagen beim Verbinden da');
+  console.log('    erwartet: still, NICHTS abgewiesen, und die Stille erklärt sich');
+  console.log('    KEINE Aussage über Peters Gerät — seine Schnittdaten fehlen\n');
   zeile('drei als historisch eingeordnet', A.historisch, 3);
   zeile('nichts angenommen', A.angenommen, 0);
-  zeile('nichts gezeichnet', A.verarbeitet, 0);
+  zeile('nichts verarbeitet', A.verarbeitet, 0);
+  zeile('nichts ausgegeben', A.ausgegeben, 0);
   zeile('nichts abgewiesen', A.abgewiesen, 0);
   zeile('keine Meldung im Bild', A.meldungen, 0);
   zeile('kein Flug', A.fliegend, 0);
@@ -215,22 +234,27 @@ function tischen(wurzel) {
   console.log('    erwartet: angenommen UND gezeichnet, Meldung und Flug\n');
   zeile('drei angenommen', B.angenommen, 3);
   zeile('drei von der Zeichenschleife verarbeitet', B.verarbeitet, 3);
-  zeile('Anzeige nennt dieselbe Zahl', B.gezeichnetAnzeige, 3);
+  zeile('mindestens drei ausgegeben', B.ausgegeben >= 3, true);
+  zeile('Anzeige nennt verarbeitet', B.verarbeitetAnzeige, 3);
+  zeile('Anzeige nennt ausgegeben', B.ausgegebenAnzeige >= 3, true);
   zeile('nichts abgewiesen', B.abgewiesen, 0);
   zeile('drei Meldungen im Bild', B.meldungen, 3);
   zeile('mindestens ein Flug aus dem handoff', B.fliegend >= 1, true);
   zeile('keine unbelegte Arbeit vorgetäuscht', (B.zahlen.indexOf('Arbeit') >= 0), false);
   zeile('keine Seitenfehler', B.pageErr.length, 0);
 
-  console.log('\nC — Angenommen ist nicht gezeichnet: zwei Quellen, zwei Zahlen');
-  console.log('    erwartet: beide vorhanden und hier gleich\n');
+  console.log('\nC — Drei Zahlen, drei Bedeutungen, zwei Quellen');
+  console.log('    angenommen → verarbeitet → ausgegeben; wo zwei auseinander-');
+  console.log('    gehen, steckt es dazwischen\n');
   zeile('Adapterzähler lesbar', B.angenommen >= 0, true);
-  zeile('Zählung der Zeichenschleife lesbar', B.verarbeitet >= 0, true);
-  zeile('hier gleich, also nichts hängengeblieben',
-        B.angenommen === B.verarbeitet, true);
-  console.log('        Eine STEHENDE Zeichenschleife ist hier nicht nachgestellt —');
-  console.log('        von aussen nicht zuverlässig erzwingbar. Nachgewiesen ist,');
-  console.log('        dass sie ERKENNBAR wäre: die Zahlen gingen auseinander.');
+  zeile('Zählung der Schleife lesbar', B.verarbeitet >= 0, true);
+  zeile('Zählung der Ausgabe lesbar', B.ausgegeben >= 0, true);
+  zeile('angenommen == verarbeitet', B.angenommen === B.verarbeitet, true);
+  zeile('ausgegeben nicht kleiner als verarbeitet',
+        B.ausgegeben >= B.verarbeitet, true);
+  console.log('        Eine STEHENDE Schleife ist nicht nachgestellt — von aussen');
+  console.log('        nicht zuverlässig erzwingbar. Und GEZEICHNETE BILDPUNKTE');
+  console.log('        beweist keine der drei Zahlen; das wäre ein Bildvergleich.');
 
   console.log('\nD — Die Klapptafel versteckt ihre Erklärung nicht mehr');
   console.log('    erwartet: offen, wenn etwas in die Historie fiel; sonst zu\n');
@@ -248,8 +272,10 @@ function tischen(wurzel) {
   }
   console.log('\nALLES WIE VEREINBART — keine Abweichung.');
   console.log('Die Historie wird weiterhin NICHT nachgespielt. Neu ist, dass der');
-  console.log('Monitor sagt, was er getan hat, und dass sich „angenommen" von');
-  console.log('„gezeichnet" unterscheiden lässt. Echte Körper, kein Netz, kein');
-  console.log('Relais — und keine Abnahme auf Peters iPad.');
+  console.log('Monitor sagt, was er getan hat, und dass angenommen, verarbeitet');
+  console.log('und ausgegeben getrennt zu lesen sind.');
+  console.log('NICHT belegt: die Ursache auf Peters Gerät, gezeichnete Bildpunkte,');
+  console.log('eine stehende Schleife — und dass historische Übergaben fertige');
+  console.log('Arbeit bedeuten. Das Wiederherstellen offener Aufgaben steht aus.');
   process.exit(0);
 })().catch(e => { ungeprueft('Nachweis abgebrochen: ' + (e && e.message)); });

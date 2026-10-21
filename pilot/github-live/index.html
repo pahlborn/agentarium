@@ -3054,6 +3054,7 @@
          nicht ein Stück. */
       if (E.an === derBall.ursprung) { E = Object.create(E); E.gross = 0.92; derBall = null; }
     }
+    if (MODUS === 'live') ausgegeben++;      /* ein Flug entsteht jetzt */
     baelle.push({
       x: p[0], y: p[1], zx: z[0], zy: z[1],
       u: 0, dauer: flugdauer(E, m, p, z),
@@ -4870,6 +4871,18 @@
      stehenden Schleife der interessante.
      Dieser Zaehler steht fuer den zweiten Schritt und fuer nichts sonst. */
   var verarbeitet = 0;
+  /* UND EINE ZWEITE ZAHL, DIE WIRKLICH DIE AUSGABE MISST.
+     `verarbeitet` steht am ANFANG der Verarbeitung -- es zaehlt also, dass
+     ein Ereignis aus der Warteschlange genommen wurde, nicht dass etwas
+     entstanden ist. Eine Ausnahme danach wuerde trotzdem zaehlen. Von Atlas
+     am 21.10. benannt, und er hat recht: Der Anzeigetext "gezeichnet" hat
+     mehr behauptet als der Zaehler misst. `ausgegeben` steigt erst, wenn
+     eine Meldung oder ein Flug tatsaechlich angelegt wurde.
+     Die beiden Zahlen nebeneinander zeigen, WO es haengt: angenommen gegen
+     verarbeitet trennt Adapter von Schleife, verarbeitet gegen ausgegeben
+     trennt Schleife von Ausgabe. Gezeichnete Bildpunkte beweist weiterhin
+     keine der drei -- das waere ein Bildvergleich und steht nicht hier. */
+  var ausgegeben = 0;
 
   function schritt(dt) {
     if (laeuft) {
@@ -4926,6 +4939,7 @@
           melden(E.von, '', E.art, E.text, FORTSCHRITT,
                  E.spur ? spurWort(E) : (E.id + ' \u00b7 ' + herkunftWort(E.herkunft)));
           pulsAn(E.von);
+          if (MODUS === 'live') ausgegeben++;   /* Meldung UND Puls sind raus */
           tunStill = 0;
           continue;
         }
@@ -5077,7 +5091,7 @@
              /* Was die Zeichenschleife wirklich angefasst hat. Steht hier
                 eine kleinere Zahl als im Adapterzaehler, ist etwas
                 angenommen und nicht gezeichnet worden. */
-             verarbeitet: verarbeitet,
+             verarbeitet: verarbeitet, ausgegeben: ausgegeben,
              luecken: luecken.gesamt,
              lueckenEinzeln: { beginn: luecken.beginn,
                lieferung: luecken.lieferung, abbruch: luecken.abbruch },
@@ -5151,7 +5165,7 @@
     /* Jeder Wechsel setzt den Livepuffer zurueck. Was ein voriger Strom
        geliefert hat, gehoert nicht in den naechsten. */
     liveListe.length = 0;
-    verarbeitet = 0;
+    verarbeitet = 0; ausgegeben = 0;
     /* Auch die Live-Identitaet: Was ein voriger Strom gemeldet hat, ist
        beim naechsten Wechsel keine Aussage mehr. */
     liveKopf = null;
