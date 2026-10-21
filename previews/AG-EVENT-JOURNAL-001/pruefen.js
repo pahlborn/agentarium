@@ -270,6 +270,65 @@ function koerper(f) {
          reporter: 'cadence', kind: 'delivered', title: 'dieselbe Lieferung nochmal' },
        '2026-10-20T19:04:00Z');
 
+  /* R13: DIE ECHTE ARBEITSTEILUNG, und genau der Fall, den meine bisherigen
+     Fixtures VERDECKT haben. Atlas' Befund vom 21.10. (6319743049):
+     Pruefung und Annahme waren an den Aufgabenhalter gebunden, und in R12
+     prueft und annimmt dieselbe Rolle, die geliefert hat. Hier nicht:
+
+       atlas  vergibt an forge
+       forge  empfaengt, beginnt, liefert
+       argus  meldet seine EIGENE Pruefung    (nicht Halter)
+       atlas  meldet seine EIGENE Annahme     (nicht Halter)
+
+     Eine Selbstmeldung des Pruefers ist etwas anderes als eine
+     Selbstabnahme des Lieferanten. */
+  hist({ id: 'R13:assigned', task: 'AG-EVJ-R13', actor: 'atlas', reporter: 'atlas',
+         recipient: 'forge', kind: 'assigned', title: 'R13 an forge' },
+       '2026-10-20T20:00:00Z');
+  hist({ id: 'R13:received', task: 'AG-EVJ-R13', actor: 'forge', reporter: 'forge',
+         kind: 'received', title: 'R13 empfangen' },
+       '2026-10-20T20:01:00Z');
+  hist({ id: 'R13:started', task: 'AG-EVJ-R13', actor: 'forge', reporter: 'forge',
+         kind: 'started', title: 'R13 begonnen' },
+       '2026-10-20T20:02:00Z');
+  hist({ id: 'R13:delivered', task: 'AG-EVJ-R13', actor: 'forge', reporter: 'forge',
+         kind: 'delivered', title: 'R13 geliefert' },
+       '2026-10-20T20:03:00Z');
+  hist({ id: 'R13:reviewed-argus', task: 'AG-EVJ-R13', actor: 'argus', reporter: 'argus',
+         kind: 'reviewed', title: 'Argus prüft — nicht der Halter' },
+       '2026-10-20T20:04:00Z');
+
+  /* R14: dasselbe, aber bis zur Annahme durch atlas. Die Aufgabe muss danach
+     ZU sein -- und zwar geschlossen von einem, der sie nie gehalten hat. */
+  hist({ id: 'R14:assigned', task: 'AG-EVJ-R14', actor: 'atlas', reporter: 'atlas',
+         recipient: 'forge', kind: 'assigned', title: 'R14 an forge' },
+       '2026-10-20T21:00:00Z');
+  hist({ id: 'R14:started', task: 'AG-EVJ-R14', actor: 'forge', reporter: 'forge',
+         kind: 'started', title: 'R14 begonnen' },
+       '2026-10-20T21:01:00Z');
+  hist({ id: 'R14:delivered', task: 'AG-EVJ-R14', actor: 'forge', reporter: 'forge',
+         kind: 'delivered', title: 'R14 geliefert' },
+       '2026-10-20T21:02:00Z');
+  hist({ id: 'R14:reviewed-sentinel', task: 'AG-EVJ-R14', actor: 'sentinel',
+         reporter: 'sentinel', kind: 'reviewed', title: 'Sentinel prüft' },
+       '2026-10-20T21:03:00Z');
+  hist({ id: 'R14:accepted-atlas', task: 'AG-EVJ-R14', actor: 'atlas', reporter: 'atlas',
+         kind: 'accepted', title: 'Atlas nimmt fachlich an — und schließt damit' },
+       '2026-10-20T21:04:00Z');
+
+  /* R15: die Gegenprobe zur Selbstauskunft. Atlas BEHAUPTET Argus' Pruefung.
+     Das ist eine Fremdaussage und darf nichts weiterstellen -- sonst waere
+     die Loesung des Halterproblems gleich die naechste Luecke. */
+  hist({ id: 'R15:assigned', task: 'AG-EVJ-R15', actor: 'atlas', reporter: 'atlas',
+         recipient: 'scout', kind: 'assigned', title: 'R15 an scout' },
+       '2026-10-20T22:00:00Z');
+  hist({ id: 'R15:delivered', task: 'AG-EVJ-R15', actor: 'scout', reporter: 'scout',
+         kind: 'delivered', title: 'R15 geliefert' },
+       '2026-10-20T22:01:00Z');
+  hist({ id: 'R15:reviewed-fremd', task: 'AG-EVJ-R15', actor: 'argus', reporter: 'atlas',
+         kind: 'reviewed', title: 'Atlas behauptet Argus hätte geprüft' },
+       '2026-10-20T22:02:00Z');
+
   /* R8, R9 UND R10: KLEMMEN IN DER HISTORIE.
      Atlas' Bedingung vom 21.10. woertlich: "Projekt-/Lauftrennung und
      Wiederherstellung muessen dabei dieselbe Lage ergeben wie
@@ -382,6 +441,7 @@ function koerper(f) {
       R4: f('AG-EVJ-R4'), R5: f('AG-EVJ-R5'),
       R8: f('AG-EVJ-R8'), R9: f('AG-EVJ-R9'), R10: f('AG-EVJ-R10'),
       R11: f('AG-EVJ-R11'), R12: f('AG-EVJ-R12'),
+      R13: f('AG-EVJ-R13'), R14: f('AG-EVJ-R14'), R15: f('AG-EVJ-R15'),
       klemmen: st.klemmen,
       verarbeitet: st.verarbeitet, ausgegeben: st.ausgegeben,
       fliegend: (st.fliegend || []).length,
@@ -389,7 +449,7 @@ function koerper(f) {
       zahlen: (document.getElementById('agGhZahlen') || {}).textContent || ''
     };
   });
-  zeile('neun offene Aufgaben übernommen', nachRestore.wieder, 9);
+  zeile('elf offene Aufgaben übernommen', nachRestore.wieder, 11);
   zeile('R1 liegt bei scout', nachRestore.R1 ? nachRestore.R1.wer : null, 'scout');
   zeile('R1 ist begonnen', nachRestore.R1 ? nachRestore.R1.zustand : null, 'begonnen');
   zeile('R1 als wiederhergestellt gekennzeichnet',
@@ -474,6 +534,26 @@ function koerper(f) {
      es auch nicht, denn ein Duplikat ist kein Ruecksprung. */
   console.log('        (auf R12s Prüfung folgt ein zweites `delivered` —');
   console.log('         es stellt nichts zurück)');
+
+  console.log('\nA7 — Prüfung und Annahme kommen von einer ANDEREN Rolle');
+  console.log('    Atlas, 21.10.: „Eine Selbstmeldung des Prüfers/Annehmenden');
+  console.log('    ist etwas anderes als eine Selbstabnahme des Lieferanten."');
+  console.log('    Meine bisherigen Fixtures haben den Fall verdeckt, weil in');
+  console.log('    ihnen dieselbe Rolle lieferte, prüfte und annahm.\n');
+  zeile('R13 ist offen', !!nachRestore.R13, true);
+  zeile('R13 liegt weiter bei forge',
+        nachRestore.R13 ? nachRestore.R13.wer : null, 'forge');
+  /* DIE ENTSCHEIDENDE ZEILE: Argus hat geprueft, nicht der Halter. */
+  zeile('Argus’ Prüfung stellt forges Aufgabe weiter',
+        nachRestore.R13 ? nachRestore.R13.zustand : null, 'geprueft');
+  zeile('R14 ist zu — Atlas hat angenommen', nachRestore.R14, null);
+  /* Und die Gegenprobe zur Selbstauskunft: Eine Fremdaussage stellt nichts
+     weiter, auch nicht nach dieser Korrektur. */
+  zeile('R15 ist offen', !!nachRestore.R15, true);
+  zeile('Fremdaussage über eine Prüfung stellt nichts weiter',
+        nachRestore.R15 ? nachRestore.R15.zustand : null, 'geliefert');
+  zeile('und wird als Fremdaussage ausgewiesen',
+        /Fremdaussage/.test(nachRestore.zahlen), true);
 
   console.log('\nA4 — Gleiche Rolle, gleiche Aufgabenkennung, zwei Projekte');
   console.log('    erwartet: zwei getrennte Ringe, und der Beginn des einen');
@@ -888,6 +968,24 @@ function koerper(f) {
      Die Gegenprobe steht daneben und ist der Teil, der das Messgeraet
      prueft: R1 bei scout laeuft weiter. Ohne sie wuerde ein Ring, der
      UEBERHAUPT nicht mehr bewegt wird, ebenfalls bestehen. */
+  /* WELCHE RINGE WERDEN UEBERHAUPT GESCHRITTEN? `arbeitSchritt` fasst nur
+     die ersten VIER Auftraege je Rolle an (`Math.min(S.liste.length, 4)`) --
+     ein fuenfter Ring wird nicht gezeichnet und sein Winkel nicht
+     weitergestellt. Genau daran ist diese Messung einmal gescheitert: Sie
+     las zweimal denselben Wert und meldete "laeuft nicht vorwaerts", also
+     das richtige Ergebnis aus dem falschen Grund.
+     Deshalb steht die Lage jetzt daneben, und die Messung nimmt eine
+     Aufgabe, die wirklich geschritten wird. */
+  const lage = await s.evaluate(() => {
+    const st = (window.__agStand && window.__agStand()) || {};
+    const r = {};
+    (st.aufgaben || []).forEach(a => { (r[a.wer] = r[a.wer] || []).push(a.aufgabe); });
+    return r;
+  });
+  console.log('        forge hält: ' + (lage.forge || []).join(', '));
+  zeile('J1 liegt unter den ersten vier Ringen von forge',
+        (lage.forge || []).indexOf('AG-EVJ-J1') >= 0 &&
+        (lage.forge || []).indexOf('AG-EVJ-J1') < 4, true);
   const wA = await s.evaluate(() => {
     const st = (window.__agStand && window.__agStand()) || {};
     const g = (st.aufgaben || []);
@@ -1099,6 +1197,114 @@ function koerper(f) {
   zeile('und die Klemme von R8 auch',
         nachRestore.R8 && nachRestore.R8.klemmt[0]
           ? /^\d+$/.test(nachRestore.R8.klemmt[0].beleg) : null, true);
+
+  console.log('\nL — Dieselbe Arbeitsteilung am laufenden Strom');
+  console.log('    Atlas’ Prüffall, wörtlich: atlas vergibt an forge → forge');
+  console.log('    empfängt/beginnt/liefert → Argus meldet eigene Prüfung →');
+  console.log('    Atlas meldet eigene Annahme. Live und Restore müssen');
+  console.log('    dasselbe ergeben.\n');
+
+  /* Eine zweite, FREMDE Aufgabe daneben, die unberuehrt bleiben muss. */
+  await liefern('L0:assigned-fremd', koerper({
+    id: 'AG-EVENT-JOURNAL-001:atlas:assigned:L0', task: 'AG-EVJ-L0',
+    actor: 'atlas', reporter: 'atlas', recipient: 'scout', kind: 'assigned',
+    title: 'Eine fremde Aufgabe, die nichts davon mitbekommen darf'
+  }), 90501);
+
+  await liefern('L1:assigned', koerper({
+    id: 'AG-EVENT-JOURNAL-001:atlas:assigned:L1', task: 'AG-EVJ-L1',
+    actor: 'atlas', reporter: 'atlas', recipient: 'forge', kind: 'assigned',
+    title: 'Atlas vergibt L1 an forge'
+  }), 90502);
+  await liefern('L1:received', koerper({
+    id: 'AG-EVENT-JOURNAL-001:forge:received:L1', task: 'AG-EVJ-L1',
+    actor: 'forge', reporter: 'forge', kind: 'received',
+    title: 'Forge empfängt L1'
+  }), 90503);
+  st = await stand();
+  let L1 = (st.aufgaben || []).filter(a => a.aufgabe === 'AG-EVJ-L1')[0] || null;
+  zeile('Empfang ist eine eigene Stufe', L1 ? L1.zustand : null, 'empfangen');
+  await liefern('L1:started', koerper({
+    id: 'AG-EVENT-JOURNAL-001:forge:started:L1', task: 'AG-EVJ-L1',
+    actor: 'forge', reporter: 'forge', kind: 'started', title: 'Forge beginnt L1'
+  }), 90504);
+  await liefern('L1:delivered', koerper({
+    id: 'AG-EVENT-JOURNAL-001:forge:delivered:L1', task: 'AG-EVJ-L1',
+    actor: 'forge', reporter: 'forge', kind: 'delivered', title: 'Forge liefert L1'
+  }), 90505);
+  st = await stand();
+  L1 = (st.aufgaben || []).filter(a => a.aufgabe === 'AG-EVJ-L1')[0] || null;
+  zeile('nach der Lieferung: geliefert', L1 ? L1.zustand : null, 'geliefert');
+  zeile('und die Aufgabe liegt bei forge', L1 ? L1.wer : null, 'forge');
+
+  /* DER FALL. Argus prueft -- und argus haelt die Aufgabe nicht. */
+  const vorStufe = st.lueckenEinzeln ? st.lueckenEinzeln.stufe : -1;
+  await liefern('L1:reviewed-argus', koerper({
+    id: 'AG-EVENT-JOURNAL-001:argus:reviewed:L1', task: 'AG-EVJ-L1',
+    actor: 'argus', reporter: 'argus', kind: 'reviewed',
+    title: 'Argus meldet seine eigene Prüfung von L1'
+  }), 90506);
+  st = await stand();
+  L1 = (st.aufgaben || []).filter(a => a.aufgabe === 'AG-EVJ-L1')[0] || null;
+  zeile('Argus’ Prüfung stellt forges Aufgabe weiter',
+        L1 ? L1.zustand : null, 'geprueft');
+  zeile('sie bleibt bei forge, nicht bei argus', L1 ? L1.wer : null, 'forge');
+  zeile('keine Lücke dabei gezählt',
+        (st.lueckenEinzeln ? st.lueckenEinzeln.stufe : -1), vorStufe);
+  /* PRAEZISE, NICHT GROSSZUEGIG: argus HAELT eine Aufgabe -- R3 aus der
+     Historie. Die Behauptung ist nicht "argus hat keine Aufgabe", sondern
+     "argus hat durch seine Pruefung keine bekommen". Mein erstes Soll war
+     zu grob und fiel zu Recht durch. */
+  zeile('argus bekommt durch die Prüfung keine Aufgabe',
+        (st.aufgaben || []).filter(a => a.wer === 'argus' &&
+                                        a.aufgabe === 'AG-EVJ-L1').length, 0);
+  /* Die fremde Aufgabe ist unberuehrt. */
+  const L0 = (st.aufgaben || []).filter(a => a.aufgabe === 'AG-EVJ-L0')[0] || null;
+  zeile('die fremde Aufgabe ist unberührt', L0 ? L0.zustand : null, 'zugewiesen');
+
+  /* Und Atlas nimmt an -- und schliesst damit eine Aufgabe, die er nie
+     gehalten hat. */
+  await liefern('L1:accepted-atlas', koerper({
+    id: 'AG-EVENT-JOURNAL-001:atlas:accepted:L1', task: 'AG-EVJ-L1',
+    actor: 'atlas', reporter: 'atlas', kind: 'accepted',
+    title: 'Atlas meldet seine eigene fachliche Annahme von L1'
+  }), 90507);
+  st = await stand();
+  zeile('Atlas’ Annahme schließt forges Aufgabe',
+        (st.aufgaben || []).filter(a => a.aufgabe === 'AG-EVJ-L1').length, 0);
+  zeile('die fremde Aufgabe ist weiter da',
+        (st.aufgaben || []).filter(a => a.aufgabe === 'AG-EVJ-L0').length, 1);
+  zeile('atlas bekommt durch die Annahme keine Aufgabe',
+        (st.aufgaben || []).filter(a => a.wer === 'atlas').length, 0);
+
+  /* GEGENPROBEN. Erstens: eine Pruefung zu einer Kennung, die es nirgends
+     gibt, erfindet keine Aufgabe und bleibt eine gezaehlte Luecke. */
+  const vorStufe2 = st.lueckenEinzeln ? st.lueckenEinzeln.stufe : -1;
+  await liefern('L2:reviewed-ohne', koerper({
+    id: 'AG-EVENT-JOURNAL-001:argus:reviewed:NICHTS', task: 'AG-EVJ-GIBT-ES-NICHT-2',
+    actor: 'argus', reporter: 'argus', kind: 'reviewed',
+    title: 'Prüfung zu einer Kennung, die hier niemand kennt'
+  }), 90508);
+  st = await stand();
+  zeile('Prüfung ohne Aufgabe legt keine an',
+        (st.aufgaben || []).filter(a => a.aufgabe === 'AG-EVJ-GIBT-ES-NICHT-2').length, 0);
+  zeile('und wird als Lücke gezählt',
+        (st.lueckenEinzeln ? st.lueckenEinzeln.stufe : -1) > vorStufe2, true);
+
+  /* Zweitens: eine FREMDAUSSAGE ueber eine Pruefung stellt nichts weiter.
+     Die Selbstauskunftsregel gilt unveraendert -- sie sagt nur nichts mehr
+     ueber den Halter. */
+  const L3 = (st.aufgaben || []).filter(a => a.aufgabe === 'AG-EVJ-L0')[0];
+  await liefern('L0:reviewed-fremd', koerper({
+    id: 'AG-EVENT-JOURNAL-001:atlas-ueber-argus:reviewed:L0', task: 'AG-EVJ-L0',
+    actor: 'argus', reporter: 'atlas', kind: 'reviewed',
+    title: 'Atlas behauptet, Argus hätte L0 geprüft'
+  }), 90509);
+  st = await stand();
+  const L0b = (st.aufgaben || []).filter(a => a.aufgabe === 'AG-EVJ-L0')[0] || null;
+  zeile('Fremdaussage stellt nichts weiter',
+        L0b ? L0b.zustand : null, 'zugewiesen');
+  console.log('        (dieselbe Lage wie in A7 aus der Historie — so verlangt)');
 
   console.log('\nI — Was auch jetzt noch NICHT geschieht');
   console.log('    erwartet: kein Ballwechsel aus Lebenszyklusereignissen,');

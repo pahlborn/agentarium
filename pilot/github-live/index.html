@@ -2319,7 +2319,7 @@
 
      Der Bauzeitpunkt kommt beim Bauen aus der Uhr. Von Hand gepflegte
      Datumsangaben sind nach der zweiten Änderung falsch. */
-  var FASSUNG = '67', GEBAUT = '2026-10-21T15:20Z';
+  var FASSUNG = '68', GEBAUT = '2026-10-21T15:45Z';
 
   /* AG-GH-LIVE-001: JEDE TEXTSENKE MASKIERT.
      Seit Live-Daten von aussen kommen (GitHub-Kommentare, one-event.json),
@@ -4113,6 +4113,52 @@
   var ZU_ZUSTAND = { received: 'empfangen', started: 'begonnen',
                      delivered: 'geliefert', reviewed: 'geprueft' };
 
+  /* ========= WER DARF EINE AUFGABE WEITERSTELLEN, UND WESSEN? =========
+
+     Befund von Atlas, 21.10. (Kommentar 6319743049), und er trifft: Pruefung
+     und Annahme waren an den Aufgabenhalter gebunden. `arbeitStufe(E.von,…)`
+     sucht in der Liste des MELDERS -- eine Pruefung von Argus fand Forges
+     Aufgabe dort nie, und eine Annahme von Atlas auch nicht. Meine eigenen
+     Nachweise haben den Fall VERDECKT, weil in ihnen jeweils dieselbe Rolle
+     lieferte, pruefte und annahm.
+
+     Die Unterscheidung, die dabei verlorengegangen war, ist Atlas' Satz:
+     Eine Selbstmeldung des PRUEFERS ist etwas anderes als eine
+     Selbstabnahme des LIEFERANTEN. Die Selbstauskunftsregel sagt
+     `reporter === actor` -- sie sagt NICHT, dass der Akteur die Aufgabe
+     halten muss. Bei Empfang, Beginn und Lieferung fallen beide zusammen,
+     denn nur der Arbeitende kann seine Arbeit empfangen, beginnen und
+     abgeben. Bei Pruefung, Annahme und Abbruch ist der Akteur
+     NOTWENDIGERWEISE ein anderer -- sonst waere es eine Selbstabnahme.
+
+     Dass Abbruch dazugehoert, steht nicht in Atlas' Befund, folgt aber aus
+     Peters Festlegung vom 21.10.: "ich will doch keine abbrueche senden, das
+     muss das projekt, also atlas". Ein Abbruch kommt vom Projekt, nicht vom
+     Gescheiterten. Dieselbe Bindung, derselbe Fehler.
+
+     Welche Rolle WELCHE Autorität hat, prueft der Monitor nicht und soll er
+     nicht: Er zeigt, wer was gemeldet hat. Die Autorität liegt im Regelwerk,
+     und im Fuss der Tafel steht, dass Zustaende gemeldet und nicht
+     verifiziert sind. */
+  var HALTERGEBUNDEN = { received: 1, started: 1, delivered: 1 };
+
+  /* Die Aufgabe dieser Identitaet, wo immer sie liegt. Liegt sie mehrfach,
+     wird NICHT gewaehlt: Zwei Halter derselben Kennung sind ein Widerspruch
+     in den Daten, und eine Rateentscheidung darueber waere schlimmer als
+     die gezaehlte Luecke. */
+  function aufgabeSuchen(k) {
+    var fund = null, mehrfach = false;
+    for (var name in arbeit) {
+      var S = arbeit[name];
+      if (!S || S.aus) continue;
+      for (var q = 0; q < S.liste.length; q++)
+        if (trifft(S.liste[q], k)) {
+          if (fund) mehrfach = true; else fund = { wer: name, i: q };
+        }
+    }
+    return mehrfach ? { mehrfach: true } : fund;
+  }
+
   /* Ein Schritt in der Kette. Ist die Aufgabe unbekannt, wird KEINE angelegt
      und keine fremde umgestellt -- das waere ein erfundener Zustand. Die
      Luecke wird gezaehlt. */
@@ -5227,10 +5273,23 @@
             /* Die Kette: received/started/delivered/reviewed stellen den
                Zustand weiter, accepted und aborted beenden die Aufgabe.
                `merged` und `published` stehen hier NICHT -- siehe unten. */
-            if (ZU_ZUSTAND[E.art])
+            /* HALTERGEBUNDEN: in der Liste des Melders -- nur der
+               Arbeitende empfaengt, beginnt und liefert seine eigene
+               Arbeit.
+               NICHT HALTERGEBUNDEN: Pruefung, Annahme und Abbruch kommen
+               von einer anderen Rolle und treffen die Aufgabe, wo immer sie
+               liegt. Siehe `HALTERGEBUNDEN`. */
+            if (ZU_ZUSTAND[E.art] && HALTERGEBUNDEN[E.art])
               arbeitStufe(E.von, E.spur, ZU_ZUSTAND[E.art], 'stufe');
-            else if (E.art === 'accepted' || E.art === 'aborted')
-              auftragFertig(E.von, E.spur, true);   /* streng */
+            else if (ZU_ZUSTAND[E.art]) {
+              var fs = aufgabeSuchen(kennung(E.spur));
+              if (!fs || fs.mehrfach) luecke('stufe');
+              else arbeitStufe(fs.wer, E.spur, ZU_ZUSTAND[E.art], 'stufe');
+            } else if (E.art === 'accepted' || E.art === 'aborted') {
+              var fz = aufgabeSuchen(kennung(E.spur));
+              if (!fz || fz.mehrfach) luecke('lieferung');
+              else auftragFertig(fz.wer, E.spur, true);   /* streng */
+            }
             /* Auch hier gilt die Selbstauskunftsregel: Wer klemmt, sagt es
                selbst. Atlas ueber forge bleibt Beobachtung -- sonst haengte
                eine Rolle an einer Klemme, die ein anderer behauptet hat. */

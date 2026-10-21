@@ -26,7 +26,7 @@
 */
 (function () {
   'use strict';
-  var ADAPTER = 'AG-GH-LIVE-001-v1.7';
+  var ADAPTER = 'AG-GH-LIVE-001-v1.8';
   /* Wortlaut von Sentinel vorgeschrieben (AG-CONNECT-UX-001, 21.10.), Zeichen
      fuer Zeichen. Einmal benannt, damit Platzhalter und Zeile nicht
      auseinanderlaufen koennen. */
@@ -100,6 +100,11 @@
      `begonnen`. Eine Aufloesung nimmt genau eine Klemme weg und behauptet
      weder Beginn noch Abschluss. Darum braucht jede ihre Kennung. */
   var KLEMMARTEN = { blocked: 1, resolved: 1 };
+  /* Arten, die nur der Aufgabenhalter selbst melden kann. Pruefung, Annahme
+     und Abbruch sind NICHT dabei: Sie kommen notwendigerweise von einer
+     anderen Rolle -- sonst waere es eine Selbstabnahme. Der Abbruch kommt
+     nach Peters Festlegung vom Projekt, nicht vom Gescheiterten. */
+  var HALTERGEBUNDEN = { received: 1, started: 1, delivered: 1 };
   /* GEMELDET-V2, UND DER SPRUNG IST NOETIG. In v1 kamen `blocked`/`resolved`
      an und trieben nichts; jetzt legen sie eine Klemme an die Aufgabe. Ein
      Original aus dem Vorrat, das nur v1 sagt, wuerde die beiden Arten also
@@ -834,7 +839,13 @@
           return;
         }
         if (!selbst) { basisGrenzen.fremdaussagen++; return; }
-        if (ZU[e.kind] && halter && e.actor === halter) {
+        /* HALTERGEBUNDEN ODER NICHT -- dieselbe Unterscheidung wie live.
+           Atlas' Befund vom 21.10.: Pruefung und Annahme waren hier an
+           `e.actor === halter` gebunden, also konnte Argus' eigene Pruefung
+           Forges Aufgabe nicht weiterstellen. Eine Selbstmeldung des
+           Pruefers ist etwas anderes als eine Selbstabnahme des Lieferanten;
+           `selbst` oben prueft schon, dass der Melder der Akteur ist. */
+        if (ZU[e.kind] && halter && (!HALTERGEBUNDEN[e.kind] || e.actor === halter)) {
           /* Nur vorwaerts: Ein Ereignis, das keine hoehere Stufe bringt,
              aendert nichts. Ein zweites `delivered` ist ein Duplikat, kein
              Ruecksprung -- und als Widerspruch zaehlt es auch nicht. */
@@ -866,8 +877,7 @@
             }
           widersprueche++; return;
         }
-        if ((e.kind === 'accepted' || e.kind === 'aborted') &&
-            halter && e.actor === halter) {
+        if ((e.kind === 'accepted' || e.kind === 'aborted') && halter) {
           /* ANGENOMMEN ODER ABGEBROCHEN SCHLIESST, GELIEFERT NICHT. Hier
              stand `delivered`; mit Pruefung und Annahme in der Kette waere
              die Aufgabe weg, bevor jemand sie angesehen hat.

@@ -40,6 +40,38 @@ sehen.
 **Das ist eine Änderung an schon abgenommenem Verhalten**, und sie ist hier
 benannt statt beiläufig mitgenommen.
 
+## Wer darf welche Aufgabe weiterstellen
+
+| Art | gebunden an |
+|---|---|
+| `received`, `started`, `delivered` | **den Halter**. Nur der Arbeitende empfängt, beginnt und gibt seine eigene Arbeit ab. |
+| `reviewed`, `accepted`, `aborted` | **niemanden**. Sie treffen die Aufgabe, wo immer sie liegt. |
+
+**Befund von Atlas, 21.10.** (Kommentar 6319743049): Prüfung und Annahme waren
+an den Halter gebunden. `arbeitStufe(E.von, …)` sucht in der Liste des
+*Melders* — eine Prüfung von Argus fand Forges Aufgabe dort nie, eine Annahme
+von Atlas auch nicht. **Meine eigenen Nachweise haben den Fall verdeckt**, weil
+in ihnen jeweils dieselbe Rolle lieferte, prüfte und annahm.
+
+Die verlorene Unterscheidung ist Atlas' Satz: *Eine Selbstmeldung des Prüfers
+ist etwas anderes als eine Selbstabnahme des Lieferanten.* Die
+Selbstauskunftsregel sagt `reporter === actor` — sie sagt **nicht**, dass der
+Akteur die Aufgabe halten muss. Bei Empfang, Beginn und Lieferung fallen beide
+zusammen. Bei Prüfung, Annahme und Abbruch ist der Akteur
+**notwendigerweise** ein anderer.
+
+Dass der **Abbruch** dazugehört, steht nicht in Atlas' Befund, folgt aber aus
+Peters Festlegung: „ich will doch keine abbrüche senden, das muss das projekt,
+also atlas". Ein Abbruch kommt vom Projekt, nicht vom Gescheiterten.
+
+**Liegt eine Kennung mehrfach**, wird nicht gewählt: Zwei Halter derselben
+Kennung sind ein Widerspruch in den Daten, und eine Rateentscheidung darüber
+wäre schlimmer als die gezählte Lücke.
+
+**Welche Rolle welche Autorität hat, prüft der Monitor nicht** und soll er
+nicht. Er zeigt, wer was gemeldet hat; die Autorität liegt im Regelwerk, und im
+Fuß der Tafel steht, dass Zustände gemeldet und nicht verifiziert sind.
+
 ## Was `merged` und `published` nicht sind
 
 Keine Zustände einer Aufgabe. Sie sagen etwas über ein **Ergebnis** — einen
@@ -85,6 +117,12 @@ nichts zurück), Teil A4 (die Lieferung in Projekt B schließt nichts, erst die
 Annahme), Teil H (Lieferung → Prüfung → Annahme einzeln, und `merged`/
 `published` legen keine Aufgabe an).
 
+Teil A7 und Teil L prüfen Atlas' Fall in beiden Wegen: atlas vergibt an forge →
+forge empfängt/beginnt/liefert → **Argus** meldet seine eigene Prüfung →
+**Atlas** meldet seine eigene Annahme. Dazu die Gegenproben: eine Fremdaussage
+über eine Prüfung stellt nichts weiter, eine Prüfung ohne Aufgabe legt keine
+an, und die fremde Aufgabe daneben bleibt unberührt.
+
 **Gegentest gelaufen.** Mit dem alten Verhalten fallen sieben Zeilen durch.
 
 *Anmerkung zum Gegentest selbst:* Der erste Versuch war wirkungslos. Er
@@ -94,3 +132,17 @@ sieben, und das sah nach einem bestandenen Gegentest aus. Aufgefallen ist es,
 weil die *erwartete* Fehlzeile fehlte. Ein Gegentest, der die Sache nicht
 wirklich zurückstellt, belegt nichts — derselbe Fehler wie bei einem
 Messgerät, das nichts ausgibt.
+
+## Eine offene Messfrage, die ich nicht geklärt habe
+
+Die Zeile „der geklemmte Ring läuft nicht vorwärts" ist in **einem** Lauf
+durchgefallen, mit zweimal demselben Winkel auf vier Stellen — der Ring wurde
+in den 1,4 s zwischen den Messungen offenbar gar nicht weitergestellt. In drei
+aufeinanderfolgenden Läufen danach bewegte er sich jedes Mal. **Die Ursache
+kenne ich nicht.** Mein erster Verdacht war die Deckelung auf vier gezeichnete
+Ringe; der Nachweis nennt die Lage jetzt selbst (`forge hält: …`) und zeigt,
+dass es das nicht war — drei Aufgaben, J1 an Position 3.
+
+Die Zeile steht nicht als erledigt da. Was sich geändert hat, ist nur, dass sie
+ihre **Voraussetzung mitmisst**: Fällt sie wieder, sagt die Ausgabe daneben, ob
+der Ring überhaupt gezeichnet wurde.
