@@ -122,6 +122,18 @@ function tischen(wurzel) {
     antwort = [{ id: id, body: koerper[name],
                  user: { login: 'github-actions[bot]', id: 41898282 } }];
     await s.waitForTimeout(2800);
+    /* Bis sich "angenommen" und "gezeichnet" gefangen haben: Die zweite Zahl
+       steigt erst, wenn die Zeichenschleife das Ereignis genommen hat. Ohne
+       dieses Warten entscheidet der Zufall, siehe AG-LIVE-LATENCY-001. */
+    for (let w = 0; w < 24; w++) {
+      const g = await s.evaluate(() => {
+        const z = (document.getElementById('agGhZahlen') || {}).textContent || '';
+        const a = z.match(/angenommen (\d+)/), b = z.match(/gezeichnet (\d+)/);
+        return (a && b) ? (a[1] === b[1]) : false;
+      });
+      if (g) break;
+      await s.waitForTimeout(250);
+    }
     return await s.evaluate(() => ({
       letztes: (document.getElementById('agGhLetztes') || {}).textContent || '',
       zahlen: (document.getElementById('agGhZahlen') || {}).textContent || '',
@@ -170,7 +182,13 @@ function tischen(wurzel) {
     zeile(kurz + ' als ' + art, stand.letztes.indexOf('Neu (live): ' + art + ' ·') === 0 ? 'ja' : 'nein', 'ja');
     zeile(kurz + ' von ' + wer, stand.letztes.indexOf('· ' + wer + ' ·') > 0 ? 'ja' : 'nein', 'ja');
   }
-  zeile('vier gezeigt, keiner mehr', /neu gezeigt 4\b/.test(stand.zahlen) ? 'ja' : 'nein, ' + stand.zahlen.slice(0, 70), 'ja');
+  /* "neu gezeigt" heisst seit AG-LIVE-LATENCY-001 "angenommen", und das ist
+     die ehrlichere Beschriftung: Gezaehlt wird, sobald das Original annimmt.
+     Von Sentinel am 21.10. benannt -- und diese Zeile hier war der Beleg
+     dafuer, dass ein Nachweis die Unterscheidung uebersehen kann. Deshalb
+     steht die zweite Zahl jetzt daneben. */
+  zeile('vier angenommen, keiner mehr', /angenommen 4\b/.test(stand.zahlen) ? 'ja' : 'nein, ' + stand.zahlen.slice(0, 70), 'ja');
+  zeile('und vier auch gezeichnet', /gezeichnet 4\b/.test(stand.zahlen) ? 'ja' : 'nein, ' + stand.zahlen.slice(0, 70), 'ja');
   zeile('bis hierher nichts abgewiesen', /abgewiesen 0\b/.test(stand.zahlen) ? 'ja' : 'nein, ' + stand.zahlen.slice(0, 70), 'ja');
 
   console.log('\nC — Und der ungeschützte Körper, mit dem richtigen Grund');
@@ -179,7 +197,8 @@ function tischen(wurzel) {
   stand = await nachliefern('OHNE_SCHUTZ_ERWARTET_ABGEWIESEN', nr++);
   zeile('abgewiesen', /Marker mehrfach/.test(stand.grund) ? 'ja' : 'nein, ' + stand.grund.slice(0, 40), 'ja');
   zeile('genau eine Abweisung', /abgewiesen 1\b/.test(stand.zahlen) ? 'ja' : 'nein, ' + stand.zahlen.slice(0, 70), 'ja');
-  zeile('kein fünftes Ereignis gezeigt', /neu gezeigt 4\b/.test(stand.zahlen) ? 'ja' : 'nein', 'ja');
+  zeile('kein fünftes Ereignis angenommen', /angenommen 4\b/.test(stand.zahlen) ? 'ja' : 'nein', 'ja');
+  zeile('und keines zusätzlich gezeichnet', /gezeichnet 4\b/.test(stand.zahlen) ? 'ja' : 'nein', 'ja');
   zeile('letzte Meldung unverändert', stand.letztes === vorher ? 'ja' : 'nein', 'ja');
 
   console.log('\nD — Was der Schutz bewirkt hat');

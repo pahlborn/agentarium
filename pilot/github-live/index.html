@@ -4860,6 +4860,17 @@
      das Stück — im Archiv auf den Knopf, im Live-Betrieb auf Daten. */
   var zeit = 0, naechstes = 0, laeuft = true, tempo = 1;
 
+  /* ANGENOMMEN IST NICHT GEZEICHNET -- die Unterscheidung fehlte, und
+     Sentinel hat sie am 21.10. benannt. Der Adapter zaehlt ein Ereignis,
+     sobald `__agEreignis` es ANNIMMT; zu diesem Zeitpunkt liegt es nur in
+     `liveListe`. Flug, Meldung und Puls entstehen erst, wenn die
+     Zeichenschleife es aus der Warteschlange nimmt. Ein gruener Nachweis,
+     der nur den Adapterzaehler liest, uebersieht also den Fall
+     "angenommen, aber nie gezeichnet" -- und genau der ist bei einer
+     stehenden Schleife der interessante.
+     Dieser Zaehler steht fuer den zweiten Schritt und fuer nichts sonst. */
+  var verarbeitet = 0;
+
   function schritt(dt) {
     if (laeuft) {
       zeit += dt * tempo;
@@ -4867,6 +4878,7 @@
       while (naechstes < LISTE.length &&
              LISTE[naechstes].t <= zeit) {
           var E = LISTE[naechstes++];
+          if (MODUS === 'live') verarbeitet++;
         /* AG-GH-LIVE-001: Fortschritt ist eine Meldung AM PLATZ, kein Flug.
            Er beendet keinen Auftrag, eroeffnet keinen, blockiert nichts und
            hinterlaesst nichts -- ein kurzer Puls und eine lesbare Zeile.
@@ -5062,6 +5074,10 @@
                 Ohne sie laesst sich von aussen nicht unterscheiden, ob eine
                 Aufgabe liegt oder bearbeitet wird -- und genau das ist der
                 Unterschied, um den es geht. Diagnose, keine Anzeige. */
+             /* Was die Zeichenschleife wirklich angefasst hat. Steht hier
+                eine kleinere Zahl als im Adapterzaehler, ist etwas
+                angenommen und nicht gezeichnet worden. */
+             verarbeitet: verarbeitet,
              luecken: luecken.gesamt,
              lueckenEinzeln: { beginn: luecken.beginn,
                lieferung: luecken.lieferung, abbruch: luecken.abbruch },
@@ -5135,6 +5151,7 @@
     /* Jeder Wechsel setzt den Livepuffer zurueck. Was ein voriger Strom
        geliefert hat, gehoert nicht in den naechsten. */
     liveListe.length = 0;
+    verarbeitet = 0;
     /* Auch die Live-Identitaet: Was ein voriger Strom gemeldet hat, ist
        beim naechsten Wechsel keine Aussage mehr. */
     liveKopf = null;

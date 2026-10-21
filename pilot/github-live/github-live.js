@@ -295,8 +295,23 @@
     zahlEl.textContent =
       (Z.schnittIso ? 'Basis bis ' + Z.schnittIso + ' (Geräteuhr): ' + zahl.basisKommentare +
         ' Kommentare, ' + zahl.basisMarkiert + ' markierte historisch, nicht abgespielt · ' : '') +
-      'neu gezeigt ' + zahl.gezeigt + (zahl.waehrendAufbau ? ' (davon während Aufbau ' +
+      /* ANGENOMMEN, NICHT GEZEIGT. Hier stand "neu gezeigt", und das war
+         zu dem Zeitpunkt nicht wahr: Gezaehlt wird, sobald das Original das
+         Ereignis ANNIMMT -- gezeichnet wird es erst, wenn die
+         Zeichenschleife es aus der Warteschlange nimmt. Benannt von
+         Sentinel am 21.10. Die zweite Zahl kommt aus dem Original selbst
+         und sagt, was dort wirklich angefasst wurde; stehen sie
+         auseinander, ist etwas angenommen und nicht gezeichnet. */
+      'angenommen ' + zahl.gezeigt + (zahl.waehrendAufbau ? ' (davon während Aufbau ' +
         zahl.waehrendAufbau + ')' : '') +
+      (function () {
+        try {
+          var st = window.__agStand && window.__agStand();
+          if (st && typeof st.verarbeitet === 'number')
+            return ' · gezeichnet ' + st.verarbeitet;
+        } catch (x) {}
+        return '';
+      })() +
       ' · doppelt ' + zahl.duplikate + ' · Konflikt ' + zahl.konflikte +
       (zahl.abbrueche ? ' · in dieser Sitzung beobachtet: ' + zahl.abbrueche +
         ' Abbruch' + (zahl.abbrueche > 1 ? 'e' : '') + ' (Projektabdeckung: partial)' : '') +
@@ -443,6 +458,15 @@
     var r = window.__agEreignis(aus);
     if (!r || !r.angenommen) { abweisen('Original wies ab: ' + (r ? r.grund : '?')); return; }
     zahl.gezeigt++;
+    /* NACH DEM ZEICHNEN NOCHMAL ANZEIGEN. Die zweite Zahl ("gezeichnet")
+       kommt aus dem Original und steigt erst, wenn die Zeichenschleife das
+       Ereignis aus der Warteschlange nimmt -- ein paar Bilder spaeter. Ohne
+       diese Auffrischung stand in der Tafel bis zum naechsten Abruf
+       "angenommen 4 - gezeichnet 3", also ein Ereignis, das haengen zu
+       bleiben SCHIEN. Gemessen: Zwei eigene Nachweise sind daran zufaellig
+       durch- und zufaellig nicht durchgefallen, je nachdem, wann sie lasen.
+       Eine Anzeige, die nach Glueck richtig ist, ist keine. */
+    setTimeout(anzeigen, 400);
     letztes = { id: ev.id, kind: ev.kind, actor: ev.actor, recipient: ev.recipient,
                 title: ev.title, herkunft: ev.source_evidence,
                 project_id: ev.project_id, run_id: ev.run_id, task_id: ev.task_id,
@@ -615,7 +639,29 @@
     for (var i = 0; i < spaeter.length; i++) {
       zahl.waehrendAufbau++; zeigen(spaeter[i], 'während Aufbau');
     }
-    if (!spaeter.length) auf.open = false;   /* nach dem Verbinden: eine Zeile */
+    /* DIE STILLE ERKLAEREN, STATT SIE ZU ZEIGEN.
+       Gemessen am 21.10. mit den drei echten Kommentaren von Atlas gegen
+       die veroeffentlichte Fassung: Lagen sie beim Verbinden schon da,
+       meldete das Fach "3 markierte historisch, nicht abgespielt", und die
+       Buehne blieb leer -- genau Peters "kein ball, keine aktivitaet,
+       totenstille". Kamen dieselben drei danach, standen drei Meldungen und
+       ein Flug im Bild. Abgewiesen wurde in beiden Faellen nichts.
+       Nachgespielt wird die Historie weiterhin NICHT -- das Bild wuerde
+       sonst Arbeit zeigen, die vorbei ist. Aber es sagt jetzt, was geschehen
+       ist, und zwar in der Zeile, die sonst "Noch kein neues Ereignis"
+       trug: Die bisherige Fassung verschwieg die Einordnung genau dort, wo
+       man nach ihr gesucht haette.
+       Und das Fach bleibt OFFEN, wenn markierte Ereignisse in die Historie
+       gefallen sind. Es klappte bisher ausgerechnet im einzigen Fall zu, in
+       dem seine Erklaerung gebraucht wird. */
+    if (zahl.basisMarkiert && !spaeter.length) {
+      letztesEl.textContent =
+        'Nichts Neues seit dem Verbinden. ' + zahl.basisMarkiert +
+        ' markierte Ereignis' + (zahl.basisMarkiert > 1 ? 'se' : '') +
+        ' lagen schon vor dem Schnitt (' + Z.schnittIso + ') und werden nicht ' +
+        'nachgespielt — das Bild zeigt keine Arbeit, die vorbei ist.';
+    }
+    if (!spaeter.length && !zahl.basisMarkiert) auf.open = false;   /* nach dem Verbinden: eine Zeile */
   }
 
   async function abfrage(g) {
