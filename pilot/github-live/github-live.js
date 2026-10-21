@@ -26,7 +26,7 @@
 */
 (function () {
   'use strict';
-  var ADAPTER = 'AG-GH-LIVE-001-v1.6';
+  var ADAPTER = 'AG-GH-LIVE-001-v1.7';
   /* Wortlaut von Sentinel vorgeschrieben (AG-CONNECT-UX-001, 21.10.), Zeichen
      fuer Zeichen. Einmal benannt, damit Platzhalter und Zeile nicht
      auseinanderlaufen koennen. */
@@ -74,6 +74,7 @@
   var OPTIONAL = ['recipient', 'reporter', 'blocker_id'];  /* nie Pflicht fuer progress */
   var ARTEN = { progress: 1, handoff: 1, contribution: 1,
                 assigned: 1, received: 1, started: 1, delivered: 1,
+                reviewed: 1, accepted: 1, merged: 1, published: 1,
                 blocked: 1, resolved: 1, aborted: 1 };
   var KOMM = { handoff: 1, contribution: 1 };    /* nur beobachtet, kein Zustand */
   /* Arten, die einen Aufgabenzustand treiben DUERFEN -- und nur bei
@@ -81,6 +82,7 @@
      naturgemaess nicht der Empfaenger, sondern der Vergebende. Sie legt
      deshalb eine Aufgabe als ZUGEWIESEN an und behauptet keinen Beginn. */
   var LEBEN = { assigned: 1, received: 1, started: 1, delivered: 1,
+                reviewed: 1, accepted: 1, merged: 1, published: 1,
                 blocked: 1, resolved: 1, aborted: 1 };
   /* BLOCKADE IST KEIN ABBRUCH, UND DAS WAR MEIN FEHLER.
      Atlas hatte am 21.10. ausdruecklich entschieden: Die Abbruchzahl kommt
@@ -104,7 +106,13 @@
      ANNEHMEN UND HALB ANZEIGEN -- genau der Zustand, gegen den die Zusage
      geschrieben ist ("lieber nichts als halb"). Mit dem neuen Wort weist es
      sie ausdruecklich ab, statt eine Blockade zu verschweigen. */
-  var KANN_LEBEN_WORT = 'gemeldet-v2';
+  /* v3: die ganze Kette. `delivered` schliesst eine Aufgabe nicht mehr --
+     `accepted` tut es. Eine aeltere Fassung aus dem Vorrat wuerde
+     `reviewed`/`accepted`/`merged`/`published` annehmen und nichts damit
+     tun; schlimmer: Bei ihr haette `delivered` die Aufgabe schon
+     geschlossen, und eine spaetere Annahme fiele ins Leere. Also bekommt
+     sie die Arten gar nicht erst. */
+  var KANN_LEBEN_WORT = 'gemeldet-v3';
   var KENNUNG = /^[A-Za-z0-9][A-Za-z0-9._:\/-]{0,119}$/;
   var ISO = /^\d{4}-\d\d-\d\dT\d\d:\d\d(:\d\d(\.\d{1,9})?)?(Z|[+-]\d\d:\d\d)$/;
   var STEUER = /[\u0000-\u001f\u007f-\u009f\u2028\u2029\u202a-\u202e\u2066-\u2069]/;
@@ -791,6 +799,13 @@
           return p.recorded_at < q.recorded_at ? -1 : 1;
         return p.kommentar - q.kommentar;
       });
+      /* DIESELBE KETTE WIE LIVE, mit denselben Stufen. Stuende hier eine
+         andere Reihenfolge, zeigte dieselbe Lage je nach Weg zwei
+         Wahrheiten -- Atlas' Bedingung. */
+      var STUFE = { zugewiesen: 1, empfangen: 2, begonnen: 3,
+                    geliefert: 4, geprueft: 5 };
+      var ZU = { received: 'empfangen', started: 'begonnen',
+                 delivered: 'geliefert', reviewed: 'geprueft' };
       var halter = '', zustand = '', titel = '', zu = false, letzte = null,
           klemmt = [], belegVergabe = 0;
       g.forEach(function (x) {
@@ -801,8 +816,8 @@
              Widerspruch in den Daten, keine Wiedereroeffnung. Eine Klemme
              nach dem Abschluss gehoert dazu: Sie behauptete, eine Aufgabe
              haenge, die laut denselben Daten vorbei ist. */
-          if (e.kind === 'started' || e.kind === 'assigned' ||
-              e.kind === 'blocked') widersprueche++;
+          if (ZU[e.kind] || e.kind === 'assigned' || e.kind === 'blocked')
+            widersprueche++;
           return;
         }
         if (e.kind === 'assigned' && e.recipient) {
@@ -819,8 +834,13 @@
           return;
         }
         if (!selbst) { basisGrenzen.fremdaussagen++; return; }
-        if (e.kind === 'started' && halter && e.actor === halter) {
-          zustand = 'begonnen'; letzte = x; return;
+        if (ZU[e.kind] && halter && e.actor === halter) {
+          /* Nur vorwaerts: Ein Ereignis, das keine hoehere Stufe bringt,
+             aendert nichts. Ein zweites `delivered` ist ein Duplikat, kein
+             Ruecksprung -- und als Widerspruch zaehlt es auch nicht. */
+          if ((STUFE[ZU[e.kind]] || 0) > (STUFE[zustand] || 0))
+            zustand = ZU[e.kind];
+          letzte = x; return;
         }
         /* ======= DIE KLEMMEN WERDEN MITGEFALTET, NICHT UEBERSPRUNGEN =====
            Atlas' Bedingung: Wiederherstellung und Livebetrieb muessen
@@ -846,12 +866,14 @@
             }
           widersprueche++; return;
         }
-        if ((e.kind === 'delivered' || e.kind === 'aborted') &&
+        if ((e.kind === 'accepted' || e.kind === 'aborted') &&
             halter && e.actor === halter) {
-          /* Geliefert, obwohl noch etwas klemmte: Die Aufgabe ist weg, und
-             mit ihr die Klemme. Das ist keine Aufloesung und wird auch
-             nicht als eine gezaehlt -- es stand nur nie ein `resolved`
-             dazu. */
+          /* ANGENOMMEN ODER ABGEBROCHEN SCHLIESST, GELIEFERT NICHT. Hier
+             stand `delivered`; mit Pruefung und Annahme in der Kette waere
+             die Aufgabe weg, bevor jemand sie angesehen hat.
+             Klemmt noch etwas, geht es mit der Aufgabe weg. Das ist keine
+             Aufloesung und wird auch nicht als eine gezaehlt -- es stand
+             nur nie ein `resolved` dazu. */
           zu = true; letzte = x; return;
         }
       });

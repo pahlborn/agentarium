@@ -2319,7 +2319,7 @@
 
      Der Bauzeitpunkt kommt beim Bauen aus der Uhr. Von Hand gepflegte
      Datumsangaben sind nach der zweiten Änderung falsch. */
-  var FASSUNG = '66', GEBAUT = '2026-10-21T12:45Z';
+  var FASSUNG = '67', GEBAUT = '2026-10-21T15:20Z';
 
   /* AG-GH-LIVE-001: JEDE TEXTSENKE MASKIERT.
      Seit Live-Daten von aussen kommen (GitHub-Kommentare, one-event.json),
@@ -3924,7 +3924,7 @@
      keine FREMDE Aufgabe schliessen (Atlas, 21.10.: "unbekannte ID muss als
      Luecke/Konflikt stehen bleiben"). Es bleibt also stehen, und die Luecke
      wird gezaehlt statt verschwiegen. */
-  var luecken = { beginn: 0, lieferung: 0, abbruch: 0,
+  var luecken = { beginn: 0, stufe: 0, lieferung: 0, abbruch: 0,
                   klemme: 0, loesung: 0, gesamt: 0 };
   function luecke(was) { luecken[was]++; luecken.gesamt++; }
   /* Hier stand `lueckenNull()`. Die Funktion hatte nie einen Aufrufer -- ich
@@ -4084,22 +4084,56 @@
     return true;
   }
 
-  /* BEGINN: genau die zugewiesene Aufgabe wird begonnen. Ist sie unbekannt,
-     wird KEINE angelegt und keine fremde umgestellt -- das waere ein
-     erfundener Beginn. Die Luecke wird gezaehlt. */
-  function arbeitBeginnen(name, kenn) {
+  /* ================= DIE KETTE DER ZUSTAENDE ======================
+
+     Atlas' Auftrag nennt sie der Reihe nach: Auftrag, Empfang, Beginn,
+     Lieferung, Pruefung, Annahme, Merge, Veroeffentlichung.
+
+     MATERIALENTSCHEIDUNG, und sie aendert etwas, das schon abgenommen war:
+     Bisher SCHLOSS `delivered` die Aufgabe. Das kann nicht bleiben, sobald
+     Pruefung und Annahme dazukommen -- dann waere die Aufgabe weg, bevor
+     irgendjemand sie angesehen hat, und "Pruefung" und "Annahme" haetten
+     nichts mehr, woran sie haengen. Geliefert heisst: der Arbeitende ist
+     fertig. Erledigt heisst: jemand hat es ANGENOMMEN. Das sind zwei Dinge,
+     und das Regelwerk trennt sie ausdruecklich (Rulebook 1.3 §6:
+     "Accepted requirement, passed test and released product are distinct").
+
+     Folge, und sie ist gewollt: Eine gelieferte Aufgabe, die niemand
+     annimmt, bleibt sichtbar liegen. Genau das soll man sehen.
+
+     NUR VORWAERTS. Jeder Zustand hat eine Stufe; ein Ereignis, das keine
+     hoehere Stufe bringt, aendert nichts und ist keine Luecke -- ein
+     zweites `delivered` ist ein Transportduplikat, kein Ruecksprung. Ein
+     Ruecksprung waere eine Behauptung ueber eine Reihenfolge, die die Daten
+     nicht tragen. */
+  var STUFE = { zugewiesen: 1, empfangen: 2, begonnen: 3,
+                geliefert: 4, geprueft: 5 };
+  /* Welches Ereignis bringt welchen Zustand. `accepted` steht NICHT hier:
+     Es schliesst die Aufgabe, statt sie weiterzustellen. */
+  var ZU_ZUSTAND = { received: 'empfangen', started: 'begonnen',
+                     delivered: 'geliefert', reviewed: 'geprueft' };
+
+  /* Ein Schritt in der Kette. Ist die Aufgabe unbekannt, wird KEINE angelegt
+     und keine fremde umgestellt -- das waere ein erfundener Zustand. Die
+     Luecke wird gezaehlt. */
+  function arbeitStufe(name, kenn, neu, was) {
     var S = arbeit[name], k = kennung(kenn);
-    if (!S || S.aus || !k.aufgabe) { luecke('beginn'); return false; }
+    if (!S || S.aus || !k.aufgabe) { luecke(was); return false; }
     for (var q = 0; q < S.liste.length; q++) {
-      if (!trifft(S.liste[q], k)) continue;
-      if (S.liste[q].zustand === 'zugewiesen') {
-        S.liste[q].zustand = 'begonnen';
-        S.liste[q].beginn = zeit;      /* die Dauer zaehlt ab dem Beginn */
+      var L = S.liste[q];
+      if (!trifft(L, k)) continue;
+      if ((STUFE[neu] || 0) > (STUFE[L.zustand] || 0)) {
+        L.zustand = neu;
+        /* Die Dauer zaehlt ab dem Beginn, nicht ab der Vergabe. */
+        if (neu === 'begonnen') L.beginn = zeit;
       }
       return true;
     }
-    luecke('beginn');
+    luecke(was);
     return false;
+  }
+  function arbeitBeginnen(name, kenn) {
+    return arbeitStufe(name, kenn, 'begonnen', 'beginn');
   }
 
   /* ===================== BLOCKADE UND AUFLOESUNG =======================
@@ -4573,15 +4607,19 @@
      Der Demopfad legt Auftraege sofort als `begonnen` an und sagt deshalb
      unveraendert "arbeitet". */
   function tunWort(S) {
-    var begonnen = 0, frei = 0;
+    var begonnen = 0, frei = 0, wartet = 0;
     for (var q = 0; q < S.liste.length; q++) {
       var L = S.liste[q];
-      if (L.zustand === 'zugewiesen') continue;
+      /* Geliefert oder geprueft heisst: fertig und wartet auf eine Annahme.
+         Weder "arbeitet" noch "liegt" trifft das. */
+      if (L.zustand === 'geliefert' || L.zustand === 'geprueft') { wartet++; continue; }
+      if (L.zustand !== 'begonnen') continue;
       begonnen++;
       if (!(L.klemmt && L.klemmt.length)) frei++;
     }
     if (frei) return 'arbeitet';
     if (begonnen) return 'klemmt';
+    if (wartet) return 'wartet';
     return 'liegt';
   }
 
@@ -4666,7 +4704,14 @@
            Kreisen heisst in diesem Feld "dort entsteht etwas, und zwar nur,
            solange man kreist". Ein stehender Kreis sagt also genau das
            Richtige: liegt da, noch nichts entsteht. */
-        var ruht = (L.zustand === 'zugewiesen');
+        /* TAETIG IST NUR, WER BEGONNEN HAT. Vorher hiess "nicht zugewiesen"
+           soviel wie "arbeitet"; seit es `empfangen`, `geliefert` und
+           `geprueft` gibt, waere das falsch: Wer geliefert hat, produziert
+           nichts mehr, er wartet auf eine Annahme. Ein kreisender Ring
+           behauptete dort Arbeit, die niemand gemeldet hat.
+           Im aufgezeichneten Stueck ist der Vorgabewert `begonnen`, dort
+           aendert sich nichts. */
+        var ruht = (L.zustand !== 'begonnen');
         /* ============ WAS KLEMMT, STOCKT GEGEN SICH SELBST ============
 
            Peters Entwurf vom 21.10., woertlich: "einen kleinen
@@ -4722,7 +4767,7 @@
          Taetigkeit, von der der Melder selbst gesagt hat, dass sie haengt. */
       var irgendBegonnen = false;
       for (var hb = 0; hb < S.liste.length; hb++)
-        if (S.liste[hb].zustand !== 'zugewiesen' &&
+        if (S.liste[hb].zustand === 'begonnen' &&
             !(S.liste[hb].klemmt && S.liste[hb].klemmt.length))
           { irgendBegonnen = true; break; }
       S.schlag = (S.schlag || 0) - dt;
@@ -5156,21 +5201,35 @@
                 deshalb eine Aufgabe als ZUGEWIESEN an -- und behauptet
                 keinen Beginn.
 
-             `blocked`/`resolved` sind dazugekommen (Atlas, 21.10.) und
-             treiben KEINEN Zustandswechsel, sondern legen eine Klemme neben
-             den Zustand bzw. nehmen sie weg -- siehe `arbeitKlemmt`.
-             Was NICHT hier steht, ist Absicht: `reviewed/accepted/merged/
-             published` treiben noch nichts. Sie kommen an und sind lesbar;
-             einen Zustand bekommen sie, wenn sie einen haben, den der
-             Vertrag belegt. */
+             `blocked`/`resolved` treiben KEINEN Zustandswechsel, sondern
+             legen eine Klemme neben den Zustand bzw. nehmen sie weg --
+             siehe `arbeitKlemmt`.
+
+             WAS `merged` UND `published` NICHT SIND: Zustaende einer
+             Aufgabe. Sie sagen etwas ueber ein ERGEBNIS -- einen Zweig, eine
+             Fassung -- und nicht darueber, was eine Rolle gerade tut. Das
+             Regelwerk trennt das ausdruecklich (Rulebook 1.3 §6: "Accepted
+             requirement, passed test and released product are distinct"),
+             und der Monitor hat dafuer schon einen eigenen Ort: das
+             Register, das fuehrt, woraus das Produkt besteht. Dort haengen
+             sie an einer Artefaktkennung, und die traegt der Livevertrag
+             heute nicht. Also kommen sie an, sind lesbar und treiben
+             nichts -- und das steht als offener Punkt da, nicht als
+             stillschweigende Luecke. Sie an die Aufgabe zu haengen waere
+             bequem und falsch: Eine Aufgabe ist mit der ANNAHME erledigt,
+             nicht mit dem Merge. */
           if (E.art === 'assigned' && E.an && E.spur && E.spur.task_id) {
             /* Die GANZE Spur, nicht nur die Aufgabenkennung: project_id und
                run_id gehoeren zur Identitaet. Siehe `kennung`/`trifft`. */
             arbeitZuweisen(E.an, E.spur, E.text,
                            { nr: E.beleg || '', ref: E.belegRef || '' });
           } else if (E.selbstauskunft && E.spur && E.spur.task_id) {
-            if (E.art === 'started') arbeitBeginnen(E.von, E.spur);
-            else if (E.art === 'delivered' || E.art === 'aborted')
+            /* Die Kette: received/started/delivered/reviewed stellen den
+               Zustand weiter, accepted und aborted beenden die Aufgabe.
+               `merged` und `published` stehen hier NICHT -- siehe unten. */
+            if (ZU_ZUSTAND[E.art])
+              arbeitStufe(E.von, E.spur, ZU_ZUSTAND[E.art], 'stufe');
+            else if (E.art === 'accepted' || E.art === 'aborted')
               auftragFertig(E.von, E.spur, true);   /* streng */
             /* Auch hier gilt die Selbstauskunftsregel: Wer klemmt, sagt es
                selbst. Atlas ueber forge bleibt Beobachtung -- sonst haengte
@@ -5345,6 +5404,7 @@
              wiederhergestellt: wiederhergestellt, abdeckung: liveAbdeckung,
              luecken: luecken.gesamt,
              lueckenEinzeln: { beginn: luecken.beginn,
+               stufe: luecken.stufe,
                lieferung: luecken.lieferung, abbruch: luecken.abbruch,
                klemme: luecken.klemme, loesung: luecken.loesung },
              /* Die Klemmen, einzeln und mit Kennung. Eine Gesamtzahl allein
@@ -5995,6 +6055,7 @@
      uebrigen Stufen kommen an und sind lesbar, mehr nicht. */
   var GH_ARTEN = { progress: 1, handoff: 1, contribution: 1,
                    assigned: 1, received: 1, started: 1, delivered: 1,
+                   reviewed: 1, accepted: 1, merged: 1, published: 1,
                    blocked: 1, resolved: 1, aborted: 1 };
   /* Arten, die eine Klemmenkennung MITBRINGEN MUESSEN. Ohne sie liesse sich
      "genau diese Blockade" nicht sagen, und die Aufloesung muesste sich
@@ -6004,6 +6065,7 @@
      ueber denselben Weg wie `progress` -- eine Meldung am Platz des
      Agenten, die vergeht -- und erfinden damit keinen Zustand. */
   var GH_LEBEN = { assigned: 1, received: 1, started: 1, delivered: 1,
+                   reviewed: 1, accepted: 1, merged: 1, published: 1,
                    blocked: 1, resolved: 1, aborted: 1 };
   var GH_KENNUNG = new RegExp('^[A-Za-z0-9][A-Za-z0-9._:/-]{0,119}$');
   function ghKenn(x) { return (typeof x === 'string' && GH_KENNUNG.test(x)) ? x : ''; }
@@ -6105,7 +6167,13 @@
       if (!A || typeof A !== 'object') { abgewiesen++; return; }
       var wer = (typeof A.wer === 'string') ? A.wer.trim().toLowerCase() : '';
       var id = (typeof A.aufgabe === 'string') ? A.aufgabe : '';
-      var zu = (A.zustand === 'begonnen') ? 'begonnen' : 'zugewiesen';
+      /* DIE GANZE KETTE, nicht nur zwei Zustaende. Hier stand
+         `(A.zustand === 'begonnen') ? 'begonnen' : 'zugewiesen'` -- damit
+         waere eine gelieferte oder geprueffte Aufgabe aus der Historie als
+         "zugewiesen" wiedergekommen, also ein Rueckschritt gegenueber dem,
+         was die Daten sagen. Unbekanntes faellt auf `zugewiesen` zurueck,
+         denn das ist der Zustand, den eine Vergabe allein belegt. */
+      var zu = STUFE[A.zustand] ? A.zustand : 'zugewiesen';
       if (!wer || !nachName[wer] || !id) { abgewiesen++; return; }
       var kenn = { aufgabe: id,
                    projekt: typeof A.projekt === 'string' ? A.projekt : '',
@@ -6124,7 +6192,7 @@
       if (!arbeitZuweisen(wer, kenn, typeof A.titel === 'string' ? A.titel : '',
                           { nr: bnr, ref: bref }))
         { abgewiesen++; return; }      /* schon da: kein zweiter Ring */
-      if (zu === 'begonnen') arbeitBeginnen(wer, kenn);
+      if (zu !== 'zugewiesen') arbeitStufe(wer, kenn, zu, 'stufe');
       /* DIE KLEMMEN KOMMEN MIT, SONST ERGIBT DIE WIEDERHERSTELLUNG EINE
          ANDERE LAGE ALS DER LIVEBETRIEB. Atlas' Bedingung vom 21.10.
          woertlich: "Projekt-/Lauftrennung und Wiederherstellung muessen
@@ -7113,7 +7181,7 @@
          Lebenszyklusereignisse deshalb gar nicht erst -- lieber nichts als
          halb, und halb hiesse hier: eine Blockade anzeigen, ohne sie an die
          Aufgabe zu haengen. */
-      lebenszyklus: 'gemeldet-v2',
+      lebenszyklus: 'gemeldet-v3',
       akteure: AGENTEN.map(function (a) { return a.name; }),
       istLive: function () { return MODUS === 'live'; }
     };

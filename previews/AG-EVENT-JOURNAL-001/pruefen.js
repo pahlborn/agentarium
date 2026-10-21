@@ -142,10 +142,13 @@ function koerper(f) {
     fassung: (window.__agGithubBruecke || {}).fassung
   }));
   zeile('kommunikation', z.komm, 'beobachtet-v1');
-  /* V2, NICHT V1. In v1 kamen `blocked`/`resolved` an und trieben nichts;
-     jetzt legen sie eine Klemme an die Aufgabe. Ein Original aus dem Vorrat,
-     das nur v1 sagt, soll sie deshalb ABWEISEN statt halb anzuzeigen. */
-  zeile('lebenszyklus', z.leben, 'gemeldet-v2');
+  /* V3. Jede Stufe hat das Wort weitergestellt, weil jede etwas aendert,
+     was eine aeltere Fassung falsch machen wuerde: v2 legte Klemmen an die
+     Aufgabe, v3 hat die ganze Kette -- und bei v2 schloss `delivered` die
+     Aufgabe noch, so dass eine spaetere Annahme ins Leere fiele. Ein
+     Original aus dem Vorrat, das ein aelteres Wort sagt, bekommt die
+     Lebenszyklusarten deshalb gar nicht erst. */
+  zeile('lebenszyklus', z.leben, 'gemeldet-v3');
   console.log('        Fassung des Originals: ' + z.fassung);
 
   /* ===== SCHRITT 2b: WAS BEIM VERBINDEN SCHON OFFEN WAR =====
@@ -169,9 +172,18 @@ function koerper(f) {
   /* R2 zuerst hinlegen, obwohl es spaeter geschah -- die Faltung muss das
      richten. Und die Lieferung traegt dieselbe occurred_at wie der Beginn;
      dann entscheidet recorded_at. */
+  /* R2 SCHLIESST DURCH ANNAHME, NICHT DURCH LIEFERUNG. Bis Fassung 66
+     schloss `delivered`; mit Pruefung und Annahme in der Kette waere die
+     Aufgabe weg, bevor jemand sie angesehen hat. R2 traegt deshalb beides,
+     und die Lieferung liegt absichtlich VOR der Antwort und mit derselben
+     occurred_at wie der Beginn -- die Ordnung muss aus recorded_at und
+     Kommentarnummer entstehen. */
   hist({ id: 'R2:delivered', task: 'AG-EVJ-R2', actor: 'forge', reporter: 'forge',
          kind: 'delivered', title: 'R2 geliefert' },
        '2026-10-20T09:00:00Z', '2026-10-20T09:00:30Z');
+  hist({ id: 'R2:accepted', task: 'AG-EVJ-R2', actor: 'forge', reporter: 'forge',
+         kind: 'accepted', title: 'R2 angenommen — erst das schließt' },
+       '2026-10-20T09:10:00Z');
   hist({ id: 'R2:assigned', task: 'AG-EVJ-R2', actor: 'atlas', reporter: 'atlas',
          recipient: 'forge', kind: 'assigned', title: 'R2 vergeben' },
        '2026-10-20T08:00:00Z');
@@ -220,6 +232,44 @@ function koerper(f) {
          kind: 'started', title: 'nur Projekt A beginnt' },
        '2026-10-20T14:02:00Z');
 
+  /* R11: GELIEFERT UND NIEMAND HAT ES ANGENOMMEN.
+     Das ist der Fall, den die neue Kette ueberhaupt erst sichtbar macht.
+     Vorher verschwand so eine Aufgabe mit der Lieferung aus dem Bild --
+     und sah damit aus wie erledigt, obwohl sie auf jemanden wartet. */
+  hist({ id: 'R11:assigned', task: 'AG-EVJ-R11', actor: 'atlas', reporter: 'atlas',
+         recipient: 'nova', kind: 'assigned', title: 'R11 an nova' },
+       '2026-10-20T18:00:00Z');
+  hist({ id: 'R11:received', task: 'AG-EVJ-R11', actor: 'nova', reporter: 'nova',
+         kind: 'received', title: 'R11 empfangen' },
+       '2026-10-20T18:01:00Z');
+  hist({ id: 'R11:started', task: 'AG-EVJ-R11', actor: 'nova', reporter: 'nova',
+         kind: 'started', title: 'R11 begonnen' },
+       '2026-10-20T18:02:00Z');
+  hist({ id: 'R11:delivered', task: 'AG-EVJ-R11', actor: 'nova', reporter: 'nova',
+         kind: 'delivered', title: 'R11 geliefert — und dann nichts mehr' },
+       '2026-10-20T18:03:00Z');
+
+  /* R12: geliefert UND geprueft, aber nicht angenommen. Die Pruefung ist
+     eine eigene Stufe und nicht die Annahme -- genau die Trennung, die das
+     Regelwerk verlangt. */
+  hist({ id: 'R12:assigned', task: 'AG-EVJ-R12', actor: 'atlas', reporter: 'atlas',
+         recipient: 'cadence', kind: 'assigned', title: 'R12 an cadence' },
+       '2026-10-20T19:00:00Z');
+  hist({ id: 'R12:started', task: 'AG-EVJ-R12', actor: 'cadence', reporter: 'cadence',
+         kind: 'started', title: 'R12 begonnen' },
+       '2026-10-20T19:01:00Z');
+  hist({ id: 'R12:delivered', task: 'AG-EVJ-R12', actor: 'cadence', reporter: 'cadence',
+         kind: 'delivered', title: 'R12 geliefert' },
+       '2026-10-20T19:02:00Z');
+  hist({ id: 'R12:reviewed', task: 'AG-EVJ-R12', actor: 'cadence', reporter: 'cadence',
+         kind: 'reviewed', title: 'R12 geprüft — aber nicht angenommen' },
+       '2026-10-20T19:03:00Z');
+  /* Und ein zweites `delivered` danach: ein Rueckschritt darf nicht
+     geschehen, und als Widerspruch zaehlt ein Duplikat auch nicht. */
+  hist({ id: 'R12:delivered-nochmal', task: 'AG-EVJ-R12', actor: 'cadence',
+         reporter: 'cadence', kind: 'delivered', title: 'dieselbe Lieferung nochmal' },
+       '2026-10-20T19:04:00Z');
+
   /* R8, R9 UND R10: KLEMMEN IN DER HISTORIE.
      Atlas' Bedingung vom 21.10. woertlich: "Projekt-/Lauftrennung und
      Wiederherstellung muessen dabei dieselbe Lage ergeben wie
@@ -262,6 +312,9 @@ function koerper(f) {
   hist({ id: 'R10:delivered', task: 'AG-EVJ-R10', actor: 'sentinel', reporter: 'sentinel',
          kind: 'delivered', title: 'R10 geliefert' },
        '2026-10-20T17:02:00Z');
+  hist({ id: 'R10:accepted', task: 'AG-EVJ-R10', actor: 'sentinel', reporter: 'sentinel',
+         kind: 'accepted', title: 'R10 angenommen' },
+       '2026-10-20T17:02:30Z');
   hist({ id: 'R10:blocked-nach-zu', task: 'AG-EVJ-R10', actor: 'sentinel',
          reporter: 'sentinel', kind: 'blocked', blocker: 'KLEMME-R10',
          title: 'Klemme NACH dem Abschluss — Widerspruch' },
@@ -328,6 +381,7 @@ function koerper(f) {
       R1: f('AG-EVJ-R1'), R2: f('AG-EVJ-R2'), R3: f('AG-EVJ-R3'),
       R4: f('AG-EVJ-R4'), R5: f('AG-EVJ-R5'),
       R8: f('AG-EVJ-R8'), R9: f('AG-EVJ-R9'), R10: f('AG-EVJ-R10'),
+      R11: f('AG-EVJ-R11'), R12: f('AG-EVJ-R12'),
       klemmen: st.klemmen,
       verarbeitet: st.verarbeitet, ausgegeben: st.ausgegeben,
       fliegend: (st.fliegend || []).length,
@@ -335,12 +389,13 @@ function koerper(f) {
       zahlen: (document.getElementById('agGhZahlen') || {}).textContent || ''
     };
   });
-  zeile('sieben offene Aufgaben übernommen', nachRestore.wieder, 7);
+  zeile('neun offene Aufgaben übernommen', nachRestore.wieder, 9);
   zeile('R1 liegt bei scout', nachRestore.R1 ? nachRestore.R1.wer : null, 'scout');
   zeile('R1 ist begonnen', nachRestore.R1 ? nachRestore.R1.zustand : null, 'begonnen');
   zeile('R1 als wiederhergestellt gekennzeichnet',
         nachRestore.R1 ? nachRestore.R1.wieder : null, true);
   zeile('R2 ist zu — kein Ring', nachRestore.R2, null);
+  console.log('        (R2 schließt durch die ANNAHME, nicht durch die Lieferung)');
   zeile('R3 liegt bei argus', nachRestore.R3 ? nachRestore.R3.wer : null, 'argus');
   zeile('R3 nur zugewiesen', nachRestore.R3 ? nachRestore.R3.zustand : null, 'zugewiesen');
   zeile('R4 trotz Fremdaussage nur zugewiesen',
@@ -402,6 +457,24 @@ function koerper(f) {
   zeile('argus: nur zugewiesen → liegt', schilder.argus, 'liegt');
   zeile('scout: begonnen und frei → arbeitet', schilder.scout, 'arbeitet');
 
+  console.log('\nA6 — Die ganze Kette, und wo sie stehen bleibt');
+  console.log('    MATERIALENTSCHEIDUNG: `delivered` schließt eine Aufgabe');
+  console.log('    nicht mehr — `accepted` tut es. Geliefert heißt, der');
+  console.log('    Arbeitende ist fertig; erledigt heißt, jemand hat es');
+  console.log('    angenommen. Rulebook 1.3 §6 trennt beides ausdrücklich.\n');
+  zeile('R11 geliefert und nicht angenommen: bleibt offen',
+        !!nachRestore.R11, true);
+  zeile('und zwar als geliefert',
+        nachRestore.R11 ? nachRestore.R11.zustand : null, 'geliefert');
+  zeile('R11 liegt bei nova', nachRestore.R11 ? nachRestore.R11.wer : null, 'nova');
+  zeile('R12 ist geprüft, nicht angenommen',
+        nachRestore.R12 ? nachRestore.R12.zustand : null, 'geprueft');
+  /* NUR VORWAERTS: Auf das `reviewed` folgte noch ein zweites `delivered`.
+     Es darf den Zustand nicht zurueckstellen -- und als Widerspruch zaehlt
+     es auch nicht, denn ein Duplikat ist kein Ruecksprung. */
+  console.log('        (auf R12s Prüfung folgt ein zweites `delivered` —');
+  console.log('         es stellt nichts zurück)');
+
   console.log('\nA4 — Gleiche Rolle, gleiche Aufgabenkennung, zwei Projekte');
   console.log('    erwartet: zwei getrennte Ringe, und der Beginn des einen');
   console.log('    lässt den anderen unberührt\n');
@@ -419,14 +492,29 @@ function koerper(f) {
   zeile('A trägt seinen Lauf', zwei.A ? zwei.A.lauf : null, 'LAUF-A');
   zeile('B trägt seinen Lauf', zwei.B ? zwei.B.lauf : null, 'LAUF-B');
 
-  /* Und die Gegenprobe im LIVEBETRIEB: Eine Lieferung in Projekt B darf
-     die Aufgabe in Projekt A nicht schliessen. */
+  /* Und die Gegenprobe im LIVEBETRIEB. Erst die Lieferung: Sie schliesst
+     NICHTS mehr, auch nicht in B -- sie stellt B auf `geliefert`. */
   await liefern('delivered-projektB', koerper({
     id: 'AG-EVENT-JOURNAL-001:forge:delivered:B', task: 'AG-EVJ-GLEICH',
     projekt: 'malstudio', lauf: 'LAUF-B',
     actor: 'forge', reporter: 'forge', kind: 'delivered',
-    title: 'Projekt B liefert — Projekt A bleibt'
+    title: 'Projekt B liefert — und bleibt trotzdem stehen'
   }), 90201);
+  const nachLieferung = await s.evaluate(() => {
+    const st = (window.__agStand && window.__agStand()) || {};
+    const g = (st.aufgaben || []).filter(a => a.aufgabe === 'AG-EVJ-GLEICH');
+    return { anzahl: g.length,
+             B: (g.filter(a => a.projekt === 'malstudio')[0] || {}).zustand };
+  });
+  zeile('die Lieferung schließt nichts', nachLieferung.anzahl, 2);
+  zeile('B steht auf geliefert', nachLieferung.B, 'geliefert');
+  /* Und erst die ANNAHME schliesst -- und zwar nur B. */
+  await liefern('accepted-projektB', koerper({
+    id: 'AG-EVENT-JOURNAL-001:forge:accepted:B', task: 'AG-EVJ-GLEICH',
+    projekt: 'malstudio', lauf: 'LAUF-B',
+    actor: 'forge', reporter: 'forge', kind: 'accepted',
+    title: 'Projekt B angenommen — Projekt A bleibt'
+  }), 90202);
   const danach = await s.evaluate(() => {
     const st = (window.__agStand && window.__agStand()) || {};
     const g = (st.aufgaben || []).filter(a => a.aufgabe === 'AG-EVJ-GLEICH');
@@ -651,15 +739,57 @@ function koerper(f) {
   zeile('und wird als Lücke gezählt', (st.luecken || 0) > vorLuecke, true);
   zeile('nicht als Rateentscheidung', st.ratEinzeln ? st.ratEinzeln.auftrag : -1, 0);
 
-  /* Und die richtige Lieferung schliesst genau sie. */
+  /* Die richtige Lieferung stellt sie auf `geliefert` -- und schliesst sie
+     NICHT. Das ist die Aenderung von Fassung 67. */
   await liefern('delivered-richtig', koerper({
     id: 'AG-EVENT-JOURNAL-001:forge:delivered:H1', task: 'AG-EVJ-H1',
     actor: 'forge', reporter: 'forge', kind: 'delivered',
     title: 'Forge liefert H1 — Prüfung und Annahme bleiben getrennt'
   }), 90106);
   st = await stand();
-  zeile('Lieferung schließt genau diese Aufgabe',
+  a1 = aufg(st, 'forge', 'AG-EVJ-H1');
+  zeile('die Lieferung schließt nicht', !!a1, true);
+  zeile('sie stellt auf geliefert', a1 ? a1.zustand : null, 'geliefert');
+  /* Eine Pruefung ist eine eigene Stufe und keine Annahme. */
+  await liefern('reviewed-H1', koerper({
+    id: 'AG-EVENT-JOURNAL-001:forge:reviewed:H1', task: 'AG-EVJ-H1',
+    actor: 'forge', reporter: 'forge', kind: 'reviewed',
+    title: 'H1 geprüft — das ist noch keine Annahme'
+  }), 90107);
+  st = await stand();
+  a1 = aufg(st, 'forge', 'AG-EVJ-H1');
+  zeile('die Prüfung schließt auch nicht', !!a1, true);
+  zeile('sie stellt auf geprueft', a1 ? a1.zustand : null, 'geprueft');
+  /* Und erst die Annahme schliesst. */
+  await liefern('accepted-H1', koerper({
+    id: 'AG-EVENT-JOURNAL-001:forge:accepted:H1', task: 'AG-EVJ-H1',
+    actor: 'forge', reporter: 'forge', kind: 'accepted',
+    title: 'H1 angenommen — erst das schließt'
+  }), 90108);
+  st = await stand();
+  zeile('die Annahme schließt genau diese Aufgabe',
         (st.aufgaben || []).filter(a => a.aufgabe === 'AG-EVJ-H1').length, 0);
+  /* MERGE UND VEROEFFENTLICHUNG TREIBEN NICHTS. Sie sagen etwas ueber ein
+     Ergebnis, nicht darueber, was eine Rolle tut -- und der Livevertrag
+     traegt heute keine Artefaktkennung, an der sie haengen koennten. Das
+     steht so im Quelltext und wird hier gemessen, nicht geglaubt. */
+  const vorMerge = (await stand()).aufgaben.length;
+  const rm = await liefern('merged', koerper({
+    id: 'AG-EVENT-JOURNAL-001:forge:merged:H1', task: 'AG-EVJ-H1',
+    actor: 'forge', reporter: 'forge', kind: 'merged',
+    title: 'H1 gemergt — sagt etwas über ein Ergebnis, nicht über eine Aufgabe'
+  }), 90109);
+  st = await stand();
+  zeile('merged wird angenommen', /merged/.test(rm.letztes), true);
+  zeile('merged legt keine Aufgabe an', st.aufgaben.length, vorMerge);
+  const rp = await liefern('published', koerper({
+    id: 'AG-EVENT-JOURNAL-001:forge:published:H1', task: 'AG-EVJ-H1',
+    actor: 'forge', reporter: 'forge', kind: 'published',
+    title: 'H1 veröffentlicht'
+  }), 90110);
+  st = await stand();
+  zeile('published wird angenommen', /published/.test(rp.letztes), true);
+  zeile('published legt keine Aufgabe an', st.aufgaben.length, vorMerge);
 
   console.log('\nJ — Blockade und Auflösung am laufenden Strom');
   console.log('    Atlas, 21.10., wörtlich: „Blockade lässt die Aufgabe');
