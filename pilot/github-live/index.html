@@ -186,6 +186,36 @@
     transition:transform .12s ease-out;}
   .agName{transition:transform .5s ease;}
   @keyframes agPuls{0%,100%{opacity:.80;} 50%{opacity:1;}}
+  /* ============ DER PULS AM NAMEN -- EINMAL, KURZ ============
+
+     DIE KLASSE WAR DA, DIE REGEL NICHT. `pulsAn` setzt `agGhPuls` am
+     Namensschild, erzwingt einen Umbruch, damit die Animation neu anläuft,
+     und nimmt die Klasse nach 1600 ms wieder weg -- seit AG-GH-LIVE-001.
+     Nur gab es im ganzen Stilblatt keine Regel, die auf `agGhPuls` passt.
+     Die Klasse war also wirkungslos: drei Zeilen Code, geschrieben für eine
+     sichtbare Wirkung, die nie ankam. Nachgesehen mit einer Suche über die
+     Datei, nicht vermutet — und messbar, weil `getComputedStyle` ohne
+     Regel einfach den Atem weitermeldet.
+
+     Sentinel hat am 21.10. gemeldet, die Klasse allein beweise die
+     Sichtbarkeit nicht. Das ist richtig und war noch zu freundlich: Sie
+     bewies gar nichts, weil nichts auf sie hörte. Peters „kein ball, keine
+     aktivität, totenstille" hat hier eine seiner Ursachen — ein `progress`
+     erzeugte Feldteilchen, aber am Agenten selbst rührte sich nichts.
+
+     Die Regel steht NACH `.agName.arbeitet`: gleiche Spezifität (zwei
+     Klassen), also gewinnt die spätere. Stünde sie davor, überschriebe das
+     ruhige Dauer-Atmen eines arbeitenden Agenten den kurzen Puls -- genau
+     bei dem, bei dem er am meisten zählt.
+
+     Einmal, nicht endlos (`1`), und 1,6 s lang wie der Timer im Code: Ein
+     Puls, der länger leuchtet als seine Klasse lebt, bricht mitten im Bild
+     ab. */
+  .agName.agGhPuls{animation:agGhPulsAn 1.6s ease-out 1; opacity:1;}
+  @keyframes agGhPulsAn{
+    0%{opacity:1; letter-spacing:.42em;}
+    16%{opacity:1; letter-spacing:.25em;}
+    100%{opacity:.70; letter-spacing:.2em;}}
   /* Erstes Pult: Wer vorgezogen sitzt, steht auch etwas deutlicher da. */
   /* Wer außerhalb des Kreises steht, steht auch anders da: etwas größer
      und weiter gesperrt. Kein Abzeichen — nur ein anderer Ton. */
@@ -2289,7 +2319,7 @@
 
      Der Bauzeitpunkt kommt beim Bauen aus der Uhr. Von Hand gepflegte
      Datumsangaben sind nach der zweiten Änderung falsch. */
-  var FASSUNG = '64', GEBAUT = '2026-10-21T12:10Z';
+  var FASSUNG = '65', GEBAUT = '2026-10-21T12:25Z';
 
   /* AG-GH-LIVE-001: JEDE TEXTSENKE MASKIERT.
      Seit Live-Daten von aussen kommen (GitHub-Kommentare, one-event.json),
@@ -6409,6 +6439,14 @@
     AGENTEN.forEach(function (a, i) {
       var p = heimat(a), e = document.createElement('div');
       e.className = 'agName' + (a.aussen ? ' agDraussen' : '');
+      /* WESSEN SCHILD DAS IST, STEHT AM SCHILD. Bisher liess sich das nur
+         ueber die Reihenfolge erschliessen (`AGENTEN.indexOf`), und der
+         Text wechselt zwischen Name und Rolle -- von aussen also nicht
+         zuverlaessig zuzuordnen. Dieselbe Angabe tragen die Schilder am
+         Fuss und die Arbeitsanzeige schon; hier fehlte sie. Dadurch kann
+         ein Nachweis den Puls AM RICHTIGEN Agenten pruefen statt an einem
+         Index, den er selbst nachrechnet. */
+      e.setAttribute('data-wer', a.name);
       e.style.left = p[0] + 'px'; e.style.top = p[1] + 'px';
       e.style.color = hex(a.farbe);
       e.textContent = a.name;

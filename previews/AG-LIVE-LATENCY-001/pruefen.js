@@ -256,6 +256,168 @@ function tischen(wurzel) {
   console.log('        nicht zuverlässig erzwingbar. Und GEZEICHNETE BILDPUNKTE');
   console.log('        beweist keine der drei Zahlen; das wäre ein Bildvergleich.');
 
+  /* ===================== TEIL E: DER PULS ==========================
+
+     Sentinels Befund vom 21.10., und er trifft: Dieser Nachweis prueft
+     Meldungen, Flug und Zaehler -- den PULS prueft er nicht. `pulsAn` kann
+     lautlos zurueckkehren, wenn Agent oder Feld fehlen, also beweist
+     `ausgegeben` den Puls nicht.
+
+     Beim Nachsehen war es schlimmer als gemeldet: `pulsAn` setzt am
+     Namensschild die Klasse `agGhPuls` -- und im ganzen Stilblatt stand
+     KEINE Regel, die darauf passt. Die Klasse war wirkungslos. Am Agenten
+     selbst rührte sich bei einem `progress` nichts; sichtbar waren nur die
+     Feldteilchen.
+
+     Gemessen wird deshalb BEIDES, und zwar so, dass es ohne die Regel
+     durchfallen MUSS:
+       1. `animationName` am richtigen Namensschild. Ohne passende Regel
+          meldet `getComputedStyle` einfach den Atem weiter (`agAtem` bzw.
+          `agPuls`) -- die Zeile faellt dann durch. Eine Klasse abzufragen
+          haette genau das NICHT gefangen.
+       2. Die Feldwirkung: ein Knoten und zehn Straenge in der Signatur von
+          `pulsAn` (Kraft 0.80 / 16 / 0.9) in der Farbe des Melders.
+       3. Das Abklingen: nach 1,6 s ist die Klasse weg und der Atem zurueck
+          -- ein Puls, der bleibt, waere kein Puls.
+     Dazu zwei Gegenproben: vor dem Ereignis pulst niemand, und waehrend
+     scout pulst, pulst kein anderer. */
+  async function pulslauf() {
+    const q = await b.newContext({ viewport: { width: 1194, height: 834 } });
+    const s = await q.newPage();
+    const pageErr = [];
+    s.on('pageerror', e => pageErr.push(String(e.message).slice(0, 110)));
+    let antwort = [];
+    let k = 0;
+    await s.route('**api.github.com/**', r => {
+      k++;
+      r.fulfill({ status: 200, contentType: 'application/json',
+                  headers: { ETag: 'W/"pu' + k + '"' }, body: JSON.stringify(antwort) });
+    });
+    await s.goto(n.adr + '?live=github', { waitUntil: 'load' });
+    await s.waitForTimeout(2200);
+    if (!await s.evaluate(() => !!document.getElementById('agGhToken'))) {
+      await q.close(); return null;
+    }
+    /* DIE FELDSPITZEL VOR DEM VERBINDEN. Sie zaehlen nur die Signatur von
+       `pulsAn`; der Herzschlag der Arbeit benutzt 0.62/10/0.75 und faellt
+       damit nicht hinein. Ohne diese Unterscheidung zaehlte der Nachweis
+       den Takt mit, den er nicht meint. */
+    await s.evaluate(() => {
+      window.__pulse = [];
+      const f = window.__feld;
+      const kn = f.knoten, st = f.strang;
+      f.knoten = function (x, y, kraft, farbe, a5, a6, a7) {
+        if (kraft === 0.80 && a6 === 16 && a7 === 0.9)
+          window.__pulse.push({ art: 'knoten', x: x, y: y, farbe: farbe,
+                                t: Date.now() });
+        return kn.apply(f, arguments);
+      };
+      f.strang = function (x, y, vx, vy, kraft, leben, farbe) {
+        if (kraft === 0.34 && leben === 0.55)
+          window.__pulse.push({ art: 'strang', x: x, y: y, farbe: farbe,
+                                t: Date.now() });
+        return st.apply(f, arguments);
+      };
+    });
+    await s.fill('#agGhToken', 'AGLIVELATENCY001_Scheintoken_0123456789');
+    await s.click('#agGhAn');
+    await s.waitForTimeout(3000);
+
+    /* Welches Namensschild ist scout? Am Schild selbst, nicht am Index:
+       `data-wer`. Den Index nachzurechnen hiesse, die Zuordnung des
+       Programms im Nachweis zu wiederholen -- dann prueft er seine eigene
+       Rechnung mit. */
+    const vorher = await s.evaluate(() => {
+      const el = document.querySelector('#agRing .agName[data-wer="scout"]');
+      return { gefunden: !!el,
+               klasse: el ? el.classList.contains('agGhPuls') : null,
+               animation: el ? getComputedStyle(el).animationName : null,
+               pulse: (window.__pulse || []).length };
+    });
+
+    /* GENAU EIN ECHTES progress, nichts sonst. Scouts eigener Beginn,
+       Kommentar 6313282429, Wort fuer Wort wie auf Vorgang 2. */
+    antwort = ECHT.filter(c => String(c.id) === '6313282429');
+    let getroffen = null;
+    for (let i = 0; i < 40; i++) {
+      await s.waitForTimeout(150);
+      getroffen = await s.evaluate(() => {
+        const els = document.querySelectorAll('#agRing .agName');
+        const el = document.querySelector('#agRing .agName[data-wer="scout"]');
+        let andere = 0;
+        for (let q = 0; q < els.length; q++)
+          if (els[q] !== el && els[q].classList.contains('agGhPuls')) andere++;
+        return { klasse: el ? el.classList.contains('agGhPuls') : null,
+                 animation: el ? getComputedStyle(el).animationName : null,
+                 dauer: el ? getComputedStyle(el).animationDuration : null,
+                 wiederholung: el ? getComputedStyle(el).animationIterationCount : null,
+                 andere: andere,
+                 pulse: (window.__pulse || []).slice() };
+      });
+      if (getroffen.klasse) break;
+    }
+    /* Und das Abklingen: Die Klasse lebt 1600 ms. Nach 2,2 s muss sie weg
+       und der Atem zurueck sein. */
+    await s.waitForTimeout(2200);
+    const danach = await s.evaluate(() => {
+      const el = document.querySelector('#agRing .agName[data-wer="scout"]');
+      return { klasse: el ? el.classList.contains('agGhPuls') : null,
+               animation: el ? getComputedStyle(el).animationName : null };
+    });
+    await q.close();
+    return { vorher: vorher, getroffen: getroffen, danach: danach,
+             pageErr: pageErr };
+  }
+
+  const P = await pulslauf();
+  console.log('\nE — Der Puls am Agenten, und zwar sichtbar');
+  console.log('    Sentinel, 21.10.: der Puls ist nicht geprüft. Beim Nachsehen');
+  console.log('    fehlte die CSS-Regel zu `agGhPuls` ganz — die Klasse wurde');
+  console.log('    gesetzt und wieder entfernt, ohne dass etwas darauf hörte.\n');
+  if (!P) {
+    zeile('Pulslauf möglich', false, true);
+  } else {
+    zeile('vorher pulst niemand', P.vorher.klasse, false);
+    const vorhin = String(P.vorher.animation || '').split(', ');
+    zeile('vorher ruhiger Atem',
+          vorhin.indexOf('agAtem') >= 0 || vorhin.indexOf('agPuls') >= 0, true);
+    zeile('vorher kein Puls in der Liste',
+          vorhin.indexOf('agGhPulsAn') < 0, true);
+    zeile('scouts Schild gefunden', P.vorher.gefunden, true);
+    zeile('nach dem progress: Klasse am Melder', P.getroffen.klasse, true);
+    /* DIE ENTSCHEIDENDE ZEILE. Ohne passende Regel steht hier `agAtem`. */
+    zeile('und eine Regel greift darauf',
+          String(P.getroffen.animation || '').split(', ')
+            .indexOf('agGhPulsAn') >= 0, true);
+    console.log('        gemessen währenddessen: ' + P.getroffen.animation);
+    zeile('einmal, nicht endlos', P.getroffen.wiederholung, '1');
+    zeile('so lang wie die Klasse lebt', P.getroffen.dauer, '1.6s');
+    zeile('kein anderer Agent pulst mit', P.getroffen.andere, 0);
+    /* Die Feldwirkung in der Signatur von `pulsAn`, an scouts Farbe (0.41). */
+    const knoten = (P.getroffen.pulse || []).filter(x => x.art === 'knoten');
+    const straenge = (P.getroffen.pulse || []).filter(x => x.art === 'strang');
+    zeile('ein Knoten im Feld', knoten.length >= 1, true);
+    zeile('zehn Stränge dazu', straenge.length >= 10, true);
+    zeile('in der Farbe des Melders',
+          knoten.length ? Math.abs(knoten[0].farbe - 0.41) < 0.001 : null, true);
+    zeile('Knoten und Stränge am selben Ort',
+          (knoten.length && straenge.length)
+            ? Math.abs(knoten[0].x - straenge[0].x) < 12 : null, true);
+    zeile('abgeklungen: Klasse weg', P.danach.klasse, false);
+    /* HIER STAND EIN GLEICHHEITSVERGLEICH, UND ER WAR ZU ENG. Gemessen
+       kam "agGuss, agAtem" zurueck: Der Umschlag Name <-> Rolle laeuft
+       gleichzeitig, also stehen zwei Animationen in der Liste. Die Zeile
+       fiel durch, obwohl der Atem da war -- mein Soll war falsch, nicht
+       das Programm. Gefragt ist Zugehoerigkeit, nicht Gleichheit. */
+    const nachher = String(P.danach.animation || '').split(', ');
+    zeile('der Puls läuft nicht weiter',
+          nachher.indexOf('agGhPulsAn') < 0, true);
+    zeile('und der Atem ist zurück',
+          nachher.indexOf('agAtem') >= 0 || nachher.indexOf('agPuls') >= 0, true);
+    console.log('        gemessen danach: ' + P.danach.animation);
+    zeile('keine Seitenfehler', P.pageErr.length, 0);
+  }
+
   console.log('\nD — Die Klapptafel versteckt ihre Erklärung nicht mehr');
   console.log('    erwartet: offen, wenn etwas in die Historie fiel; sonst zu\n');
   const offenA = await klappstand(true);
