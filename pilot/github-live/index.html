@@ -2326,7 +2326,7 @@
 
      Der Bauzeitpunkt kommt beim Bauen aus der Uhr. Von Hand gepflegte
      Datumsangaben sind nach der zweiten Änderung falsch. */
-  var FASSUNG = '69', GEBAUT = '2026-10-21T16:10Z';
+  var FASSUNG = '70', GEBAUT = '2026-10-21T16:35Z';
 
   /* AG-GH-LIVE-001: JEDE TEXTSENKE MASKIERT.
      Seit Live-Daten von aussen kommen (GitHub-Kommentare, one-event.json),
@@ -4124,7 +4124,7 @@
            (L.lauf || '') === k.lauf;
   }
 
-  function arbeitZuweisen(name, kenn, titel, beleg) {
+  function arbeitZuweisen(name, kenn, titel, beleg, element) {
     if (!nachName[name]) return false;
     var k = kennung(kenn);
     var S = arbeit[name];
@@ -4134,7 +4134,7 @@
     }
     /* Der Beleg geht als EIGENES Stueck mit, nicht in der Kennung: `trifft`
        vergleicht Identitaet, und ein Beleg ist keine. */
-    arbeitAn(name, titel || '', '', '', k, 'zugewiesen', beleg);
+    arbeitAn(name, titel || '', '', '', k, 'zugewiesen', beleg, element);
     return true;
   }
 
@@ -4323,7 +4323,7 @@
     return n;
   }
 
-  function arbeitAn(name, auftrag, kommando, modell, b, zustand, beleg) {
+  function arbeitAn(name, auftrag, kommando, modell, b, zustand, beleg, element) {
     if (!nachName[name]) return;
     var S = arbeit[name];
     if (!S || S.aus) { S = arbeit[name] = { t: 0, liste: [] }; }
@@ -4364,6 +4364,12 @@
          Beleg, und ein erfundener waere schlimmer als keiner. */
       beleg: (beleg && beleg.nr) || '',
       belegRef: (beleg && beleg.ref) || '',
+      /* WAS fuer ein Arbeitselement, unter welchem Elternteil, in welcher
+         Fassung. Vorgabe `task` -- im aufgezeichneten Stueck und bei jedem
+         Produzenten, der die Angaben nicht sendet. */
+      eTyp: (element && element.typ) || 'task',
+      eEltern: (element && element.eltern) || '',
+      eFassung: (element && element.fassung) || '',
       w: Math.random() * 6.2832, t: 0, beginn: zeit
     });
     /* Alle Aufträge bleiben in der Liste. Vorher flog der älteste
@@ -5322,7 +5328,9 @@
             /* Die GANZE Spur, nicht nur die Aufgabenkennung: project_id und
                run_id gehoeren zur Identitaet. Siehe `kennung`/`trifft`. */
             arbeitZuweisen(E.an, E.spur, E.text,
-                           { nr: E.beleg || '', ref: E.belegRef || '' });
+                           { nr: E.beleg || '', ref: E.belegRef || '' },
+                           { typ: E.eTyp || 'task', eltern: E.eEltern || '',
+                             fassung: E.eFassung || '' });
           } else if (E.selbstauskunft && E.spur && E.spur.task_id) {
             /* Die Kette: received/started/delivered/reviewed stellen den
                Zustand weiter, accepted und aborted beenden die Aufgabe.
@@ -5567,6 +5575,9 @@
                                Quelle haengt und nicht in der Luft. */
                             beleg: L.beleg || '',
                             belegRef: L.belegRef || '',
+                            eTyp: L.eTyp || 'task',
+                            eEltern: L.eEltern || '',
+                            eFassung: L.eFassung || '',
                             /* Der Ringwinkel. Er steht hier, damit sich der
                                Effekt MESSEN laesst statt ihn zu behaupten:
                                Ein laufender Ring wird groesser, ein
@@ -6199,6 +6210,10 @@
      eigener Kennung. */
   var WERKARTEN = { merged: 1, published: 1 };
   var WERKDARF = { merged: 1, published: 1, delivered: 1 };
+  /* Genau die drei Arten aus Atlas' Arbeitsregister, als Aufzaehlung statt
+     als freier Text. Unbekanntes faellt auf `task` zurueck, denn das war
+     bisher der einzige Fall. */
+  var ELEMENTARTEN = { epic: 1, story: 1, task: 1 };
   /* Arten, fuer die es im Bild noch keine eigene Gestalt gibt. Sie laufen
      ueber denselben Weg wie `progress` -- eine Meldung am Platz des
      Agenten, die vergeht -- und erfinden damit keinen Zustand. */
@@ -6217,6 +6232,10 @@
     if (E.beleg) t += ' \u00b7 Beleg ' + E.beleg;
     /* WELCHES Ergebnis. Ohne die Kennung sagt ein "gemergt" nicht, was. */
     if (E.werk) t += ' \u00b7 Werk ' + E.werk + (E.werkV ? ' ' + E.werkV : '');
+    /* Typ nur, wenn er etwas sagt: `task` ist die Vorgabe, keine Meldung. */
+    if (E.eTyp && E.eTyp !== 'task') t += ' \u00b7 ' + E.eTyp;
+    if (E.eFassung) t += ' \u00b7 Fassung ' + E.eFassung;
+    if (E.eEltern) t += ' \u00b7 unter ' + E.eEltern;
     if (E.art === 'handoff')
       t += ' \u00b7 beobachtete \u00dcbergabe \u2014 keine Annahme, kein Arbeitsbeginn';
     else if (E.art === 'contribution')
@@ -6329,8 +6348,17 @@
       if (bnr && typeof A.belegRef === 'string' &&
           A.belegRef.slice(-(bnr.length + 1)) === '/' + bnr)
         bref = A.belegRef;
+      /* Typ, Elternbezug und Fassung kommen mit -- sonst waere eine
+         wiederhergestellte Vergabe eine Aufgabe ohne Elternkette, und Live
+         und Restore zeigten zwei verschiedene Lagen. */
       if (!arbeitZuweisen(wer, kenn, typeof A.titel === 'string' ? A.titel : '',
-                          { nr: bnr, ref: bref }))
+                          { nr: bnr, ref: bref },
+                          { typ: (typeof A.eTyp === 'string' &&
+                                  ELEMENTARTEN[A.eTyp]) ? A.eTyp : 'task',
+                            eltern: (typeof A.eEltern === 'string' &&
+                                     GH_KENNUNG.test(A.eEltern)) ? A.eEltern : '',
+                            fassung: (typeof A.eFassung === 'string' &&
+                                      GH_KENNUNG.test(A.eFassung)) ? A.eFassung : '' }))
         { abgewiesen++; return; }      /* schon da: kein zweiter Ring */
       if (zu !== 'zugewiesen') arbeitStufe(wer, kenn, zu, 'stufe');
       /* DIE KLEMMEN KOMMEN MIT, SONST ERGIBT DIE WIEDERHERSTELLUNG EINE
@@ -6481,6 +6509,31 @@
     if (e.gh_selbstauskunft === true) E.selbstauskunft = true;
     if (klemme) E.klemme = klemme;
     if (werk) { E.werk = werk; E.werkV = werkV; }
+
+    /* ============ DAS ARBEITSELEMENT: TYP, ELTERN, FASSUNG ============
+
+       Atlas' Auftrag: eine Uebergabe soll GENAU DAS Objekt zeigen, das
+       vergeben wurde -- Epic, Story oder Aufgabe -- mit richtiger
+       Elternkette, und "keine erfundenen Kinderstarts oder Doppelauftraege".
+
+       Der zweite Teil ist hier geschenkt und soll trotzdem gemessen werden:
+       Dieser Monitor kennt keine Kinder. Er legt an, was gemeldet wird, und
+       leitet aus einer Epic nichts ab. Eine Vergabe einer Epic erzeugt genau
+       EINEN Ring -- den der Epic. Was darunter laeuft, muss einzeln gemeldet
+       werden, und dann steht es einzeln da.
+
+       Alle drei Angaben sind WAHLFREI. Fehlen sie, ist der Typ `task` und es
+       gibt keinen Elternbezug -- genau das Verhalten von vorher. */
+    var eTyp = (typeof e.item_type === 'string' &&
+                ELEMENTARTEN[e.item_type]) ? e.item_type : 'task';
+    var eEltern = ghKenn(e.parent_id);
+    var eFassung = ghKenn(e.item_version);
+    /* Ein Element ist nicht sein eigenes Elternteil. */
+    if (eEltern && spur && eEltern === spur.task_id)
+      return nein('parent_id gleich task_id');
+    E.eTyp = eTyp;
+    if (eEltern) E.eEltern = eEltern;
+    if (eFassung) E.eFassung = eFassung;
     /* ======================= DER ORIGINALBELEG =======================
 
        `source_evidence` sagt die ART des Belegs (Laufzeit oder gemeldet),
@@ -7334,7 +7387,7 @@
          Lebenszyklusereignisse deshalb gar nicht erst -- lieber nichts als
          halb, und halb hiesse hier: eine Blockade anzeigen, ohne sie an die
          Aufgabe zu haengen. */
-      lebenszyklus: 'gemeldet-v4',
+      lebenszyklus: 'gemeldet-v5',
       akteure: AGENTEN.map(function (a) { return a.name; }),
       istLive: function () { return MODUS === 'live'; }
     };

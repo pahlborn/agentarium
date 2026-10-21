@@ -102,6 +102,9 @@ function koerper(f) {
   if (f.blocker) ev.blocker_id = f.blocker;
   if (f.werk) ev.artifact_id = f.werk;
   if (f.werkV) ev.artifact_version = f.werkV;
+  if (f.typ) ev.item_type = f.typ;
+  if (f.eltern) ev.parent_id = f.eltern;
+  if (f.eFassung) ev.item_version = f.eFassung;
   let text = '## ' + f.kind + ' — ' + f.title + '\n\n';
   text += MARKER + '\n```json\n' + JSON.stringify(ev, null, 2) + '\n```';
   return text;
@@ -150,7 +153,7 @@ function koerper(f) {
      Aufgabe noch, so dass eine spaetere Annahme ins Leere fiele. Ein
      Original aus dem Vorrat, das ein aelteres Wort sagt, bekommt die
      Lebenszyklusarten deshalb gar nicht erst. */
-  zeile('lebenszyklus', z.leben, 'gemeldet-v4');
+  zeile('lebenszyklus', z.leben, 'gemeldet-v5');
   console.log('        Fassung des Originals: ' + z.fassung);
 
   /* ===== SCHRITT 2b: WAS BEIM VERBINDEN SCHON OFFEN WAR =====
@@ -331,6 +334,32 @@ function koerper(f) {
          kind: 'reviewed', title: 'Atlas behauptet Argus hätte geprüft' },
        '2026-10-20T22:02:00Z');
 
+  /* R16, R17, R18: EINE ELTERNKETTE IN DER HISTORIE.
+     Atlas verlangt, dass Live und Restore dieselbe Lage ergeben. Teil N
+     prueft die Kette am laufenden Strom; hier liegt sie VOR dem Verbinden.
+     Absichtlich NICHT bei forge: Der Ringnachweis in Teil J misst eine
+     Aufgabe von forge, und `arbeitSchritt` fasst nur die ersten vier Ringe
+     je Rolle an. Eine fuenfte Aufgabe bei forge haette die Messung still
+     eingefroren -- derselbe Fall, den die Voraussetzungszeile dort jetzt
+     benennt. */
+  hist({ id: 'R16:epic', task: 'AG-LM-EP-003', actor: 'atlas', reporter: 'atlas',
+         recipient: 'sentinel', kind: 'assigned', typ: 'epic', eFassung: 'V1',
+         title: 'Projektarbeit fortsetzen und nachvollziehen' },
+       '2026-10-20T23:00:00Z');
+  hist({ id: 'R17:story', task: 'AG-LM-US-009', actor: 'atlas', reporter: 'atlas',
+         recipient: 'archibald', kind: 'assigned', typ: 'story',
+         eltern: 'AG-LM-EP-003', eFassung: 'V1',
+         title: 'Vergangene Arbeit nachvollziehen' },
+       '2026-10-20T23:01:00Z');
+  hist({ id: 'R18:task', task: 'AG-LM-TK-017', actor: 'atlas', reporter: 'atlas',
+         recipient: 'cadence', kind: 'assigned',
+         eltern: 'AG-LM-US-009',
+         title: 'Archivmodus an dieselbe Quelle anschließen' },
+       '2026-10-20T23:02:00Z');
+  hist({ id: 'R18:started', task: 'AG-LM-TK-017', actor: 'cadence', reporter: 'cadence',
+         kind: 'started', title: 'Cadence beginnt TK-017' },
+       '2026-10-20T23:03:00Z');
+
   /* R8, R9 UND R10: KLEMMEN IN DER HISTORIE.
      Atlas' Bedingung vom 21.10. woertlich: "Projekt-/Lauftrennung und
      Wiederherstellung muessen dabei dieselbe Lage ergeben wie
@@ -444,6 +473,9 @@ function koerper(f) {
       R8: f('AG-EVJ-R8'), R9: f('AG-EVJ-R9'), R10: f('AG-EVJ-R10'),
       R11: f('AG-EVJ-R11'), R12: f('AG-EVJ-R12'),
       R13: f('AG-EVJ-R13'), R14: f('AG-EVJ-R14'), R15: f('AG-EVJ-R15'),
+      EP: f('AG-LM-EP-003'), US: f('AG-LM-US-009'), TK: f('AG-LM-TK-017'),
+      kinderVonEP: (st.aufgaben || []).filter(
+        a => a.eEltern === 'AG-LM-EP-003').length,
       klemmen: st.klemmen,
       verarbeitet: st.verarbeitet, ausgegeben: st.ausgegeben,
       fliegend: (st.fliegend || []).length,
@@ -451,7 +483,7 @@ function koerper(f) {
       zahlen: (document.getElementById('agGhZahlen') || {}).textContent || ''
     };
   });
-  zeile('elf offene Aufgaben übernommen', nachRestore.wieder, 11);
+  zeile('vierzehn offene Aufgaben übernommen', nachRestore.wieder, 14);
   zeile('R1 liegt bei scout', nachRestore.R1 ? nachRestore.R1.wer : null, 'scout');
   zeile('R1 ist begonnen', nachRestore.R1 ? nachRestore.R1.zustand : null, 'begonnen');
   zeile('R1 als wiederhergestellt gekennzeichnet',
@@ -556,6 +588,29 @@ function koerper(f) {
         nachRestore.R15 ? nachRestore.R15.zustand : null, 'geliefert');
   zeile('und wird als Fremdaussage ausgewiesen',
         /Fremdaussage/.test(nachRestore.zahlen), true);
+
+  console.log('\nA8 — Die Elternkette aus der Historie: dieselbe Lage wie live');
+  console.log('    Atlas verlangt Gleichheit von Live und Restore. Teil N');
+  console.log('    prüft die Kette am Strom, hier lag sie vor dem Verbinden.\n');
+  zeile('die Epic ist übernommen', !!nachRestore.EP, true);
+  zeile('und zwar als epic', nachRestore.EP ? nachRestore.EP.eTyp : null, 'epic');
+  zeile('mit ihrer Fassung', nachRestore.EP ? nachRestore.EP.eFassung : null, 'V1');
+  zeile('ohne Elternteil', nachRestore.EP ? nachRestore.EP.eEltern : null, '');
+  zeile('die Story trägt ihren Elternbezug',
+        nachRestore.US ? nachRestore.US.eEltern : null, 'AG-LM-EP-003');
+  zeile('und liegt bei archibald', nachRestore.US ? nachRestore.US.wer : null, 'archibald');
+  /* Ohne Typangabe in der Historie: `task`, genau wie live. */
+  zeile('die Aufgabe ohne Typangabe ist task',
+        nachRestore.TK ? nachRestore.TK.eTyp : null, 'task');
+  zeile('mit ihrem Elternbezug',
+        nachRestore.TK ? nachRestore.TK.eEltern : null, 'AG-LM-US-009');
+  zeile('ihr eigener Beginn ist übernommen',
+        nachRestore.TK ? nachRestore.TK.zustand : null, 'begonnen');
+  /* KEINE ERFUNDENEN KINDER, auch nicht rueckblickend: Nur was gemeldet
+     wurde, steht da -- die Story, und nichts sonst unter der Epic. */
+  zeile('unter der Epic steht genau das Gemeldete', nachRestore.kinderVonEP, 1);
+  zeile('und die Epic selbst bleibt zugewiesen',
+        nachRestore.EP ? nachRestore.EP.zustand : null, 'zugewiesen');
 
   console.log('\nA4 — Gleiche Rolle, gleiche Aufgabenkennung, zwei Projekte');
   console.log('    erwartet: zwei getrennte Ringe, und der Beginn des einen');
@@ -1433,6 +1488,99 @@ function koerper(f) {
   }), 90609);
   zeile('artifact_version ohne artifact_id abgewiesen',
         /artifact_version ohne artifact_id/.test(rw3.grund), true);
+
+  console.log('\nN — Epic, Story, Aufgabe: Typ, Elternkette, Fassung');
+  console.log('    Atlas, AG-LM-TK-021: die Übergabe soll GENAU das vergebene');
+  console.log('    Objekt zeigen, mit richtiger Elternkette — und „keine');
+  console.log('    erfundenen Kinderstarts oder Doppelaufträge".\n');
+
+  function el(st, id) {
+    return (st.aufgaben || []).filter(a => a.aufgabe === id)[0] || null;
+  }
+
+  /* Eine Epic wird vergeben. */
+  const rn1 = await liefern('N:epic', koerper({
+    id: 'AG-EVENT-JOURNAL-001:atlas:assigned:EP002', task: 'AG-LM-EP-002',
+    actor: 'atlas', reporter: 'atlas', recipient: 'forge', kind: 'assigned',
+    typ: 'epic', eFassung: 'V1',
+    title: 'Aufgaben bis zum belegten Ergebnis steuern'
+  }), 90701);
+  st = await stand();
+  let EP = el(st, 'AG-LM-EP-002');
+  zeile('die Epic ist genau ein Eintrag', !!EP, true);
+  zeile('und zwar als epic', EP ? EP.eTyp : null, 'epic');
+  zeile('mit ihrer Fassung', EP ? EP.eFassung : null, 'V1');
+  zeile('ohne Elternteil', EP ? EP.eEltern : null, '');
+  zeile('die Tafel nennt den Typ', /· epic/.test(rn1.letztes), true);
+
+  /* KEINE ERFUNDENEN KINDER. Nach der Vergabe der Epic darf nichts
+     darunter entstanden sein. */
+  zeile('die Epic erzeugt kein Kind',
+        (st.aufgaben || []).filter(a => a.eEltern === 'AG-LM-EP-002').length, 0);
+
+  /* Eine Story darunter, einzeln gemeldet. */
+  const rn2 = await liefern('N:story', koerper({
+    id: 'AG-EVENT-JOURNAL-001:atlas:assigned:US006', task: 'AG-LM-US-006',
+    actor: 'atlas', reporter: 'atlas', recipient: 'argus', kind: 'assigned',
+    typ: 'story', eltern: 'AG-LM-EP-002', eFassung: 'V1',
+    title: 'Ergebnisreife beurteilen'
+  }), 90702);
+  st = await stand();
+  const US = el(st, 'AG-LM-US-006');
+  zeile('die Story liegt bei argus', US ? US.wer : null, 'argus');
+  zeile('und ist eine story', US ? US.eTyp : null, 'story');
+  zeile('mit ihrem Elternteil', US ? US.eEltern : null, 'AG-LM-EP-002');
+  zeile('die Tafel nennt die Elternkette',
+        /unter AG-LM-EP-002/.test(rn2.letztes), true);
+  /* ZWEI getrennte Eintraege, keiner aus dem anderen abgeleitet. */
+  zeile('Epic und Story stehen getrennt',
+        (st.aufgaben || []).filter(a => a.aufgabe === 'AG-LM-EP-002' ||
+                                        a.aufgabe === 'AG-LM-US-006').length, 2);
+  zeile('die Epic ist davon unberührt', el(st, 'AG-LM-EP-002').zustand, 'zugewiesen');
+
+  /* Eine Aufgabe unter der Story. Ohne Typangabe -- RUECKWAERTSKOMPATIBEL:
+     es muss `task` herauskommen. */
+  await liefern('N:task-ohne-typ', koerper({
+    id: 'AG-EVENT-JOURNAL-001:atlas:assigned:TK011', task: 'AG-LM-TK-011',
+    actor: 'atlas', reporter: 'atlas', recipient: 'forge', kind: 'assigned',
+    eltern: 'AG-LM-US-006',
+    title: 'Rollenbefund schließen und Ergebnis zuordnen'
+  }), 90703);
+  st = await stand();
+  const TK = el(st, 'AG-LM-TK-011');
+  zeile('ohne Typangabe kommt task heraus', TK ? TK.eTyp : null, 'task');
+  zeile('der Elternbezug steht trotzdem', TK ? TK.eEltern : null, 'AG-LM-US-006');
+
+  /* Der Beginn der Aufgabe beruehrt Story und Epic NICHT. Das ist die
+     zweite Haelfte von "keine erfundenen Kinderstarts", von unten gelesen. */
+  await liefern('N:task-started', koerper({
+    id: 'AG-EVENT-JOURNAL-001:forge:started:TK011', task: 'AG-LM-TK-011',
+    actor: 'forge', reporter: 'forge', kind: 'started',
+    title: 'Forge beginnt TK-011'
+  }), 90704);
+  st = await stand();
+  zeile('die Aufgabe ist begonnen', el(st, 'AG-LM-TK-011').zustand, 'begonnen');
+  zeile('die Story bleibt zugewiesen', el(st, 'AG-LM-US-006').zustand, 'zugewiesen');
+  zeile('die Epic bleibt zugewiesen', el(st, 'AG-LM-EP-002').zustand, 'zugewiesen');
+  console.log('        (kein Abschluss nach oben — das ist offener Umfang,');
+  console.log('         nicht eine stille Ableitung)');
+
+  console.log('\nN2 — Was der Vertrag bei Arbeitselementen abweist\n');
+  const rn3 = await liefern('N:typ-erfunden', koerper({
+    id: 'AG-EVENT-JOURNAL-001:atlas:assigned:falschTyp', task: 'AG-LM-XX-001',
+    actor: 'atlas', reporter: 'atlas', recipient: 'forge', kind: 'assigned',
+    typ: 'Epic', title: 'Typ mit großem Anfangsbuchstaben'
+  }), 90705);
+  zeile('unbekannter item_type abgewiesen',
+        /item_type nicht erlaubt/.test(rn3.grund), true);
+  const rn4 = await liefern('N:eigenes-elternteil', koerper({
+    id: 'AG-EVENT-JOURNAL-001:atlas:assigned:zyklus', task: 'AG-LM-US-009',
+    actor: 'atlas', reporter: 'atlas', recipient: 'forge', kind: 'assigned',
+    typ: 'story', eltern: 'AG-LM-US-009',
+    title: 'Ein Element als sein eigenes Elternteil'
+  }), 90706);
+  zeile('eigenes Elternteil abgewiesen',
+        /parent_id gleich task_id/.test(rn4.grund), true);
 
   console.log('\nI — Was auch jetzt noch NICHT geschieht');
   console.log('    erwartet: kein Ballwechsel aus Lebenszyklusereignissen,');

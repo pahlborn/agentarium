@@ -26,7 +26,7 @@
 */
 (function () {
   'use strict';
-  var ADAPTER = 'AG-GH-LIVE-001-v1.9';
+  var ADAPTER = 'AG-GH-LIVE-001-v2.0';
   /* Wortlaut von Sentinel vorgeschrieben (AG-CONNECT-UX-001, 21.10.), Zeichen
      fuer Zeichen. Einmal benannt, damit Platzhalter und Zeile nicht
      auseinanderlaufen koennen. */
@@ -71,8 +71,25 @@
      `started` mit Klemmenkennung behauptete einen Bezug, den es nicht hat.
      MATERIALENTSCHEIDUNG, und sie ist an Atlas gemeldet: Das ist das zwoelfte
      Feld des Vertrags. */
+  /* ARBEITSELEMENT: TYP, ELTERNBEZUG, FASSUNG.
+     Atlas' Auftrag (AG-LM-TK-021, Kommentar 6320323499): "kleinste
+     rueckwaertskompatible Ergaenzung von Arbeitselementtyp/ID/Elternbezug/
+     Version im vorhandenen Monitorvertrag".
+
+     RUECKWAERTSKOMPATIBEL HEISST: alle drei sind WAHLFREI. Ein Ereignis ohne
+     sie verhaelt sich genau wie bisher -- Typ `task`, kein Elternbezug. Kein
+     Produzent muss etwas aendern, um weiter angenommen zu werden.
+
+     KEIN VIERTES FELD FUER DIE KENNUNG. `task_id` traegt die Identitaet des
+     Elements schon, egal welcher Art es ist; ein zusaetzliches `item_id`
+     waere dieselbe Angabe zweimal und koennte auseinanderlaufen. `item_type`
+     sagt, WAS diese Kennung benennt. */
   var OPTIONAL = ['recipient', 'reporter', 'blocker_id',
-                  'artifact_id', 'artifact_version'];  /* nie Pflicht fuer progress */
+                  'artifact_id', 'artifact_version',
+                  'item_type', 'parent_id', 'item_version'];  /* nie Pflicht fuer progress */
+  /* Genau die drei Arten aus Atlas' Register. Eine Aufzaehlung, kein freier
+     Text: "Epic", "EPIC" oder "epik" waeren drei Dinge, die eines meinen. */
+  var ELEMENTARTEN = { epic: 1, story: 1, task: 1 };
   var ARTEN = { progress: 1, handoff: 1, contribution: 1,
                 assigned: 1, received: 1, started: 1, delivered: 1,
                 reviewed: 1, accepted: 1, merged: 1, published: 1,
@@ -126,7 +143,7 @@
      tun; schlimmer: Bei ihr haette `delivered` die Aufgabe schon
      geschlossen, und eine spaetere Annahme fiele ins Leere. Also bekommt
      sie die Arten gar nicht erst. */
-  var KANN_LEBEN_WORT = 'gemeldet-v4';
+  var KANN_LEBEN_WORT = 'gemeldet-v5';
   var KENNUNG = /^[A-Za-z0-9][A-Za-z0-9._:\/-]{0,119}$/;
   var ISO = /^\d{4}-\d\d-\d\dT\d\d:\d\d(:\d\d(\.\d{1,9})?)?(Z|[+-]\d\d:\d\d)$/;
   var STEUER = /[\u0000-\u001f\u007f-\u009f\u2028\u2029\u202a-\u202e\u2066-\u2069]/;
@@ -517,6 +534,19 @@
       return nein('artifact_id nicht erlaubt bei ' + d.kind);
     /* Eine Fassung ohne Kennung ist eine Fassung von nichts. */
     if (hatWerkV && !hatWerk) return nein('artifact_version ohne artifact_id');
+    var hatTyp = Object.prototype.hasOwnProperty.call(d, 'item_type');
+    var hatEltern = Object.prototype.hasOwnProperty.call(d, 'parent_id');
+    var hatEFass = Object.prototype.hasOwnProperty.call(d, 'item_version');
+    if (hatTyp && typeof d.item_type !== 'string') return nein('item_type kein Text');
+    if (hatTyp && !ELEMENTARTEN[d.item_type])
+      return nein('item_type nicht erlaubt: ' + String(d.item_type).slice(0, 20));
+    if (hatEltern && typeof d.parent_id !== 'string') return nein('parent_id kein Text');
+    if (hatEFass && typeof d.item_version !== 'string')
+      return nein('item_version kein Text');
+    /* EIN ELEMENT IST NICHT SEIN EIGENES ELTERNTEIL. Das waere ein Zyklus
+       aus einem einzigen Glied, und die Elternkette haette kein Ende. */
+    if (hatEltern && d.parent_id === d.task_id)
+      return nein('parent_id gleich task_id');
     var ids = ['id', 'project_id', 'run_id', 'task_id', 'source_tool_id'];
     for (var q = 0; q < ids.length; q++)
       if (!KENNUNG.test(d[ids[q]])) return nein(ids[q] + ' ungültig');
@@ -524,6 +554,8 @@
     if (hatWerk && !KENNUNG.test(d.artifact_id)) return nein('artifact_id ungültig');
     if (hatWerkV && !KENNUNG.test(d.artifact_version))
       return nein('artifact_version ungültig');
+    if (hatEltern && !KENNUNG.test(d.parent_id)) return nein('parent_id ungültig');
+    if (hatEFass && !KENNUNG.test(d.item_version)) return nein('item_version ungültig');
     if (!AKTEURE[d.actor]) return nein('actor unbekannt');
     if (hatEmpf && !AKTEURE[d.recipient]) return nein('recipient unbekannt');
     if (hatMeld && !AKTEURE[d.reporter]) return nein('reporter unbekannt');
@@ -549,6 +581,11 @@
       blocker_id: hatKlemme ? d.blocker_id : '',
       artifact_id: hatWerk ? d.artifact_id : '',
       artifact_version: hatWerkV ? d.artifact_version : '',
+      /* Vorgabe `task`, nicht leer: Ein Ereignis ohne Typangabe benennt eine
+         Aufgabe -- das war bisher der einzige Fall und bleibt der Normalfall. */
+      item_type: hatTyp ? d.item_type : 'task',
+      parent_id: hatEltern ? d.parent_id : '',
+      item_version: hatEFass ? d.item_version : '',
       /* Die PRUEFBARE Aussage, nicht die bewiesene: Melder und Akteur fallen
          zusammen. Verifiziert ist davon nichts ausser dem Login -- deshalb
          heisst das Feld nicht `verifiziert`. */
@@ -589,6 +626,9 @@
     if (ev.blocker_id) aus.blocker_id = ev.blocker_id;
     if (ev.artifact_id) aus.artifact_id = ev.artifact_id;
     if (ev.artifact_version) aus.artifact_version = ev.artifact_version;
+    if (ev.item_type) aus.item_type = ev.item_type;
+    if (ev.parent_id) aus.parent_id = ev.parent_id;
+    if (ev.item_version) aus.item_version = ev.item_version;
     /* Der Beleg geht mit: die Nummer, die GitHub vergeben hat, und die
        Adresse, unter der genau dieser Kommentar wieder auffindbar ist.
        Beides abgeleitet, nichts behauptet. */
@@ -622,6 +662,11 @@
       (ev.blocker_id ? ' · Klemme ' + ev.blocker_id : '') +
       (ev.artifact_id ? ' · Werk ' + ev.artifact_id +
          (ev.artifact_version ? ' ' + ev.artifact_version : '') : '') +
+      /* Typ, Fassung und Elternbezug des Arbeitselements. Ohne sie steht
+         hier nichts -- `task` ist die Vorgabe und keine Meldung. */
+      (ev.item_type && ev.item_type !== 'task' ? ' · ' + ev.item_type : '') +
+      (ev.item_version ? ' · Fassung ' + ev.item_version : '') +
+      (ev.parent_id ? ' · unter ' + ev.parent_id : '') +
       /* WO ES STEHT, NICHT NUR DASS ES STEHT. `source_evidence` sagt die
          ART des Belegs (Laufzeit oder gemeldet), nicht seinen ORT. Ohne
          die Nummer ist eine Angabe in dieser Tafel nicht nachzusehen. */
@@ -656,7 +701,8 @@
          lautlos weg, und die Aufgabe klemmte einmal statt zweimal. */
       var fa = [ev.project_id, ev.run_id, ev.task_id, ev.actor, ev.kind,
                 ev.recipient, ev.reporter, ev.blocker_id,
-                ev.artifact_id, ev.artifact_version, ev.title,
+                ev.artifact_id, ev.artifact_version,
+                ev.item_type, ev.parent_id, ev.item_version, ev.title,
                 ev.occurred_at, ev.source_evidence, ev.source_tool_id].join('\u0001');
       if (bekannte.hat(ev.id) || (basisIds && basisIds.hat(ev.id))) {
         var frueher = abdruck[ev.id];
@@ -841,7 +887,8 @@
       var ZU = { received: 'empfangen', started: 'begonnen',
                  delivered: 'geliefert', reviewed: 'geprueft' };
       var halter = '', zustand = '', titel = '', zu = false, letzte = null,
-          klemmt = [], belegVergabe = 0;
+          klemmt = [], belegVergabe = 0,
+          eTyp = 'task', eEltern = '', eFassung = '';
       g.forEach(function (x) {
         var e = x.ev;
         var selbst = !!e.selbstauskunft;
@@ -865,6 +912,13 @@
              Genau das schliesst Atlas' Bedingung aus. Der zuletzt wirkende
              Beleg geht als eigene Angabe mit, statt den ersten zu ersetzen. */
           if (!belegVergabe) belegVergabe = x.kommentar;
+          /* Typ, Elternbezug und Fassung kommen von der VERGABE -- wie der
+             Beleg. Live setzt `arbeitZuweisen` sie genau dort; naehme die
+             Faltung sie von einem spaeteren Ereignis, zeigte dieselbe Lage
+             je nach Weg zwei verschiedene Elternketten. */
+          eTyp = e.item_type || 'task';
+          eEltern = e.parent_id || '';
+          eFassung = e.item_version || '';
           return;
         }
         if (!selbst) { basisGrenzen.fremdaussagen++; return; }
@@ -922,6 +976,7 @@
                      titel: titel, klemmt: klemmt,
                      occurred_at: letzte ? letzte.ev.occurred_at : '',
                      recorded_at: letzte ? letzte.recorded_at : '',
+                     eTyp: eTyp, eEltern: eEltern, eFassung: eFassung,
                      beleg: belegVergabe,
                      belegRef: belegVergabe ? BELEG_BASIS + belegVergabe : '',
                      belegLetzte: letzte ? letzte.kommentar : 0 });
