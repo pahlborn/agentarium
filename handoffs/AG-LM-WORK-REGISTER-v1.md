@@ -195,3 +195,19 @@ AG-LIVE-LATENCY-001 bleibt Fehler-ID für EP001, insbesondere US001–003. Der u
 Lot: vorhandenen Rollenfix weiterführen; Register gegen tatsächlichen Code/Lieferungen abgleichen, kleinste nötige Hierarchieergänzung und fehlende Produzenten benennen. Die bereits angefragte Schätzung auf Tasks beziehen (Umsetzung/eigene Prüfung, unabhängige Prüfung, Wartezeiten getrennt), auf Stories/Epics ohne Doppelzählung aggregieren. Gemeinsam genutzte Arbeiten einmal veranschlagen. Keine neue Spec-/Implementierungsrunde nur wegen dieses Registers. Atlas führt Belegzuordnung, Restkriterien und die nächste tatsächliche Vergabe unter den stabilen IDs.
 
 Status der Anpassung: Arbeitsregister gespeichert; Datenvertrag/Monitor noch nicht als umgesetzt, getestet oder veröffentlicht bestätigt. Kein Merge, keine Veröffentlichung, kein bezahlter Lauf durch dieses Dokument.
+
+## Nachtrag V1.1 — Zeitstempel für angezeigte Aufträge und Übergaben
+
+Nutzerauftrag vom 2026-10-21: einplanen, nicht sofort umsetzen. Priorität nach aktueller Livefehlerbehebung. Keine zusätzliche Ausführung/Veröffentlichung hiermit.
+
+- Epic: AG-LM-EP-001.
+- User Story: AG-LM-US-001, Abnahmekriterien ergänzt auf V2; vorhandener Nutzerzweck bleibt unverändert.
+- Task: AG-LM-TK-019 — Zeitstempel an angezeigten Aufträgen/Übergaben in vorhandener Liste bzw. Details ergänzen.
+- parent_id des Tasks: AG-LM-US-001.
+- Technischer Owner für spätere Umsetzung: Lot.
+- Status: BACKLOG / Umsetzung zurückgestellt; Aufwand noch ungeschätzt.
+- Testfall: AG-LM-TC-013 V1, noch NOT_RUN, prüft TK019/US001 V2.
+
+Abnahmekriterien: Datum und Uhrzeit einschließlich Sekunden und erkennbarer Zeitzone an der jeweiligen Übergabe nachvollziehbar anzeigen; vorhandene Ereigniszeit verwenden, Erfassungs-/Empfangszeit davon klar unterscheiden, wenn mit angezeigt. Fehlende Ereigniszeit bleibt unbekannt, keine erfundene Uhrzeit. Gleicher Originalzeitpunkt im Livebetrieb und Archiv; verspäteter Empfang ändert die ursprüngliche Zeit nicht. Vorhandene Oberfläche nutzen, keine neue Ansicht.
+
+TC013: zwei Ereignisse mit unterschiedlichen Ereigniszeiten und verspäteter Zustellung anzeigen, anschließend denselben Verlauf im Archiv prüfen. Erwartet: richtig zugeordnete Datum/Uhrzeit/Zeitzone, ursprünglicher Zeitpunkt bleibt erhalten; fehlende Zeit wird ausdrücklich kenntlich. Darstellung auf Zielgerät lesbar. Keine bestandene Prüfung behauptet.
