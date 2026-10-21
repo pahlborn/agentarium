@@ -147,6 +147,15 @@ function koerper(f) {
   await s.waitForTimeout(2500);
   await s.evaluate(() => { const d = document.getElementById('agGhAuf'); if (d) d.open = true; });
 
+  /* DEN KOPF JETZT ABLESEN, VOR DEM ERSTEN EREIGNIS. Genau dieser Moment ist
+     der beobachtete: verbunden, LIVE, noch kein Strom. Spaeter meldet der
+     Adapter den Lauf und ersetzt den Namen zu Recht -- wer erst dann
+     hinsieht, misst den Normalfall und nicht den Fehlerfall. */
+  const kopfWartend = await s.evaluate(() => ({
+    werk: (document.getElementById('agWerkName') || {}).textContent || '',
+    markiert: document.querySelectorAll('.wProjekte li.hier').length
+  }));
+
   async function liefern(name, body, cid) {
     antwort = [{ id: cid, body: body,
                  user: { login: 'github-actions[bot]', id: 41898282 },
@@ -239,6 +248,30 @@ function koerper(f) {
   zeile('Sitzungszählung erscheint', /in dieser Sitzung beobachtet: 1 Abbruch/.test(r7.zahlen), true);
   zeile('Abdeckung ausgewiesen', /Projektabdeckung: partial/.test(r7.zahlen), true);
   zeile('keine Projektzahl behauptet', /Projektabdeckung: complete/.test(r7.zahlen), false);
+
+  console.log('\nG2 — Der Kopf behauptet im Livebetrieb kein Demoprojekt');
+  console.log('    Atlas hat es an Peters Schirm beobachtet: verbunden, LIVE,');
+  console.log('    „Wartet auf einen Strom" — und darüber „NACHTPOST V1".\n');
+  const kopfJetzt = await s.evaluate(() => ({
+    werk: (document.getElementById('agWerkName') || {}).textContent || ''
+  }));
+  /* Der Stueckwaehler im Projektblatt NENNT die Demostuecke -- das ist sein
+     Zweck und richtig. Falsch waere, eines davon als das aktuelle zu
+     markieren oder seinen Titel als laufendes Werk auszugeben. */
+  const demoNamen = ['NACHTPOST V1', 'NACHTPOST V2',
+                     'eine Stadt aus ungesendeten Briefen',
+                     'Die Stadt, die sich gemeinsam verändert'];
+  zeile('wartend: kein Demotitel im Werknamen',
+        demoNamen.some(d => kopfWartend.werk.indexOf(d) >= 0), false);
+  zeile('wartend: kein Stück als aktuell markiert', kopfWartend.markiert, 0);
+  zeile('wartend: Betriebsart als Platzhalter', /LIVE/.test(kopfWartend.werk), true);
+  console.log('        wartend:  „' + kopfWartend.werk.trim().slice(0, 56) + '"');
+  /* Und die Gegenprobe: Sobald ein Lauf gemeldet ist, steht er da. Ohne
+     diese Zeile wuerde ein Monitor, der NIE einen Namen zeigt, ebenfalls
+     bestehen -- der Platzhalter ist kein Selbstzweck. */
+  zeile('nach dem Lauf: der echte Lauf steht da',
+        kopfJetzt.werk.indexOf('AG-EVENT-JOURNAL-001') >= 0, true);
+  console.log('        danach:   „' + kopfJetzt.werk.trim().slice(0, 56) + '"');
 
   console.log('\nG — Was dieser Schritt NICHT tut');
   console.log('    erwartet: kein Aufgabenzustand getrieben, kein Ring, kein Zähler\n');

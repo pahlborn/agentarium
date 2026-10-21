@@ -2289,7 +2289,7 @@
 
      Der Bauzeitpunkt kommt beim Bauen aus der Uhr. Von Hand gepflegte
      Datumsangaben sind nach der zweiten Änderung falsch. */
-  var FASSUNG = '57', GEBAUT = '2026-10-21T08:15Z';
+  var FASSUNG = '58', GEBAUT = '2026-10-21T08:25Z';
 
   /* AG-GH-LIVE-001: JEDE TEXTSENKE MASKIERT.
      Seit Live-Daten von aussen kommen (GitHub-Kommentare, one-event.json),
@@ -3727,7 +3727,9 @@
     for (var bq in stopper) blockiert++;
     var ganz = aufgabenAuf,
         teil = ganz ? Math.min(1, aufgabenZu / ganz) : 0,
-        schl = (STUECK.titel || STUECK.projekt || '') + '|' +
+        /* Im Livebetrieb benennt dieser Block den gemeldeten Lauf, nicht
+           das aufgezeichnete Stueck -- derselbe Grund wie im Kopf. */
+        schl = (livTit() || '') + '|' +
                aufgabenZu + '|' + ganz + '|' + (glanz > 0.25) + '|' +
                offen + '|' + tisch.length + '|' + blockiert + '|' +
                bausteine.length + '|' + register.length + '|' +
@@ -3774,7 +3776,7 @@
       };
       werkNameEl.innerHTML =
         /* 1. Was es ist */
-        '<div class="wTitel">' + esc(STUECK.titel || STUECK.projekt || '') + '</div>' +
+        '<div class="wTitel">' + esc(livTit()) + '</div>' +
         /* 2. Wie weit */
         '<div class="wBalken"><span style="width:' +
           (teil * 100).toFixed(1) + '%"></span></div>' +
@@ -3789,8 +3791,15 @@
           reihe('fertig', bausteine.length, 'sFertig') +
         '</div>' +
         /* 4. Woher und was das Konzept behauptet */
-        '<div class="wOrt">' + esc(STUECK.ablage || 'extern') +
-          (STUECK.umfang ? ' · laut Konzept ' + esc(STUECK.umfang) : '') + '</div>' +
+        /* Auch hier gilt die Trennung: Im Livebetrieb stammen Ablage und
+           Umfang aus dem gemeldeten Lauf, nicht aus dem aufgezeichneten
+           Stueck. Steht nichts, steht nichts -- "extern" ist dann die
+           einzige Aussage, die zutrifft. */
+        (function () {
+          var Q = (MODUS === 'live') ? (liveKopf || {}) : STUECK;
+          return '<div class="wOrt">' + esc(Q.ablage || 'extern') +
+            (Q.umfang ? ' · laut Konzept ' + esc(Q.umfang) : '') + '</div>';
+        })() +
         /* 5. Woraus es besteht */
         reg;
     }
@@ -5014,14 +5023,46 @@
     /* Jeder Wechsel setzt den Livepuffer zurueck. Was ein voriger Strom
        geliefert hat, gehoert nicht in den naechsten. */
     liveListe.length = 0;
+    /* Auch die Live-Identitaet: Was ein voriger Strom gemeldet hat, ist
+       beim naechsten Wechsel keine Aussage mehr. */
+    liveKopf = null;
     zurueckAufAnfang();
     laeuft = !!modus().start;
     kopfSetzen();
     knoepfeSetzen();
   }
 
+  /* Die Identitaet des laufenden Live-Projekts -- `null`, solange keine
+     gemeldet wurde. Sie ersetzt im Livebetrieb das aufgezeichnete Stueck
+     und wird bei jedem Betriebsartwechsel geloescht. */
+  var liveKopf = null;
+
+  /* Welcher Titel gilt gerade? Im Livebetrieb der gemeldete, sonst der des
+     aufgezeichneten Stuecks -- und solange nichts gemeldet ist, das Wort der
+     Betriebsart statt eines fremden Projektnamens. Einmal benannt, damit
+     Kopf und Werkname nicht auseinanderlaufen; sie taten es schon. */
+  function livTit() {
+    if (MODUS === 'live')
+      return liveKopf ? (liveKopf.titel || liveKopf.projekt || '')
+                      : MODI.live.wort.toUpperCase();
+    return STUECK.titel || STUECK.projekt || '';
+  }
+
   function kopfSetzen() {
-    projektEl.textContent = STUECK.projekt || '';
+    /* IM LIVEBETRIEB NIE DER DEMONAME.
+       Von Atlas am 21.10. an Peters Schirm beobachtet: verbunden, LIVE
+       gewaehlt, "Wartet auf einen Strom von aussen" -- und darueber stand
+       weiter "NACHTPOST V1". Der Kopf las `STUECK.projekt`, und das ist das
+       aufgezeichnete Stueck; der Adapter ueberspringt beim Verbinden
+       absichtlich die Historie, also kam kein Lauf, der den Namen ersetzt
+       haette. Ergebnis: eine Aussage ueber die Wirklichkeit, die falsch war.
+       Steht noch keine Live-Identitaet, zeigt der Kopf das Wort der
+       Betriebsart. Es ist kein erfundener Projektname und kann mit keinem
+       verwechselt werden -- und die Zeile darunter sagt ohnehin, worauf
+       gewartet wird. */
+    var K = (MODUS === 'live') ? (liveKopf || { projekt: MODI.live.wort.toUpperCase() })
+                               : STUECK;
+    projektEl.textContent = K.projekt || '';
     /* Beim Zeigen auf den Namen steht da, was BALL heißt und welche
        Fassung läuft. Im Ruhezustand ist es weg — der Monitor soll das Feld
        zeigen, nicht seine eigenen Angaben. */
@@ -5035,15 +5076,23 @@
     if (STUECKE.length > 1) {
       h += '<ul class="wProjekte">';
       STUECKE.forEach(function (S, i) {
-        h += '<li' + (i === stueckNr ? ' class="hier"' : '') +
+        /* Im Livebetrieb ist KEIN aufgezeichnetes Stueck das aktuelle.
+           Die Markierung blieb sonst auf dem zuletzt gespielten stehen und
+           sagte damit genau das Falsche. */
+        h += '<li' + ((i === stueckNr && MODUS !== 'live') ? ' class="hier"' : '') +
              ' data-nr="' + i + '">' + esc(S.projekt || S.titel || ('Stück ' + (i+1))) +
              '</li>';
       });
       h += '</ul>';
     }
-    if (STUECK.titel && STUECK.titel !== STUECK.projekt)
-      h += '<p class="wTitel">' + esc(STUECK.titel) + '</p>';
-    if (STUECK.beschreibung) h += '<p>' + esc(STUECK.beschreibung) + '</p>';
+    if (K.titel && K.titel !== K.projekt)
+      h += '<p class="wTitel">' + esc(K.titel) + '</p>';
+    /* Die Beschreibung des aufgezeichneten Stuecks gehoert nicht in den
+       Livebetrieb: Sie beschreibt NACHTPOST, nicht das, was gerade
+       geschieht. Im Livebetrieb steht hier, was gemeldet wurde -- oder
+       nichts. */
+    var besch = (MODUS === 'live') ? (K.was || '') : (STUECK.beschreibung || '');
+    if (besch) h += '<p>' + esc(besch) + '</p>';
 
     h += '<ul class="wModi">';
     ['demo', 'archiv', 'live'].forEach(function (m) {
@@ -5573,15 +5622,23 @@
     if (!d || typeof d !== 'object') return { angenommen: false, grund: 'keine Angabe' };
     var pid = (typeof d.project_id === 'string') ? d.project_id.trim() : '';
     if (!pid) return { angenommen: false, grund: 'project_id fehlt' };
-    STUECK.projekt = (typeof d.kurz === 'string' && d.kurz.trim()) ? d.kurz.trim() : pid;
-    STUECK.titel   = (typeof d.titel === 'string' && d.titel.trim()) ? d.titel.trim() : pid;
-    STUECK.was     = (typeof d.was === 'string') ? d.was : '';
-    STUECK.ablage  = (typeof d.ablage === 'string') ? d.ablage : '';
-    /* Keinen Umfang behaupten, den niemand genannt hat. */
-    if (typeof d.umfang === 'number') STUECK.umfang = d.umfang;
-    else delete STUECK.umfang;
+    /* AG-EVENT-JOURNAL-001: IN `liveKopf`, NICHT IN `STUECK`.
+       Hier stand vorher `STUECK.projekt = ...` -- und `STUECK` ist eine
+       Verweisung auf das aufgezeichnete Stueck. Der Livename wurde also in
+       die Demodaten geschrieben und stand nach dem Zurueckschalten dort,
+       wo "NACHTPOST V1" hingehoert. Zwei Betriebsarten, die sich dieselbe
+       Variable teilen, werden sich irgendwann gegenseitig ueberschreiben;
+       hier taten sie es schon. */
+    liveKopf = {
+      projekt: (typeof d.kurz === 'string' && d.kurz.trim()) ? d.kurz.trim() : pid,
+      titel:   (typeof d.titel === 'string' && d.titel.trim()) ? d.titel.trim() : pid,
+      was:     (typeof d.was === 'string') ? d.was : '',
+      ablage:  (typeof d.ablage === 'string') ? d.ablage : '',
+      /* Keinen Umfang behaupten, den niemand genannt hat. */
+      umfang:  (typeof d.umfang === 'number') ? d.umfang : null
+    };
     kopfSetzen();
-    return { angenommen: true, projekt: STUECK.projekt };
+    return { angenommen: true, projekt: liveKopf.projekt };
   };
 
   window.__agEreignis = function (e) {
