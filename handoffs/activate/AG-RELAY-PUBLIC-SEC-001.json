@@ -1,0 +1,12 @@
+{
+  "schema": "agentarium.relay-activation.v2",
+  "task_id": "AG-RELAY-LIVE-PILOT-001",
+  "authorized": true,
+  "source_commit": "eba3c69457392fe9115ee9f8f6f043a5e54ff103",
+  "role": "coding-agent",
+  "request": "handoffs/AG-RELAY-LIVE-PILOT-001-forge-request-v1.json",
+  "handback": "handoffs/AG-RELAY-LIVE-PILOT-001-forge-result-v1.md",
+  "model": "opus",
+  "max_turns": 4,
+  "max_budget_usd": 1
+}
