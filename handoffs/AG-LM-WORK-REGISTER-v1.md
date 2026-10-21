@@ -211,3 +211,11 @@ Nutzerauftrag vom 2026-10-21: einplanen, nicht sofort umsetzen. Priorität nach 
 Abnahmekriterien: Datum und Uhrzeit einschließlich Sekunden und erkennbarer Zeitzone an der jeweiligen Übergabe nachvollziehbar anzeigen; vorhandene Ereigniszeit verwenden, Erfassungs-/Empfangszeit davon klar unterscheiden, wenn mit angezeigt. Fehlende Ereigniszeit bleibt unbekannt, keine erfundene Uhrzeit. Gleicher Originalzeitpunkt im Livebetrieb und Archiv; verspäteter Empfang ändert die ursprüngliche Zeit nicht. Vorhandene Oberfläche nutzen, keine neue Ansicht.
 
 TC013: zwei Ereignisse mit unterschiedlichen Ereigniszeiten und verspäteter Zustellung anzeigen, anschließend denselben Verlauf im Archiv prüfen. Erwartet: richtig zugeordnete Datum/Uhrzeit/Zeitzone, ursprünglicher Zeitpunkt bleibt erhalten; fehlende Zeit wird ausdrücklich kenntlich. Darstellung auf Zielgerät lesbar. Keine bestandene Prüfung behauptet.
+
+## Nachtrag V1.2 — gleiche verfügbare Details in Flug und Liste
+
+Nutzerbefund: „Im fliegenden auftrag kann ich mehr daten sehen als in der liste.“
+Task AG-LM-TK-020 → AG-LM-US-001 (Kriterien V3) → AG-LM-EP-001. Owner Lot. Zustand: Befund erfasst, Abgleich der tatsächlich geladenen Darstellung offen, nicht umgesetzt.
+Ziel: Alle am fliegenden Auftrag verfügbaren fachlichen Angaben sind auch nach dessen Verschwinden am zugehörigen Listeneintrag dauerhaft erreichbar; vorhandene Details verwenden, keine neue Ansicht.
+Codebefund an main53f7c278: stromZeile hat getrennte Auftrags-/Ereigniszweige; Auftragszweig übernimmt nur Kommando/Empfänger/optionales Modell/Text, während der Ereigniszweig die Spur anhängt. Bei beobachteten GitHub-Ereignissen benutzen Liste und Flug allerdings beide spurWort; für diese allein ist damit kein Datenverlust bewiesen. Außerdem .agAuf.tat opacity .42. Peters konkrete geladene Fassung und fehlende Felder sind noch nicht beobachtet, kein eindeutiger Fehlerort behauptet.
+Test AG-LM-TC-014 V1 / NOT_RUN: dieselbe Übergabe während des Flugs und anschließend in Liste/Details vergleichen. Alle verfügbaren IDs, Hierarchie, Titel, Rollen, Herkunft/Originalbeleg und geplanten Zeitstempel müssen zum selben Ereignis gehören und nach dem Flug erreichbar/lesbar bleiben, auch per Touch. Fehlende Quelldaten bleiben kenntlich. Vorhandene kurze Listenansicht darf kompakt bleiben, ohne Details unzugänglich zu machen.
