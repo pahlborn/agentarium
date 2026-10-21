@@ -11,11 +11,11 @@
    und eine ChatGPT-Rolle (sentinel) — dieselbe Schnittstelle, wie der Auftrag
    es verlangt.
 
-   WAS DIESER SCHRITT NICHT TUT. Er treibt noch keinen Aufgabenzustand: kein
-   Ring, kein Ballwechsel, kein Zähler am Agenten. Die Arten kommen an und
-   werden gezeigt, nicht ausgewertet. Das ist Absicht und steht auch im
-   Quelltext: Angenommen und nicht gezeigt wäre eine stille Lüge; getrieben
-   und nicht geprüft wäre die größere.
+   WAS DIESER NACHWEIS INZWISCHEN MITPRÜFT. Die Aufgabenzustände selbst:
+   Vergabe legt hin, Selbstauskunft beginnt, Lieferung schließt genau ihre
+   Aufgabe — und seit dem 21.10. Blockade und Auflösung, die NEBEN dem
+   Zustand liegen statt ihn zu ersetzen. Was weiter fehlt, steht am Ende der
+   Ausgabe und nicht nur im Kommentar.
 
    WAS ER AUSDRÜCKLICH PRÜFT, weil Atlas es am 21.10. verlangt hat:
    - Melder (`reporter`) und Akteur (`actor`) sind getrennte Felder.
@@ -99,6 +99,7 @@ function koerper(f) {
   };
   if (f.recipient) ev.recipient = f.recipient;
   if (f.reporter) ev.reporter = f.reporter;
+  if (f.blocker) ev.blocker_id = f.blocker;
   let text = '## ' + f.kind + ' — ' + f.title + '\n\n';
   text += MARKER + '\n```json\n' + JSON.stringify(ev, null, 2) + '\n```';
   return text;
@@ -141,7 +142,10 @@ function koerper(f) {
     fassung: (window.__agGithubBruecke || {}).fassung
   }));
   zeile('kommunikation', z.komm, 'beobachtet-v1');
-  zeile('lebenszyklus', z.leben, 'gemeldet-v1');
+  /* V2, NICHT V1. In v1 kamen `blocked`/`resolved` an und trieben nichts;
+     jetzt legen sie eine Klemme an die Aufgabe. Ein Original aus dem Vorrat,
+     das nur v1 sagt, soll sie deshalb ABWEISEN statt halb anzuzeigen. */
+  zeile('lebenszyklus', z.leben, 'gemeldet-v2');
   console.log('        Fassung des Originals: ' + z.fassung);
 
   /* ===== SCHRITT 2b: WAS BEIM VERBINDEN SCHON OFFEN WAR =====
@@ -216,6 +220,53 @@ function koerper(f) {
          kind: 'started', title: 'nur Projekt A beginnt' },
        '2026-10-20T14:02:00Z');
 
+  /* R8, R9 UND R10: KLEMMEN IN DER HISTORIE.
+     Atlas' Bedingung vom 21.10. woertlich: "Projekt-/Lauftrennung und
+     Wiederherstellung muessen dabei dieselbe Lage ergeben wie
+     Live-Verarbeitung." Also muss eine Klemme, die vor dem Verbinden lag
+     und nie aufgeloest wurde, nach dem Verbinden wieder da sein -- mit
+     derselben Kennung, damit ein spaeteres `resolved` sie trifft.
+       R8   vergeben, begonnen, geklemmt            -> offen, begonnen, klemmt
+       R9   vergeben, geklemmt, aufgeloest          -> offen, ohne Klemme
+       R10  vergeben, begonnen, geliefert, geklemmt -> zu, Klemme = Widerspruch
+     R10 ist der Fall, der nicht stillschweigend gutgehen darf: Eine Klemme
+     nach dem Abschluss behauptet, eine Aufgabe haenge, die laut denselben
+     Daten vorbei ist. */
+  hist({ id: 'R8:assigned', task: 'AG-EVJ-R8', actor: 'atlas', reporter: 'atlas',
+         recipient: 'archibald', kind: 'assigned', title: 'R8 an archibald' },
+       '2026-10-20T15:00:00Z');
+  hist({ id: 'R8:started', task: 'AG-EVJ-R8', actor: 'archibald', reporter: 'archibald',
+         kind: 'started', title: 'R8 begonnen' },
+       '2026-10-20T15:01:00Z');
+  hist({ id: 'R8:blocked', task: 'AG-EVJ-R8', actor: 'archibald', reporter: 'archibald',
+         kind: 'blocked', blocker: 'KLEMME-R8-WARTET-AUF-SCOUT',
+         title: 'R8 klemmt — wartet auf eine Zuarbeit' },
+       '2026-10-20T15:02:00Z');
+
+  hist({ id: 'R9:assigned', task: 'AG-EVJ-R9', actor: 'atlas', reporter: 'atlas',
+         recipient: 'cadence', kind: 'assigned', title: 'R9 an cadence' },
+       '2026-10-20T16:00:00Z');
+  hist({ id: 'R9:blocked', task: 'AG-EVJ-R9', actor: 'cadence', reporter: 'cadence',
+         kind: 'blocked', blocker: 'KLEMME-R9', title: 'R9 klemmte' },
+       '2026-10-20T16:01:00Z');
+  hist({ id: 'R9:resolved', task: 'AG-EVJ-R9', actor: 'cadence', reporter: 'cadence',
+         kind: 'resolved', blocker: 'KLEMME-R9', title: 'R9 wieder frei' },
+       '2026-10-20T16:02:00Z');
+
+  hist({ id: 'R10:assigned', task: 'AG-EVJ-R10', actor: 'atlas', reporter: 'atlas',
+         recipient: 'sentinel', kind: 'assigned', title: 'R10 an sentinel' },
+       '2026-10-20T17:00:00Z');
+  hist({ id: 'R10:started', task: 'AG-EVJ-R10', actor: 'sentinel', reporter: 'sentinel',
+         kind: 'started', title: 'R10 begonnen' },
+       '2026-10-20T17:01:00Z');
+  hist({ id: 'R10:delivered', task: 'AG-EVJ-R10', actor: 'sentinel', reporter: 'sentinel',
+         kind: 'delivered', title: 'R10 geliefert' },
+       '2026-10-20T17:02:00Z');
+  hist({ id: 'R10:blocked-nach-zu', task: 'AG-EVJ-R10', actor: 'sentinel',
+         reporter: 'sentinel', kind: 'blocked', blocker: 'KLEMME-R10',
+         title: 'Klemme NACH dem Abschluss — Widerspruch' },
+       '2026-10-20T17:03:00Z');
+
   /* EIN ABBRUCH, DER SCHON DALIEGT, BEVOR VERBUNDEN WIRD. Das ist die
      zweite Haelfte von Argus' Befund: Der Zaehler stand ueber dem
      `basis`-Zweig und zaehlte damit auch Ereignisse von vorgestern als
@@ -276,13 +327,15 @@ function koerper(f) {
       wieder: st.wiederhergestellt, abdeckung: st.abdeckung,
       R1: f('AG-EVJ-R1'), R2: f('AG-EVJ-R2'), R3: f('AG-EVJ-R3'),
       R4: f('AG-EVJ-R4'), R5: f('AG-EVJ-R5'),
+      R8: f('AG-EVJ-R8'), R9: f('AG-EVJ-R9'), R10: f('AG-EVJ-R10'),
+      klemmen: st.klemmen,
       verarbeitet: st.verarbeitet, ausgegeben: st.ausgegeben,
       fliegend: (st.fliegend || []).length,
       meldungen: document.querySelectorAll('.agRuf').length,
       zahlen: (document.getElementById('agGhZahlen') || {}).textContent || ''
     };
   });
-  zeile('fünf offene Aufgaben übernommen', nachRestore.wieder, 5);
+  zeile('sieben offene Aufgaben übernommen', nachRestore.wieder, 7);
   zeile('R1 liegt bei scout', nachRestore.R1 ? nachRestore.R1.wer : null, 'scout');
   zeile('R1 ist begonnen', nachRestore.R1 ? nachRestore.R1.zustand : null, 'begonnen');
   zeile('R1 als wiederhergestellt gekennzeichnet',
@@ -300,6 +353,54 @@ function koerper(f) {
   zeile('Abdeckung partial, nie complete', nachRestore.abdeckung, 'partial');
   zeile('Fremdaussage ausgewiesen',
         /Fremdaussage/.test(nachRestore.zahlen), true);
+
+  console.log('\nA5 — Klemmen aus der Historie: dieselbe Lage wie live');
+  console.log('    erwartet: R8 klemmt weiter, R9 nicht mehr, und eine Klemme');
+  console.log('    nach dem Abschluss ist ein Widerspruch, kein Ring\n');
+  zeile('R8 liegt bei archibald',
+        nachRestore.R8 ? nachRestore.R8.wer : null, 'archibald');
+  /* DER ZUSTAND BLEIBT, WAS ER WAR. Eine Blockade ist kein Zustand der
+     Aufgabe, sondern liegt neben ihm -- sonst muesste die Aufloesung raten,
+     was vorher war. */
+  zeile('R8 bleibt begonnen, nicht "blockiert"',
+        nachRestore.R8 ? nachRestore.R8.zustand : null, 'begonnen');
+  zeile('R8 traegt genau eine Klemme',
+        nachRestore.R8 ? nachRestore.R8.klemmt.length : -1, 1);
+  zeile('und zwar mit ihrer Kennung',
+        nachRestore.R8 ? nachRestore.R8.klemmt[0].id : null,
+        'KLEMME-R8-WARTET-AUF-SCOUT');
+  /* Und der Grund kommt mit -- sonst waere eine wiederhergestellte Klemme
+     eine Klemme ohne Anlass. */
+  zeile('und mit ihrem Grund',
+        nachRestore.R8 ? nachRestore.R8.klemmt[0].grund : null,
+        'R8 klemmt \u2014 wartet auf eine Zuarbeit');
+  zeile('R9 ist offen', !!nachRestore.R9, true);
+  zeile('R9 klemmt nicht mehr',
+        nachRestore.R9 ? nachRestore.R9.klemmt.length : -1, 0);
+  zeile('R9 blieb zugewiesen — kein Beginn behauptet',
+        nachRestore.R9 ? nachRestore.R9.zustand : null, 'zugewiesen');
+  zeile('R10 ist zu — die Klemme danach macht nichts auf',
+        nachRestore.R10, null);
+  zeile('Widerspruch ausgewiesen',
+        /Widerspruch/.test(nachRestore.zahlen), true);
+  zeile('genau eine Klemme insgesamt übernommen', nachRestore.klemmen, 1);
+  zeile('und in der Tafel benannt',
+        /davon 1 mit Klemme/.test(nachRestore.zahlen), true);
+
+  /* DAS WORT AM SCHILD. Hier stand bisher in jedem Fall "arbeitet", auch
+     bei einer bloss zugewiesenen und bei einer geklemmten Aufgabe -- der
+     Ring sagte es richtig, das Wort darunter nicht. Drei Faelle, drei
+     Worte, und der dritte ist die Gegenprobe. */
+  const schilder = await s.evaluate(() => {
+    const w = (n) => {
+      const e = document.querySelector('#agTun [data-wer="' + n + '"]');
+      return e ? e.textContent.split(' ·')[0] : null;
+    };
+    return { archibald: w('archibald'), argus: w('argus'), scout: w('scout') };
+  });
+  zeile('archibald: begonnen und geklemmt → klemmt', schilder.archibald, 'klemmt');
+  zeile('argus: nur zugewiesen → liegt', schilder.argus, 'liegt');
+  zeile('scout: begonnen und frei → arbeitet', schilder.scout, 'arbeitet');
 
   console.log('\nA4 — Gleiche Rolle, gleiche Aufgabenkennung, zwei Projekte');
   console.log('    erwartet: zwei getrennte Ringe, und der Beginn des einen');
@@ -413,14 +514,35 @@ function koerper(f) {
   console.log('    „nicht aus Titeln und nicht aus BLOCKED". Gefunden von');
   console.log('    Argus. Eine Blockade wartet und kann sich auflösen, ein');
   console.log('    Abbruch ist gescheitert und endet.\n');
+  const vorKlemme = await s.evaluate(() => {
+    const st = (window.__agStand && window.__agStand()) || {};
+    return st.lueckenEinzeln ? st.lueckenEinzeln.klemme : -1;
+  });
   const r7 = await liefern('blocked', koerper({
     id: 'AG-EVENT-JOURNAL-001:forge:blocked', task: 'AG-EVJ-001',
     actor: 'forge', reporter: 'forge', kind: 'blocked',
+    blocker: 'KLEMME-F-OHNE-AUFGABE',
     title: 'Forge klemmt — Grund steht im Beleg, nicht im Bild'
   }), 90007);
   zeile('blocked angenommen', /blocked/.test(r7.letztes), true);
   zeile('blocked zählt NICHT als Abbruch',
-        /in dieser Sitzung beobachtet/.test(r7.zahlen), false);
+        /Abbruch/.test(r7.zahlen), false);
+  /* ABER ES WIRD GEZAEHLT, und zwar getrennt. Peter will das tatsaechliche
+     Geschehen sehen; eine Blockade, die nirgends auftaucht, waere genau das
+     Verschweigen, gegen das dieser Kandidat gebaut ist. */
+  zeile('blocked zählt als Blockade',
+        /in dieser Sitzung beobachtet: 1 Blockade/.test(r7.zahlen), true);
+  /* AG-EVJ-001 ist nie vergeben worden (Teil B meldete nur einen Beginn).
+     Eine Klemme ohne Aufgabe legt deshalb KEINE an -- das waere eine
+     erfundene Aufgabe -- und bleibt eine gezaehlte Luecke. */
+  const nachKlemme = await s.evaluate(() => {
+    const st = (window.__agStand && window.__agStand()) || {};
+    return { luecke: st.lueckenEinzeln ? st.lueckenEinzeln.klemme : -1,
+             aufgabe: (st.aufgaben || []).filter(
+               a => a.aufgabe === 'AG-EVJ-001').length };
+  });
+  zeile('ohne Aufgabe wird keine angelegt', nachKlemme.aufgabe, 0);
+  zeile('und die Lücke wird gezählt', nachKlemme.luecke > vorKlemme, true);
 
   const r8 = await liefern('aborted', koerper({
     id: 'AG-EVENT-JOURNAL-001:forge:aborted', task: 'AG-EVJ-005',
@@ -428,8 +550,12 @@ function koerper(f) {
     title: 'Forge ist gescheitert — die Aufgabe endet hier'
   }), 90008);
   zeile('aborted angenommen', /aborted/.test(r8.letztes), true);
+  /* Beide stehen jetzt in derselben Zeile, aber als ZWEI Zahlen. Eine
+     Summe waere wieder der Fehler, den Argus gefunden hat. */
   zeile('aborted zählt als Abbruch',
-        /in dieser Sitzung beobachtet: 1 Abbruch/.test(r8.zahlen), true);
+        /1 Abbruch(?!e)/.test(r8.zahlen), true);
+  zeile('und die Blockade steht daneben, nicht darin',
+        /1 Blockade/.test(r8.zahlen), true);
   zeile('Abdeckung ausgewiesen', /Projektabdeckung: partial/.test(r8.zahlen), true);
   zeile('keine Projektzahl behauptet', /Projektabdeckung: complete/.test(r8.zahlen), false);
 
@@ -535,8 +661,235 @@ function koerper(f) {
   zeile('Lieferung schließt genau diese Aufgabe',
         (st.aufgaben || []).filter(a => a.aufgabe === 'AG-EVJ-H1').length, 0);
 
-  console.log('\nI — Was auch Schritt 2 noch NICHT tut');
-  console.log('    erwartet: kein Ballwechsel, blocked treibt nichts\n');
+  console.log('\nJ — Blockade und Auflösung am laufenden Strom');
+  console.log('    Atlas, 21.10., wörtlich: „Blockade lässt die Aufgabe');
+  console.log('    liegen, Auflösung betrifft genau diese Blockade und');
+  console.log('    behauptet keinen neuen Arbeitsbeginn oder Abschluss."\n');
+
+  /* Eine eigene Aufgabe, damit nichts aus Teil H hineinspielt. */
+  await liefern('J1:assigned', koerper({
+    id: 'AG-EVENT-JOURNAL-001:atlas:assigned:J1', task: 'AG-EVJ-J1',
+    actor: 'atlas', reporter: 'atlas', recipient: 'forge', kind: 'assigned',
+    title: 'Atlas vergibt J1 an forge'
+  }), 90301);
+  await liefern('J1:started', koerper({
+    id: 'AG-EVENT-JOURNAL-001:forge:started:J1', task: 'AG-EVJ-J1',
+    actor: 'forge', reporter: 'forge', kind: 'started',
+    title: 'Forge beginnt J1'
+  }), 90302);
+
+  function j1(st) {
+    return (st.aufgaben || []).filter(a => a.aufgabe === 'AG-EVJ-J1')[0] || null;
+  }
+  const r9 = await liefern('J1:blocked:K1', koerper({
+    id: 'AG-EVENT-JOURNAL-001:forge:blocked:J1:K1', task: 'AG-EVJ-J1',
+    actor: 'forge', reporter: 'forge', kind: 'blocked', blocker: 'KLEMME-J1-K1',
+    title: 'J1 klemmt an einer Zuarbeit'
+  }), 90303);
+  st = await stand();
+  let J = j1(st);
+  zeile('die Aufgabe liegt weiter da', !!J, true);
+  zeile('und bleibt begonnen', J ? J.zustand : null, 'begonnen');
+  zeile('sie trägt die Klemme', J ? J.klemmt.length : -1, 1);
+  zeile('und zwar genau diese', J ? J.klemmt[0].id : null, 'KLEMME-J1-K1');
+  /* IN DER LISTE NACHSEHEN KOENNEN -- Peters Aufteilung: der Effekt am
+     Agenten sagt DASS, die Liste sagt WELCHE. */
+  zeile('die Klemme steht in der Tafel',
+        /Klemme KLEMME-J1-K1/.test(r9.letztes), true);
+
+  /* Dasselbe nochmal, eigene Ereigniskennung: ein Transportduplikat der
+     Klemme darf keine zweite erzeugen. */
+  await liefern('J1:blocked:K1b', koerper({
+    id: 'AG-EVENT-JOURNAL-001:forge:blocked:J1:K1b', task: 'AG-EVJ-J1',
+    actor: 'forge', reporter: 'forge', kind: 'blocked', blocker: 'KLEMME-J1-K1',
+    title: 'Dieselbe Klemme ein zweites Mal'
+  }), 90304);
+  st = await stand();
+  zeile('dieselbe Klemme zweimal ist einmal', j1(st).klemmt.length, 1);
+
+  await liefern('J1:blocked:K2', koerper({
+    id: 'AG-EVENT-JOURNAL-001:forge:blocked:J1:K2', task: 'AG-EVJ-J1',
+    actor: 'forge', reporter: 'forge', kind: 'blocked', blocker: 'KLEMME-J1-K2',
+    title: 'Eine zweite, andere Klemme'
+  }), 90305);
+  st = await stand();
+  zeile('zwei verschiedene Klemmen bleiben zwei', j1(st).klemmt.length, 2);
+
+  /* DAS BILD DAZU, GEMESSEN STATT BEHAUPTET. Peter am 21.10.: "du hast doch
+     liste und den block mit den aufgaben. warum da nicht jeweils einfuegen
+     und einen kleinen resonanz-effekt am agenten selbst". Also stehen hier
+     drei Dinge: die Zahl im Block, das Wort am Agenten, und dass der Ring
+     nicht mehr gleichmaessig dreht. */
+  const bild = await s.evaluate(() => {
+    const w = document.getElementById('agWerkName');
+    let bl = null;
+    if (w) Array.prototype.forEach.call(w.querySelectorAll('.wAufZ'), z => {
+      const u = z.querySelector('u'), b = z.querySelector('b');
+      if (u && b && u.textContent === 'blockiert') bl = b.textContent;
+    });
+    return { blockiert: bl,
+             schild: (document.getElementById('agTun') || {}).textContent || '' };
+  });
+  /* DREI, NICHT ZWEI -- UND DAS IST DIE RICHTIGE ZAHL. Hier stand zuerst
+     eine 2, weil ich nur an J1 gedacht habe. Die Klemme von R8 liegt aus
+     der Historie noch dazu und ist genauso offen; dass der Block sie
+     mitzaehlt, ist das Gegenteil eines Fehlers. Gefunden vom Nachweis
+     selbst, und die Rechnung steht jetzt daneben statt im Kopf. */
+  zeile('der Block zählt alle offenen Klemmen (2 × J1 + 1 × R8)',
+        bild.blockiert, '3');
+  zeile('das Schild am Agenten sagt es', /1 klemmt/.test(bild.schild), true);
+  /* Mischfall: forge hat eine freie und eine geklemmte Aufgabe. Dann heisst
+     das Wort weiter "arbeitet" -- denn es wird gearbeitet -- und die Klemme
+     steht als Zahl daneben. */
+  const schildForge = await s.evaluate(() => {
+    const e = document.querySelector('#agTun [data-wer="forge"]');
+    return e ? e.textContent : '';
+  });
+  zeile('Mischfall: das Wort bleibt "arbeitet"',
+        /^arbeitet /.test(schildForge), true);
+  zeile('und die Klemme steht als Zahl daneben',
+        /1 klemmt/.test(schildForge), true);
+  /* UND DER RING SELBST, GEMESSEN. Hier stand zuerst eine Zusicherung, die
+     nicht fallen konnte ("Stand abrufbar") -- derselbe Fehler, den ich am
+     21.10. schon einmal gemacht habe, als ein Nachweis `.open` an einem
+     `div` las. Gemessen wird jetzt der Ringwinkel ueber 1,4 Sekunden, also
+     ueber mehr als einen Stocktakt (1,15 s): Ein laufender Ring wird
+     groesser, ein geklemmter zuckt zurueck.
+     Die Gegenprobe steht daneben und ist der Teil, der das Messgeraet
+     prueft: R1 bei scout laeuft weiter. Ohne sie wuerde ein Ring, der
+     UEBERHAUPT nicht mehr bewegt wird, ebenfalls bestehen. */
+  const wA = await s.evaluate(() => {
+    const st = (window.__agStand && window.__agStand()) || {};
+    const g = (st.aufgaben || []);
+    const f = (id) => (g.filter(a => a.aufgabe === id)[0] || {}).w;
+    return { j1: f('AG-EVJ-J1'), r1: f('AG-EVJ-R1') };
+  });
+  await s.waitForTimeout(1400);
+  const wB = await s.evaluate(() => {
+    const st = (window.__agStand && window.__agStand()) || {};
+    const g = (st.aufgaben || []);
+    const f = (id) => (g.filter(a => a.aufgabe === id)[0] || {}).w;
+    return { j1: f('AG-EVJ-J1'), r1: f('AG-EVJ-R1') };
+  });
+  zeile('der geklemmte Ring läuft nicht vorwärts', wB.j1 < wA.j1, true);
+  zeile('Gegenprobe: ein laufender Ring tut es', wB.r1 > wA.r1, true);
+  console.log('        geklemmt ' + wA.j1 + ' → ' + wB.j1 +
+              ' · laufend ' + wA.r1 + ' → ' + wB.r1);
+
+  /* FREMDAUSSAGE KLEMMT NICHT. Dieselbe Regel wie beim Beginn: Wer klemmt,
+     sagt es selbst. */
+  await liefern('J1:blocked-fremd', koerper({
+    id: 'AG-EVENT-JOURNAL-001:atlas:blocked:J1:K3', task: 'AG-EVJ-J1',
+    actor: 'forge', reporter: 'atlas', kind: 'blocked', blocker: 'KLEMME-J1-K3',
+    title: 'Atlas behauptet eine Klemme von forge'
+  }), 90306);
+  st = await stand();
+  zeile('Fremdaussage legt keine Klemme', j1(st).klemmt.length, 2);
+
+  /* GENAU DIESE BLOCKADE. K2 wird aufgeloest, K1 bleibt. */
+  await liefern('J1:resolved:K2', koerper({
+    id: 'AG-EVENT-JOURNAL-001:forge:resolved:J1:K2', task: 'AG-EVJ-J1',
+    actor: 'forge', reporter: 'forge', kind: 'resolved', blocker: 'KLEMME-J1-K2',
+    title: 'Die zweite Klemme ist weg'
+  }), 90307);
+  st = await stand();
+  J = j1(st);
+  zeile('nach der Auflösung bleibt eine', J.klemmt.length, 1);
+  zeile('und es ist die andere', J.klemmt[0].id, 'KLEMME-J1-K1');
+  zeile('kein Beginn behauptet', J.zustand, 'begonnen');
+  zeile('kein Abschluss behauptet', !!J, true);
+
+  /* EINE AUFLOESUNG OHNE PASSENDE KLEMME LOEST NICHTS. Sonst waere die
+     verbleibende K1 die "naechstbeste" -- genau die Rateentscheidung, die
+     dieser Monitor nicht mehr trifft. */
+  const vorLoesung = st.lueckenEinzeln ? st.lueckenEinzeln.loesung : -1;
+  await liefern('J1:resolved-unbekannt', koerper({
+    id: 'AG-EVENT-JOURNAL-001:forge:resolved:J1:K9', task: 'AG-EVJ-J1',
+    actor: 'forge', reporter: 'forge', kind: 'resolved', blocker: 'KLEMME-GIBT-ES-NICHT',
+    title: 'Auflösung einer Klemme, die hier niemand kennt'
+  }), 90308);
+  st = await stand();
+  J = j1(st);
+  zeile('unbekannte Klemme löst nichts auf', J.klemmt.length, 1);
+  zeile('die verbliebene ist unberührt', J.klemmt[0].id, 'KLEMME-J1-K1');
+  zeile('und wird als Lücke gezählt',
+        (st.lueckenEinzeln ? st.lueckenEinzeln.loesung : -1) > vorLoesung, true);
+
+  /* Und die letzte Aufloesung: keine Klemme mehr, und der Zustand ist
+     derselbe wie vorher -- weder begonnen noch fertig behauptet. */
+  await liefern('J1:resolved:K1', koerper({
+    id: 'AG-EVENT-JOURNAL-001:forge:resolved:J1:K1', task: 'AG-EVJ-J1',
+    actor: 'forge', reporter: 'forge', kind: 'resolved', blocker: 'KLEMME-J1-K1',
+    title: 'J1 läuft wieder'
+  }), 90309);
+  st = await stand();
+  J = j1(st);
+  zeile('keine Klemme mehr', J.klemmt.length, 0);
+  zeile('die Aufgabe ist weiter offen', !!J, true);
+  zeile('und weiter begonnen, nicht neu begonnen', J.zustand, 'begonnen');
+
+  console.log('\nJ2 — Was der Vertrag bei Klemmen abweist\n');
+  const r10 = await liefern('blocked-ohne-kennung', koerper({
+    id: 'AG-EVENT-JOURNAL-001:forge:blocked:ohne', task: 'AG-EVJ-J1',
+    actor: 'forge', reporter: 'forge', kind: 'blocked',
+    title: 'Blockade ohne eigene Kennung'
+  }), 90310);
+  zeile('blocked ohne blocker_id abgewiesen',
+        /blocker_id fehlt/.test(r10.grund), true);
+  const r11 = await liefern('started-mit-kennung', koerper({
+    id: 'AG-EVENT-JOURNAL-001:forge:started:mitKlemme', task: 'AG-EVJ-J1',
+    actor: 'forge', reporter: 'forge', kind: 'started', blocker: 'KLEMME-FALSCH',
+    title: 'Ein Beginn, der eine Klemme nennt'
+  }), 90311);
+  zeile('blocker_id an fremder Art abgewiesen',
+        /blocker_id nicht erlaubt/.test(r11.grund), true);
+
+  console.log('\nJ3 — Klemmen folgen der Projekttrennung');
+  console.log('    dieselbe Rolle, dieselbe Aufgabenkennung, zwei Projekte:');
+  console.log('    eine Klemme in A lässt B unberührt\n');
+  await liefern('J2:assigned:C', koerper({
+    id: 'AG-EVENT-JOURNAL-001:atlas:assigned:J2C', task: 'AG-EVJ-J2',
+    projekt: 'agentarium', lauf: 'LAUF-C',
+    actor: 'atlas', reporter: 'atlas', recipient: 'nova', kind: 'assigned',
+    title: 'J2 in Projekt C'
+  }), 90321);
+  await liefern('J2:assigned:D', koerper({
+    id: 'AG-EVENT-JOURNAL-001:atlas:assigned:J2D', task: 'AG-EVJ-J2',
+    projekt: 'malstudio', lauf: 'LAUF-D',
+    actor: 'atlas', reporter: 'atlas', recipient: 'nova', kind: 'assigned',
+    title: 'J2 in Projekt D'
+  }), 90322);
+  await liefern('J2:blocked:C', koerper({
+    id: 'AG-EVENT-JOURNAL-001:nova:blocked:J2C', task: 'AG-EVJ-J2',
+    projekt: 'agentarium', lauf: 'LAUF-C',
+    actor: 'nova', reporter: 'nova', kind: 'blocked', blocker: 'KLEMME-J2-C',
+    title: 'Nur Projekt C klemmt'
+  }), 90323);
+  st = await stand();
+  const jc = (st.aufgaben || []).filter(
+    a => a.aufgabe === 'AG-EVJ-J2' && a.lauf === 'LAUF-C')[0] || null;
+  const jd = (st.aufgaben || []).filter(
+    a => a.aufgabe === 'AG-EVJ-J2' && a.lauf === 'LAUF-D')[0] || null;
+  zeile('beide Aufgaben vorhanden', !!(jc && jd), true);
+  zeile('C klemmt', jc ? jc.klemmt.length : -1, 1);
+  zeile('D klemmt nicht', jd ? jd.klemmt.length : -1, 0);
+  /* Und die Aufloesung in C trifft nicht D -- auch nicht, wenn D irgendwann
+     dieselbe Klemmenkennung tragen sollte. */
+  await liefern('J2:resolved:C', koerper({
+    id: 'AG-EVENT-JOURNAL-001:nova:resolved:J2C', task: 'AG-EVJ-J2',
+    projekt: 'agentarium', lauf: 'LAUF-C',
+    actor: 'nova', reporter: 'nova', kind: 'resolved', blocker: 'KLEMME-J2-C',
+    title: 'C ist wieder frei'
+  }), 90324);
+  st = await stand();
+  zeile('C aufgelöst', (st.aufgaben || []).filter(
+    a => a.aufgabe === 'AG-EVJ-J2' && a.lauf === 'LAUF-C')[0].klemmt.length, 0);
+  zeile('D unverändert offen', (st.aufgaben || []).filter(
+    a => a.aufgabe === 'AG-EVJ-J2' && a.lauf === 'LAUF-D').length, 1);
+
+  console.log('\nI — Was auch jetzt noch NICHT geschieht');
+  console.log('    erwartet: kein Ballwechsel aus Lebenszyklusereignissen,');
+  console.log('    und reviewed/accepted/merged/published fehlen weiter\n');
   zeile('kein Ball verschoben', st.ball || null, null);
   zeile('keine Seitenfehler', pageErr.length, 0);
   if (pageErr.length) console.log('        ' + pageErr.join('\n        '));
@@ -552,9 +905,13 @@ function koerper(f) {
   console.log('Vertrag und Zustände: Vergabe legt hin, Selbstauskunft beginnt,');
   console.log('Lieferung schließt genau ihre Aufgabe — und eine unbekannte');
   console.log('Kennung schließt nichts, sondern bleibt eine gezählte Lücke.');
-  console.log('Offen und sichtbar offen: blocked/resolved treiben nichts,');
-  console.log('reviewed/accepted/merged/published fehlen, und die dauerhafte');
-  console.log('Ereignisquelle samt Wiederherstellung ist der nächste Schnitt.');
+  console.log('Blockade und Auflösung liegen NEBEN dem Zustand: die Aufgabe');
+  console.log('bleibt liegen, eine Auflösung trifft genau ihre Klemme und');
+  console.log('behauptet keinen Beginn und keinen Abschluss — in der');
+  console.log('Wiederherstellung dieselbe Lage wie am laufenden Strom.');
+  console.log('Offen und sichtbar offen: reviewed/accepted/merged/published');
+  console.log('fehlen, die Archivwiedergabe aus derselben Quelle fehlt, und');
+  console.log('der Originalbeleg hat noch kein eigenes Feld.');
   console.log('Synthetische Körper, kein Relais, keine Abnahme am iPad.');
   process.exit(0);
 })().catch(e => { ungeprueft('Nachweis abgebrochen: ' + (e && e.message)); });
