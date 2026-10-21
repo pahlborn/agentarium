@@ -15,7 +15,7 @@ Claude-Sitzung in diesem Repository gelesen, auch von Forge, Archibald und
 Cadence. Damit sie dort nichts überschreibt, gilt sie ausdrücklich begrenzt:
 
 1. **Vorrang haben `AGENTS.md` und [`governance/`](governance/).** Das
-   Team-Regelwerk — Rulebook 1.2, Prozess 1.2, die Aufgabenautorität — gilt
+   Team-Regelwerk — Rulebook 1.3, Prozess 1.3, die Aufgabenautorität — gilt
    unverändert. Widerspricht etwas hier dem Regelwerk, gilt das Regelwerk,
    und der Widerspruch gehört gemeldet.
 2. **Hier stehen Peters Arbeitsabsprachen**, nicht Team-Governance: wie
@@ -256,7 +256,7 @@ Vorschläge, Messungen und Berichte jederzeit. Was eine Freigabe braucht, ist
 den niemand bestellt hat. Was innerhalb eines belegten Auftrags liegt — eine
 freigegebene Epic, ein Review-Befund auf einem eigenen Pull Request, ein
 Folgeauftrag von Atlas in dessen Aufgabenautorität —, wird erledigt, nicht
-rückgefragt. Maßgeblich sind Rulebook 1.2 und die konkrete
+rückgefragt. Maßgeblich sind Rulebook 1.3 und die konkrete
 Aufgabenautorität, nicht dieser Satz.
 
 **Eine Rollenbezeichnung ist kein Beleg für einen geladenen Agenten.** Wer
@@ -286,3 +286,7 @@ Plattform `claude`, Ausprägung **hoch**.
 Das ist keine Schwäche des Bildes, sondern eine zutreffende Beschreibung:
 Was nicht in diesem Repository steht, ist in der nächsten Sitzung fort.
 Deshalb gibt es diese Datei.
+
+
+## Anwendung der Prozessverbesserung vom 21.10.2026
+Für Auftrag, wesentliche Rückgabe/Blockade und Abschluss gilt `governance/agentarium-process-v1.3.md`. Lot trägt Agentarium-Änderungen technisch durchgehend; Atlas koordiniert Ziel, Priorität, unabhängige Prüfung und Abschluss. Vor Ausbau zuerst Bestand und kritischen vollständigen Weg prüfen. Eigene Tests und unabhängige Prüfung bleiben verschieden. Eine fehlende erforderliche Bildschirm-/Geräteprüfung bleibt offen; sie wird nicht durch Zähler ersetzt. Wiederholte Prozessfehler gehen über Atlas mit Originalbelegen und Folgeprüfung an Cadence; eine laufende Cadence-Überwachung wird nicht behauptet. Diese Regeln erweitern keine Werkzeuge oder Freigaben.
