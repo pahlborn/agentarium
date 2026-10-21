@@ -144,6 +144,12 @@
     '#agGithub .ghZ{display:flex;gap:4px;align-items:center;margin:4px 0;flex-wrap:wrap}' +
     '#agGithub input{font:inherit;width:12em;background:#0b1018;color:#e8f0ea;' +
     'border:1px solid #3a4658;border-radius:3px;padding:3px 4px}' +
+    /* Gesperrt heisst hier "schon erledigt", nicht "kaputt": lesbar bleiben,
+       nicht ausgrauen. Der Platzhalter traegt die Auskunft. */
+    '#agGithub input:disabled{opacity:1;color:#9fb4a6;border-color:#2b3442;' +
+    'background:#080c13}' +
+    '#agGithub input:disabled::placeholder{color:#8fb39c;opacity:1}' +
+    '#agGithub button:disabled{opacity:.45}' +
     '#agGithub button{font:inherit;background:#18222f;color:#e8f0ea;' +
     'border:1px solid #3a4658;border-radius:3px;padding:3px 7px}' +
     '#agGithub div,#agGithub small{display:block;margin:2px 0;overflow-wrap:anywhere}' +
@@ -229,7 +235,26 @@
       ' · ohne Marker ' + zahl.ohneMarker + ' · Anfragen ' + zahl.anfragen +
       ' (304: ' + zahl.n304 + ') · Seite ' + Z.seite;
     grundEl.textContent = letzterGrund ? 'Zuletzt abgewiesen: ' + letzterGrund : '';
-    knAus.disabled = !token;
+
+    /* DAS LEERE FELD IST ABSICHT, UND MAN MUSS ES SEHEN KOENNEN.
+       `verbinden()` loescht den Token in derselben Zeile, in der es ihn liest
+       (`feld.value = ''`), damit ihn nichts mehr aus dem Eingabeelement
+       auslesen kann. Nur steht danach ein leeres Feld da und sieht aus wie
+       "nichts hinterlegt" -- obwohl die Statuszeile "verbunden" meldet. Genau
+       dieser Widerspruch ist am 21.10. aufgefallen, nach dem ersten echten
+       Live-Piloten: zwei Anzeigen, die sich zu widersprechen scheinen, und
+       die beruhigende ist die unauffaellige.
+       Das Feld sagt es jetzt selbst und nimmt keine Eingabe mehr an, die
+       ohnehin nichts bewirkt haette. Am Token aendert das nichts: er liegt
+       weiter allein in der Abschlussvariablen und nicht im DOM. */
+    var hinterlegt = !!token;
+    knAus.disabled = !hinterlegt;
+    knAn.disabled = hinterlegt;
+    feld.disabled = hinterlegt;
+    feld.placeholder = hinterlegt
+      ? 'hinterlegt — nur im Arbeitsspeicher'
+      : '';
+    lab.textContent = hinterlegt ? 'Lesetoken · liegt' : 'Lesetoken';
   }
   anzeigen();
 
