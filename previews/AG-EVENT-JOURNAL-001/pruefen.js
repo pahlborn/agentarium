@@ -142,9 +142,33 @@ function koerper(f) {
   zeile('lebenszyklus', z.leben, 'gemeldet-v1');
   console.log('        Fassung des Originals: ' + z.fassung);
 
+  /* EIN ABBRUCH, DER SCHON DALIEGT, BEVOR VERBUNDEN WIRD. Das ist die
+     zweite Haelfte von Argus' Befund: Der Zaehler stand ueber dem
+     `basis`-Zweig und zaehlte damit auch Ereignisse von vorgestern als
+     "in dieser Sitzung beobachtet". Er liegt jetzt dahinter -- und das
+     wird hier gemessen, nicht behauptet. */
+  antwort = [{ id: 89001, body: koerper({
+      id: 'AG-EVENT-JOURNAL-001:forge:aborted-historisch', task: 'AG-EVJ-ALT',
+      actor: 'forge', reporter: 'forge', kind: 'aborted',
+      at: '2026-10-19T12:00:00Z',
+      title: 'Ein Abbruch von vorgestern — Historie, nicht diese Sitzung'
+    }), user: { login: 'github-actions[bot]', id: 41898282 },
+    created_at: '2026-10-19T12:00:00Z' }];
+
   await s.fill('#agGhToken', 'AGJOURNAL001_Scheintoken_fuer_den_Nachweis_0123456789');
   await s.click('#agGhAn');
   await s.waitForTimeout(2500);
+
+  console.log('\nA2 — Ein Abbruch in der Historie zählt nicht für diese Sitzung');
+  console.log('    erwartet: als markiert-historisch gezählt, nicht als Abbruch\n');
+  const nachBasis = await s.evaluate(() => ({
+    zahlen: (document.getElementById('agGhZahlen') || {}).textContent || '',
+    letztes: (document.getElementById('agGhLetztes') || {}).textContent || ''
+  }));
+  zeile('als historisch erkannt', /markierte historisch/.test(nachBasis.zahlen), true);
+  zeile('nicht abgespielt', /aborted-historisch/.test(nachBasis.letztes), false);
+  zeile('NICHT als Abbruch dieser Sitzung gezählt',
+        /in dieser Sitzung beobachtet/.test(nachBasis.zahlen), false);
   await s.evaluate(() => { const d = document.getElementById('agGhAuf'); if (d) d.open = true; });
 
   /* DEN KOPF JETZT ABLESEN, VOR DEM ERSTEN EREIGNIS. Genau dieser Moment ist
@@ -237,17 +261,33 @@ function koerper(f) {
   zeile('Konflikt gezählt', /Konflikt [1-9]/.test(r6.zahlen), true);
   zeile('Konflikt begründet', /gleiche Kennung, anderer Inhalt/.test(r6.grund), true);
 
-  console.log('\nF — Abbruch wird gezählt, und zwar nur für diese Sitzung');
-  console.log('    erwartet: „in dieser Sitzung beobachtet", Abdeckung partial\n');
+  console.log('\nF — Blockade ist kein Abbruch');
+  console.log('    DIESER TEIL VERLANGTE ZUERST DAS FALSCHE SOLL. Er prüfte,');
+  console.log('    dass `blocked` als Abbruch gezählt wird — und machte damit');
+  console.log('    genau den Fehler grün, den Atlas vorher ausgeschlossen');
+  console.log('    hatte: Die Zahl kommt aus typisierten Abbruchereignissen,');
+  console.log('    „nicht aus Titeln und nicht aus BLOCKED". Gefunden von');
+  console.log('    Argus. Eine Blockade wartet und kann sich auflösen, ein');
+  console.log('    Abbruch ist gescheitert und endet.\n');
   const r7 = await liefern('blocked', koerper({
     id: 'AG-EVENT-JOURNAL-001:forge:blocked', task: 'AG-EVJ-001',
     actor: 'forge', reporter: 'forge', kind: 'blocked',
     title: 'Forge klemmt — Grund steht im Beleg, nicht im Bild'
   }), 90007);
   zeile('blocked angenommen', /blocked/.test(r7.letztes), true);
-  zeile('Sitzungszählung erscheint', /in dieser Sitzung beobachtet: 1 Abbruch/.test(r7.zahlen), true);
-  zeile('Abdeckung ausgewiesen', /Projektabdeckung: partial/.test(r7.zahlen), true);
-  zeile('keine Projektzahl behauptet', /Projektabdeckung: complete/.test(r7.zahlen), false);
+  zeile('blocked zählt NICHT als Abbruch',
+        /in dieser Sitzung beobachtet/.test(r7.zahlen), false);
+
+  const r8 = await liefern('aborted', koerper({
+    id: 'AG-EVENT-JOURNAL-001:forge:aborted', task: 'AG-EVJ-005',
+    actor: 'forge', reporter: 'forge', kind: 'aborted',
+    title: 'Forge ist gescheitert — die Aufgabe endet hier'
+  }), 90008);
+  zeile('aborted angenommen', /aborted/.test(r8.letztes), true);
+  zeile('aborted zählt als Abbruch',
+        /in dieser Sitzung beobachtet: 1 Abbruch/.test(r8.zahlen), true);
+  zeile('Abdeckung ausgewiesen', /Projektabdeckung: partial/.test(r8.zahlen), true);
+  zeile('keine Projektzahl behauptet', /Projektabdeckung: complete/.test(r8.zahlen), false);
 
   console.log('\nG2 — Der Kopf behauptet im Livebetrieb kein Demoprojekt');
   console.log('    Atlas hat es an Peters Schirm beobachtet: verbunden, LIVE,');

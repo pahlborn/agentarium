@@ -2289,7 +2289,7 @@
 
      Der Bauzeitpunkt kommt beim Bauen aus der Uhr. Von Hand gepflegte
      Datumsangaben sind nach der zweiten Änderung falsch. */
-  var FASSUNG = '58', GEBAUT = '2026-10-21T08:25Z';
+  var FASSUNG = '59', GEBAUT = '2026-10-21T08:35Z';
 
   /* AG-GH-LIVE-001: JEDE TEXTSENKE MASKIERT.
      Seit Live-Daten von aussen kommen (GitHub-Kommentare, one-event.json),
@@ -5567,12 +5567,12 @@
      waere die groessere. */
   var GH_ARTEN = { progress: 1, handoff: 1, contribution: 1,
                    assigned: 1, received: 1, started: 1, delivered: 1,
-                   blocked: 1, resolved: 1 };
+                   blocked: 1, resolved: 1, aborted: 1 };
   /* Arten, fuer die es im Bild noch keine eigene Gestalt gibt. Sie laufen
      ueber denselben Weg wie `progress` -- eine Meldung am Platz des
      Agenten, die vergeht -- und erfinden damit keinen Zustand. */
   var GH_LEBEN = { assigned: 1, received: 1, started: 1, delivered: 1,
-                   blocked: 1, resolved: 1 };
+                   blocked: 1, resolved: 1, aborted: 1 };
   var GH_KENNUNG = new RegExp('^[A-Za-z0-9][A-Za-z0-9._:/-]{0,119}$');
   function ghKenn(x) { return (typeof x === 'string' && GH_KENNUNG.test(x)) ? x : ''; }
   function spurWort(E) {

@@ -48,14 +48,24 @@
   var OPTIONAL = ['recipient', 'reporter'];      /* nie Pflicht fuer progress */
   var ARTEN = { progress: 1, handoff: 1, contribution: 1,
                 assigned: 1, received: 1, started: 1, delivered: 1,
-                blocked: 1, resolved: 1 };
+                blocked: 1, resolved: 1, aborted: 1 };
   var KOMM = { handoff: 1, contribution: 1 };    /* nur beobachtet, kein Zustand */
   /* Arten, die einen Aufgabenzustand treiben DUERFEN -- und nur bei
      Selbstauskunft. `assigned` ist dabei die Ausnahme: Die Vergabe meldet
      naturgemaess nicht der Empfaenger, sondern der Vergebende. Sie legt
      deshalb eine Aufgabe als ZUGEWIESEN an und behauptet keinen Beginn. */
   var LEBEN = { assigned: 1, received: 1, started: 1, delivered: 1,
-                blocked: 1, resolved: 1 };
+                blocked: 1, resolved: 1, aborted: 1 };
+  /* BLOCKADE IST KEIN ABBRUCH, UND DAS WAR MEIN FEHLER.
+     Atlas hatte am 21.10. ausdruecklich entschieden: Die Abbruchzahl kommt
+     aus typisierten Abbruchereignissen, "nicht aus Titeln und nicht aus
+     BLOCKED". Ich habe trotzdem `blocked` gezaehlt -- und mein eigener
+     Nachweis verlangte dieses falsche Soll, machte den Fehler also gruen.
+     Gefunden von Argus. Der Unterschied ist nicht sprachlich: Eine Blockade
+     wartet auf etwas und kann sich aufloesen (`resolved`), ein Abbruch ist
+     gescheitert und endet. Wer beides zusammenzaehlt, misst nicht, was im
+     Review bearbeitet werden soll. */
+  var ABBRUCHARTEN = { aborted: 1 };
   var BRAUCHT_EMPF = { assigned: 1 };            /* an wen vergeben wurde */
   var KANN_LEBEN_WORT = 'gemeldet-v1';
   var KENNUNG = /^[A-Za-z0-9][A-Za-z0-9._:\/-]{0,119}$/;
@@ -426,7 +436,6 @@
         zahl.duplikate++; vermerk('doppelt ' + ev.id); continue;
       }
       abdruckLegen(ev.id, fa);
-      if (ev.kind === 'blocked') zahl.abbrueche++;
       if (modus === 'basis') {
         basisIds.add(ev.id);
         var t = Date.parse(c.created_at);
@@ -435,6 +444,11 @@
         continue;
       }
       bekannte.add(ev.id);
+      /* ERST HIER, NACH DER BASIS-/LIVE-TRENNUNG. Vorher stand diese Zeile
+         ueber dem `basis`-Zweig und zaehlte damit auch die Historie -- also
+         Ereignisse von vorgestern als "in dieser Sitzung beobachtet".
+         Ebenfalls von Argus gefunden; derselbe Befund, zweite Haelfte. */
+      if (ABBRUCHARTEN[ev.kind]) zahl.abbrueche++;
       zeigen(ev, 'live');
     }
   }
