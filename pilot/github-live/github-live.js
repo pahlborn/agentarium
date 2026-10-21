@@ -118,12 +118,28 @@
             fehler: '', pausiert: false };
   var zahl = { anfragen: 0, n200: 0, n304: 0, basisKommentare: 0, basisMarkiert: 0,
                waehrendAufbau: 0, gezeigt: 0, duplikate: 0, abgewiesen: 0, ohneMarker: 0,
-               konflikte: 0, abbrueche: 0 };
+               konflikte: 0, abbrueche: 0, wieder: 0, abdeckung: '' };
   /* Fingerabdruck je Ereigniskennung, damit sich ein TRANSPORTDUPLIKAT von
      einem KONFLIKT unterscheiden laesst: dieselbe Kennung mit demselben
      Inhalt ist wirkungslos, dieselbe Kennung mit anderem Inhalt ist ein
      Befund und wird abgewiesen statt stillschweigend verworfen.
      Gedeckelt wie `bekannte`, damit eine lange Sitzung nicht waechst. */
+  /* AG-EVENT-JOURNAL-001 Schritt 2b: WAS BEIM VERBINDEN SCHON OFFEN WAR.
+     Bisher wurde die Historie gezaehlt und weggeworfen. Atlas hat am 21.10.
+     den Punkt benannt, der daran falsch ist: "historische Ereignisse
+     bedeuten nicht automatisch abgeschlossene Arbeit". Ein `handoff` von
+     vor einer Stunde kann eine Aufgabe betreffen, die noch LIEGT -- und
+     davon zeigte das Bild nichts.
+     Gesammelt werden deshalb die Lebenszyklusereignisse der Basis, und
+     zwar MIT BEIDEN ZEITEN: `occurred_at` ist die Angabe des Melders,
+     `recorded_at` ist GitHubs `created_at` und damit die pruefbare. Dazu
+     die Kommentarnummer, weil sie monoton ist und bei gleichen Zeiten
+     entscheidet. Alle drei kommen aus den Daten; keine ist erfunden.
+     ABGESPIELT WIRD NICHTS. Was daraus entsteht, ist ein Zustand, kein
+     Ereignis: Ringe, die liegen, ohne Flug, ohne Meldung, ohne Puls. */
+  var basisLeben = [];
+  var basisGrenzen = { seitenDeckel: false, konflikte: 0, fremdaussagen: 0 };
+
   var abdruck = Object.create(null), abdruckFolge = [];
   function abdruckLegen(id, fa) {
     if (abdruck[id] === undefined) {
@@ -295,6 +311,15 @@
     zahlEl.textContent =
       (Z.schnittIso ? 'Basis bis ' + Z.schnittIso + ' (Geräteuhr): ' + zahl.basisKommentare +
         ' Kommentare, ' + zahl.basisMarkiert + ' markierte historisch, nicht abgespielt · ' : '') +
+      /* Wiederhergestellt heisst: aus der Historie gefaltet, nicht
+         abgespielt. Die Abdeckung steht daneben, damit die Zahl nicht fuer
+         vollstaendig genommen wird. */
+      (zahl.abdeckung ? 'offen übernommen ' + zahl.wieder +
+        ' (Abdeckung: ' + zahl.abdeckung + ')' +
+        (basisGrenzen.fremdaussagen ? ', ' + basisGrenzen.fremdaussagen +
+          ' Fremdaussage(n) nicht gezählt' : '') +
+        (basisGrenzen.konflikte ? ', ' + basisGrenzen.konflikte +
+          ' Widerspruch/Widersprüche' : '') + ' · ' : '') +
       /* ANGENOMMEN, NICHT GEZEIGT. Hier stand "neu gezeigt", und das war
          zu dem Zeitpunkt nicht wahr: Gezaehlt wird, sobald das Original das
          Ereignis ANNIMMT -- gezeichnet wird es erst, wenn die
@@ -525,6 +550,14 @@
         var t = Date.parse(c.created_at);
         if (!isNaN(t) && t >= Z.schnitt) { spaeter.push(ev); continue; }
         zahl.basisMarkiert++;
+        /* Nur Lebenszyklusereignisse tragen einen Aufgabenzustand.
+           `progress`, `handoff` und `contribution` sind beobachtete
+           Kommunikation -- aus ihnen wird weiterhin kein Zustand
+           abgeleitet, auch nicht rueckblickend. */
+        if (LEBEN[ev.kind]) {
+          basisLeben.push({ ev: ev, recorded_at: c.created_at || '',
+                            kommentar: Number(cid) || 0 });
+        }
         continue;
       }
       bekannte.add(ev.id);
@@ -619,6 +652,10 @@
   /* Ab `seite` vorwaerts, solange es Seiten gibt. */
   async function vorwaerts(seite, g, modus, spaeter, basisIds) {
     for (var n = 0; n < MAX_SEITEN; n++) {
+      /* Letzte erlaubte Runde und es ginge weiter? Dann ist nicht alles
+         gelesen, und das darf nicht stillschweigend als vollstaendig
+         gelten -- die Abdeckung faellt dann auf `unavailable`. */
+      if (n === MAX_SEITEN - 1 && modus === 'basis') basisGrenzen.seitenDeckel = true;
       var a = await holen(seite, g);
       if (a.status === 304 || !a.items.length) return;
       verarbeiten(a.items, modus, spaeter, basisIds);
@@ -630,9 +667,84 @@
     }
   }
 
+  /* DIE HISTORIE ZU EINEM ZUSTAND FALTEN.
+
+     STABILE ORDNUNG, und zwar aus drei Angaben statt aus einer: `occurred_at`
+     allein reicht nicht, weil zwei Meldungen dieselbe Zeit tragen koennen und
+     eine verspaetete Meldung eine aeltere Zeit hat. Also:
+       1. occurred_at   was der Melder sagt
+       2. recorded_at   wann GitHub es angenommen hat (pruefbar)
+       3. Kommentarnummer  monoton, entscheidet den Rest
+     Keine dieser drei ist erfunden. Bei genau gleichen Werten in allen drei
+     bleibt die Lesereihenfolge -- `sort` ist in modernen Browsern stabil.
+
+     KEINE UNBELEGTE RUECKNAHME: Gefaltet wird nur vorwaerts. Ein `delivered`
+     schliesst; danach macht kein spaeteres `started` die Aufgabe wieder auf,
+     denn das waere eine Behauptung ueber eine Reihenfolge, die die Daten
+     nicht tragen. Ein solcher Fall wird als Widerspruch gezaehlt, nicht
+     stillschweigend aufgeloest.
+
+     DIESELBE SELBSTAUSKUNFTSREGEL WIE LIVE: `assigned` kommt vom Vergebenden,
+     alles andere zaehlt nur, wenn Melder und Akteur zusammenfallen. Was
+     rueckblickend gilt, muss dasselbe sein wie das, was live gilt -- sonst
+     zeigte dieselbe Lage je nach Verbindungszeitpunkt zwei Wahrheiten. */
+  function faltenZuZustand(liste) {
+    var nachAufgabe = Object.create(null), reihen = [];
+    liste.forEach(function (x) {
+      var k = x.ev.project_id + '\u0001' + x.ev.run_id + '\u0001' + x.ev.task_id;
+      if (!nachAufgabe[k]) { nachAufgabe[k] = []; reihen.push(k); }
+      nachAufgabe[k].push(x);
+    });
+    var offen = [], widersprueche = 0;
+    reihen.forEach(function (k) {
+      var g = nachAufgabe[k];
+      g.sort(function (p, q) {
+        if (p.ev.occurred_at !== q.ev.occurred_at)
+          return p.ev.occurred_at < q.ev.occurred_at ? -1 : 1;
+        if (p.recorded_at !== q.recorded_at)
+          return p.recorded_at < q.recorded_at ? -1 : 1;
+        return p.kommentar - q.kommentar;
+      });
+      var halter = '', zustand = '', titel = '', zu = false, letzte = null;
+      g.forEach(function (x) {
+        var e = x.ev;
+        var selbst = !!e.selbstauskunft;
+        if (zu) {
+          /* Nach dem Schliessen noch ein Zustandsereignis: Das ist ein
+             Widerspruch in den Daten, keine Wiedereroeffnung. */
+          if (e.kind === 'started' || e.kind === 'assigned') widersprueche++;
+          return;
+        }
+        if (e.kind === 'assigned' && e.recipient) {
+          halter = e.recipient; zustand = 'zugewiesen';
+          titel = e.title; letzte = x; return;
+        }
+        if (!selbst) { basisGrenzen.fremdaussagen++; return; }
+        if (e.kind === 'started' && halter && e.actor === halter) {
+          zustand = 'begonnen'; letzte = x; return;
+        }
+        if ((e.kind === 'delivered' || e.kind === 'aborted') &&
+            halter && e.actor === halter) { zu = true; letzte = x; return; }
+      });
+      if (!zu && halter && zustand) {
+        offen.push({ projekt: g[0].ev.project_id, lauf: g[0].ev.run_id,
+                     aufgabe: g[0].ev.task_id, wer: halter, zustand: zustand,
+                     titel: titel,
+                     occurred_at: letzte ? letzte.ev.occurred_at : '',
+                     recorded_at: letzte ? letzte.recorded_at : '',
+                     beleg: letzte ? letzte.kommentar : 0 });
+      }
+    });
+    basisGrenzen.konflikte += widersprueche;
+    return offen;
+  }
+
   async function aufbau(g) {
     Z.kommentare.leeren(); Z.etags = {}; Z.seite = 1; Z.anzahl = 0;
     zahl.basisKommentare = 0; zahl.basisMarkiert = 0;
+    basisLeben.length = 0;
+    basisGrenzen = { seitenDeckel: false, konflikte: 0, fremdaussagen: 0 };
+    zahl.wieder = 0; zahl.abdeckung = '';
     var spaeter = [], basisIds = Menge(MAX_IDS);
     anzeigen('lese alle Basisseiten …');
     await vorwaerts(1, g, 'basis', spaeter, basisIds);
@@ -660,6 +772,28 @@
        Und das Fach bleibt OFFEN, wenn markierte Ereignisse in die Historie
        gefallen sind. Es klappte bisher ausgerechnet im einzigen Fall zu, in
        dem seine Erklaerung gebraucht wird. */
+    /* WAS OFFEN WAR, WIRD WIEDERHERGESTELLT -- ALS ZUSTAND, NICHT ALS LAUF.
+       Die Abdeckung ist dabei NIEMALS `complete`, und das ist keine
+       Vorsicht, sondern eine Tatsache: Was nie gemeldet wurde, steht in
+       keiner Quelle, also kann keine Zaehlung es finden. `unavailable` gilt,
+       wenn schon das Lesen unvollstaendig war -- dann ist nicht einmal das
+       Gemeldete ganz da. */
+    var offen = faltenZuZustand(basisLeben);
+    zahl.abdeckung = basisGrenzen.seitenDeckel ? 'unavailable' : 'partial';
+    if (typeof window.__agWiederherstellen === 'function') {
+      try {
+        var w = window.__agWiederherstellen({
+          aufgaben: offen, abdeckung: zahl.abdeckung,
+          gelesen: zahl.basisKommentare, markiert: zahl.basisMarkiert,
+          grenzen: basisGrenzen, schnitt: Z.schnittIso });
+        zahl.wieder = (w && typeof w.angenommen === 'number') ? w.angenommen : 0;
+        vermerk('wiederhergestellt: ' + zahl.wieder + ' offene Aufgabe(n), ' +
+                'Abdeckung ' + zahl.abdeckung);
+      } catch (x) {
+        vermerk('Wiederherstellen scheiterte: ' + (x && x.message));
+        zahl.abdeckung = 'unavailable';
+      }
+    }
     if (zahl.basisMarkiert && !spaeter.length) {
       letztesEl.textContent =
         'Nichts Neues seit dem Verbinden. ' + zahl.basisMarkiert +

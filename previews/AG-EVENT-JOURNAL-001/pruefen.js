@@ -142,18 +142,71 @@ function koerper(f) {
   zeile('lebenszyklus', z.leben, 'gemeldet-v1');
   console.log('        Fassung des Originals: ' + z.fassung);
 
+  /* ===== SCHRITT 2b: WAS BEIM VERBINDEN SCHON OFFEN WAR =====
+     Eine Historie mit drei Aufgaben, die sich unterscheiden MUESSEN:
+       R1  vergeben und begonnen, nicht geliefert   -> bleibt offen, begonnen
+       R2  vergeben, begonnen, geliefert            -> ist zu, kein Ring
+       R3  vergeben, nie begonnen                   -> bleibt offen, zugewiesen
+     Dazu zwei Faelle, die NICHT zaehlen duerfen:
+       R4  Beginn als Fremdaussage (atlas ueber forge)  -> bleibt zugewiesen
+       R5  Beginn OHNE vorherige Vergabe                -> gar keine Aufgabe
+     Absichtlich in verdrehter Reihenfolge hingelegt und mit teils gleichen
+     `occurred_at`: Die Ordnung muss aus occurred_at, recorded_at und
+     Kommentarnummer entstehen, nicht aus der Lesereihenfolge. */
+  const H = [];
+  let hid = 88000;
+  function hist(f, occ, rec) {
+    H.push({ id: ++hid, body: koerper(Object.assign({ at: occ }, f)),
+             user: { login: 'github-actions[bot]', id: 41898282 },
+             created_at: rec || occ });
+  }
+  /* R2 zuerst hinlegen, obwohl es spaeter geschah -- die Faltung muss das
+     richten. Und die Lieferung traegt dieselbe occurred_at wie der Beginn;
+     dann entscheidet recorded_at. */
+  hist({ id: 'R2:delivered', task: 'AG-EVJ-R2', actor: 'forge', reporter: 'forge',
+         kind: 'delivered', title: 'R2 geliefert' },
+       '2026-10-20T09:00:00Z', '2026-10-20T09:00:30Z');
+  hist({ id: 'R2:assigned', task: 'AG-EVJ-R2', actor: 'atlas', reporter: 'atlas',
+         recipient: 'forge', kind: 'assigned', title: 'R2 vergeben' },
+       '2026-10-20T08:00:00Z');
+  hist({ id: 'R2:started', task: 'AG-EVJ-R2', actor: 'forge', reporter: 'forge',
+         kind: 'started', title: 'R2 begonnen' },
+       '2026-10-20T09:00:00Z', '2026-10-20T09:00:10Z');
+
+  hist({ id: 'R1:assigned', task: 'AG-EVJ-R1', actor: 'atlas', reporter: 'atlas',
+         recipient: 'scout', kind: 'assigned', title: 'R1 an scout vergeben' },
+       '2026-10-20T10:00:00Z');
+  hist({ id: 'R1:started', task: 'AG-EVJ-R1', actor: 'scout', reporter: 'scout',
+         kind: 'started', title: 'R1 begonnen' },
+       '2026-10-20T10:05:00Z');
+
+  hist({ id: 'R3:assigned', task: 'AG-EVJ-R3', actor: 'atlas', reporter: 'atlas',
+         recipient: 'argus', kind: 'assigned', title: 'R3 an argus vergeben' },
+       '2026-10-20T11:00:00Z');
+
+  hist({ id: 'R4:assigned', task: 'AG-EVJ-R4', actor: 'atlas', reporter: 'atlas',
+         recipient: 'nova', kind: 'assigned', title: 'R4 an nova vergeben' },
+       '2026-10-20T12:00:00Z');
+  hist({ id: 'R4:started-fremd', task: 'AG-EVJ-R4', actor: 'nova', reporter: 'atlas',
+         kind: 'started', title: 'Atlas behauptet Novas Beginn' },
+       '2026-10-20T12:05:00Z');
+
+  hist({ id: 'R5:started-ohne', task: 'AG-EVJ-R5', actor: 'cadence', reporter: 'cadence',
+         kind: 'started', title: 'Beginn ohne Vergabe' },
+       '2026-10-20T13:00:00Z');
+
   /* EIN ABBRUCH, DER SCHON DALIEGT, BEVOR VERBUNDEN WIRD. Das ist die
      zweite Haelfte von Argus' Befund: Der Zaehler stand ueber dem
      `basis`-Zweig und zaehlte damit auch Ereignisse von vorgestern als
      "in dieser Sitzung beobachtet". Er liegt jetzt dahinter -- und das
      wird hier gemessen, nicht behauptet. */
-  antwort = [{ id: 89001, body: koerper({
+  antwort = H.concat([{ id: 89001, body: koerper({
       id: 'AG-EVENT-JOURNAL-001:forge:aborted-historisch', task: 'AG-EVJ-ALT',
       actor: 'forge', reporter: 'forge', kind: 'aborted',
       at: '2026-10-19T12:00:00Z',
       title: 'Ein Abbruch von vorgestern — Historie, nicht diese Sitzung'
     }), user: { login: 'github-actions[bot]', id: 41898282 },
-    created_at: '2026-10-19T12:00:00Z' }];
+    created_at: '2026-10-19T12:00:00Z' }]);
 
   await s.fill('#agGhToken', 'AGJOURNAL001_Scheintoken_fuer_den_Nachweis_0123456789');
   await s.click('#agGhAn');
@@ -191,6 +244,41 @@ function koerper(f) {
       grund: (document.getElementById('agGhGrund') || {}).textContent || ''
     }));
   }
+
+  console.log('\nA3 — Was beim Verbinden offen war, liegt wieder da');
+  console.log('    erwartet: R1 begonnen, R3 zugewiesen, R2 zu, R4 nicht');
+  console.log('    begonnen, R5 gar nicht — und kein Flug, keine Meldung\n');
+  const nachRestore = await s.evaluate(() => {
+    const st = (window.__agStand && window.__agStand()) || {};
+    const f = (id) => (st.aufgaben || []).filter(a => a.aufgabe === id)[0] || null;
+    return {
+      wieder: st.wiederhergestellt, abdeckung: st.abdeckung,
+      R1: f('AG-EVJ-R1'), R2: f('AG-EVJ-R2'), R3: f('AG-EVJ-R3'),
+      R4: f('AG-EVJ-R4'), R5: f('AG-EVJ-R5'),
+      verarbeitet: st.verarbeitet, ausgegeben: st.ausgegeben,
+      fliegend: (st.fliegend || []).length,
+      meldungen: document.querySelectorAll('.agRuf').length,
+      zahlen: (document.getElementById('agGhZahlen') || {}).textContent || ''
+    };
+  });
+  zeile('drei offene Aufgaben übernommen', nachRestore.wieder, 3);
+  zeile('R1 liegt bei scout', nachRestore.R1 ? nachRestore.R1.wer : null, 'scout');
+  zeile('R1 ist begonnen', nachRestore.R1 ? nachRestore.R1.zustand : null, 'begonnen');
+  zeile('R1 als wiederhergestellt gekennzeichnet',
+        nachRestore.R1 ? nachRestore.R1.wieder : null, true);
+  zeile('R2 ist zu — kein Ring', nachRestore.R2, null);
+  zeile('R3 liegt bei argus', nachRestore.R3 ? nachRestore.R3.wer : null, 'argus');
+  zeile('R3 nur zugewiesen', nachRestore.R3 ? nachRestore.R3.zustand : null, 'zugewiesen');
+  zeile('R4 trotz Fremdaussage nur zugewiesen',
+        nachRestore.R4 ? nachRestore.R4.zustand : null, 'zugewiesen');
+  zeile('R5 ohne Vergabe gar nicht angelegt', nachRestore.R5, null);
+  zeile('kein Flug aus der Historie', nachRestore.fliegend, 0);
+  zeile('keine Meldung aus der Historie', nachRestore.meldungen, 0);
+  zeile('nichts verarbeitet', nachRestore.verarbeitet, 0);
+  zeile('nichts ausgegeben', nachRestore.ausgegeben, 0);
+  zeile('Abdeckung partial, nie complete', nachRestore.abdeckung, 'partial');
+  zeile('Fremdaussage ausgewiesen',
+        /Fremdaussage/.test(nachRestore.zahlen), true);
 
   console.log('\nB — Je ein Fixture, dieselbe Schnittstelle');
   console.log('    forge ist eine Claude-Rolle, sentinel eine ChatGPT-Rolle\n');

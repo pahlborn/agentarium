@@ -2289,7 +2289,7 @@
 
      Der Bauzeitpunkt kommt beim Bauen aus der Uhr. Von Hand gepflegte
      Datumsangaben sind nach der zweiten Änderung falsch. */
-  var FASSUNG = '61', GEBAUT = '2026-10-21T10:20Z';
+  var FASSUNG = '62', GEBAUT = '2026-10-21T11:05Z';
 
   /* AG-GH-LIVE-001: JEDE TEXTSENKE MASKIERT.
      Seit Live-Daten von aussen kommen (GitHub-Kommentare, one-event.json),
@@ -5092,6 +5092,7 @@
                 eine kleinere Zahl als im Adapterzaehler, ist etwas
                 angenommen und nicht gezeichnet worden. */
              verarbeitet: verarbeitet, ausgegeben: ausgegeben,
+             wiederhergestellt: wiederhergestellt, abdeckung: liveAbdeckung,
              luecken: luecken.gesamt,
              lueckenEinzeln: { beginn: luecken.beginn,
                lieferung: luecken.lieferung, abbruch: luecken.abbruch },
@@ -5099,7 +5100,8 @@
                for (var n in arbeit) {
                  if (arbeit[n].aus) continue;
                  arbeit[n].liste.forEach(function (L) {
-                   r.push({ wer: n, aufgabe: L.aufgabe, zustand: L.zustand });
+                   r.push({ wer: n, aufgabe: L.aufgabe, zustand: L.zustand,
+                            wieder: !!L.wieder });
                  });
                }
                return r; })() };
@@ -5166,6 +5168,7 @@
        geliefert hat, gehoert nicht in den naechsten. */
     liveListe.length = 0;
     verarbeitet = 0; ausgegeben = 0;
+    wiederhergestellt = 0; liveAbdeckung = '';
     /* Auch die Live-Identitaet: Was ein voriger Strom gemeldet hat, ist
        beim naechsten Wechsel keine Aussage mehr. */
     liveKopf = null;
@@ -5179,6 +5182,10 @@
      gemeldet wurde. Sie ersetzt im Livebetrieb das aufgezeichnete Stueck
      und wird bei jedem Betriebsartwechsel geloescht. */
   var liveKopf = null;
+  /* Wie viele Aufgaben aus der Historie uebernommen wurden, und wie
+     vollstaendig die Quelle dabei war. Beides gehoert in die Diagnose,
+     damit eine Zahl nicht fuer vollstaendig genommen wird. */
+  var wiederhergestellt = 0, liveAbdeckung = '';
 
   /* Welcher Titel gilt gerade? Im Livebetrieb der gemeldete, sonst der des
      aufgezeichneten Stuecks -- und solange nichts gemeldet ist, das Wort der
@@ -5782,6 +5789,43 @@
     };
     kopfSetzen();
     return { angenommen: true, projekt: liveKopf.projekt };
+  };
+
+  /* ===== WAS BEIM VERBINDEN SCHON OFFEN WAR =====
+     AG-EVENT-JOURNAL-001 Schritt 2b. Der Adapter faltet die Historie zu
+     einem Zustand und uebergibt ihn hier. Was hier entsteht, sind RINGE,
+     DIE LIEGEN -- kein Flug, keine Meldung, kein Puls, kein Ball. Das ist
+     der ganze Unterschied zum Abspielen: Eine Aufgabe, die noch offen ist,
+     SOLL man sehen; eine Uebergabe, die vor einer Stunde geschah, nicht
+     noch einmal.
+     `verarbeitet` und `ausgegeben` bleiben unberuehrt -- hier wird nichts
+     durch die Zeichenschleife genommen und nichts ausgegeben. Wer die
+     Zahlen liest, soll die Wiederherstellung nicht fuer Live-Verkehr
+     halten. */
+  window.__agWiederherstellen = function (d) {
+    if (MODUS !== 'live') return { angenommen: 0, grund: 'nicht im Live-Betrieb' };
+    if (!d || typeof d !== 'object' || !Array.isArray(d.aufgaben))
+      return { angenommen: 0, grund: 'keine Aufgabenliste' };
+    var n = 0, abgewiesen = 0;
+    d.aufgaben.forEach(function (A) {
+      if (!A || typeof A !== 'object') { abgewiesen++; return; }
+      var wer = (typeof A.wer === 'string') ? A.wer.trim().toLowerCase() : '';
+      var id = (typeof A.aufgabe === 'string') ? A.aufgabe : '';
+      var zu = (A.zustand === 'begonnen') ? 'begonnen' : 'zugewiesen';
+      if (!wer || !nachName[wer] || !id) { abgewiesen++; return; }
+      if (!arbeitZuweisen(wer, id, typeof A.titel === 'string' ? A.titel : ''))
+        { abgewiesen++; return; }      /* schon da: kein zweiter Ring */
+      if (zu === 'begonnen') arbeitBeginnen(wer, id);
+      /* Merken, dass dieser Ring aus der Historie stammt und nicht aus
+         beobachtetem Verkehr. Die Herkunft einer Anzeige gehoert zur
+         Anzeige. */
+      var S = arbeit[wer];
+      if (S) S.liste.forEach(function (L) { if (L.aufgabe === id) L.wieder = 1; });
+      n++;
+    });
+    if (typeof d.abdeckung === 'string') liveAbdeckung = d.abdeckung;
+    wiederhergestellt = n;
+    return { angenommen: n, abgewiesen: abgewiesen };
   };
 
   window.__agEreignis = function (e) {
