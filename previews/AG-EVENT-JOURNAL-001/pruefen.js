@@ -100,6 +100,8 @@ function koerper(f) {
   if (f.recipient) ev.recipient = f.recipient;
   if (f.reporter) ev.reporter = f.reporter;
   if (f.blocker) ev.blocker_id = f.blocker;
+  if (f.werk) ev.artifact_id = f.werk;
+  if (f.werkV) ev.artifact_version = f.werkV;
   let text = '## ' + f.kind + ' — ' + f.title + '\n\n';
   text += MARKER + '\n```json\n' + JSON.stringify(ev, null, 2) + '\n```';
   return text;
@@ -148,7 +150,7 @@ function koerper(f) {
      Aufgabe noch, so dass eine spaetere Annahme ins Leere fiele. Ein
      Original aus dem Vorrat, das ein aelteres Wort sagt, bekommt die
      Lebenszyklusarten deshalb gar nicht erst. */
-  zeile('lebenszyklus', z.leben, 'gemeldet-v3');
+  zeile('lebenszyklus', z.leben, 'gemeldet-v4');
   console.log('        Fassung des Originals: ' + z.fassung);
 
   /* ===== SCHRITT 2b: WAS BEIM VERBINDEN SCHON OFFEN WAR =====
@@ -857,6 +859,10 @@ function koerper(f) {
   const rm = await liefern('merged', koerper({
     id: 'AG-EVENT-JOURNAL-001:forge:merged:H1', task: 'AG-EVJ-H1',
     actor: 'forge', reporter: 'forge', kind: 'merged',
+    /* SEIT FASSUNG 69 PFLICHT. Ohne Artefaktkennung weist der Vertrag ab --
+       und genau das hat dieser Teil gefangen, als die Pflicht dazukam: Die
+       beiden Zeilen fielen durch, weil hier noch die alte Form stand. */
+    werk: 'previews/AG-EVENT-JOURNAL-001/H1',
     title: 'H1 gemergt — sagt etwas über ein Ergebnis, nicht über eine Aufgabe'
   }), 90109);
   st = await stand();
@@ -865,6 +871,7 @@ function koerper(f) {
   const rp = await liefern('published', koerper({
     id: 'AG-EVENT-JOURNAL-001:forge:published:H1', task: 'AG-EVJ-H1',
     actor: 'forge', reporter: 'forge', kind: 'published',
+    werk: 'previews/AG-EVENT-JOURNAL-001/H1',
     title: 'H1 veröffentlicht'
   }), 90110);
   st = await stand();
@@ -1305,6 +1312,127 @@ function koerper(f) {
   zeile('Fremdaussage stellt nichts weiter',
         L0b ? L0b.zustand : null, 'zugewiesen');
   console.log('        (dieselbe Lage wie in A7 aus der Historie — so verlangt)');
+
+  console.log('\nM — Das Ergebnis geht ins Register, nicht an die Aufgabe');
+  console.log('    Atlas führt merged/published als offenes Restkriterium:');
+  console.log('    lesbare Meldungen ohne persistente Ergebniszuordnung.');
+  console.log('    Die Zuordnung geht an die Stelle, die es schon gibt.\n');
+
+  async function werke() {
+    return await s.evaluate(() => {
+      const st = (window.__agStand && window.__agStand()) || {};
+      return st.werke || [];
+    });
+  }
+  /* NULLSICHER, UND DAS IST KEIN STILFRAGE. Der Gegentest zu diesem Teil
+     (Registerpfad abgeschaltet) brach zuerst MIT EINER AUSNAHME ab --
+     Rueckgabe 2, "ungeprueft". Das faellt im Lauf ebenfalls durch, sagt aber
+     das Falsche: Wer die Ausgabe liest, erfaehrt nicht, WELCHE Zusagen
+     verletzt sind, sondern nur, dass der Nachweis gestorben ist. Mit
+     `zust()` fallen stattdessen fuenf Zeilen sauber durch und benennen sich
+     selbst. */
+  function werk(w, k) { return w.filter(x => x.kennung === k)[0] || null; }
+  function zust(w, k) { const e = werk(w, k); return e ? e.zustand : null; }
+
+  /* Eine Aufgabe, deren Lieferung ein Artefakt benennt. */
+  await liefern('M1:assigned', koerper({
+    id: 'AG-EVENT-JOURNAL-001:atlas:assigned:M1', task: 'AG-EVJ-M1',
+    actor: 'atlas', reporter: 'atlas', recipient: 'forge', kind: 'assigned',
+    title: 'Atlas vergibt M1 an forge'
+  }), 90601);
+  await liefern('M1:delivered', koerper({
+    id: 'AG-EVENT-JOURNAL-001:forge:delivered:M1', task: 'AG-EVJ-M1',
+    actor: 'forge', reporter: 'forge', kind: 'delivered',
+    werk: 'pilot/github-live/index.html', werkV: 'v69',
+    title: 'Forge liefert M1 und benennt das Ergebnis'
+  }), 90602);
+  let W = await werke();
+  let E1 = werk(W, 'pilot/github-live/index.html');
+  zeile('die Lieferung legt den Registereintrag an', !!E1, true);
+  zeile('mit ihrer Fassung', E1 ? E1.version : null, 'v69');
+  zeile('und dem Zustand geliefert', E1 ? E1.zustand : null, 'geliefert');
+  zeile('der Beleg haftet am Eintrag',
+        E1 && /^\d+$/.test(E1.beleg), true);
+
+  /* Merge und Veroeffentlichung stellen den Eintrag weiter -- und die
+     Aufgabe beruehren sie NICHT. */
+  const vorM = (await stand()).aufgaben.length;
+  await liefern('M1:merged', koerper({
+    id: 'AG-EVENT-JOURNAL-001:atlas:merged:M1', task: 'AG-EVJ-M1',
+    actor: 'atlas', reporter: 'atlas', kind: 'merged',
+    werk: 'pilot/github-live/index.html', werkV: 'v69',
+    title: 'Atlas mergt das Ergebnis'
+  }), 90603);
+  W = await werke();
+  E1 = werk(W, 'pilot/github-live/index.html');
+  zeile('merged stellt das Register weiter', E1 ? E1.zustand : null, 'gemergt');
+  st = await stand();
+  zeile('und lässt die Aufgabe unberührt', st.aufgaben.length, vorM);
+  zeile('die Aufgabe ist weiter offen',
+        (st.aufgaben || []).filter(a => a.aufgabe === 'AG-EVJ-M1').length, 1);
+
+  await liefern('M1:published', koerper({
+    id: 'AG-EVENT-JOURNAL-001:atlas:published:M1', task: 'AG-EVJ-M1',
+    actor: 'atlas', reporter: 'atlas', kind: 'published',
+    werk: 'pilot/github-live/index.html', werkV: 'v69',
+    title: 'Atlas veröffentlicht das Ergebnis'
+  }), 90604);
+  W = await werke();
+  zeile('published stellt weiter',
+        zust(W, 'pilot/github-live/index.html'), 'veroeffentlicht');
+
+  /* NUR VORWAERTS: ein zweites `merged` danach stellt nichts zurueck. */
+  await liefern('M1:merged-nochmal', koerper({
+    id: 'AG-EVENT-JOURNAL-001:atlas:merged:M1b', task: 'AG-EVJ-M1',
+    actor: 'atlas', reporter: 'atlas', kind: 'merged',
+    werk: 'pilot/github-live/index.html', werkV: 'v69',
+    title: 'dasselbe Merge ein zweites Mal'
+  }), 90605);
+  W = await werke();
+  zeile('ein zweites merged stellt nichts zurück',
+        zust(W, 'pilot/github-live/index.html'), 'veroeffentlicht');
+
+  /* Ein Merge zu einem Artefakt, das noch nie genannt wurde: Der Eintrag
+     entsteht mit dem GEMELDETEN Zustand, nicht mit einem erfundenen
+     frueheren. Wer erst beim Merge auftaucht, hat keine belegte Lieferung. */
+  await liefern('M2:merged-ohne-lieferung', koerper({
+    id: 'AG-EVENT-JOURNAL-001:atlas:merged:M2', task: 'AG-EVJ-M1',
+    actor: 'atlas', reporter: 'atlas', kind: 'merged',
+    werk: 'docs/nie-geliefert.md',
+    title: 'Merge eines Ergebnisses, das nie geliefert wurde'
+  }), 90606);
+  W = await werke();
+  const E2 = werk(W, 'docs/nie-geliefert.md');
+  zeile('ein unbekanntes Ergebnis wird angelegt', !!E2, true);
+  zeile('und zwar mit dem gemeldeten Zustand',
+        E2 ? E2.zustand : null, 'gemergt');
+  console.log('        (keine erfundene Lieferung davor — wer erst beim');
+  console.log('         Merge auftaucht, hat keine belegte Lieferung)');
+
+  console.log('\nM2 — Was der Vertrag bei Ergebnissen abweist\n');
+  const rw1 = await liefern('merged-ohne-werk', koerper({
+    id: 'AG-EVENT-JOURNAL-001:atlas:merged:ohne', task: 'AG-EVJ-M1',
+    actor: 'atlas', reporter: 'atlas', kind: 'merged',
+    title: 'Merge ohne Artefaktkennung'
+  }), 90607);
+  zeile('merged ohne artifact_id abgewiesen',
+        /artifact_id fehlt/.test(rw1.grund), true);
+  const rw2 = await liefern('started-mit-werk', koerper({
+    id: 'AG-EVENT-JOURNAL-001:forge:started:mitWerk', task: 'AG-EVJ-M1',
+    actor: 'forge', reporter: 'forge', kind: 'started',
+    werk: 'pilot/github-live/index.html',
+    title: 'Ein Beginn, der ein Artefakt benennt'
+  }), 90608);
+  zeile('artifact_id an fremder Art abgewiesen',
+        /artifact_id nicht erlaubt/.test(rw2.grund), true);
+  const rw3 = await liefern('werkV-ohne-werk', koerper({
+    id: 'AG-EVENT-JOURNAL-001:forge:delivered:nurFassung', task: 'AG-EVJ-M1',
+    actor: 'forge', reporter: 'forge', kind: 'delivered',
+    werkV: 'v70',
+    title: 'Eine Fassung ohne Kennung'
+  }), 90609);
+  zeile('artifact_version ohne artifact_id abgewiesen',
+        /artifact_version ohne artifact_id/.test(rw3.grund), true);
 
   console.log('\nI — Was auch jetzt noch NICHT geschieht');
   console.log('    erwartet: kein Ballwechsel aus Lebenszyklusereignissen,');

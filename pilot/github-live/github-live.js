@@ -26,7 +26,7 @@
 */
 (function () {
   'use strict';
-  var ADAPTER = 'AG-GH-LIVE-001-v1.8';
+  var ADAPTER = 'AG-GH-LIVE-001-v1.9';
   /* Wortlaut von Sentinel vorgeschrieben (AG-CONNECT-UX-001, 21.10.), Zeichen
      fuer Zeichen. Einmal benannt, damit Platzhalter und Zeile nicht
      auseinanderlaufen koennen. */
@@ -71,7 +71,8 @@
      `started` mit Klemmenkennung behauptete einen Bezug, den es nicht hat.
      MATERIALENTSCHEIDUNG, und sie ist an Atlas gemeldet: Das ist das zwoelfte
      Feld des Vertrags. */
-  var OPTIONAL = ['recipient', 'reporter', 'blocker_id'];  /* nie Pflicht fuer progress */
+  var OPTIONAL = ['recipient', 'reporter', 'blocker_id',
+                  'artifact_id', 'artifact_version'];  /* nie Pflicht fuer progress */
   var ARTEN = { progress: 1, handoff: 1, contribution: 1,
                 assigned: 1, received: 1, started: 1, delivered: 1,
                 reviewed: 1, accepted: 1, merged: 1, published: 1,
@@ -105,6 +106,14 @@
      anderen Rolle -- sonst waere es eine Selbstabnahme. Der Abbruch kommt
      nach Peters Festlegung vom Projekt, nicht vom Gescheiterten. */
   var HALTERGEBUNDEN = { received: 1, started: 1, delivered: 1 };
+  /* DAS ERGEBNIS BRAUCHT EINE EIGENE KENNUNG. `merged`/`published` sagen
+     etwas ueber ein Artefakt -- einen Zweig, eine Fassung --, nicht ueber
+     eine Aufgabe. Ohne Kennung liesse sich nicht sagen, WELCHES. Pflicht
+     dort, erlaubt bei `delivered` (die Lieferung bringt es hervor und darf
+     es benennen), sonst verboten: Ein `started` mit Artefaktkennung
+     behauptete einen Bezug, den die Art nicht hergibt. */
+  var WERKARTEN = { merged: 1, published: 1 };
+  var WERKDARF = { merged: 1, published: 1, delivered: 1 };
   /* GEMELDET-V2, UND DER SPRUNG IST NOETIG. In v1 kamen `blocked`/`resolved`
      an und trieben nichts; jetzt legen sie eine Klemme an die Aufgabe. Ein
      Original aus dem Vorrat, das nur v1 sagt, wuerde die beiden Arten also
@@ -117,7 +126,7 @@
      tun; schlimmer: Bei ihr haette `delivered` die Aufgabe schon
      geschlossen, und eine spaetere Annahme fiele ins Leere. Also bekommt
      sie die Arten gar nicht erst. */
-  var KANN_LEBEN_WORT = 'gemeldet-v3';
+  var KANN_LEBEN_WORT = 'gemeldet-v4';
   var KENNUNG = /^[A-Za-z0-9][A-Za-z0-9._:\/-]{0,119}$/;
   var ISO = /^\d{4}-\d\d-\d\dT\d\d:\d\d(:\d\d(\.\d{1,9})?)?(Z|[+-]\d\d:\d\d)$/;
   var STEUER = /[\u0000-\u001f\u007f-\u009f\u2028\u2029\u202a-\u202e\u2066-\u2069]/;
@@ -498,10 +507,23 @@
        als eine Angabe mitfuehren, die nichts bedeutet. */
     if (hatKlemme && !KLEMMARTEN[d.kind])
       return nein('blocker_id nicht erlaubt bei ' + d.kind);
+    var hatWerk = Object.prototype.hasOwnProperty.call(d, 'artifact_id');
+    var hatWerkV = Object.prototype.hasOwnProperty.call(d, 'artifact_version');
+    if (hatWerk && typeof d.artifact_id !== 'string') return nein('artifact_id kein Text');
+    if (hatWerkV && typeof d.artifact_version !== 'string')
+      return nein('artifact_version kein Text');
+    if (WERKARTEN[d.kind] && !hatWerk) return nein('artifact_id fehlt bei ' + d.kind);
+    if (hatWerk && !WERKDARF[d.kind])
+      return nein('artifact_id nicht erlaubt bei ' + d.kind);
+    /* Eine Fassung ohne Kennung ist eine Fassung von nichts. */
+    if (hatWerkV && !hatWerk) return nein('artifact_version ohne artifact_id');
     var ids = ['id', 'project_id', 'run_id', 'task_id', 'source_tool_id'];
     for (var q = 0; q < ids.length; q++)
       if (!KENNUNG.test(d[ids[q]])) return nein(ids[q] + ' ungültig');
     if (hatKlemme && !KENNUNG.test(d.blocker_id)) return nein('blocker_id ungültig');
+    if (hatWerk && !KENNUNG.test(d.artifact_id)) return nein('artifact_id ungültig');
+    if (hatWerkV && !KENNUNG.test(d.artifact_version))
+      return nein('artifact_version ungültig');
     if (!AKTEURE[d.actor]) return nein('actor unbekannt');
     if (hatEmpf && !AKTEURE[d.recipient]) return nein('recipient unbekannt');
     if (hatMeld && !AKTEURE[d.reporter]) return nein('reporter unbekannt');
@@ -525,6 +547,8 @@
       source_evidence: d.source_evidence, source_tool_id: d.source_tool_id,
       reporter: hatMeld ? d.reporter : '',
       blocker_id: hatKlemme ? d.blocker_id : '',
+      artifact_id: hatWerk ? d.artifact_id : '',
+      artifact_version: hatWerkV ? d.artifact_version : '',
       /* Die PRUEFBARE Aussage, nicht die bewiesene: Melder und Akteur fallen
          zusammen. Verifiziert ist davon nichts ausser dem Login -- deshalb
          heisst das Feld nicht `verifiziert`. */
@@ -563,6 +587,8 @@
        -- hier wird nichts behauptet, nur weitergegeben. */
     if (ev.reporter) aus.reporter = ev.reporter;
     if (ev.blocker_id) aus.blocker_id = ev.blocker_id;
+    if (ev.artifact_id) aus.artifact_id = ev.artifact_id;
+    if (ev.artifact_version) aus.artifact_version = ev.artifact_version;
     /* Der Beleg geht mit: die Nummer, die GitHub vergeben hat, und die
        Adresse, unter der genau dieser Kommentar wieder auffindbar ist.
        Beides abgeleitet, nichts behauptet. */
@@ -594,6 +620,8 @@
       ' · ' + ev.project_id + ' / ' + ev.run_id + ' / ' + ev.task_id +
       ' · Werkzeug ' + ev.source_tool_id +
       (ev.blocker_id ? ' · Klemme ' + ev.blocker_id : '') +
+      (ev.artifact_id ? ' · Werk ' + ev.artifact_id +
+         (ev.artifact_version ? ' ' + ev.artifact_version : '') : '') +
       /* WO ES STEHT, NICHT NUR DASS ES STEHT. `source_evidence` sagt die
          ART des Belegs (Laufzeit oder gemeldet), nicht seinen ORT. Ohne
          die Nummer ist eine Angabe in dieser Tafel nicht nachzusehen. */
@@ -627,7 +655,8 @@
          gleichem Zeitstempel ein Transportduplikat -- die zweite fiele
          lautlos weg, und die Aufgabe klemmte einmal statt zweimal. */
       var fa = [ev.project_id, ev.run_id, ev.task_id, ev.actor, ev.kind,
-                ev.recipient, ev.reporter, ev.blocker_id, ev.title,
+                ev.recipient, ev.reporter, ev.blocker_id,
+                ev.artifact_id, ev.artifact_version, ev.title,
                 ev.occurred_at, ev.source_evidence, ev.source_tool_id].join('\u0001');
       if (bekannte.hat(ev.id) || (basisIds && basisIds.hat(ev.id))) {
         var frueher = abdruck[ev.id];
