@@ -219,3 +219,33 @@ Task AG-LM-TK-020 → AG-LM-US-001 (Kriterien V3) → AG-LM-EP-001. Owner Lot. Z
 Ziel: Alle am fliegenden Auftrag verfügbaren fachlichen Angaben sind auch nach dessen Verschwinden am zugehörigen Listeneintrag dauerhaft erreichbar; vorhandene Details verwenden, keine neue Ansicht.
 Codebefund an main53f7c278: stromZeile hat getrennte Auftrags-/Ereigniszweige; Auftragszweig übernimmt nur Kommando/Empfänger/optionales Modell/Text, während der Ereigniszweig die Spur anhängt. Bei beobachteten GitHub-Ereignissen benutzen Liste und Flug allerdings beide spurWort; für diese allein ist damit kein Datenverlust bewiesen. Außerdem .agAuf.tat opacity .42. Peters konkrete geladene Fassung und fehlende Felder sind noch nicht beobachtet, kein eindeutiger Fehlerort behauptet.
 Test AG-LM-TC-014 V1 / NOT_RUN: dieselbe Übergabe während des Flugs und anschließend in Liste/Details vergleichen. Alle verfügbaren IDs, Hierarchie, Titel, Rollen, Herkunft/Originalbeleg und geplanten Zeitstempel müssen zum selben Ereignis gehören und nach dem Flug erreichbar/lesbar bleiben, auch per Touch. Fehlende Quelldaten bleiben kenntlich. Vorhandene kurze Listenansicht darf kompakt bleiben, ohne Details unzugänglich zu machen.
+
+## Nachtrag V1.3 — operativer Paketabgleich mit Lot
+
+Geprüfte Produktbaseline: df8cd4db0c987cac70b6c77276be247806840358. Originale: PR46/6320419135 (Restschätzung),6320849443 (Kandidat/Veröffentlichung und Lieferung),6320899194 (Archibald-Route). Atlas ordnet operative Priorität/Abhängigkeiten; dies ersetzt weder Archibalds Spezifikation noch Sentinels Testplanung.
+
+### Konkret ergänzte Arbeitspositionen
+
+- AG-LM-TK-021 → AG-LM-US-004 → AG-LM-EP-002: bereits veröffentlichte Archibald-Spezifikationsaufgabe aus6320541062; nun im Register nachgeführt. Owner Archibald/spec-agent; BLOCKED/pending_route. Lot meldet spec-agent in seiner laufenden Sitzung nicht verfügbar. Ein neuer geladener Claude-Host ist nicht durch Atlas startbar; kein allgemeiner Agent als Ersatz und kein ungeprüfter API-Aufruf.
+- AG-LM-TK-022 → AG-LM-US-001 → AG-LM-EP-001: fehlende Erzeugung echter Lebenszyklusmeldungen mit den tatsächlich ausführenden Rollen/Hostquellen klären und innerhalb geltender Rechte anbinden. Schnittstellenowner Lot; Atlas verantwortet Quellen-/Rollenrouting. Erst kleinster Ende-zu-Ende-Nachweis, keine neue Infrastruktur/Workflowaktivierung/bezahlt ausgeführte Testrolle. Noch nicht geschätzt; bisherige Summe deckt diesen Rest nicht ab.
+- AG-LM-TK-023 → AG-LM-US-004 → AG-LM-EP-002: Kindstatus zu Story-/Epic-Abschluss zusammenführen; Owner Lot, Spezifikationsabhängigkeit TK021. Dies ist Umsetzung, kein Testfall. TC011 prüft TK023 sowie die Hierarchietasks. Vom Nutzer ausdrücklich verlangt, aber noch nicht spezifiziert/implementiert; kein stillschweigendes Done aus Liefermeldungen.
+
+### Reihenfolge und parallele Prüfung
+
+| Paket | Tatsächliche Positionen | Abhängigkeit / Freigabereife |
+|---|---|---|
+| AG-LM-PK-001 — echte Live-Kette | TK022, bestehende Umsetzungsteile TK001/003/005, Nachweistasks002/004/006 | höchste Priorität. Automatisches Relay schreibt bisher nur handoff/contribution/progress, keine Lebenszyklusmeldungen. Echte Quelle und tatsächlich geladene Verbraucherversion prüfen. Rollentätigkeit nicht aus Transportbestätigung ableiten. Veröffentlichungsebene separat freigeben. |
+| AG-LM-PK-002 — bestehende Ergebnislieferung abschließen | TK011/012, TC006 | Rollenfix/Ergebniszuordnung liegen jetzt remote vor; nicht erneut implementieren. CI39634351288 beim ersten Abruf in_progress, danach tatsächliches Ergebnis abgleichen. Kandidatenprüfung kann parallel zur Quellenklärung laufen; keine Gesamtannahme. |
+| AG-LM-PK-003 — Arbeitsstruktur vollständig | TK021, gemeinsamer Hierarchieanteil TK001/007/015, Umsetzung TK023, Nachweistask008, TC010/011/012 | zusammenhängendes Technikpaket, vorhandene IDs erhalten; zuerst Archibald-Spezifikation und unabhängige Testplanung. Elternaggregation ergänzt die Hierarchie; nicht erst im Archiv entdecken. |
+| AG-LM-PK-004 — Wiederaufnahme und Archiv | TK009/010/015/016/017/018, TC005/008/009 | auf gleichem geprüften Vertrag/Hie­rarchie aufbauen; Restore-Grund früh schließen, soweit unabhängig. Archivzeitachse ist offene Produktentscheidung; keine stille Wahl eines festen Takts oder Zeitstauchung. |
+| AG-LM-PK-005 — ergänzende Laufdetails/Bedienung | TK013/014, TK020; Issue8 | Ladestandsanzeige darf unbestätigt bleiben, echte Ladebelege separat als fehlende Quelle führen. Liste/Flug nur nach tatsächlich beobachtetem Befund ändern; keine belegte Live-Datenlücke bisher. Issue8 ist Erklärung/Appfassung, NICHT US007 (Skillstand); frühere Gleichsetzung aus Lots Text korrigiert. TK019 bleibt ausdrücklich BACKLOG/später. |
+
+PK-IDs sind Bündelungskennungen, keine neuen Epics oder Arbeitsergebnisse. Jede enthaltene Task-ID behält Status, Owner und Nachweis; gemeinsame technische Umsetzung wird einmal geschätzt. Testausführung und Dokumentation können parallel zu anderer unabhängiger Arbeit erfolgen; keine zwei Entwickler auf dieselbe Implementierung.
+
+### Aufwand und Grenzen des Abgleichs
+
+Lots Originalprognose6320419135: 12–16 technische Arbeitsblöcke, jeweils abgegrenzte Umsetzung mit eigenen Checks/Gegentest; keine Stunden-/Termin-/Kostenprognose. Enthält weder unabhängige Sentinel-Ausführung noch Wartezeit/Freigabe noch unbekannte Live-Reparatur. Der dort noch mit 2 Blöcken angesetzte Ergebnisanteil ist inzwischen remote geliefert, Prüfung/Annahme offen. Er wird nicht nochmals entwickelt; eine aktualisierte Restprognose darf erst nach Ownerabgleich daraus abgeleitet werden. TK019/020 und explizite Produceranbindung TK022 sind in der ursprünglichen Schätzung nicht belegt enthalten.
+
+Offen bleiben: echter Lebenszyklusproducer, Archibald-Route, nötige echte Ladebelege, Archivzeitachse und Zielgerät-/Veröffentlichungsnachweis. Bildänderungen/Veröffentlichung nach geltender Peter-Autorität; keine Freigabe aus technischen Prüfergebnissen.
+
+Sentinel wurde einmalig als realer Subagent /root/sentinel_package_alignment für begrenzte Prüfreife/Paketabhängigkeiten gestartet (Veröffentlichung vor Start: PR6320964370, Issue2/6320964665). Dies ist kein bereits bestandener TC001-Lauf und keine Ersatzspezifikation. Ergebnis wird als eigener Originalbericht nachgetragen.
