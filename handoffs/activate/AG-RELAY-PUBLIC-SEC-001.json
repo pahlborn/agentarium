@@ -1,0 +1,12 @@
+{
+  "schema": "agentarium.relay-activation.v2",
+  "task_id": "AG-LM-TK-021",
+  "authorized": true,
+  "source_commit": "91dccc1d4bee9694f6d434a7599507e6cdcec6b0",
+  "role": "spec-agent",
+  "request": "handoffs/AG-LM-TK-021-archibald-request-v1.json",
+  "handback": "handoffs/AG-LM-TK-021-archibald-handback-v1.md",
+  "model": "opus",
+  "max_turns": 20,
+  "max_budget_usd": 1
+}
