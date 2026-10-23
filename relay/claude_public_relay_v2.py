@@ -327,10 +327,15 @@ def prepare() -> None:
                "activation": a, "request": packet, "readable_paths": paths,
                "prepared_at": now(), "run_id": os.environ.get("GITHUB_RUN_ID")}
     (control / "context.json").write_text(json.dumps(context, indent=2, ensure_ascii=False))
+    read_only = a["role"] in ("spec-agent", "process-agent")
+    allowed = [f"Read(/{name})" for name in paths] if read_only else [f"Edit(/{a['handback']})"]
+    denied = ["Bash", "WebFetch", "WebSearch", "Agent", "mcp__*"]
+    if read_only:
+        denied += ["Edit", "Write", "NotebookEdit"]
     (control / "settings.json").write_text(json.dumps({"permissions": {
         "blockReadsOutsideWorkingDirectories": True,
-        "allow": [f"Edit(/{a['handback']})"],
-        "deny": ["Bash", "WebFetch", "WebSearch", "Agent", "mcp__*"],
+        "allow": allowed,
+        "deny": denied,
     }}, indent=2))
     shutil.copy2(Path(__file__).resolve(), PREPARED / "relay_driver.py")
     (PREPARED / "manifest.json").write_text(json.dumps(manifest(PREPARED), indent=2))
@@ -373,13 +378,20 @@ def child_environment() -> dict[str, str]:
 def claude_command(context: dict, settings: Path) -> list[str]:
     a, packet = context["activation"], context["request"]
     profile = (PREPARED / "workspace" / ROLES[a["role"]]).read_text()
+    read_only = a["role"] in ("spec-agent", "process-agent")
+    role_tools = ["Read"] if read_only else ["Read", "Edit"]
     config = {a["role"]: {"description": "Bounded Agentarium relay task",
-                           "prompt": profile, "tools": ["Read", "Edit"]}}
+                           "prompt": profile, "tools": role_tools}}
+    if read_only:
+        config[a["role"]]["effort"] = "high"
+        config[a["role"]]["disallowedTools"] = ["Edit", "Write", "NotebookEdit", "Bash", "Agent", "WebFetch", "WebSearch", "mcp__*"]
+    allowed = ",".join(f"Read(/{name})" for name in context["readable_paths"]) if read_only else f"Edit(/{a['handback']})"
+    denied = "Bash,WebFetch,WebSearch,Agent,mcp__*" + (",Edit,Write,NotebookEdit" if read_only else "")
     return [
         "claude", "--bare", "-p", json.dumps(packet, ensure_ascii=False),
         "--agents", json.dumps(config, ensure_ascii=False), "--agent", a["role"],
-        "--tools", "Read,Edit", "--allowedTools", f"Edit(/{a['handback']})",
-        "--disallowedTools", "Bash,WebFetch,WebSearch,Agent,mcp__*",
+        "--tools", ",".join(role_tools), "--allowedTools", allowed,
+        "--disallowedTools", denied,
         "--permission-mode", "dontAsk", "--settings", str(settings),
         "--model", a["model"], "--max-turns", str(a["max_turns"]),
         "--max-budget-usd", str(a["max_budget_usd"]),
@@ -472,10 +484,22 @@ def run_model() -> None:
             raise RuntimeError("secret scan blocked result")
         after = {str(p.relative_to(work)): p.read_bytes() for p in work.rglob("*") if p.is_file()}
         changed = sorted(name for name in set(before) | set(after) if before.get(name) != after.get(name))
-        if changed != [a["handback"]]:
+        read_only = a["role"] in ("spec-agent", "process-agent")
+        expected_changes = [] if read_only else [a["handback"]]
+        if changed != expected_changes:
             raise RuntimeError("changed-path boundary mismatch: " + ", ".join(changed))
         if proc.returncode or not result or result.get("is_error"):
             raise RuntimeError("Claude process failed or returned no valid result")
+        if read_only:
+            # The role returns text only. The trusted host materializes its
+            # unchanged handback AFTER verifying zero worker file changes.
+            returned = result.get("result")
+            if not isinstance(returned, str) or not returned.strip():
+                raise RuntimeError("read-only worker returned no handback text")
+            if secret_hit(returned.encode(), api_key):
+                raise RuntimeError("secret scan blocked returned text")
+            handback.write_text(returned)
+            changed = [a["handback"]]
         shutil.copy2(handback, RESULT / "handback.md")
         raw_tmp.rename(RESULT / "stream.jsonl")
         err_tmp.rename(RESULT / "stderr.txt")
