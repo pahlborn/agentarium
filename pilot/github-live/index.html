@@ -873,6 +873,39 @@
      zurück und bleiben, solange eine Tafel offen ist.
      Unsichtbar heißt auch unanklickbar: Ein blinder Treffer auf einen
      Knopf, den man nicht sieht, wäre schlimmer als ein zweites Antippen. */
+  /* DIE TEMPOZEILE. Sie sitzt UEBER den Knoepfen, und zwar auf der Hoehe,
+     die dort wirklich gemessen wurde (`--agTastenH`) -- nicht auf einer
+     Zahl im Stylesheet. Auf dem Telefon bricht die Knopfleiste um; eine
+     feste Zahl staende dann in den Knoepfen. Denselben Fehler gab es
+     schon einmal mit 52 Pixeln fuer eine Reihe. */
+  #agTempo{position:fixed; right:max(14px,env(safe-area-inset-right));
+    bottom:calc(max(14px,env(safe-area-inset-bottom)) + var(--agTastenH, 44px) + 6px);
+    z-index:11; display:flex; align-items:center; gap:10px;
+    padding:9px 14px; border-radius:8px;
+    background:rgba(9,13,20,.82); box-shadow:inset 0 0 0 1px rgba(150,170,200,.12);
+    pointer-events:auto; transition:opacity .55s ease;}
+  #agTempo.leise{opacity:0; pointer-events:none;}
+  #agTempo label{color:#B8C6DC; white-space:nowrap;
+    font:400 11px/1 ui-monospace,SFMono-Regular,Menlo,monospace;
+    letter-spacing:.16em; text-transform:uppercase;}
+  #agTempo label b{font-weight:400; color:#E6EEFB;}
+  /* Der Regler selbst: dieselbe gedeckte Linie wie die Balken im Kopf.
+     Der Griff ist 28 Pixel breit -- auf einem Finger ist alles darunter
+     geraten. Apples eigene Vorgabe fuer eine Trefferflaeche ist 44; der
+     Griff waechst nicht so weit, aber die Zeile um ihn herum ist hoch
+     genug, dass die Flaeche zusammen hinkommt. */
+  #agTempo input[type=range]{appearance:none; -webkit-appearance:none;
+    width:min(34vw,148px); height:28px; background:transparent; margin:0;
+    -webkit-tap-highlight-color:transparent;}
+  #agTempo input[type=range]::-webkit-slider-runnable-track{
+    height:2px; border-radius:1px; background:rgba(143,163,192,.34);}
+  #agTempo input[type=range]::-moz-range-track{
+    height:2px; border-radius:1px; background:rgba(143,163,192,.34);}
+  #agTempo input[type=range]::-webkit-slider-thumb{appearance:none;
+    -webkit-appearance:none; width:14px; height:14px; margin-top:-6px;
+    border-radius:50%; background:#AFC0D8; border:0;}
+  #agTempo input[type=range]::-moz-range-thumb{
+    width:14px; height:14px; border-radius:50%; background:#AFC0D8; border:0;}
   #agTasten{transition:opacity .55s ease;}
   #agTasten.leise{opacity:0; pointer-events:none;}
   /* Angeschaltet heißt heller, nicht bunter. Vorher stand hier ein
@@ -1025,6 +1058,7 @@
 <button id="agHalt" type="button">Halt</button>
 <button id="agVorn" type="button">Von vorn</button>
 <button id="agPlatz" type="button" hidden>Plätze zurück</button></div>
+<div id="agTempo" hidden><label for="agSchnell">Tempo <b>1&#215;</b></label><input id="agSchnell" type="range" min="0" max="3" step="1" value="0" aria-label="Tempo der Wiedergabe"></div>
 <div id="agGesetz"></div>
 <p id="hinweis">Du darfst mitrühren</p>
 <script>
@@ -2395,7 +2429,7 @@
 
      Der Bauzeitpunkt kommt beim Bauen aus der Uhr. Von Hand gepflegte
      Datumsangaben sind nach der zweiten Änderung falsch. */
-  var FASSUNG = '72', GEBAUT = '2026-10-23T12:58Z';
+  var FASSUNG = '73', GEBAUT = '2026-10-23T16:14Z';
 
   /* AG-GH-LIVE-001: JEDE TEXTSENKE MASKIERT.
      Seit Live-Daten von aussen kommen (GitHub-Kommentare, one-event.json),
@@ -5694,6 +5728,7 @@
                                                                   : 'Weiter');
     }
     document.body.setAttribute('data-modus', MODUS);
+    if (typeof tempoZeigen === 'function') tempoZeigen();
     document.body.setAttribute('data-gross',
       schmal() ? 'telefon-hoch' : (flach() ? 'telefon-quer' : 'weit'));
     /* Wie hoch die Knopfleiste WIRKLICH ist, statt einer Zahl im
@@ -7516,6 +7551,57 @@
   document.getElementById('agVorn').addEventListener('click', function () {
     zurueckAufAnfang();
   });
+
+  /* ======================= DAS TEMPO DER WIEDERGABE =======================
+
+     Peter am 23.10.: "normalablauf, zusaetzlich regler fuer vorlauf und
+     einen fuer die erhoehung der geschwindigkeit. beim ausmass bin ich mir
+     nicht sicher: 2fach, 5 und 10?" -- Die Leiter kommt also von ihm, und
+     sie passt zu den Stuecken: V2 laeuft 480 Sekunden, bei 10x sind das 48.
+
+     DIE LEITUNG LAG SCHON. `tempo` steht seit Fassung 1 neben `zeit` und
+     wird in `schritt` gelesen (`zeit += dt * tempo`) -- gesetzt hat es
+     nie jemand. Ein toter Knopf im Code, und das war er lange genug, dass
+     ich ihn beim Suchen fuer eine neue Idee hielt.
+
+     NICHT IM LIVEBETRIEB. Dort kommen die Ereignisse von aussen, wenn sie
+     kommen; eine schnellere Uhr beschleunigt nichts, sie behauptet es nur.
+     Dieselbe Regel wie bei "Von vorn" und "Halt": ein Regler, der nichts
+     tut, kostet mehr als keiner.
+
+     DER VORLAUF FEHLT HIER, und zwar mit Grund: `schritt(dt)` ist eine
+     BILDfunktion, nicht eine Simulationsfunktion -- am Ende stehen zwoelf
+     Anzeigeaufrufe, darunter `motorenZeigen()` und `fussOrdnen()` mit
+     Layoutmessungen. Eine Aufzeichnung stumm nachzuspielen hiesse, sie
+     viertausendmal aufzurufen. Ein echter Vorlauf verlangt, Simulation und
+     Anzeige zu trennen, und das ist ein Eingriff in die Hauptschleife --
+     nichts, was ich nebenbei mache. Peter vorgelegt, nicht geraten. */
+  var TEMPI = [1, 2, 5, 10];
+  var tempoEl = document.getElementById('agTempo'),
+      schnellEl = document.getElementById('agSchnell'),
+      tempoWortEl = tempoEl ? tempoEl.querySelector('label b') : null;
+
+  function tempoSetzen(i) {
+    var n = TEMPI[Math.max(0, Math.min(TEMPI.length - 1, i | 0))] || 1;
+    tempo = n;
+    if (tempoWortEl) tempoWortEl.textContent = n + '\u00D7';
+  }
+  /* Sichtbar nur, wo es etwas zu beschleunigen gibt. Aufgerufen aus
+     `knoepfeSetzen`, also bei jedem Bild -- deshalb aendert es das DOM nur,
+     wenn sich wirklich etwas aendert. */
+  function tempoZeigen() {
+    if (!tempoEl) return;
+    var soll = (MODUS !== 'live');
+    if (tempoEl.hidden === soll) tempoEl.hidden = !soll;
+    /* Beim Wechsel in den Livebetrieb zurueck auf Normalablauf: Sonst
+       stuende die Uhr eines unsichtbaren Reglers weiter auf 10x. */
+    if (!soll && tempo !== 1) { if (schnellEl) schnellEl.value = '0'; tempoSetzen(0); }
+  }
+  if (schnellEl)
+    schnellEl.addEventListener('input', function () {
+      tempoSetzen(Number(schnellEl.value));
+    });
+  tempoZeigen();
   /* Die Knöpfe verschwinden nach drei Sekunden Ruhe und kommen bei jeder
      Bewegung zurück. Auf einem iPad gibt es kein Darüberfahren, also zählt
      dort die Berührung — das erste Antippen holt sie, das zweite bedient
@@ -7525,11 +7611,17 @@
 
   function tastenZeigen() {
     tasten.classList.remove('leise');
+    /* Die Tempozeile geht MIT. Zwei Fristen waeren zwei Dinge, die
+       auseinanderlaufen koennen -- und ein Regler, der allein stehen
+       bleibt, waere der einzige sichtbare Rest einer Bedienung, die sich
+       gerade verabschiedet hat. */
+    if (tempoEl) tempoEl.classList.remove('leise');
     if (tastenUhr) clearTimeout(tastenUhr);
     tastenUhr = setTimeout(function () {
       if (legende.classList.contains('auf')) return;   /* Tafel offen */
       if (document.getElementById('agWas').classList.contains('auf')) return;
       tasten.classList.add('leise');
+      if (tempoEl) tempoEl.classList.add('leise');
     }, 3000);
   }
   /* Die eigene Weckuhr der Griffe ist entfallen. Sie war aus Fassung 54 und
