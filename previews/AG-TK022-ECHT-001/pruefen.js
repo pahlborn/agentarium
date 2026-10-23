@@ -38,7 +38,10 @@ const { execFileSync } = require('child_process');
 
 const ZIEL = process.env.AG_ZIEL || path.join('pilot', 'github-live');
 const WURZEL = path.resolve(__dirname, '..', '..', ...ZIEL.split('/'));
-const VERGLEICH = process.env.AG_VERGLEICH || 'origin/main';
+/* Fest an Fassung 56 (aacf1b2), die letzte ohne Lebenszyklus-Vertrag.
+   Seit #57 (Fassung 70) hat main den Vertrag selbst, die Gegenprobe gegen
+   origin/main wurde dadurch ungueltig. Ein fester Punkt veraltet nicht. */
+const VERGLEICH = process.env.AG_VERGLEICH || 'aacf1b2';
 const ECHT = JSON.parse(fs.readFileSync(path.join(__dirname, 'koerper-echt.json'), 'utf8'));
 
 let fehler = 0;
