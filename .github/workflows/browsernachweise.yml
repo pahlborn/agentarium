@@ -59,7 +59,27 @@ concurrency:
 
 jobs:
   nachweise:
-    runs-on: ubuntu-latest
+    # DAS ABBILD IST FESTGENAGELT, UND ZWAR GEMESSEN.
+    #
+    # `ubuntu-latest` ist am 21.10.2026 zwischen 16:48 und 20:42 von
+    # ubuntu-24.04 auf ubuntu-26.04 umgezogen. Damit brach Schritt 4 mit
+    #   "ERROR: Playwright does not support chromium on ubuntu26.04-x64"
+    # und die Nachweise liefen gar nicht mehr (Schritt 5 und 6 uebersprungen).
+    # Nachgelesen in den Laufprotokollen, nicht vermutet:
+    #   Lauf 39637128431, 16:42, gruen  -> Image: ubuntu-24.04
+    #   Lauf 39638041060, 16:48, gruen  -> Image: ubuntu-24.04
+    #   Lauf 39672592846, 20:42, rot    -> Image: ubuntu-26.04
+    #
+    # Gewaehlt ist das Abbild, auf dem alle bisherigen Laeufe gruen waren --
+    # nicht eine neuere Playwright-Fassung, von der ich nur VERMUTE, dass sie
+    # 26.04 kann. Playwright steht hier bewusst auf einer festen Nummer; ein
+    # geratenes Upgrade wuerde die Festnagelung gegen eine Hoffnung tauschen.
+    #
+    # Und das ist derselbe Fehler wie der Rest dieses Tages, nur auf der
+    # Infrastrukturebene: `latest` als etwas Festes behandeln. Was sich
+    # bewegen darf, bewegt sich irgendwann -- und dann faellt ein Lauf aus,
+    # der mit dem Kandidaten nichts zu tun hat.
+    runs-on: ubuntu-24.04
     # GEMESSEN IM LAUF 39390390569, nicht geschaetzt: der Schritt mit beiden
     # Nachweisen brauchte 118 Sekunden (08:01:29 bis 08:03:27), der ganze Job
     # 2 min 25 s einschliesslich Browser-Download. Ich hatte vorher "rund
