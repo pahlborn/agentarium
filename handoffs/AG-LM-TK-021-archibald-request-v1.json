@@ -6,7 +6,7 @@
   "role": "archibald",
   "technical_agent": "spec-agent",
   "repository": "pahlborn/agentarium",
-  "base_commit": "cd58bf6481f9806d930b61be0c6294f13afabf54",
+  "base_commit": "8cd1f16cc3348f218ccc2e5c326630a2405bba81",
   "branch": "agent/ag-event-journal-001",
   "goal": "Die bereits von Peter verlangte Epic/Story/Task/Testfall-Struktur mit eindeutigen IDs, beleggebundener Delegation und Abschluss erst nach erfolgreicher Kinderarbeit/Prüfung implementierungsreif spezifizieren.",
   "scope": [
@@ -38,7 +38,7 @@
     "pilot/github-live/github-live.js",
     "pilot/github-live/index.html"
   ],
-  "authority": "Peters direkte Anweisung zur Arbeitsstruktur und direkten Archibald-Zuweisung; keine zusätzliche API-Kostenaktivierung durch dieses vorbereitete Paket.",
+  "authority": "Peter hat am23.10.2026 den einmaligen direkten Archibald-Lauf bis maximal1USD und20Turns ausdrücklich freigegeben.",
   "allowed_actions": [
     "Lesen der freigegebenen Quellen mit echter spec-agent-Definition.",
     "Eine begrenzte SA_READY-Rückgabe oder eine entscheidungsrelevante SA_QUESTION an Atlas."
@@ -47,10 +47,10 @@
     "Keine Schreib-/Shell-/Web-/Delegationswerkzeuge innerhalb des spec-agent.",
     "Kein Rollenwechsel, keine zusätzlichen Modellläufe, keine Selbstannahme."
   ],
-  "expected_result": "Kurzer versionsgebundener SA_READY/SA_QUESTION-Handback mit Quellen, Anforderungen/Abnahmekriterien, korrigierter Traceability und offenen Entscheidungen. Veröffentlichung des unveränderten read-only Ergebnisses erfolgt nur durch den getrennten Publisher.",
+  "expected_result": "Gib genau einen kurzen SA_READY- oder SA_QUESTION-Handback als abschließenden Antworttext zurück. Keine Datei schreiben. Der getrennte Host materialisiert und veröffentlicht unverändert. Behalte Task-, Story-, Epic- und Testfall-IDs bei; markiere ungeklärte Kriterien.",
   "stop_condition": "Nach einer begrenzten Spezifikationsrückgabe oder einem exakt belegten fehlenden Input stoppen; keine selbständige Revisionsschleife.",
-  "handoff_status": "PREPARED_NOT_DISPATCHED",
-  "execution_gate": "Vor Aktivierung tatsächliche bestehende API-Kostenautorität und exakte Aktivierungsspezifikation prüfen; keine Aktivierungsdatei Teil dieses Pakets.",
+  "handoff_status": "AUTHORIZED_FOR_SINGLE_DISPATCH",
+  "execution_gate": "Einmaliger Lauf über den bestehenden Relay; kein Wiederholungs-/Zusatzlauf, keine Veröffentlichung des Produkts.",
   "source_refs": [
     "https://github.com/pahlborn/agentarium/pull/46#issuecomment-6320541062",
     "https://github.com/pahlborn/agentarium/pull/46#issuecomment-6320419135",
