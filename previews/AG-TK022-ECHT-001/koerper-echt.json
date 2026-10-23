@@ -1,0 +1,38 @@
+[
+  {
+    "id": 6332374462,
+    "created_at": "2026-10-22T04:02:19Z",
+    "user": {
+      "login": "pahlborn",
+      "id": 277496791
+    },
+    "body": "<!-- AGENTARIUM_EVENT_V1 -->\n```json\n{\n  \"schema\": \"agentarium.github-event.v1\",\n  \"id\": \"AG-TK022-ASSIGN-1792641738605\",\n  \"project_id\": \"agentarium\",\n  \"run_id\": \"AG-EVENT-JOURNAL-001\",\n  \"task_id\": \"AG-LM-TK-022\",\n  \"actor\": \"atlas\",\n  \"reporter\": \"atlas\",\n  \"kind\": \"assigned\",\n  \"recipient\": \"sentinel\",\n  \"title\": \"Atlas vergibt Sentinel den echten Quellen- und Vertragsnachweis am aktuellen Kandidaten.\",\n  \"occurred_at\": \"2026-10-22T04:02:18.605Z\",\n  \"source_evidence\": \"reported_checkpoint\",\n  \"source_tool_id\": \"atlas-current-chat\",\n  \"item_type\": \"task\",\n  \"parent_id\": \"AG-LM-US-001\",\n  \"item_version\": \"V1\"\n}\n```\nEchte Vergabe vor Subagentenstart. Die veröffentlichte Fassung56 unterstützt diese Art noch nicht; kein Empfang/Rendering behauptet. Begrenzte unabhängige Quellenprüfung, keine Implementierung."
+  },
+  {
+    "id": 6332384949,
+    "created_at": "2026-10-22T04:03:10Z",
+    "user": {
+      "login": "pahlborn",
+      "id": 277496791
+    },
+    "body": "<!-- AGENTARIUM_EVENT_V1 -->\n```json\n{\"schema\":\"agentarium.github-event.v1\",\"id\":\"AG-TK022-SENTINEL-RECEIVED-20261022T040247291Z\",\"project_id\":\"agentarium\",\"run_id\":\"AG-EVENT-JOURNAL-001\",\"task_id\":\"AG-LM-TK-022\",\"actor\":\"sentinel\",\"reporter\":\"sentinel\",\"kind\":\"received\",\"title\":\"Sentinel hat die begrenzte echte Quellen- und Vertragsprüfung empfangen.\",\"occurred_at\":\"2026-10-22T04:02:47.291Z\",\"source_evidence\":\"reported_checkpoint\",\"source_tool_id\":\"sentinel-real-source\",\"item_type\":\"task\",\"parent_id\":\"AG-LM-US-001\",\"item_version\":\"V1\"}\n```\nOriginal-Selbstauskunft des tatsächlich gestarteten Subagenten /root/sentinel_real_source, unverändert durch Atlas veröffentlicht. Rolle und Publisher sind getrennt; kein Empfang/Rendering des Browsers behauptet."
+  },
+  {
+    "id": 6332385173,
+    "created_at": "2026-10-22T04:03:11Z",
+    "user": {
+      "login": "pahlborn",
+      "id": 277496791
+    },
+    "body": "<!-- AGENTARIUM_EVENT_V1 -->\n```json\n{\"schema\":\"agentarium.github-event.v1\",\"id\":\"AG-TK022-SENTINEL-STARTED-20261022T040247291Z\",\"project_id\":\"agentarium\",\"run_id\":\"AG-EVENT-JOURNAL-001\",\"task_id\":\"AG-LM-TK-022\",\"actor\":\"sentinel\",\"reporter\":\"sentinel\",\"kind\":\"started\",\"title\":\"Sentinel beginnt die read-only Prüfung der Originalvergabe und des aktuellen Validators.\",\"occurred_at\":\"2026-10-22T04:02:47.291Z\",\"source_evidence\":\"reported_checkpoint\",\"source_tool_id\":\"sentinel-real-source\",\"item_type\":\"task\",\"parent_id\":\"AG-LM-US-001\",\"item_version\":\"V1\"}\n```\nOriginal-Selbstauskunft des tatsächlich gestarteten Subagenten /root/sentinel_real_source, unverändert durch Atlas veröffentlicht. Rolle und Publisher sind getrennt; kein Empfang/Rendering des Browsers behauptet."
+  },
+  {
+    "id": 6332401658,
+    "created_at": "2026-10-22T04:04:29Z",
+    "user": {
+      "login": "pahlborn",
+      "id": 277496791
+    },
+    "body": "<!-- AGENTARIUM_EVENT_V1 -->\n```json\n{\"schema\":\"agentarium.github-event.v1\",\"id\":\"AG-TK022-SENTINEL-DELIVERED-20261022T040342615Z\",\"project_id\":\"agentarium\",\"run_id\":\"AG-EVENT-JOURNAL-001\",\"task_id\":\"AG-LM-TK-022\",\"actor\":\"sentinel\",\"reporter\":\"sentinel\",\"kind\":\"delivered\",\"title\":\"Sentinel liefert die begrenzte Quellenprüfung: drei echte Originalmeldungen im Kandidaten angenommen, von main abgewiesen; Rendering ungeprüft.\",\"occurred_at\":\"2026-10-22T04:03:42.615Z\",\"source_evidence\":\"reported_checkpoint\",\"source_tool_id\":\"sentinel-real-source\",\"item_type\":\"task\",\"parent_id\":\"AG-LM-US-001\",\"item_version\":\"V1\"}\n```\nOriginal-Liefermeldung von /root/sentinel_real_source, unverändert veröffentlicht durch Atlas. Teilprüfung geliefert, kein TK022-Gesamtabschluss/keine Geräteabnahme."
+  }
+]
