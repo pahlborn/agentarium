@@ -279,7 +279,40 @@
   /* Ein offener Auftrag steht hell. Was geschehen ist, steht blass — die
      Liste sagt damit zweierlei zugleich, wofür es vorher zwei brauchte. */
   .agAuf.offen{opacity:1;}
-  .agAuf.tat{opacity:.42;}
+  /* WIE BLASS DARF "GESCHEHEN" SEIN? Peter am 23.10.: "liste ist zu
+     schwach". Nachgerechnet gegen den dunkelsten Grund (`--grund`
+     #05070C, ohne das Licht des Feldes) und gegen die Textfarbe der
+     Zeile (#C2CEE2):
+
+       Deckkraft   Kontrast    vs. .offen
+       .42         2,93:1      5,95x      <- war hier, unter AA
+       .60         4,95:1      2,94x
+       .62         5,23:1      2,75x      <- jetzt
+       .75         7,30:1      1,85x         zu nah an .offen
+
+     ZWEI Bedingungen zugleich, und darum ist es keine Geschmacksfrage:
+     Lesbar heisst 4,5:1 (AA, 12px), und die Liste muss WEITER zweierlei
+     sagen koennen -- was offen ist, steht hell, was geschehen ist, blass.
+     Bei .75 verschwindet der Unterschied, auf den die ganze Liste gebaut
+     ist. .62 erfuellt beides.
+
+     BEFUND BEIM MESSEN, und er ist groesser als diese Zeile: Die zweite
+     Bedingung greift im LIVEBETRIEB gar nicht. `auftrag` in `stromZeile`
+     verlangt `!E.beobachtet`, und `beobachtet` tragen ALLE Live-
+     Ereignisse. Es gibt dort also keine einzige `.offen`-Zeile -- die
+     ganze Liste stand blass, und zwar bei 2,93:1. Der Kommentar oben
+     ("damit sagt eine Liste zwei Dinge zugleich") gilt nur fuer Demo und
+     Archiv. Das erklaert Peters Befund vollstaendig und ist nicht mit
+     dieser Deckkraft behoben: Dass eine beobachtete Uebergabe kein
+     offener Auftrag ist, war eine Entscheidung (AG-GH-LIVE-004) -- dass
+     die Liste live damit ihre zweite Aussage verliert, war keine.
+     Gemeldet, nicht mitgeaendert; es ist eine Aenderung am Bild.
+
+     OFFEN, und nicht mitgeaendert: Die Herkunftszeile und `em` tragen
+     #8295B0 und kommen damit auch bei .62 nur auf 3,11:1. Das waere eine
+     Aenderung an der Farbe, nicht an der Deckkraft -- eine Stufe mehr und
+     eine Entscheidung Peters. Gemeldet, nicht gemacht. */
+  .agAuf.tat{opacity:.62;}
   .agAuf.tat s{text-decoration:none; font-size:9px; letter-spacing:.16em;
     text-transform:uppercase;}
   .agAuf u{text-decoration:none;
@@ -2331,7 +2364,7 @@
 
      Der Bauzeitpunkt kommt beim Bauen aus der Uhr. Von Hand gepflegte
      Datumsangaben sind nach der zweiten Änderung falsch. */
-  var FASSUNG = '71', GEBAUT = '2026-10-23T05:01Z';
+  var FASSUNG = '72', GEBAUT = '2026-10-23T05:41Z';
 
   /* AG-GH-LIVE-001: JEDE TEXTSENKE MASKIERT.
      Seit Live-Daten von aussen kommen (GitHub-Kommentare, one-event.json),
