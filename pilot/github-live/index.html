@@ -279,7 +279,42 @@
   /* Ein offener Auftrag steht hell. Was geschehen ist, steht blass — die
      Liste sagt damit zweierlei zugleich, wofür es vorher zwei brauchte. */
   .agAuf.offen{opacity:1;}
-  .agAuf.tat{opacity:.42;}
+  /* WIE BLASS DARF "GESCHEHEN" SEIN? Peter am 23.10.: "liste ist zu
+     schwach". Nachgerechnet gegen den dunkelsten Grund (`--grund`
+     #05070C, ohne das Licht des Feldes) und gegen die Textfarbe der
+     Zeile (#C2CEE2):
+
+       Deckkraft   Kontrast    vs. .offen
+       .42         2,93:1      5,95x      <- war hier, unter AA
+       .60         4,95:1      2,94x
+       .62         5,23:1      2,75x      <- jetzt
+       .75         7,30:1      1,85x         zu nah an .offen
+
+     ZWEI Bedingungen zugleich, und darum ist es keine Geschmacksfrage:
+     Lesbar heisst 4,5:1 (AA, 12px), und die Liste muss WEITER zweierlei
+     sagen koennen -- was offen ist, steht hell, was geschehen ist, blass.
+     Bei .75 verschwindet der Unterschied, auf den die ganze Liste gebaut
+     ist. .62 erfuellt beides.
+
+     BEFUND BEIM MESSEN, und er ist groesser als diese Zeile: Die zweite
+     Bedingung greift im LIVEBETRIEB gar nicht. `auftrag` in `stromZeile`
+     verlangt `!E.beobachtet`, und `beobachtet` tragen ALLE Live-
+     Ereignisse. Es gibt dort also keine einzige `.offen`-Zeile -- die
+     ganze Liste stand blass, und zwar bei 2,93:1. Der Kommentar oben
+     ("damit sagt eine Liste zwei Dinge zugleich") gilt nur fuer Demo und
+     Archiv. Das erklaert Peters Befund vollstaendig und ist nicht mit
+     dieser Deckkraft behoben: Dass eine beobachtete Uebergabe kein
+     offener Auftrag ist, war eine Entscheidung (AG-GH-LIVE-004) -- dass
+     die Liste live damit ihre zweite Aussage verliert, war keine.
+     Gemeldet, nicht mitgeaendert; es ist eine Aenderung am Bild.
+
+     OFFEN, und nicht mitgeaendert: Die Herkunftszeile und `em` tragen
+     #8295B0 und kommen damit auch bei .62 nur auf 3,11:1. Das waere eine
+     Aenderung an der Farbe, nicht an der Deckkraft -- eine Stufe mehr und
+     eine Entscheidung Peters. Gemeldet, nicht gemacht.
+     NACHTRAG 46-5: entschieden und umgesetzt, siehe "DIE HERKUNFTSZEILE WAR
+     SCHWARZ" weiter unten -- die Herkunftszeile war nicht #8295B0. */
+  .agAuf.tat{opacity:.62;}
   .agAuf.tat s{text-decoration:none; font-size:9px; letter-spacing:.16em;
     text-transform:uppercase;}
   .agAuf u{text-decoration:none;
@@ -288,9 +323,20 @@
   .agAuf b{font-weight:500; font-size:11px; letter-spacing:.1em;
     text-transform:uppercase; opacity:.75;}
   .agAuf span{color:#C2CEE2;}
-  .agAuf em{font-style:normal; color:#8295B0; font-size:9px;
+  .agAuf em{font-style:normal; color:#B0C0D7; font-size:9px;
     letter-spacing:.16em; text-transform:uppercase;
     font-family:ui-monospace,SFMono-Regular,Menlo,monospace;}
+  /* DIE HERKUNFTSZEILE WAR SCHWARZ (gemessen am 23.10., Aufgabe 46-5).
+     `small.agHerkunft` hatte keine eigene Farbe; der Adapter setzt nur
+     `opacity:.75`. Sie erbte also Schwarz und stand in einer geschehenen
+     Zeile (.62) mit 1,03:1 auf dem Grund -- unsichtbar. Die Annahme oben
+     ("#8295B0, 3,11:1") galt nur fuer `em`.
+     Peters Entscheidung vom 23.10.: lesbar machen. #B0C0D7 erreicht bei .62
+     mindestens 4,5:1 und bleibt blasser als der Text (#C2CEE2), damit die
+     Rangfolge der Zeile bleibt. Volle eigene Deckkraft, denn mit .75 kaeme
+     selbst #C2CEE2 nur auf 3,36:1. Die Rechnung steht im Nachweis
+     (AG-EVENT-JOURNAL-001, Teil O2), nicht hier. */
+  #agLaeuft .agAuf small.agHerkunft{color:#B0C0D7; opacity:1;}
   /* Der Verlauf steht nicht mehr in einer Spalte, sondern dort, wo er
      geschieht — am Empfänger, nach außen geschrieben, und er vergeht. */
   #agRufe{position:fixed; inset:0; z-index:4; pointer-events:none;}
@@ -611,6 +657,24 @@
       transition:transform .3s ease, filter .3s ease, opacity .45s ease;}
     #agEcke:hover{transform:scale(1.10); filter:brightness(1.6) saturate(1.05);
       z-index:12;}}
+  /* AUF DEM TASTGERAET HELLT DIE LISTE BEIM ANTIPPEN AUF -- Peters
+     Entscheidung vom 23.10. (Aufgabe 46-5): "auf dem ipad funktionieren die
+     anderen bloecke mit antippen".
+     Die Abwaegung darueber bleibt gueltig, sie wird nur feiner geschnitten:
+     Der KASTEN `#agEcke` nimmt weiter keine Beruehrung an, nur die SCHRIFT
+     der Zeilen. Ein Tipp auf eine Zeile hellt die Liste auf wie Name, Kopf
+     und Werkname (`lesen`, sechs Sekunden, siehe "Beruehren hellt auf");
+     ein Tipp daneben -- zwischen die Zeilen, rechts neben den Text -- geht
+     weiter durch zum Agenten darunter. Ist die Liste weggeschaltet oder
+     ausgeklungen, nimmt auch die Schrift nichts an. */
+  #agEcke .agAuf > *{pointer-events:auto;}
+  #agEcke.leise .agAuf > *, #agEcke.ausklang .agAuf > *{pointer-events:none;}
+  #agEcke{transform-origin:left bottom;
+    transition:transform .3s ease, filter .3s ease, opacity .45s ease;}
+  #agEcke.lesen{transform:scale(1.10); filter:brightness(1.6) saturate(1.05);
+    z-index:12;}
+  body.hellAn #agEcke.lesen{
+    filter:brightness(calc(var(--agHell) * 1.6)) saturate(1.05);}
   #agWerkName:hover, #agWerkName.lesen{opacity:1;}
   /* Die Auskunft zum Namen: nur beim Zeigen, sonst nimmt sie Platz weg,
      den das Feld braucht. */
@@ -2331,7 +2395,7 @@
 
      Der Bauzeitpunkt kommt beim Bauen aus der Uhr. Von Hand gepflegte
      Datumsangaben sind nach der zweiten Änderung falsch. */
-  var FASSUNG = '71', GEBAUT = '2026-10-23T05:01Z';
+  var FASSUNG = '72', GEBAUT = '2026-10-23T12:58Z';
 
   /* AG-GH-LIVE-001: JEDE TEXTSENKE MASKIERT.
      Seit Live-Daten von aussen kommen (GitHub-Kommentare, one-event.json),
@@ -7434,8 +7498,10 @@
      Ohne das wäre die Regel am iPad, wo es kein Zeigen gibt, wirkungslos. */
   (function () {
     /* `agMarke` gehoert dazu, seit sie einen Griff traegt: ohne Tippen waere
-       sie nur am Zeigegeraet beweglich, und das Zielgeraet ist ein iPad. */
-    ['agMarke', 'agKopf', 'agWerkName'].forEach(function (id) {
+       sie nur am Zeigegeraet beweglich, und das Zielgeraet ist ein iPad.
+       `agEcke` seit 46-5: Der Kasten nimmt keine Beruehrung an, nur die
+       Schrift seiner Zeilen; deren Tipp steigt bis hierher auf. */
+    ['agMarke', 'agKopf', 'agWerkName', 'agEcke'].forEach(function (id) {
       var el = document.getElementById(id);
       if (!el) return;
       el.addEventListener('click', function (ev) {

@@ -1642,6 +1642,176 @@ function koerper(f) {
   zeile('eigenes Elternteil abgewiesen',
         /parent_id gleich task_id/.test(rn4.grund), true);
 
+  /* ================================================ O: DIE LISTE LESEN ===
+     Peters Befund vom 23.10., woertlich: "liste ist zu schwach, zudem
+     sollte sie sich erhellen bei mouse over."
+
+     Die Liste ist bis heute von KEINEM Nachweis angefasst worden -- sie
+     ist das, was man am laufenden Strom liest, und sie war nicht gemessen.
+     Darum steht das hier, obwohl dieser Nachweis vom Vertrag handelt: Die
+     Zeilen entstehen durch die Ereignisse der Teile oben, es braucht also
+     keinen zweiten Aufbau.
+
+     Gemessen wird nicht "sieht besser aus", sondern zwei Bedingungen, die
+     gegeneinander laufen:
+       1. LESBAR: 4,5:1 gegen den dunkelsten Grund (AA, 12px).
+       2. UNTERSCHEIDBAR: Was offen ist, muss heller stehen als was
+          geschehen ist -- darauf ist die ganze Liste gebaut, und eine zu
+          starke Blassstufe nimmt ihr genau diese Aussage.
+     Das Licht des Feldes hinter der Liste wird NICHT mitgerechnet; es
+     macht den Grund heller, also ist die Rechnung die unguenstigste. */
+  console.log('\nO — Die Liste ist lesbar — und sagt live nur EINES');
+  console.log('    erwartet: >= 4,5:1 gegen den Grund; keine offene Zeile im Live\n');
+  const liste = await s.evaluate(() => {
+    const t = document.querySelector('#agLaeuft .agAuf.tat');
+    const o = document.querySelector('#agLaeuft .agAuf.offen');
+    const sp = t && t.querySelector('span');
+    const w = getComputedStyle(document.documentElement)
+                .getPropertyValue('--grund').trim();
+    return { zeilen: document.querySelectorAll('#agLaeuft .agAuf').length,
+             opTat: t ? getComputedStyle(t).opacity : null,
+             opOffen: o ? getComputedStyle(o).opacity : null,
+             farbe: sp ? getComputedStyle(sp).color : null,
+             grund: w };
+  });
+  console.log('        ' + liste.zeilen + ' Zeilen · Grund ' + liste.grund +
+              ' · Text ' + liste.farbe);
+  zeile('es gibt überhaupt eine Zeile', liste.zeilen > 0, true);
+  zeile('Deckkraft einer geschehenen Zeile', liste.opTat, '0.62');
+  /* Die Rechnung steht HIER, nicht in der Seite: ein Nachweis, der seine
+     Schwelle in den Gegenstand hineinlegt, prueft sich selbst. */
+  const rgb = (c) => (String(c).match(/[\d.]+/g) || []).slice(0, 3).map(Number);
+  const hx = (c) => { const m = /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i
+                        .exec(String(c).trim());
+                      return m ? m.slice(1).map(v => parseInt(v, 16)) : null; };
+  const lum = (p) => { const f = (v) => { v /= 255;
+                         return v <= 0.03928 ? v / 12.92
+                                             : Math.pow((v + 0.055) / 1.055, 2.4); };
+                       return 0.2126 * f(p[0]) + 0.7152 * f(p[1]) + 0.0722 * f(p[2]); };
+  const kontrast = (a, b) => { const L = [lum(a), lum(b)].sort((x, y) => y - x);
+                               return (L[0] + 0.05) / (L[1] + 0.05); };
+  const vg = rgb(liste.farbe), gr = hx(liste.grund), al = Number(liste.opTat);
+  const drauf = vg.map((v, i) => v * al + gr[i] * (1 - al));
+  const k = kontrast(drauf, gr);
+  console.log('        Kontrast bei ' + al + ': ' + k.toFixed(2) + ':1');
+  zeile('Kontrast erreicht AA (>= 4,5:1)', k >= 4.5, true);
+  /* DIE GEGENBEDINGUNG IST IM LIVEBETRIEB NICHT MESSBAR, und das ist der
+     eigentliche Befund dieses Teils. Zuerst stand hier ein "nicht
+     gemessen" -- ein stillschweigend ausgelassener Fall. Nachgesehen,
+     warum: `auftrag` in `stromZeile` verlangt `!E.beobachtet`, und
+     `beobachtet` tragen ALLE Live-Ereignisse (gesetzt in `__agEreignis`).
+     Es kann live also keine `.offen`-Zeile geben.
+
+     Damit sagt die Liste live nur EINES, nicht zweierlei -- und bis zu
+     dieser Fassung stand sie dabei ganz auf .42, also unter AA. Das ist
+     Peters Befund, vollstaendig. Behoben ist davon die Lesbarkeit; dass
+     die zweite Aussage fehlt, ist eine Aenderung am Bild und steht als
+     Befund. Gemessen wird deshalb die TATSACHE, nicht eine Hoffnung:
+     keine offene Zeile im Livebetrieb. Faellt diese Zeile eines Tages,
+     hat jemand das Bild geaendert -- und dann soll es auffallen. */
+  zeile('live gibt es keine offene Zeile (Befund, nicht Wunsch)',
+        liste.opOffen, null);
+
+  /* DAS ERHELLEN BEI MOUSEOVER GIBT ES SCHON, und es ist kein Versehen,
+     dass Peter es nicht gesehen hat: Die Regel steht unter
+     `@media (hover:hover)`. Auf dem iPad gibt es keinen Zeiger, der nur
+     zeigt -- und `#agEcke` traegt mit Absicht `pointer-events:none`, weil
+     die Liste sonst jeden Tipp auf peter schluckt, der links bei 180 Grad
+     steht. Geprueft wird hier, DASS die Regel existiert; ob sie greift,
+     entscheidet das Geraet. */
+  const heller = await s.evaluate(() => {
+    let r = '';
+    for (const bl of document.styleSheets) {
+      let rs; try { rs = bl.cssRules; } catch (e) { continue; }
+      for (const x of rs) {
+        if (x.type !== CSSRule.MEDIA_RULE) continue;
+        if (!/hover/.test(x.conditionText || '')) continue;
+        for (const y of x.cssRules)
+          if (/#agEcke:hover/.test(y.selectorText || '')) r = y.style.filter || '(ohne filter)';
+      }
+    }
+    return r;
+  });
+  zeile('Erhellen am Zeigegerät ist angelegt', /brightness/.test(heller), true);
+  console.log('        ' + (heller || '(keine Regel gefunden)') +
+              ' — auf einem Tastgerät greift das nicht');
+
+  /* ======================= O2: ANTIPPEN UND HERKUNFT (46-5) ===
+     Peters Entscheidung vom 23.10.: Auf dem iPad hellt die Liste beim
+     Antippen auf wie Name, Kopf und Werkname, und ein Tipp neben die Zeilen
+     geht weiter zum Agenten darunter. Die Herkunftszeile wird lesbar.
+
+     Gemessen in einem EIGENEN Kontext mit `hasTouch`. Dort gilt
+     `(hover:hover)` nicht -- wie auf dem iPad --, und die Regel aus Teil O
+     greift nicht. Der Teil oben misst das Zeigegeraet, dieser das Tastgeraet.
+
+     Eine Probezeile im Bau von `stromZeile`, ausdruecklich markiert. Gemessen
+     wird das Verhalten der Seite, nicht ein Ereignis; darum genuegt sie.
+     Die Kontrastrechnung ist dieselbe wie in Teil O (`kontrast`, `gr`). */
+  console.log('\nO2 — Auf dem Tastgerät: Antippen hellt auf, daneben geht durch; Herkunft lesbar');
+  console.log('    erwartet: kein (hover:hover); Kasten ohne Berührung, Schrift mit;');
+  console.log('    Tipp auf die Schrift setzt `lesen`; Herkunft und em >= 4,5:1\n');
+  const o2Err = [];
+  const o2Kontext = await b.newContext({ viewport: { width: 1194, height: 834 }, hasTouch: true });
+  const o2Seite = await o2Kontext.newPage();
+  o2Seite.on('pageerror', e => o2Err.push(String(e)));
+  await o2Seite.route('**api.github.com/**', route => route.fulfill({ status: 200,
+    contentType: 'application/json', body: '[]' }));
+  await o2Seite.goto(n.adr + '?live=github', { waitUntil: 'load' });
+  await o2Seite.waitForFunction(() => document.getElementById('agLaeuft'));
+  const o2 = await o2Seite.evaluate(() => {
+    const l = document.getElementById('agLaeuft'), ecke = document.getElementById('agEcke');
+    const z = document.createElement('div');
+    z.className = 'agAuf tat'; z.setAttribute('data-probe', '46-5');
+    z.innerHTML = '<u>atlas</u> <s>handoff</s><br><span>Probezeile</span>' +
+                  '<br><small class="agHerkunft">AG-PROBE · unter AG-X</small> <em>EM</em>';
+    l.appendChild(z);
+    const sp = z.querySelector('span').getBoundingClientRect();
+    const ek = ecke.getBoundingClientRect();
+    const auf = document.elementFromPoint(sp.left + 3, sp.top + sp.height / 2);
+    /* Rechts neben dem Text, aber noch im Kasten der Liste. */
+    const nx = Math.min(ek.right - 2, sp.right + 40), ny = sp.top + sp.height / 2;
+    const neben = document.elementFromPoint(nx, ny);
+    const c = (q) => { const g = getComputedStyle(z.querySelector(q));
+                       return { farbe: g.color, deck: Number(g.opacity) }; };
+    return { hover: matchMedia('(hover:hover)').matches,
+             kasten: getComputedStyle(ecke).pointerEvents,
+             aufSchrift: !!(auf && ecke.contains(auf)),
+             nebenImKasten: nx > sp.right && nx < ek.right,
+             daneben: !!(neben && ecke.contains(neben)),
+             zeile: Number(getComputedStyle(z).opacity),
+             text: getComputedStyle(z.querySelector('span')).color,
+             herkunft: c('small.agHerkunft'), em: c('em') };
+  });
+  zeile('Tastgerät: (hover:hover) gilt nicht', o2.hover, false);
+  zeile('der Kasten der Liste nimmt keine Berührung an', o2.kasten, 'none');
+  zeile('ein Punkt auf der Schrift trifft die Liste', o2.aufSchrift, true);
+  zeile('der Punkt daneben liegt noch im Kasten', o2.nebenImKasten, true);
+  zeile('ein Punkt daneben trifft NICHT die Liste', o2.daneben, false);
+  for (const [w, x] of [['Herkunftszeile', o2.herkunft], ['em', o2.em]]) {
+    const al = o2.zeile * x.deck;
+    const o2k = kontrast(rgb(x.farbe).map((v, i) => v * al + gr[i] * (1 - al)), gr);
+    console.log('        ' + w + ': ' + x.farbe + ' · Deckkraft ' + al.toFixed(3) +
+                ' · ' + o2k.toFixed(2) + ':1');
+    zeile(w + ' erreicht AA (>= 4,5:1)', o2k >= 4.5, true);
+  }
+  zeile('die Herkunft bleibt blasser als der Text',
+        lum(rgb(o2.herkunft.farbe)) < lum(rgb(o2.text)), true);
+  /* `force`: Der Finger trifft die STELLE, egal was dort liegt -- so wie auf
+     dem iPad. Ohne `force` wartet Playwright, bis die Schrift Beruehrung
+     annimmt; in der Gegenprobe (Stand ohne 46-5) endete das in einer
+     Zeitueberschreitung und Rueckgabe 2 statt in einem sauberen FEHL. */
+  await o2Seite.tap('#agLaeuft .agAuf[data-probe] span', { force: true, timeout: 5000 });
+  await o2Seite.waitForTimeout(450);
+  const o2Nach = await o2Seite.evaluate(() => { const e = document.getElementById('agEcke');
+    return { lesen: e.classList.contains('lesen'), filter: getComputedStyle(e).filter }; });
+  zeile('Antippen setzt `lesen` an der Liste', o2Nach.lesen, true);
+  zeile('und die Liste wird heller', /brightness/.test(o2Nach.filter), true);
+  console.log('        ' + o2Nach.filter);
+  zeile('keine Seitenfehler auf dem Tastgerät', o2Err.length, 0);
+  if (o2Err.length) console.log('        ' + o2Err.join('\n        '));
+  await o2Kontext.close();
+
   console.log('\nI — Was auch jetzt noch NICHT geschieht');
   console.log('    erwartet: kein Ballwechsel aus Lebenszyklusereignissen,');
   console.log('    und reviewed/accepted/merged/published fehlen weiter\n');
