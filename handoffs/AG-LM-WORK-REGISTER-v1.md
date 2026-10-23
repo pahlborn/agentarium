@@ -1,5 +1,8 @@
 # AG-LM-WORK-REGISTER — V1
 
+> **Verbindliche Einordnung nach erneutem Vorgabenabgleich am2026-10-23:** Dieses Register ist Atlas' Arbeitsplanung und Anforderungsentwurf. Produktspezifikation/Abnahmekriterien sind erst nach tatsächlicher Archibald-Rückgabe entsprechend belegt; TC001–014 bleiben Atlas-Entwürfe bis zur unabhängigen Sentinel-Testplanung. Frühere direkte oder indirekte Verbindlichkeitserklärungen der Atlas-Ausarbeitung werden hiermit korrigiert. Peters Originalanforderungen gelten unverändert. Lot wird nicht für Archibalds Aufruf oder Spezifikation eingesetzt. Die folgenden historischen Zustandsangaben sind Momentaufnahmen; maßgeblich ist die belegte aktuelle Lieferung, nicht ein altes „offen“ im Text.
+
+
 Stand: 2026-10-21. Autor/Koordination: Atlas. Nutzerentscheidung: eindeutige IDs für Epics, User Stories, Tasks und Testfälle; vollständige Hierarchie, beleggebundene Übergaben und Abschluss erst nach erfolgreicher Arbeit und Prüfung. Ersetzt als führendes Strukturregister die losen E1/E2/E3- und LM-S-Bezeichnungen aus PR46-Kommentaren6320102814/6320171504. Historie bleibt erhalten.
 
 Projekt: agentarium. Lauf unverändert: AG-EVENT-JOURNAL-001. Geprüfte Produktbaseline: ba9796294726a01d355ecfac59d26435984d5582. Produktzustand und Plan sind getrennt; dieses Register ist keine Implementierungs-/Abnahmebehauptung.
