@@ -144,7 +144,8 @@ function koerper(f) {
   const z = await s.evaluate(() => ({
     komm: (window.__agGithubBruecke || {}).kommunikation,
     leben: (window.__agGithubBruecke || {}).lebenszyklus,
-    fassung: (window.__agGithubBruecke || {}).fassung
+    fassung: (window.__agGithubBruecke || {}).fassung,
+    akteure: ((window.__agGithubBruecke || {}).akteure || []).slice().sort()
   }));
   zeile('kommunikation', z.komm, 'beobachtet-v1');
   /* V3. Jede Stufe hat das Wort weitergestellt, weil jede etwas aendert,
@@ -155,6 +156,17 @@ function koerper(f) {
      Lebenszyklusarten deshalb gar nicht erst. */
   zeile('lebenszyklus', z.leben, 'gemeldet-v5');
   console.log('        Fassung des Originals: ' + z.fassung);
+
+  /* DIE AKTEURSLISTE IST DER TORWAeCHTER, nicht ein Beiwerk. Der Adapter
+     baut `AKTEURE` aus genau diesem Feld (github-live.js: `(B.akteure ||
+     []).forEach`) und weist jedes Ereignis ab, dessen actor nicht darin
+     steht. Bis Fassung 70 fehlte `lot` -- der Monitor konnte den nicht
+     zeigen, der ihn gebaut hat, und Weg A war fuer ihn verschlossen. Peter
+     hat am 23.10. aufgenommen; geprueft wird deshalb die GANZE Liste, denn
+     ein stiller Verlust eines anderen Namens waere dieselbe Sperre fuer
+     den Betroffenen. */
+  zeile('Akteure (die Liste des Adapters)', z.akteure.join(','),
+        'archibald,argus,atlas,cadence,forge,lot,nova,peter,scout,sentinel');
 
   /* ===== SCHRITT 2b: WAS BEIM VERBINDEN SCHON OFFEN WAR =====
      Eine Historie mit drei Aufgaben, die sich unterscheiden MUESSEN:
@@ -1048,23 +1060,71 @@ function koerper(f) {
   zeile('J1 liegt unter den ersten vier Ringen von forge',
         (lage.forge || []).indexOf('AG-EVJ-J1') >= 0 &&
         (lage.forge || []).indexOf('AG-EVJ-J1') < 4, true);
-  const wA = await s.evaluate(() => {
+  /* ZWEI PROBEN WAREN ZU WENIG, und das ist am 23.10. aufgefallen --
+     nicht durch Nachdenken, sondern weil EINE zusaetzliche `evaluate`
+     weiter oben (die Akteursliste) den Messzeitpunkt um ein paar
+     Millisekunden verschob und die Zeile damit umkippte. Gemessen hatte
+     sie `geklemmt -0.8675 -> -0.8675`, also GAR KEINE Bewegung, und
+     verlangt hatte sie eine echte Abnahme.
+
+     BELEGT ist: Die Zeile haengt am Messzeitpunkt und kippte durch eine
+     Aenderung, die mit ihr nichts zu tun hat. Zurueck geht es nur, solange
+     `L.t % 1.15 < 0.17`, also in rund 15 von 100 Teilen der Zeit; zwei
+     Proben sehen von dieser Flanke nur, was zufaellig dazwischen liegt.
+     Die abgetastete Bahn zeigt es: 2 von 16 Schritten gehen zurueck.
+
+     NICHT BELEGT ist, warum zwei Proben im Abstand von 1,4 s -- also
+     ueber mehr als einen ganzen Takt -- auf vier Stellen GENAU denselben
+     Wert lasen. Rein aus der Flanke folgt das nicht; dazu muesste `dt`
+     in dieser Zeit nicht angekommen sein (gedrosselte Bilder im
+     kopflosen Browser waere eine Vermutung, keine Messung). Das bleibt
+     offen und steht hier, statt weggeschrieben zu werden. Die Zeile ist
+     davon unabhaengig richtig geworden: Sie behauptet jetzt das, was im
+     Produkt steht, und stellt ihre Voraussetzung selbst fest.
+
+     Fehlerklasse wie `git push | tail`: Das Messgeraet wurde fuer den
+     Gegenstand genommen.
+
+     Jetzt wird die BAHN abgetastet -- 16 Proben ueber 1,6 s, also ueber
+     mehr als einen ganzen Stocktakt -- und die Behauptung ist die, die im
+     Produkt steht: Ein geklemmter Ring geht NIE vorwaerts und mindestens
+     einmal zurueck. Und vorher wird die Voraussetzung festgestellt, statt
+     sie anzunehmen: Klemmt J1 in diesem Augenblick ueberhaupt, und ist er
+     `begonnen`? Ein aufgeloester oder nur zugewiesener Ring steht
+     naemlich ebenfalls still -- er haette die alte Zeile bestanden, aus
+     dem falschen Grund. */
+  const probe = () => s.evaluate(() => {
     const st = (window.__agStand && window.__agStand()) || {};
     const g = (st.aufgaben || []);
-    const f = (id) => (g.filter(a => a.aufgabe === id)[0] || {}).w;
-    return { j1: f('AG-EVJ-J1'), r1: f('AG-EVJ-R1') };
+    const f = (id) => (g.filter(a => a.aufgabe === id)[0] || {});
+    const j = f('AG-EVJ-J1'), r = f('AG-EVJ-R1');
+    return { j1: j.w, r1: r.w,
+             klemmen: (j.klemmt || []).length, zustand: j.zustand };
   });
-  await s.waitForTimeout(1400);
-  const wB = await s.evaluate(() => {
-    const st = (window.__agStand && window.__agStand()) || {};
-    const g = (st.aufgaben || []);
-    const f = (id) => (g.filter(a => a.aufgabe === id)[0] || {}).w;
-    return { j1: f('AG-EVJ-J1'), r1: f('AG-EVJ-R1') };
-  });
-  zeile('der geklemmte Ring läuft nicht vorwärts', wB.j1 < wA.j1, true);
-  zeile('Gegenprobe: ein laufender Ring tut es', wB.r1 > wA.r1, true);
-  console.log('        geklemmt ' + wA.j1 + ' → ' + wB.j1 +
-              ' · laufend ' + wA.r1 + ' → ' + wB.r1);
+  const p0 = await probe();
+  zeile('J1 klemmt im Augenblick der Messung', p0.klemmen > 0, true);
+  zeile('J1 ist begonnen (ein ruhender Ring stünde ohnehin)',
+        p0.zustand, 'begonnen');
+  const bahn = [p0];
+  for (let i = 0; i < 16; i++) { await s.waitForTimeout(100); bahn.push(await probe()); }
+  let vor = 0, zurueck = 0, rVor = 0;
+  for (let i = 1; i < bahn.length; i++) {
+    const dj = bahn[i].j1 - bahn[i - 1].j1, dr = bahn[i].r1 - bahn[i - 1].r1;
+    if (dj > 1e-9) vor++;
+    if (dj < -1e-9) zurueck++;
+    if (dr > 1e-9) rVor++;
+  }
+  zeile('der geklemmte Ring geht nie vorwärts', vor, 0);
+  zeile('und zuckt im Stocktakt zurück', zurueck > 0, true);
+  /* Die Gegenprobe prueft das MESSGERAeT: Ohne sie bestuende auch ein Ring,
+     den ueberhaupt niemand mehr weiterstellt. R1 bei scout laeuft. */
+  zeile('Gegenprobe: ein laufender Ring geht in jedem Schritt vorwärts',
+        rVor, bahn.length - 1);
+  console.log('        geklemmt ' + bahn[0].j1.toFixed(4) + ' → ' +
+              bahn[bahn.length - 1].j1.toFixed(4) +
+              ' (' + vor + '× vor, ' + zurueck + '× zurück)' +
+              ' · laufend ' + bahn[0].r1.toFixed(4) + ' → ' +
+              bahn[bahn.length - 1].r1.toFixed(4));
 
   /* FREMDAUSSAGE KLEMMT NICHT. Dieselbe Regel wie beim Beginn: Wer klemmt,
      sagt es selbst. */
@@ -1604,9 +1664,16 @@ function koerper(f) {
   console.log('bleibt liegen, eine Auflösung trifft genau ihre Klemme und');
   console.log('behauptet keinen Beginn und keinen Abschluss — in der');
   console.log('Wiederherstellung dieselbe Lage wie am laufenden Strom.');
-  console.log('Offen und sichtbar offen: reviewed/accepted/merged/published');
-  console.log('fehlen, die Archivwiedergabe aus derselben Quelle fehlt, und');
-  console.log('der Originalbeleg hat noch kein eigenes Feld.');
+  /* DIESE DREI SAeTZE WAREN ZWEI DRITTEL FALSCH, und sie standen unter
+     JEDEM gruenen Lauf. Am 23.10. gegen den Code gehalten: Die vier Arten
+     sind gebaut (acht Fundstellen im Lebenszyklus-Zweig), und der
+     Originalbeleg hat sein eigenes Feld (`beleg`/`belegRef`). Stehen
+     geblieben waren sie, weil ein Schlusssatz nichts misst -- also faellt
+     er auch nie auf. Was hier steht, ist jetzt am Code geprueft. */
+  console.log('Offen und sichtbar offen: eine Archivwiedergabe aus derselben');
+  console.log('Quelle fehlt, es gibt bis heute keinen ECHTEN Erzeuger der');
+  console.log('Lebenszyklusarten (das Relais liefert keine davon), und');
+  console.log('keine Abnahme auf Peters Gerät.');
   console.log('Synthetische Körper, kein Relais, keine Abnahme am iPad.');
   process.exit(0);
 })().catch(e => { ungeprueft('Nachweis abgebrochen: ' + (e && e.message)); });
