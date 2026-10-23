@@ -2398,7 +2398,7 @@
 
      Der Bauzeitpunkt kommt beim Bauen aus der Uhr. Von Hand gepflegte
      Datumsangaben sind nach der zweiten Änderung falsch. */
-  var FASSUNG = '75', GEBAUT = '2026-10-23T07:07Z';
+  var FASSUNG = '76', GEBAUT = '2026-10-23T07:42Z';
 
   /* AG-GH-LIVE-001: JEDE TEXTSENKE MASKIERT.
      Seit Live-Daten von aussen kommen (GitHub-Kommentare, one-event.json),
@@ -6395,6 +6395,73 @@
                    blocked: 1, resolved: 1, aborted: 1 };
   var GH_KENNUNG = new RegExp('^[A-Za-z0-9][A-Za-z0-9._:/-]{0,119}$');
   function ghKenn(x) { return (typeof x === 'string' && GH_KENNUNG.test(x)) ? x : ''; }
+  /* ============ DIE ELTERNKETTE, UND SIE ENDET IMMER ============
+
+     Archibalds Anforderung R2: "Die Details zeigen die Kette bis zur Wurzel.
+     Laengere Zyklen (A->B->A) werden als Konflikt sichtbar und enden nicht in
+     einer Schleife. Das ist eine Luecke: Heute wird nur der Fall 'eigenes
+     Elternteil' abgewiesen."
+
+     Atlas' Eingrenzung vom 23.10.: "Zyklusdiagnose in vorhandenen Details ist
+     Bestandteil des verlangten Konfliktnachweises, kein neues
+     Oberflaechenkonzept; keine neue Bildsprache daraus ableiten." Also kommt
+     kein Zeichen, keine Farbe und keine Form ins Bild -- die Zeile, die
+     bisher "unter X" sagte, sagt jetzt "unter X <- Y <- Z", und wo es sich
+     im Kreis dreht, endet sie mit dem Wort.
+
+     ZWEI SICHERUNGEN, und sie sichern Verschiedenes:
+       `gesehen`     verhindert den Kreis. Sie ist die eigentliche Antwort
+                     auf R2 und reicht allein schon, damit die Schleife nicht
+                     unendlich laeuft -- mehr Schritte als verschiedene
+                     Kennungen kann es nicht geben.
+       `KETTE_MAX`   deckelt die LAENGE. Nicht gegen die Schleife, sondern
+                     gegen die Zeile: Das hier ist ein Text, den jemand
+                     liest, und eine Kette aus dreissig Gliedern waere keine
+                     Auskunft mehr. Zwoelf, weil die tiefste Kette im
+                     Arbeitsregister drei Ebenen hat -- epic, story, task --
+                     und das Vierfache reicht fuer jede Ueberraschung.
+
+     DAS ELTERNTEIL WIRD IM SELBEN PROJEKT UND LAUF GESUCHT. Das ist
+     Archibalds Annahme A1, und sie steht hier als Code, nicht als Hoffnung:
+     Zwei Projekte duerfen dieselbe Aufgabenkennung fuehren -- genau das
+     prueft Teil A4 -- und ein Elternbezug, der ins andere Projekt greift,
+     waere eine erfundene Zuordnung.
+
+     WAS HIER NICHT STEHT: "Eltern unbekannt". Ein Elternteil, das nicht auf
+     der Buehne liegt, laesst die Kette einfach enden, genau wie bisher. Das
+     Wort gehoert zu R1, und R1 ist nicht freigegeben. */
+  var KETTE_MAX = 12;
+  function aufgabeMitId(id, spur) {
+    for (var name in arbeit) {
+      var S = arbeit[name];
+      if (!S || S.aus) continue;
+      for (var q = 0; q < S.liste.length; q++) {
+        var L = S.liste[q];
+        if (L.aufgabe !== id) continue;
+        /* A1: dasselbe Projekt, derselbe Lauf. */
+        if ((L.projekt || '') !== (spur.project_id || '')) continue;
+        if ((L.lauf || '') !== (spur.run_id || '')) continue;
+        return L;
+      }
+    }
+    return null;
+  }
+  function elternKette(spur, erstes) {
+    var teile = [], gesehen = {}, id = erstes, n = 0;
+    /* Die eigene Kennung zaehlt mit -- sonst waere A -> B -> A unsichtbar. */
+    if (spur && spur.task_id) gesehen[spur.task_id] = 1;
+    while (id) {
+      if (gesehen[id]) { teile.push('Zyklus'); break; }
+      if (n++ >= KETTE_MAX) { teile.push('\u2026'); break; }
+      gesehen[id] = 1;
+      teile.push(id);
+      var L = aufgabeMitId(id, spur);
+      if (!L) break;                 /* nicht auf der Buehne: Kette endet */
+      id = L.eEltern;
+    }
+    return teile.join(' \u2190 ');
+  }
+
   function spurWort(E) {
     var s = E.spur;
     if (!s) return '';
@@ -6408,7 +6475,7 @@
     /* Typ nur, wenn er etwas sagt: `task` ist die Vorgabe, keine Meldung. */
     if (E.eTyp && E.eTyp !== 'task') t += ' \u00b7 ' + E.eTyp;
     if (E.eFassung) t += ' \u00b7 Fassung ' + E.eFassung;
-    if (E.eEltern) t += ' \u00b7 unter ' + E.eEltern;
+    if (E.eEltern) t += ' \u00b7 unter ' + elternKette(s, E.eEltern);
     if (E.art === 'handoff')
       t += ' \u00b7 beobachtete \u00dcbergabe \u2014 keine Annahme, kein Arbeitsbeginn';
     else if (E.art === 'contribution')

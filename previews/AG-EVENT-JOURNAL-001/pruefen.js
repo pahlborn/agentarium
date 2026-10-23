@@ -1772,6 +1772,95 @@ function koerper(f) {
   console.log('        (kein Abschluss nach oben — das ist offener Umfang,');
   console.log('         nicht eine stille Ableitung)');
 
+  /* ============ N3: DIE ELTERNKETTE, UND EIN ZYKLUS ============
+     Archibald R2, von Atlas als Teil des Konfliktnachweises eingegrenzt:
+     "Zyklusdiagnose in vorhandenen Details ... kein neues
+     Oberflaechenkonzept." Also wird dieselbe Zeile gemessen, die bisher
+     "unter X" sagte -- keine neue Stelle, kein neues Zeichen.
+
+     Die GEFAHR an R2 ist nicht die Anzeige, sondern die Schleife: A unter B,
+     B unter A, und ein Durchgang, der nach oben laeuft, laeuft fuer immer.
+     Deshalb prueft dieser Teil zweierlei, und das Zweite ist das
+     Wichtigere: dass das Wort dasteht, UND dass die Seite danach noch
+     antwortet.
+
+     GEMESSEN WIRD DIE LISTE, nicht die Tafel -- und beim ersten Anlauf habe
+     ich genau das verwechselt. `#agGhLetztes` baut der ADAPTER, und der
+     kennt die Buehne nicht: Er sieht nur das eintreffende Ereignis und
+     schreibt `' · unter ' + ev.parent_id`, also das unmittelbare Elternteil
+     und sonst nichts. Die Kette kann nur das Original bilden, denn nur es
+     weiss, was offen liegt -- und sie erscheint in der Herkunftszeile der
+     Liste (`spurWort`). Zwei Zeilen, die fast gleich aussehen und aus zwei
+     verschiedenen Koepfen kommen. */
+  const herkunft = () => s.evaluate(() => {
+    const e = document.querySelectorAll('#agLaeuft .agAuf .agHerkunft');
+    return e.length ? e[e.length - 1].textContent : '';
+  });
+  console.log('\nN3 — Die Elternkette bis zur Wurzel, und ein Zyklus');
+  console.log('    erwartet: Kette mit Pfeilen; bei A->B->A endet sie mit');
+  console.log('              "Zyklus" — und die Seite antwortet danach noch\n');
+
+  /* Die bestehende Kette TK-011 -> US-006 -> EP-002 ist drei Ebenen tief.
+     Eine Meldung, die den Elternbezug mitbringt, muss sie ganz zeigen. */
+  const rk1 = await liefern('N3:kette', koerper({
+    id: 'AG-EVENT-JOURNAL-001:forge:received:TK011-kette', task: 'AG-LM-TK-011',
+    actor: 'forge', reporter: 'forge', kind: 'received',
+    eltern: 'AG-LM-US-006',
+    title: 'Meldung zu TK-011, die ihren Elternbezug mitbringt'
+  }), 90711);
+  const h1 = await herkunft();
+  console.log('        Liste: ...' + h1.replace(/\s+/g, ' ').trim().slice(-110));
+  console.log('        Tafel: ...' + (rk1.letztes || '').replace(/\s+/g, ' ').trim().slice(-70));
+  zeile('die Kette läuft bis zur Wurzel',
+        /unter AG-LM-US-006 \u2190 AG-LM-EP-002/.test(h1), true);
+  zeile('und nicht weiter — EP-002 hat kein Elternteil',
+        /AG-LM-EP-002 \u2190/.test(h1), false);
+  /* Und die Tafel bleibt, was sie war: das unmittelbare Elternteil. Das ist
+     kein Mangel, sondern die Arbeitsteilung -- der Adapter kennt die Buehne
+     nicht. Steht hier eines Tages eine Kette, hat jemand dem Adapter Wissen
+     gegeben, das er nicht haben kann. */
+  zeile('die Tafel nennt weiter nur das unmittelbare Elternteil',
+        /unter AG-LM-US-006(?! \u2190)/.test(rk1.letztes), true);
+
+  /* UND JETZT DER KREIS. Zwei Vergaben, die sich gegenseitig als Elternteil
+     nennen. Beides sind NEUE Kennungen, also greift R3 hier nicht -- es ist
+     kein Widerspruch zu einer bestehenden Vergabe, sondern ein Kreis
+     zwischen zwei gueltigen. */
+  await liefern('N3:z1', koerper({
+    id: 'AG-EVENT-JOURNAL-001:atlas:assigned:Z1', task: 'AG-EVJ-Z1',
+    actor: 'atlas', reporter: 'atlas', recipient: 'nova', kind: 'assigned',
+    eltern: 'AG-EVJ-Z2', title: 'Z1 nennt Z2 als Elternteil' }), 90712);
+  await liefern('N3:z2', koerper({
+    id: 'AG-EVENT-JOURNAL-001:atlas:assigned:Z2', task: 'AG-EVJ-Z2',
+    actor: 'atlas', reporter: 'atlas', recipient: 'nova', kind: 'assigned',
+    eltern: 'AG-EVJ-Z1', title: 'Z2 nennt Z1 als Elternteil — jetzt ist es ein Kreis' }), 90713);
+  const rk2 = await liefern('N3:kreis', koerper({
+    id: 'AG-EVENT-JOURNAL-001:nova:received:Z1', task: 'AG-EVJ-Z1',
+    actor: 'nova', reporter: 'nova', kind: 'received',
+    eltern: 'AG-EVJ-Z2', title: 'Meldung zu Z1 im Kreis' }), 90714);
+  const h2 = await herkunft();
+  console.log('        Liste: ...' + h2.replace(/\s+/g, ' ').trim().slice(-110));
+  zeile('der Kreis wird benannt',
+        /unter AG-EVJ-Z2 \u2190 Zyklus/.test(h2), true);
+  zeile('und die Zeile bleibt kurz', h2.length < 600, true);
+
+  /* DIE EIGENTLICHE PRUEFUNG: Haengt es? Eine Schleife waere kein
+     Fehlschlag, sondern ein Stillstand -- und ein Nachweis, der nur den Text
+     liest, meldet dann gar nichts, er laeuft in seinen eigenen Zeitablauf.
+     Also wird NACH dem Kreis noch etwas gemessen, das nur antwortet, wenn
+     die Zeichenschleife lebt. */
+  const lebt = await s.evaluate(() => {
+    const a = (window.__agStand && window.__agStand()) || null;
+    return a ? { zeit: typeof a.zeit, aufgaben: (a.aufgaben || []).length } : null;
+  });
+  zeile('die Maschine antwortet nach dem Kreis noch', !!lebt && lebt.zeit, 'number');
+  const nochmal = await liefern('N3:danach', koerper({
+    id: 'AG-EVENT-JOURNAL-001:nova:started:Z1', task: 'AG-EVJ-Z1',
+    actor: 'nova', reporter: 'nova', kind: 'started',
+    title: 'und eine Meldung nach dem Kreis kommt noch an' }), 90715);
+  zeile('und nimmt danach noch ein Ereignis an',
+        /started/.test(nochmal.letztes), true);
+
   console.log('\nN2 — Was der Vertrag bei Arbeitselementen abweist\n');
   const rn3 = await liefern('N:typ-erfunden', koerper({
     id: 'AG-EVENT-JOURNAL-001:atlas:assigned:falschTyp', task: 'AG-LM-XX-001',
