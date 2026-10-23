@@ -28,7 +28,6 @@
     "AGENTS.md",
     "CLAUDE.md",
     ".claude/agents/spec-agent.md",
-    ".claude/agent-protocol/spec-agent-output.md",
     "governance/agentarium-rulebook-v1.3.md",
     "governance/agentarium-process-v1.3.md",
     "handoffs/AG-LM-TK-021-archibald-request-v1.json",
@@ -57,5 +56,6 @@
     "https://github.com/pahlborn/agentarium/pull/46#issuecomment-6320419135",
     "https://github.com/pahlborn/agentarium/pull/46#issuecomment-6357811676"
   ],
-  "provenance_note": "Taskauftrag von Atlas; keine Archibald-Arbeit oder Sentinel-Testplanung."
+  "provenance_note": "Taskauftrag von Atlas; keine Archibald-Arbeit oder Sentinel-Testplanung.",
+  "input_limit": "Die in der spec-agent-Definition genannte optionale Ausgabeschablone .claude/agent-protocol/spec-agent-output.md ist an der geprüften Baseline nicht vorhanden. Keine erfundene Schablone; für die begrenzte Korrektur die in der Definition genannten anwendbaren Abschnitte verwenden oder SA_QUESTION liefern, falls dies das Ergebnis tatsächlich blockiert."
 }
