@@ -66,3 +66,8 @@ Apply `agentarium-process-v1.3.md` at assignment, material handback/blocker and 
 Atlas must act on existing authority, reconcile remaining criteria and arrange triggered learning without repeated user prompting. No report or count is stronger evidence than the behavior it actually measures. Keep role, platform, transport, author, reporter and technical executor distinct. New role names and subscription records do not create or attest execution.
 
 An unresolved learning finding has an owner, status and next review event. Cadence's absence is explicit pending work, never continuous supervision. No new permission, paid-runtime or background service follows from this provision. Requirements already fixed by Peter are not renegotiated as routine implementation decisions. Every affected member may contribute; this revision does not fabricate consent or require extra work solely to appear involved.
+
+## 12. Visible handoffs in the monitor — 2026-10-23
+When Atlas receives a task from Peter, Atlas's first event for that task is a `handoff` from `peter` to `atlas` (reporter `atlas`), before `assigned` or `started`. When Atlas passes a task to another role, Atlas reports `handoff` first (the visible ball) and then `assigned` (which creates the task). A role returns its result to Atlas as `contribution`; Atlas returns the result to Peter as `contribution` to `peter`. One event per comment on Issue #2. Peter connects the monitor before sending a task; what exists at connection is not replayed.
+
+Ready-to-fill templates, field rules and limits: `handoffs/AG-EVENT-JOURNAL-001-anstoss-v1.md`. This provision adds a reporting duty only. It creates no role, permission or runtime, and a rule is not evidence that a report was made.
