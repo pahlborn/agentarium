@@ -378,6 +378,31 @@ function koerper(f) {
          kind: 'started', title: 'Cadence beginnt TK-017' },
        '2026-10-20T23:03:00Z');
 
+  /* R19: ZWEI VERGABEN DERSELBEN KENNUNG, DIE SICH WIDERSPRECHEN.
+     Archibald R3, von Atlas am 23.10. zum Vorziehen freigegeben. Bis
+     Fassung 74 gewann in der Faltung die LETZTE Vergabe, und zwar ohne ein
+     Wort: `eTyp`/`eEltern` wurden je Ereignis der Gruppe neu zugewiesen.
+     Erwartet jetzt: Das ERSTE bleibt stehen, und der Widerspruch erscheint
+     in der vorhandenen Konfliktanzeige -- keine neue Anzeige, so wie Atlas
+     es verlangt hat.
+     Absichtlich bei `nova`: forges erste vier Ringe werden in Teil J
+     gemessen, und ein fuenfter dort haette die Messung still eingefroren.
+     Und absichtlich mit EIGENEN Elternkennungen (EP-019/US-019): Beim
+     ersten Anlauf hing R19 unter EP-003, und damit fiel eine ganz andere
+     Zeile -- "unter der Epic steht genau das Gemeldete" zaehlte ploetzlich
+     zwei Kinder. Die Zeile hatte recht; mein Fixture hatte eine fremde
+     Behauptung mitbenutzt. */
+  hist({ id: 'R19:assigned-1', task: 'AG-EVJ-R19', actor: 'atlas', reporter: 'atlas',
+         recipient: 'nova', kind: 'assigned', typ: 'story',
+         eltern: 'AG-LM-EP-019', eFassung: 'V1',
+         title: 'R19 zuerst als story unter EP-019' },
+       '2026-10-20T23:30:00Z');
+  hist({ id: 'R19:assigned-2', task: 'AG-EVJ-R19', actor: 'atlas', reporter: 'atlas',
+         recipient: 'nova', kind: 'assigned', typ: 'task',
+         eltern: 'AG-LM-US-019', eFassung: 'V1',
+         title: 'R19 danach als task unter US-019 — das widerspricht' },
+       '2026-10-20T23:31:00Z');
+
   /* R8, R9 UND R10: KLEMMEN IN DER HISTORIE.
      Atlas' Bedingung vom 21.10. woertlich: "Projekt-/Lauftrennung und
      Wiederherstellung muessen dabei dieselbe Lage ergeben wie
@@ -498,6 +523,7 @@ function koerper(f) {
       R8: f('AG-EVJ-R8'), R9: f('AG-EVJ-R9'), R10: f('AG-EVJ-R10'),
       R11: f('AG-EVJ-R11'), R12: f('AG-EVJ-R12'),
       R13: f('AG-EVJ-R13'), R14: f('AG-EVJ-R14'), R15: f('AG-EVJ-R15'),
+      R19: f('AG-EVJ-R19'),
       EP: f('AG-LM-EP-003'), US: f('AG-LM-US-009'), TK: f('AG-LM-TK-017'),
       kinderVonEP: (st.aufgaben || []).filter(
         a => a.eEltern === 'AG-LM-EP-003').length,
@@ -515,7 +541,7 @@ function koerper(f) {
      steht hier als Zahl, damit eine stille Verschiebung auffaellt -- und
      dass sie sich um genau eine geaendert hat, ist der Beleg, dass die
      Regel genau einen Fall trifft und nicht mehr. */
-  zeile('fünfzehn offene Aufgaben übernommen', nachRestore.wieder, 15);
+  zeile('sechzehn offene Aufgaben übernommen', nachRestore.wieder, 16);
   zeile('R1 liegt bei scout', nachRestore.R1 ? nachRestore.R1.wer : null, 'scout');
   zeile('R1 ist begonnen', nachRestore.R1 ? nachRestore.R1.zustand : null, 'begonnen');
   zeile('R1 als wiederhergestellt gekennzeichnet',
@@ -633,6 +659,13 @@ function koerper(f) {
   zeile('R14 ist zu — Atlas hat angenommen', nachRestore.R14, null);
   /* Und die Gegenprobe zur Selbstauskunft: Eine Fremdaussage stellt nichts
      weiter, auch nicht nach dieser Korrektur. */
+  /* ===== R19: DAS ERSTE BLEIBT, DER WIDERSPRUCH WIRD GEZAEHLT ===== */
+  zeile('R19 ist offen', !!nachRestore.R19, true);
+  zeile('R19 behält den ERSTEN Typ', nachRestore.R19 ? nachRestore.R19.eTyp : null, 'story');
+  zeile('und die ERSTEN Eltern',
+        nachRestore.R19 ? nachRestore.R19.eEltern : null, 'AG-LM-EP-019');
+  zeile('R19 liegt bei nova', nachRestore.R19 ? nachRestore.R19.wer : null, 'nova');
+
   zeile('R15 ist offen', !!nachRestore.R15, true);
   zeile('Fremdaussage über eine Prüfung stellt nichts weiter',
         nachRestore.R15 ? nachRestore.R15.zustand : null, 'geliefert');
@@ -1652,6 +1685,45 @@ function koerper(f) {
      darunter entstanden sein. */
   zeile('die Epic erzeugt kein Kind',
         (st.aufgaben || []).filter(a => a.eEltern === 'AG-LM-EP-002').length, 0);
+
+  /* ===== R3 AM LAUFENDEN STROM: ZWEITE VERGABE, ANDERER TYP =====
+     Dieselbe Kennung kommt noch einmal, diesmal als `story` mit einem
+     Elternteil. Bis Fassung 74 lief das in `arbeitZuweisen` ins Leere --
+     die Funktion sah nur in der Liste des EMPFAENGERS nach und gab still
+     `false` zurueck, ohne Vergleich und ohne Zaehlung. Erwartet jetzt: Das
+     Erste bleibt stehen, und der Widerspruch ist gezaehlt. */
+  const vorKonflikt = await s.evaluate(() =>
+    ((window.__agStand && window.__agStand()) || {}).vergabekonflikte || 0);
+  await liefern('N:epic-widerspruch', koerper({
+    id: 'AG-EVENT-JOURNAL-001:atlas:assigned:EP002-wieder', task: 'AG-LM-EP-002',
+    actor: 'atlas', reporter: 'atlas', recipient: 'forge', kind: 'assigned',
+    typ: 'story', eltern: 'AG-LM-EP-003', eFassung: 'V1',
+    title: 'dieselbe Kennung, diesmal als story unter EP-003'
+  }), 90707);
+  st = await stand();
+  EP = el(st, 'AG-LM-EP-002');
+  zeile('der Typ bleibt epic', EP ? EP.eTyp : null, 'epic');
+  zeile('und es bleibt elternlos', EP ? EP.eEltern : null, '');
+  zeile('es entsteht kein zweiter Eintrag',
+        (st.aufgaben || []).filter(a => a.aufgabe === 'AG-LM-EP-002').length, 1);
+  zeile('der Widerspruch ist gezählt',
+        (st.vergabekonflikte || 0) - vorKonflikt, 1);
+
+  /* UND DIE GEGENPROBE: DASSELBE ZWEIMAL IST KEIN WIDERSPRUCH.
+     Ohne sie wuerde ein Zaehler bestehen, der bei JEDER zweiten Vergabe
+     steigt -- und ein Transportduplikat ist kein Konflikt, derselbe
+     Unterschied wie beim zweiten `delivered`. */
+  await liefern('N:epic-duplikat', koerper({
+    id: 'AG-EVENT-JOURNAL-001:atlas:assigned:EP002-gleich', task: 'AG-LM-EP-002',
+    actor: 'atlas', reporter: 'atlas', recipient: 'forge', kind: 'assigned',
+    typ: 'epic', eFassung: 'V1',
+    title: 'dieselbe Kennung, dieselben Angaben — ein Duplikat'
+  }), 90708);
+  st = await stand();
+  zeile('Gegenprobe: gleiche Angaben zählen NICHT als Widerspruch',
+        (st.vergabekonflikte || 0) - vorKonflikt, 1);
+  zeile('und auch hier kein zweiter Eintrag',
+        (st.aufgaben || []).filter(a => a.aufgabe === 'AG-LM-EP-002').length, 1);
 
   /* Eine Story darunter, einzeln gemeldet. */
   const rn2 = await liefern('N:story', koerper({
