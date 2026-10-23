@@ -26,12 +26,26 @@
 */
 (function () {
   'use strict';
-  var ADAPTER = 'AG-GH-LIVE-001-v1.3';
+  var ADAPTER = 'AG-GH-LIVE-001-v2.0';
   /* Wortlaut von Sentinel vorgeschrieben (AG-CONNECT-UX-001, 21.10.), Zeichen
      fuer Zeichen. Einmal benannt, damit Platzhalter und Zeile nicht
      auseinanderlaufen koennen. */
   var TOKEN_SATZ = 'Token ist sicher hinterlegt und wird nicht angezeigt.';
   var ENDPOINT = 'https://api.github.com/repos/pahlborn/agentarium/issues/2/comments?per_page=100';
+  /* DER ORIGINALBELEG IST KEIN FELD DES SENDERS, UND ZWAR NICHT AUS
+     BEQUEMLICHKEIT. Atlas verlangt den "eindeutig aufloesbaren Originalbeleg
+     als eigenes Feld". Als Pflichtfeld im Vertrag kann es ihn nicht geben:
+     Ein Agent schreibt seinen Kommentar, und erst GitHub vergibt dabei die
+     Nummer -- er kann sie beim Schreiben nicht kennen. Jedes selbst
+     gesetzte "Beleg"-Feld waere also eine Behauptung ueber einen Ort, den
+     der Melder nicht kennt.
+     Der Beleg ist deshalb der Kommentar SELBST, und abgeleitet wird er dort,
+     wo er gelesen wird: hier. `c.id` kommt von GitHub, nicht vom Melder.
+     Die Adresse wird aus ENDPOINT gerechnet statt zweimal hingeschrieben --
+     sonst zeigt sie nach dem naechsten Umzug auf einen anderen Vorgang als
+     der, aus dem gelesen wurde. */
+  var BELEG_BASIS = ENDPOINT.replace(/\/issues\/\d+\/comments\b.*$/,
+                                     '/issues/comments/');
   var MARKER = '<!-- AGENTARIUM_EVENT_V1 -->';
   var SCHEMA = 'agentarium.github-event.v1';
   var LOGINS = { 'pahlborn': true, 'github-actions[bot]': true };
@@ -39,9 +53,97 @@
   var MAX_KOERPER = 65536, MAX_SEITEN = 100, MAX_TITEL = 200;
   var FELDER = ['schema', 'id', 'project_id', 'run_id', 'task_id', 'actor', 'kind',
                 'title', 'occurred_at', 'source_evidence', 'source_tool_id'];
-  var OPTIONAL = ['recipient'];                  /* nie Pflicht fuer progress */
-  var ARTEN = { progress: 1, handoff: 1, contribution: 1 };
+  /* AG-EVENT-JOURNAL-001: `reporter` ist WER MELDET, `actor` ist WER HANDELT.
+     Bisher gab es nur `actor`, und damit war beides dasselbe Feld. Atlas hat
+     am 21.10. den wunden Punkt genannt: Alle Rollen schreiben unter demselben
+     GitHub-Login, also beweist kein Feld eine Identitaet. Daraus folgt nicht,
+     dass die Trennung nutzlos ist -- sie macht aus einer Behauptung eine
+     PRUEFBARE Behauptung: Faellt `reporter` mit `actor` zusammen, ist es eine
+     Selbstauskunft der arbeitenden Rolle; sonst spricht einer ueber einen
+     anderen. Nur das Erste darf spaeter einen Aufgabenzustand treiben.
+     Verifiziert ist weiterhin allein der Login des Kommentars, und genau so
+     steht es im Fuss der Tafel. */
+  /* `blocker_id` benennt GENAU EINE Blockade. Atlas' Auftrag vom 21.10.:
+     "Aufloesung betrifft genau diese Blockade." Ohne eigene Kennung liesse
+     sich das nicht sagen -- eine Aufgabe kann mehrere Klemmen haben, und die
+     aelteste zu nehmen waere wieder eine Rateentscheidung. Deshalb ist das
+     Feld bei `blocked` und `resolved` PFLICHT und sonst verboten: Ein
+     `started` mit Klemmenkennung behauptete einen Bezug, den es nicht hat.
+     MATERIALENTSCHEIDUNG, und sie ist an Atlas gemeldet: Das ist das zwoelfte
+     Feld des Vertrags. */
+  /* ARBEITSELEMENT: TYP, ELTERNBEZUG, FASSUNG.
+     Atlas' Auftrag (AG-LM-TK-021, Kommentar 6320323499): "kleinste
+     rueckwaertskompatible Ergaenzung von Arbeitselementtyp/ID/Elternbezug/
+     Version im vorhandenen Monitorvertrag".
+
+     RUECKWAERTSKOMPATIBEL HEISST: alle drei sind WAHLFREI. Ein Ereignis ohne
+     sie verhaelt sich genau wie bisher -- Typ `task`, kein Elternbezug. Kein
+     Produzent muss etwas aendern, um weiter angenommen zu werden.
+
+     KEIN VIERTES FELD FUER DIE KENNUNG. `task_id` traegt die Identitaet des
+     Elements schon, egal welcher Art es ist; ein zusaetzliches `item_id`
+     waere dieselbe Angabe zweimal und koennte auseinanderlaufen. `item_type`
+     sagt, WAS diese Kennung benennt. */
+  var OPTIONAL = ['recipient', 'reporter', 'blocker_id',
+                  'artifact_id', 'artifact_version',
+                  'item_type', 'parent_id', 'item_version'];  /* nie Pflicht fuer progress */
+  /* Genau die drei Arten aus Atlas' Register. Eine Aufzaehlung, kein freier
+     Text: "Epic", "EPIC" oder "epik" waeren drei Dinge, die eines meinen. */
+  var ELEMENTARTEN = { epic: 1, story: 1, task: 1 };
+  var ARTEN = { progress: 1, handoff: 1, contribution: 1,
+                assigned: 1, received: 1, started: 1, delivered: 1,
+                reviewed: 1, accepted: 1, merged: 1, published: 1,
+                blocked: 1, resolved: 1, aborted: 1 };
   var KOMM = { handoff: 1, contribution: 1 };    /* nur beobachtet, kein Zustand */
+  /* Arten, die einen Aufgabenzustand treiben DUERFEN -- und nur bei
+     Selbstauskunft. `assigned` ist dabei die Ausnahme: Die Vergabe meldet
+     naturgemaess nicht der Empfaenger, sondern der Vergebende. Sie legt
+     deshalb eine Aufgabe als ZUGEWIESEN an und behauptet keinen Beginn. */
+  var LEBEN = { assigned: 1, received: 1, started: 1, delivered: 1,
+                reviewed: 1, accepted: 1, merged: 1, published: 1,
+                blocked: 1, resolved: 1, aborted: 1 };
+  /* BLOCKADE IST KEIN ABBRUCH, UND DAS WAR MEIN FEHLER.
+     Atlas hatte am 21.10. ausdruecklich entschieden: Die Abbruchzahl kommt
+     aus typisierten Abbruchereignissen, "nicht aus Titeln und nicht aus
+     BLOCKED". Ich habe trotzdem `blocked` gezaehlt -- und mein eigener
+     Nachweis verlangte dieses falsche Soll, machte den Fehler also gruen.
+     Gefunden von Argus. Der Unterschied ist nicht sprachlich: Eine Blockade
+     wartet auf etwas und kann sich aufloesen (`resolved`), ein Abbruch ist
+     gescheitert und endet. Wer beides zusammenzaehlt, misst nicht, was im
+     Review bearbeitet werden soll. */
+  var ABBRUCHARTEN = { aborted: 1 };
+  var BRAUCHT_EMPF = { assigned: 1 };            /* an wen vergeben wurde */
+  /* BLOCKADE IST KEIN ZUSTAND, SIE LIEGT NEBEN EINEM. Eine Blockade laesst
+     die Aufgabe liegen: `zugewiesen` bleibt `zugewiesen`, `begonnen` bleibt
+     `begonnen`. Eine Aufloesung nimmt genau eine Klemme weg und behauptet
+     weder Beginn noch Abschluss. Darum braucht jede ihre Kennung. */
+  var KLEMMARTEN = { blocked: 1, resolved: 1 };
+  /* Arten, die nur der Aufgabenhalter selbst melden kann. Pruefung, Annahme
+     und Abbruch sind NICHT dabei: Sie kommen notwendigerweise von einer
+     anderen Rolle -- sonst waere es eine Selbstabnahme. Der Abbruch kommt
+     nach Peters Festlegung vom Projekt, nicht vom Gescheiterten. */
+  var HALTERGEBUNDEN = { received: 1, started: 1, delivered: 1 };
+  /* DAS ERGEBNIS BRAUCHT EINE EIGENE KENNUNG. `merged`/`published` sagen
+     etwas ueber ein Artefakt -- einen Zweig, eine Fassung --, nicht ueber
+     eine Aufgabe. Ohne Kennung liesse sich nicht sagen, WELCHES. Pflicht
+     dort, erlaubt bei `delivered` (die Lieferung bringt es hervor und darf
+     es benennen), sonst verboten: Ein `started` mit Artefaktkennung
+     behauptete einen Bezug, den die Art nicht hergibt. */
+  var WERKARTEN = { merged: 1, published: 1 };
+  var WERKDARF = { merged: 1, published: 1, delivered: 1 };
+  /* GEMELDET-V2, UND DER SPRUNG IST NOETIG. In v1 kamen `blocked`/`resolved`
+     an und trieben nichts; jetzt legen sie eine Klemme an die Aufgabe. Ein
+     Original aus dem Vorrat, das nur v1 sagt, wuerde die beiden Arten also
+     ANNEHMEN UND HALB ANZEIGEN -- genau der Zustand, gegen den die Zusage
+     geschrieben ist ("lieber nichts als halb"). Mit dem neuen Wort weist es
+     sie ausdruecklich ab, statt eine Blockade zu verschweigen. */
+  /* v3: die ganze Kette. `delivered` schliesst eine Aufgabe nicht mehr --
+     `accepted` tut es. Eine aeltere Fassung aus dem Vorrat wuerde
+     `reviewed`/`accepted`/`merged`/`published` annehmen und nichts damit
+     tun; schlimmer: Bei ihr haette `delivered` die Aufgabe schon
+     geschlossen, und eine spaetere Annahme fiele ins Leere. Also bekommt
+     sie die Arten gar nicht erst. */
+  var KANN_LEBEN_WORT = 'gemeldet-v5';
   var KENNUNG = /^[A-Za-z0-9][A-Za-z0-9._:\/-]{0,119}$/;
   var ISO = /^\d{4}-\d\d-\d\dT\d\d:\d\d(:\d\d(\.\d{1,9})?)?(Z|[+-]\d\d:\d\d)$/;
   var STEUER = /[\u0000-\u001f\u007f-\u009f\u2028\u2029\u202a-\u202e\u2066-\u2069]/;
@@ -61,6 +163,11 @@
      Auftrag/Abschluss behandeln. Ohne diese Zusage wird nichts davon
      weitergereicht. */
   var KANN_KOMM = B.kommunikation === 'beobachtet-v1';
+  /* Dieselbe Bauart wie die Zusage fuer beobachtete Kommunikation: Ein
+     Original, das den Lebenszyklus nicht kennt, verwirft die neuen Arten
+     ausdruecklich, statt sie halb anzuzeigen. Eine aeltere Fassung sagt
+     dieses Wort nicht und bekommt die Ereignisse deshalb gar nicht erst. */
+  var KANN_LEBEN = B.lebenszyklus === KANN_LEBEN_WORT;
 
   function Menge(max) {
     var o = Object.create(null), q = [];
@@ -82,7 +189,38 @@
             schnitt: 0, schnittIso: '', intervall: TAKT, fehlerFolge: 0, nichtVor: 0,
             fehler: '', pausiert: false };
   var zahl = { anfragen: 0, n200: 0, n304: 0, basisKommentare: 0, basisMarkiert: 0,
-               waehrendAufbau: 0, gezeigt: 0, duplikate: 0, abgewiesen: 0, ohneMarker: 0 };
+               waehrendAufbau: 0, gezeigt: 0, duplikate: 0, abgewiesen: 0, ohneMarker: 0,
+               konflikte: 0, abbrueche: 0, klemmen: 0,
+               wieder: 0, wiederKlemmt: 0, abdeckung: '' };
+  /* Fingerabdruck je Ereigniskennung, damit sich ein TRANSPORTDUPLIKAT von
+     einem KONFLIKT unterscheiden laesst: dieselbe Kennung mit demselben
+     Inhalt ist wirkungslos, dieselbe Kennung mit anderem Inhalt ist ein
+     Befund und wird abgewiesen statt stillschweigend verworfen.
+     Gedeckelt wie `bekannte`, damit eine lange Sitzung nicht waechst. */
+  /* AG-EVENT-JOURNAL-001 Schritt 2b: WAS BEIM VERBINDEN SCHON OFFEN WAR.
+     Bisher wurde die Historie gezaehlt und weggeworfen. Atlas hat am 21.10.
+     den Punkt benannt, der daran falsch ist: "historische Ereignisse
+     bedeuten nicht automatisch abgeschlossene Arbeit". Ein `handoff` von
+     vor einer Stunde kann eine Aufgabe betreffen, die noch LIEGT -- und
+     davon zeigte das Bild nichts.
+     Gesammelt werden deshalb die Lebenszyklusereignisse der Basis, und
+     zwar MIT BEIDEN ZEITEN: `occurred_at` ist die Angabe des Melders,
+     `recorded_at` ist GitHubs `created_at` und damit die pruefbare. Dazu
+     die Kommentarnummer, weil sie monoton ist und bei gleichen Zeiten
+     entscheidet. Alle drei kommen aus den Daten; keine ist erfunden.
+     ABGESPIELT WIRD NICHTS. Was daraus entsteht, ist ein Zustand, kein
+     Ereignis: Ringe, die liegen, ohne Flug, ohne Meldung, ohne Puls. */
+  var basisLeben = [];
+  var basisGrenzen = { seitenDeckel: false, konflikte: 0, fremdaussagen: 0 };
+
+  var abdruck = Object.create(null), abdruckFolge = [];
+  function abdruckLegen(id, fa) {
+    if (abdruck[id] === undefined) {
+      abdruckFolge.push(id);
+      while (abdruckFolge.length > MAX_IDS) delete abdruck[abdruckFolge.shift()];
+    }
+    abdruck[id] = fa;
+  }
   var letztes = null, letzterGrund = '', log = [], aktuellerLauf = '';
 
   function vermerk(t) {
@@ -208,7 +346,16 @@
   var grundEl = el('div', { id: 'agGhGrund' });
   var fuss = el('small', {}, 'Token nur im Arbeitsspeicher dieser Seite, nur an api.github.com. ' +
                 'Kosten: nicht verfügbar. Fortschritt ist kein Abschluss. ' +
-                'Übergabe/Beitrag: beobachtete Kommunikation, keine Annahme, keine Abnahme. ' + ADAPTER);
+                'Übergabe/Beitrag: beobachtete Kommunikation, keine Annahme, keine Abnahme. ' +
+                /* Die Vertrauensgrenze steht da, wo die Zusagen stehen, und
+                   zwar vollstaendig: Alle Rollen schreiben unter demselben
+                   Login, also ist `actor` eine Angabe und kein Beweis. */
+                'Zustände sind gemeldet, nicht verifiziert: Rollen schreiben unter ' +
+                'demselben GitHub-Login, geprüft ist nur dieser. ' +
+                /* Was eine Blockade NICHT ist, gehoert neben die Zusagen:
+                   Sie beendet nichts und beginnt nichts. */
+                'Blockade lässt die Aufgabe liegen; eine Auflösung betrifft genau ' +
+                'diese Blockade und behauptet keinen Beginn und keinen Abschluss. ' + ADAPTER);
   [kopf, zeile, satzEl, ablaufZeile, ablaufText, ablaufHilfe, letztesEl, zahlEl, grundEl, fuss].forEach(function (x) { auf.appendChild(x); });
   tafel.appendChild(auf);
   document.body.appendChild(tafel);
@@ -241,9 +388,58 @@
     zahlEl.textContent =
       (Z.schnittIso ? 'Basis bis ' + Z.schnittIso + ' (Geräteuhr): ' + zahl.basisKommentare +
         ' Kommentare, ' + zahl.basisMarkiert + ' markierte historisch, nicht abgespielt · ' : '') +
-      'neu gezeigt ' + zahl.gezeigt + (zahl.waehrendAufbau ? ' (davon während Aufbau ' +
+      /* Wiederhergestellt heisst: aus der Historie gefaltet, nicht
+         abgespielt. Die Abdeckung steht daneben, damit die Zahl nicht fuer
+         vollstaendig genommen wird. */
+      (zahl.abdeckung ? 'offen übernommen ' + zahl.wieder +
+        ' (Abdeckung: ' + zahl.abdeckung + ')' +
+        /* Eine uebernommene Aufgabe, die klemmt, ist keine laufende.
+           Die Zahl steht deshalb an der Zahl, auf die sie sich
+           bezieht, und nicht irgendwo weiter hinten. */
+        (zahl.wiederKlemmt ? ', davon ' + zahl.wiederKlemmt +
+          ' mit Klemme' : '') +
+        (basisGrenzen.fremdaussagen ? ', ' + basisGrenzen.fremdaussagen +
+          ' Fremdaussage(n) nicht gezählt' : '') +
+        (basisGrenzen.konflikte ? ', ' + basisGrenzen.konflikte +
+          ' Widerspruch/Widersprüche' : '') + ' · ' : '') +
+      /* ANGENOMMEN, NICHT GEZEIGT. Hier stand "neu gezeigt", und das war
+         zu dem Zeitpunkt nicht wahr: Gezaehlt wird, sobald das Original das
+         Ereignis ANNIMMT -- gezeichnet wird es erst, wenn die
+         Zeichenschleife es aus der Warteschlange nimmt. Benannt von
+         Sentinel am 21.10. Die zweite Zahl kommt aus dem Original selbst
+         und sagt, was dort wirklich angefasst wurde; stehen sie
+         auseinander, ist etwas angenommen und nicht gezeichnet. */
+      'angenommen ' + zahl.gezeigt + (zahl.waehrendAufbau ? ' (davon während Aufbau ' +
         zahl.waehrendAufbau + ')' : '') +
-      ' · doppelt ' + zahl.duplikate + ' · abgewiesen ' + zahl.abgewiesen +
+      (function () {
+        try {
+          var st = window.__agStand && window.__agStand();
+          /* NICHT "gezeichnet": Das behauptete mehr, als gemessen wird.
+             `verarbeitet` heisst "aus der Warteschlange genommen",
+             `ausgegeben` heisst "Meldung oder Flug angelegt". Gezeichnete
+             Bildpunkte beweist keine der beiden. Benannt von Atlas. */
+          if (st && typeof st.verarbeitet === 'number')
+            return ' · verarbeitet ' + st.verarbeitet +
+                   (typeof st.ausgegeben === 'number'
+                      ? ' · ausgegeben ' + st.ausgegeben : '');
+        } catch (x) {}
+        return '';
+      })() +
+      ' · doppelt ' + zahl.duplikate + ' · Konflikt ' + zahl.konflikte +
+      (zahl.abbrueche || zahl.klemmen ? ' · in dieser Sitzung beobachtet: ' +
+        [zahl.abbrueche ? zahl.abbrueche + ' Abbruch' +
+           (zahl.abbrueche > 1 ? 'e' : '') : '',
+         /* BLOCKADE UND ABBRUCH STEHEN GETRENNT, UND ZWAR WEITER.
+            Eine Blockade wartet auf etwas und kann sich aufloesen,
+            ein Abbruch ist gescheitert und endet. Zusammengezaehlt
+            waere genau der Fehler, den Argus am 21.10. gefunden
+            hat -- er bleibt behoben, auch jetzt, wo die Blockade
+            eine eigene Zahl bekommt. */
+         zahl.klemmen ? zahl.klemmen + ' Blockade' +
+           (zahl.klemmen > 1 ? 'n' : '') : ''
+        ].filter(function (x) { return x; }).join(', ') +
+        ' (Projektabdeckung: partial)' : '') +
+      ' · abgewiesen ' + zahl.abgewiesen +
       ' · ohne Marker ' + zahl.ohneMarker + ' · Anfragen ' + zahl.anfragen +
       ' (304: ' + zahl.n304 + ') · Seite ' + Z.seite;
     grundEl.textContent = letzterGrund ? 'Zuletzt abgewiesen: ' + letzterGrund : '';
@@ -317,13 +513,61 @@
     var hatEmpf = Object.prototype.hasOwnProperty.call(d, 'recipient');
     if (hatEmpf && typeof d.recipient !== 'string') return nein('recipient kein Text');
     if (KOMM[d.kind] && !hatEmpf) return nein('recipient fehlt bei ' + d.kind);
+    if (BRAUCHT_EMPF[d.kind] && !hatEmpf) return nein('recipient fehlt bei ' + d.kind);
+    var hatMeld = Object.prototype.hasOwnProperty.call(d, 'reporter');
+    if (hatMeld && typeof d.reporter !== 'string') return nein('reporter kein Text');
+    var hatKlemme = Object.prototype.hasOwnProperty.call(d, 'blocker_id');
+    if (hatKlemme && typeof d.blocker_id !== 'string') return nein('blocker_id kein Text');
+    if (KLEMMARTEN[d.kind] && !hatKlemme) return nein('blocker_id fehlt bei ' + d.kind);
+    /* UND NUR DORT. Ein `blocker_id` an einem `started` behauptete einen
+       Bezug zu einer Blockade, den die Art nicht hergibt. Lieber abweisen
+       als eine Angabe mitfuehren, die nichts bedeutet. */
+    if (hatKlemme && !KLEMMARTEN[d.kind])
+      return nein('blocker_id nicht erlaubt bei ' + d.kind);
+    var hatWerk = Object.prototype.hasOwnProperty.call(d, 'artifact_id');
+    var hatWerkV = Object.prototype.hasOwnProperty.call(d, 'artifact_version');
+    if (hatWerk && typeof d.artifact_id !== 'string') return nein('artifact_id kein Text');
+    if (hatWerkV && typeof d.artifact_version !== 'string')
+      return nein('artifact_version kein Text');
+    if (WERKARTEN[d.kind] && !hatWerk) return nein('artifact_id fehlt bei ' + d.kind);
+    if (hatWerk && !WERKDARF[d.kind])
+      return nein('artifact_id nicht erlaubt bei ' + d.kind);
+    /* Eine Fassung ohne Kennung ist eine Fassung von nichts. */
+    if (hatWerkV && !hatWerk) return nein('artifact_version ohne artifact_id');
+    var hatTyp = Object.prototype.hasOwnProperty.call(d, 'item_type');
+    var hatEltern = Object.prototype.hasOwnProperty.call(d, 'parent_id');
+    var hatEFass = Object.prototype.hasOwnProperty.call(d, 'item_version');
+    if (hatTyp && typeof d.item_type !== 'string') return nein('item_type kein Text');
+    if (hatTyp && !ELEMENTARTEN[d.item_type])
+      return nein('item_type nicht erlaubt: ' + String(d.item_type).slice(0, 20));
+    if (hatEltern && typeof d.parent_id !== 'string') return nein('parent_id kein Text');
+    if (hatEFass && typeof d.item_version !== 'string')
+      return nein('item_version kein Text');
+    /* EIN ELEMENT IST NICHT SEIN EIGENES ELTERNTEIL. Das waere ein Zyklus
+       aus einem einzigen Glied, und die Elternkette haette kein Ende. */
+    if (hatEltern && d.parent_id === d.task_id)
+      return nein('parent_id gleich task_id');
     var ids = ['id', 'project_id', 'run_id', 'task_id', 'source_tool_id'];
     for (var q = 0; q < ids.length; q++)
       if (!KENNUNG.test(d[ids[q]])) return nein(ids[q] + ' ungültig');
+    if (hatKlemme && !KENNUNG.test(d.blocker_id)) return nein('blocker_id ungültig');
+    if (hatWerk && !KENNUNG.test(d.artifact_id)) return nein('artifact_id ungültig');
+    if (hatWerkV && !KENNUNG.test(d.artifact_version))
+      return nein('artifact_version ungültig');
+    if (hatEltern && !KENNUNG.test(d.parent_id)) return nein('parent_id ungültig');
+    if (hatEFass && !KENNUNG.test(d.item_version)) return nein('item_version ungültig');
     if (!AKTEURE[d.actor]) return nein('actor unbekannt');
     if (hatEmpf && !AKTEURE[d.recipient]) return nein('recipient unbekannt');
+    if (hatMeld && !AKTEURE[d.reporter]) return nein('reporter unbekannt');
     if (KOMM[d.kind] && !KANN_KOMM)
       return nein('Original kennt beobachtete Kommunikation nicht (' + d.kind + ')');
+    if (LEBEN[d.kind] && !KANN_LEBEN)
+      return nein('Original kennt den Lebenszyklus nicht (' + d.kind + ')');
+    /* EIN LEBENSZYKLUSEREIGNIS MUSS SAGEN, WER ES MELDET. Ohne `reporter`
+       liesse sich Selbstauskunft nicht von Fremdaussage unterscheiden -- und
+       die Unterscheidung ist der ganze Zweck des Feldes. Lieber abweisen als
+       raten; geraten wird in diesem Monitor nichts mehr. */
+    if (LEBEN[d.kind] && !hatMeld) return nein('reporter fehlt bei ' + d.kind);
     var titel = d.title.trim();
     if (!titel || titel.length > MAX_TITEL) return nein('title leer oder länger als ' + MAX_TITEL);
     if (STEUER.test(titel)) return nein('title enthält Steuerzeichen');
@@ -333,6 +577,20 @@
       task_id: d.task_id, actor: d.actor, kind: d.kind,
       recipient: hatEmpf ? d.recipient : '', title: titel, occurred_at: d.occurred_at,
       source_evidence: d.source_evidence, source_tool_id: d.source_tool_id,
+      reporter: hatMeld ? d.reporter : '',
+      blocker_id: hatKlemme ? d.blocker_id : '',
+      artifact_id: hatWerk ? d.artifact_id : '',
+      artifact_version: hatWerkV ? d.artifact_version : '',
+      /* Vorgabe `task`, nicht leer: Ein Ereignis ohne Typangabe benennt eine
+         Aufgabe -- das war bisher der einzige Fall und bleibt der Normalfall. */
+      item_type: hatTyp ? d.item_type : 'task',
+      parent_id: hatEltern ? d.parent_id : '',
+      item_version: hatEFass ? d.item_version : '',
+      /* Die PRUEFBARE Aussage, nicht die bewiesene: Melder und Akteur fallen
+         zusammen. Verifiziert ist davon nichts ausser dem Login -- deshalb
+         heisst das Feld nicht `verifiziert`. */
+      selbstauskunft: !!(hatMeld && d.reporter === d.actor),
+      login: login,
       kommentar: String(c.id) } };
   }
 
@@ -361,9 +619,36 @@
       fictional: false, gh_beobachtet: true, project_id: ev.project_id,
       run_id: ev.run_id, task_id: ev.task_id, source_tool_id: ev.source_tool_id };
     if (ev.recipient) aus.recipient = ev.recipient;
+    /* AG-EVENT-JOURNAL-001: Melder und die daraus abgeleitete, PRUEFBARE
+       Aussage gehen mit. Das Original entscheidet selbst, was es damit tut
+       -- hier wird nichts behauptet, nur weitergegeben. */
+    if (ev.reporter) aus.reporter = ev.reporter;
+    if (ev.blocker_id) aus.blocker_id = ev.blocker_id;
+    if (ev.artifact_id) aus.artifact_id = ev.artifact_id;
+    if (ev.artifact_version) aus.artifact_version = ev.artifact_version;
+    if (ev.item_type) aus.item_type = ev.item_type;
+    if (ev.parent_id) aus.parent_id = ev.parent_id;
+    if (ev.item_version) aus.item_version = ev.item_version;
+    /* Der Beleg geht mit: die Nummer, die GitHub vergeben hat, und die
+       Adresse, unter der genau dieser Kommentar wieder auffindbar ist.
+       Beides abgeleitet, nichts behauptet. */
+    if (ev.kommentar) {
+      aus.source_comment = ev.kommentar;
+      aus.source_ref = BELEG_BASIS + ev.kommentar;
+    }
+    aus.gh_selbstauskunft = !!ev.selbstauskunft;
     var r = window.__agEreignis(aus);
     if (!r || !r.angenommen) { abweisen('Original wies ab: ' + (r ? r.grund : '?')); return; }
     zahl.gezeigt++;
+    /* NACH DEM ZEICHNEN NOCHMAL ANZEIGEN. Die zweite Zahl ("gezeichnet")
+       kommt aus dem Original und steigt erst, wenn die Zeichenschleife das
+       Ereignis aus der Warteschlange nimmt -- ein paar Bilder spaeter. Ohne
+       diese Auffrischung stand in der Tafel bis zum naechsten Abruf
+       "angenommen 4 - gezeichnet 3", also ein Ereignis, das haengen zu
+       bleiben SCHIEN. Gemessen: Zwei eigene Nachweise sind daran zufaellig
+       durch- und zufaellig nicht durchgefallen, je nachdem, wann sie lasen.
+       Eine Anzeige, die nach Glueck richtig ist, ist keine. */
+    setTimeout(anzeigen, 400);
     letztes = { id: ev.id, kind: ev.kind, actor: ev.actor, recipient: ev.recipient,
                 title: ev.title, herkunft: ev.source_evidence,
                 project_id: ev.project_id, run_id: ev.run_id, task_id: ev.task_id,
@@ -374,6 +659,18 @@
         ? 'reported_checkpoint — gemeldet, kein Laufzeitbeleg' : 'runtime_stream') +
       ' · ' + ev.project_id + ' / ' + ev.run_id + ' / ' + ev.task_id +
       ' · Werkzeug ' + ev.source_tool_id +
+      (ev.blocker_id ? ' · Klemme ' + ev.blocker_id : '') +
+      (ev.artifact_id ? ' · Werk ' + ev.artifact_id +
+         (ev.artifact_version ? ' ' + ev.artifact_version : '') : '') +
+      /* Typ, Fassung und Elternbezug des Arbeitselements. Ohne sie steht
+         hier nichts -- `task` ist die Vorgabe und keine Meldung. */
+      (ev.item_type && ev.item_type !== 'task' ? ' · ' + ev.item_type : '') +
+      (ev.item_version ? ' · Fassung ' + ev.item_version : '') +
+      (ev.parent_id ? ' · unter ' + ev.parent_id : '') +
+      /* WO ES STEHT, NICHT NUR DASS ES STEHT. `source_evidence` sagt die
+         ART des Belegs (Laufzeit oder gemeldet), nicht seinen ORT. Ohne
+         die Nummer ist eine Angabe in dieser Tafel nicht nachzusehen. */
+      (ev.kommentar ? ' · Beleg Kommentar ' + ev.kommentar : '') +
       (KOMM[ev.kind] ? ' · beobachtete Kommunikation, keine Annahme/Abnahme' : '');
     vermerk('gezeigt ' + ev.id + ' (' + wie + ')');
   }
@@ -394,17 +691,55 @@
       if (p.art === 'ohne') { zahl.ohneMarker++; continue; }
       if (p.art !== 'ok') { abweisen(p.grund, cid); continue; }
       var ev = p.ev;
+      /* Der Fingerabdruck ist der Inhalt ohne die Kommentarnummer: Zweimal
+         dasselbe Ereignis in zwei Kommentaren ist ein Transportduplikat und
+         wirkungslos; dieselbe Kennung mit anderem Inhalt ist ein Konflikt
+         und ein Befund. */
+      /* `blocker_id` GEHOERT IN DEN FINGERABDRUCK. Ohne sie waeren zwei
+         verschiedene Klemmen derselben Aufgabe mit gleichem Titel und
+         gleichem Zeitstempel ein Transportduplikat -- die zweite fiele
+         lautlos weg, und die Aufgabe klemmte einmal statt zweimal. */
+      var fa = [ev.project_id, ev.run_id, ev.task_id, ev.actor, ev.kind,
+                ev.recipient, ev.reporter, ev.blocker_id,
+                ev.artifact_id, ev.artifact_version,
+                ev.item_type, ev.parent_id, ev.item_version, ev.title,
+                ev.occurred_at, ev.source_evidence, ev.source_tool_id].join('\u0001');
       if (bekannte.hat(ev.id) || (basisIds && basisIds.hat(ev.id))) {
+        var frueher = abdruck[ev.id];
+        if (frueher !== undefined && frueher !== fa) {
+          zahl.konflikte++;
+          abweisen('gleiche Kennung, anderer Inhalt: ' + ev.id, cid);
+          continue;
+        }
         zahl.duplikate++; vermerk('doppelt ' + ev.id); continue;
       }
+      abdruckLegen(ev.id, fa);
       if (modus === 'basis') {
         basisIds.add(ev.id);
         var t = Date.parse(c.created_at);
         if (!isNaN(t) && t >= Z.schnitt) { spaeter.push(ev); continue; }
         zahl.basisMarkiert++;
+        /* Nur Lebenszyklusereignisse tragen einen Aufgabenzustand.
+           `progress`, `handoff` und `contribution` sind beobachtete
+           Kommunikation -- aus ihnen wird weiterhin kein Zustand
+           abgeleitet, auch nicht rueckblickend. */
+        if (LEBEN[ev.kind]) {
+          basisLeben.push({ ev: ev, recorded_at: c.created_at || '',
+                            kommentar: Number(cid) || 0 });
+        }
         continue;
       }
       bekannte.add(ev.id);
+      /* ERST HIER, NACH DER BASIS-/LIVE-TRENNUNG. Vorher stand diese Zeile
+         ueber dem `basis`-Zweig und zaehlte damit auch die Historie -- also
+         Ereignisse von vorgestern als "in dieser Sitzung beobachtet".
+         Ebenfalls von Argus gefunden; derselbe Befund, zweite Haelfte. */
+      if (ABBRUCHARTEN[ev.kind]) zahl.abbrueche++;
+      /* Gezaehlt wird die MELDUNG einer Blockade, nicht die Zahl der gerade
+         offenen -- dieselbe Lesart wie bei den Abbruechen, und sie steht
+         auch so in der Zeile ("in dieser Sitzung beobachtet"). Wie viele
+         gerade haengen, sagt der Block mit den Aufgaben. */
+      if (ev.kind === 'blocked') zahl.klemmen++;
       zeigen(ev, 'live');
     }
   }
@@ -491,6 +826,10 @@
   /* Ab `seite` vorwaerts, solange es Seiten gibt. */
   async function vorwaerts(seite, g, modus, spaeter, basisIds) {
     for (var n = 0; n < MAX_SEITEN; n++) {
+      /* Letzte erlaubte Runde und es ginge weiter? Dann ist nicht alles
+         gelesen, und das darf nicht stillschweigend als vollstaendig
+         gelten -- die Abdeckung faellt dann auf `unavailable`. */
+      if (n === MAX_SEITEN - 1 && modus === 'basis') basisGrenzen.seitenDeckel = true;
       var a = await holen(seite, g);
       if (a.status === 304 || !a.items.length) return;
       verarbeiten(a.items, modus, spaeter, basisIds);
@@ -502,9 +841,157 @@
     }
   }
 
+  /* DIE HISTORIE ZU EINEM ZUSTAND FALTEN.
+
+     STABILE ORDNUNG, und zwar aus drei Angaben statt aus einer: `occurred_at`
+     allein reicht nicht, weil zwei Meldungen dieselbe Zeit tragen koennen und
+     eine verspaetete Meldung eine aeltere Zeit hat. Also:
+       1. occurred_at   was der Melder sagt
+       2. recorded_at   wann GitHub es angenommen hat (pruefbar)
+       3. Kommentarnummer  monoton, entscheidet den Rest
+     Keine dieser drei ist erfunden. Bei genau gleichen Werten in allen drei
+     bleibt die Lesereihenfolge -- `sort` ist in modernen Browsern stabil.
+
+     KEINE UNBELEGTE RUECKNAHME: Gefaltet wird nur vorwaerts. Ein `delivered`
+     schliesst; danach macht kein spaeteres `started` die Aufgabe wieder auf,
+     denn das waere eine Behauptung ueber eine Reihenfolge, die die Daten
+     nicht tragen. Ein solcher Fall wird als Widerspruch gezaehlt, nicht
+     stillschweigend aufgeloest.
+
+     DIESELBE SELBSTAUSKUNFTSREGEL WIE LIVE: `assigned` kommt vom Vergebenden,
+     alles andere zaehlt nur, wenn Melder und Akteur zusammenfallen. Was
+     rueckblickend gilt, muss dasselbe sein wie das, was live gilt -- sonst
+     zeigte dieselbe Lage je nach Verbindungszeitpunkt zwei Wahrheiten. */
+  function faltenZuZustand(liste) {
+    var nachAufgabe = Object.create(null), reihen = [];
+    liste.forEach(function (x) {
+      var k = x.ev.project_id + '\u0001' + x.ev.run_id + '\u0001' + x.ev.task_id;
+      if (!nachAufgabe[k]) { nachAufgabe[k] = []; reihen.push(k); }
+      nachAufgabe[k].push(x);
+    });
+    var offen = [], widersprueche = 0;
+    reihen.forEach(function (k) {
+      var g = nachAufgabe[k];
+      g.sort(function (p, q) {
+        if (p.ev.occurred_at !== q.ev.occurred_at)
+          return p.ev.occurred_at < q.ev.occurred_at ? -1 : 1;
+        if (p.recorded_at !== q.recorded_at)
+          return p.recorded_at < q.recorded_at ? -1 : 1;
+        return p.kommentar - q.kommentar;
+      });
+      /* DIESELBE KETTE WIE LIVE, mit denselben Stufen. Stuende hier eine
+         andere Reihenfolge, zeigte dieselbe Lage je nach Weg zwei
+         Wahrheiten -- Atlas' Bedingung. */
+      var STUFE = { zugewiesen: 1, empfangen: 2, begonnen: 3,
+                    geliefert: 4, geprueft: 5 };
+      var ZU = { received: 'empfangen', started: 'begonnen',
+                 delivered: 'geliefert', reviewed: 'geprueft' };
+      var halter = '', zustand = '', titel = '', zu = false, letzte = null,
+          klemmt = [], belegVergabe = 0,
+          eTyp = 'task', eEltern = '', eFassung = '';
+      g.forEach(function (x) {
+        var e = x.ev;
+        var selbst = !!e.selbstauskunft;
+        if (zu) {
+          /* Nach dem Schliessen noch ein Zustandsereignis: Das ist ein
+             Widerspruch in den Daten, keine Wiedereroeffnung. Eine Klemme
+             nach dem Abschluss gehoert dazu: Sie behauptete, eine Aufgabe
+             haenge, die laut denselben Daten vorbei ist. */
+          if (ZU[e.kind] || e.kind === 'assigned' || e.kind === 'blocked')
+            widersprueche++;
+          return;
+        }
+        if (e.kind === 'assigned' && e.recipient) {
+          halter = e.recipient; zustand = 'zugewiesen';
+          titel = e.title; letzte = x;
+          /* DER BELEG DER AUFGABE IST DER, DER SIE VERGEBEN HAT -- genau wie
+             im Livepfad, wo `arbeitZuweisen` den Beleg des `assigned`
+             mitbekommt. Hier stand zuerst der Beleg des ZULETZT wirkenden
+             Ereignisses; damit haette dieselbe Lage je nach Weg (live oder
+             wiederhergestellt) auf zwei verschiedene Kommentare gezeigt.
+             Genau das schliesst Atlas' Bedingung aus. Der zuletzt wirkende
+             Beleg geht als eigene Angabe mit, statt den ersten zu ersetzen. */
+          if (!belegVergabe) belegVergabe = x.kommentar;
+          /* Typ, Elternbezug und Fassung kommen von der VERGABE -- wie der
+             Beleg. Live setzt `arbeitZuweisen` sie genau dort; naehme die
+             Faltung sie von einem spaeteren Ereignis, zeigte dieselbe Lage
+             je nach Weg zwei verschiedene Elternketten. */
+          eTyp = e.item_type || 'task';
+          eEltern = e.parent_id || '';
+          eFassung = e.item_version || '';
+          return;
+        }
+        if (!selbst) { basisGrenzen.fremdaussagen++; return; }
+        /* HALTERGEBUNDEN ODER NICHT -- dieselbe Unterscheidung wie live.
+           Atlas' Befund vom 21.10.: Pruefung und Annahme waren hier an
+           `e.actor === halter` gebunden, also konnte Argus' eigene Pruefung
+           Forges Aufgabe nicht weiterstellen. Eine Selbstmeldung des
+           Pruefers ist etwas anderes als eine Selbstabnahme des Lieferanten;
+           `selbst` oben prueft schon, dass der Melder der Akteur ist. */
+        if (ZU[e.kind] && halter && (!HALTERGEBUNDEN[e.kind] || e.actor === halter)) {
+          /* Nur vorwaerts: Ein Ereignis, das keine hoehere Stufe bringt,
+             aendert nichts. Ein zweites `delivered` ist ein Duplikat, kein
+             Ruecksprung -- und als Widerspruch zaehlt es auch nicht. */
+          if ((STUFE[ZU[e.kind]] || 0) > (STUFE[zustand] || 0))
+            zustand = ZU[e.kind];
+          letzte = x; return;
+        }
+        /* ======= DIE KLEMMEN WERDEN MITGEFALTET, NICHT UEBERSPRUNGEN =====
+           Atlas' Bedingung: Wiederherstellung und Livebetrieb muessen
+           dieselbe Lage ergeben. Dieselbe Regel also auch hier: Nur der
+           Halter selbst meldet seine Klemme, der Zustand bleibt unberuehrt,
+           und eine Aufloesung trifft GENAU die Klemme ihrer Kennung.
+           Vorwaerts gefaltet wie alles andere: Eine Aufloesung ohne
+           passende offene Klemme ist ein Widerspruch, keine stille
+           Korrektur. */
+        if (e.kind === 'blocked' && halter && e.actor === halter &&
+            e.blocker_id) {
+          for (var bz = 0; bz < klemmt.length; bz++)
+            if (klemmt[bz].id === e.blocker_id) return;   /* Duplikat */
+          /* Mit dem Beleg: WELCHER Kommentar die Klemme gemeldet hat. */
+          klemmt.push({ id: e.blocker_id, grund: e.title, beleg: x.kommentar });
+          letzte = x; return;
+        }
+        if (e.kind === 'resolved' && halter && e.actor === halter &&
+            e.blocker_id) {
+          for (var rz = 0; rz < klemmt.length; rz++)
+            if (klemmt[rz].id === e.blocker_id) {
+              klemmt.splice(rz, 1); letzte = x; return;
+            }
+          widersprueche++; return;
+        }
+        if ((e.kind === 'accepted' || e.kind === 'aborted') && halter) {
+          /* ANGENOMMEN ODER ABGEBROCHEN SCHLIESST, GELIEFERT NICHT. Hier
+             stand `delivered`; mit Pruefung und Annahme in der Kette waere
+             die Aufgabe weg, bevor jemand sie angesehen hat.
+             Klemmt noch etwas, geht es mit der Aufgabe weg. Das ist keine
+             Aufloesung und wird auch nicht als eine gezaehlt -- es stand
+             nur nie ein `resolved` dazu. */
+          zu = true; letzte = x; return;
+        }
+      });
+      if (!zu && halter && zustand) {
+        offen.push({ projekt: g[0].ev.project_id, lauf: g[0].ev.run_id,
+                     aufgabe: g[0].ev.task_id, wer: halter, zustand: zustand,
+                     titel: titel, klemmt: klemmt,
+                     occurred_at: letzte ? letzte.ev.occurred_at : '',
+                     recorded_at: letzte ? letzte.recorded_at : '',
+                     eTyp: eTyp, eEltern: eEltern, eFassung: eFassung,
+                     beleg: belegVergabe,
+                     belegRef: belegVergabe ? BELEG_BASIS + belegVergabe : '',
+                     belegLetzte: letzte ? letzte.kommentar : 0 });
+      }
+    });
+    basisGrenzen.konflikte += widersprueche;
+    return offen;
+  }
+
   async function aufbau(g) {
     Z.kommentare.leeren(); Z.etags = {}; Z.seite = 1; Z.anzahl = 0;
     zahl.basisKommentare = 0; zahl.basisMarkiert = 0;
+    basisLeben.length = 0;
+    basisGrenzen = { seitenDeckel: false, konflikte: 0, fremdaussagen: 0 };
+    zahl.wieder = 0; zahl.wiederKlemmt = 0; zahl.abdeckung = '';
     var spaeter = [], basisIds = Menge(MAX_IDS);
     anzeigen('lese alle Basisseiten …');
     await vorwaerts(1, g, 'basis', spaeter, basisIds);
@@ -517,7 +1004,54 @@
     for (var i = 0; i < spaeter.length; i++) {
       zahl.waehrendAufbau++; zeigen(spaeter[i], 'während Aufbau');
     }
-    if (!spaeter.length) auf.open = false;   /* nach dem Verbinden: eine Zeile */
+    /* DIE STILLE ERKLAEREN, STATT SIE ZU ZEIGEN.
+       Gemessen am 21.10. mit den drei echten Kommentaren von Atlas gegen
+       die veroeffentlichte Fassung: Lagen sie beim Verbinden schon da,
+       meldete das Fach "3 markierte historisch, nicht abgespielt", und die
+       Buehne blieb leer -- genau Peters "kein ball, keine aktivitaet,
+       totenstille". Kamen dieselben drei danach, standen drei Meldungen und
+       ein Flug im Bild. Abgewiesen wurde in beiden Faellen nichts.
+       Nachgespielt wird die Historie weiterhin NICHT -- das Bild wuerde
+       sonst Arbeit zeigen, die vorbei ist. Aber es sagt jetzt, was geschehen
+       ist, und zwar in der Zeile, die sonst "Noch kein neues Ereignis"
+       trug: Die bisherige Fassung verschwieg die Einordnung genau dort, wo
+       man nach ihr gesucht haette.
+       Und das Fach bleibt OFFEN, wenn markierte Ereignisse in die Historie
+       gefallen sind. Es klappte bisher ausgerechnet im einzigen Fall zu, in
+       dem seine Erklaerung gebraucht wird. */
+    /* WAS OFFEN WAR, WIRD WIEDERHERGESTELLT -- ALS ZUSTAND, NICHT ALS LAUF.
+       Die Abdeckung ist dabei NIEMALS `complete`, und das ist keine
+       Vorsicht, sondern eine Tatsache: Was nie gemeldet wurde, steht in
+       keiner Quelle, also kann keine Zaehlung es finden. `unavailable` gilt,
+       wenn schon das Lesen unvollstaendig war -- dann ist nicht einmal das
+       Gemeldete ganz da. */
+    var offen = faltenZuZustand(basisLeben);
+    zahl.abdeckung = basisGrenzen.seitenDeckel ? 'unavailable' : 'partial';
+    if (typeof window.__agWiederherstellen === 'function') {
+      try {
+        var w = window.__agWiederherstellen({
+          aufgaben: offen, abdeckung: zahl.abdeckung,
+          gelesen: zahl.basisKommentare, markiert: zahl.basisMarkiert,
+          grenzen: basisGrenzen, schnitt: Z.schnittIso });
+        zahl.wieder = (w && typeof w.angenommen === 'number') ? w.angenommen : 0;
+        /* Aus dem RUECKGABEWERT, nicht aus der gefalteten Liste: Was das
+           Original wirklich angelegt hat, weiss nur das Original. */
+        zahl.wiederKlemmt = (w && typeof w.mitKlemme === 'number') ? w.mitKlemme : 0;
+        vermerk('wiederhergestellt: ' + zahl.wieder + ' offene Aufgabe(n), ' +
+                'Abdeckung ' + zahl.abdeckung);
+      } catch (x) {
+        vermerk('Wiederherstellen scheiterte: ' + (x && x.message));
+        zahl.abdeckung = 'unavailable';
+      }
+    }
+    if (zahl.basisMarkiert && !spaeter.length) {
+      letztesEl.textContent =
+        'Nichts Neues seit dem Verbinden. ' + zahl.basisMarkiert +
+        ' markierte Ereignis' + (zahl.basisMarkiert > 1 ? 'se' : '') +
+        ' lagen schon vor dem Schnitt (' + Z.schnittIso + ') und werden nicht ' +
+        'nachgespielt — das Bild zeigt keine Arbeit, die vorbei ist.';
+    }
+    if (!spaeter.length && !zahl.basisMarkiert) auf.open = false;   /* nach dem Verbinden: eine Zeile */
   }
 
   async function abfrage(g) {

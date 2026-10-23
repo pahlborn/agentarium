@@ -1,0 +1,29 @@
+[
+ {
+  "id": 6313271451,
+  "body": "<!-- AGENTARIUM_EVENT_V1 -->\n```json\n{\n  \"schema\": \"agentarium.github-event.v1\",\n  \"id\": \"AG-LATENCY-DISPATCH-1792576888719\",\n  \"project_id\": \"agentarium\",\n  \"run_id\": \"AG-EVENT-JOURNAL-001\",\n  \"task_id\": \"AG-LIVE-LATENCY-001\",\n  \"actor\": \"atlas\",\n  \"kind\": \"handoff\",\n  \"recipient\": \"scout\",\n  \"title\": \"Atlas beauftragt Scout: tatsächlichen Abrufpfad und Ursachen der verzögerten Übergabeanzeige prüfen.\",\n  \"occurred_at\": \"2026-10-21T10:01:28.719Z\",\n  \"source_evidence\": \"reported_checkpoint\",\n  \"source_tool_id\": \"scout-live-latency-followup\"\n}\n```\nDiese Vergabe wird vor dem tatsächlichen Folgeaufruf veröffentlicht. Noch kein Empfang oder Arbeitsbeginn behauptet. Prüfung read-only, keine kostenpflichtigen Modellaufrufe und keine Änderung des Monitors.",
+  "user": {
+   "login": "pahlborn",
+   "id": 277496791
+  },
+  "created_at": "2026-10-21T10:01:29Z"
+ },
+ {
+  "id": 6313282429,
+  "body": "<!-- AGENTARIUM_EVENT_V1 -->\n```json\n{\n  \"schema\": \"agentarium.github-event.v1\",\n  \"id\": \"AG-SCOUT-LATENCY-START-1792576923265\",\n  \"project_id\": \"agentarium\",\n  \"run_id\": \"AG-EVENT-JOURNAL-001\",\n  \"task_id\": \"AG-LIVE-LATENCY-001\",\n  \"actor\": \"scout\",\n  \"kind\": \"progress\",\n  \"title\": \"Scout hat die Latenzprüfung empfangen und beginnt den Vergleich von veröffentlichtem Adapter und PR46.\",\n  \"occurred_at\": \"2026-10-21T10:02:03.265Z\",\n  \"source_evidence\": \"reported_checkpoint\",\n  \"source_tool_id\": \"scout-latency-code-review\"\n}\n```\n\nEigene Empfangs-/Beginnmeldung des tatsächlichen Scout-Laufs /root/scout_transport_comparison, Auftrag https://github.com/pahlborn/agentarium/issues/2#issuecomment-6313271451. Read-only, keine Behauptung über Anzeige auf Peters Gerät.",
+  "user": {
+   "login": "pahlborn",
+   "id": 277496791
+  },
+  "created_at": "2026-10-21T10:02:04Z"
+ },
+ {
+  "id": 6313324554,
+  "body": "<!-- AGENTARIUM_EVENT_V1 -->\n```json\n{\n  \"schema\": \"agentarium.github-event.v1\",\n  \"id\": \"AG-LATENCY-SCOUT-RESULT-1792577062087\",\n  \"project_id\": \"agentarium\",\n  \"run_id\": \"AG-EVENT-JOURNAL-001\",\n  \"task_id\": \"AG-LIVE-LATENCY-001\",\n  \"actor\": \"atlas\",\n  \"kind\": \"progress\",\n  \"title\": \"Atlas hat Scouts Prüfergebnis empfangen: Abrufsteuerung geprüft; Ursache auf Peters Gerät noch ungemessen.\",\n  \"occurred_at\": \"2026-10-21T10:04:22.087Z\",\n  \"source_evidence\": \"reported_checkpoint\",\n  \"source_tool_id\": \"scout-live-latency-result\"\n}\n```\nScout /root/scout_transport_comparison hat den Prüfauftrag beendet. Eigener Empfangs-/Beginncheckpoint von Scout: https://github.com/pahlborn/agentarium/issues/2#issuecomment-6313282429 . Atlas meldet hier ausschließlich den tatsächlich empfangenen Handback. Bestätigt: Abrufdauer plus mindestens2s/gegebenenfalls Headerwartezeit, Aufbau seriell, Tabpause und Backoff; keine Ursache der beobachteten30s ohne Browsermessung belegt.",
+  "user": {
+   "login": "pahlborn",
+   "id": 277496791
+  },
+  "created_at": "2026-10-21T10:04:22Z"
+ }
+]
