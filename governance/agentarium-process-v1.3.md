@@ -40,3 +40,10 @@ After one bounded delivery, assess useful outcome and quality together with obse
 
 ## Adoption and behavioral checks
 Active task authority and safety boundaries take precedence. Existing sessions must actually reload the relevant changed definitions; a commit does not reload a running worker. Record independently checked role behavior separately from integration. Claude tools/model/effort limits remain unchanged. A clean-context dry run tests decision behavior only; a later actual task tests operational effectiveness.
+
+## Cost/read checkpoint — 2026-10-23
+Assignment: existing ID; one outcome/owner; exact baseline; allowed reads with a finite file/comment list and extent; exclusions; decisive check. Link prior results instead of repeating transcripts. A necessary additional read is identified narrowly before expanding the read list. Avoid unrelated CI reruns; repeat checks only for changed behavior or an unresolved failure.
+
+Lot handback: result/head and check/limit, plus `source_evidence: reported_checkpoint`, `tokens_since_checkpoint`, `cost_usd_since_checkpoint`, `measurement_scope` and available runtime evidence. Use `unknown` plus reason if unavailable. Session totals must be labelled separately; no guessed task attribution or accounting-only model call.
+
+For #46: preserve the frozen source branch; do not close or merge it. Extract TK-022 into a bounded PR targeting main only with its proven necessary implementation/test dependencies; its mocked-fetch browser proof is not real-network/device acceptance. R3, TK-023 and cycle detection are separate findings/branches; R5 and R6/E3 retain their own evidence and unresolved status. Do not reimplement existing delivered fixes. Independent QA and role/run attribution remain required before product merge. Check effectiveness on the next actual Lot handback: bounded reads, one delivered outcome and honest cost checkpoint; Atlas owns this check.
