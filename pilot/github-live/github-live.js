@@ -434,10 +434,18 @@
              `verarbeitet` heisst "aus der Warteschlange genommen",
              `ausgegeben` heisst "Meldung oder Flug angelegt". Gezeichnete
              Bildpunkte beweist keine der beiden. Benannt von Atlas. */
+          /* R3 IM LIVEPFAD SICHTBAR (Aufgabe 46-8): Das Original zaehlt
+             widerspruechliche zweite Vergaben in `vergabekonflikte`, bisher
+             nur ueber `__agStand` messbar. Es kommt hierher wie `verarbeitet`
+             und `ausgegeben` -- dieselbe Zeile, dasselbe Wort wie bei der
+             Wiederherstellung ("Widerspruch"), keine neue Anzeige. Nur wenn
+             es einen gibt, damit die Zeile ruhig bleibt. */
           if (st && typeof st.verarbeitet === 'number')
             return ' · verarbeitet ' + st.verarbeitet +
                    (typeof st.ausgegeben === 'number'
-                      ? ' · ausgegeben ' + st.ausgegeben : '');
+                      ? ' · ausgegeben ' + st.ausgegeben : '') +
+                   (typeof st.vergabekonflikte === 'number' && st.vergabekonflikte
+                      ? ' · live ' + st.vergabekonflikte + ' Widerspruch/Widersprüche' : '');
         } catch (x) {}
         return '';
       })() +
@@ -923,6 +931,23 @@
           return;
         }
         if (e.kind === 'assigned' && e.recipient) {
+          /* ===== R3, NACHBESSERUNG (Aufgabe 46-8): ERST PRUEFEN, DANN AENDERN =====
+             Atlas' Befund 6359816846 vom 23.10.: Hier liefen Halter, Stufe,
+             Titel und `letzte` VOR dem Typ-/Elternvergleich. Ein
+             widerspruechliches zweites `assigned` wurde zwar gezaehlt und
+             behielt Typ und Eltern -- verschob aber schon den Halter und
+             setzte die Stufe auf "zugewiesen" zurueck. Der Livepfad
+             (`arbeitZuweisen`) kehrt dagegen VOR jeder Aenderung zurueck. Zwei
+             Wege, zwei Lagen.
+             Jetzt wie live: Widerspricht die Vergabe, wird sie gezaehlt und
+             wirkt GAR NICHT -- Halter, Stufe, Titel, Beleg und Fassung bleiben
+             die der ersten. Gegentest: R20 (Historie) und L20 (laufender Strom)
+             im Nachweis AG-EVENT-JOURNAL-001. */
+          var tPruef = e.item_type || 'task', pPruef = e.parent_id || '';
+          if (eTypGesetzt && (eTyp !== tPruef || eEltern !== pPruef)) {
+            widersprueche++;
+            return;
+          }
           halter = e.recipient; zustand = 'zugewiesen';
           titel = e.title; letzte = x;
           /* DER BELEG DER AUFGABE IST DER, DER SIE VERGEBEN HAT -- genau wie
@@ -959,13 +984,9 @@
              rechtmaessige Meldung sein, und genau darueber ist E3/R6 noch
              offen. Sie hier mit einzufangen hiesse, eine offene Entscheidung
              im Vorbeigehen zu treffen. */
-          var tNeu = e.item_type || 'task';
-          var pNeu = e.parent_id || '';
-          if (eTypGesetzt && (eTyp !== tNeu || eEltern !== pNeu)) {
-            widersprueche++;
-          } else {
-            eTyp = tNeu; eEltern = pNeu; eTypGesetzt = true;
-          }
+          /* Der Widerspruch ist oben schon abgefangen (Nachbesserung 46-8);
+             hier kommt nur noch an, was zum Ersten passt oder das Erste ist. */
+          eTyp = tPruef; eEltern = pPruef; eTypGesetzt = true;
           eFassung = e.item_version || '';
           return;
         }
