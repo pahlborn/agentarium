@@ -217,7 +217,17 @@
      ABGESPIELT WIRD NICHTS. Was daraus entsteht, ist ein Zustand, kein
      Ereignis: Ringe, die liegen, ohne Flug, ohne Meldung, ohne Puls. */
   var basisLeben = [];
-  var basisGrenzen = { seitenDeckel: false, konflikte: 0, fremdaussagen: 0 };
+  var basisGrenzen = { seitenDeckel: false, konflikte: 0, fremdaussagen: 0,
+                       /* SELBSTANNAHME IST KEIN KONFLIKT UND KEINE
+                          FREMDAUSSAGE, darum eine eigene Zahl. Ein
+                          Konflikt heisst "zwei Angaben widersprechen";
+                          eine Fremdaussage heisst "der Melder ist nicht
+                          der Akteur". Hier stimmt beides, und die
+                          Meldung zaehlt trotzdem nicht.
+                          NICHT in der Wiederherstellungszeile ausgegeben:
+                          Atlas am 23.10. ausdruecklich "kein neues Zeichen
+                          noetig". Messbar ueber `grenzen`. */
+                       selbstannahmen: 0 };
 
   var abdruck = Object.create(null), abdruckFolge = [];
   function abdruckLegen(id, fa) {
@@ -934,6 +944,31 @@
            Forges Aufgabe nicht weiterstellen. Eine Selbstmeldung des
            Pruefers ist etwas anderes als eine Selbstabnahme des Lieferanten;
            `selbst` oben prueft schon, dass der Melder der Akteur ist. */
+        /* ============ WER LIEFERT, NIMMT NICHT SELBST AB ============
+
+           Archibalds Befund R5, von Atlas am 23.10. als Lesart A
+           entschieden: "Selbstannahme schliesst nicht; Aufgabe bleibt
+           offen." Dieselbe Regel hier wie live, denn Atlas' Bedingung
+           lautet: Wiederherstellung und Livebetrieb muessen dieselbe Lage
+           ergeben.
+
+           ZWEI SCHRANKEN, NICHT EINE. `selbst` oben prueft, WER MELDEN
+           DARF (Melder = Akteur). Diese prueft, WER ABNEHMEN DARF
+           (Akteur != Halter). Ich hatte die beiden zweimal verwechselt --
+           einmal in meiner TK-022-Notiz, einmal hier im Code, und beide
+           Male hat es jemand anderes gefunden.
+
+           `aborted` STEHT HIER NICHT, und das ist Atlas' eigener Zusatz:
+           Wer abbricht, bricht seine eigene Arbeit ab -- eine Nachricht
+           ueber sich selbst, kein Urteil ueber ein Ergebnis. Es faellt
+           weiter in den Schliesszweig unten, auch vom Halter. */
+        if ((e.kind === 'reviewed' || e.kind === 'accepted') &&
+            halter && e.actor === halter) {
+          basisGrenzen.selbstannahmen++;
+          /* `letzte` bleibt, wo es war -- dieses Ereignis hat nicht
+             gewirkt, also ist es auch nicht das zuletzt wirkende. */
+          return;
+        }
         if (ZU[e.kind] && halter && (!HALTERGEBUNDEN[e.kind] || e.actor === halter)) {
           /* Nur vorwaerts: Ein Ereignis, das keine hoehere Stufe bringt,
              aendert nichts. Ein zweites `delivered` ist ein Duplikat, kein
@@ -996,7 +1031,8 @@
     Z.kommentare.leeren(); Z.etags = {}; Z.seite = 1; Z.anzahl = 0;
     zahl.basisKommentare = 0; zahl.basisMarkiert = 0;
     basisLeben.length = 0;
-    basisGrenzen = { seitenDeckel: false, konflikte: 0, fremdaussagen: 0 };
+    basisGrenzen = { seitenDeckel: false, konflikte: 0, fremdaussagen: 0,
+                     selbstannahmen: 0 };
     zahl.wieder = 0; zahl.wiederKlemmt = 0; zahl.abdeckung = '';
     var spaeter = [], basisIds = Menge(MAX_IDS);
     anzeigen('lese alle Basisseiten …');
