@@ -40,3 +40,10 @@ After one bounded delivery, assess useful outcome and quality together with obse
 
 ## Adoption and behavioral checks
 Active task authority and safety boundaries take precedence. Existing sessions must actually reload the relevant changed definitions; a commit does not reload a running worker. Record independently checked role behavior separately from integration. Claude tools/model/effort limits remain unchanged. A clean-context dry run tests decision behavior only; a later actual task tests operational effectiveness.
+
+## Bounded reading — 2026-10-23
+Assignment: existing ID; one outcome/owner; exact baseline; allowed reads with a finite file/comment list and extent; exclusions; decisive check. Link prior results instead of repeating transcripts. A necessary additional read is identified narrowly before expanding the read list. Avoid unrelated CI reruns; repeat checks only for changed behavior or an unresolved failure.
+
+Handbacks report result/head and decisive checks/limits concisely. Peter records consumption from his usage monitor; no agent token/cost checkpoint is required.
+
+For #46: the content is transferred as tasks 46-1 … 46-10, assigned by Peter's Zuarbeit. #46 stays frozen and is closed without merge in 46-10.
