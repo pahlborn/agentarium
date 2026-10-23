@@ -46,4 +46,4 @@ Assignment: existing ID; one outcome/owner; exact baseline; allowed reads with a
 
 Handbacks report result/head and decisive checks/limits concisely. Peter records consumption from his usage monitor; no agent token/cost checkpoint is required.
 
-For #46: preserve the frozen source branch; do not close or merge it. Extract TK-022 into a bounded PR targeting main only with its proven necessary implementation/test dependencies; its mocked-fetch browser proof is not real-network/device acceptance. R3, TK-023 and cycle detection are separate findings/branches; R5 and R6/E3 retain their own evidence and unresolved status. Do not reimplement existing delivered fixes. Independent QA and role/run attribution remain required before product merge. Check effectiveness on the next actual Lot handback: bounded reads and one delivered outcome; Atlas owns this check.
+For #46: the content is transferred as tasks 46-1 … 46-10, assigned by Peter's Zuarbeit. #46 stays frozen and is closed without merge in 46-10.
