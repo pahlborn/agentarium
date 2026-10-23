@@ -1642,6 +1642,100 @@ function koerper(f) {
   zeile('eigenes Elternteil abgewiesen',
         /parent_id gleich task_id/.test(rn4.grund), true);
 
+  /* ================================================ O: DIE LISTE LESEN ===
+     Peters Befund vom 23.10., woertlich: "liste ist zu schwach, zudem
+     sollte sie sich erhellen bei mouse over."
+
+     Die Liste ist bis heute von KEINEM Nachweis angefasst worden -- sie
+     ist das, was man am laufenden Strom liest, und sie war nicht gemessen.
+     Darum steht das hier, obwohl dieser Nachweis vom Vertrag handelt: Die
+     Zeilen entstehen durch die Ereignisse der Teile oben, es braucht also
+     keinen zweiten Aufbau.
+
+     Gemessen wird nicht "sieht besser aus", sondern zwei Bedingungen, die
+     gegeneinander laufen:
+       1. LESBAR: 4,5:1 gegen den dunkelsten Grund (AA, 12px).
+       2. UNTERSCHEIDBAR: Was offen ist, muss heller stehen als was
+          geschehen ist -- darauf ist die ganze Liste gebaut, und eine zu
+          starke Blassstufe nimmt ihr genau diese Aussage.
+     Das Licht des Feldes hinter der Liste wird NICHT mitgerechnet; es
+     macht den Grund heller, also ist die Rechnung die unguenstigste. */
+  console.log('\nO — Die Liste ist lesbar — und sagt live nur EINES');
+  console.log('    erwartet: >= 4,5:1 gegen den Grund; keine offene Zeile im Live\n');
+  const liste = await s.evaluate(() => {
+    const t = document.querySelector('#agLaeuft .agAuf.tat');
+    const o = document.querySelector('#agLaeuft .agAuf.offen');
+    const sp = t && t.querySelector('span');
+    const w = getComputedStyle(document.documentElement)
+                .getPropertyValue('--grund').trim();
+    return { zeilen: document.querySelectorAll('#agLaeuft .agAuf').length,
+             opTat: t ? getComputedStyle(t).opacity : null,
+             opOffen: o ? getComputedStyle(o).opacity : null,
+             farbe: sp ? getComputedStyle(sp).color : null,
+             grund: w };
+  });
+  console.log('        ' + liste.zeilen + ' Zeilen · Grund ' + liste.grund +
+              ' · Text ' + liste.farbe);
+  zeile('es gibt überhaupt eine Zeile', liste.zeilen > 0, true);
+  zeile('Deckkraft einer geschehenen Zeile', liste.opTat, '0.62');
+  /* Die Rechnung steht HIER, nicht in der Seite: ein Nachweis, der seine
+     Schwelle in den Gegenstand hineinlegt, prueft sich selbst. */
+  const rgb = (c) => (String(c).match(/[\d.]+/g) || []).slice(0, 3).map(Number);
+  const hx = (c) => { const m = /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i
+                        .exec(String(c).trim());
+                      return m ? m.slice(1).map(v => parseInt(v, 16)) : null; };
+  const lum = (p) => { const f = (v) => { v /= 255;
+                         return v <= 0.03928 ? v / 12.92
+                                             : Math.pow((v + 0.055) / 1.055, 2.4); };
+                       return 0.2126 * f(p[0]) + 0.7152 * f(p[1]) + 0.0722 * f(p[2]); };
+  const kontrast = (a, b) => { const L = [lum(a), lum(b)].sort((x, y) => y - x);
+                               return (L[0] + 0.05) / (L[1] + 0.05); };
+  const vg = rgb(liste.farbe), gr = hx(liste.grund), al = Number(liste.opTat);
+  const drauf = vg.map((v, i) => v * al + gr[i] * (1 - al));
+  const k = kontrast(drauf, gr);
+  console.log('        Kontrast bei ' + al + ': ' + k.toFixed(2) + ':1');
+  zeile('Kontrast erreicht AA (>= 4,5:1)', k >= 4.5, true);
+  /* DIE GEGENBEDINGUNG IST IM LIVEBETRIEB NICHT MESSBAR, und das ist der
+     eigentliche Befund dieses Teils. Zuerst stand hier ein "nicht
+     gemessen" -- ein stillschweigend ausgelassener Fall. Nachgesehen,
+     warum: `auftrag` in `stromZeile` verlangt `!E.beobachtet`, und
+     `beobachtet` tragen ALLE Live-Ereignisse (gesetzt in `__agEreignis`).
+     Es kann live also keine `.offen`-Zeile geben.
+
+     Damit sagt die Liste live nur EINES, nicht zweierlei -- und bis zu
+     dieser Fassung stand sie dabei ganz auf .42, also unter AA. Das ist
+     Peters Befund, vollstaendig. Behoben ist davon die Lesbarkeit; dass
+     die zweite Aussage fehlt, ist eine Aenderung am Bild und steht als
+     Befund. Gemessen wird deshalb die TATSACHE, nicht eine Hoffnung:
+     keine offene Zeile im Livebetrieb. Faellt diese Zeile eines Tages,
+     hat jemand das Bild geaendert -- und dann soll es auffallen. */
+  zeile('live gibt es keine offene Zeile (Befund, nicht Wunsch)',
+        liste.opOffen, null);
+
+  /* DAS ERHELLEN BEI MOUSEOVER GIBT ES SCHON, und es ist kein Versehen,
+     dass Peter es nicht gesehen hat: Die Regel steht unter
+     `@media (hover:hover)`. Auf dem iPad gibt es keinen Zeiger, der nur
+     zeigt -- und `#agEcke` traegt mit Absicht `pointer-events:none`, weil
+     die Liste sonst jeden Tipp auf peter schluckt, der links bei 180 Grad
+     steht. Geprueft wird hier, DASS die Regel existiert; ob sie greift,
+     entscheidet das Geraet. */
+  const heller = await s.evaluate(() => {
+    let r = '';
+    for (const bl of document.styleSheets) {
+      let rs; try { rs = bl.cssRules; } catch (e) { continue; }
+      for (const x of rs) {
+        if (x.type !== CSSRule.MEDIA_RULE) continue;
+        if (!/hover/.test(x.conditionText || '')) continue;
+        for (const y of x.cssRules)
+          if (/#agEcke:hover/.test(y.selectorText || '')) r = y.style.filter || '(ohne filter)';
+      }
+    }
+    return r;
+  });
+  zeile('Erhellen am Zeigegerät ist angelegt', /brightness/.test(heller), true);
+  console.log('        ' + (heller || '(keine Regel gefunden)') +
+              ' — auf einem Tastgerät greift das nicht');
+
   console.log('\nI — Was auch jetzt noch NICHT geschieht');
   console.log('    erwartet: kein Ballwechsel aus Lebenszyklusereignissen,');
   console.log('    und reviewed/accepted/merged/published fehlen weiter\n');
