@@ -1,5 +1,8 @@
 # AG-LM-WORK-REGISTER — V1
 
+> **Verbindliche Einordnung nach erneutem Vorgabenabgleich am2026-10-23:** Dieses Register ist Atlas' Arbeitsplanung und Anforderungsentwurf. Produktspezifikation/Abnahmekriterien sind erst nach tatsächlicher Archibald-Rückgabe entsprechend belegt; TC001–014 bleiben Atlas-Entwürfe bis zur unabhängigen Sentinel-Testplanung. Frühere direkte oder indirekte Verbindlichkeitserklärungen der Atlas-Ausarbeitung werden hiermit korrigiert. Peters Originalanforderungen gelten unverändert. Lot wird nicht für Archibalds Aufruf oder Spezifikation eingesetzt. Die folgenden historischen Zustandsangaben sind Momentaufnahmen; maßgeblich ist die belegte aktuelle Lieferung, nicht ein altes „offen“ im Text.
+
+
 Stand: 2026-10-21. Autor/Koordination: Atlas. Nutzerentscheidung: eindeutige IDs für Epics, User Stories, Tasks und Testfälle; vollständige Hierarchie, beleggebundene Übergaben und Abschluss erst nach erfolgreicher Arbeit und Prüfung. Ersetzt als führendes Strukturregister die losen E1/E2/E3- und LM-S-Bezeichnungen aus PR46-Kommentaren6320102814/6320171504. Historie bleibt erhalten.
 
 Projekt: agentarium. Lauf unverändert: AG-EVENT-JOURNAL-001. Geprüfte Produktbaseline: ba9796294726a01d355ecfac59d26435984d5582. Produktzustand und Plan sind getrennt; dieses Register ist keine Implementierungs-/Abnahmebehauptung.
@@ -267,3 +270,9 @@ TK021-Route: Lots beobachtete fehlende Verfügbarkeit des spec-agent bleibt ein 
 Nach22:00 einmal vorhandene Kommentare/Head abgleichen und nur unbeantwortete Aufgaben weiterreichen. Lot prüft ohne Testmodellaufruf: genaue Runtime/Version, Projekt-/Arbeitsverzeichnis und dortige spec-agent-Datei, Agentverzeichnis bei Sitzungsstart vorhanden, Startup-/Hostingbeschränkungen, echte Liste verfügbarer Typen. Unterstütztes Nachladen verwenden, ohne Tools/Rechte/Modellgrenzen zu ändern; tatsächlichen spec-agent erst nach belegter Verfügbarkeit im bestehenden autorisierten Rahmen für TK021 starten. Andernfalls konkrete Start-/Reloadbedingung des Hosts liefern, keine pauschale Abwesenheitsmeldung, keine Umbenennung allgemeiner Agenten und kein neuer bezahlter Workflow.
 
 TK022-Quellenroute: Anzeige/Verbraucher und Erzeugung getrennt. Atlas meldet eigene reale Übergänge; Claude-Host/Rolle nur beobachtete eigene. Lot prüft den minimalen bestehenden Produzentenanschluss an den strikten Vertrag; kein kompletter neuer Collector und keine Infrastrukturaktivierung aus diesem Auftrag. Ein realer Lebenszyklusfall genügt zunächst als Nachweis; vollständige Abnahme bleibt später nach Hierarchie.
+
+## Nachtrag V1.5 — direkte Archibald-Zuweisung
+
+Peters Routingkorrektur vom2026-10-23: Atlas beauftragt Archibald direkt, nicht über Lot. Die Host-/Reload-Abhängigkeit von Lots laufender Sitzung in TK021/NachtragV1.4 ist als regulärer Ausführungsweg aufgehoben. Lot bleibt Implementierungsowner des Monitors, Archibald/spec-agent bleibt Spezifikationsowner, Atlas verantwortet seinen direkten Aufruf.
+
+Aktuell verifizierte bestehende Route: relay/claude_public_relay_v2.py enthält spec-agent in ROLES. Der alte archibald-relay.yml-Identitätstest ist nicht die einzige Route. Direct-Relay-Unterstützung ist keine bestätigte aktuelle Ausführung; API-Worker-Aktivierung verlangt weiterhin konkrete Kostenautorität und geprüftes versioniertes Paket. Keine Aktivierung durch dieses Dokument. TK021: direkte Beauftragung durch Atlas, worker_started nicht belegt. Frühere pauschale Aussage, es gebe keinen Archibald-Weg, wird entsprechend eingeschränkt: direkter Sessionconnector hier nicht vorhanden, vorhandener API-Relay-Weg unterstützt die Rolle.
