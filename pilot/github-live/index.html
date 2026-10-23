@@ -2398,7 +2398,7 @@
 
      Der Bauzeitpunkt kommt beim Bauen aus der Uhr. Von Hand gepflegte
      Datumsangaben sind nach der zweiten Änderung falsch. */
-  var FASSUNG = '73', GEBAUT = '2026-10-23T05:57Z';
+  var FASSUNG = '74', GEBAUT = '2026-10-23T06:17Z';
 
   /* AG-GH-LIVE-001: JEDE TEXTSENKE MASKIERT.
      Seit Live-Daten von aussen kommen (GitHub-Kommentare, one-event.json),
@@ -4052,6 +4052,15 @@
      wird gezaehlt statt verschwiegen. */
   var luecken = { beginn: 0, stufe: 0, lieferung: 0, abbruch: 0,
                   klemme: 0, loesung: 0, gesamt: 0 };
+  /* SELBSTANNAHME UND SELBSTPRUEFUNG SIND KEINE LUECKE, darum ein eigener
+     Zaehler. Eine Luecke heisst "ich konnte eine Meldung nicht zuordnen";
+     hier ist die Zuordnung klar und die Meldung zaehlt trotzdem nicht.
+     Unter `luecken.gesamt` gebucht waere es ein anderer Befund mit demselben
+     Namen -- und `gesamt` steht im Bild.
+     NICHT ANGEZEIGT, mit Absicht: Atlas am 23.10. ausdruecklich "kein neues
+     Zeichen noetig". Messbar ist es ueber `__agStand`; sichtbar zu machen
+     waere eine Zeile mehr und Peters Entscheidung. */
+  var selbstannahmen = 0;
   function luecke(was) { luecken[was]++; luecken.gesamt++; }
   /* Hier stand `lueckenNull()`. Die Funktion hatte nie einen Aufrufer -- ich
      hatte sie in Schritt 2 vorsorglich dazugeschrieben, parallel zu
@@ -5413,7 +5422,35 @@
                NICHT HALTERGEBUNDEN: Pruefung, Annahme und Abbruch kommen
                von einer anderen Rolle und treffen die Aufgabe, wo immer sie
                liegt. Siehe `HALTERGEBUNDEN`. */
-            if (ZU_ZUSTAND[E.art] && HALTERGEBUNDEN[E.art])
+            /* ========== WER LIEFERT, NIMMT NICHT SELBST AB ==========
+
+               Archibalds Befund R5 vom 23.10., von mir an BEIDEN Pfaden
+               nachgemessen und von Atlas als Lesart A entschieden:
+               "Selbstannahme schliesst nicht; Aufgabe bleibt offen."
+
+               ZWEI SCHRANKEN, NICHT EINE -- und ich habe sie vorher zweimal
+               verwechselt. `E.selbstauskunft` oben prueft, WER MELDEN DARF
+               (Melder = Akteur). Diese hier prueft, WER ABNEHMEN DARF
+               (Akteur != Halter). Beide muessen halten; die eine ersetzt die
+               andere nicht.
+
+               WARUM `aborted` NICHT DAZUGEHOERT, und das ist Atlas' eigener
+               Zusatz: Wer abbricht, bricht seine eigene Arbeit ab. Das ist
+               kein Urteil ueber ein Ergebnis, sondern eine Nachricht ueber
+               sich selbst -- genau umgekehrt zur Annahme. `aborted` faellt
+               deshalb weiter in den Schliesszweig, auch vom Halter.
+
+               UND KEIN NEUES ZEICHEN: Die Aufgabe bleibt einfach liegen,
+               genau wie bei einer Fremdaussage. Dieselbe Grammatik, kein
+               Vermerk, keine Farbe. */
+            var halterHier = null;
+            if (E.art === 'reviewed' || E.art === 'accepted') {
+              var fh = aufgabeSuchen(kennung(E.spur));
+              halterHier = (fh && !fh.mehrfach) ? fh.wer : null;
+            }
+            if (halterHier && halterHier === E.von) {
+              selbstannahmen++;                  /* zaehlt, wirkt nicht */
+            } else if (ZU_ZUSTAND[E.art] && HALTERGEBUNDEN[E.art])
               arbeitStufe(E.von, E.spur, ZU_ZUSTAND[E.art], 'stufe');
             else if (ZU_ZUSTAND[E.art]) {
               var fs = aufgabeSuchen(kennung(E.spur));
@@ -5610,7 +5647,10 @@
                 angenommen und nicht gezeichnet worden. */
              verarbeitet: verarbeitet, ausgegeben: ausgegeben,
              wiederhergestellt: wiederhergestellt, abdeckung: liveAbdeckung,
+             selbstannahmenGemeldet: selbstannahmenGemeldet,
              luecken: luecken.gesamt,
+             /* Eigene Zahl, nicht in `luecken.gesamt` -- siehe dort. */
+             selbstannahmen: selbstannahmen,
              lueckenEinzeln: { beginn: luecken.beginn,
                stufe: luecken.stufe,
                lieferung: luecken.lieferung, abbruch: luecken.abbruch,
@@ -5723,7 +5763,7 @@
        geliefert hat, gehoert nicht in den naechsten. */
     liveListe.length = 0;
     verarbeitet = 0; ausgegeben = 0;
-    wiederhergestellt = 0; liveAbdeckung = '';
+    wiederhergestellt = 0; liveAbdeckung = ''; selbstannahmenGemeldet = 0;
     /* Auch die Live-Identitaet: Was ein voriger Strom gemeldet hat, ist
        beim naechsten Wechsel keine Aussage mehr. */
     liveKopf = null;
@@ -5741,6 +5781,14 @@
      vollstaendig die Quelle dabei war. Beides gehoert in die Diagnose,
      damit eine Zahl nicht fuer vollstaendig genommen wird. */
   var wiederhergestellt = 0, liveAbdeckung = '';
+  /* GEMELDET, NICHT GEMESSEN -- und der Name sagt es. Wie viele
+     Selbstannahmen die FALTUNG verworfen hat, weiss nur der Adapter;
+     das Original sieht sie nie, denn sie kommen nie bei ihm an. Die
+     Zahl wird uebernommen wie `abdeckung` und `gelesen` und tritt
+     NEBEN den eigenen Zaehler `selbstannahmen` des Livepfads, nicht
+     in ihn. Zwei Wege, zwei Zahlen -- sonst liesse sich nicht mehr
+     sagen, welcher Weg was verworfen hat. */
+  var selbstannahmenGemeldet = 0;
 
   /* Welcher Titel gilt gerade? Im Livebetrieb der gemeldete, sonst der des
      aufgezeichneten Stuecks -- und solange nichts gemeldet ist, das Wort der
@@ -6470,6 +6518,8 @@
       n++;
     });
     if (typeof d.abdeckung === 'string') liveAbdeckung = d.abdeckung;
+    if (d.grenzen && typeof d.grenzen.selbstannahmen === 'number')
+      selbstannahmenGemeldet = d.grenzen.selbstannahmen;
     wiederhergestellt = n;
     return { angenommen: n, abgewiesen: abgewiesen, mitKlemme: mitKlemme };
   };

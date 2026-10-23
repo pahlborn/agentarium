@@ -171,7 +171,8 @@ function koerper(f) {
   /* ===== SCHRITT 2b: WAS BEIM VERBINDEN SCHON OFFEN WAR =====
      Eine Historie mit drei Aufgaben, die sich unterscheiden MUESSEN:
        R1  vergeben und begonnen, nicht geliefert   -> bleibt offen, begonnen
-       R2  vergeben, begonnen, geliefert            -> ist zu, kein Ring
+       R2  vergeben, begonnen, geliefert, SELBST
+           angenommen                               -> bleibt OFFEN, geliefert
        R3  vergeben, nie begonnen                   -> bleibt offen, zugewiesen
      Dazu zwei Faelle, die NICHT zaehlen duerfen:
        R4  Beginn als Fremdaussage (atlas ueber forge)  -> bleibt zugewiesen
@@ -278,8 +279,13 @@ function koerper(f) {
   hist({ id: 'R12:delivered', task: 'AG-EVJ-R12', actor: 'cadence', reporter: 'cadence',
          kind: 'delivered', title: 'R12 geliefert' },
        '2026-10-20T19:02:00Z');
-  hist({ id: 'R12:reviewed', task: 'AG-EVJ-R12', actor: 'cadence', reporter: 'cadence',
-         kind: 'reviewed', title: 'R12 geprüft — aber nicht angenommen' },
+  /* GEPRUEFT VON ARGUS, nicht von cadence selbst. Hier stand
+     `actor: 'cadence'` -- und cadence HAELT R12. Eine Selbstpruefung also,
+     und sie stellte den Zustand weiter. Gemeint war: geprueft ist noch
+     nicht angenommen. Dafuer muss die Pruefung zaehlen, also prueft die
+     Rolle, die prueft. */
+  hist({ id: 'R12:reviewed', task: 'AG-EVJ-R12', actor: 'argus', reporter: 'argus',
+         kind: 'reviewed', title: 'R12 geprüft von Argus — aber nicht angenommen' },
        '2026-10-20T19:03:00Z');
   /* Und ein zweites `delivered` danach: ein Rueckschritt darf nicht
      geschehen, und als Widerspruch zaehlt ein Duplikat auch nicht. */
@@ -414,8 +420,14 @@ function koerper(f) {
   hist({ id: 'R10:delivered', task: 'AG-EVJ-R10', actor: 'sentinel', reporter: 'sentinel',
          kind: 'delivered', title: 'R10 geliefert' },
        '2026-10-20T17:02:00Z');
-  hist({ id: 'R10:accepted', task: 'AG-EVJ-R10', actor: 'sentinel', reporter: 'sentinel',
-         kind: 'accepted', title: 'R10 angenommen' },
+  /* ANGENOMMEN VON ATLAS, nicht von sentinel selbst. Hier stand
+     `actor: 'sentinel'` -- und sentinel HAELT R10. Das war eine
+     Selbstannahme, und sie schloss, weil die Regel fehlte (Archibald R5,
+     23.10.). Gepruefen wollte dieses Fixture etwas ganz anderes: dass eine
+     Klemme NACH dem Abschluss ein Widerspruch ist. Dafuer muss es
+     wirklich schliessen, also nimmt die Rolle an, die abnimmt. */
+  hist({ id: 'R10:accepted', task: 'AG-EVJ-R10', actor: 'atlas', reporter: 'atlas',
+         kind: 'accepted', title: 'R10 angenommen — von Atlas, nicht vom Halter' },
        '2026-10-20T17:02:30Z');
   hist({ id: 'R10:blocked-nach-zu', task: 'AG-EVJ-R10', actor: 'sentinel',
          reporter: 'sentinel', kind: 'blocked', blocker: 'KLEMME-R10',
@@ -473,7 +485,8 @@ function koerper(f) {
   }
 
   console.log('\nA3 — Was beim Verbinden offen war, liegt wieder da');
-  console.log('    erwartet: R1 begonnen, R3 zugewiesen, R2 zu, R4 nicht');
+  console.log('    erwartet: R1 begonnen, R3 zugewiesen, R2 OFFEN (nur selbst');
+  console.log('    angenommen), R4 nicht');
   console.log('    begonnen, R5 gar nicht — und kein Flug, keine Meldung\n');
   const nachRestore = await s.evaluate(() => {
     const st = (window.__agStand && window.__agStand()) || {};
@@ -489,19 +502,44 @@ function koerper(f) {
       kinderVonEP: (st.aufgaben || []).filter(
         a => a.eEltern === 'AG-LM-EP-003').length,
       klemmen: st.klemmen,
+      /* Gemeldet vom Adapter, nicht vom Original gemessen -- siehe dort. */
+      selbstGemeldet: st.selbstannahmenGemeldet,
       verarbeitet: st.verarbeitet, ausgegeben: st.ausgegeben,
       fliegend: (st.fliegend || []).length,
       meldungen: document.querySelectorAll('.agRuf').length,
       zahlen: (document.getElementById('agGhZahlen') || {}).textContent || ''
     };
   });
-  zeile('vierzehn offene Aufgaben übernommen', nachRestore.wieder, 14);
+  /* FUENFZEHN, nicht vierzehn: R2 bleibt offen, seit eine Selbstannahme
+     nicht mehr schliesst (Archibald R5, Atlas' Lesart A, 23.10.). Die Zahl
+     steht hier als Zahl, damit eine stille Verschiebung auffaellt -- und
+     dass sie sich um genau eine geaendert hat, ist der Beleg, dass die
+     Regel genau einen Fall trifft und nicht mehr. */
+  zeile('fünfzehn offene Aufgaben übernommen', nachRestore.wieder, 15);
   zeile('R1 liegt bei scout', nachRestore.R1 ? nachRestore.R1.wer : null, 'scout');
   zeile('R1 ist begonnen', nachRestore.R1 ? nachRestore.R1.zustand : null, 'begonnen');
   zeile('R1 als wiederhergestellt gekennzeichnet',
         nachRestore.R1 ? nachRestore.R1.wieder : null, true);
-  zeile('R2 ist zu — kein Ring', nachRestore.R2, null);
-  console.log('        (R2 schließt durch die ANNAHME, nicht durch die Lieferung)');
+  /* ====== R2 IST DER GEGENTEST, NICHT DER NORMALFALL ======
+     Bis Fassung 73 stand hier "R2 ist zu -- kein Ring", und das war die
+     Masche in die falsche Richtung: R2 ist an forge vergeben, und forge
+     meldet `accepted` SELBST. Die Zeile behauptete also eine Selbstannahme
+     als gueltigen Abschluss -- und verteidigte damit den Fehler gegen den,
+     der ihn findet. Gefunden hat ihn Archibald (R5), entschieden hat Atlas
+     (Lesart A, 23.10.).
+
+     R2 bleibt mit Absicht eine Selbstannahme und ist jetzt der Gegentest.
+     Der unabhaengige Fall steht daneben: R14, von atlas angenommen, und
+     der schliesst. Zwei Faelle, zwei Ergebnisse -- vorher hatten sie
+     dasselbe. */
+  zeile('R2 bleibt OFFEN — forge nimmt sich selbst nicht ab',
+        !!nachRestore.R2, true);
+  zeile('und steht weiter auf geliefert',
+        nachRestore.R2 ? nachRestore.R2.zustand : null, 'geliefert');
+  zeile('R2 liegt weiter bei forge',
+        nachRestore.R2 ? nachRestore.R2.wer : null, 'forge');
+  zeile('genau eine Selbstannahme in der Historie gemeldet',
+        nachRestore.selbstGemeldet, 1);
   zeile('R3 liegt bei argus', nachRestore.R3 ? nachRestore.R3.wer : null, 'argus');
   zeile('R3 nur zugewiesen', nachRestore.R3 ? nachRestore.R3.zustand : null, 'zugewiesen');
   zeile('R4 trotz Fremdaussage nur zugewiesen',
@@ -659,9 +697,13 @@ function koerper(f) {
   zeile('B steht auf geliefert', nachLieferung.B, 'geliefert');
   /* Und erst die ANNAHME schliesst -- und zwar nur B. */
   await liefern('accepted-projektB', koerper({
-    id: 'AG-EVENT-JOURNAL-001:forge:accepted:B', task: 'AG-EVJ-GLEICH',
+    id: 'AG-EVENT-JOURNAL-001:atlas:accepted:B', task: 'AG-EVJ-GLEICH',
     projekt: 'malstudio', lauf: 'LAUF-B',
-    actor: 'forge', reporter: 'forge', kind: 'accepted',
+    /* ATLAS nimmt an, nicht forge. forge haelt die Aufgabe; hier stand
+       `actor: 'forge'`, also eine Selbstannahme (Archibald R5). Dieses
+       Fixture prueft die Projekttrennung und braucht dafuer einen
+       wirklichen Abschluss. */
+    actor: 'atlas', reporter: 'atlas', kind: 'accepted',
     title: 'Projekt B angenommen — Projekt A bleibt'
   }), 90202);
   const danach = await s.evaluate(() => {
@@ -899,24 +941,57 @@ function koerper(f) {
   a1 = aufg(st, 'forge', 'AG-EVJ-H1');
   zeile('die Lieferung schließt nicht', !!a1, true);
   zeile('sie stellt auf geliefert', a1 ? a1.zustand : null, 'geliefert');
-  /* Eine Pruefung ist eine eigene Stufe und keine Annahme. */
+  /* Eine Pruefung ist eine eigene Stufe und keine Annahme -- UND SIE KOMMT
+     VON ARGUS. Hier stand `actor: 'forge'`, und forge haelt H1: eine
+     Selbstpruefung, die den Zustand weiterstellte (Archibald R5). */
   await liefern('reviewed-H1', koerper({
-    id: 'AG-EVENT-JOURNAL-001:forge:reviewed:H1', task: 'AG-EVJ-H1',
-    actor: 'forge', reporter: 'forge', kind: 'reviewed',
-    title: 'H1 geprüft — das ist noch keine Annahme'
+    id: 'AG-EVENT-JOURNAL-001:argus:reviewed:H1', task: 'AG-EVJ-H1',
+    actor: 'argus', reporter: 'argus', kind: 'reviewed',
+    title: 'H1 von Argus geprüft — das ist noch keine Annahme'
   }), 90107);
   st = await stand();
   a1 = aufg(st, 'forge', 'AG-EVJ-H1');
   zeile('die Prüfung schließt auch nicht', !!a1, true);
   zeile('sie stellt auf geprueft', a1 ? a1.zustand : null, 'geprueft');
-  /* Und erst die Annahme schliesst. */
-  await liefern('accepted-H1', koerper({
-    id: 'AG-EVENT-JOURNAL-001:forge:accepted:H1', task: 'AG-EVJ-H1',
+
+  /* ===== DER GEGENTEST AM LAUFENDEN STROM: forge nimmt SICH SELBST ab ====
+     Ohne diese Stelle waere die Regel nur in der Wiederherstellung
+     gemessen (R2) und im Livepfad unbelegt -- und der Livepfad ist der,
+     den Peter sieht. Atlas' Bedingung: beide Wege, dieselbe Lage.
+     Erwartet: nichts geschieht. Kein Abschluss, kein Rueckschritt, keine
+     Luecke -- die Kennung war ja bekannt -- und ein eigener Zaehler. */
+  /* VORHER MERKEN, nicht gegen Null pruefen. Erster Anlauf verlangte
+     `lueckenEinzeln.lieferung === 0` -- und fiel mit 1 durch, weil dieser
+     Teil WEITER OBEN absichtlich eine Luecke erzeugt (Lieferung an eine
+     unbekannte Kennung). Ein kumulativer Zaehler gegen Null geprueft misst
+     die ganze Vorgeschichte mit. */
+  const vorSelbst = await s.evaluate(() => {
+    const st = (window.__agStand && window.__agStand()) || {};
+    return { selbst: st.selbstannahmen || 0,
+             luecke: st.lueckenEinzeln ? st.lueckenEinzeln.lieferung : -1 };
+  });
+  await liefern('accepted-H1-selbst', koerper({
+    id: 'AG-EVENT-JOURNAL-001:forge:accepted:H1-selbst', task: 'AG-EVJ-H1',
     actor: 'forge', reporter: 'forge', kind: 'accepted',
-    title: 'H1 angenommen — erst das schließt'
+    title: 'Forge nimmt die eigene Arbeit ab — das zählt nicht'
   }), 90108);
   st = await stand();
-  zeile('die Annahme schließt genau diese Aufgabe',
+  a1 = aufg(st, 'forge', 'AG-EVJ-H1');
+  zeile('Selbstannahme schließt NICHT', !!a1, true);
+  zeile('und stellt auch nichts zurück', a1 ? a1.zustand : null, 'geprueft');
+  zeile('als Selbstannahme gezählt',
+        (st.selbstannahmen || 0) - vorSelbst.selbst, 1);
+  zeile('und keine neue Lücke dabei',
+        (st.lueckenEinzeln ? st.lueckenEinzeln.lieferung : -1) - vorSelbst.luecke, 0);
+
+  /* Und erst die Annahme DURCH EINEN ANDEREN schliesst. */
+  await liefern('accepted-H1', koerper({
+    id: 'AG-EVENT-JOURNAL-001:atlas:accepted:H1', task: 'AG-EVJ-H1',
+    actor: 'atlas', reporter: 'atlas', kind: 'accepted',
+    title: 'H1 von Atlas angenommen — erst das schließt'
+  }), 90109);
+  st = await stand();
+  zeile('die unabhängige Annahme schließt genau diese Aufgabe',
         (st.aufgaben || []).filter(a => a.aufgabe === 'AG-EVJ-H1').length, 0);
   /* MERGE UND VEROEFFENTLICHUNG TREIBEN NICHTS. Sie sagen etwas ueber ein
      Ergebnis, nicht darueber, was eine Rolle tut -- und der Livevertrag
@@ -931,7 +1006,7 @@ function koerper(f) {
        beiden Zeilen fielen durch, weil hier noch die alte Form stand. */
     werk: 'previews/AG-EVENT-JOURNAL-001/H1',
     title: 'H1 gemergt — sagt etwas über ein Ergebnis, nicht über eine Aufgabe'
-  }), 90109);
+  }), 90111);
   st = await stand();
   zeile('merged wird angenommen', /merged/.test(rm.letztes), true);
   zeile('merged legt keine Aufgabe an', st.aufgaben.length, vorMerge);
@@ -940,7 +1015,7 @@ function koerper(f) {
     actor: 'forge', reporter: 'forge', kind: 'published',
     werk: 'previews/AG-EVENT-JOURNAL-001/H1',
     title: 'H1 veröffentlicht'
-  }), 90110);
+  }), 90112);
   st = await stand();
   zeile('published wird angenommen', /published/.test(rp.letztes), true);
   zeile('published legt keine Aufgabe an', st.aufgaben.length, vorMerge);
