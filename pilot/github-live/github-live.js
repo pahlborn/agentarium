@@ -72,9 +72,15 @@
      MATERIALENTSCHEIDUNG, und sie ist an Atlas gemeldet: Das ist das zwoelfte
      Feld des Vertrags. */
   /* ARBEITSELEMENT: TYP, ELTERNBEZUG, FASSUNG.
-     Atlas' Auftrag (AG-LM-TK-021, Kommentar 6320323499): "kleinste
-     rueckwaertskompatible Ergaenzung von Arbeitselementtyp/ID/Elternbezug/
-     Version im vorhandenen Monitorvertrag".
+     Atlas' Auftrag (Kommentar 6320323499): "kleinste rueckwaertskompatible
+     Ergaenzung von Arbeitselementtyp/ID/Elternbezug/Version im vorhandenen
+     Monitorvertrag".
+
+     ZUORDNUNG BERICHTIGT (Archibald, K1, 23.10.): Hier stand AG-LM-TK-021.
+     Das ist der Spezifikationsauftrag an Archibald selbst; diese
+     Vertragsfelder gehoeren zu TK-001/007/015. Dieselbe Verwechslung hatte
+     Atlas schon in der Hierarchie-Notiz berichtigt -- im Code war sie
+     stehen geblieben.
 
      RUECKWAERTSKOMPATIBEL HEISST: alle drei sind WAHLFREI. Ein Ereignis ohne
      sie verhaelt sich genau wie bisher -- Typ `task`, kein Elternbezug. Kein
