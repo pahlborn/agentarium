@@ -67,6 +67,11 @@ Atlas must act on existing authority, reconcile remaining criteria and arrange t
 
 An unresolved learning finding has an owner, status and next review event. Cadence's absence is explicit pending work, never continuous supervision. No new permission, paid-runtime or background service follows from this provision. Requirements already fixed by Peter are not renegotiated as routine implementation decisions. Every affected member may contribute; this revision does not fabricate consent or require extra work solely to appear involved.
 
+## 12. Visible handoffs in the monitor — 2026-10-23
+When Atlas receives a task from Peter, Atlas's first event for that task is a `handoff` from `peter` to `atlas` (reporter `atlas`), before `assigned` or `started`. When Atlas passes a task to another role, Atlas reports `handoff` first (the visible ball) and then `assigned` (which creates the task). A role returns its result to Atlas as `contribution`; Atlas returns the result to Peter as `contribution` to `peter`. One event per comment on Issue #2. Peter connects the monitor before sending a task; what exists at connection is not replayed.
+
+Ready-to-fill templates, field rules and limits: `handoffs/AG-EVENT-JOURNAL-001-anstoss-v1.md`. This provision adds a reporting duty only. It creates no role, permission or runtime, and a rule is not evidence that a report was made.
+
 ## Bounded reading and scope — Peter's decision, 2026-10-23
 Every assignment has one existing ID, one outcome, one technical owner, explicit exclusions, decisive checks and a bounded read list (exact files/versions or comment IDs; line ranges where practical). Do not require rereading an entire growing branch or conversation. Read-budget expansion needs a specific missing dependency and Atlas's bounded decision within existing authority; Peter decides material scope or spending changes. Relay dollar limits do not control Lot's maintainer-session context costs.
 

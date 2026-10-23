@@ -186,6 +186,36 @@
     transition:transform .12s ease-out;}
   .agName{transition:transform .5s ease;}
   @keyframes agPuls{0%,100%{opacity:.80;} 50%{opacity:1;}}
+  /* ============ DER PULS AM NAMEN -- EINMAL, KURZ ============
+
+     DIE KLASSE WAR DA, DIE REGEL NICHT. `pulsAn` setzt `agGhPuls` am
+     Namensschild, erzwingt einen Umbruch, damit die Animation neu anläuft,
+     und nimmt die Klasse nach 1600 ms wieder weg -- seit AG-GH-LIVE-001.
+     Nur gab es im ganzen Stilblatt keine Regel, die auf `agGhPuls` passt.
+     Die Klasse war also wirkungslos: drei Zeilen Code, geschrieben für eine
+     sichtbare Wirkung, die nie ankam. Nachgesehen mit einer Suche über die
+     Datei, nicht vermutet — und messbar, weil `getComputedStyle` ohne
+     Regel einfach den Atem weitermeldet.
+
+     Sentinel hat am 21.10. gemeldet, die Klasse allein beweise die
+     Sichtbarkeit nicht. Das ist richtig und war noch zu freundlich: Sie
+     bewies gar nichts, weil nichts auf sie hörte. Peters „kein ball, keine
+     aktivität, totenstille" hat hier eine seiner Ursachen — ein `progress`
+     erzeugte Feldteilchen, aber am Agenten selbst rührte sich nichts.
+
+     Die Regel steht NACH `.agName.arbeitet`: gleiche Spezifität (zwei
+     Klassen), also gewinnt die spätere. Stünde sie davor, überschriebe das
+     ruhige Dauer-Atmen eines arbeitenden Agenten den kurzen Puls -- genau
+     bei dem, bei dem er am meisten zählt.
+
+     Einmal, nicht endlos (`1`), und 1,6 s lang wie der Timer im Code: Ein
+     Puls, der länger leuchtet als seine Klasse lebt, bricht mitten im Bild
+     ab. */
+  .agName.agGhPuls{animation:agGhPulsAn 1.6s ease-out 1; opacity:1;}
+  @keyframes agGhPulsAn{
+    0%{opacity:1; letter-spacing:.42em;}
+    16%{opacity:1; letter-spacing:.25em;}
+    100%{opacity:.70; letter-spacing:.2em;}}
   /* Erstes Pult: Wer vorgezogen sitzt, steht auch etwas deutlicher da. */
   /* Wer außerhalb des Kreises steht, steht auch anders da: etwas größer
      und weiter gesperrt. Kein Abzeichen — nur ein anderer Ton. */
@@ -336,6 +366,13 @@
     text-transform:uppercase; font-size:8px; letter-spacing:.16em;
     color:#55637A;}
   .wZeile.z-angenommen s{color:#E8D9A8;}
+  /* Die neuen Zustaende des Livebetriebs. `gemergt` und `veroeffentlicht`
+     stehen HELLER als die Pruefung -- ein Ergebnis, das draussen ist, ist
+     das Weiteste, was dieses Register sagen kann. Dieselbe Sprache wie
+     `z-angenommen`, nur eine Stufe weiter; keine neue Farbe im Bild. */
+  .wZeile.z-geliefert s{color:#8FA3C0;}
+  .wZeile.z-gemergt s{color:#E8D9A8;}
+  .wZeile.z-veroeffentlicht s{color:#E8D9A8; font-weight:500;}
   .wZeile.z-ersetzt{opacity:.45;}
   .wZeile.z-ersetzt s{text-decoration:line-through;}
   .wZeile.z-verworfen{opacity:.5;}
@@ -981,7 +1018,12 @@
 
   var N = 14000;            /* Fäden */
   var SCHWEIF = 0.125;      /* Länge des Schweifs in Sekunden Bewegung */
-  var KERNE_MAX = 10;   /* neun Agenten, einer frei */
+  /* Einer mehr als Agenten. Die Reserve ist nicht Zierde: `kernWaehlen`
+     stiehlt, wenn alles besetzt ist, dem schwaechsten Kern den Platz --
+     mitten im Leben, sichtbar. Mit lot sind es zehn Agenten; blieb die
+     Zehn stehen, waere die Reserve lautlos weg und der Diebstahl erst
+     dann zu sehen, wenn alle zugleich pulsen. */
+  var KERNE_MAX = 11;   /* zehn Agenten, einer frei */
 
   var cv = document.getElementById('feld');
   var gl = cv.getContext('webgl2', { alpha:false, antialias:false, premultipliedAlpha:false, preserveDrawingBuffer:false })
@@ -1013,7 +1055,7 @@
     'uniform float uFarbwahl; uniform float uKurve;' +
     'void main(){' +
     /* Die Farbe ist die Identität. In Resonanz wählte vTon zwischen zwei
-       Familien; hier läuft es um den ganzen Kreis, damit neun Agenten
+       Familien; hier läuft es um den ganzen Kreis, damit zehn Agenten
        unterscheidbar bleiben. Die Hitze bleibt, was sie war: Sie entscheidet
        über Sättigung und Helligkeit, nicht über den Ton. Ein kalter Faden ist
        fast grau — die Farbe eines Agenten wird erst sichtbar, wo er wirkt. */
@@ -2272,7 +2314,7 @@
      nicht veralten.
      ==================================================================== */
 
-  var AGENTEN = [{"name": "peter", "farbe": 0.11, "winkel": 180, "nah": 1.28, "rolle": "Auftraggeber", "platt": "mensch", "weise": "kreisen", "kennung": "", "bereich": [], "verbote": [], "auftrag": "Entscheidet. Ohne ihn wird nichts zusammengef\u00fchrt und nichts ver\u00f6ffentlicht."}, {"name": "nova", "farbe": 0.86, "winkel": 22.5, "nah": 1.0, "rolle": "Vision", "platt": "chatgpt", "weise": "erfinden", "kennung": "create-vision-with-nova", "bereich": ["vision", "experience", "vision_drift"], "verbote": ["code", "merge", "publish", "approve_release"], "auftrag": "Erlebnis und Vision entwickeln; eigene Vorschl\u00e4ge und R\u00fcckfragen erw\u00fcnscht."}, {"name": "atlas", "farbe": 0.15, "winkel": 67.5, "nah": 1.0, "rolle": "Orchestrator", "platt": "chatgpt", "weise": "kreisen", "kennung": "operate-as-atlas", "bereich": [], "verbote": [], "auftrag": "Koordiniert, aktiviert und motiviert. Routet Gegenfragen und gibt Antworten zur\u00fcck; offene Kl\u00e4rung wird nicht durch eine erfundene Antwort ersetzt."}, {"name": "cadence", "farbe": 0.6, "winkel": 112.5, "nah": 1.0, "rolle": "Prozess", "platt": "claude", "weise": "ordnen", "kennung": "process-agent", "bereich": ["process_maintenance", "process_improvement"], "verbote": [], "auftrag": "H\u00e4lt den Prozess instand und verbessert ihn; erkennt doppelte Arbeit."}, {"name": "scout", "farbe": 0.41, "winkel": 157.5, "nah": 1.0, "rolle": "Recherche", "platt": "chatgpt", "weise": "holen", "kennung": "build-research-knowledge", "bereich": [], "verbote": [], "auftrag": "Baut Wissen auf. Sortiert Fundst\u00fccke aus und revidiert Regeln an Gegenbeispielen."}, {"name": "forge", "farbe": 0.02, "winkel": 202.5, "nah": 1.0, "rolle": "Entwicklung", "platt": "claude", "weise": "bauen", "kennung": "coding-agent", "bereich": ["implementation"], "verbote": [], "auftrag": "Baut. Meldet technische Abh\u00e4ngigkeiten selbst, statt sie zu umgehen."}, {"name": "sentinel", "farbe": 0.34, "winkel": 247.5, "nah": 1.0, "rolle": "Qualit\u00e4t", "platt": "chatgpt", "weise": "takten", "kennung": "qa-agent-sentinel", "bereich": [], "verbote": [], "auftrag": "Stellt Fehler nach, pr\u00fcft Regressionen und benennt die Grenzen der Pr\u00fcfung."}, {"name": "archibald", "farbe": 0.5, "winkel": 292.5, "nah": 1.0, "rolle": "Spezifikation", "platt": "claude", "weise": "schaerfen", "kennung": "spec-agent", "bereich": ["specification"], "verbote": [], "auftrag": "Macht Anforderungen pr\u00fcfbar und verlangt unterscheidbare Ergebnisse."}, {"name": "argus", "farbe": 0.73, "winkel": 337.5, "nah": 1.0, "rolle": "Review", "platt": "chatgpt", "weise": "pruefen", "kennung": "review-agent-argus", "bereich": [], "verbote": [], "auftrag": "Hinterfragt aktiv, auch scheinbar Harmloses; liefert Gegenbeispiele statt Meinungen."}];
+  var AGENTEN = [{"name": "peter", "farbe": 0.11, "winkel": 180, "nah": 1.28, "rolle": "Auftraggeber", "platt": "mensch", "weise": "kreisen", "kennung": "", "bereich": [], "verbote": [], "auftrag": "Entscheidet. Ohne ihn wird nichts zusammengef\u00fchrt und nichts ver\u00f6ffentlicht."}, {"name": "nova", "farbe": 0.86, "winkel": 22.5, "nah": 1.0, "rolle": "Vision", "platt": "chatgpt", "weise": "erfinden", "kennung": "create-vision-with-nova", "bereich": ["vision", "experience", "vision_drift"], "verbote": ["code", "merge", "publish", "approve_release"], "auftrag": "Erlebnis und Vision entwickeln; eigene Vorschl\u00e4ge und R\u00fcckfragen erw\u00fcnscht."}, {"name": "atlas", "farbe": 0.15, "winkel": 67.5, "nah": 1.0, "rolle": "Orchestrator", "platt": "chatgpt", "weise": "kreisen", "kennung": "operate-as-atlas", "bereich": [], "verbote": [], "auftrag": "Koordiniert, aktiviert und motiviert. Routet Gegenfragen und gibt Antworten zur\u00fcck; offene Kl\u00e4rung wird nicht durch eine erfundene Antwort ersetzt."}, {"name": "cadence", "farbe": 0.6, "winkel": 112.5, "nah": 1.0, "rolle": "Prozess", "platt": "claude", "weise": "ordnen", "kennung": "process-agent", "bereich": ["process_maintenance", "process_improvement"], "verbote": [], "auftrag": "H\u00e4lt den Prozess instand und verbessert ihn; erkennt doppelte Arbeit."}, {"name": "scout", "farbe": 0.41, "winkel": 157.5, "nah": 1.0, "rolle": "Recherche", "platt": "chatgpt", "weise": "holen", "kennung": "build-research-knowledge", "bereich": [], "verbote": [], "auftrag": "Baut Wissen auf. Sortiert Fundst\u00fccke aus und revidiert Regeln an Gegenbeispielen."}, {"name": "forge", "farbe": 0.02, "winkel": 202.5, "nah": 1.0, "rolle": "Entwicklung", "platt": "claude", "weise": "bauen", "kennung": "coding-agent", "bereich": ["implementation"], "verbote": [], "auftrag": "Baut. Meldet technische Abh\u00e4ngigkeiten selbst, statt sie zu umgehen."}, {"name": "sentinel", "farbe": 0.34, "winkel": 247.5, "nah": 1.0, "rolle": "Qualit\u00e4t", "platt": "chatgpt", "weise": "takten", "kennung": "qa-agent-sentinel", "bereich": [], "verbote": [], "auftrag": "Stellt Fehler nach, pr\u00fcft Regressionen und benennt die Grenzen der Pr\u00fcfung."}, {"name": "archibald", "farbe": 0.5, "winkel": 292.5, "nah": 1.0, "rolle": "Spezifikation", "platt": "claude", "weise": "schaerfen", "kennung": "spec-agent", "bereich": ["specification"], "verbote": [], "auftrag": "Macht Anforderungen pr\u00fcfbar und verlangt unterscheidbare Ergebnisse."}, {"name": "argus", "farbe": 0.73, "winkel": 337.5, "nah": 1.0, "rolle": "Review", "platt": "chatgpt", "weise": "pruefen", "kennung": "review-agent-argus", "bereich": [], "verbote": [], "auftrag": "Hinterfragt aktiv, auch scheinbar Harmloses; liefert Gegenbeispiele statt Meinungen."}, {"name": "lot", "farbe": 0.245, "winkel": 0, "nah": 1.28, "rolle": "Darstellung", "platt": "claude", "weise": "kreisen", "kennung": "", "bereich": ["visualization", "interface"], "verbote": ["merge", "publish"], "auftrag": "Baut Darstellung und Bedienung. Misst nach, statt eine Wirkung zu behaupten."}];
   var ARTEN = {"request": {"abgabe": 0.0, "nachhall": 3.8, "gestalt": "sonne", "kraft": 0.95, "tempo": 0.55, "gross": 1.0, "was": "Peter wirft den goldenen Ball an"}, "handoff": {"abgabe": 0.0, "nachhall": 3.2, "gestalt": "sonne", "kraft": 0.72, "tempo": 0.85, "gross": 0.48, "was": "Ein St\u00fcck vom Ball wird abgeworfen"}, "answer": {"abgabe": 0.0, "nachhall": 3.0, "gestalt": "pfeil", "kraft": 0.62, "tempo": 1.2, "was": "Antwort auf eine R\u00fcckfrage"}, "contribution": {"abgabe": 0.0, "nachhall": 3.0, "gestalt": "wurf", "kraft": 0.62, "tempo": 1.0, "was": "Beitrag zur\u00fcckgegeben"}, "proposal": {"abgabe": 0.0, "nachhall": 3.6, "gestalt": "wurf", "kraft": 0.68, "tempo": 1.0, "was": "Vorschlag, noch nicht beschlossen"}, "recommendation": {"abgabe": 0.0, "nachhall": 3.6, "gestalt": "wurf", "kraft": 0.64, "tempo": 1.0, "was": "Empfehlung, noch nicht beschlossen"}, "question": {"abgabe": 0.0, "nachhall": 0.9, "gestalt": "pfeil", "kraft": 0.45, "tempo": 1.5, "was": "R\u00fcckfrage, noch unbeantwortet"}, "objection": {"abgabe": 0.0, "nachhall": 1.1, "gestalt": "gegen", "kraft": 0.85, "tempo": 1.5, "was": "Widerspruch aus dem Review"}, "change_request": {"abgabe": 0.0, "nachhall": 1.1, "gestalt": "gegen", "kraft": 0.7, "tempo": 1.3, "was": "\u00c4nderung verlangt"}, "defect": {"abgabe": 0.0, "nachhall": 0.8, "gestalt": "bersten", "kraft": 0.9, "tempo": 1.8, "was": "Fehler gefunden"}, "open_state": {"abgabe": 0.0, "nachhall": 0.9, "gestalt": "pfeil", "kraft": 0.38, "tempo": 0.6, "was": "etwas bleibt offen"}, "stop": {"abgabe": 0.0, "nachhall": 0.0, "gestalt": "zustand", "kraft": 0.0, "tempo": 1.0, "was": "Ein Stop: der Betroffene kann nicht weiter"}, "resume": {"abgabe": 0.0, "nachhall": 0.0, "gestalt": "zustand", "kraft": 0.0, "tempo": 1.0, "was": "Der Stop ist aufgehoben"}, "artifact": {"abgabe": 4.0, "nachhall": 2.6, "gestalt": "wurf", "kraft": 0.95, "tempo": 0.9, "was": "Ergebnis geliefert: Epics, Stories, Code"}, "decision": {"abgabe": 4.0, "nachhall": 2.6, "gestalt": "wurf", "kraft": 1.0, "tempo": 0.8, "was": "Peter entscheidet"}, "test_result": {"abgabe": 4.0, "nachhall": 2.4, "gestalt": "wurf", "kraft": 0.8, "tempo": 1.1, "was": "Pr\u00fcfung bestanden"}, "review_result": {"abgabe": 4.0, "nachhall": 2.4, "gestalt": "wurf", "kraft": 0.8, "tempo": 1.1, "was": "Review abgeschlossen"}};
   /* Mehrere Stücke auf derselben Bühne. Das war von Anfang an die
      Aufgabe — „je nachdem umschaltbar auf Protokolldaten" —, und es ist
@@ -2289,7 +2331,7 @@
 
      Der Bauzeitpunkt kommt beim Bauen aus der Uhr. Von Hand gepflegte
      Datumsangaben sind nach der zweiten Änderung falsch. */
-  var FASSUNG = '56', GEBAUT = '2026-10-21T05:20Z';
+  var FASSUNG = '71', GEBAUT = '2026-10-23T05:01Z';
 
   /* AG-GH-LIVE-001: JEDE TEXTSENKE MASKIERT.
      Seit Live-Daten von aussen kommen (GitHub-Kommentare, one-event.json),
@@ -3054,6 +3096,7 @@
          nicht ein Stück. */
       if (E.an === derBall.ursprung) { E = Object.create(E); E.gross = 0.92; derBall = null; }
     }
+    if (MODUS === 'live') ausgegeben++;      /* ein Flug entsteht jetzt */
     baelle.push({
       x: p[0], y: p[1], zx: z[0], zy: z[1],
       u: 0, dauer: flugdauer(E, m, p, z),
@@ -3475,7 +3518,15 @@
 
   function ballOrt() {
     if (!derBall) return null;
-    var p = heimat(nachName[derBall.bei]);
+    /* EIN BALL BEI NIEMANDEM IST KEIN BALL. Steht in `bei` ein Name, den es
+       nicht gibt, lag hier bisher `undefined.winkel` -- und das in der
+       Zeichenschleife, also in jedem Bild erneut. Der Ball wird deshalb
+       abgelegt statt der Lauf angehalten: Ein Ball ohne Halter ist nichts,
+       was man zeichnen koennte, und ein stehendes Bild ist schlimmer als
+       ein fehlender Ball. */
+    var halter = nachName[derBall.bei];
+    if (!halter) { derBall = null; return null; }
+    var p = heimat(halter);
     /* Etwas neben dem Namen, damit er nicht darunter liegt. */
     var zm = Math.atan2(my() - p[1], mx() - p[0]);
     var d = Math.min(W(), H()) * 0.055;
@@ -3556,6 +3607,53 @@
     var R = Math.min(W(), H()) * 0.135;
     var w = i * 2.0944 - 1.5708;
     return [mx() + Math.cos(w) * R, my() + Math.sin(w) * R * 0.9];
+  }
+
+  /* ============== DAS REGISTER IM LIVEBETRIEB ==============
+
+     Atlas fuehrt `merged`/`published` als offenes Restkriterium: lesbare
+     Meldungen ohne persistente Ergebniszuordnung. Hier ist die Zuordnung,
+     und sie geht an die Stelle, die es schon gibt -- das Register, das
+     fuehrt, woraus das Produkt besteht. Kein neuer Block, keine zweite
+     Liste.
+
+     WARUM NICHT AN DIE AUFGABE: Eine Aufgabe ist mit der ANNAHME erledigt.
+     Merge und Veroeffentlichung sagen etwas ueber ein ERGEBNIS -- einen
+     Zweig, eine Fassung. Das Regelwerk trennt das ausdruecklich (Rulebook
+     1.3 §6). Deshalb braucht es eine Artefaktkennung, und deshalb ist sie
+     im Vertrag Pflicht bei `merged`/`published`.
+
+     NUR VORWAERTS, wie die Aufgabenkette. Ein zweites `merged` ist ein
+     Duplikat, kein Rueckschritt. */
+  var WERKSTUFE = { geliefert: 1, 'prüfung': 2, geprueft: 2,
+                    angenommen: 3, gemergt: 4, veroeffentlicht: 5 };
+  /* `ersetzt` und `verworfen` stehen NICHT in der Stufenleiter: Sie sind
+     keine Reifegrade, sondern Ausgaenge. Eine ersetzte Fassung wird nicht
+     durch ein spaeteres `merged` wieder gueltig. */
+  var WERKAUSGANG = { ersetzt: 1, verworfen: 1 };
+
+  function werkStufe(artefakt, version, zustand, ton, beleg) {
+    if (!artefakt || !WERKSTUFE[zustand]) return false;
+    for (var r = register.length - 1; r >= 0; r--) {
+      var E0 = register[r];
+      if (E0.kennung !== artefakt) continue;
+      if (version && E0.version && E0.version !== version) continue;
+      if (WERKAUSGANG[E0.zustand]) return false;   /* ein Ausgang bleibt */
+      if ((WERKSTUFE[zustand] || 0) > (WERKSTUFE[E0.zustand] || 0)) {
+        E0.zustand = zustand;
+        if (beleg) E0.beleg = beleg;
+      }
+      return true;
+    }
+    /* Noch kein Eintrag: Das Ergebnis wird hier zum ersten Mal genannt.
+       Angelegt wird es mit dem GEMELDETEN Zustand, nicht mit einem
+       erfundenen frueheren -- wer erst beim Merge auftaucht, hat keine
+       belegte Lieferung davor. */
+    register.push({ kennung: artefakt, version: version || '', ton: ton,
+                    zustand: zustand, text: '', von: '', t: zeit,
+                    beleg: beleg || '' });
+    while (register.length > 40) register.shift();
+    return true;
   }
 
   function hinlegen(ton, text, gearbeitet, artefakt, version, aufgabe) {
@@ -3717,9 +3815,22 @@
     var offen = 0, blockiert = 0;
     for (var nq in arbeit) { var Sq = arbeit[nq]; if (Sq && !Sq.aus) offen += Sq.liste.length; }
     for (var bq in stopper) blockiert++;
+    /* DIE KLEMMEN GEHOEREN IN DIESELBE ZEILE. Peter am 21.10.: "du hast
+       doch liste und den block mit den aufgaben. warum da nicht jeweils
+       einfuegen" -- also keine zehnte Zeile fuer dieselbe Frage. Der
+       Stopper (aufgezeichnetes Stueck, am Agenten) und die Klemme
+       (Livebetrieb, an der Aufgabe) sind beide die Antwort auf "was haengt
+       gerade", und sie treten nie zugleich auf: Im Livebetrieb bleibt
+       `stopper` leer, im Stueck gibt es keine Lebenszyklusereignisse.
+       Die Zeile "offen" zaehlt eine geklemmte Aufgabe weiter mit -- sie IST
+       offen. Das ist keine Doppelzaehlung, sondern zwei Fragen an denselben
+       Bestand, genau wie "pruefung" neben "offen" steht. */
+    blockiert += klemmenZahl();
     var ganz = aufgabenAuf,
         teil = ganz ? Math.min(1, aufgabenZu / ganz) : 0,
-        schl = (STUECK.titel || STUECK.projekt || '') + '|' +
+        /* Im Livebetrieb benennt dieser Block den gemeldeten Lauf, nicht
+           das aufgezeichnete Stueck -- derselbe Grund wie im Kopf. */
+        schl = (livTit() || '') + '|' +
                aufgabenZu + '|' + ganz + '|' + (glanz > 0.25) + '|' +
                offen + '|' + tisch.length + '|' + blockiert + '|' +
                bausteine.length + '|' + register.length + '|' +
@@ -3766,7 +3877,7 @@
       };
       werkNameEl.innerHTML =
         /* 1. Was es ist */
-        '<div class="wTitel">' + esc(STUECK.titel || STUECK.projekt || '') + '</div>' +
+        '<div class="wTitel">' + esc(livTit()) + '</div>' +
         /* 2. Wie weit */
         '<div class="wBalken"><span style="width:' +
           (teil * 100).toFixed(1) + '%"></span></div>' +
@@ -3781,8 +3892,15 @@
           reihe('fertig', bausteine.length, 'sFertig') +
         '</div>' +
         /* 4. Woher und was das Konzept behauptet */
-        '<div class="wOrt">' + esc(STUECK.ablage || 'extern') +
-          (STUECK.umfang ? ' · laut Konzept ' + esc(STUECK.umfang) : '') + '</div>' +
+        /* Auch hier gilt die Trennung: Im Livebetrieb stammen Ablage und
+           Umfang aus dem gemeldeten Lauf, nicht aus dem aufgezeichneten
+           Stueck. Steht nichts, steht nichts -- "extern" ist dann die
+           einzige Aussage, die zutrifft. */
+        (function () {
+          var Q = (MODUS === 'live') ? (liveKopf || {}) : STUECK;
+          return '<div class="wOrt">' + esc(Q.ablage || 'extern') +
+            (Q.umfang ? ' · laut Konzept ' + esc(Q.umfang) : '') + '</div>';
+        })() +
         /* 5. Woraus es besteht */
         reg;
     }
@@ -3857,6 +3975,23 @@
      hier, dass es sie nicht gibt — erfunden wird nichts. */
   var register = [];
   function ratVermerk(was) { geraten[was]++; geraten.gesamt++; }
+
+  /* LUECKEN SIND NICHT RATEENTSCHEIDUNGEN. Im aufgezeichneten Stueck darf
+     der Monitor raten und es vermerken -- die Daten sind erfunden, und eine
+     Rateentscheidung ist dort eine Notloesung. Im Livebetrieb ist Raten
+     verboten: Ein `delivered` zu einer unbekannten Aufgabenkennung darf
+     keine FREMDE Aufgabe schliessen (Atlas, 21.10.: "unbekannte ID muss als
+     Luecke/Konflikt stehen bleiben"). Es bleibt also stehen, und die Luecke
+     wird gezaehlt statt verschwiegen. */
+  var luecken = { beginn: 0, stufe: 0, lieferung: 0, abbruch: 0,
+                  klemme: 0, loesung: 0, gesamt: 0 };
+  function luecke(was) { luecken[was]++; luecken.gesamt++; }
+  /* Hier stand `lueckenNull()`. Die Funktion hatte nie einen Aufrufer -- ich
+     hatte sie in Schritt 2 vorsorglich dazugeschrieben, parallel zu
+     `ratNull()`. Sie ist weg, und zwar nicht nur als Aufraeumen: Luecken
+     entstehen ausschliesslich im Livebetrieb, und dort gibt es kein "von
+     vorn". Eine Nullstellung waere also entweder wirkungslos oder sie loeschte
+     einen Befund, den niemand mehr nachzaehlen kann. */
   function ratNull() {
     geraten.auftrag = geraten.abnahme = geraten.gegen =
       geraten.antwort = geraten.gesamt = 0;
@@ -3976,7 +4111,224 @@
      läuft; beim Stückwechsel auf null. */
   var verbrauch = {};
 
-  function arbeitAn(name, auftrag, kommando, modell, b) {
+  /* VERGABE: eine Aufgabe legt sich hin, ohne zu behaupten, dass daran
+     gearbeitet wird. Doppelte Vergabe derselben Kennung ist wirkungslos --
+     ein Transportduplikat darf keinen zweiten Ring erzeugen. */
+  /* Eine Kennung kann ein nackter Text sein (aufgezeichnetes Stueck, wo es
+     keine Projekte gibt) oder die vollstaendige Identitaet. Beides wird hier
+     auf dieselbe Form gebracht, damit es nur EINEN Vergleich gibt. */
+  function kennung(k) {
+    if (k && typeof k === 'object')
+      return { aufgabe: k.task_id || k.aufgabe || '',
+               projekt: k.project_id || k.projekt || '',
+               lauf: k.run_id || k.lauf || '' };
+    return { aufgabe: k || '', projekt: '', lauf: '' };
+  }
+  function trifft(L, k) {
+    return L.aufgabe === k.aufgabe && (L.projekt || '') === k.projekt &&
+           (L.lauf || '') === k.lauf;
+  }
+
+  function arbeitZuweisen(name, kenn, titel, beleg, element) {
+    if (!nachName[name]) return false;
+    var k = kennung(kenn);
+    var S = arbeit[name];
+    if (S && !S.aus && k.aufgabe) {
+      for (var q = 0; q < S.liste.length; q++)
+        if (trifft(S.liste[q], k)) return false;
+    }
+    /* Der Beleg geht als EIGENES Stueck mit, nicht in der Kennung: `trifft`
+       vergleicht Identitaet, und ein Beleg ist keine. */
+    arbeitAn(name, titel || '', '', '', k, 'zugewiesen', beleg, element);
+    return true;
+  }
+
+  /* ================= DIE KETTE DER ZUSTAENDE ======================
+
+     Atlas' Auftrag nennt sie der Reihe nach: Auftrag, Empfang, Beginn,
+     Lieferung, Pruefung, Annahme, Merge, Veroeffentlichung.
+
+     MATERIALENTSCHEIDUNG, und sie aendert etwas, das schon abgenommen war:
+     Bisher SCHLOSS `delivered` die Aufgabe. Das kann nicht bleiben, sobald
+     Pruefung und Annahme dazukommen -- dann waere die Aufgabe weg, bevor
+     irgendjemand sie angesehen hat, und "Pruefung" und "Annahme" haetten
+     nichts mehr, woran sie haengen. Geliefert heisst: der Arbeitende ist
+     fertig. Erledigt heisst: jemand hat es ANGENOMMEN. Das sind zwei Dinge,
+     und das Regelwerk trennt sie ausdruecklich (Rulebook 1.3 §6:
+     "Accepted requirement, passed test and released product are distinct").
+
+     Folge, und sie ist gewollt: Eine gelieferte Aufgabe, die niemand
+     annimmt, bleibt sichtbar liegen. Genau das soll man sehen.
+
+     NUR VORWAERTS. Jeder Zustand hat eine Stufe; ein Ereignis, das keine
+     hoehere Stufe bringt, aendert nichts und ist keine Luecke -- ein
+     zweites `delivered` ist ein Transportduplikat, kein Ruecksprung. Ein
+     Ruecksprung waere eine Behauptung ueber eine Reihenfolge, die die Daten
+     nicht tragen. */
+  var STUFE = { zugewiesen: 1, empfangen: 2, begonnen: 3,
+                geliefert: 4, geprueft: 5 };
+  /* Welches Ereignis bringt welchen Zustand. `accepted` steht NICHT hier:
+     Es schliesst die Aufgabe, statt sie weiterzustellen. */
+  var ZU_ZUSTAND = { received: 'empfangen', started: 'begonnen',
+                     delivered: 'geliefert', reviewed: 'geprueft' };
+
+  /* ========= WER DARF EINE AUFGABE WEITERSTELLEN, UND WESSEN? =========
+
+     Befund von Atlas, 21.10. (Kommentar 6319743049), und er trifft: Pruefung
+     und Annahme waren an den Aufgabenhalter gebunden. `arbeitStufe(E.von,…)`
+     sucht in der Liste des MELDERS -- eine Pruefung von Argus fand Forges
+     Aufgabe dort nie, und eine Annahme von Atlas auch nicht. Meine eigenen
+     Nachweise haben den Fall VERDECKT, weil in ihnen jeweils dieselbe Rolle
+     lieferte, pruefte und annahm.
+
+     Die Unterscheidung, die dabei verlorengegangen war, ist Atlas' Satz:
+     Eine Selbstmeldung des PRUEFERS ist etwas anderes als eine
+     Selbstabnahme des LIEFERANTEN. Die Selbstauskunftsregel sagt
+     `reporter === actor` -- sie sagt NICHT, dass der Akteur die Aufgabe
+     halten muss. Bei Empfang, Beginn und Lieferung fallen beide zusammen,
+     denn nur der Arbeitende kann seine Arbeit empfangen, beginnen und
+     abgeben. Bei Pruefung, Annahme und Abbruch ist der Akteur
+     NOTWENDIGERWEISE ein anderer -- sonst waere es eine Selbstabnahme.
+
+     Dass Abbruch dazugehoert, steht nicht in Atlas' Befund, folgt aber aus
+     Peters Festlegung vom 21.10.: "ich will doch keine abbrueche senden, das
+     muss das projekt, also atlas". Ein Abbruch kommt vom Projekt, nicht vom
+     Gescheiterten. Dieselbe Bindung, derselbe Fehler.
+
+     Welche Rolle WELCHE Autorität hat, prueft der Monitor nicht und soll er
+     nicht: Er zeigt, wer was gemeldet hat. Die Autorität liegt im Regelwerk,
+     und im Fuss der Tafel steht, dass Zustaende gemeldet und nicht
+     verifiziert sind. */
+  var HALTERGEBUNDEN = { received: 1, started: 1, delivered: 1 };
+
+  /* Die Aufgabe dieser Identitaet, wo immer sie liegt. Liegt sie mehrfach,
+     wird NICHT gewaehlt: Zwei Halter derselben Kennung sind ein Widerspruch
+     in den Daten, und eine Rateentscheidung darueber waere schlimmer als
+     die gezaehlte Luecke. */
+  function aufgabeSuchen(k) {
+    var fund = null, mehrfach = false;
+    for (var name in arbeit) {
+      var S = arbeit[name];
+      if (!S || S.aus) continue;
+      for (var q = 0; q < S.liste.length; q++)
+        if (trifft(S.liste[q], k)) {
+          if (fund) mehrfach = true; else fund = { wer: name, i: q };
+        }
+    }
+    return mehrfach ? { mehrfach: true } : fund;
+  }
+
+  /* Ein Schritt in der Kette. Ist die Aufgabe unbekannt, wird KEINE angelegt
+     und keine fremde umgestellt -- das waere ein erfundener Zustand. Die
+     Luecke wird gezaehlt. */
+  function arbeitStufe(name, kenn, neu, was) {
+    var S = arbeit[name], k = kennung(kenn);
+    if (!S || S.aus || !k.aufgabe) { luecke(was); return false; }
+    for (var q = 0; q < S.liste.length; q++) {
+      var L = S.liste[q];
+      if (!trifft(L, k)) continue;
+      if ((STUFE[neu] || 0) > (STUFE[L.zustand] || 0)) {
+        L.zustand = neu;
+        /* Die Dauer zaehlt ab dem Beginn, nicht ab der Vergabe. */
+        if (neu === 'begonnen') L.beginn = zeit;
+      }
+      return true;
+    }
+    luecke(was);
+    return false;
+  }
+  function arbeitBeginnen(name, kenn) {
+    return arbeitStufe(name, kenn, 'begonnen', 'beginn');
+  }
+
+  /* ===================== BLOCKADE UND AUFLOESUNG =======================
+
+     Atlas' Auftrag vom 21.10., woertlich: "Blockade laesst die Aufgabe
+     liegen, Aufloesung betrifft genau diese Blockade und behauptet keinen
+     neuen Arbeitsbeginn oder Abschluss."
+
+     Daraus folgt die ganze Bauart, und sie ist bewusst NICHT die naechste
+     Zustandsstufe: Eine Blockade ist kein Zustand der Aufgabe, sondern
+     etwas, das NEBEN ihrem Zustand liegt. Haette `blockiert` den Zustand
+     ueberschrieben, muesste die Aufloesung ihn wiederherstellen -- und
+     dabei raten, ob vorher `zugewiesen` oder `begonnen` stand. Genau das
+     waere die erfundene Behauptung, die der Auftrag verbietet. So aber
+     bleibt `zustand` unberuehrt, und die Aufloesung muss nichts
+     zurueckrechnen: Sie nimmt eine Klemme weg, mehr nicht.
+
+     Mehrere Klemmen an einer Aufgabe sind deshalb moeglich, und jede traegt
+     ihre eigene Kennung (`blocker_id` im Vertrag). Ohne diese Kennung liesse
+     sich "genau diese Blockade" nicht sagen; der Adapter weist ein
+     `blocked`/`resolved` ohne sie ab, statt die aelteste zu nehmen. */
+  function arbeitKlemmt(name, kenn, klemme, grund, beleg) {
+    var S = arbeit[name], k = kennung(kenn);
+    if (!S || S.aus || !k.aufgabe || !klemme) { luecke('klemme'); return false; }
+    for (var q = 0; q < S.liste.length; q++) {
+      var L = S.liste[q];
+      if (!trifft(L, k)) continue;
+      if (!L.klemmt) L.klemmt = [];
+      /* Transportduplikat: dieselbe Klemme zweimal ist einmal. */
+      for (var d = 0; d < L.klemmt.length; d++)
+        if (L.klemmt[d].id === klemme) return true;
+      /* `w` und `t` standen hier zuerst mit und waren toter Zustand: Die
+         Klemme bekommt absichtlich KEINEN eigenen Leuchtpunkt, also dreht
+         sich an ihr auch nichts. */
+      /* Auch die Klemme traegt ihren Beleg: WELCHER Kommentar sie gemeldet
+         hat. Fuer eine wiederhergestellte Klemme ist das der einzige Weg
+         zurueck zur Quelle -- sie hat keine Listenzeile. */
+      L.klemmt.push({ id: klemme, grund: grund || '', seit: zeit,
+                      beleg: (beleg && beleg.nr) || '' });
+      return true;
+    }
+    /* Keine Aufgabe dieser Kennung: Es wird KEINE angelegt. Eine Blockade
+       ohne Aufgabe waere eine erfundene Aufgabe. */
+    luecke('klemme');
+    return false;
+  }
+
+  function arbeitLoest(name, kenn, klemme) {
+    var S = arbeit[name], k = kennung(kenn);
+    if (!S || S.aus || !k.aufgabe || !klemme) { luecke('loesung'); return false; }
+    for (var q = 0; q < S.liste.length; q++) {
+      var L = S.liste[q];
+      if (!trifft(L, k)) continue;
+      if (L.klemmt) for (var d = 0; d < L.klemmt.length; d++)
+        if (L.klemmt[d].id === klemme) {
+          L.klemmt.splice(d, 1);
+          /* UND SONST NICHTS. Kein Beginn, kein Abschluss, kein Ball, kein
+             Herzschlag. Eine Aufgabe, die zugewiesen war und geklemmt hat,
+             ist danach wieder bloss zugewiesen -- nicht begonnen. */
+          return true;
+        }
+      /* Die Aufgabe gibt es, die Klemme nicht. Aufgeloest wird dann nichts:
+         Welche von zwei anderen gemeint war, sagen die Daten nicht. */
+      luecke('loesung');
+      return false;
+    }
+    luecke('loesung');
+    return false;
+  }
+
+  /* Wie viele Klemmen liegen insgesamt? Fuer den Block mit den Aufgaben
+     und fuer den Stand -- gezaehlt, nicht geschaetzt. */
+  function klemmenZahl() {
+    var n = 0;
+    for (var name in arbeit) {
+      var S = arbeit[name];
+      if (!S || S.aus) continue;
+      for (var q = 0; q < S.liste.length; q++)
+        n += (S.liste[q].klemmt ? S.liste[q].klemmt.length : 0);
+    }
+    return n;
+  }
+  function klemmtWer(S) {
+    var n = 0;
+    for (var q = 0; q < S.liste.length; q++)
+      if (S.liste[q].klemmt && S.liste[q].klemmt.length) n++;
+    return n;
+  }
+
+  function arbeitAn(name, auftrag, kommando, modell, b, zustand, beleg, element) {
     if (!nachName[name]) return;
     var S = arbeit[name];
     if (!S || S.aus) { S = arbeit[name] = { t: 0, liste: [] }; }
@@ -3990,6 +4342,39 @@
          den ganzen Auftrag stabil und ist der Schlüssel, mit dem sich
          später sagen lässt, WELCHE Arbeit endet. */
       aufgabe: (b && b.aufgabe) || '',
+      /* DIE AUFGABENKENNUNG ALLEIN IST NICHT DIE IDENTITAET.
+         `faltenZuZustand` trennt nach project_id + run_id + task_id, und
+         genau diese Trennung ging hier verloren: Gespeichert und verglichen
+         wurde nur `aufgabe`. Zwei offene Aufgaben derselben Rolle mit
+         gleicher task_id in verschiedenen Projekten oder Laeufen fielen
+         damit zusammen -- der zweite Ring wurde abgewiesen, und ein
+         spaeteres `started` oder `delivered` konnte die FALSCHE Aufgabe
+         treffen. Gefunden von Atlas am 21.10.
+         Im aufgezeichneten Stueck sind beide leer; dort vergleicht leer mit
+         leer, und nichts aendert sich. */
+      projekt: (b && b.projekt) || '',
+      lauf: (b && b.lauf) || '',
+      /* ZUGEWIESEN IST NICHT BEGONNEN. Der Demopfad legt weiter sofort
+         `begonnen` an -- dort IST das Ankommen des Balls der Beginn, und
+         das bleibt unveraendert. Der Livepfad kann `zugewiesen` setzen:
+         dann steht der Ring still, statt zu kreisen. Ein stehender Ring
+         ist zaehlbar und behauptet keine Arbeit. */
+      zustand: zustand || 'begonnen',
+      /* Die Klemmen dieser Aufgabe. Sie liegen NEBEN dem Zustand, nicht in
+         ihm -- siehe `arbeitKlemmt`. Leer heisst: laeuft. */
+      klemmt: [],
+      /* WOHER DIESE AUFGABE WEISS, DASS SIE DA IST. Die Nummer des
+         Kommentars, der sie vergeben hat, und die aufloesbare Adresse dazu.
+         Im aufgezeichneten Stueck bleibt beides leer -- dort gibt es keinen
+         Beleg, und ein erfundener waere schlimmer als keiner. */
+      beleg: (beleg && beleg.nr) || '',
+      belegRef: (beleg && beleg.ref) || '',
+      /* WAS fuer ein Arbeitselement, unter welchem Elternteil, in welcher
+         Fassung. Vorgabe `task` -- im aufgezeichneten Stueck und bei jedem
+         Produzenten, der die Angaben nicht sendet. */
+      eTyp: (element && element.typ) || 'task',
+      eEltern: (element && element.eltern) || '',
+      eFassung: (element && element.fassung) || '',
       w: Math.random() * 6.2832, t: 0, beginn: zeit
     });
     /* Alle Aufträge bleiben in der Liste. Vorher flog der älteste
@@ -4001,19 +4386,25 @@
   /* Was beendet welchen Auftrag? Den ältesten offenen — wer liefert, wird
      das los, was am längsten liegt. Erst wenn keiner mehr offen ist, hört
      die Arbeit ganz auf. */
-  function auftragFertig(name, aufgabe) {
+  function auftragFertig(name, kenn, streng) {
     var S = arbeit[name];
     if (!S || S.aus) return;
+    var kk = kennung(kenn);
     /* Sagen die Daten, WELCHE Aufgabe erledigt ist, wird genau die
        geschlossen — und die übrigen laufen sichtbar weiter. Sagen sie es
        nicht, endet der älteste offene, und das wird als Rateentscheidung
        vermerkt, sofern es überhaupt etwas zu wählen gab. */
     var i = -1;
-    if (aufgabe) {
+    if (kk.aufgabe) {
       for (var q = 0; q < S.liste.length; q++)
-        if (S.liste[q].aufgabe === aufgabe) { i = q; break; }
+        if (trifft(S.liste[q], kk)) { i = q; break; }
     }
     if (i < 0) {
+      /* STRENG HEISST: NICHTS SCHLIESSEN. Ohne diesen Zweig fiele eine
+         unbekannte Kennung auf den aeltesten Auftrag zurueck -- im
+         aufgezeichneten Stueck eine vermerkte Notloesung, im Livebetrieb
+         eine falsche Tatsachenbehauptung ueber eine fremde Aufgabe. */
+      if (streng) { luecke('lieferung'); return; }
       if (S.liste.length > 1) ratVermerk('auftrag');
       i = 0;
     }
@@ -4317,6 +4708,32 @@
       'liefert, läuft es an; einen Selbststart gibt es hier nicht.</span>';
   }
 
+  /* DAS WORT AM SCHILD FOLGT DEN TATSACHEN, NICHT DER GEWOHNHEIT.
+     Hier stand immer "arbeitet", und das war seit der Einfuehrung von
+     `zugewiesen` falsch: Ein Agent mit einer bloss zugewiesenen Aufgabe
+     arbeitet nicht, und einer, dessen einzige begonnene Aufgabe klemmt,
+     arbeitet auch nicht. Der Ring sagte es schon richtig (steht still,
+     zuckt), das Wort darunter sagte etwas anderes -- also zwei Anzeigen,
+     von denen die auffaelligere die falsche war. Eigener Befund.
+     Der Demopfad legt Auftraege sofort als `begonnen` an und sagt deshalb
+     unveraendert "arbeitet". */
+  function tunWort(S) {
+    var begonnen = 0, frei = 0, wartet = 0;
+    for (var q = 0; q < S.liste.length; q++) {
+      var L = S.liste[q];
+      /* Geliefert oder geprueft heisst: fertig und wartet auf eine Annahme.
+         Weder "arbeitet" noch "liegt" trifft das. */
+      if (L.zustand === 'geliefert' || L.zustand === 'geprueft') { wartet++; continue; }
+      if (L.zustand !== 'begonnen') continue;
+      begonnen++;
+      if (!(L.klemmt && L.klemmt.length)) frei++;
+    }
+    if (frei) return 'arbeitet';
+    if (begonnen) return 'klemmt';
+    if (wartet) return 'wartet';
+    return 'liegt';
+  }
+
   function tunZeigen(dt) {
     tunStill += dt;
     var h = '', n;
@@ -4340,8 +4757,15 @@
       h += '<div class="agTut auf' + (lang ? ' lang' : '') +
            '" data-wer="' + n + '" data-y="' + Math.round(o[1]) +
            '" style="left:' + o[0] + 'px;top:' + (o[1] + unten) +
-           'px;color:' + hex(A.farbe) + '">arbeitet · ' + mm + ':' + ss +
+           'px;color:' + hex(A.farbe) + '">' + tunWort(S) + ' · ' + mm + ':' + ss +
            (S.liste.length > 1 ? ' · ' + S.liste.length + ' Aufträge' : '') +
+           /* DAS WORT ZUM EFFEKT. Der stockende Ring sagt, DASS etwas
+              klemmt; das Schild sagt, WIE VIELE. Welche, steht in der
+              Liste -- so hat Peter die Aufteilung gewollt.
+              Nur im MISCHFALL: Heisst das Wort schon "klemmt", waere
+              die Zahl daneben eine Wiederholung. */
+           (tunWort(S) === 'arbeitet' && klemmtWer(S)
+              ? ' · ' + klemmtWer(S) + ' klemmt' : '') +
            (lang ? '<b>die anderen warten</b>' : '') + '</div>';
     }
     if (h !== tunEl.__h) {
@@ -4383,15 +4807,62 @@
       for (var q = 0; q < Math.min(S.liste.length, 4); q++) {
         var L = S.liste[q];
         L.t += dt;
-        L.w += (1.1 - q * 0.17) * dt;
+        /* EIN ZUGEWIESENER RING DREHT NICHT. Das ist der ganze Unterschied,
+           und er ist mit Absicht so klein: Dieselbe Gestalt, dieselbe
+           Zaehlbarkeit, nur ohne Bewegung und schwaecher. Wer zusieht, sieht
+           sofort, wer eine Aufgabe HAT und wer an ihr ARBEITET -- und es
+           kommt keine neue Form ins Bild.
+           Kreisen heisst in diesem Feld "dort entsteht etwas, und zwar nur,
+           solange man kreist". Ein stehender Kreis sagt also genau das
+           Richtige: liegt da, noch nichts entsteht. */
+        /* TAETIG IST NUR, WER BEGONNEN HAT. Vorher hiess "nicht zugewiesen"
+           soviel wie "arbeitet"; seit es `empfangen`, `geliefert` und
+           `geprueft` gibt, waere das falsch: Wer geliefert hat, produziert
+           nichts mehr, er wartet auf eine Annahme. Ein kreisender Ring
+           behauptete dort Arbeit, die niemand gemeldet hat.
+           Im aufgezeichneten Stueck ist der Vorgabewert `begonnen`, dort
+           aendert sich nichts. */
+        var ruht = (L.zustand !== 'begonnen');
+        /* ============ WAS KLEMMT, STOCKT GEGEN SICH SELBST ============
+
+           Peters Entwurf vom 21.10., woertlich: "einen kleinen
+           resonanz-effekt am agenten selbst, damit man sehen kann, dass
+           etwas 'klemmt'. nachsehen kann man dann in der liste." Dazu
+           ausdruecklich: "es soll aber jetzt nicht alles zu
+           unuebersichtlich werden."
+
+           Also kommt KEINE neue Gestalt, KEINE neue Farbe und KEIN neuer
+           Leuchtpunkt ins Bild -- nur die Bewegung des Rings, den es schon
+           gibt, aendert sich. Dieselbe Grammatik benutzt der Stopper seit
+           V1, und sein Kommentar sagt, warum: Diese Maschine addiert nur
+           Licht, sie kann kein Schwarz malen. Was blockiert, muss sich also
+           durch BEWEGUNG zeigen -- gegenlaeufig und ruckend gegen das
+           gleichmaessige Kreisen.
+
+           Der Unterschied zum ruhenden Ring ist damit auch im Ruhefall
+           sichtbar: `zugewiesen` steht still, `zugewiesen und geklemmt`
+           steht still UND zuckt. */
+        var klemmt = !!(L.klemmt && L.klemmt.length);
+        if (klemmt) {
+          var takt = L.t % 1.15;
+          if (takt < 0.17) L.w -= dt * 3.4;      /* gegen die Arbeitsrichtung */
+        } else if (!ruht) {
+          L.w += (1.1 - q * 0.17) * dt;
+        }
         var r = grund * (0.68 + q * 0.46)
-              * (1 + 0.09 * Math.sin(L.t * 1.25 + q));
+              * (1 + (ruht || klemmt ? 0.03 : 0.09) * Math.sin(L.t * 1.25 + q));
+        /* EIN KLEMMENDER RING DARF NICHT BLASSER SEIN ALS EIN RUHENDER.
+           Zuerst stand er bei 0.17 gegen 0.20 -- also waere das Auffaellige
+           das Unauffaelligste im Bild geworden. Jetzt liegt er knapp
+           DARUEBER: Ruhen heisst "liegt da", Klemmen heisst "liegt da und
+           soll auffallen". Das Kreisen bleibt deutlich heller als beides. */
+        var zug = klemmt ? 0.30 : (ruht ? 0.25 : 0.9);
         for (var s = 0; s < 2; s++) {
           var w = L.w + s * Math.PI;
           window.__feld.strang(
             p[0] + Math.cos(w) * r, p[1] + Math.sin(w) * r,
-            -Math.sin(w) * r * 0.9, Math.cos(w) * r * 0.9,
-            (0.40 + 0.22 * atem) * staerke,
+            -Math.sin(w) * r * zug, Math.cos(w) * r * zug,
+            (klemmt ? 0.24 : (ruht ? 0.20 : (0.40 + 0.22 * atem))) * staerke,
             0.38 + 0.16 * Math.random(), A.farbe, 0);
         }
       }
@@ -4399,8 +4870,19 @@
       /* Der Herzschlag der Arbeit: Etwa jede anderthalb Sekunden ein kurzer
          Knoten in der Mitte. Ohne ihn ist das Kreisen gleichförmig, und
          gleichförmig liest man als Verzierung statt als Tätigkeit. */
+      /* Der Herzschlag gehoert zur ARBEIT, nicht zum Besitz. Liegen nur
+         zugewiesene Auftraege, schlaegt nichts -- sonst behauptete der
+         Takt eine Taetigkeit, die niemand gemeldet hat. */
+      /* Und eine GEKLEMMTE Aufgabe schlaegt auch nicht: Sie ist begonnen,
+         aber es geht gerade nichts voran. Der Takt behauptete sonst eine
+         Taetigkeit, von der der Melder selbst gesagt hat, dass sie haengt. */
+      var irgendBegonnen = false;
+      for (var hb = 0; hb < S.liste.length; hb++)
+        if (S.liste[hb].zustand === 'begonnen' &&
+            !(S.liste[hb].klemmt && S.liste[hb].klemmt.length))
+          { irgendBegonnen = true; break; }
       S.schlag = (S.schlag || 0) - dt;
-      if (S.schlag <= 0 && !S.aus) {
+      if (S.schlag <= 0 && !S.aus && irgendBegonnen) {
         S.schlag = 1.5;
         window.__feld.knoten(p[0], p[1], 0.62, A.farbe, 0, 10, 0.75);
       }
@@ -4771,6 +5253,29 @@
      das Stück — im Archiv auf den Knopf, im Live-Betrieb auf Daten. */
   var zeit = 0, naechstes = 0, laeuft = true, tempo = 1;
 
+  /* ANGENOMMEN IST NICHT GEZEICHNET -- die Unterscheidung fehlte, und
+     Sentinel hat sie am 21.10. benannt. Der Adapter zaehlt ein Ereignis,
+     sobald `__agEreignis` es ANNIMMT; zu diesem Zeitpunkt liegt es nur in
+     `liveListe`. Flug, Meldung und Puls entstehen erst, wenn die
+     Zeichenschleife es aus der Warteschlange nimmt. Ein gruener Nachweis,
+     der nur den Adapterzaehler liest, uebersieht also den Fall
+     "angenommen, aber nie gezeichnet" -- und genau der ist bei einer
+     stehenden Schleife der interessante.
+     Dieser Zaehler steht fuer den zweiten Schritt und fuer nichts sonst. */
+  var verarbeitet = 0;
+  /* UND EINE ZWEITE ZAHL, DIE WIRKLICH DIE AUSGABE MISST.
+     `verarbeitet` steht am ANFANG der Verarbeitung -- es zaehlt also, dass
+     ein Ereignis aus der Warteschlange genommen wurde, nicht dass etwas
+     entstanden ist. Eine Ausnahme danach wuerde trotzdem zaehlen. Von Atlas
+     am 21.10. benannt, und er hat recht: Der Anzeigetext "gezeichnet" hat
+     mehr behauptet als der Zaehler misst. `ausgegeben` steigt erst, wenn
+     eine Meldung oder ein Flug tatsaechlich angelegt wurde.
+     Die beiden Zahlen nebeneinander zeigen, WO es haengt: angenommen gegen
+     verarbeitet trennt Adapter von Schleife, verarbeitet gegen ausgegeben
+     trennt Schleife von Ausgabe. Gezeichnete Bildpunkte beweist weiterhin
+     keine der drei -- das waere ein Bildvergleich und steht nicht hier. */
+  var ausgegeben = 0;
+
   function schritt(dt) {
     if (laeuft) {
       zeit += dt * tempo;
@@ -4778,15 +5283,113 @@
       while (naechstes < LISTE.length &&
              LISTE[naechstes].t <= zeit) {
           var E = LISTE[naechstes++];
+          if (MODUS === 'live') verarbeitet++;
         /* AG-GH-LIVE-001: Fortschritt ist eine Meldung AM PLATZ, kein Flug.
            Er beendet keinen Auftrag, eroeffnet keinen, blockiert nichts und
            hinterlaesst nichts -- ein kurzer Puls und eine lesbare Zeile.
            Diese Art gibt es nur im GitHub-Livebetrieb (siehe __agEreignis). */
-        if (E.art === 'progress') {
+        /* AG-EVENT-JOURNAL-001: Die Lebenszyklusarten gehen denselben Weg.
+           NICHT AUS BEQUEMLICHKEIT, SONDERN WEIL ES SONST KRACHT -- und zwar
+           gemessen: Ohne diesen Zweig fielen sie in den Flugpfad, galten
+           wegen `gross: 1.0` als GANZER Ball und setzten `derBall.bei` auf
+           den leeren Empfaenger. `ballOrt()` las dann `nachName['']`, also
+           `undefined.winkel`, und zwar in jedem Bild der Zeichenschleife.
+           Mein Kommentar behauptete da schon "treibt keinen Zustand" --
+           er trieb den Ball, ich hatte nur an `arbeitAn` gedacht.
+           Gefunden vom eigenen Nachweis, nicht im Betrieb. */
+        if (E.art === 'progress' || GH_LEBEN[E.art]) {
+          /* ===== DER ZUSTAND FOLGT DEM BELEG, NICHT DER ANIMATION =====
+
+             Welches Ereignis darf welchen Uebergang treiben? Die Regel hat
+             genau zwei Teile, und beide stehen in Atlas' Betriebskonzept:
+
+             1. "Jede tatsaechlich arbeitende Rolle meldet ihre eigenen
+                Uebergaenge" -- also treibt `received`, `started`,
+                `delivered`, `aborted` nur, wenn der Melder der Akteur ist
+                (`E.selbstauskunft`). Atlas ueber forge bleibt Beobachtung.
+             2. `assigned` ist die Ausnahme, und zwar notwendig: Eine
+                Vergabe meldet der Vergebende, nie der Empfaenger. Sie legt
+                deshalb eine Aufgabe als ZUGEWIESEN an -- und behauptet
+                keinen Beginn.
+
+             `blocked`/`resolved` treiben KEINEN Zustandswechsel, sondern
+             legen eine Klemme neben den Zustand bzw. nehmen sie weg --
+             siehe `arbeitKlemmt`.
+
+             WAS `merged` UND `published` NICHT SIND: Zustaende einer
+             Aufgabe. Sie sagen etwas ueber ein ERGEBNIS -- einen Zweig, eine
+             Fassung -- und nicht darueber, was eine Rolle gerade tut. Das
+             Regelwerk trennt das ausdruecklich (Rulebook 1.3 §6: "Accepted
+             requirement, passed test and released product are distinct"),
+             und der Monitor hat dafuer schon einen eigenen Ort: das
+             Register, das fuehrt, woraus das Produkt besteht. Dort haengen
+             sie an einer Artefaktkennung, und die traegt der Livevertrag
+             heute nicht. Also kommen sie an, sind lesbar und treiben
+             nichts -- und das steht als offener Punkt da, nicht als
+             stillschweigende Luecke. Sie an die Aufgabe zu haengen waere
+             bequem und falsch: Eine Aufgabe ist mit der ANNAHME erledigt,
+             nicht mit dem Merge. */
+          if (E.art === 'assigned' && E.an && E.spur && E.spur.task_id) {
+            /* Die GANZE Spur, nicht nur die Aufgabenkennung: project_id und
+               run_id gehoeren zur Identitaet. Siehe `kennung`/`trifft`. */
+            arbeitZuweisen(E.an, E.spur, E.text,
+                           { nr: E.beleg || '', ref: E.belegRef || '' },
+                           { typ: E.eTyp || 'task', eltern: E.eEltern || '',
+                             fassung: E.eFassung || '' });
+          } else if (E.selbstauskunft && E.spur && E.spur.task_id) {
+            /* Die Kette: received/started/delivered/reviewed stellen den
+               Zustand weiter, accepted und aborted beenden die Aufgabe.
+               `merged` und `published` stehen hier NICHT -- siehe unten. */
+            /* HALTERGEBUNDEN: in der Liste des Melders -- nur der
+               Arbeitende empfaengt, beginnt und liefert seine eigene
+               Arbeit.
+               NICHT HALTERGEBUNDEN: Pruefung, Annahme und Abbruch kommen
+               von einer anderen Rolle und treffen die Aufgabe, wo immer sie
+               liegt. Siehe `HALTERGEBUNDEN`. */
+            if (ZU_ZUSTAND[E.art] && HALTERGEBUNDEN[E.art])
+              arbeitStufe(E.von, E.spur, ZU_ZUSTAND[E.art], 'stufe');
+            else if (ZU_ZUSTAND[E.art]) {
+              var fs = aufgabeSuchen(kennung(E.spur));
+              if (!fs || fs.mehrfach) luecke('stufe');
+              else arbeitStufe(fs.wer, E.spur, ZU_ZUSTAND[E.art], 'stufe');
+            } else if (E.art === 'accepted' || E.art === 'aborted') {
+              var fz = aufgabeSuchen(kennung(E.spur));
+              if (!fz || fz.mehrfach) luecke('lieferung');
+              else auftragFertig(fz.wer, E.spur, true);   /* streng */
+            }
+            /* DAS ERGEBNIS, NICHT DIE AUFGABE. Merge und Veroeffentlichung
+               gehen ins Register; die Aufgabe ist mit der Annahme erledigt
+               und wird davon nicht mehr beruehrt. Eine Lieferung mit
+               Artefaktkennung legt den Eintrag an. */
+            if (E.werk) {
+              if (E.art === 'merged')
+                werkStufe(E.werk, E.werkV, 'gemergt',
+                          nachName[E.von].farbe, E.beleg || '');
+              else if (E.art === 'published')
+                werkStufe(E.werk, E.werkV, 'veroeffentlicht',
+                          nachName[E.von].farbe, E.beleg || '');
+              else if (E.art === 'delivered')
+                werkStufe(E.werk, E.werkV, 'geliefert',
+                          nachName[E.von].farbe, E.beleg || '');
+            }
+            /* Auch hier gilt die Selbstauskunftsregel: Wer klemmt, sagt es
+               selbst. Atlas ueber forge bleibt Beobachtung -- sonst haengte
+               eine Rolle an einer Klemme, die ein anderer behauptet hat. */
+            else if (E.art === 'blocked')
+              arbeitKlemmt(E.von, E.spur, E.klemme, E.text,
+                           { nr: E.beleg || '' });
+            else if (E.art === 'resolved')
+              arbeitLoest(E.von, E.spur, E.klemme);
+          }
           stromZeile(E, FORTSCHRITT);
-          melden(E.von, '', 'progress', E.text, FORTSCHRITT,
+          /* Die wahre Art steht in der Meldung, nicht "progress": `melden`
+             benutzt sie ausschliesslich als Beschriftung (nachgesehen), und
+             ein `started`, das sich als Fortschritt ausgibt, waere genau
+             die Umdeutung, die der Auftrag verbietet. */
+          melden(E.von, '', E.art, E.text, FORTSCHRITT,
                  E.spur ? spurWort(E) : (E.id + ' \u00b7 ' + herkunftWort(E.herkunft)));
           pulsAn(E.von);
+          if (MODUS === 'live') ausgegeben++;   /* Meldung UND Puls sind raus */
           tunStill = 0;
           continue;
         }
@@ -4930,6 +5533,64 @@
              arbeiten: (function () { var r = [];
                for (var n in arbeit) if (!arbeit[n].aus && arbeit[n].liste.length)
                  r.push(n + ':' + arbeit[n].liste.length);
+               return r; })(),
+             /* AG-EVENT-JOURNAL-001: Luecken und die Zustaende je Aufgabe.
+                Ohne sie laesst sich von aussen nicht unterscheiden, ob eine
+                Aufgabe liegt oder bearbeitet wird -- und genau das ist der
+                Unterschied, um den es geht. Diagnose, keine Anzeige. */
+             /* Was die Zeichenschleife wirklich angefasst hat. Steht hier
+                eine kleinere Zahl als im Adapterzaehler, ist etwas
+                angenommen und nicht gezeichnet worden. */
+             verarbeitet: verarbeitet, ausgegeben: ausgegeben,
+             wiederhergestellt: wiederhergestellt, abdeckung: liveAbdeckung,
+             luecken: luecken.gesamt,
+             lueckenEinzeln: { beginn: luecken.beginn,
+               stufe: luecken.stufe,
+               lieferung: luecken.lieferung, abbruch: luecken.abbruch,
+               klemme: luecken.klemme, loesung: luecken.loesung },
+             /* Die Klemmen, einzeln und mit Kennung. Eine Gesamtzahl allein
+                liesse nicht pruefen, ob eine Aufloesung GENAU die gemeinte
+                Klemme getroffen hat -- und das ist Atlas' Bedingung. */
+             klemmen: klemmenZahl(),
+             /* Das Register, damit sich die Ergebniszuordnung von aussen
+                pruefen laesst -- Kennung, Fassung, Zustand, Beleg. */
+             werke: register.map(function (R) {
+               return { kennung: R.kennung, version: R.version || '',
+                        zustand: R.zustand, beleg: R.beleg || '' }; }),
+             aufgaben: (function () { var r = [];
+               for (var n in arbeit) {
+                 if (arbeit[n].aus) continue;
+                 arbeit[n].liste.forEach(function (L) {
+                   r.push({ wer: n, aufgabe: L.aufgabe, zustand: L.zustand,
+                            projekt: L.projekt || '', lauf: L.lauf || '',
+                            wieder: !!L.wieder,
+                            /* Kennung UND Grund. Der Grund steht im Bild
+                               bisher nur in der Listenzeile des Ereignisses
+                               -- eine wiederhergestellte Klemme hat keine
+                               solche Zeile. Dass er dort fehlt, ist offen
+                               und steht in der Liste der offenen Punkte;
+                               hier ist er wenigstens abrufbar und messbar
+                               statt unsichtbar. */
+                            klemmt: (L.klemmt || []).map(function (K) {
+                              return { id: K.id, grund: K.grund,
+                                       beleg: K.beleg || '' }; }),
+                            /* Der Originalbeleg der Aufgabe: Nummer und
+                               aufloesbare Adresse. Damit laesst sich von
+                               aussen pruefen, dass eine Anzeige an einer
+                               Quelle haengt und nicht in der Luft. */
+                            beleg: L.beleg || '',
+                            belegRef: L.belegRef || '',
+                            eTyp: L.eTyp || 'task',
+                            eEltern: L.eEltern || '',
+                            eFassung: L.eFassung || '',
+                            /* Der Ringwinkel. Er steht hier, damit sich der
+                               Effekt MESSEN laesst statt ihn zu behaupten:
+                               Ein laufender Ring wird groesser, ein
+                               geklemmter zuckt zurueck. Diagnose, keine
+                               Anzeige. */
+                            w: +L.w.toFixed(4) });
+                 });
+               }
                return r; })() };
   };
 
@@ -4993,14 +5654,52 @@
     /* Jeder Wechsel setzt den Livepuffer zurueck. Was ein voriger Strom
        geliefert hat, gehoert nicht in den naechsten. */
     liveListe.length = 0;
+    verarbeitet = 0; ausgegeben = 0;
+    wiederhergestellt = 0; liveAbdeckung = '';
+    /* Auch die Live-Identitaet: Was ein voriger Strom gemeldet hat, ist
+       beim naechsten Wechsel keine Aussage mehr. */
+    liveKopf = null;
     zurueckAufAnfang();
     laeuft = !!modus().start;
     kopfSetzen();
     knoepfeSetzen();
   }
 
+  /* Die Identitaet des laufenden Live-Projekts -- `null`, solange keine
+     gemeldet wurde. Sie ersetzt im Livebetrieb das aufgezeichnete Stueck
+     und wird bei jedem Betriebsartwechsel geloescht. */
+  var liveKopf = null;
+  /* Wie viele Aufgaben aus der Historie uebernommen wurden, und wie
+     vollstaendig die Quelle dabei war. Beides gehoert in die Diagnose,
+     damit eine Zahl nicht fuer vollstaendig genommen wird. */
+  var wiederhergestellt = 0, liveAbdeckung = '';
+
+  /* Welcher Titel gilt gerade? Im Livebetrieb der gemeldete, sonst der des
+     aufgezeichneten Stuecks -- und solange nichts gemeldet ist, das Wort der
+     Betriebsart statt eines fremden Projektnamens. Einmal benannt, damit
+     Kopf und Werkname nicht auseinanderlaufen; sie taten es schon. */
+  function livTit() {
+    if (MODUS === 'live')
+      return liveKopf ? (liveKopf.titel || liveKopf.projekt || '')
+                      : MODI.live.wort.toUpperCase();
+    return STUECK.titel || STUECK.projekt || '';
+  }
+
   function kopfSetzen() {
-    projektEl.textContent = STUECK.projekt || '';
+    /* IM LIVEBETRIEB NIE DER DEMONAME.
+       Von Atlas am 21.10. an Peters Schirm beobachtet: verbunden, LIVE
+       gewaehlt, "Wartet auf einen Strom von aussen" -- und darueber stand
+       weiter "NACHTPOST V1". Der Kopf las `STUECK.projekt`, und das ist das
+       aufgezeichnete Stueck; der Adapter ueberspringt beim Verbinden
+       absichtlich die Historie, also kam kein Lauf, der den Namen ersetzt
+       haette. Ergebnis: eine Aussage ueber die Wirklichkeit, die falsch war.
+       Steht noch keine Live-Identitaet, zeigt der Kopf das Wort der
+       Betriebsart. Es ist kein erfundener Projektname und kann mit keinem
+       verwechselt werden -- und die Zeile darunter sagt ohnehin, worauf
+       gewartet wird. */
+    var K = (MODUS === 'live') ? (liveKopf || { projekt: MODI.live.wort.toUpperCase() })
+                               : STUECK;
+    projektEl.textContent = K.projekt || '';
     /* Beim Zeigen auf den Namen steht da, was BALL heißt und welche
        Fassung läuft. Im Ruhezustand ist es weg — der Monitor soll das Feld
        zeigen, nicht seine eigenen Angaben. */
@@ -5014,15 +5713,23 @@
     if (STUECKE.length > 1) {
       h += '<ul class="wProjekte">';
       STUECKE.forEach(function (S, i) {
-        h += '<li' + (i === stueckNr ? ' class="hier"' : '') +
+        /* Im Livebetrieb ist KEIN aufgezeichnetes Stueck das aktuelle.
+           Die Markierung blieb sonst auf dem zuletzt gespielten stehen und
+           sagte damit genau das Falsche. */
+        h += '<li' + ((i === stueckNr && MODUS !== 'live') ? ' class="hier"' : '') +
              ' data-nr="' + i + '">' + esc(S.projekt || S.titel || ('Stück ' + (i+1))) +
              '</li>';
       });
       h += '</ul>';
     }
-    if (STUECK.titel && STUECK.titel !== STUECK.projekt)
-      h += '<p class="wTitel">' + esc(STUECK.titel) + '</p>';
-    if (STUECK.beschreibung) h += '<p>' + esc(STUECK.beschreibung) + '</p>';
+    if (K.titel && K.titel !== K.projekt)
+      h += '<p class="wTitel">' + esc(K.titel) + '</p>';
+    /* Die Beschreibung des aufgezeichneten Stuecks gehoert nicht in den
+       Livebetrieb: Sie beschreibt NACHTPOST, nicht das, was gerade
+       geschieht. Im Livebetrieb steht hier, was gemeldet wurde -- oder
+       nichts. */
+    var besch = (MODUS === 'live') ? (K.was || '') : (STUECK.beschreibung || '');
+    if (besch) h += '<p>' + esc(besch) + '</p>';
 
     h += '<ul class="wModi">';
     ['demo', 'archiv', 'live'].forEach(function (m) {
@@ -5490,7 +6197,34 @@
      die Zeile. Die Schluessel werden gezeigt, aber an KEINE Aufgabe, keinen
      Tisch und keinen Ball gebunden. Demo, Archiv, ?mvp=1 und unmarkierte
      Aufrufe von __agEreignis verhalten sich wie bisher. */
-  var GH_ARTEN = { progress: 1, handoff: 1, contribution: 1 };
+  /* AG-EVENT-JOURNAL-001: dazu die Lebenszyklusarten. Angenommen und nicht
+     gezeigt waere eine stille Luege; getrieben und nicht geprueft waere die
+     groessere. Getrieben wird inzwischen: `assigned`/`started`/`delivered`/
+     `aborted` den Zustand, `blocked`/`resolved` die Klemme daneben. Die
+     uebrigen Stufen kommen an und sind lesbar, mehr nicht. */
+  var GH_ARTEN = { progress: 1, handoff: 1, contribution: 1,
+                   assigned: 1, received: 1, started: 1, delivered: 1,
+                   reviewed: 1, accepted: 1, merged: 1, published: 1,
+                   blocked: 1, resolved: 1, aborted: 1 };
+  /* Arten, die eine Klemmenkennung MITBRINGEN MUESSEN. Ohne sie liesse sich
+     "genau diese Blockade" nicht sagen, und die Aufloesung muesste sich
+     eine aussuchen. Geraten wird in diesem Monitor nichts. */
+  var KLEMMARTEN = { blocked: 1, resolved: 1 };
+  /* Arten, die eine Artefaktkennung MITBRINGEN MUESSEN. `delivered` darf
+     eine tragen, muss aber nicht: Nicht jede Lieferung ist ein Artefakt mit
+     eigener Kennung. */
+  var WERKARTEN = { merged: 1, published: 1 };
+  var WERKDARF = { merged: 1, published: 1, delivered: 1 };
+  /* Genau die drei Arten aus Atlas' Arbeitsregister, als Aufzaehlung statt
+     als freier Text. Unbekanntes faellt auf `task` zurueck, denn das war
+     bisher der einzige Fall. */
+  var ELEMENTARTEN = { epic: 1, story: 1, task: 1 };
+  /* Arten, fuer die es im Bild noch keine eigene Gestalt gibt. Sie laufen
+     ueber denselben Weg wie `progress` -- eine Meldung am Platz des
+     Agenten, die vergeht -- und erfinden damit keinen Zustand. */
+  var GH_LEBEN = { assigned: 1, received: 1, started: 1, delivered: 1,
+                   reviewed: 1, accepted: 1, merged: 1, published: 1,
+                   blocked: 1, resolved: 1, aborted: 1 };
   var GH_KENNUNG = new RegExp('^[A-Za-z0-9][A-Za-z0-9._:/-]{0,119}$');
   function ghKenn(x) { return (typeof x === 'string' && GH_KENNUNG.test(x)) ? x : ''; }
   function spurWort(E) {
@@ -5499,10 +6233,28 @@
     var t = (E.beobachtet ? E.von + ' \u2192 ' + E.an + ' \u00b7 ' : '') +
             E.id + ' \u00b7 ' + s.project_id + ' / ' + s.run_id + ' / ' + s.task_id +
             ' \u00b7 ' + herkunftWort(s.herkunft) + ' \u00b7 Werkzeug ' + s.source_tool_id;
+    /* Und WO es steht. Ohne diese Nummer ist die Zeile nicht nachzusehen. */
+    if (E.beleg) t += ' \u00b7 Beleg ' + E.beleg;
+    /* WELCHES Ergebnis. Ohne die Kennung sagt ein "gemergt" nicht, was. */
+    if (E.werk) t += ' \u00b7 Werk ' + E.werk + (E.werkV ? ' ' + E.werkV : '');
+    /* Typ nur, wenn er etwas sagt: `task` ist die Vorgabe, keine Meldung. */
+    if (E.eTyp && E.eTyp !== 'task') t += ' \u00b7 ' + E.eTyp;
+    if (E.eFassung) t += ' \u00b7 Fassung ' + E.eFassung;
+    if (E.eEltern) t += ' \u00b7 unter ' + E.eEltern;
     if (E.art === 'handoff')
       t += ' \u00b7 beobachtete \u00dcbergabe \u2014 keine Annahme, kein Arbeitsbeginn';
     else if (E.art === 'contribution')
       t += ' \u00b7 beobachteter Bericht \u2014 keine Abnahme';
+    /* IN DER LISTE NACHSEHEN KOENNEN, und zwar WELCHE Klemme. Peter am
+       21.10.: "nachsehen kann man dann in der liste." Dazu muss die Zeile
+       die Klemmenkennung tragen -- die Aufgabenkennung allein sagt nicht,
+       welche von zwei Klemmen gemeint ist. */
+    else if (E.art === 'blocked')
+      t += ' \u00b7 Klemme ' + (E.klemme || 'ohne Kennung') +
+           ' \u2014 die Aufgabe bleibt liegen, kein Abschluss';
+    else if (E.art === 'resolved')
+      t += ' \u00b7 Klemme ' + (E.klemme || 'ohne Kennung') +
+           ' aufgel\u00f6st \u2014 kein Arbeitsbeginn, kein Abschluss';
     return t;
   }
   /* Ein kurzer Puls am Platz des Meldenden. Knoten und Faeden ohne Abgabe:
@@ -5540,15 +6292,118 @@
     if (!d || typeof d !== 'object') return { angenommen: false, grund: 'keine Angabe' };
     var pid = (typeof d.project_id === 'string') ? d.project_id.trim() : '';
     if (!pid) return { angenommen: false, grund: 'project_id fehlt' };
-    STUECK.projekt = (typeof d.kurz === 'string' && d.kurz.trim()) ? d.kurz.trim() : pid;
-    STUECK.titel   = (typeof d.titel === 'string' && d.titel.trim()) ? d.titel.trim() : pid;
-    STUECK.was     = (typeof d.was === 'string') ? d.was : '';
-    STUECK.ablage  = (typeof d.ablage === 'string') ? d.ablage : '';
-    /* Keinen Umfang behaupten, den niemand genannt hat. */
-    if (typeof d.umfang === 'number') STUECK.umfang = d.umfang;
-    else delete STUECK.umfang;
+    /* AG-EVENT-JOURNAL-001: IN `liveKopf`, NICHT IN `STUECK`.
+       Hier stand vorher `STUECK.projekt = ...` -- und `STUECK` ist eine
+       Verweisung auf das aufgezeichnete Stueck. Der Livename wurde also in
+       die Demodaten geschrieben und stand nach dem Zurueckschalten dort,
+       wo "NACHTPOST V1" hingehoert. Zwei Betriebsarten, die sich dieselbe
+       Variable teilen, werden sich irgendwann gegenseitig ueberschreiben;
+       hier taten sie es schon. */
+    liveKopf = {
+      projekt: (typeof d.kurz === 'string' && d.kurz.trim()) ? d.kurz.trim() : pid,
+      titel:   (typeof d.titel === 'string' && d.titel.trim()) ? d.titel.trim() : pid,
+      was:     (typeof d.was === 'string') ? d.was : '',
+      ablage:  (typeof d.ablage === 'string') ? d.ablage : '',
+      /* Keinen Umfang behaupten, den niemand genannt hat. */
+      umfang:  (typeof d.umfang === 'number') ? d.umfang : null
+    };
     kopfSetzen();
-    return { angenommen: true, projekt: STUECK.projekt };
+    return { angenommen: true, projekt: liveKopf.projekt };
+  };
+
+  /* ===== WAS BEIM VERBINDEN SCHON OFFEN WAR =====
+     AG-EVENT-JOURNAL-001 Schritt 2b. Der Adapter faltet die Historie zu
+     einem Zustand und uebergibt ihn hier. Was hier entsteht, sind RINGE,
+     DIE LIEGEN -- kein Flug, keine Meldung, kein Puls, kein Ball. Das ist
+     der ganze Unterschied zum Abspielen: Eine Aufgabe, die noch offen ist,
+     SOLL man sehen; eine Uebergabe, die vor einer Stunde geschah, nicht
+     noch einmal.
+     `verarbeitet` und `ausgegeben` bleiben unberuehrt -- hier wird nichts
+     durch die Zeichenschleife genommen und nichts ausgegeben. Wer die
+     Zahlen liest, soll die Wiederherstellung nicht fuer Live-Verkehr
+     halten. */
+  window.__agWiederherstellen = function (d) {
+    if (MODUS !== 'live') return { angenommen: 0, grund: 'nicht im Live-Betrieb' };
+    if (!d || typeof d !== 'object' || !Array.isArray(d.aufgaben))
+      return { angenommen: 0, grund: 'keine Aufgabenliste' };
+    var n = 0, abgewiesen = 0, mitKlemme = 0;
+    d.aufgaben.forEach(function (A) {
+      if (!A || typeof A !== 'object') { abgewiesen++; return; }
+      var wer = (typeof A.wer === 'string') ? A.wer.trim().toLowerCase() : '';
+      var id = (typeof A.aufgabe === 'string') ? A.aufgabe : '';
+      /* DIE GANZE KETTE, nicht nur zwei Zustaende. Hier stand
+         `(A.zustand === 'begonnen') ? 'begonnen' : 'zugewiesen'` -- damit
+         waere eine gelieferte oder geprueffte Aufgabe aus der Historie als
+         "zugewiesen" wiedergekommen, also ein Rueckschritt gegenueber dem,
+         was die Daten sagen. Unbekanntes faellt auf `zugewiesen` zurueck,
+         denn das ist der Zustand, den eine Vergabe allein belegt. */
+      var zu = STUFE[A.zustand] ? A.zustand : 'zugewiesen';
+      if (!wer || !nachName[wer] || !id) { abgewiesen++; return; }
+      var kenn = { aufgabe: id,
+                   projekt: typeof A.projekt === 'string' ? A.projekt : '',
+                   lauf: typeof A.lauf === 'string' ? A.lauf : '' };
+      /* DER BELEG KOMMT MIT. Eine wiederhergestellte Aufgabe ohne ihn waere
+         eine Anzeige ohne Quelle -- und gerade sie hat keine Listenzeile, an
+         der man nachsehen koennte. Geprueft wie im Livepfad: Die Adresse
+         muss auf genau diese Nummer enden. */
+      var bnr = (typeof A.beleg === 'string' || typeof A.beleg === 'number')
+              ? String(A.beleg) : '';
+      if (!/^[0-9]{1,24}$/.test(bnr)) bnr = '';
+      var bref = '';
+      if (bnr && typeof A.belegRef === 'string' &&
+          A.belegRef.slice(-(bnr.length + 1)) === '/' + bnr)
+        bref = A.belegRef;
+      /* Typ, Elternbezug und Fassung kommen mit -- sonst waere eine
+         wiederhergestellte Vergabe eine Aufgabe ohne Elternkette, und Live
+         und Restore zeigten zwei verschiedene Lagen. */
+      if (!arbeitZuweisen(wer, kenn, typeof A.titel === 'string' ? A.titel : '',
+                          { nr: bnr, ref: bref },
+                          { typ: (typeof A.eTyp === 'string' &&
+                                  ELEMENTARTEN[A.eTyp]) ? A.eTyp : 'task',
+                            eltern: (typeof A.eEltern === 'string' &&
+                                     GH_KENNUNG.test(A.eEltern)) ? A.eEltern : '',
+                            fassung: (typeof A.eFassung === 'string' &&
+                                      GH_KENNUNG.test(A.eFassung)) ? A.eFassung : '' }))
+        { abgewiesen++; return; }      /* schon da: kein zweiter Ring */
+      if (zu !== 'zugewiesen') arbeitStufe(wer, kenn, zu, 'stufe');
+      /* DIE KLEMMEN KOMMEN MIT, SONST ERGIBT DIE WIEDERHERSTELLUNG EINE
+         ANDERE LAGE ALS DER LIVEBETRIEB. Atlas' Bedingung vom 21.10.
+         woertlich: "Projekt-/Lauftrennung und Wiederherstellung muessen
+         dabei dieselbe Lage ergeben wie Live-Verarbeitung." Eine Aufgabe,
+         die vor dem Verbinden geklemmt hat und nicht aufgeloest wurde,
+         klemmt also auch nach dem Verbinden -- und zwar mit derselben
+         Kennung, damit ein spaeteres `resolved` sie trifft.
+         Geprueft wird hier selbst, statt `arbeitKlemmt` ueber eine
+         fehlerhafte Angabe stolpern zu lassen: Eine Luecke der
+         Wiederherstellung ist keine Luecke des Stroms. */
+      if (Array.isArray(A.klemmt)) {
+        var gelegt = 0;
+        A.klemmt.forEach(function (K) {
+          var ki = (K && typeof K.id === 'string') ? K.id : '';
+          if (!ki) { abgewiesen++; return; }
+          var kb = (K && (typeof K.beleg === 'string' || typeof K.beleg === 'number'))
+                 ? String(K.beleg) : '';
+          if (!/^[0-9]{1,24}$/.test(kb)) kb = '';
+          if (arbeitKlemmt(wer, kenn, ki,
+                           (K && typeof K.grund === 'string') ? K.grund : '',
+                           { nr: kb }))
+            gelegt++;
+        });
+        /* Gezaehlt wird, was WIRKLICH gelegt wurde. Die Zahl in der Tafel
+           aus der gefalteten Liste zu nehmen waere wieder der alte Fehler:
+           das Soll fuer das Haben zu halten. */
+        if (gelegt) mitKlemme++;
+      }
+      /* Merken, dass dieser Ring aus der Historie stammt und nicht aus
+         beobachtetem Verkehr. Die Herkunft einer Anzeige gehoert zur
+         Anzeige. */
+      var S = arbeit[wer];
+      if (S) S.liste.forEach(function (L) { if (trifft(L, kennung(kenn))) L.wieder = 1; });
+      n++;
+    });
+    if (typeof d.abdeckung === 'string') liveAbdeckung = d.abdeckung;
+    wiederhergestellt = n;
+    return { angenommen: n, abgewiesen: abgewiesen, mitKlemme: mitKlemme };
   };
 
   window.__agEreignis = function (e) {
@@ -5567,7 +6422,11 @@
     var gh = (e.gh_beobachtet === true);
     if (gh && !ghLive) return nein('GitHub-Ereignis nur im GitHub-Livebetrieb');
     if (gh && !GH_ARTEN[art]) return nein('kind fuer GitHub nicht erlaubt: ' + art);
-    var fortschritt = (ghLive && art === 'progress');
+    /* Die Lebenszyklusarten laufen auf demselben Weg wie `progress`: eine
+       Meldung am Platz des Agenten, die vergeht. Sie haben in dieser
+       Fassung absichtlich keine eigene Gestalt und keinen Verbrauch --
+       beides waere eine Behauptung ueber Arbeit, die hier nicht belegt ist. */
+    var fortschritt = (ghLive && (art === 'progress' || GH_LEBEN[art]));
     if (!ARTEN[art] && !fortschritt) return nein('kind unbekannt: ' + art);
     var herkunft = '';
     if (fortschritt || gh) {
@@ -5585,6 +6444,26 @@
 
     var text = (typeof e.title === 'string') ? e.title.trim() : '';
     if (!text) return nein('title fehlt');
+
+    /* Die Klemmenkennung -- dieselbe Form wie die uebrigen Kennungen, und
+       bei `blocked`/`resolved` Pflicht. Der Adapter prueft sie schon; hier
+       steht die Pruefung ein zweites Mal, weil das Original auch ohne ihn
+       aufrufbar ist und sonst eine Klemme ohne Kennung entstehen koennte. */
+    var klemme = ghKenn(e.blocker_id);
+    if (KLEMMARTEN[art] && !klemme)
+      return nein('blocker_id fehlt oder ungueltig bei ' + art);
+
+    /* DIE ARTEFAKTKENNUNG. Pflicht bei `merged`/`published`: Beide sagen
+       etwas ueber ein ERGEBNIS, und ohne seine Kennung laesst sich nicht
+       sagen, WELCHES. Erlaubt bei `delivered`, weil eine Lieferung das
+       Ergebnis hervorbringt und es benennen darf. Sonst verboten -- ein
+       `started` mit Artefaktkennung behauptete einen Bezug, den die Art
+       nicht hergibt. Dieselbe Bauart wie bei `blocker_id`. */
+    var werk = ghKenn(e.artifact_id);
+    var werkV = (typeof e.artifact_version === 'string' &&
+                 GH_KENNUNG.test(e.artifact_version)) ? e.artifact_version : '';
+    if (WERKARTEN[art] && !werk)
+      return nein('artifact_id fehlt oder ungueltig bei ' + art);
 
     var an = (typeof e.recipient === 'string') ? e.recipient.trim().toLowerCase() : '';
     if (KOMMUNIKATION[art] && !an) return nein('recipient fehlt bei ' + art);
@@ -5619,8 +6498,67 @@
       /* Kein ganzer Ball (Groesse wie ein abgeworfenes Stueck) und vor
          allem: `beobachtet` schaltet in schritt/wirf/ballSchritt jede
          Zustandsfolge ab. */
-      if (art !== 'progress') { E.beobachtet = true; E.gross = ARTEN[art].gross || 0.5; }
+      /* `GH_LEBEN` wird hier mitgefangen, und zwar nicht aus Bequemlichkeit:
+         Fuer diese Arten gibt es keinen Eintrag in `ARTEN`, also waere
+         `ARTEN[art].gross` ein Zugriff auf `undefined` und haette den
+         ganzen Aufruf geworfen. */
+      if (art !== 'progress' && !GH_LEBEN[art]) {
+        E.beobachtet = true; E.gross = ARTEN[art].gross || 0.5;
+      }
     }
+    /* Melder und die daraus abgeleitete Aussage werden mitgefuehrt, aber
+       NOCH NICHT ausgewertet. Schritt 2 treibt damit Aufgabenzustaende; bis
+       dahin steht hier Datenhaltung ohne Wirkung, und das ist der ehrlichere
+       Zwischenstand. */
+    if (typeof e.reporter === 'string' && e.reporter) E.melder = e.reporter;
+    if (e.gh_selbstauskunft === true) E.selbstauskunft = true;
+    if (klemme) E.klemme = klemme;
+    if (werk) { E.werk = werk; E.werkV = werkV; }
+
+    /* ============ DAS ARBEITSELEMENT: TYP, ELTERN, FASSUNG ============
+
+       Atlas' Auftrag: eine Uebergabe soll GENAU DAS Objekt zeigen, das
+       vergeben wurde -- Epic, Story oder Aufgabe -- mit richtiger
+       Elternkette, und "keine erfundenen Kinderstarts oder Doppelauftraege".
+
+       Der zweite Teil ist hier geschenkt und soll trotzdem gemessen werden:
+       Dieser Monitor kennt keine Kinder. Er legt an, was gemeldet wird, und
+       leitet aus einer Epic nichts ab. Eine Vergabe einer Epic erzeugt genau
+       EINEN Ring -- den der Epic. Was darunter laeuft, muss einzeln gemeldet
+       werden, und dann steht es einzeln da.
+
+       Alle drei Angaben sind WAHLFREI. Fehlen sie, ist der Typ `task` und es
+       gibt keinen Elternbezug -- genau das Verhalten von vorher. */
+    var eTyp = (typeof e.item_type === 'string' &&
+                ELEMENTARTEN[e.item_type]) ? e.item_type : 'task';
+    var eEltern = ghKenn(e.parent_id);
+    var eFassung = ghKenn(e.item_version);
+    /* Ein Element ist nicht sein eigenes Elternteil. */
+    if (eEltern && spur && eEltern === spur.task_id)
+      return nein('parent_id gleich task_id');
+    E.eTyp = eTyp;
+    if (eEltern) E.eEltern = eEltern;
+    if (eFassung) E.eFassung = eFassung;
+    /* ======================= DER ORIGINALBELEG =======================
+
+       `source_evidence` sagt die ART des Belegs (Laufzeit oder gemeldet),
+       nicht seinen ORT. Wer eine Angabe im Bild nachsehen will, braucht die
+       Stelle, an der sie steht. Der Adapter leitet sie aus der Nummer ab,
+       die GitHub dem Kommentar gegeben hat -- ein Pflichtfeld des Senders
+       koennte das nicht sein, denn beim Schreiben kennt er sie nicht.
+
+       GEPRUEFT WIRD DER ZUSAMMENHANG, NICHT NUR DIE FORM: Die Adresse muss
+       auf GENAU diese Nummer enden. Ein Paar aus Nummer A und Adresse B
+       waere ein Beleg, der auf etwas anderes zeigt -- schlimmer als keiner,
+       weil er nachsehbar aussieht. */
+    var beleg = (typeof e.source_comment === 'string' && /^[0-9]{1,24}$/.test(e.source_comment))
+              ? e.source_comment : '';
+    var belegRef = '';
+    if (beleg && typeof e.source_ref === 'string' &&
+        /^https:\/\/[A-Za-z0-9.\-\/_]+$/.test(e.source_ref) &&
+        e.source_ref.slice(-(beleg.length + 1)) === '/' + beleg)
+      belegRef = e.source_ref;
+    if (beleg) { E.beleg = beleg; E.belegRef = belegRef; }
     if (v && typeof v === 'object' && v.belegt === true) {
       var tk = {};
       if (typeof v.output_tokens === 'number') tk.aus = v.output_tokens;
@@ -5839,6 +6777,14 @@
     AGENTEN.forEach(function (a, i) {
       var p = heimat(a), e = document.createElement('div');
       e.className = 'agName' + (a.aussen ? ' agDraussen' : '');
+      /* WESSEN SCHILD DAS IST, STEHT AM SCHILD. Bisher liess sich das nur
+         ueber die Reihenfolge erschliessen (`AGENTEN.indexOf`), und der
+         Text wechselt zwischen Name und Rolle -- von aussen also nicht
+         zuverlaessig zuzuordnen. Dieselbe Angabe tragen die Schilder am
+         Fuss und die Arbeitsanzeige schon; hier fehlte sie. Dadurch kann
+         ein Nachweis den Puls AM RICHTIGEN Agenten pruefen statt an einem
+         Index, den er selbst nachrechnet. */
+      e.setAttribute('data-wer', a.name);
       e.style.left = p[0] + 'px'; e.style.top = p[1] + 'px';
       e.style.color = hex(a.farbe);
       e.textContent = a.name;
@@ -6437,6 +7383,16 @@
       /* AG-GH-LIVE-004: Zusage an den Adapter, dass handoff/contribution
          hier nur beobachtet werden. Fehlt sie, reicht er sie nicht weiter. */
       kommunikation: 'beobachtet-v1',
+      /* AG-EVENT-JOURNAL-001: Zusage, dass die Lebenszyklusarten hier
+         ankommen duerfen. Dieselbe Bauart wie die Zeile darueber: Eine
+         Fassung, die dieses Wort nicht sagt, bekommt die Ereignisse gar
+         nicht erst -- lieber nichts als halb. */
+      /* v2: `blocked`/`resolved` treiben jetzt eine Klemme an der Aufgabe.
+         Eine aeltere Fassung sagt dieses Wort nicht und bekommt die
+         Lebenszyklusereignisse deshalb gar nicht erst -- lieber nichts als
+         halb, und halb hiesse hier: eine Blockade anzeigen, ohne sie an die
+         Aufgabe zu haengen. */
+      lebenszyklus: 'gemeldet-v5',
       akteure: AGENTEN.map(function (a) { return a.name; }),
       istLive: function () { return MODUS === 'live'; }
     };
