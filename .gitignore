@@ -1,0 +1,15 @@
+# Was hier NICHT ins Repository gehoert, und warum genau diese Zeile.
+#
+# `previews/AG-RELAY-LIVE-001/pruefen.js` laedt seine Koerper ueber
+# `koerper.py`, und das importiert `relay/claude_public_relay_v2.py`. Python
+# legt dabei `relay/__pycache__/` an. Gemessen, nicht vermutet: Nach jedem
+# Lauf der Browsernachweise steht das Verzeichnis wieder da, mit dem
+# Zeitstempel des Laufs.
+#
+# Folge ohne diese Zeile: Wer die Nachweise laufen laesst, hat danach einen
+# unsauberen Baum -- und ein `git add -A` nimmt kompilierten Bytecode mit.
+# Genau das ist am 21.10. einmal passiert und musste aus dem Commit heraus.
+# Bytecode gehoert nicht ins Repository: er ist erzeugt, an die
+# Python-Fassung gebunden und sagt nichts, was die Quelle nicht sagt.
+__pycache__/
+*.pyc
