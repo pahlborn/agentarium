@@ -1,0 +1,61 @@
+{
+  "schema": "agentarium.handoff.v0",
+  "project": "agentarium",
+  "task_id": "AG-LM-TK-021",
+  "source_version": 1,
+  "role": "archibald",
+  "technical_agent": "spec-agent",
+  "repository": "pahlborn/agentarium",
+  "base_commit": "cd58bf6481f9806d930b61be0c6294f13afabf54",
+  "branch": "agent/ag-event-journal-001",
+  "goal": "Die bereits von Peter verlangte Epic/Story/Task/Testfall-Struktur mit eindeutigen IDs, beleggebundener Delegation und Abschluss erst nach erfolgreicher Kinderarbeit/Prüfung implementierungsreif spezifizieren.",
+  "scope": [
+    "Bestehenden Monitorvertrag und tatsächlich vorhandene Hierarchie prüfen; bereits Geliefertes nicht neu spezifizieren.",
+    "Arbeitsregister als Atlas-Anforderungsentwurf prüfen, vorhandene IDs beibehalten und fehlende/falsche Beziehungen mit nachvollziehbarer Korrektur benennen.",
+    "Normale Abläufe, Blockade/Auflösung, unabhängige Prüfung/Annahme, Elternabschluss und relevante Fehler-/Wiederherstellungsfälle präzisieren.",
+    "Für Sentinel prüfbare Abnahmekriterien liefern; Testfallentwürfe nicht als eigene oder Sentinel-Lieferung ausgeben."
+  ],
+  "non_goals": [
+    "Neue Produktvision, Ersatzmonitor, neue Infrastruktur, Kostenanzeige, Partitur/Reports.",
+    "Implementierung, Dateischreiben, externe Veröffentlichung, Modell-/Berechtigungsänderung, Selbstfreigabe.",
+    "Ungeprüfte Freigabe von Produktmerge oder Veröffentlichung."
+  ],
+  "request": "handoffs/AG-LM-TK-021-archibald-request-v1.json",
+  "allowed_paths": [
+    "handoffs/AG-LM-TK-021-archibald-handback-v1.md"
+  ],
+  "readable_paths": [
+    "AGENTS.md",
+    "CLAUDE.md",
+    ".claude/agents/spec-agent.md",
+    ".claude/agent-protocol/spec-agent-output.md",
+    "governance/agentarium-rulebook-v1.3.md",
+    "governance/agentarium-process-v1.3.md",
+    "handoffs/AG-LM-TK-021-archibald-request-v1.json",
+    "handoffs/AG-LM-WORK-REGISTER-v1.md",
+    "handoffs/AG-EVENT-JOURNAL-001-forge-request-v1.md",
+    "handoffs/AG-EVENT-JOURNAL-001-hierarchie-v1.md",
+    "handoffs/AG-LM-TK-022-quellenklaerung-v1.md",
+    "pilot/github-live/github-live.js",
+    "pilot/github-live/index.html"
+  ],
+  "authority": "Peters direkte Anweisung zur Arbeitsstruktur und direkten Archibald-Zuweisung; keine zusätzliche API-Kostenaktivierung durch dieses vorbereitete Paket.",
+  "allowed_actions": [
+    "Lesen der freigegebenen Quellen mit echter spec-agent-Definition.",
+    "Eine begrenzte SA_READY-Rückgabe oder eine entscheidungsrelevante SA_QUESTION an Atlas."
+  ],
+  "forbidden_actions": [
+    "Keine Schreib-/Shell-/Web-/Delegationswerkzeuge innerhalb des spec-agent.",
+    "Kein Rollenwechsel, keine zusätzlichen Modellläufe, keine Selbstannahme."
+  ],
+  "expected_result": "Kurzer versionsgebundener SA_READY/SA_QUESTION-Handback mit Quellen, Anforderungen/Abnahmekriterien, korrigierter Traceability und offenen Entscheidungen. Veröffentlichung des unveränderten read-only Ergebnisses erfolgt nur durch den getrennten Publisher.",
+  "stop_condition": "Nach einer begrenzten Spezifikationsrückgabe oder einem exakt belegten fehlenden Input stoppen; keine selbständige Revisionsschleife.",
+  "handoff_status": "PREPARED_NOT_DISPATCHED",
+  "execution_gate": "Vor Aktivierung tatsächliche bestehende API-Kostenautorität und exakte Aktivierungsspezifikation prüfen; keine Aktivierungsdatei Teil dieses Pakets.",
+  "source_refs": [
+    "https://github.com/pahlborn/agentarium/pull/46#issuecomment-6320541062",
+    "https://github.com/pahlborn/agentarium/pull/46#issuecomment-6320419135",
+    "https://github.com/pahlborn/agentarium/pull/46#issuecomment-6357811676"
+  ],
+  "provenance_note": "Taskauftrag von Atlas; keine Archibald-Arbeit oder Sentinel-Testplanung."
+}
