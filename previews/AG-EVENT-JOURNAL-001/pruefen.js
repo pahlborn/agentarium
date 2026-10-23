@@ -1736,6 +1736,82 @@ function koerper(f) {
   console.log('        ' + (heller || '(keine Regel gefunden)') +
               ' — auf einem Tastgerät greift das nicht');
 
+  /* ======================= O2: ANTIPPEN UND HERKUNFT (46-5) ===
+     Peters Entscheidung vom 23.10.: Auf dem iPad hellt die Liste beim
+     Antippen auf wie Name, Kopf und Werkname, und ein Tipp neben die Zeilen
+     geht weiter zum Agenten darunter. Die Herkunftszeile wird lesbar.
+
+     Gemessen in einem EIGENEN Kontext mit `hasTouch`. Dort gilt
+     `(hover:hover)` nicht -- wie auf dem iPad --, und die Regel aus Teil O
+     greift nicht. Der Teil oben misst das Zeigegeraet, dieser das Tastgeraet.
+
+     Eine Probezeile im Bau von `stromZeile`, ausdruecklich markiert. Gemessen
+     wird das Verhalten der Seite, nicht ein Ereignis; darum genuegt sie.
+     Die Kontrastrechnung ist dieselbe wie in Teil O (`kontrast`, `gr`). */
+  console.log('\nO2 — Auf dem Tastgerät: Antippen hellt auf, daneben geht durch; Herkunft lesbar');
+  console.log('    erwartet: kein (hover:hover); Kasten ohne Berührung, Schrift mit;');
+  console.log('    Tipp auf die Schrift setzt `lesen`; Herkunft und em >= 4,5:1\n');
+  const o2Err = [];
+  const o2Kontext = await b.newContext({ viewport: { width: 1194, height: 834 }, hasTouch: true });
+  const o2Seite = await o2Kontext.newPage();
+  o2Seite.on('pageerror', e => o2Err.push(String(e)));
+  await o2Seite.route('**api.github.com/**', route => route.fulfill({ status: 200,
+    contentType: 'application/json', body: '[]' }));
+  await o2Seite.goto(n.adr + '?live=github', { waitUntil: 'load' });
+  await o2Seite.waitForFunction(() => document.getElementById('agLaeuft'));
+  const o2 = await o2Seite.evaluate(() => {
+    const l = document.getElementById('agLaeuft'), ecke = document.getElementById('agEcke');
+    const z = document.createElement('div');
+    z.className = 'agAuf tat'; z.setAttribute('data-probe', '46-5');
+    z.innerHTML = '<u>atlas</u> <s>handoff</s><br><span>Probezeile</span>' +
+                  '<br><small class="agHerkunft">AG-PROBE · unter AG-X</small> <em>EM</em>';
+    l.appendChild(z);
+    const sp = z.querySelector('span').getBoundingClientRect();
+    const ek = ecke.getBoundingClientRect();
+    const auf = document.elementFromPoint(sp.left + 3, sp.top + sp.height / 2);
+    /* Rechts neben dem Text, aber noch im Kasten der Liste. */
+    const nx = Math.min(ek.right - 2, sp.right + 40), ny = sp.top + sp.height / 2;
+    const neben = document.elementFromPoint(nx, ny);
+    const c = (q) => { const g = getComputedStyle(z.querySelector(q));
+                       return { farbe: g.color, deck: Number(g.opacity) }; };
+    return { hover: matchMedia('(hover:hover)').matches,
+             kasten: getComputedStyle(ecke).pointerEvents,
+             aufSchrift: !!(auf && ecke.contains(auf)),
+             nebenImKasten: nx > sp.right && nx < ek.right,
+             daneben: !!(neben && ecke.contains(neben)),
+             zeile: Number(getComputedStyle(z).opacity),
+             text: getComputedStyle(z.querySelector('span')).color,
+             herkunft: c('small.agHerkunft'), em: c('em') };
+  });
+  zeile('Tastgerät: (hover:hover) gilt nicht', o2.hover, false);
+  zeile('der Kasten der Liste nimmt keine Berührung an', o2.kasten, 'none');
+  zeile('ein Punkt auf der Schrift trifft die Liste', o2.aufSchrift, true);
+  zeile('der Punkt daneben liegt noch im Kasten', o2.nebenImKasten, true);
+  zeile('ein Punkt daneben trifft NICHT die Liste', o2.daneben, false);
+  for (const [w, x] of [['Herkunftszeile', o2.herkunft], ['em', o2.em]]) {
+    const al = o2.zeile * x.deck;
+    const o2k = kontrast(rgb(x.farbe).map((v, i) => v * al + gr[i] * (1 - al)), gr);
+    console.log('        ' + w + ': ' + x.farbe + ' · Deckkraft ' + al.toFixed(3) +
+                ' · ' + o2k.toFixed(2) + ':1');
+    zeile(w + ' erreicht AA (>= 4,5:1)', o2k >= 4.5, true);
+  }
+  zeile('die Herkunft bleibt blasser als der Text',
+        lum(rgb(o2.herkunft.farbe)) < lum(rgb(o2.text)), true);
+  /* `force`: Der Finger trifft die STELLE, egal was dort liegt -- so wie auf
+     dem iPad. Ohne `force` wartet Playwright, bis die Schrift Beruehrung
+     annimmt; in der Gegenprobe (Stand ohne 46-5) endete das in einer
+     Zeitueberschreitung und Rueckgabe 2 statt in einem sauberen FEHL. */
+  await o2Seite.tap('#agLaeuft .agAuf[data-probe] span', { force: true, timeout: 5000 });
+  await o2Seite.waitForTimeout(450);
+  const o2Nach = await o2Seite.evaluate(() => { const e = document.getElementById('agEcke');
+    return { lesen: e.classList.contains('lesen'), filter: getComputedStyle(e).filter }; });
+  zeile('Antippen setzt `lesen` an der Liste', o2Nach.lesen, true);
+  zeile('und die Liste wird heller', /brightness/.test(o2Nach.filter), true);
+  console.log('        ' + o2Nach.filter);
+  zeile('keine Seitenfehler auf dem Tastgerät', o2Err.length, 0);
+  if (o2Err.length) console.log('        ' + o2Err.join('\n        '));
+  await o2Kontext.close();
+
   console.log('\nI — Was auch jetzt noch NICHT geschieht');
   console.log('    erwartet: kein Ballwechsel aus Lebenszyklusereignissen,');
   console.log('    und reviewed/accepted/merged/published fehlen weiter\n');
