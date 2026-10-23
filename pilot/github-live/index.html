@@ -2398,7 +2398,7 @@
 
      Der Bauzeitpunkt kommt beim Bauen aus der Uhr. Von Hand gepflegte
      Datumsangaben sind nach der zweiten Änderung falsch. */
-  var FASSUNG = '74', GEBAUT = '2026-10-23T06:17Z';
+  var FASSUNG = '75', GEBAUT = '2026-10-23T07:07Z';
 
   /* AG-GH-LIVE-001: JEDE TEXTSENKE MASKIERT.
      Seit Live-Daten von aussen kommen (GitHub-Kommentare, one-event.json),
@@ -4061,6 +4061,17 @@
      Zeichen noetig". Messbar ist es ueber `__agStand`; sichtbar zu machen
      waere eine Zeile mehr und Peters Entscheidung. */
   var selbstannahmen = 0;
+  /* R3: EINE ZWEITE VERGABE DESSELBEN ELEMENTS MIT ANDEREM TYP ODER
+     ANDEREN ELTERN. Auch das ist keine Luecke -- die Kennung ist
+     bekannt, die Meldung ist zuzuordnen, sie widerspricht nur dem,
+     was schon dasteht. Eigener Zaehler, wie bei den Selbstannahmen,
+     und aus demselben Grund: `luecken.gesamt` steht im Bild und
+     bedeutet etwas anderes.
+     NICHT ANGEZEIGT. In der Faltung gibt es die vorhandene
+     Konfliktanzeige, und Atlas hat gesagt, sie zu nutzen; im
+     Livepfad gibt es keine entsprechende Stelle, und eine neue waere
+     eine Aenderung am Bild. Messbar ueber `__agStand`. */
+  var vergabekonflikte = 0;
   function luecke(was) { luecken[was]++; luecken.gesamt++; }
   /* Hier stand `lueckenNull()`. Die Funktion hatte nie einen Aufrufer -- ich
      hatte sie in Schritt 2 vorsorglich dazugeschrieben, parallel zu
@@ -4205,9 +4216,48 @@
            (L.lauf || '') === k.lauf;
   }
 
-  function arbeitZuweisen(name, kenn, titel, beleg, element) {
+  function arbeitZuweisen(name, kenn, titel, beleg, element, zaehlen) {
     if (!nachName[name]) return false;
     var k = kennung(kenn);
+    /* ======== R3: EINE ZWEITE VERGABE UEBERSCHREIBT NICHT STILL ========
+
+       Archibalds Anforderung R3, von Atlas am 23.10. zum Vorziehen
+       freigegeben: "Eine weitere Vergabe desselben offenen Elements mit
+       anderem Typ oder anderen Eltern wird als Konflikt gezeigt und
+       ueberschreibt nicht still."
+
+       GESUCHT WIRD UEBERALL, nicht nur beim Empfaenger. Die alte Zeile sah
+       nur in `arbeit[name]` nach -- eine zweite Vergabe mit abweichendem Typ
+       an eine ANDERE Rolle waere also als voellig neue Aufgabe durchgegangen,
+       und niemand haette den Widerspruch gesehen.
+
+       GEZAEHLT WIRD NUR, WENN ES SICH WIDERSPRICHT. Eine zweite Vergabe mit
+       denselben Angaben ist ein Transportduplikat, kein Konflikt -- derselbe
+       Unterschied wie beim zweiten `delivered`.
+
+       `zaehlen` ist falsch, wenn die Wiederherstellung aufruft: Dort kommt
+       je Aufgabe genau ein Eintrag aus der Faltung, und ein Widerspruch in
+       der Historie ist dort schon gezaehlt worden (`widersprueche` im
+       Adapter, als "Konflikt" sichtbar). Hier noch einmal zu zaehlen waere
+       dieselbe Sache zweimal.
+
+       NICHT MITGEAENDERT, und darum hier benannt: Eine zweite Vergabe mit
+       GLEICHEM Typ und gleichen Eltern an eine andere Rolle legt weiter
+       einen zweiten Eintrag an -- zwei Ringe fuer eine Kennung. Das ist ein
+       eigener Befund und nicht R3; wer es anfasst, aendert, was eine
+       Uebergabe bedeutet. */
+    if (k.aufgabe) {
+      var da = aufgabeSuchen(k);
+      if (da && !da.mehrfach) {
+        var L0 = arbeit[da.wer].liste[da.i];
+        var tNeu = (element && element.typ) || 'task';
+        var eNeu = (element && element.eltern) || '';
+        if (L0.eTyp !== tNeu || L0.eEltern !== eNeu) {
+          if (zaehlen) vergabekonflikte++;
+          return false;                /* das Erste bleibt stehen */
+        }
+      }
+    }
     var S = arbeit[name];
     if (S && !S.aus && k.aufgabe) {
       for (var q = 0; q < S.liste.length; q++)
@@ -5411,7 +5461,8 @@
             arbeitZuweisen(E.an, E.spur, E.text,
                            { nr: E.beleg || '', ref: E.belegRef || '' },
                            { typ: E.eTyp || 'task', eltern: E.eEltern || '',
-                             fassung: E.eFassung || '' });
+                             fassung: E.eFassung || '' },
+                           1);          /* R3: Widersprueche zaehlen */
           } else if (E.selbstauskunft && E.spur && E.spur.task_id) {
             /* Die Kette: received/started/delivered/reviewed stellen den
                Zustand weiter, accepted und aborted beenden die Aufgabe.
@@ -5651,6 +5702,7 @@
              luecken: luecken.gesamt,
              /* Eigene Zahl, nicht in `luecken.gesamt` -- siehe dort. */
              selbstannahmen: selbstannahmen,
+             vergabekonflikte: vergabekonflikte,
              lueckenEinzeln: { beginn: luecken.beginn,
                stufe: luecken.stufe,
                lieferung: luecken.lieferung, abbruch: luecken.abbruch,

@@ -904,7 +904,12 @@
                  delivered: 'geliefert', reviewed: 'geprueft' };
       var halter = '', zustand = '', titel = '', zu = false, letzte = null,
           klemmt = [], belegVergabe = 0,
-          eTyp = 'task', eEltern = '', eFassung = '';
+          eTyp = 'task', eEltern = '', eFassung = '',
+          /* R3: Ob schon EINE Vergabe gesprochen hat. Nicht `eTyp !== ''`
+             pruefen -- der Vorgabewert ist `task`, also waere eine erste
+             Vergabe ohne `item_type` nicht von "noch keine" zu
+             unterscheiden. */
+          eTypGesetzt = false;
       g.forEach(function (x) {
         var e = x.ev;
         var selbst = !!e.selbstauskunft;
@@ -932,8 +937,35 @@
              Beleg. Live setzt `arbeitZuweisen` sie genau dort; naehme die
              Faltung sie von einem spaeteren Ereignis, zeigte dieselbe Lage
              je nach Weg zwei verschiedene Elternketten. */
-          eTyp = e.item_type || 'task';
-          eEltern = e.parent_id || '';
+          /* ===== R3: DAS ERSTE BLEIBT STEHEN =====
+             Archibald R3, von Atlas am 23.10. zum Vorziehen freigegeben:
+             "Eine weitere Vergabe desselben offenen Elements mit anderem Typ
+             oder anderen Eltern wird als Konflikt gezeigt und ueberschreibt
+             nicht still."
+
+             Hier stand eine blanke Zuweisung, und die lief je Ereignis der
+             Gruppe erneut durch -- die LETZTE Vergabe gewann, ohne ein Wort.
+             Jetzt gewinnt die erste, und ein Widerspruch wird gezaehlt: Er
+             erscheint in der vorhandenen Konfliktanzeige
+             (`basisGrenzen.konflikte` -> "Konflikt" in der Zeile), genau wie
+             Atlas es verlangt -- keine neue Anzeige.
+
+             Gleiche Angaben zweimal sind KEIN Konflikt, sondern ein
+             Transportduplikat. Derselbe Unterschied wie beim zweiten
+             `delivered`.
+
+             `item_version` BLEIBT wie bisher die letzte, und das ist
+             Absicht: Eine neue Fassung desselben Elements kann eine
+             rechtmaessige Meldung sein, und genau darueber ist E3/R6 noch
+             offen. Sie hier mit einzufangen hiesse, eine offene Entscheidung
+             im Vorbeigehen zu treffen. */
+          var tNeu = e.item_type || 'task';
+          var pNeu = e.parent_id || '';
+          if (eTypGesetzt && (eTyp !== tNeu || eEltern !== pNeu)) {
+            widersprueche++;
+          } else {
+            eTyp = tNeu; eEltern = pNeu; eTypGesetzt = true;
+          }
           eFassung = e.item_version || '';
           return;
         }
