@@ -114,9 +114,14 @@ function vergleichsfassung() {
     s.on('pageerror', e => err.push(String(e)));
     await s.goto(adr, { waitUntil: 'load' });
     await s.waitForTimeout(1300);
+    /* Ort UND Name je Schild. Der Name ist in der Vergleichsfassung
+       womoeglich leer: `data-wer` gibt es erst seit Fassung 69, und
+       verglichen wird gegen origin/main. Deshalb wird WEITER nach Index
+       verglichen -- aber nicht mehr blind, siehe unten. */
     const r = await s.$$eval('.agName', e => e.map(x => {
       const k = x.getBoundingClientRect();
-      return Math.round(k.x + k.width / 2) + ',' + Math.round(k.y + k.height / 2);
+      return { o: Math.round(k.x + k.width / 2) + ',' + Math.round(k.y + k.height / 2),
+               w: x.getAttribute('data-wer') || '' };
     }));
     await q.close();
     return { r, err };
@@ -127,14 +132,40 @@ function vergleichsfassung() {
   for (const vp of [{ width: 1194, height: 834 }, { width: 834, height: 1194 },
                     { width: 844, height: 390 }]) {
     const A = await lage(a.adr, vp), N = await lage(n.adr, vp);
-    let abw = 0;
-    A.r.forEach((v, i) => {
-      const p = v.split(',').map(Number), q = (N.r[i] || '0,0').split(',').map(Number);
-      abw = Math.max(abw, Math.abs(p[0] - q[0]) + Math.abs(p[1] - q[1]));
-    });
-    const gleich = A.r.length === N.r.length && A.r.join('|') === N.r.join('|');
+    /* WARUM DER INDEXVERGLEICH HIER HAELT -- und wann nicht mehr.
+
+       Er haelt, weil ein neuer Agent ANGEHAENGT wurde: Stelle 0 bis 8
+       bedeuten in beiden Fassungen dasselbe. Wuerde jemand einen Agenten
+       EINSCHIEBEN, verglich diese Zeile ab dort jeden gegen seinen
+       Nachbarn und meldete eine Wanderung, die es nicht gibt -- oder,
+       schlimmer, keine, weil sich zwei Nachbarn zufaellig deckten.
+       Die Annahme wird deshalb nicht geglaubt, sondern geprueft: Die
+       Reihenfolge des gemeinsamen Vorderstuecks muss die der
+       Vergleichsfassung sein. Nach Namen vergleichen laesst sich erst,
+       wenn die Vergleichsfassung selbst `data-wer` traegt. */
+    const ORDNUNG = ['peter', 'nova', 'atlas', 'cadence', 'scout',
+                     'forge', 'sentinel', 'archibald', 'argus'];
+    const gemein = Math.min(A.r.length, N.r.length);
+    let abw = 0, gewandert = [];
+    for (let i = 0; i < gemein; i++) {
+      const p = A.r[i].o.split(',').map(Number), q = N.r[i].o.split(',').map(Number);
+      const d = Math.abs(p[0] - q[0]) + Math.abs(p[1] - q[1]);
+      if (d > 0) gewandert.push((N.r[i].w || '#' + i) + ' ' + d + ' px');
+      abw = Math.max(abw, d);
+    }
     zeile(vp.width + 'x' + vp.height + ': Namen gleiche Stelle',
-          gleich ? 'ja' : 'NEIN, max ' + abw + ' px', 'ja');
+          gewandert.length ? 'NEIN: ' + gewandert.join(', ') : 'ja', 'ja');
+    zeile(vp.width + 'x' + vp.height + ': Reihenfolge unverändert',
+          N.r.slice(0, ORDNUNG.length).map(x => x.w).join(','),
+          ORDNUNG.join(','));
+    /* Ein neuer Agent ist eine Entscheidung Peters, kein Verrutschen -- aber
+       er wird benannt, damit er nicht unbemerkt mitfaehrt. */
+    zeile(vp.width + 'x' + vp.height + ': niemand verschwunden',
+          N.r.length >= A.r.length ? 'keiner' : (A.r.length - N.r.length) + ' weg',
+          'keiner');
+    if (N.r.length !== A.r.length)
+      console.log('        Besetzung: ' + A.r.length + ' → ' + N.r.length +
+                  ', neu: ' + N.r.slice(gemein).map(x => x.w || '(ohne Namen)').join(','));
     zeile(vp.width + 'x' + vp.height + ': Konsolenfehler neu',
           N.err.length ? N.err[0].slice(0, 34) : 'keine', 'keine');
   }

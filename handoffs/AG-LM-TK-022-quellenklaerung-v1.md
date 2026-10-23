@@ -147,6 +147,32 @@ Eingriff; er braucht nur, dass eine gelistete Rolle schreibt.**
 Bühne, mit Platz im Ring und eigener Farbe. Das entscheidet Peter, und ich
 schlage es nur vor.
 
+### Nachtrag vom 23.10.: Peter hat aufgenommen
+
+Der Befund oben bleibt stehen, wie er gemessen war — **er gilt weiter für jede
+veröffentlichte Fassung.** Dazu drei Angaben, damit niemand das eine für das
+andere nimmt:
+
+| Stelle | Fassung | kennt `lot` |
+|---|---|---|
+| `main`, also alles, was ein Gerät holen kann | 56 | nein |
+| Zweig `agent/ag-event-journal-001` | 71 | ja |
+
+Peters Freigabe, wörtlich: *„ja. lot ist ein anker geworden. ihr habt einen
+funktionierenden weg zur kommunikation gefunden, lot brauch einen platz auf der
+bühne mit voller funktion."*
+
+Damit steht `lot` in `AGENTEN` — und weil der Adapter seine Akteursliste aus
+genau diesem Feld baut (`(B.akteure || []).forEach`), nimmt er `actor: lot`
+seit Fassung 71 an. Geprüft wird das als eigene Zeile im Nachweis
+(*Akteure (die Liste des Adapters)*), und die Gegenprobe ohne `lot` lässt genau
+diese Zeile fallen.
+
+**Was das für Weg A heißt:** Die fehlende Schreibfähigkeit ist auf dem Zweig
+behoben, nicht in der Welt. Solange die Fassung nicht veröffentlicht ist, läuft
+überall Fassung 56, und dort wird `actor: lot` weiter abgewiesen. Veröffentlichen
+entscheidet Peter; Atlas' stehende Weisung sagt zusätzlich „kein Merge".
+
 ## Was ich ausdrücklich nicht getan habe
 
 Keine Änderung am Relais ohne Entscheidung. Keine erfundene Meldung im echten

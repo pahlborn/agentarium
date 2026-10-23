@@ -86,24 +86,35 @@ const TYPEN = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; ch
   const b = await chromium.launch({ executablePath: browser.pfad,
                                     args: ['--no-sandbox', '--disable-dev-shm-usage'] });
   /* Die Schilder wechseln sich mit der Rolle ab (rolleUhr). Über den Text
-     gewählt findet man sie deshalb nur in der Hälfte der Zeit. Gewählt wird
-     über die Reihenfolge, in der AGENTEN sie anlegt:
-     0 peter, 1 nova, 2 atlas, 3 cadence, 4 scout, 5 forge, 6 sentinel,
-     7 archibald, 8 argus. */
-  const WER = { peter: 0, nova: 1, atlas: 2, cadence: 3, scout: 4,
-                forge: 5, sentinel: 6, archibald: 7, argus: 8 };
+     gewaehlt findet man sie deshalb nur in der Haelfte der Zeit -- und
+     vorher stand hier dafuer eine HANDGEPFLEGTE Reihenfolge
+     (0 peter, 1 nova, ... 8 argus). Das war eine zweite Wahrheit neben
+     AGENTEN, und sie ist beim zehnten Agenten sofort falsch geworden.
+     Gewaehlt wird jetzt ueber `data-wer`, das das Schild selbst traegt
+     und das genau zu diesem Zweck angebracht wurde. */
   async function mitte(seite, name) {
-    const r = await seite.$$eval('.agName', (e, i) => {
-      const k = e[i].getBoundingClientRect();
+    const r = await seite.$$eval('.agName', (e, n) => {
+      const t = e.find(x => x.getAttribute('data-wer') === n);
+      if (!t) throw new Error('kein Schild mit data-wer=' + n);
+      const k = t.getBoundingClientRect();
       return { x: Math.round(k.x + k.width / 2), y: Math.round(k.y + k.height / 2) };
-    }, WER[name]);
+    }, name);
     return r;
+  }
+  /* Dasselbe fuer ein Schild, das nur gelesen wird. */
+  async function schild(seite, name) {
+    return seite.$$eval('.agName', (e, n) => {
+      const t = e.find(x => x.getAttribute('data-wer') === n);
+      const k = t.getBoundingClientRect();
+      return { w: Math.round(k.width), k: t.className,
+               ganzImBild: k.right <= innerWidth && k.left >= 0 };
+    }, name);
   }
 
   try {
     /* ---------------------------------------------------- A: Entkopplung */
     console.log('A — Ort und Bedeutung getrennt (ohne Zug)');
-    console.log('    erwartet: nur peter ist „aussen", und das hängt nicht mehr an nah\n');
+    console.log('    erwartet: peter und lot sind „aussen", und das hängt nicht mehr an nah\n');
     const q = await b.newContext({ viewport: { width: 1194, height: 834 } });
     const s = await q.newPage();
     const konsole = [];
@@ -112,10 +123,15 @@ const TYPEN = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; ch
     await s.goto(adr, { waitUntil: 'load' });
     await s.waitForTimeout(900);
 
-    const draussen = await s.$$eval('.agName.agDraussen', e => e.map(x => x.textContent));
-    zeile('als draußen gezeichnet', draussen.join(',') || '(keine)', 'peter');
+    /* NICHT am Textinhalt. Der wechselt zwischen Name und Rolle, und genau
+       das hat hier zugeschlagen: lot steht an Stelle zehn, ist damit um
+       14,4 s versetzt und zeigt beim Laden „Darstellung". Gemessen wird
+       `data-wer` -- was das Schild IST, nicht was gerade darauf steht. */
+    const draussen = await s.$$eval('.agName.agDraussen',
+      e => e.map(x => x.getAttribute('data-wer')).sort());
+    zeile('als draußen gezeichnet', draussen.join(',') || '(keine)', 'lot,peter');
     const anzahl = await s.$$eval('.agName', e => e.length);
-    zeile('Namen im Feld', anzahl, 9);
+    zeile('Namen im Feld', anzahl, 10);
     const knopfVor = await s.$eval('#agPlatz', e => e.hidden);
     zeile('Knopf „Plätze zurück" verborgen', knopfVor, true);
 
@@ -239,26 +255,37 @@ const TYPEN = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; ch
        Punktgleichheit -- und in der Mitte, oben und unten die Punktgleichheit. */
     console.log('\nB3 — Peter, das breiteste Schild');
     console.log('    erwartet: mittig/oben/unten genau; am Rand ganz im Bild\n');
-    const bp = await s.evaluate(() => {
-      const e = document.querySelectorAll('.agName')[0];
-      return { w: Math.round(e.getBoundingClientRect().width), k: e.className };
-    });
-    zeile('Peter trägt agDraussen', /agDraussen/.test(bp.k), true);
+    zeile('Peter trägt agDraussen', /agDraussen/.test((await schild(s, 'peter')).k), true);
     zeile('Mitte (Abw. px)', await ablegen('peter', 597, 417), 0);
     zeile('oben (Abw. px)', await ablegen('peter', 597, 16), 0);
     zeile('unten (Abw. px)', await ablegen('peter', 597, 818), 0);
     await ablegen('peter', 1164, 250);
-    const randR = await s.evaluate(() => {
-      const k = document.querySelectorAll('.agName')[0].getBoundingClientRect();
-      return k.right <= innerWidth && k.left >= 0;
-    });
-    zeile('rechter Rand: ganz im Bild', randR, true);
+    zeile('rechter Rand: ganz im Bild', (await schild(s, 'peter')).ganzImBild, true);
     await ablegen('peter', 22, 584);
-    const randL = await s.evaluate(() => {
-      const k = document.querySelectorAll('.agName')[0].getBoundingClientRect();
-      return k.left >= 0 && k.right <= innerWidth;
-    });
-    zeile('linker Rand: ganz im Bild', randL, true);
+    zeile('linker Rand: ganz im Bild', (await schild(s, 'peter')).ganzImBild, true);
+
+    /* -------------------------------------- B4: LOT, die rechte Bandkante --
+       Peter sitzt mit 1,28 Radien auf der linken Kante des Bandes, weil
+       `mx() = bandL() + ringR() * 1.28` ist. lot steht mit demselben Wert
+       bei Winkel 0 und landet damit spiegelbildlich auf der RECHTEN Kante
+       -- und zwar AB WERK, ohne dass jemand zieht. Das ist ein Fall, den es
+       vorher nicht gab: Peters Kantenlage wurde nur nach einem Zug
+       gemessen. Rechts steht ausserdem die Kopfspalte, also ist „ganz im
+       Bild" dort nicht geschenkt. */
+    console.log('\nB4 — lot, die rechte Bandkante ab Werk');
+    console.log('    erwartet: draußen gezeichnet, ganz im Bild, ohne Zug\n');
+    /* Werksstellung ohne den Knopf: Der ist verborgen, solange nichts von
+       Hand steht, und ein Klick darauf wartet dann 30 s ins Leere. Die
+       Ablage leeren und neu laden ist beides nicht. */
+    await s.evaluate(k => localStorage.removeItem(k), SCHLUESSEL);
+    await s.reload({ waitUntil: 'load' });
+    await s.waitForTimeout(900);
+    const bl = await schild(s, 'lot');
+    zeile('lot trägt agDraussen', /agDraussen/.test(bl.k), true);
+    zeile('ab Werk ganz im Bild', bl.ganzImBild, true);
+    zeile('Mitte (Abw. px)', await ablegen('lot', 597, 417), 0);
+    await ablegen('lot', 1164, 250);
+    zeile('rechter Rand: ganz im Bild', (await schild(s, 'lot')).ganzImBild, true);
 
     /* Zuruecksetzen, damit Teil C von der Werksstellung ausgeht. */
     await s.click('#agPlatz'); await s.waitForTimeout(400);
