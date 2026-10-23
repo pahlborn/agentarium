@@ -16,7 +16,7 @@
    Neuladen mitten im Lauf gibt es nicht: Was gerade zu sehen ist, soll
    zu Ende laufen duerfen.
 */
-const VORRAT = 'agentarium-v75';
+const VORRAT = 'agentarium-v76';
 const STUECKE = ['./', 'index.html', 'manifest.webmanifest', 'github-live.js',
                  'icon-120.png', 'icon-152.png', 'icon-180.png',
                  'icon-192.png', 'icon-512.png'];
