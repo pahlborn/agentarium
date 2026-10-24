@@ -1,0 +1,12 @@
+{
+  "schema": "agentarium.relay-activation.v2",
+  "task_id": "AG-SPASS-001-ARCHIBALD",
+  "authorized": true,
+  "source_commit": "b18a68dee2b562e6f66ae026fb7b4180937ba34e",
+  "role": "spec-agent",
+  "request": "handoffs/AG-SPASS-001-archibald-request-v1.json",
+  "handback": "handoffs/AG-SPASS-001-archibald-handback-v1.md",
+  "model": "opus",
+  "max_turns": 3,
+  "max_budget_usd": 0.3
+}
