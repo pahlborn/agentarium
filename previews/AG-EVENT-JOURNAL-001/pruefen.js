@@ -1770,7 +1770,10 @@ function koerper(f) {
      beginnt, dann eine widerspruechliche zweite Vergabe an sentinel. Der
      Livepfad prueft schon vor jeder Aenderung -- dieser Teil belegt, dass er
      dieselbe Lage ergibt wie die Faltung (R20), und dass der Widerspruch
-     jetzt in der Zaehlzeile STEHT statt nur ueber `__agStand` messbar zu sein. */
+     jetzt in der Zaehlzeile STEHT statt nur ueber `__agStand` messbar zu sein.
+     Kommentarnummern 90801-90804: Die erste Fassung nahm 90709-90712 und
+     kollidierte mit Lots N3 (90711/90712) -- der Adapter hielt N3 fuer schon
+     gesehen, und zwei N3-Zeilen fielen. Gefunden bei 46-9. */
   const vorL20 = await s.evaluate(() =>
     ((window.__agStand && window.__agStand()) || {}).vergabekonflikte || 0);
   await liefern('L20:assigned-1', koerper({
@@ -1778,21 +1781,21 @@ function koerper(f) {
     actor: 'atlas', reporter: 'atlas', recipient: 'scout', kind: 'assigned',
     typ: 'story', eltern: 'AG-LM-EP-020', eFassung: 'V1',
     title: 'L20 an scout, als story unter EP-020'
-  }), 90709);
+  }), 90801);
   await liefern('L20:received', koerper({
     id: 'AG-EVENT-JOURNAL-001:scout:received:L20', task: 'AG-EVJ-L20',
     actor: 'scout', reporter: 'scout', kind: 'received', title: 'scout hat L20 empfangen'
-  }), 90710);
+  }), 90802);
   await liefern('L20:started', koerper({
     id: 'AG-EVENT-JOURNAL-001:scout:started:L20', task: 'AG-EVJ-L20',
     actor: 'scout', reporter: 'scout', kind: 'started', title: 'scout beginnt L20'
-  }), 90711);
+  }), 90803);
   const rL20 = await liefern('L20:assigned-2', koerper({
     id: 'AG-EVENT-JOURNAL-001:atlas:assigned:L20-2', task: 'AG-EVJ-L20',
     actor: 'atlas', reporter: 'atlas', recipient: 'sentinel', kind: 'assigned',
     typ: 'task', eltern: 'AG-LM-US-020', eFassung: 'V1',
     title: 'L20 an sentinel, als task unter US-020 — das widerspricht'
-  }), 90712);
+  }), 90804);
   st = await stand();
   const L20 = el(st, 'AG-EVJ-L20');
   zeile('L20: genau ein Eintrag',
@@ -1801,7 +1804,7 @@ function koerper(f) {
   zeile('L20 bleibt begonnen', L20 ? L20.zustand : null, 'begonnen');
   zeile('L20 behält den ersten Typ', L20 ? L20.eTyp : null, 'story');
   zeile('L20 behält die ersten Eltern', L20 ? L20.eEltern : null, 'AG-LM-EP-020');
-  zeile('L20 behält den Beleg der ersten Vergabe', L20 ? String(L20.beleg) : null, '90709');
+  zeile('L20 behält den Beleg der ersten Vergabe', L20 ? String(L20.beleg) : null, '90801');
   zeile('genau dieser Widerspruch ist gezählt',
         (st.vergabekonflikte || 0) - vorL20, 1);
   zeile('und er steht in der Zählzeile',
