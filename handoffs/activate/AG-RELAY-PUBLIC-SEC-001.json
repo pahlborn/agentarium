@@ -1,0 +1,12 @@
+{
+  "schema": "agentarium.relay-activation.v2",
+  "task_id": "AG-SPASS-001-CADENCE",
+  "authorized": true,
+  "source_commit": "bf5245b03cd216d1f5d194998f2843a4dc54b5ed",
+  "role": "process-agent",
+  "request": "handoffs/AG-SPASS-001-cadence-request-v1.json",
+  "handback": "handoffs/AG-SPASS-001-cadence-handback-v1.md",
+  "model": "opus",
+  "max_turns": 3,
+  "max_budget_usd": 0.3
+}
