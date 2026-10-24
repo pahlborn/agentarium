@@ -1,0 +1,41 @@
+{
+  "schema": "agentarium.handoff.v0",
+  "project": "ballbrause",
+  "task_id": "AG-SPASS-001-FORGE",
+  "source_version": 1,
+  "role": "forge",
+  "technical_agent": "coding-agent",
+  "repository": "pahlborn/agentarium",
+  "base_commit": "91dccc1d4bee9694f6d434a7599507e6cdcec6b0",
+  "branch": "agent/ag-relay-task-ballbrause-forge-v1",
+  "goal": "Schreibe NUR das fertige kurze Ballbrause-Übungsetikett in die vorerstellte erlaubte Handbackdatei. Verwende Edit zum Ersetzen des vorhandenen Inhalts # Handback\\n. Kein Code, keine Recherche, kein Lesen weiterer Dateien.",
+  "scope": [
+    "Ein Markdown-Textkasten als Blockquote (kein ASCII-Rahmen). Name exakt Ballbrause. Slogan exakt: Ballbrause – der prickelnde Volltreffer für deinen Durst.",
+    "Zutaten mindestens1 höchstens5, ALLE erfunden (keine echte Rezeptur); Warnhinweis sichtbar und beginnend mit Warnung:. Übung/erfunden deutlich kennzeichnen.",
+    "Fakt wörtlich übernehmen: Die Orangenlimonade fritz-limo orange enthält laut Hersteller17%Fruchtanteil. Quelle https://fritz-kola.com/products/fritz-limo-orange-0-33-l . Fakt klar als reales Fremdprodukt kennzeichnen, keine17%-Behauptung über Ballbrause."
+  ],
+  "non_goals": [
+    "Kein Produktauftrag; keine Tests,keine weiteren Agenten,keine Nachbesserungsschleife,keine anderen Dateien."
+  ],
+  "request": "handoffs/AG-SPASS-001-forge-request-v1.json",
+  "allowed_paths": [
+    "handoffs/AG-SPASS-001-forge-handback-v1.md"
+  ],
+  "readable_paths": [
+    "AGENTS.md",
+    "CLAUDE.md",
+    ".claude/agents/coding-agent.md",
+    "handoffs/AG-SPASS-001-forge-request-v1.json"
+  ],
+  "authority": "Peter hat einen Forge-Modellaufruf bisUSD0.30 freigegeben, ohne Wiederholung.",
+  "allowed_actions": [
+    "Edit ausschließlich der vorerstellten Handbackdatei, Inhalte stehen vollständig im Auftrag"
+  ],
+  "forbidden_actions": [
+    "Kein Bash/Web/Delegation/sonstige Dateien"
+  ],
+  "expected_result": "Ein Markdown-Blockquote mit Produktname,Slogan,max5Fantasiezutaten,realfaktmitLink,Warnung:. Insgesamt höchstens130Wörter. Datei mit Edit tatsächlich ersetzen.",
+  "stop_condition": "Nach genau einer Etikettlieferung stoppen.",
+  "handoff_status": "AUTHORIZED_ONCE",
+  "execution_gate": "Ein Opus-Aufruf,max3Turns,maxUSD0.30 freigegeben."
+}
