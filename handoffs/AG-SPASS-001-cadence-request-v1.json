@@ -1,0 +1,40 @@
+{
+  "schema": "agentarium.handoff.v0",
+  "project": "ballbrause",
+  "task_id": "AG-SPASS-001-CADENCE",
+  "source_version": 1,
+  "role": "cadence",
+  "technical_agent": "process-agent",
+  "repository": "pahlborn/agentarium",
+  "base_commit": "91dccc1d4bee9694f6d434a7599507e6cdcec6b0",
+  "branch": "agent/ag-relay-task-ballbrause-cadence-v1",
+  "goal": "Übung Ballbrause: genau EINEN deutschen Satz liefern: Was hätte diese Übung schneller gemacht?",
+  "scope": [
+    "Bekannter tatsächlicher Ablauf: Nova(Slogan) und Scout(1Herstellerfakt) parallel geliefert. Archibald3Anforderungen über Relay. Erster kostenfreier Prepare scheiterte an fehlenden AGENTS.md/CLAUDE.md in Leseliste, kein Modellaufruf; Eingabepaket korrigiert, erster bezahlterArchlaufUSD0.034906 erfolgreich. Forge1Etikett USD0.0569206 erfolgreich. Argus1Einwand und Sentinel3PASS parallel geliefert. Auf explizite Budgetfreigabe wurde gewartet. Jede echte Übergabe wurde als Monitorereignis gespeichert; tatsächliche Anzeige bei Peter nicht geprüft.",
+    "Nur ein konkreter Verbesserungssatz,höchstens35Wörter; keine weitere Recherche,keine Dateien lesen,keine Prozessdiskussion."
+  ],
+  "non_goals": [
+    "Keine Änderungen,keine Folgeagenten,keine eigenen Tools oder neuen Anforderungen."
+  ],
+  "request": "handoffs/AG-SPASS-001-cadence-request-v1.json",
+  "allowed_paths": [
+    "handoffs/AG-SPASS-001-cadence-handback-v1.md"
+  ],
+  "readable_paths": [
+    "AGENTS.md",
+    "CLAUDE.md",
+    ".claude/agents/process-agent.md",
+    "handoffs/AG-SPASS-001-cadence-request-v1.json"
+  ],
+  "authority": "Peter hat genau einen Cadence-Aufruf maximalUSD0.30 freigegeben,keine Wiederholung.",
+  "allowed_actions": [
+    "Nur eine Textantwort"
+  ],
+  "forbidden_actions": [
+    "Keine Tools/Dateiänderungen/Delegation/Recherche"
+  ],
+  "expected_result": "Genau ein deutscher Satz,höchstens35Wörter.",
+  "stop_condition": "Nach dem Satz Ende.",
+  "handoff_status": "AUTHORIZED_ONCE",
+  "execution_gate": "Opus,max3Turns,maxUSD0.30."
+}
