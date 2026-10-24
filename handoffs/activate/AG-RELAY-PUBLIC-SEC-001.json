@@ -1,0 +1,12 @@
+{
+  "schema": "agentarium.relay-activation.v2",
+  "task_id": "AG-SPASS-001-FORGE",
+  "authorized": true,
+  "source_commit": "bd395b7c52e9b77e55707c3b28ae9602fe91db8e",
+  "role": "coding-agent",
+  "request": "handoffs/AG-SPASS-001-forge-request-v1.json",
+  "handback": "handoffs/AG-SPASS-001-forge-handback-v1.md",
+  "model": "opus",
+  "max_turns": 3,
+  "max_budget_usd": 0.3
+}
