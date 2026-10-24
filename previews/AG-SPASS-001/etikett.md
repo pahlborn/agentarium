@@ -44,7 +44,7 @@ Projekt `ballbrause`, Run `AG-SPASS-001`. Alle Beiträge stammen aus tatsächlic
 
 | Rolle | Tatsächlicher Lauf | Ergebnis / belegte API-Kosten |
 |---|---|---|
-| Nova | `/root/nova_ballbrause` | Slogan, 8 Wörter; ChatGPT-Verbrauch nicht separat messbar |
+| Nova | `/root/nova_ballbrause` | Slogan, höchstens 8 Wörter; ChatGPT-Verbrauch nicht separat messbar |
 | Scout | `/root/scout_ballbrause` | Herstellerfakt und Link; von Atlas an der Herstellerseite gegengeprüft |
 | Archibald | [40108991534](https://github.com/pahlborn/agentarium/actions/runs/40108991534), Session `45681f16-53f4-4776-b628-d7715d1c3a46` | 3 Anforderungen; USD 0.034906 |
 | Forge | [40109160860](https://github.com/pahlborn/agentarium/actions/runs/40109160860), Session `91010528-f2c9-4cd1-bc65-104a1b2b8115` | Etikett; USD 0.0569206 |
