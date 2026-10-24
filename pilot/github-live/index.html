@@ -2429,7 +2429,7 @@
 
      Der Bauzeitpunkt kommt beim Bauen aus der Uhr. Von Hand gepflegte
      Datumsangaben sind nach der zweiten Änderung falsch. */
-  var FASSUNG = '76', GEBAUT = '2026-10-24T05:06Z';
+  var FASSUNG = '77', GEBAUT = '2026-10-24T05:36Z';
 
   /* AG-GH-LIVE-001: JEDE TEXTSENKE MASKIERT.
      Seit Live-Daten von aussen kommen (GitHub-Kommentare, one-event.json),
@@ -3219,6 +3219,10 @@
          den Daten für jede ein `erledigt` stand. Die Felder waren da, die
          Übergabe fehlte. */
       aufgabe: E.aufgabe || '',
+      /* Ballspiel (AG-MON-BALLSPIEL-001): Projekt, Lauf und Aufgabe eines
+         Live-Ereignisses fliegen mit, damit der Ball nach der Landung weiss,
+         zu welcher Aufgabe er gehoert. Im Demo-Modus leer. */
+      spur: E.spur || null,
       /* AG-GH-LIVE-004: nur Flug und Beschriftung, kein Zustand. */
       beobachtet: !!E.beobachtet,
       ganz: (m.gestalt === 'sonne' && (E.gross != null ? E.gross : gross) > 0.85),
@@ -3525,6 +3529,10 @@
       if (b.ganz && !b.beobachtet)
         derBall = { bei: b.an, ursprung: derBall ? derBall.ursprung : b.von,
                     t: 0, kommando: b.kommando };
+      /* BALLSPIEL, Schritt 1: Im Livebetrieb bleibt Peters Anstoss als Ball
+         beim Empfaenger liegen; das Ergebnis an Peter nimmt ihn wieder weg.
+         Siehe "DAS BALLSPIEL IM LIVEBETRIEB" bei `derBall`. */
+      if (b.beobachtet && b.spur) ballspielGelandet(b);
 
       /* Ein Treffer auf dem Tisch lässt das Stück dort beben. */
       if (b.aufTisch && tisch.length) {
@@ -3643,6 +3651,82 @@
     window.__feld.sonne(o[0], o[1], 0, 0, rad,        0.70, 0.115, 0, 52);
     window.__feld.sonne(o[0], o[1], 0, 0, rad * 1.75, 0.48, 0.115, 0, 26);
 
+  }
+
+  /* ============================ DAS BALLSPIEL IM LIVEBETRIEB ============
+     AG-MON-BALLSPIEL-001, Schritt 1. Peter am 23.10.: "Der Ball muesste bei
+     Atlas liegen bleiben, damit man sieht, wer die Aufgabe gerade
+     bearbeitet." Seine Produktdefinition in Issue #8: "Bei wem liegt gerade
+     der Ball?"
+
+     Im Demo-Modus gibt es dafuer `derBall` -- EINEN Ball, weil das Stueck
+     EINE Aufgabe erzaehlt. Live kommen mehrere Auftraege von Peter, also
+     mehrere Baelle, je Aufgabe einer. Derselbe Koerper, dieselbe Stelle
+     neben dem Namen; liegen mehrere bei einem, rueckt jeder ein Stueck zur
+     Seite. `derBall` und das Stueck bleiben unberuehrt.
+
+     WANN EIN BALL LIEGT: Ein beobachteter `handoff` von `peter` ist
+     gelandet (Meldepflicht, Rulebook Abschnitt 12: Atlas' erstes Ereignis).
+     Schluessel ist Projekt + Lauf + Aufgabe, nicht die Kennung allein --
+     zwei Projekte duerfen dieselbe Aufgabenkennung fuehren.
+
+     WANN ER WIEDER GEHT (Zwischenstand Schritt 1): Eine `contribution` des
+     Halters an `peter` zu derselben Aufgabe ist gelandet. In Schritt 3 fliegt
+     er stattdessen als Ball zu Peter und liegt dort bis zur Annahme (Peters
+     Entscheidung vom 24.10.).
+
+     NOCH NICHT (bewusst, eigene Schritte): Teilbaelle bei Weitergabe
+     (Schritt 2), Rueckflug als Ball und Annahme (Schritt 3), Wiederherstellung
+     nach Neuladen, Antippen zeigt die Aufgabe. Nichts davon wird hier
+     vorweggenommen. Ohne Meldung kein Ball -- nichts wird erfunden. */
+  var liegend = [];   /* { schluessel, aufgabe, bei, von, t } */
+
+  function ballspielSchluessel(sp) {
+    return sp.project_id + '\u0001' + sp.run_id + '\u0001' + sp.task_id;
+  }
+
+  function ballspielGelandet(b) {
+    var k = ballspielSchluessel(b.spur), i;
+    if (b.art === 'handoff' && b.von === 'peter' && nachName[b.an]) {
+      for (i = 0; i < liegend.length; i++) if (liegend[i].schluessel === k) break;
+      if (i < liegend.length) { liegend[i].bei = b.an; return; }
+      liegend.push({ schluessel: k, aufgabe: b.spur.task_id, bei: b.an,
+                     von: 'peter', t: 0 });
+      return;
+    }
+    if (b.art === 'contribution' && b.an === 'peter') {
+      for (i = liegend.length - 1; i >= 0; i--)
+        if (liegend[i].schluessel === k && liegend[i].bei === b.von) liegend.splice(i, 1);
+    }
+  }
+
+  /* Neben dem Namen, wie `ballOrt` -- liegen mehrere bei einem Halter,
+     faechern sie um die Richtung zur Mitte auf. */
+  function liegendOrt(l) {
+    var halter = nachName[l.bei];
+    if (!halter) return null;
+    var dort = liegend.filter(function (x) { return x.bei === l.bei; });
+    var n = dort.length, k = dort.indexOf(l);
+    var p = heimat(halter);
+    /* 0,9 rad Abstand: Bei 0,5 lagen zwei Baelle so dicht, dass sie als ein
+       heller Fleck gelesen wurden (Aufnahme vom 24.10.). */
+    var zm = Math.atan2(my() - p[1], mx() - p[0]) + (k - (n - 1) / 2) * 0.9;
+    var d = Math.min(W(), H()) * 0.055;
+    return [p[0] + Math.cos(zm) * d, p[1] + Math.sin(zm) * d];
+  }
+
+  function liegendeZeichnen(dt) {
+    for (var i = liegend.length - 1; i >= 0; i--) {
+      var l = liegend[i];
+      l.t += dt;
+      var o = liegendOrt(l);
+      /* Ein Ball bei niemandem ist kein Ball (siehe `ballOrt`). */
+      if (!o) { liegend.splice(i, 1); continue; }
+      var rad = Math.min(W(), H()) * 0.021 * (1 + 0.09 * Math.sin(l.t * 1.1 + i));
+      window.__feld.sonne(o[0], o[1], 0, 0, rad * 0.38, 0.88, 0.115, 0, 20);
+      window.__feld.sonne(o[0], o[1], 0, 0, rad,        0.70, 0.115, 0, 52);
+      window.__feld.sonne(o[0], o[1], 0, 0, rad * 1.75, 0.48, 0.115, 0, 26);
+    }
   }
 
   /* ===================================================== DER EINSTURZ ===
@@ -5668,7 +5752,7 @@
             kometen.length = 0; kometUhr = 0;
             for (var nn2 in arbeit) delete arbeit[nn2];
             for (var ns in stopper) delete stopper[ns];
-            tisch.length = 0; derBall = null; baelle.length = 0;
+            tisch.length = 0; derBall = null; baelle.length = 0; liegend.length = 0;
             bausteine.length = 0; produkt = 0; werkEl.innerHTML = '';
             register.length = 0; aufgabenAuf = 0; aufgabenZu = 0;
             ratNull();
@@ -5692,6 +5776,7 @@
     motorenZeigen();
     fussOrdnen();
     ballSchrittRuhend(dt);
+    liegendeZeichnen(dt);
     tischSchritt(dt);
     uhrZeigen();
     stromZeigen();
@@ -5709,6 +5794,8 @@
                auftrag: geraten.auftrag, abnahme: geraten.abnahme,
                gegen: geraten.gegen, antwort: geraten.antwort },
              ball: derBall ? derBall.bei : null,
+             /* Ballspiel: die liegenden Live-Baelle, je Aufgabe einer. */
+             liegend: liegend.map(function (l) { return { aufgabe: l.aufgabe, bei: l.bei }; }),
              /* Die fliegenden Baelle, damit sich das Einholen nachmessen
                 laesst: Wer wirft, wohin, wie weit ist er, wie lange soll
                 der Flug noch dauern. */
@@ -7542,7 +7629,7 @@
     for (var n1 in arbeit) delete arbeit[n1];
     for (var n2 in stopper) delete stopper[n2];
     for (var n3 in erwartung) { weiterSagen(n3, 0); delete erwartung[n3]; }
-    tisch.length = 0; derBall = null;
+    tisch.length = 0; derBall = null; liegend.length = 0;
     bausteine.length = 0; produkt = 0; ratNull();
     register.length = 0; aufgabenAuf = 0; aufgabenZu = 0;
     werkEl.innerHTML = ''; rufeEl.innerHTML = '';
