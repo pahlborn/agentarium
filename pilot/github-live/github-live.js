@@ -434,10 +434,18 @@
              `verarbeitet` heisst "aus der Warteschlange genommen",
              `ausgegeben` heisst "Meldung oder Flug angelegt". Gezeichnete
              Bildpunkte beweist keine der beiden. Benannt von Atlas. */
+          /* R3 IM LIVEPFAD SICHTBAR (Aufgabe 46-8): Das Original zaehlt
+             widerspruechliche zweite Vergaben in `vergabekonflikte`, bisher
+             nur ueber `__agStand` messbar. Es kommt hierher wie `verarbeitet`
+             und `ausgegeben` -- dieselbe Zeile, dasselbe Wort wie bei der
+             Wiederherstellung ("Widerspruch"), keine neue Anzeige. Nur wenn
+             es einen gibt, damit die Zeile ruhig bleibt. */
           if (st && typeof st.verarbeitet === 'number')
             return ' · verarbeitet ' + st.verarbeitet +
                    (typeof st.ausgegeben === 'number'
-                      ? ' · ausgegeben ' + st.ausgegeben : '');
+                      ? ' · ausgegeben ' + st.ausgegeben : '') +
+                   (typeof st.vergabekonflikte === 'number' && st.vergabekonflikte
+                      ? ' · live ' + st.vergabekonflikte + ' Widerspruch/Widersprüche' : '');
         } catch (x) {}
         return '';
       })() +
@@ -904,7 +912,12 @@
                  delivered: 'geliefert', reviewed: 'geprueft' };
       var halter = '', zustand = '', titel = '', zu = false, letzte = null,
           klemmt = [], belegVergabe = 0,
-          eTyp = 'task', eEltern = '', eFassung = '';
+          eTyp = 'task', eEltern = '', eFassung = '',
+          /* R3: Ob schon EINE Vergabe gesprochen hat. Nicht `eTyp !== ''`
+             pruefen -- der Vorgabewert ist `task`, also waere eine erste
+             Vergabe ohne `item_type` nicht von "noch keine" zu
+             unterscheiden. */
+          eTypGesetzt = false;
       g.forEach(function (x) {
         var e = x.ev;
         var selbst = !!e.selbstauskunft;
@@ -918,6 +931,23 @@
           return;
         }
         if (e.kind === 'assigned' && e.recipient) {
+          /* ===== R3, NACHBESSERUNG (Aufgabe 46-8): ERST PRUEFEN, DANN AENDERN =====
+             Atlas' Befund 6359816846 vom 23.10.: Hier liefen Halter, Stufe,
+             Titel und `letzte` VOR dem Typ-/Elternvergleich. Ein
+             widerspruechliches zweites `assigned` wurde zwar gezaehlt und
+             behielt Typ und Eltern -- verschob aber schon den Halter und
+             setzte die Stufe auf "zugewiesen" zurueck. Der Livepfad
+             (`arbeitZuweisen`) kehrt dagegen VOR jeder Aenderung zurueck. Zwei
+             Wege, zwei Lagen.
+             Jetzt wie live: Widerspricht die Vergabe, wird sie gezaehlt und
+             wirkt GAR NICHT -- Halter, Stufe, Titel, Beleg und Fassung bleiben
+             die der ersten. Gegentest: R20 (Historie) und L20 (laufender Strom)
+             im Nachweis AG-EVENT-JOURNAL-001. */
+          var tPruef = e.item_type || 'task', pPruef = e.parent_id || '';
+          if (eTypGesetzt && (eTyp !== tPruef || eEltern !== pPruef)) {
+            widersprueche++;
+            return;
+          }
           halter = e.recipient; zustand = 'zugewiesen';
           titel = e.title; letzte = x;
           /* DER BELEG DER AUFGABE IST DER, DER SIE VERGEBEN HAT -- genau wie
@@ -932,8 +962,31 @@
              Beleg. Live setzt `arbeitZuweisen` sie genau dort; naehme die
              Faltung sie von einem spaeteren Ereignis, zeigte dieselbe Lage
              je nach Weg zwei verschiedene Elternketten. */
-          eTyp = e.item_type || 'task';
-          eEltern = e.parent_id || '';
+          /* ===== R3: DAS ERSTE BLEIBT STEHEN =====
+             Archibald R3, von Atlas am 23.10. zum Vorziehen freigegeben:
+             "Eine weitere Vergabe desselben offenen Elements mit anderem Typ
+             oder anderen Eltern wird als Konflikt gezeigt und ueberschreibt
+             nicht still."
+
+             Hier stand eine blanke Zuweisung, und die lief je Ereignis der
+             Gruppe erneut durch -- die LETZTE Vergabe gewann, ohne ein Wort.
+             Jetzt gewinnt die erste, und ein Widerspruch wird gezaehlt: Er
+             erscheint in der vorhandenen Konfliktanzeige
+             (`basisGrenzen.konflikte` -> "Konflikt" in der Zeile), genau wie
+             Atlas es verlangt -- keine neue Anzeige.
+
+             Gleiche Angaben zweimal sind KEIN Konflikt, sondern ein
+             Transportduplikat. Derselbe Unterschied wie beim zweiten
+             `delivered`.
+
+             `item_version` BLEIBT wie bisher die letzte, und das ist
+             Absicht: Eine neue Fassung desselben Elements kann eine
+             rechtmaessige Meldung sein, und genau darueber ist E3/R6 noch
+             offen. Sie hier mit einzufangen hiesse, eine offene Entscheidung
+             im Vorbeigehen zu treffen. */
+          /* Der Widerspruch ist oben schon abgefangen (Nachbesserung 46-8);
+             hier kommt nur noch an, was zum Ersten passt oder das Erste ist. */
+          eTyp = tPruef; eEltern = pPruef; eTypGesetzt = true;
           eFassung = e.item_version || '';
           return;
         }
