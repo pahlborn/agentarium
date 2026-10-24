@@ -7,7 +7,7 @@
   "technical_agent": "spec-agent",
   "repository": "pahlborn/agentarium",
   "base_commit": "91dccc1d4bee9694f6d434a7599507e6cdcec6b0",
-  "branch": "agent/ag-relay-task-ballbrause-arch-v1",
+  "branch": "agent/ag-relay-task-ballbrause-arch-ready-v1",
   "goal": "Übung Ballbrause: genau drei prüfbare Anforderungen für ein erfundenes Limonadenetikett liefern.",
   "scope": [
     "Nur drei kurze Anforderungen: Name Ballbrause, maximal fünf erfundene Zutaten, Warnhinweis. Keine weiteren Anforderungen oder Konzepte."
@@ -20,10 +20,12 @@
     "handoffs/AG-SPASS-001-archibald-handback-v1.md"
   ],
   "readable_paths": [
+    "AGENTS.md",
+    "CLAUDE.md",
     ".claude/agents/spec-agent.md",
     "handoffs/AG-SPASS-001-archibald-request-v1.json"
   ],
-  "authority": "Spiel von Peter gestartet. API-Aktivierung erst nach konkreter Budgetfreigabe; dieses Paket aktiviert keinen Lauf.",
+  "authority": "Peter hat genau einen Claude-Aufruf für Archibald freigegeben, maximalUSD0.30; keine Wiederholung eines Modellaufrufs.",
   "allowed_actions": [
     "Read-only Spezifikationsrückgabe von genau drei Punkten"
   ],
@@ -33,5 +35,5 @@
   "expected_result": "Genau drei kurze, binär prüfbare Anforderungen, deutsch; insgesamt höchstens60Wörter.",
   "stop_condition": "Sofort nach den drei Punkten stoppen. Keine Revision.",
   "handoff_status": "PREPARED_NOT_ACTIVATED",
-  "execution_gate": "Vorgeschlagen: ein Opus-Aufruf, maximal3Turns, maximalUSD0.30; noch nicht freigegeben."
+  "execution_gate": "Freigegeben: Opus, höchstens3Turns, maximalUSD0.30."
 }
