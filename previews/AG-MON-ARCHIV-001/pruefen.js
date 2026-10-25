@@ -200,7 +200,9 @@ async function archivVerfolgen(s, maxMs, beiJedem) {
     console.log('A — Live nach dem Verbinden');
     let st = await stand(s), g = await gh(s);
     zeile('verbunden, alle Projekte', g.phase + '/' + (g.projekte && g.projekte.wahl), 'verbunden/*');
-    zeile('offener Ball von GT-L2 liegt', liegendText(st), 'B1@nova');
+    /* A1 ist an Peter zurueckgegeben und nie angenommen -- seit
+       AG-MON-BALLSPIEL-003 liegt es deshalb bei Peter. */
+    zeile('offene Bälle: GT-L2 bei nova, A1 bei Peter', liegendText(st), 'A1@peter,B1@nova');
     zeile('Blatt bietet Archiv · Live (Live gewählt)', await modi(s), 'archiv live*');
     zeile('keine Zeile „Lauf nachspielen" mehr in der Tafel',
           await s.evaluate(() => !!document.getElementById('agGhArchiv')), false);
@@ -232,7 +234,7 @@ async function archivVerfolgen(s, maxMs, beiJedem) {
     zeile('nicht verzeichnetes Projekt fehlt (peter→lot)', a.gesehen.has('peter→lot'), false);
     zeile('echtes neues Ereignis nicht hineingemischt', a.gesehen.has('peter→scout'), false);
     zeile('Peters Ball lag bei atlas, solange A1 offen war', lagBeiAtlas, true);
-    zeile('am Ende liegt nur der offene GT-Ball', liegendText(a.st), 'B1@nova');
+    zeile('am Ende: GT-Ball bei nova, A1 bei Peter', liegendText(a.st), 'A1@peter,B1@nova');
     zeile('Aufnahme während des Archivs', bild, true);
     zeile('Archivansicht steht noch', a.g.archiv && a.g.archiv.ansicht, true);
     const dauer1 = a.ms;

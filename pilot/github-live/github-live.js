@@ -858,7 +858,8 @@
         if (modus === 'basis' && !basisIds.hat(ev.id)) {
           basisIds.add(ev.id);
           archivAlle.push({ ev: ev, recorded_at: c.created_at || '', kommentar: Number(cid) || 0 });
-          if (ev.kind === 'handoff' || ev.kind === 'contribution') {
+          if (ev.kind === 'handoff' || ev.kind === 'contribution' ||
+              (ev.kind === 'accepted' && ev.actor === 'peter')) {
             basisBall.push({ ev: ev, recorded_at: c.created_at || '',
                              kommentar: Number(cid) || 0 });
           }
@@ -886,8 +887,10 @@
            mitgenommen -- Uebergaben und Rueckgaben (seit Schritt 2 auch die
            zwischen Agenten, fuer die Teilbaelle). Sie treiben keinen
            AUFGABENZUSTAND (der Satz oben gilt weiter), nur die Frage, bei
-           wem welcher Ball liegt. */
-        if (ev.kind === 'handoff' || ev.kind === 'contribution') {
+           wem welcher Ball liegt. Seit Schritt 3 dazu Peters Annahme, die
+           seinen Ball wegnimmt. */
+        if (ev.kind === 'handoff' || ev.kind === 'contribution' ||
+            (ev.kind === 'accepted' && ev.actor === 'peter')) {
           basisBall.push({ ev: ev, recorded_at: c.created_at || '',
                            kommentar: Number(cid) || 0 });
         }
@@ -1029,9 +1032,10 @@
   /* BALLSPIEL, Schritt 1b: Welcher von Peters Baellen liegt noch, und wo?
      Dieselbe Ordnung wie bei der Aufgabenfaltung (Ereigniszeit, dann
      Erfassung, dann Kommentarnummer). Ein Anstoss legt den Ball beim
-     Empfaenger hin; eine Rueckgabe des HALTERS an Peter nimmt ihn weg --
-     dieselbe Regel wie live (`ballspielGelandet` im Original). Was danach
-     uebrig ist, liegt. */
+     Empfaenger hin; eine Rueckgabe des HALTERS an Peter legt ihn bei Peter
+     hin (Schritt 3), und erst Peters Annahme (von Atlas gemeldet) nimmt ihn
+     weg -- dieselbe Regel wie live (`ballspielGelandet`,
+     `ballspielAngenommen` im Original). Was danach uebrig ist, liegt. */
   function baelleFalten(liste) {
     var s = liste.slice().sort(function (p, q) {
       if (p.ev.occurred_at !== q.ev.occurred_at)
@@ -1049,9 +1053,15 @@
         lage[k] = { project_id: e.project_id, run_id: e.run_id,
                     task_id: e.task_id, bei: e.recipient };
       } else if (e.kind === 'contribution' && e.recipient === 'peter') {
-        /* Teilbaelle bleiben, bis ihr Agent selbst zurueckgibt -- der
+        /* Schritt 3: Der Ball liegt danach bei Peter, bis er annimmt.
+           Teilbaelle bleiben, bis ihr Agent selbst zurueckgibt -- der
            Monitor dient der Kontrolle (Peter, 25.10.; siehe Original). */
-        if (lage[k] && lage[k].bei === e.actor) lage[k] = null;
+        if (lage[k] && lage[k].bei === e.actor) lage[k].bei = 'peter';
+      } else if (e.kind === 'accepted') {
+        /* Schritt 3: Peters Annahme, von Atlas fuer ihn gemeldet -- die
+           einzige Fremdaussage, die wirkt, und nur auf den Ball. */
+        if (e.actor === 'peter' && e.reporter === 'atlas' &&
+            lage[k] && lage[k].bei === 'peter') lage[k] = null;
       } else if (e.kind === 'handoff' && e.recipient && e.recipient !== 'peter') {
         /* Schritt 2: Teilball beim Empfaenger, Schluessel mit Empfaenger --
            dieselbe Regel wie live (`ballspielGelandet`). */

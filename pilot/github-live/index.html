@@ -2467,7 +2467,7 @@
 
      Der Bauzeitpunkt kommt beim Bauen aus der Uhr. Von Hand gepflegte
      Datumsangaben sind nach der zweiten Änderung falsch. */
-  var FASSUNG = '83', GEBAUT = '2026-10-25T15:44Z';
+  var FASSUNG = '84', GEBAUT = '2026-10-25T17:00Z';
 
   /* AG-GH-LIVE-001: JEDE TEXTSENKE MASKIERT.
      Seit Live-Daten von aussen kommen (GitHub-Kommentare, one-event.json),
@@ -3732,9 +3732,12 @@
      Weitergabe oft dieselbe task_id wie Peters Auftrag; ohne den Empfaenger
      im Schluessel ueberschriebe der Teilball den ganzen Ball.
 
-     NOCH NICHT (bewusst, eigener Schritt): Rueckflug zu Peter als Ball und
-     Annahme (Schritt 3), Antippen zeigt die Aufgabe. Ohne Meldung kein Ball
-     -- nichts wird erfunden. */
+     RUECKGABE UND ANNAHME (Schritt 3): Gibt der Halter das Ergebnis an
+     Peter, fliegt der ganze Ball zu Peter und LIEGT DORT, bis Atlas Peters
+     Annahme meldet (`ballspielAngenommen`).
+
+     NOCH NICHT: Antippen zeigt die Aufgabe. Ohne Meldung kein Ball --
+     nichts wird erfunden. */
   var liegend = [];   /* { schluessel, aufgabe, bei, von, t, teil } */
 
   function ballspielSchluessel(sp) {
@@ -3751,8 +3754,13 @@
       return;
     }
     if (b.art === 'contribution' && b.an === 'peter') {
-      for (i = liegend.length - 1; i >= 0; i--)
-        if (liegend[i].schluessel === k && liegend[i].bei === b.von) liegend.splice(i, 1);
+      /* Schritt 3 (Peter, 24.10.): Der Ball LIEGT BEI PETER, bis er annimmt
+         -- erst die Annahme nimmt ihn weg (`ballspielAngenommen`). Nur der
+         Halter gibt ihn zurueck. */
+      for (i = 0; i < liegend.length; i++)
+        if (!liegend[i].teil && liegend[i].schluessel === k && liegend[i].bei === b.von) {
+          liegend[i].bei = 'peter'; liegend[i].t = 0; break;
+        }
       /* Die TEILBAELLE des Laufs bleiben liegen, bis ihr Agent selbst
          zurueckgibt -- auch wenn Peters Ball schon zurueck ist. Peter,
          25.10.: Bei einigen Agenten blieben Auftraege liegen, weil sie nicht
@@ -3775,6 +3783,23 @@
       for (i = liegend.length - 1; i >= 0; i--)
         if (liegend[i].schluessel === kr) liegend.splice(i, 1);
     }
+  }
+
+  /* ===== SCHRITT 3: DIE ANNAHME DURCH PETER =====
+     Peter, 24.10.: Der Ball liegt bei ihm bis zur Annahme. Peter meldet
+     selbst nicht; Atlas meldet fuer ihn: `accepted` mit `actor: peter` und
+     `reporter: atlas`. Das ist die EINZIGE Fremdaussage, die hier wirkt --
+     und sie wirkt nur auf den BALL. Den Aufgabenzustand treibt sie nicht;
+     dort gilt weiter: Wer meldet, muss der Akteur sein. */
+  function ballspielAngenommen(E) {
+    if (!(E && E.art === 'accepted' && E.von === 'peter' && E.melder === 'atlas' &&
+          E.spur && E.spur.task_id)) return false;
+    var k = ballspielSchluessel(E.spur);
+    for (var i = liegend.length - 1; i >= 0; i--)
+      if (!liegend[i].teil && liegend[i].schluessel === k && liegend[i].bei === 'peter') {
+        liegend.splice(i, 1); return true;
+      }
+    return false;
   }
 
   /* Neben dem Namen, wie `ballOrt` -- liegen mehrere bei einem Halter,
@@ -5619,6 +5644,9 @@
            er trieb den Ball, ich hatte nur an `arbeitAn` gedacht.
            Gefunden vom eigenen Nachweis, nicht im Betrieb. */
         if (E.art === 'progress' || GH_LEBEN[E.art]) {
+          /* Ballspiel, Schritt 3: Peters Annahme nimmt seinen Ball weg. Nur
+             der Ball -- der Zustand darunter bleibt unberuehrt. */
+          if (E.art === 'accepted') ballspielAngenommen(E);
           /* ===== DER ZUSTAND FOLGT DEM BELEG, NICHT DER ANIMATION =====
 
              Welches Ereignis darf welchen Uebergang treiben? Die Regel hat
@@ -7065,6 +7093,16 @@
         if (art === 'contribution' && an && an !== 'peter') {
           E.alsBall = true; E.gross = ARTEN.handoff.gross;
         }
+        /* Schritt 3: Gibt der HALTER von Peters Ball das Ergebnis an Peter,
+           fliegt der ganze Ball zu ihm zurueck. Gibt ein anderer Peter etwas,
+           bleibt es ein Wurf -- Peters Ball hat er nicht. */
+        if (art === 'contribution' && an === 'peter' && spur) {
+          var kz = ballspielSchluessel(spur);
+          for (var hz = 0; hz < liegend.length; hz++)
+            if (!liegend[hz].teil && liegend[hz].schluessel === kz && liegend[hz].bei === von) {
+              E.alsBall = true; E.gross = 1.0; break;
+            }
+        }
       }
     }
     /* Melder und die daraus abgeleitete Aussage werden mitgefuehrt, aber
@@ -7337,8 +7375,10 @@
       was('Etwas klemmt',
           'Rechts zählt „Blockiert", bis die Klemme gelöst ist.', true, '') +
       was('Atlas gibt dir das Ergebnis',
-          'Der Ball fliegt zu dir. Künftig bleibt er bei dir liegen, ' +
-          'bis du ihn annimmst.', true, 'Liegen geplant') +
+          'Dein Ball fliegt zu dir und bleibt bei dir liegen.', true, '') +
+      was('Du nimmst an (Atlas meldet es für dich)',
+          'Dein Ball verschwindet. Teilbälle, die nie zurückkamen, bleiben ' +
+          'liegen — zur Kontrolle.', true, '') +
       '</table>' +
 
       '<h4>Betriebsarten</h4><table>' +

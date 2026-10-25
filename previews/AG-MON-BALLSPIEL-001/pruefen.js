@@ -211,9 +211,10 @@ async function warten(s, pruef, ms) {
               title: 'Atlas gibt Peter das Ergebnis zu A (Probe).' });
     /* Seit Schritt 2 bleibt der Teilball bei forge liegen: Forge hat nie
        zurueckgegeben, und genau das soll man sehen (Peter, 25.10.: der
-       Monitor dient der Kontrolle). */
-    st = await warten(s, x => (x.liegend || []).length === 2);
-    zeile('Ball A ist weg, Ball B liegt weiter', liegendText(st), 'A@forge,B@atlas');
+       Monitor dient der Kontrolle). Seit Schritt 3 (AG-MON-BALLSPIEL-003)
+       liegt Ball A danach bei Peter, bis Atlas Peters Annahme meldet. */
+    st = await warten(s, x => (x.liegend || []).some(l => l.bei === 'peter'));
+    zeile('Ball A liegt bei Peter, Ball B weiter bei atlas', liegendText(st), 'A@forge,A@peter,B@atlas');
     zeile('Aufnahme: ein Ball bleibt bei atlas', await bild('3-ein-ball-bleibt.jpg'), true);
 
     console.log('\nG — Nichts verloren');
@@ -262,7 +263,9 @@ async function warten(s, pruef, ms) {
       await s2.waitForTimeout(3500);
       await s2.evaluate(() => { const d = document.getElementById('agGhAuf'); if (d) d.open = false; });
       let st2 = await stand(s2);
-      zeile('offene Bälle liegen sofort am richtigen Platz', liegendText(st2), 'C@atlas,E@nova');
+      /* D wurde vor dem Verbinden an Peter zurueckgegeben und nie
+         angenommen -- seit Schritt 3 liegt es deshalb bei Peter. */
+      zeile('offene Bälle liegen sofort am richtigen Platz', liegendText(st2), 'C@atlas,D@peter,E@nova');
       zeile('ohne Flug', (st2.fliegend || []).length, 0);
       zeile('nichts nachgespielt', st2.ausgegeben || 0, 0);
       await s2.screenshot({ path: path.join(AUFNAHMEN, '4-zu-spaet-verbunden.jpg'), type: 'jpeg', quality: 72 });
@@ -272,8 +275,8 @@ async function warten(s, pruef, ms) {
          Ball genauso wie einen live gelandeten. */
       antwort2 = antwort2.concat([kommentar({ task_id: T3, kind: 'contribution', actor: 'atlas',
         recipient: 'peter', reporter: 'atlas', title: 'C: Ergebnis an Peter (Probe).' })]);
-      st2 = await warten(s2, x => liegendText(x) === 'E@nova');
-      zeile('Rückgabe nach dem Verbinden nimmt den Ball weg', liegendText(st2), 'E@nova');
+      st2 = await warten(s2, x => liegendText(x) === 'C@peter,D@peter,E@nova');
+      zeile('Rückgabe nach dem Verbinden legt den Ball zu Peter', liegendText(st2), 'C@peter,D@peter,E@nova');
       zeile('keine Seitenfehler', fehler2.length, 0);
       if (fehler2.length) console.log('        ' + fehler2.join('\n        '));
       await q2.close();
