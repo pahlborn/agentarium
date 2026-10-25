@@ -749,6 +749,13 @@
   .wProjekte li:hover{color:#D6E0F0;}
   .wProjekte li.hier{color:#E8D9A8;}
   .wProjekte li.hier::after{content:' —'; opacity:.7;}
+  /* AG-PROJEKTE-002: echte Projekte und Demos stehen getrennt, mit
+     Ueberschrift -- erfunden und echt muessen auf einen Blick
+     unterscheidbar sein. */
+  .wUeber{margin:0 0 2px; color:#5E6A7D;
+    font:400 9px/1.3 ui-monospace,SFMono-Regular,Menlo,monospace;
+    letter-spacing:.24em; text-transform:uppercase;}
+  .wProjekte li b{font-weight:400; color:#B8C6DC; margin-right:.6em;}
   /* Die Betriebsart wird dort gewählt, wo man auch das Projekt wählt —
      sie gehört zum Projekt, nicht zur Bedienung. */
   .wModi{list-style:none; display:flex; gap:1px; margin:13px 0 8px; padding:0;
@@ -885,6 +892,10 @@
     background:rgba(9,13,20,.82); box-shadow:inset 0 0 0 1px rgba(150,170,200,.12);
     pointer-events:auto; transition:opacity .55s ease;}
   #agTempo.leise{opacity:0; pointer-events:none;}
+  /* `hidden` allein genuegt hier nicht: `display:flex` oben ist eine
+     ID-Regel und schlaegt die Voreinstellung des Browsers fuer [hidden].
+     Ohne diese Zeile stand der Regler auch live im Bild (bis Fassung 80). */
+  #agTempo[hidden]{display:none;}
   #agTempo label{color:#B8C6DC; white-space:nowrap;
     font:400 11px/1 ui-monospace,SFMono-Regular,Menlo,monospace;
     letter-spacing:.16em; text-transform:uppercase;}
@@ -2456,7 +2467,7 @@
 
      Der Bauzeitpunkt kommt beim Bauen aus der Uhr. Von Hand gepflegte
      Datumsangaben sind nach der zweiten Änderung falsch. */
-  var FASSUNG = '80', GEBAUT = '2026-10-25T07:25Z';
+  var FASSUNG = '81', GEBAUT = '2026-10-25T14:21Z';
 
   /* AG-GH-LIVE-001: JEDE TEXTSENKE MASKIERT.
      Seit Live-Daten von aussen kommen (GitHub-Kommentare, one-event.json),
@@ -5978,6 +5989,19 @@
      gemeldet wurde. Sie ersetzt im Livebetrieb das aufgezeichnete Stueck
      und wird bei jedem Betriebsartwechsel geloescht. */
   var liveKopf = null;
+  /* AG-PROJEKTE-002: die Projekte aus dem Verzeichnis, gemeldet vom
+     GitHub-Adapter: { liste: [{id, kuerzel, name}], wahl: '*' | id,
+     waehlen: fn }. `null`, solange keins gelesen ist -- dann bleibt alles
+     wie bisher. Bleibt ueber `modusSetzen` hinweg stehen: Es beschreibt die
+     Quelle, nicht den Lauf. */
+  var ghProjekte = null;
+  function ghProjektName() {
+    if (!ghProjekte) return '';
+    if (ghProjekte.wahl === '*') return 'Alle Projekte';
+    for (var i = 0; i < ghProjekte.liste.length; i++)
+      if (ghProjekte.liste[i].id === ghProjekte.wahl) return ghProjekte.liste[i].name;
+    return '';
+  }
   /* Wie viele Aufgaben aus der Historie uebernommen wurden, und wie
      vollstaendig die Quelle dabei war. Beides gehoert in die Diagnose,
      damit eine Zahl nicht fuer vollstaendig genommen wird. */
@@ -6016,7 +6040,11 @@
        gewartet wird. */
     var K = (MODUS === 'live') ? (liveKopf || { projekt: MODI.live.wort.toUpperCase() })
                                : STUECK;
-    projektEl.textContent = K.projekt || '';
+    /* AG-PROJEKTE-002: Oben rechts steht live die PROJEKTWAHL ("Alle
+       Projekte" oder der Projektname) -- Anzeige und Auswahl sind dasselbe
+       Ding. Der Lauf steht weiter unten rechts. */
+    var ghName = (MODUS === 'live') ? ghProjektName() : '';
+    projektEl.textContent = ghName || K.projekt || '';
     /* Beim Zeigen auf den Namen steht da, was BALL heißt und welche
        Fassung läuft. Im Ruhezustand ist es weg — der Monitor soll das Feld
        zeigen, nicht seine eigenen Angaben. */
@@ -6027,7 +6055,20 @@
       'dahinter: Aufgaben, Zustände und Übergaben zwischen Mensch und ' +
       'LLM-Agenten.<br><b>Fassung ' + FASSUNG + ' &middot; ' + GEBAUT + '</b>';
     var h = '';
+    var echt = (MODUS === 'live' && ghProjekte && ghProjekte.liste.length);
+    if (echt) {
+      h += '<p class="wUeber">Projekte</p><ul class="wProjekte">' +
+           '<li data-gh="*"' + (ghProjekte.wahl === '*' ? ' class="hier"' : '') +
+           '>Alle Projekte</li>';
+      ghProjekte.liste.forEach(function (p) {
+        h += '<li data-gh="' + esc(p.id) + '"' +
+             (ghProjekte.wahl === p.id ? ' class="hier"' : '') + '><b>' +
+             esc(p.kuerzel) + '</b>' + esc(p.name) + '</li>';
+      });
+      h += '</ul>';
+    }
     if (STUECKE.length > 1) {
+      if (echt) h += '<p class="wUeber">Demos</p>';
       h += '<ul class="wProjekte">';
       STUECKE.forEach(function (S, i) {
         /* Im Livebetrieb ist KEIN aufgezeichnetes Stueck das aktuelle.
@@ -6079,6 +6120,15 @@
     var lm = e.target.closest ? e.target.closest('li[data-modus]') : null;
     if (lm) { modusSetzen(lm.getAttribute('data-modus'));
               wasEl.classList.add('auf'); return; }
+    /* AG-PROJEKTE-002: ein echtes Projekt (oder "Alle") -- die Wahl macht
+       der Adapter, denn nur er kennt die Quelle. Danach geht das Blatt zu,
+       wie bei den Demos. */
+    var lg = e.target.closest ? e.target.closest('li[data-gh]') : null;
+    if (lg && ghProjekte && typeof ghProjekte.waehlen === 'function') {
+      ghProjekte.waehlen(lg.getAttribute('data-gh'));
+      wasEl.classList.remove('auf');
+      return;
+    }
     var li = e.target.closest ? e.target.closest('li[data-nr]') : null;
     if (li) {
       var nr = +li.getAttribute('data-nr');
@@ -7870,6 +7920,17 @@
       neuBeginnen: function () {
         if (MODUS !== 'live') return false;
         modusSetzen('live');
+        return true;
+      },
+      /* AG-PROJEKTE-002: Der Adapter meldet die Projekte aus dem Verzeichnis
+         und die aktuelle Wahl. `null` nimmt sie zurueck (Verzeichnis nicht
+         lesbar) -- dann ist alles wie vorher. */
+      projekte: function (d) {
+        ghProjekte = (d && Array.isArray(d.liste)) ? {
+          liste: d.liste.filter(function (p) { return p && p.id && p.kuerzel && p.name; }),
+          wahl: (typeof d.wahl === 'string') ? d.wahl : '*',
+          waehlen: d.waehlen } : null;
+        kopfSetzen();
         return true;
       }
     };

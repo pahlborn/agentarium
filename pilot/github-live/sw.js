@@ -16,7 +16,7 @@
    Neuladen mitten im Lauf gibt es nicht: Was gerade zu sehen ist, soll
    zu Ende laufen duerfen.
 */
-const VORRAT = 'agentarium-v80';
+const VORRAT = 'agentarium-v81';
 const STUECKE = ['./', 'index.html', 'manifest.webmanifest', 'github-live.js',
                  'icon-120.png', 'icon-152.png', 'icon-180.png',
                  'icon-192.png', 'icon-512.png'];
@@ -44,6 +44,10 @@ self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
   const u = new URL(e.request.url);
   if (u.origin !== self.location.origin) return;
+  /* AG-PROJEKTE-002: Das Projektverzeichnis geht immer ans Netz. Aus dem
+     Vorrat bedient, erschiene ein neues Projekt erst beim uebernaechsten
+     Oeffnen -- und ein entferntes stuende weiter da. */
+  if (u.pathname.endsWith('/projekte/verzeichnis.json')) return;
   e.respondWith((async () => {
     const v = await caches.open(VORRAT);
     const da = await v.match(e.request, { ignoreSearch: true });

@@ -197,7 +197,73 @@
   var zahl = { anfragen: 0, n200: 0, n304: 0, basisKommentare: 0, basisMarkiert: 0,
                waehrendAufbau: 0, gezeigt: 0, duplikate: 0, abgewiesen: 0, ohneMarker: 0,
                konflikte: 0, abbrueche: 0, klemmen: 0,
-               wieder: 0, wiederKlemmt: 0, abdeckung: '' };
+               wieder: 0, wiederKlemmt: 0, abdeckung: '', ausgeblendet: 0 };
+
+  /* ================= DAS PROJEKTVERZEICHNIS (AG-PROJEKTE-002) =================
+     Peter, 25.10.: Projekt -> Laeufe -> Aufgaben. Nur Projekte aus dem
+     Verzeichnis erscheinen; live sind sie einzeln waehlbar, dazu "Alle
+     Projekte" als Startansicht, und dort traegt jede Meldung das Kuerzel.
+
+     GELESEN VON DER EIGENEN ADRESSE, NICHT UEBER DIE SCHNITTSTELLE: GitHub
+     Pages veroeffentlicht das ganze Repo, also liegt `projekte/verzeichnis.json`
+     zwei Ebenen ueber dieser Seite. Kein Token, keine Anfrage an api.github.com
+     -- das Abruflimit bleibt unberuehrt.
+
+     RUECKFALL: Ist das Verzeichnis nicht lesbar oder ungueltig, gilt der
+     bisherige Stand -- alles wird gezeigt, ohne Projektwahl. Lieber alles
+     als still nichts. Das steht im Protokoll und im Stand. */
+  var VERZ_URL = new URL('../../projekte/verzeichnis.json', location.href).href;
+  var VERZ_ID = /^[a-z0-9][a-z0-9-]{1,39}$/, VERZ_KZ = /^[A-Z0-9]{2,5}$/;
+  var verz = null, wahl = '*';
+  async function verzeichnisLaden() {
+    var r, d;
+    try {
+      r = await fetch(VERZ_URL, { method: 'GET', cache: 'no-store', credentials: 'omit',
+                                  redirect: 'error', referrerPolicy: 'no-referrer' });
+      if (!r.ok) { vermerk('Projektverzeichnis nicht lesbar (HTTP ' + r.status + ') — alle Projekte'); return null; }
+      d = await r.json();
+    } catch (x) { vermerk('Projektverzeichnis nicht lesbar — alle Projekte'); return null; }
+    if (!d || d.schema !== 'agentarium.projektverzeichnis.v1' || !Array.isArray(d.projekte)) {
+      vermerk('Projektverzeichnis ungültig — alle Projekte'); return null;
+    }
+    var liste = [], nach = Object.create(null), kz = Object.create(null);
+    d.projekte.forEach(function (p) {
+      if (!p || !VERZ_ID.test(p.id || '') || !VERZ_KZ.test(p.kuerzel || '') ||
+          typeof p.name !== 'string' || !p.name.trim() || nach[p.id] || kz[p.kuerzel]) {
+        vermerk('Verzeichniseintrag übergangen: ' + (p && p.id)); return;
+      }
+      var e = { id: p.id, kuerzel: p.kuerzel, name: p.name.trim().slice(0, 60) };
+      nach[e.id] = e; kz[e.kuerzel] = 1; liste.push(e);
+    });
+    if (!liste.length) { vermerk('Projektverzeichnis leer — alle Projekte'); return null; }
+    return { liste: liste, nach: nach };
+  }
+  /* Was gezeigt wird: ohne Verzeichnis alles; mit Verzeichnis nur
+     verzeichnete Projekte, und davon das gewaehlte oder alle. */
+  function sichtbar(ev) {
+    if (!verz) return true;
+    if (!verz.nach[ev.project_id]) return false;
+    return wahl === '*' || ev.project_id === wahl;
+  }
+  function projekteMelden() {
+    if (typeof B.projekte !== 'function') return;
+    B.projekte(verz ? { liste: verz.liste, wahl: wahl, waehlen: projektWaehlen } : null);
+  }
+  /* Ein Projektwechsel baut den Stand neu auf -- wie "Zurueck zu live":
+     Buehne leer, Gedaechtnis leer, Historie neu gelesen und gefiltert. So
+     liegt nach dem Wechsel genau das, was im gewaehlten Projekt offen ist. */
+  function projektWaehlen(id) {
+    if (!verz || (id !== '*' && !verz.nach[id]) || id === wahl) return;
+    wahl = id;
+    vermerk('Projektwahl: ' + (id === '*' ? 'alle Projekte' : id));
+    projekteMelden();
+    if (!token) return;
+    archivUhren.forEach(clearTimeout); archivUhren = [];
+    archivLaeuft = false; archivAnsicht = false;
+    if (typeof B.neuBeginnen === 'function') B.neuBeginnen();
+    bekannte.leeren();
+    verbinden(token);
+  }
   /* Fingerabdruck je Ereigniskennung, damit sich ein TRANSPORTDUPLIKAT von
      einem KONFLIKT unterscheiden laesst: dieselbe Kennung mit demselben
      Inhalt ist wirkungslos, dieselbe Kennung mit anderem Inhalt ist ein
@@ -673,6 +739,13 @@
       vermerk('während des Nachspielens zurückgestellt: ' + ev.id);
       return;
     }
+    /* AG-PROJEKTE-002: nicht verzeichnet oder nicht gewaehlt -- nicht
+       gezeigt, aber gezaehlt, und beim Wechsel auf "Alle" wieder da. */
+    if (!sichtbar(ev)) {
+      zahl.ausgeblendet++;
+      vermerk('ausgeblendet (' + ev.project_id + '): ' + ev.id);
+      return;
+    }
     var lauf = ev.project_id + '|' + ev.run_id;
     if (lauf !== aktuellerLauf) {
       var r0 = window.__agLauf({ project_id: ev.project_id, titel: ev.run_id,
@@ -683,8 +756,13 @@
     }
     /* Volle Schluessel und Herkunft gehen mit; `gh_beobachtet` sagt dem
        Original: aus GitHub, nur beobachtet, keine Zustandsaenderung. */
+    /* In "Alle Projekte" traegt jede Meldung das Kuerzel vorn: Am fliegenden
+       Ball und in der Zeile ist so zu sehen, wozu sie gehoert. Gekuerzt auf
+       die 200 Zeichen, die ein Titel haben darf. */
+    var titel = (verz && wahl === '*' && verz.nach[ev.project_id])
+      ? (verz.nach[ev.project_id].kuerzel + ' · ' + ev.title).slice(0, 200) : ev.title;
     var aus = { id: ev.id, actor: ev.actor, kind: ev.kind,
-      title: ev.title, occurred_at: ev.occurred_at, source_evidence: ev.source_evidence,
+      title: titel, occurred_at: ev.occurred_at, source_evidence: ev.source_evidence,
       fictional: false, gh_beobachtet: true, project_id: ev.project_id,
       run_id: ev.run_id, task_id: ev.task_id, source_tool_id: ev.source_tool_id };
     if (ev.recipient) aus.recipient = ev.recipient;
@@ -1194,6 +1272,14 @@
                      selbstannahmen: 0 };
     zahl.wieder = 0; zahl.wiederKlemmt = 0; zahl.abdeckung = '';
     var spaeter = [], basisIds = Menge(MAX_IDS);
+    /* AG-PROJEKTE-002: das Verzeichnis zuerst, denn es entscheidet, was aus
+       der Historie wiederhergestellt wird. Bei jedem Aufbau neu gelesen,
+       damit ein neues Projekt mit dem naechsten Verbinden erscheint. */
+    anzeigen('lese das Projektverzeichnis …');
+    verz = await verzeichnisLaden();
+    if (g !== gen) throw ABBRUCH;
+    if (verz && wahl !== '*' && !verz.nach[wahl]) wahl = '*';
+    projekteMelden();
     anzeigen('lese alle Basisseiten …');
     await vorwaerts(1, g, 'basis', spaeter, basisIds);
     if (g !== gen) throw ABBRUCH;
@@ -1226,7 +1312,10 @@
        keiner Quelle, also kann keine Zaehlung es finden. `unavailable` gilt,
        wenn schon das Lesen unvollstaendig war -- dann ist nicht einmal das
        Gemeldete ganz da. */
-    var offen = faltenZuZustand(basisLeben);
+    /* AG-PROJEKTE-002: wiederhergestellt wird nur, was im gewaehlten
+       Ausschnitt sichtbar ist -- dieselbe Regel wie live. */
+    var nurSichtbar = function (x) { return sichtbar(x.ev); };
+    var offen = faltenZuZustand(basisLeben.filter(nurSichtbar));
     zahl.abdeckung = basisGrenzen.seitenDeckel ? 'unavailable' : 'partial';
     if (typeof window.__agWiederherstellen === 'function') {
       try {
@@ -1236,7 +1325,7 @@
           grenzen: basisGrenzen, schnitt: Z.schnittIso,
           /* Ballspiel, Schritt 1b: Peters noch liegende Baelle. Ein
              aelteres Original kennt das Feld nicht und uebergeht es. */
-          liegend: baelleFalten(basisBall) });
+          liegend: baelleFalten(basisBall.filter(nurSichtbar)) });
         zahl.wieder = (w && typeof w.angenommen === 'number') ? w.angenommen : 0;
         /* Aus dem RUECKGABEWERT, nicht aus der gefalteten Liste: Was das
            Original wirklich angelegt hat, weiss nur das Original. */
@@ -1321,6 +1410,7 @@
   function archivLaeufe() {
     var nach = Object.create(null), r = [];
     archivAlle.forEach(function (x) {
+      if (!sichtbar(x.ev)) return;   /* AG-PROJEKTE-002: nur der gewaehlte Ausschnitt */
       var k = x.ev.project_id + '\u0001' + x.ev.run_id;
       if (!nach[k]) { nach[k] = { k: k, projekt: x.ev.project_id, lauf: x.ev.run_id,
                                   n: 0, zuletzt: '' }; r.push(nach[k]); }
@@ -1460,7 +1550,9 @@
         pausiert: Z.pausiert, fehler: Z.fehler, grund: letzterGrund, zahl: zahl,
         letztes: letztes, bekannteIds: bekannte.groesse(), log: log,
         archiv: { laeuft: archivLaeuft, ansicht: archivAnsicht,
-                  ereignisse: archivAlle.length, laeufe: archivLaeufe().length } }));
+                  ereignisse: archivAlle.length, laeufe: archivLaeufe().length },
+        projekte: { verzeichnis: !!verz, wahl: wahl,
+                    liste: verz ? verz.liste.map(function (p) { return p.id; }) : [] } }));
     }
   });
 })();
