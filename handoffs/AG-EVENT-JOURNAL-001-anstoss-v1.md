@@ -44,6 +44,25 @@ Dass eine Rückgabe als Ball erscheint, ist eine eigene, spätere Bildänderung
 Alle Ereignisse einer Aufgabe tragen dieselbe `project_id`, `run_id` und
 `task_id`.
 
+## Projekt und Lauf (Peter, 25.10.)
+
+Projekt → Läufe → Aufgaben. Ein **Lauf** ist ein Auftrag von Peter, vom
+Anstoß bis zur Rückgabe; er kann mehrere Aufgaben haben.
+
+6. **Projekt-ID aus dem Verzeichnis.** `project_id` ist immer die `id` eines
+   Projekts aus `projekte/verzeichnis.json`. Läufe ohne Projektbezug (Fragen)
+   gehören zu `allgemein`.
+7. **Lauf-ID mit Kürzel.** `run_id` beginnt mit dem `kuerzel` des Projekts,
+   z. B. `AG-…` für `agentarium`, `ALLG-…` für `allgemein`.
+8. **Neues Projekt zuerst eintragen.** Startet Peter ein neues Projekt, trägt
+   Atlas es **vor der ersten Meldung** ins Verzeichnis ein: `id` (klein),
+   `kuerzel` (2–5 Zeichen, groß), `name`, `repo` (`besitzer/name` oder
+   `null`). Atlas meldet Peter ID und Kürzel. Das Repo legt Peter in der
+   Regel selbst an. `previews/AG-PROJEKTE-001/pruefen.js` prüft das
+   Verzeichnis bei jedem Prüflauf.
+
+Der Monitor zeigt künftig nur Projekte aus dem Verzeichnis.
+
 ## So wird gemeldet
 
 - **Ort:** ein Kommentar auf **Issue #2**. Nur dort liest der Monitor.
@@ -61,6 +80,7 @@ Alle Ereignisse einer Aufgabe tragen dieselbe `project_id`, `run_id` und
 ## Bausteine zum Ausfüllen
 
 Zu ersetzen ist alles in `<…>`. Die `id` ist je Ereignis neu und eindeutig.
+`<PROJEKT-ID>` und `<KÜRZEL>` stehen in `projekte/verzeichnis.json`.
 
 **1. Anstoß: Peter → Atlas** (Atlas meldet)
 
@@ -70,8 +90,8 @@ Zu ersetzen ist alles in `<…>`. Die `id` ist je Ereignis neu und eindeutig.
 {
   "schema": "agentarium.github-event.v1",
   "id": "<AUFGABE>-ANSTOSS-<zeitstempel>",
-  "project_id": "agentarium",
-  "run_id": "<LAUF>",
+  "project_id": "<PROJEKT-ID>",
+  "run_id": "<KÜRZEL>-<LAUF>",
   "task_id": "<AUFGABE>",
   "actor": "peter",
   "recipient": "atlas",
@@ -93,8 +113,8 @@ Zu ersetzen ist alles in `<…>`. Die `id` ist je Ereignis neu und eindeutig.
 {
   "schema": "agentarium.github-event.v1",
   "id": "<AUFGABE>-WEITER-<agent>-<zeitstempel>",
-  "project_id": "agentarium",
-  "run_id": "<LAUF>",
+  "project_id": "<PROJEKT-ID>",
+  "run_id": "<KÜRZEL>-<LAUF>",
   "task_id": "<AUFGABE>",
   "actor": "atlas",
   "recipient": "<agent>",
@@ -116,8 +136,8 @@ Zu ersetzen ist alles in `<…>`. Die `id` ist je Ereignis neu und eindeutig.
 {
   "schema": "agentarium.github-event.v1",
   "id": "<AUFGABE>-VERGABE-<agent>-<zeitstempel>",
-  "project_id": "agentarium",
-  "run_id": "<LAUF>",
+  "project_id": "<PROJEKT-ID>",
+  "run_id": "<KÜRZEL>-<LAUF>",
   "task_id": "<AUFGABE>",
   "actor": "atlas",
   "recipient": "<agent>",
@@ -140,8 +160,8 @@ Zu ersetzen ist alles in `<…>`. Die `id` ist je Ereignis neu und eindeutig.
 {
   "schema": "agentarium.github-event.v1",
   "id": "<AUFGABE>-ERGEBNIS-<agent>-<zeitstempel>",
-  "project_id": "agentarium",
-  "run_id": "<LAUF>",
+  "project_id": "<PROJEKT-ID>",
+  "run_id": "<KÜRZEL>-<LAUF>",
   "task_id": "<AUFGABE>",
   "actor": "<agent>",
   "recipient": "atlas",
@@ -163,8 +183,8 @@ Zu ersetzen ist alles in `<…>`. Die `id` ist je Ereignis neu und eindeutig.
 {
   "schema": "agentarium.github-event.v1",
   "id": "<AUFGABE>-ABSCHLUSS-<zeitstempel>",
-  "project_id": "agentarium",
-  "run_id": "<LAUF>",
+  "project_id": "<PROJEKT-ID>",
+  "run_id": "<KÜRZEL>-<LAUF>",
   "task_id": "<AUFGABE>",
   "actor": "atlas",
   "recipient": "peter",
