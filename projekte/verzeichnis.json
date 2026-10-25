@@ -1,0 +1,18 @@
+{
+  "schema": "agentarium.projektverzeichnis.v1",
+  "gepflegt_von": "atlas",
+  "projekte": [
+    {
+      "id": "agentarium",
+      "kuerzel": "AG",
+      "name": "Agentarium",
+      "repo": "pahlborn/agentarium"
+    },
+    {
+      "id": "allgemein",
+      "kuerzel": "ALLG",
+      "name": "Allgemein",
+      "repo": null
+    }
+  ]
+}

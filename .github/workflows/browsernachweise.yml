@@ -32,11 +32,16 @@ on:
     paths:
       - 'previews/**'
       - 'pilot/github-live/**'
+      - 'projekte/**'
       - '.github/workflows/browsernachweise.yml'
   pull_request:
     paths:
       - 'previews/**'
       - 'pilot/github-live/**'
+      # Das Projektverzeichnis pflegt Atlas von Hand; geprueft wird es von
+      # previews/AG-PROJEKTE-001 -- also muss eine Aenderung daran den Lauf
+      # ausloesen, sonst bliebe genau sie ungeprueft.
+      - 'projekte/**'
       - '.github/workflows/browsernachweise.yml'
 
 # Nur Lesen. Dieser Lauf schreibt nichts, nirgends.
