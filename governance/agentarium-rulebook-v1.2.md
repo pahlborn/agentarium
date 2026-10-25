@@ -1,4 +1,6 @@
 # Agentarium Rulebook 1.2
+
+> Historical version. Superseded by `agentarium-rulebook-v1.4.md` when the 1.4 package is integrated. Retained unchanged below for evidence; not the current instruction source.
 Revision: 2026-10-16. Authorized scope: Peter's instruction to revise process, Rulebook and all skills. Peter instructed establishment/integration on 2026-10-16. This is the adopted Agentarium team contract, superseding conflicting team-behavior provisions of historical Rulebook 1.1 within Agentarium once integrated. It does not silently update GT40 copies, existing running sessions, permissions or other repositories. Peter's exact task decisions remain binding. Adoption covers these governance/role changes and their integration; it grants no unrelated product implementation, deployment, paid-runtime or future merge authority.
 
 ## 1. Purpose and authority

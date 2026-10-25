@@ -166,14 +166,13 @@
       "platform": "claude-code",
       "technical_id": "existing_maintainer_session",
       "scope": [
-        "agentarium_visualization",
-        "interfaces",
-        "architecture",
-        "authorized_implementation"
+        "monitor_architecture",
+        "monitor_implementation",
+        "monitor_own_checks"
       ],
       "state": "definition_documented_current_execution_requires_evidence",
-      "definition_path": "CLAUDE.md",
-      "transport_note": "PR46 subscription was reported by Lot; verify a current open subscribed channel before sending. No current worker start is attested by this entry."
+      "definition_path": "LOT.md",
+      "transport_note": "Started exclusively by Peter. Time-limited monitor maintainer; team processes do not depend on Lot. A PR comment is not authorization or proof of worker start."
     }
   },
   "routing_rules": [
@@ -181,7 +180,7 @@
     "Never map ChatGPT skills to Claude agents without an explicit reviewed migration.",
     "A role name is not proof of a loaded agent.",
     "Dispatch requires technical id, platform, authorized tools and independent runtime evidence.",
-    "No merge or publication without Peter."
+    "Merge/publication authority: Rulebook 1.4 §1. Atlas and Lot may merge checked changes within mandate; other roles require Peter approval. Effective tools are unchanged."
   ],
   "task_result": {
     "task": "AG-TEAM-001",
@@ -194,12 +193,12 @@
     "future_auto_execution": false
   },
   "governance_candidate": {
-    "version": "1.3",
-    "rulebook": "governance/agentarium-rulebook-v1.3.md",
-    "process": "governance/agentarium-process-v1.3.md",
-    "review": "governance/team-learning-ledger-2026-10-21.md",
-    "runtime_status": "definitions_updated_reload_and_effectiveness_pending",
-    "historical_evidence_note": "Existing role states/run evidence below are historical, not current reachability."
+    "version": "1.4",
+    "rulebook": "governance/agentarium-rulebook-v1.4.md",
+    "process": "governance/agentarium-process-v1.4.md",
+    "review": "governance/AG-RULEBOOK-014-adoption.md",
+    "runtime_status": "integration_candidate_reload_and_effectiveness_pending",
+    "historical_evidence_note": "Existing role states and run evidence are historical, not current reachability."
   },
   "customer_sponsor": {
     "name": "Peter",

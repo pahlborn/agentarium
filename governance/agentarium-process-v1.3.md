@@ -1,4 +1,6 @@
 # Agentarium Process 1.3
+
+> Historical version. Superseded by `agentarium-process-v1.4.md` when the 1.4 package is integrated. Retained unchanged below for evidence; not the current instruction source.
 Revision: 2026-10-21. Peter authorized implementation of the agreed delivery improvements. Supersedes process 1.2 within Agentarium when integrated. Read Rulebook 1.3 and the exact task decision. No product publication, permission expansion, infrastructure activation or paid call is authorized by this revision.
 
 ## One outcome, one technical owner
