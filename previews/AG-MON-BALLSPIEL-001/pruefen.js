@@ -22,8 +22,10 @@
 
    Je Zustand ein Bild. Gemessen wird der liegende Ball als Datum UND als Bild.
 
-   GRENZEN: Abruf ist eine Attrappe mit Scheintoken. Probekoerper. Nach
-   Neuladen liegen die Baelle noch nicht wieder da (eigener Schritt). Keine
+     H  zu spaet verbunden (Schritt 1b): offene Baelle liegen sofort da,
+        ohne Flug; zurueckgegebene nicht; Fremde geben nichts zurueck
+
+   GRENZEN: Abruf ist eine Attrappe mit Scheintoken. Probekoerper. Keine
    Abnahme auf Peters Geraet.                                               */
 'use strict';
 const fs = require('fs'), path = require('path'), http = require('http'), os = require('os');
@@ -213,6 +215,63 @@ async function warten(s, pruef, ms) {
     zeile('keine Seitenfehler', seitenFehler.length, 0);
     if (seitenFehler.length) console.log('        ' + seitenFehler.join('\n        '));
     await q.close();
+
+    /* ================================ H: ZU SPAET VERBUNDEN (1b) ===
+       Peter, 25.10.: "Wenn der Ball liegen bleiben wuerde, waere es egal, ob
+       ich zu spaet komme." Alles liegt schon in der Historie, BEVOR
+       verbunden wird. Erwartet: offene Baelle liegen sofort am richtigen
+       Platz, ohne Flug, ohne Nachspielen; ein zurueckgegebener liegt nicht;
+       eine "Rueckgabe" durch einen Fremden zaehlt nicht. */
+    console.log('\nH — Zu spät verbunden: offene Bälle liegen sofort da, ohne Flug');
+    {
+      const T3 = 'AG-MON-BALLSPIEL-001-C', T4 = 'AG-MON-BALLSPIEL-001-D',
+            T5 = 'AG-MON-BALLSPIEL-001-E';
+      const q2 = await b.newContext({ viewport: { width: 1194, height: 834 } });
+      const s2 = await q2.newPage();
+      const fehler2 = [];
+      s2.on('pageerror', e => fehler2.push(String(e.message).slice(0, 110)));
+      let antwort2 = [
+        kommentar({ task_id: T3, kind: 'handoff', actor: 'peter', recipient: 'atlas',
+                    reporter: 'atlas', title: 'C liegt noch bei atlas (Probe).' }),
+        kommentar({ task_id: T4, kind: 'handoff', actor: 'peter', recipient: 'atlas',
+                    reporter: 'atlas', title: 'D Anstoß (Probe).' }),
+        kommentar({ task_id: T4, kind: 'contribution', actor: 'atlas', recipient: 'peter',
+                    reporter: 'atlas', title: 'D ist schon zurück (Probe).' }),
+        kommentar({ task_id: T5, kind: 'handoff', actor: 'peter', recipient: 'nova',
+                    reporter: 'atlas', title: 'E liegt bei nova (Probe).' }),
+        kommentar({ task_id: T5, kind: 'contribution', actor: 'forge', recipient: 'peter',
+                    reporter: 'forge', title: 'E: ein Fremder gibt zurück, zählt nicht (Probe).' })
+      ];
+      let abrufe2 = 0;
+      await s2.route('**api.github.com/**', r => {
+        abrufe2++;
+        r.fulfill({ status: 200, contentType: 'application/json',
+                    headers: { ETag: 'W/"ag-mon-ballspiel-h-' + abrufe2 + '"' },
+                    body: JSON.stringify(antwort2) });
+      });
+      await s2.goto(tisch.adr + '?live=github', { waitUntil: 'load' });
+      await s2.waitForTimeout(2200);
+      await s2.fill('#agGhToken', 'AGMONBALLSPIEL001H_Scheintoken_0123456789');
+      await s2.click('#agGhAn');
+      await s2.waitForTimeout(3500);
+      await s2.evaluate(() => { const d = document.getElementById('agGhAuf'); if (d) d.open = false; });
+      let st2 = await stand(s2);
+      zeile('offene Bälle liegen sofort am richtigen Platz', liegendText(st2), 'C@atlas,E@nova');
+      zeile('ohne Flug', (st2.fliegend || []).length, 0);
+      zeile('nichts nachgespielt', st2.ausgegeben || 0, 0);
+      await s2.screenshot({ path: path.join(AUFNAHMEN, '4-zu-spaet-verbunden.jpg'), type: 'jpeg', quality: 72 });
+      zeile('Aufnahme: Bälle liegen nach dem Verbinden',
+            fs.existsSync(path.join(AUFNAHMEN, '4-zu-spaet-verbunden.jpg')), true);
+      /* Und danach live weiter: Die Rueckgabe trifft den wiederhergestellten
+         Ball genauso wie einen live gelandeten. */
+      antwort2 = antwort2.concat([kommentar({ task_id: T3, kind: 'contribution', actor: 'atlas',
+        recipient: 'peter', reporter: 'atlas', title: 'C: Ergebnis an Peter (Probe).' })]);
+      st2 = await warten(s2, x => liegendText(x) === 'E@nova');
+      zeile('Rückgabe nach dem Verbinden nimmt den Ball weg', liegendText(st2), 'E@nova');
+      zeile('keine Seitenfehler', fehler2.length, 0);
+      if (fehler2.length) console.log('        ' + fehler2.join('\n        '));
+      await q2.close();
+    }
   } finally {
     await b.close();
     tisch.s.close();
