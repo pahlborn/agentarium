@@ -2429,7 +2429,7 @@
 
      Der Bauzeitpunkt kommt beim Bauen aus der Uhr. Von Hand gepflegte
      Datumsangaben sind nach der zweiten Änderung falsch. */
-  var FASSUNG = '77', GEBAUT = '2026-10-24T05:36Z';
+  var FASSUNG = '78', GEBAUT = '2026-10-25T04:12Z';
 
   /* AG-GH-LIVE-001: JEDE TEXTSENKE MASKIERT.
      Seit Live-Daten von aussen kommen (GitHub-Kommentare, one-event.json),
@@ -3670,14 +3670,18 @@
      Schluessel ist Projekt + Lauf + Aufgabe, nicht die Kennung allein --
      zwei Projekte duerfen dieselbe Aufgabenkennung fuehren.
 
+     WIEDERHERSTELLUNG (Schritt 1b): Beim Verbinden liegen Peters noch offene
+     Baelle sofort da, ohne Flug (Adapter aelleFalten, Original
+     __agWiederherstellen).
+
      WANN ER WIEDER GEHT (Zwischenstand Schritt 1): Eine `contribution` des
      Halters an `peter` zu derselben Aufgabe ist gelandet. In Schritt 3 fliegt
      er stattdessen als Ball zu Peter und liegt dort bis zur Annahme (Peters
      Entscheidung vom 24.10.).
 
      NOCH NICHT (bewusst, eigene Schritte): Teilbaelle bei Weitergabe
-     (Schritt 2), Rueckflug als Ball und Annahme (Schritt 3), Wiederherstellung
-     nach Neuladen, Antippen zeigt die Aufgabe. Nichts davon wird hier
+     (Schritt 2), Rueckflug als Ball und Annahme (Schritt 3), Antippen zeigt die
+     Aufgabe. Nichts davon wird hier
      vorweggenommen. Ohne Meldung kein Ball -- nichts wird erfunden. */
   var liegend = [];   /* { schluessel, aufgabe, bei, von, t } */
 
@@ -6757,8 +6761,24 @@
     if (typeof d.abdeckung === 'string') liveAbdeckung = d.abdeckung;
     if (d.grenzen && typeof d.grenzen.selbstannahmen === 'number')
       selbstannahmenGemeldet = d.grenzen.selbstannahmen;
+    /* BALLSPIEL, Schritt 1b: Peters Baelle, die beim Verbinden noch liegen,
+       liegen sofort da -- OHNE FLUG. Derselbe Grundsatz wie fuer die
+       Aufgaben darueber: Was noch offen ist, soll man sehen; die Uebergabe
+       selbst wird nicht nachgespielt. Peter, 25.10.: "Wenn der Ball liegen
+       bleiben wuerde, waere es egal, ob ich zu spaet komme." */
+    var baelleWieder = 0;
+    if (Array.isArray(d.liegend)) d.liegend.forEach(function (L) {
+      if (!L || !L.project_id || !L.run_id || !L.task_id || !nachName[L.bei]) return;
+      var k = ballspielSchluessel(L);
+      for (var j = 0; j < liegend.length; j++)
+        if (liegend[j].schluessel === k) { liegend[j].bei = L.bei; return; }
+      liegend.push({ schluessel: k, aufgabe: L.task_id, bei: L.bei,
+                     von: 'peter', t: 0 });
+      baelleWieder++;
+    });
     wiederhergestellt = n;
-    return { angenommen: n, abgewiesen: abgewiesen, mitKlemme: mitKlemme };
+    return { angenommen: n, abgewiesen: abgewiesen, mitKlemme: mitKlemme,
+             baelle: baelleWieder };
   };
 
   window.__agEreignis = function (e) {

@@ -217,6 +217,10 @@
      ABGESPIELT WIRD NICHTS. Was daraus entsteht, ist ein Zustand, kein
      Ereignis: Ringe, die liegen, ohne Flug, ohne Meldung, ohne Puls. */
   var basisLeben = [];
+  /* Ballspiel, Schritt 1b: Anstoesse von Peter und Rueckgaben an Peter aus
+     der Historie. Daraus wird beim Verbinden gefaltet, welcher Ball noch wo
+     liegt -- ohne Flug. Siehe `baelleFalten`. */
+  var basisBall = [];
   var basisGrenzen = { seitenDeckel: false, konflikte: 0, fremdaussagen: 0,
                        /* SELBSTANNAHME IST KEIN KONFLIKT UND KEINE
                           FREMDAUSSAGE, darum eine eigene Zahl. Ein
@@ -751,6 +755,17 @@
           basisLeben.push({ ev: ev, recorded_at: c.created_at || '',
                             kommentar: Number(cid) || 0 });
         }
+        /* BALLSPIEL, Schritt 1b (AG-MON-BALLSPIEL-001): Peter am 25.10.:
+           "Wenn der Ball liegen bleiben wuerde, waere es egal, ob ich zu
+           spaet komme." Darum werden genau zwei Arten aus der Historie
+           mitgenommen -- Peters Anstoss und die Rueckgabe an Peter. Sie
+           treiben keinen AUFGABENZUSTAND (der Satz oben gilt weiter), nur
+           die Frage, bei wem Peters Ball liegt. */
+        if ((ev.kind === 'handoff' && ev.actor === 'peter') ||
+            (ev.kind === 'contribution' && ev.recipient === 'peter')) {
+          basisBall.push({ ev: ev, recorded_at: c.created_at || '',
+                           kommentar: Number(cid) || 0 });
+        }
         continue;
       }
       bekannte.add(ev.id);
@@ -886,6 +901,37 @@
      alles andere zaehlt nur, wenn Melder und Akteur zusammenfallen. Was
      rueckblickend gilt, muss dasselbe sein wie das, was live gilt -- sonst
      zeigte dieselbe Lage je nach Verbindungszeitpunkt zwei Wahrheiten. */
+  /* BALLSPIEL, Schritt 1b: Welcher von Peters Baellen liegt noch, und wo?
+     Dieselbe Ordnung wie bei der Aufgabenfaltung (Ereigniszeit, dann
+     Erfassung, dann Kommentarnummer). Ein Anstoss legt den Ball beim
+     Empfaenger hin; eine Rueckgabe des HALTERS an Peter nimmt ihn weg --
+     dieselbe Regel wie live (`ballspielGelandet` im Original). Was danach
+     uebrig ist, liegt. */
+  function baelleFalten(liste) {
+    var s = liste.slice().sort(function (p, q) {
+      if (p.ev.occurred_at !== q.ev.occurred_at)
+        return p.ev.occurred_at < q.ev.occurred_at ? -1 : 1;
+      if (p.recorded_at !== q.recorded_at)
+        return p.recorded_at < q.recorded_at ? -1 : 1;
+      return p.kommentar - q.kommentar;
+    });
+    var lage = Object.create(null), reihe = [];
+    s.forEach(function (x) {
+      var e = x.ev;
+      var k = e.project_id + '\u0001' + e.run_id + '\u0001' + e.task_id;
+      if (e.kind === 'handoff' && e.actor === 'peter' && e.recipient) {
+        if (!lage[k]) reihe.push(k);
+        lage[k] = { project_id: e.project_id, run_id: e.run_id,
+                    task_id: e.task_id, bei: e.recipient };
+      } else if (e.kind === 'contribution' && e.recipient === 'peter' &&
+                 lage[k] && lage[k].bei === e.actor) {
+        lage[k] = null;
+      }
+    });
+    return reihe.filter(function (k) { return lage[k]; })
+                .map(function (k) { return lage[k]; });
+  }
+
   function faltenZuZustand(liste) {
     var nachAufgabe = Object.create(null), reihen = [];
     liste.forEach(function (x) {
@@ -1083,7 +1129,7 @@
   async function aufbau(g) {
     Z.kommentare.leeren(); Z.etags = {}; Z.seite = 1; Z.anzahl = 0;
     zahl.basisKommentare = 0; zahl.basisMarkiert = 0;
-    basisLeben.length = 0;
+    basisLeben.length = 0; basisBall.length = 0;
     basisGrenzen = { seitenDeckel: false, konflikte: 0, fremdaussagen: 0,
                      selbstannahmen: 0 };
     zahl.wieder = 0; zahl.wiederKlemmt = 0; zahl.abdeckung = '';
@@ -1127,7 +1173,10 @@
         var w = window.__agWiederherstellen({
           aufgaben: offen, abdeckung: zahl.abdeckung,
           gelesen: zahl.basisKommentare, markiert: zahl.basisMarkiert,
-          grenzen: basisGrenzen, schnitt: Z.schnittIso });
+          grenzen: basisGrenzen, schnitt: Z.schnittIso,
+          /* Ballspiel, Schritt 1b: Peters noch liegende Baelle. Ein
+             aelteres Original kennt das Feld nicht und uebergeht es. */
+          liegend: baelleFalten(basisBall) });
         zahl.wieder = (w && typeof w.angenommen === 'number') ? w.angenommen : 0;
         /* Aus dem RUECKGABEWERT, nicht aus der gefalteten Liste: Was das
            Original wirklich angelegt hat, weiss nur das Original. */
