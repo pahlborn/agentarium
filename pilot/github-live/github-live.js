@@ -247,19 +247,26 @@
   }
   function projekteMelden() {
     if (typeof B.projekte !== 'function') return;
-    B.projekte(verz ? { liste: verz.liste, wahl: wahl, waehlen: projektWaehlen } : null);
+    B.projekte(verz ? { liste: verz.liste, wahl: wahl, waehlen: projektWaehlen,
+                        archiv: archivProjekt, live: archivZurueckLive,
+                        stopp: archivStopp } : null);
   }
   /* Ein Projektwechsel baut den Stand neu auf -- wie "Zurueck zu live":
      Buehne leer, Gedaechtnis leer, Historie neu gelesen und gefiltert. So
      liegt nach dem Wechsel genau das, was im gewaehlten Projekt offen ist. */
-  function projektWaehlen(id) {
-    if (!verz || (id !== '*' && !verz.nach[id]) || id === wahl) return;
+  /* `erzwingen`: neu aufbauen, auch wenn dasselbe Projekt gewaehlt ist --
+     das Original verlangt es, wenn es aus einer Demo zum Projekt
+     zurueckkommt und das Bild deshalb leer ist. Laeuft gerade das Archiv,
+     spielt ein Wechsel das Archiv des neuen Projekts. */
+  function projektWaehlen(id, erzwingen) {
+    if (!verz || (id !== '*' && !verz.nach[id])) return;
+    if (id === wahl && !erzwingen) return;
     wahl = id;
     vermerk('Projektwahl: ' + (id === '*' ? 'alle Projekte' : id));
     projekteMelden();
     if (!token) return;
-    archivUhren.forEach(clearTimeout); archivUhren = [];
-    archivLaeuft = false; archivAnsicht = false;
+    if (archivAnsicht && !erzwingen) { archivProjekt(); return; }
+    archivStopp();
     if (typeof B.neuBeginnen === 'function') B.neuBeginnen();
     bekannte.leeren();
     verbinden(token);
@@ -288,11 +295,14 @@
      liegt -- ohne Flug. Siehe `baelleFalten`. */
   var basisBall = [];
   /* AG-MON-ARCHIV-001: jedes angenommene Ereignis, aus der Historie UND aus
-     dem laufenden Strom -- Stoff fuer "Lauf nachspielen". Nur geprueft
-     angenommene (nach Doppel- und Konfliktpruefung), nichts Erfundenes. */
+     dem laufenden Strom -- Stoff fuer das Archiv. Nur geprueft angenommene
+     (nach Doppel- und Konfliktpruefung), nichts Erfundenes. */
   var archivAlle = [], archivLaeuft = false, archivAnsicht = false,
-      archivUhren = [], archivStand = -1;
-  var ARCHIV_MIN = 900, ARCHIV_MAX = 4000, ARCHIV_RAFFUNG = 30;
+      archivStand = -1, archivTakt = null, archivFolge = [], archivIdx = 0, archivEnde = 0;
+  /* In SEKUNDEN DER MONITORUHR (AG-PROJEKTE-003), nicht der echten Uhr:
+     So beschleunigt das Tempo das Archiv, und Halt haelt es an. */
+  var ARCHIV_START = 0.3, ARCHIV_MIN = 0.9, ARCHIV_MAX = 4, ARCHIV_RAFFUNG = 30,
+      ARCHIV_NACHLAUF = 3;
   var basisGrenzen = { seitenDeckel: false, konflikte: 0, fremdaussagen: 0,
                        /* SELBSTANNAHME IST KEIN KONFLIKT UND KEINE
                           FREMDAUSSAGE, darum eine eigene Zahl. Ein
@@ -448,29 +458,12 @@
                    Sie beendet nichts und beginnt nichts. */
                 'Blockade lässt die Aufgabe liegen; eine Auflösung betrifft genau ' +
                 'diese Blockade und behauptet keinen Beginn und keinen Abschluss. ' + ADAPTER);
-  /* ===================== LAUF NACHSPIELEN (AG-MON-ARCHIV-001) =====================
-     Peter, 25.10.: Wenn das Archiv funktioniert, lassen sich Aenderungen am
-     Monitor ansehen, OHNE dass Atlas' Team dafuer neue Aufgaben erledigt.
-     Der Monitor kennt nur eine Quelle, die Kommentare auf #2. Wer dieselben
-     Ereignisse in derselben Reihenfolge durch DENSELBEN Eingang schickt
-     (`zeigen` -> `__agEreignis`), bekommt dasselbe Verhalten. Genau das
-     geschieht hier -- nicht die Faltung beim Verbinden, die bewusst nichts
-     abspielt. Waehrend des Nachspielens werden echte neue Ereignisse
-     zurueckgestellt, nicht vermischt; "Zurueck zu live" baut den echten
-     Stand neu auf wie beim Verbinden. */
-  var archivZeile = el('div', { 'class': 'ghZ', id: 'agGhArchiv' });
-  var archivLab = el('label', { 'for': 'agGhArchivWahl' }, 'Lauf nachspielen');
-  var archivWahl = el('select', { id: 'agGhArchivWahl' });
-  archivWahl.style.cssText = 'font:inherit;background:#080c13;color:#e8f0ea;' +
-    'border:1px solid #3a4658;border-radius:3px;max-width:100%';
-  var archivAn = el('button', { id: 'agGhArchivAn', type: 'button' }, 'Abspielen');
-  var archivZurueck = el('button', { id: 'agGhArchivZurueck', type: 'button' }, 'Zurück zu live');
-  archivZeile.appendChild(archivLab); archivZeile.appendChild(archivWahl);
-  archivZeile.appendChild(archivAn); archivZeile.appendChild(archivZurueck);
-  var archivText = el('div', { id: 'agGhArchivText' },
-    'Nach dem Verbinden stehen hier die Läufe aus der Vorgeschichte.');
+  /* Das Archiv wird NICHT hier gewaehlt, sondern oben rechts am Projekt
+     (AG-PROJEKTE-003, Peter: "Anzeige und Auswahl sind dasselbe Ding").
+     Die Zeile "Lauf nachspielen" aus AG-MON-ARCHIV-001 stand hier und war
+     eine zweite Stelle fuer dieselbe Sache. */
   [kopf, zeile, satzEl, ablaufZeile, ablaufText, ablaufHilfe, letztesEl, zahlEl, grundEl,
-   archivZeile, archivText, fuss].forEach(function (x) { auf.appendChild(x); });
+   fuss].forEach(function (x) { auf.appendChild(x); });
   tafel.appendChild(auf);
   document.body.appendChild(tafel);
   /* Die Tafel ruehrt nicht im Feld und blendet keine Knoepfe ein. */
@@ -483,16 +476,12 @@
     if (ev.key === 'Enter') verbinden();
   });
   knAn.addEventListener('click', function () { verbinden(); });
-  archivAn.addEventListener('click', function () { archivAbspielen(); });
-  archivZurueck.addEventListener('click', function () { archivZurueckLive(); });
-  archivWahl.addEventListener('change', function (ev) { ev.stopPropagation(); });
   knAus.addEventListener('click', function () { trennen('getrennt — Token aus dem Speicher entfernt.'); });
 
   var PHASE = { getrennt: 'getrennt', aufbau: 'verbinde …', verbunden: 'verbunden',
                 fehler: 'Fehler' };
   function anzeigen(text) {
     if (text != null) Z.fehler = text;
-    archivListeAuffrischen();
     var p = PHASE[Z.phase] || Z.phase;
     var ablauf = ablaufStand();
     ablaufText.textContent = ablauf.text;
@@ -1419,77 +1408,81 @@
     });
     return r.sort(function (a, b) { return a.zuletzt < b.zuletzt ? 1 : -1; });
   }
-  function archivListeAuffrischen() {
-    if (archivStand === archivAlle.length) return;
-    archivStand = archivAlle.length;
-    var vorher = archivWahl.value;
-    archivWahl.innerHTML = '';
-    archivLaeufe().forEach(function (L) {
-      var o = el('option', { value: L.k },
-        L.projekt + ' / ' + L.lauf + ' · ' + L.n + ' Ereignis' + (L.n === 1 ? '' : 'se') +
-        ' · ' + (L.zuletzt ? deutsch(L.zuletzt) + ' ' + L.zuletzt.slice(11, 16) + ' UTC' : ''));
-      archivWahl.appendChild(o);
-    });
-    if (vorher) archivWahl.value = vorher;
-    if (!archivAnsicht && Z.phase === 'verbunden')
-      archivText.textContent = archivAlle.length
-        ? 'Wähle einen Lauf. Er wird mit denselben Ereignissen nachgespielt, gerafft.'
-        : 'Keine Läufe in der Vorgeschichte.';
+  /* ================= ARCHIV JE PROJEKT (AG-PROJEKTE-003) =================
+     Peter, 25.10.: Das Archiv eines Projekts ist seine Projektdoku in
+     abspielbarer Form -- ALLE Laeufe mit dieser Projekt-ID, zeitlich
+     geordnet, parallele Laeufe gleichzeitig. Gewaehlt oben rechts am Projekt
+     (Archiv · Live), mit Tempo, Halt/Weiter und Von vorn.
+
+     DERSELBE EINGANG WIE LIVE (`zeigen` -> `__agEreignis`): Darum steuert
+     ein nachgespielter Lauf den Monitor genau wie ein echter.
+
+     DIE MONITORUHR TAKTET, NICHT DIE ECHTE UHR. Jedes Ereignis bekommt eine
+     Zeit in Sekunden der Monitoruhr (`B.uhr()`, das `zeit` des Originals);
+     weitergegeben wird es, sobald die Uhr sie erreicht. Das Tempo laesst die
+     Uhr schneller laufen, Halt haelt sie an -- beides wirkt also ohne eine
+     Zeile Sonderlogik. Die Pausen werden gerafft: echte Luecke geteilt durch
+     ARCHIV_RAFFUNG, nie unter ARCHIV_MIN (jeder Flug bleibt sichtbar), nie
+     ueber ARCHIV_MAX (niemand wartet eine Nacht). Laeufe, die damals
+     parallel liefen, wechseln sich dadurch so ab wie damals.
+
+     Waehrend des Archivs werden echte neue Ereignisse zurueckgestellt, nicht
+     vermischt; "Live" baut den echten Stand neu auf wie beim Verbinden. */
+  function archivStopp() {
+    if (archivTakt) { clearInterval(archivTakt); archivTakt = null; }
+    var war = archivAnsicht;
+    archivLaeuft = false; archivAnsicht = false; archivFolge = []; archivIdx = 0;
+    if (war && typeof B.archivAnzeige === 'function') B.archivAnzeige(false);
   }
-  function archivAbspielen() {
-    if (archivLaeuft) return;
-    if (Z.phase !== 'verbunden') { archivText.textContent = 'Erst verbinden.'; return; }
-    var k = archivWahl.value;
-    var liste = archivAlle.filter(function (x) {
-      return x.ev.project_id + '\u0001' + x.ev.run_id === k; }).sort(archivOrdnung);
-    if (!liste.length) { archivText.textContent = 'Kein Lauf gewählt.'; return; }
-    if (typeof B.neuBeginnen !== 'function' || !B.neuBeginnen()) {
-      archivText.textContent = 'Das Original kann nicht neu beginnen (ältere Fassung).';
-      return;
+  function archivProjekt() {
+    if (Z.phase !== 'verbunden') { vermerk('Archiv: erst verbinden'); return false; }
+    if (typeof B.uhr !== 'function' || typeof B.abspielen !== 'function' ||
+        typeof B.archivAnzeige !== 'function' || typeof B.neuBeginnen !== 'function') {
+      vermerk('Archiv: das Original ist zu alt'); return false;
     }
-    archivUhren.forEach(clearTimeout); archivUhren = [];
-    archivAnsicht = true; archivLaeuft = true; aktuellerLauf = '';
-    var name = liste[0].ev.project_id + ' / ' + liste[0].ev.run_id;
-    archivText.textContent = 'Nachspielen: ' + name + ' · ' + liste.length + ' Ereignisse …';
+    var liste = archivAlle.filter(function (x) { return sichtbar(x.ev); }).sort(archivOrdnung);
     var t = 0, vorher = NaN;
-    liste.forEach(function (x, i) {
+    archivFolge = liste.map(function (x, i) {
       var jetzt = Date.parse(x.ev.occurred_at);
-      var luecke = (isNaN(vorher) || isNaN(jetzt)) ? 0 : Math.max(0, jetzt - vorher);
-      /* Die Reihenfolge bleibt, die Pausen werden gerafft: echte Luecke
-         geteilt durch ARCHIV_RAFFUNG, aber nie unter ARCHIV_MIN (damit
-         jeder Flug zu sehen ist) und nie ueber ARCHIV_MAX (damit niemand
-         eine Stunde auf das naechste Ereignis wartet). */
-      t += (i === 0) ? 300 : Math.min(ARCHIV_MAX, Math.max(ARCHIV_MIN, luecke / ARCHIV_RAFFUNG));
+      var luecke = (isNaN(vorher) || isNaN(jetzt)) ? 0 : Math.max(0, jetzt - vorher) / 1000;
+      t += (i === 0) ? ARCHIV_START
+                     : Math.min(ARCHIV_MAX, Math.max(ARCHIV_MIN, luecke / ARCHIV_RAFFUNG));
       if (!isNaN(jetzt)) vorher = jetzt;
-      archivUhren.push(setTimeout(function () {
-        if (!archivLaeuft) return;
-        zeigen(x.ev, 'Archiv');
-        archivText.textContent = 'Nachspielen: ' + name + ' · ' + (i + 1) + ' von ' + liste.length;
-        /* "Fertig" erst, wenn der letzte Ball gelandet ist -- der Flug
-           beginnt ein Bild nach der Uebergabe und dauert. */
-        if (i === liste.length - 1) archivUhren.push(setTimeout(function () {
-          if (!archivLaeuft) return;
-          archivLaeuft = false;
-          archivText.textContent = 'Nachgespielt: ' + name + ' · ' + liste.length +
-            ' Ereignisse. Echte neue Ereignisse sind zurückgestellt — ' +
-            '„Zurück zu live" zeigt wieder den echten Stand.';
-        }, 3000));
-      }, t));
+      return { t: t, ev: x.ev };
     });
+    if (archivTakt) { clearInterval(archivTakt); archivTakt = null; }
+    B.neuBeginnen();
+    archivAnsicht = true; archivLaeuft = archivFolge.length > 0;
+    archivIdx = 0; aktuellerLauf = '';
+    /* "Durchgespielt" erst, wenn der letzte Ball gelandet sein kann. */
+    archivEnde = t + ARCHIV_NACHLAUF;
+    B.archivAnzeige(true, function () { archivProjekt(); });
+    B.abspielen();
+    vermerk('Archiv: ' + archivFolge.length + ' Ereignisse, ' +
+            (wahl === '*' ? 'alle Projekte' : wahl));
+    archivTakt = setInterval(archivSchritt, 100);
+    return true;
+  }
+  function archivSchritt() {
+    if (!archivAnsicht) return;
+    var u = B.uhr();
+    while (archivIdx < archivFolge.length && archivFolge[archivIdx].t <= u)
+      zeigen(archivFolge[archivIdx++].ev, 'Archiv');
+    if (archivLaeuft && archivIdx >= archivFolge.length && u >= archivEnde) {
+      archivLaeuft = false;
+      vermerk('Archiv: durchgespielt');
+      clearInterval(archivTakt); archivTakt = null;
+    }
   }
   function archivZurueckLive() {
-    archivUhren.forEach(clearTimeout); archivUhren = [];
     var warAnsicht = archivAnsicht;
-    archivLaeuft = false; archivAnsicht = false;
-    if (!token) { archivText.textContent = 'Nicht verbunden.'; return; }
+    archivStopp();
+    if (!warAnsicht || !token) return;
     /* Die Buehne ist danach leer, also gibt es nichts mehr, das vor einem
        zweiten Flug zu schuetzen waere: Das Gedaechtnis wird mit geleert, und
        der Neuaufbau stellt ALLES Offene wieder her (Aufgaben und Baelle). */
-    if (warAnsicht && typeof B.neuBeginnen === 'function') {
-      B.neuBeginnen();
-      bekannte.leeren();
-    }
-    archivText.textContent = 'Zurück zu live: Stand wird neu aufgebaut …';
+    if (typeof B.neuBeginnen === 'function') B.neuBeginnen();
+    bekannte.leeren();
     /* Dasselbe wie Verbinden, nur ohne erneute Eingabe: das Token geht als
        Wert weiter, nicht ueber das Eingabefeld. */
     verbinden(token);
@@ -1518,9 +1511,8 @@
   function trennen(text) {
     gen++;
     token = null;
-    /* Ein laufendes Nachspielen endet mit der Verbindung. */
-    archivUhren.forEach(clearTimeout); archivUhren = [];
-    archivLaeuft = false; archivAnsicht = false;
+    /* Ein laufendes Archiv endet mit der Verbindung. */
+    archivStopp();
     if (ctrl) { try { ctrl.abort(); } catch (x) {} }
     ctrl = null;
     clearTimeout(uhr); uhr = null;
@@ -1550,7 +1542,8 @@
         pausiert: Z.pausiert, fehler: Z.fehler, grund: letzterGrund, zahl: zahl,
         letztes: letztes, bekannteIds: bekannte.groesse(), log: log,
         archiv: { laeuft: archivLaeuft, ansicht: archivAnsicht,
-                  ereignisse: archivAlle.length, laeufe: archivLaeufe().length },
+                  ereignisse: archivAlle.length, laeufe: archivLaeufe().length,
+                  folge: archivFolge.length, gezeigt: archivIdx },
         projekte: { verzeichnis: !!verz, wahl: wahl,
                     liste: verz ? verz.liste.map(function (p) { return p.id; }) : [] } }));
     }

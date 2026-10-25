@@ -2467,7 +2467,7 @@
 
      Der Bauzeitpunkt kommt beim Bauen aus der Uhr. Von Hand gepflegte
      Datumsangaben sind nach der zweiten Änderung falsch. */
-  var FASSUNG = '81', GEBAUT = '2026-10-25T14:21Z';
+  var FASSUNG = '82', GEBAUT = '2026-10-25T15:10Z';
 
   /* AG-GH-LIVE-001: JEDE TEXTSENKE MASKIERT.
      Seit Live-Daten von aussen kommen (GitHub-Kommentare, one-event.json),
@@ -5935,7 +5935,7 @@
   function knoepfeSetzen() {
     var M = modus();
     var v = document.getElementById('agVorn');
-    if (v) v.style.display = M.vorn ? '' : 'none';
+    if (v) v.style.display = (M.vorn || ghArchiv) ? '' : 'none';
     /* „Halt" braucht etwas, das läuft. Im Live-Betrieb ohne Verbindung
        gibt es das nicht, also gibt es den Knopf auch nicht — dieselbe
        Regel wie bei „Von vorn". Ein Knopf, der nichts tut, kostet mehr als
@@ -5995,6 +5995,15 @@
      wie bisher. Bleibt ueber `modusSetzen` hinweg stehen: Es beschreibt die
      Quelle, nicht den Lauf. */
   var ghProjekte = null;
+  /* AG-PROJEKTE-003: Laeuft gerade das Archiv eines ECHTEN Projekts?
+     `null` oder { vorn: fn }. Das Original bleibt dabei im Livebetrieb (der
+     Adapter spielt durch denselben Eingang), zeigt aber, was ein Archiv
+     braucht: Tempo, Halt/Weiter, Von vorn. */
+  var ghArchiv = null;
+  /* Ist im Blatt eine DEMO gewaehlt statt eines echten Projekts? Nur von
+     Bedeutung, wenn es echte Projekte gibt (ghProjekte). Echte Projekte
+     haben Archiv und Live, Demos Demo und Archiv (Peter, 25.10.). */
+  var demoGewaehlt = false;
   function ghProjektName() {
     if (!ghProjekte) return '';
     if (ghProjekte.wahl === '*') return 'Alle Projekte';
@@ -6043,7 +6052,12 @@
     /* AG-PROJEKTE-002: Oben rechts steht live die PROJEKTWAHL ("Alle
        Projekte" oder der Projektname) -- Anzeige und Auswahl sind dasselbe
        Ding. Der Lauf steht weiter unten rechts. */
-    var ghName = (MODUS === 'live') ? ghProjektName() : '';
+    /* AG-PROJEKTE-003: Ein echtes Projekt ist gewaehlt, solange es echte
+       Projekte gibt und keine Demo angetippt wurde. Im Archiv steht das
+       dazu, damit niemand Nachgespieltes fuer Live haelt. */
+    var echtKontext = !!(ghProjekte && ghProjekte.liste.length && !demoGewaehlt);
+    var ghName = (MODUS === 'live' && echtKontext)
+      ? ghProjektName() + (ghArchiv ? ' · Archiv' : '') : '';
     projektEl.textContent = ghName || K.projekt || '';
     /* Beim Zeigen auf den Namen steht da, was BALL heißt und welche
        Fassung läuft. Im Ruhezustand ist es weg — der Monitor soll das Feld
@@ -6055,14 +6069,16 @@
       'dahinter: Aufgaben, Zustände und Übergaben zwischen Mensch und ' +
       'LLM-Agenten.<br><b>Fassung ' + FASSUNG + ' &middot; ' + GEBAUT + '</b>';
     var h = '';
-    var echt = (MODUS === 'live' && ghProjekte && ghProjekte.liste.length);
+    /* Die echten Projekte stehen IMMER da, sobald es sie gibt -- auch
+       waehrend eine Demo laeuft, sonst kaeme man nicht zurueck. */
+    var echt = !!(ghProjekte && ghProjekte.liste.length);
     if (echt) {
       h += '<p class="wUeber">Projekte</p><ul class="wProjekte">' +
-           '<li data-gh="*"' + (ghProjekte.wahl === '*' ? ' class="hier"' : '') +
+           '<li data-gh="*"' + (echtKontext && ghProjekte.wahl === '*' ? ' class="hier"' : '') +
            '>Alle Projekte</li>';
       ghProjekte.liste.forEach(function (p) {
         h += '<li data-gh="' + esc(p.id) + '"' +
-             (ghProjekte.wahl === p.id ? ' class="hier"' : '') + '><b>' +
+             (echtKontext && ghProjekte.wahl === p.id ? ' class="hier"' : '') + '><b>' +
              esc(p.kuerzel) + '</b>' + esc(p.name) + '</li>';
       });
       h += '</ul>';
@@ -6073,8 +6089,10 @@
       STUECKE.forEach(function (S, i) {
         /* Im Livebetrieb ist KEIN aufgezeichnetes Stueck das aktuelle.
            Die Markierung blieb sonst auf dem zuletzt gespielten stehen und
-           sagte damit genau das Falsche. */
-        h += '<li' + ((i === stueckNr && MODUS !== 'live') ? ' class="hier"' : '') +
+           sagte damit genau das Falsche. Mit echten Projekten zaehlt, ob
+           eine Demo angetippt wurde. */
+        var demoHier = echt ? demoGewaehlt : (MODUS !== 'live');
+        h += '<li' + ((i === stueckNr && demoHier) ? ' class="hier"' : '') +
              ' data-nr="' + i + '">' + esc(S.projekt || S.titel || ('Stück ' + (i+1))) +
              '</li>';
       });
@@ -6089,12 +6107,21 @@
     var besch = (MODUS === 'live') ? (K.was || '') : (STUECK.beschreibung || '');
     if (besch) h += '<p>' + esc(besch) + '</p>';
 
+    /* AG-PROJEKTE-003, Peter 25.10.: Echte Projekte haben ARCHIV und LIVE,
+       Demos haben DEMO und ARCHIV. Ohne echte Projekte (Seite ohne
+       GitHub-Anschluss) bleibt es bei allen dreien. */
+    var modi = echtKontext ? ['archiv', 'live'] : (echt ? ['demo', 'archiv'] : ['demo', 'archiv', 'live']);
+    var aktiv = echtKontext ? (ghArchiv ? 'archiv' : 'live') : MODUS;
+    var wasText = (echtKontext && ghArchiv)
+      ? 'Spielt alle Läufe des Projekts ab, wie sie stattfanden — gerafft, mit Tempo. ' +
+        'Neue Ereignisse warten, bis du wieder „Live" wählst.'
+      : (echtKontext ? MODI.live.was : modus().was);
     h += '<ul class="wModi">';
-    ['demo', 'archiv', 'live'].forEach(function (m) {
-      h += '<li' + (m === MODUS ? ' class="hier"' : '') + ' data-modus="' + m +
+    modi.forEach(function (m) {
+      h += '<li' + (m === aktiv ? ' class="hier"' : '') + ' data-modus="' + m +
            '">' + MODI[m].wort + '</li>';
     });
-    h += '</ul><p class="wModusWas">' + modus().was + '</p>';
+    h += '</ul><p class="wModusWas">' + wasText + '</p>';
 
     wasEl.innerHTML = h;
     projektEl.classList.add('fragbar');
@@ -6117,21 +6144,50 @@
   wasEl.addEventListener('click', function (e) {
     /* Die Betriebsart zuerst: Sie steht im selben Blatt wie die Projekte,
        und ein Klick darauf soll das Blatt nicht schließen. */
+    var echtKontext = !!(ghProjekte && ghProjekte.liste.length && !demoGewaehlt);
     var lm = e.target.closest ? e.target.closest('li[data-modus]') : null;
+    /* AG-PROJEKTE-003: Bei einem echten Projekt entscheidet der ADAPTER
+       ueber Archiv und Live -- er haelt die Quelle. Danach geht das Blatt
+       zu, damit man das Feld sieht. */
+    if (lm && echtKontext) {
+      var mm = lm.getAttribute('data-modus');
+      if (mm === 'archiv' && typeof ghProjekte.archiv === 'function') ghProjekte.archiv();
+      if (mm === 'live' && typeof ghProjekte.live === 'function') ghProjekte.live();
+      wasEl.classList.remove('auf');
+      return;
+    }
     if (lm) { modusSetzen(lm.getAttribute('data-modus'));
               wasEl.classList.add('auf'); return; }
     /* AG-PROJEKTE-002: ein echtes Projekt (oder "Alle") -- die Wahl macht
        der Adapter, denn nur er kennt die Quelle. Danach geht das Blatt zu,
-       wie bei den Demos. */
+       wie bei den Demos. Kommt man aus einer Demo zurueck, ist das Bild
+       leer: dann zurueck in den Livebetrieb und neu aufbauen. */
     var lg = e.target.closest ? e.target.closest('li[data-gh]') : null;
     if (lg && ghProjekte && typeof ghProjekte.waehlen === 'function') {
-      ghProjekte.waehlen(lg.getAttribute('data-gh'));
+      if (demoGewaehlt) {
+        demoGewaehlt = false;
+        if (MODUS !== 'live') modusSetzen('live');
+        ghProjekte.waehlen(lg.getAttribute('data-gh'), true);
+      } else {
+        ghProjekte.waehlen(lg.getAttribute('data-gh'));
+      }
+      kopfSetzen();
       wasEl.classList.remove('auf');
       return;
     }
     var li = e.target.closest ? e.target.closest('li[data-nr]') : null;
     if (li) {
       var nr = +li.getAttribute('data-nr');
+      /* AG-PROJEKTE-003: Mit echten Projekten heisst eine Demo antippen,
+         sie anzusehen -- ein laufendes Projektarchiv endet dabei. */
+      if (ghProjekte && ghProjekte.liste.length && !demoGewaehlt) {
+        if (ghArchiv && typeof ghProjekte.stopp === 'function') ghProjekte.stopp();
+        demoGewaehlt = true;
+        stueckNr = nr; STUECK = STUECKE[nr];
+        modusSetzen('demo');
+        wasEl.classList.remove('auf');
+        return;
+      }
       if (nr !== stueckNr) { stueckNr = nr; STUECK = STUECKE[nr];
                              kopfSetzen(); zurueckAufAnfang(); }
       /* NACH DER WAHL GEHT DAS BLATT ZU.
@@ -7234,10 +7290,12 @@
       '<h4>Betriebsarten</h4><table>' +
       was('Demo', 'Ein ausgedachtes Stück (NACHTPOST V1/V2), läuft in ' +
           'Schleife.', true, '') +
-      was('Archiv', 'Ein Projekt von Anfang bis Ende abspielen, mit Tempo. ' +
-          'Heute nur für die Demo-Stücke.', true, 'echte Projekte geplant') +
+      was('Archiv', 'Ein Projekt von Anfang bis Ende abspielen: alle seine ' +
+          'Läufe, parallele gleichzeitig, mit Tempo, Halt und Von vorn.', true, '') +
       was('Live', 'Was gerade geschieht. Läufe können parallel laufen.', true, '') +
-      '</table>';
+      '</table>' +
+      '<p class="gFuss">Oben rechts wählst du: ein echtes Projekt hat ' +
+      '<b>Archiv · Live</b>, eine Demo hat <b>Demo · Archiv</b>.</p>';
 
     legende.innerHTML = blick +
       '<details class="gMehr"><summary>Einzelheiten: Name, Gesetz, ' +
@@ -7929,7 +7987,26 @@
         ghProjekte = (d && Array.isArray(d.liste)) ? {
           liste: d.liste.filter(function (p) { return p && p.id && p.kuerzel && p.name; }),
           wahl: (typeof d.wahl === 'string') ? d.wahl : '*',
-          waehlen: d.waehlen } : null;
+          waehlen: d.waehlen, archiv: d.archiv, live: d.live, stopp: d.stopp } : null;
+        kopfSetzen();
+        return true;
+      },
+      /* AG-PROJEKTE-003: Die Uhr, nach der der Adapter das Archiv taktet --
+         dieselbe, die das Tempo beschleunigt und Halt anhaelt. */
+      uhr: function () { return zeit; },
+      /* Startet die Uhr fuer das Archiv. Im Livebetrieb steht sie, bis das
+         erste Ereignis kommt; das Archiv soll aber sofort laufen. */
+      abspielen: function () {
+        if (MODUS !== 'live') return false;
+        laeuft = true;
+        knoepfeSetzen();
+        return true;
+      },
+      /* An/aus: das Archiv eines echten Projekts. Aus heisst auch: Tempo
+         zurueck auf Normalablauf (das macht `tempoZeigen`). */
+      archivAnzeige: function (an, vorn) {
+        ghArchiv = an ? { vorn: vorn } : null;
+        knoepfeSetzen();
         kopfSetzen();
         return true;
       }
@@ -7988,6 +8065,9 @@
   })();
 
   document.getElementById('agVorn').addEventListener('click', function () {
+    /* Im Archiv eines echten Projekts beginnt der ADAPTER von vorn: Er
+       haelt die Folge, das Original nur das Bild. */
+    if (ghArchiv && typeof ghArchiv.vorn === 'function') { ghArchiv.vorn(); return; }
     zurueckAufAnfang();
   });
 
@@ -8030,7 +8110,9 @@
      wenn sich wirklich etwas aendert. */
   function tempoZeigen() {
     if (!tempoEl) return;
-    var soll = (MODUS !== 'live');
+    /* AG-PROJEKTE-003: auch im Archiv eines echten Projekts -- dort gibt es
+       etwas zu beschleunigen, obwohl das Original im Livebetrieb steht. */
+    var soll = (MODUS !== 'live') || !!ghArchiv;
     if (tempoEl.hidden === soll) tempoEl.hidden = !soll;
     /* Beim Wechsel in den Livebetrieb zurueck auf Normalablauf: Sonst
        stuende die Uhr eines unsichtbaren Reglers weiter auf 10x. */

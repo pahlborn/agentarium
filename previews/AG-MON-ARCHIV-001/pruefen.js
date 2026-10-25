@@ -1,29 +1,35 @@
-/* AG-MON-ARCHIV-001 — ein echter Lauf aus GitHub, nachgespielt durch denselben Eingang.
+/* AG-MON-ARCHIV-001 — das Archiv eines Projekts, nachgespielt durch denselben Eingang.
 
    Aufruf:            node previews/AG-MON-ARCHIV-001/pruefen.js
    Eigener Browser:   AG_CHROMIUM=/pfad/zur/datei node previews/...
    Aufnahmen ablegen: AG_AUFNAHMEN=/verzeichnis node previews/...
    Rueckgabe: 0 = bestanden, 1 = Abweichung, 2 = ungeprueft.
 
-   PETER, 25.10.: Wenn das Archiv funktioniert, lassen sich Aenderungen am
-   Monitor ansehen, OHNE dass Atlas' Team dafuer neue Aufgaben erledigt.
-   Versprechen: Ein nachgespielter Lauf steuert den Monitor wie live, weil er
-   denselben Eingang nimmt (`zeigen` -> `__agEreignis`).
+   PETER, 25.10.: Das Archiv eines Projekts ist seine Projektdoku in
+   abspielbarer Form -- alle Laeufe mit dieser Projekt-ID, zeitlich geordnet,
+   parallele gleichzeitig. Gewaehlt oben rechts: echte Projekte haben
+   Archiv · Live, Demos Demo · Archiv. Tempo, Halt/Weiter, Von vorn.
+   Fassung 79 hatte dafuer eine Zeile "Lauf nachspielen" in der GitHub-Tafel;
+   seit AG-PROJEKTE-003 (Fassung 82) sitzt es an der Projektwahl.
 
-     A  nach dem Verbinden: zwei Laeufe in der Auswahl; der offene Ball des
-        zweiten Laufs liegt (Schritt 1b), nichts fliegt
-     B  Lauf 1 abspielen: Neubeginn (der Ball von Lauf 2 ist weg), dann die
-        vier Baelle in der echten Reihenfolge, Peters Ball LIEGT bei atlas,
-        solange der Lauf offen ist, und geht mit der Rueckgabe
-     C  waehrend des Nachspielens kommt ein ECHTES neues Ereignis: es wird
-        nicht hineingemischt
-     D  "Zurueck zu live": der echte Stand ist wieder da (Ball von Lauf 2 und
-        der zurueckgestellte neue Ball), ohne Flug
-     E  Trennen und wieder verbinden in derselben Sitzung: alle Laeufe zur
-        Auswahl, die Baelle liegen weiter und nicht doppelt
+     A  live nach dem Verbinden: offener Ball liegt; das Blatt bietet bei
+        einem echten Projekt genau Archiv · Live
+     B  Archiv "Alle Projekte": Neubeginn, Fluege in echter Reihenfolge,
+        PARALLELE Laeufe verschraenkt wie damals, ein nicht verzeichnetes
+        Projekt fehlt; Tempo und Von vorn sind zu sehen; ein echtes neues
+        Ereignis wird nicht hineingemischt
+     C  Halt haelt das Archiv an, Weiter setzt fort; Tempo 10x spielt
+        messbar schneller (Von vorn); ein neuer Durchgang spielt auch, was
+        inzwischen gemeldet wurde
+     D  ein Projekt waehlen, waehrend das Archiv laeuft: nur dessen Archiv
+     E  Live: der echte Stand, auch das Zurueckgestellte; Tempo und Von vorn
+        wieder weg
+     F  Trennen und wieder verbinden in derselben Sitzung: Baelle bleiben,
+        nicht doppelt
+     G  eine Demo antippen und zurueck zum Projekt: wieder der echte Stand
 
-   GRENZEN: Attrappe mit Scheintoken, Probekoerper. Belegt das Abspielen im
-   Monitor, keine Abnahme am iPad.                                          */
+   GRENZEN: Attrappe mit Scheintoken, Probekoerper, Verzeichnis als
+   Attrappe. Keine Abnahme am iPad.                                         */
 'use strict';
 const fs = require('fs'), path = require('path'), http = require('http'), os = require('os');
 
@@ -31,14 +37,20 @@ const ZIEL = process.env.AG_ZIEL || 'pilot/github-live';
 const WURZEL = path.resolve(__dirname, '..', '..', ...ZIEL.split('/'));
 const AUFNAHMEN = process.env.AG_AUFNAHMEN ||
   fs.mkdtempSync(path.join(os.tmpdir(), 'ag-mon-archiv-'));
-const L1 = 'AG-ARCHIV-PROBE-1', L2 = 'AG-ARCHIV-PROBE-2', L3 = 'AG-ARCHIV-PROBE-3';
+const VERZEICHNIS = {
+  schema: 'agentarium.projektverzeichnis.v1', gepflegt_von: 'atlas',
+  projekte: [
+    { id: 'agentarium', kuerzel: 'AG', name: 'Agentarium', repo: 'pahlborn/agentarium' },
+    { id: 'gt40', kuerzel: 'GT', name: 'GT40 Baubuch', repo: null }
+  ]
+};
 
 let fehler = 0;
 function zeile(w, ist, soll) {
   const ok = ist === soll;
   if (!ok) fehler++;
-  console.log('  ' + (ok ? 'ok  ' : 'FEHL') + '  ' + w.padEnd(48) +
-              String(ist).padEnd(26) + (ok ? '' : '(erwartet ' + soll + ')'));
+  console.log('  ' + (ok ? 'ok  ' : 'FEHL') + '  ' + w.padEnd(52) +
+              String(ist).padEnd(30) + (ok ? '' : '(erwartet ' + soll + ')'));
 }
 function ungeprueft(grund) { console.log('\nUNGEPRÜFT: ' + grund); process.exit(2); }
 
@@ -90,7 +102,7 @@ function kommentar(zeit, ereignis) {
   nr++;
   const e = Object.assign({
     schema: 'agentarium.github-event.v1', id: 'AG-ARCHIV-EREIGNIS-' + nr,
-    project_id: 'agentarium', occurred_at: zeit,
+    occurred_at: zeit, reporter: 'atlas',
     source_evidence: 'reported_checkpoint', source_tool_id: 'previews/AG-MON-ARCHIV-001'
   }, ereignis);
   return { id: 9920000000 + nr, created_at: zeit,
@@ -102,9 +114,34 @@ const stand = (s) => s.evaluate(() => (window.__agStand && window.__agStand()) |
 const gh = (s) => s.evaluate(() => (window.__agGithub && window.__agGithub.stand()) || {});
 const liegendText = (st) => (st.liegend || []).map(l => l.aufgabe + '@' + l.bei).sort().join(',');
 const vor = (min) => new Date(Date.now() - min * 60000).toISOString();
+const kopf = (s) => s.evaluate(() => (document.getElementById('agProjekt') || {}).textContent || '');
+const modi = (s) => s.evaluate(() => [...document.querySelectorAll('#agWas .wModi li')]
+  .map(li => li.getAttribute('data-modus') + (li.classList.contains('hier') ? '*' : '')).join(' '));
+const sichtbar = (s, id) => s.evaluate(i => { const e = document.getElementById(i);
+  return !!e && getComputedStyle(e).display !== 'none'; }, id);
+const tippen = (s, sel) => s.evaluate(q => { const e = document.querySelector(q);
+  if (e) e.click(); return !!e; }, sel);
+
+/* Bis das Archiv durch ist: alle Fluege in der Reihenfolge ihres ersten
+   Auftretens, und wie lange es (echte Zeit) gedauert hat. */
+async function archivVerfolgen(s, maxMs, beiJedem) {
+  const folge = [], gesehen = new Set(), t0 = Date.now();
+  let st = {}, g = {};
+  for (let i = 0; i * 100 < maxMs; i++) {
+    await s.waitForTimeout(100);
+    st = await stand(s); g = await gh(s);
+    for (const f of (st.fliegend || [])) {
+      const k = f.von + '→' + f.an;
+      if (!gesehen.has(k)) { gesehen.add(k); folge.push(k); }
+    }
+    if (beiJedem) await beiJedem(st, g);
+    if (g.archiv && !g.archiv.laeuft && !(st.fliegend || []).length && i > 3) break;
+  }
+  return { folge, gesehen, ms: Date.now() - t0, st, g };
+}
 
 (async () => {
-  console.log('AG-MON-ARCHIV-001 — ein echter Lauf, nachgespielt durch denselben Eingang\n');
+  console.log('AG-MON-ARCHIV-001 — das Archiv eines Projekts, durch denselben Eingang\n');
   let chromium = null;
   try { chromium = require('playwright').chromium; } catch (e) {}
   const br = chromiumPfad(chromium);
@@ -120,23 +157,29 @@ const vor = (min) => new Date(Date.now() - min * 60000).toISOString();
     const s = await q.newPage();
     const seitenFehler = [];
     s.on('pageerror', e => seitenFehler.push(String(e.message).slice(0, 110)));
-    /* Die Vorgeschichte: Lauf 1 ist abgeschlossen (5 Ereignisse, je etwa eine
-       Minute auseinander), Lauf 2 hat einen offenen Ball bei nova. */
+    /* Die Vorgeschichte: Lauf AG-L1 (agentarium) ist abgeschlossen; Lauf
+       GT-L2 (gt40) lief PARALLEL dazu und ist offen (Ball bei nova); dazu
+       ein Ereignis eines nicht verzeichneten Projekts mitten darin. */
     let antwort = [
-      kommentar(vor(30), { run_id: L1, task_id: 'A1', kind: 'handoff', actor: 'peter',
-        recipient: 'atlas', reporter: 'atlas', title: 'Peter gibt Atlas A1 (Probe).' }),
-      kommentar(vor(29), { run_id: L1, task_id: 'A1-F', kind: 'handoff', actor: 'atlas',
-        recipient: 'forge', reporter: 'atlas', title: 'Atlas gibt Forge Arbeit an A1 (Probe).' }),
-      kommentar(vor(28.9), { run_id: L1, task_id: 'A1-F', kind: 'assigned', actor: 'atlas',
-        recipient: 'forge', reporter: 'atlas', title: 'Atlas vergibt A1-F an Forge (Probe).' }),
-      kommentar(vor(28), { run_id: L1, task_id: 'A1-F', kind: 'contribution', actor: 'forge',
-        recipient: 'atlas', reporter: 'forge', title: 'Forge gibt A1-F zurück (Probe).' }),
-      kommentar(vor(27), { run_id: L1, task_id: 'A1', kind: 'contribution', actor: 'atlas',
-        recipient: 'peter', reporter: 'atlas', title: 'Atlas gibt Peter A1 (Probe).' }),
-      kommentar(vor(10), { run_id: L2, task_id: 'B1', kind: 'handoff', actor: 'peter',
-        recipient: 'nova', reporter: 'atlas', title: 'Peter gibt B1, liegt bei nova (Probe).' })
+      kommentar(vor(30), { project_id: 'agentarium', run_id: 'AG-L1', task_id: 'A1',
+        kind: 'handoff', actor: 'peter', recipient: 'atlas', title: 'Peter gibt Atlas A1.' }),
+      kommentar(vor(29), { project_id: 'agentarium', run_id: 'AG-L1', task_id: 'A1-F',
+        kind: 'handoff', actor: 'atlas', recipient: 'forge', title: 'Atlas gibt Forge A1-F.' }),
+      kommentar(vor(28.9), { project_id: 'agentarium', run_id: 'AG-L1', task_id: 'A1-F',
+        kind: 'assigned', actor: 'atlas', recipient: 'forge', title: 'Atlas vergibt A1-F.' }),
+      kommentar(vor(28.5), { project_id: 'gt40', run_id: 'GT-L2', task_id: 'B1',
+        kind: 'handoff', actor: 'peter', recipient: 'nova', title: 'Peter gibt B1 (gt40).' }),
+      kommentar(vor(28.2), { project_id: 'ballbrause', run_id: 'BB-1', task_id: 'X1',
+        kind: 'handoff', actor: 'peter', recipient: 'lot', title: 'Nicht verzeichnet.' }),
+      kommentar(vor(28), { project_id: 'agentarium', run_id: 'AG-L1', task_id: 'A1-F',
+        kind: 'contribution', actor: 'forge', recipient: 'atlas', reporter: 'forge',
+        title: 'Forge gibt A1-F zurück.' }),
+      kommentar(vor(27), { project_id: 'agentarium', run_id: 'AG-L1', task_id: 'A1',
+        kind: 'contribution', actor: 'atlas', recipient: 'peter', title: 'Atlas gibt Peter A1.' })
     ];
     let abrufe = 0;
+    await s.route('**/projekte/verzeichnis.json', r => r.fulfill({
+      status: 200, contentType: 'application/json', body: JSON.stringify(VERZEICHNIS) }));
     await s.route('**api.github.com/**', r => {
       abrufe++;
       r.fulfill({ status: 200, contentType: 'application/json',
@@ -150,99 +193,135 @@ const vor = (min) => new Date(Date.now() - min * 60000).toISOString();
     await s.fill('#agGhToken', 'AGMONARCHIV001_Scheintoken_0123456789ab');
     await s.click('#agGhAn');
     await s.waitForTimeout(3500);
-    const tafel = (offen) => s.evaluate(o => {
-      const d = document.getElementById('agGhAuf'); if (d) d.open = o; }, offen);
+    const tafelZu = () => s.evaluate(() => {
+      const d = document.getElementById('agGhAuf'); if (d) d.open = false; });
+    await tafelZu();
 
-    console.log('A — Nach dem Verbinden');
+    console.log('A — Live nach dem Verbinden');
     let st = await stand(s), g = await gh(s);
-    zeile('verbunden', g.phase, 'verbunden');
-    zeile('zwei Läufe zur Auswahl', g.archiv ? g.archiv.laeufe : null, 2);
-    zeile('Auswahlliste hat zwei Einträge',
-          await s.evaluate(() => document.querySelectorAll('#agGhArchivWahl option').length), 2);
-    zeile('offener Ball von Lauf 2 liegt (1b)', liegendText(st), 'B1@nova');
-    zeile('nichts fliegt', (st.fliegend || []).length, 0);
+    zeile('verbunden, alle Projekte', g.phase + '/' + (g.projekte && g.projekte.wahl), 'verbunden/*');
+    zeile('offener Ball von GT-L2 liegt', liegendText(st), 'B1@nova');
+    zeile('Blatt bietet Archiv · Live (Live gewählt)', await modi(s), 'archiv live*');
+    zeile('keine Zeile „Lauf nachspielen" mehr in der Tafel',
+          await s.evaluate(() => !!document.getElementById('agGhArchiv')), false);
+    zeile('Tempo live nicht zu sehen', await sichtbar(s, 'agTempo'), false);
 
-    console.log('\nB — Lauf 1 abspielen');
-    await tafel(true);
-    await s.selectOption('#agGhArchivWahl', 'agentarium\u0001' + L1);
-    await s.click('#agGhArchivAn');
-    await tafel(false);
+    console.log('\nB — Archiv „Alle Projekte"');
+    zeile('Archiv antippen', await tippen(s, '#agWas li[data-modus="archiv"]'), true);
     await s.waitForTimeout(150);
     st = await stand(s);
-    zeile('Neubeginn: der Ball von Lauf 2 ist weg', liegendText(st), '');
-    /* C: waehrend des Nachspielens kommt ein echtes neues Ereignis. */
-    antwort = antwort.concat([kommentar(new Date().toISOString(),
-      { run_id: L3, task_id: 'C1', kind: 'handoff', actor: 'peter', recipient: 'scout',
-        reporter: 'atlas', title: 'Echt neu während des Nachspielens (Probe).' })]);
-    const folge = [], gesehen = new Set();
-    let lagBeiAtlas = false, bild = false;
-    for (let i = 0; i < 220; i++) {
-      await s.waitForTimeout(100);
-      st = await stand(s); g = await gh(s);
-      for (const f of (st.fliegend || [])) {
-        const k = f.von + '→' + f.an;
-        if (!gesehen.has(k)) { gesehen.add(k); folge.push(k); }
+    zeile('Neubeginn: nichts liegt', liegendText(st), '');
+    zeile('oben rechts', await kopf(s), 'Alle Projekte · Archiv');
+    zeile('Tempo zu sehen', await sichtbar(s, 'agTempo'), true);
+    zeile('Von vorn zu sehen', await sichtbar(s, 'agVorn'), true);
+    zeile('Blatt: Archiv gewählt', await modi(s), 'archiv* live');
+    /* Ein echtes neues Ereignis (gt40) waehrend des Archivs. */
+    antwort = antwort.concat([kommentar(new Date().toISOString(), {
+      project_id: 'gt40', run_id: 'GT-L2', task_id: 'C1', kind: 'handoff',
+      actor: 'peter', recipient: 'scout', title: 'Echt neu während des Archivs.' })]);
+    let bild = false, lagBeiAtlas = false;
+    let a = await archivVerfolgen(s, 25000, async (x) => {
+      if (/A1@atlas/.test(liegendText(x))) lagBeiAtlas = true;
+      if (!bild && (x.fliegend || []).some(f => f.von === 'peter' && f.an === 'nova' && f.u > 0.3)) {
+        await s.screenshot({ path: path.join(AUFNAHMEN, '1-archiv-parallel.jpg'), type: 'jpeg', quality: 72 });
+        bild = true;
       }
-      if (liegendText(st) === 'A1@atlas') {
-        lagBeiAtlas = true;
-        if (!bild && (st.fliegend || []).some(f => f.von === 'atlas' && f.an === 'forge' && f.u > 0.3)) {
-          await s.screenshot({ path: path.join(AUFNAHMEN, '1-archiv-ball-liegt-bei-atlas.jpg'),
-                               type: 'jpeg', quality: 72 });
-          bild = true;
-        }
-      }
-      if (g.archiv && !g.archiv.laeuft && !(st.fliegend || []).length && i > 20) break;
-    }
-    zeile('vier Bälle in der echten Reihenfolge', folge.join(' '),
-          'peter→atlas atlas→forge forge→atlas atlas→peter');
-    zeile('Peters Ball lag bei atlas, solange der Lauf offen war', lagBeiAtlas, true);
-    zeile('nach der Rückgabe liegt nichts mehr', liegendText(st), '');
-    zeile('Aufnahme während des Nachspielens', bild, true);
-    zeile('Tafel nennt das Nachspielen',
-          /Neu \(Archiv\)/.test(await s.evaluate(() =>
-            (document.getElementById('agGhLetztes') || {}).textContent || '')), true);
+    });
+    zeile('Flüge in echter Reihenfolge, parallel verschränkt', a.folge.join(' '),
+          'peter→atlas atlas→forge peter→nova forge→atlas atlas→peter');
+    zeile('nicht verzeichnetes Projekt fehlt (peter→lot)', a.gesehen.has('peter→lot'), false);
+    zeile('echtes neues Ereignis nicht hineingemischt', a.gesehen.has('peter→scout'), false);
+    zeile('Peters Ball lag bei atlas, solange A1 offen war', lagBeiAtlas, true);
+    zeile('am Ende liegt nur der offene GT-Ball', liegendText(a.st), 'B1@nova');
+    zeile('Aufnahme während des Archivs', bild, true);
+    zeile('Archivansicht steht noch', a.g.archiv && a.g.archiv.ansicht, true);
+    const dauer1 = a.ms;
 
-    console.log('\nC — Ein echtes neues Ereignis wird nicht hineingemischt');
-    zeile('kein Flug peter→scout im Nachspielen', gesehen.has('peter→scout'), false);
-    zeile('kein Ball bei scout im Nachspielen', /@scout/.test(liegendText(st)), false);
+    console.log('\nC — Halt, Weiter, Tempo');
+    zeile('Von vorn', await tippen(s, '#agVorn'), true);
+    await s.waitForTimeout(1200);
+    zeile('Halt', await tippen(s, '#agHalt'), true);
     g = await gh(s);
-    zeile('Archivansicht steht noch', g.archiv ? g.archiv.ansicht : null, true);
+    const vorHalt = g.archiv.gezeigt;
+    await s.waitForTimeout(2500);
+    g = await gh(s);
+    zeile('angehalten: nichts Neues in 2,5 s', g.archiv.gezeigt, vorHalt);
+    zeile('Weiter', await tippen(s, '#agHalt'), true);
+    a = await archivVerfolgen(s, 25000);
+    zeile('nach Weiter zu Ende gespielt', a.g.archiv.gezeigt, a.g.archiv.folge);
+    await s.evaluate(() => { const r = document.getElementById('agSchnell');
+      r.value = '3'; r.dispatchEvent(new Event('input')); });
+    zeile('Tempo 10×', await s.evaluate(() =>
+      (document.querySelector('#agTempo label b') || {}).textContent), '10×');
+    await tippen(s, '#agVorn');
+    a = await archivVerfolgen(s, 25000);
+    console.log('        Dauer 1×: ' + dauer1 + ' ms, 10×: ' + a.ms + ' ms');
+    /* Doppelt, nicht zehnmal: Abfragetakt und Nachlauf sind feste Anteile.
+       Gemessen am 25.10.: 10,0 s gegen 3,0 s. */
+    zeile('10× mindestens doppelt so schnell wie 1×', a.ms * 2 < dauer1, true);
+    /* SECHS, nicht fuenf: Das in B zurueckgestellte Ereignis (C1, peter ->
+       scout) gehoert inzwischen zur Geschichte. Zurueckgestellt heisst
+       "nicht in einen laufenden Durchgang gemischt" -- ein neuer Durchgang
+       ("Von vorn") spielt alles, was bis dahin gemeldet ist. */
+    zeile('Von vorn spielt auch das inzwischen Gemeldete', a.folge.join(' '),
+          'peter→atlas atlas→forge peter→nova forge→atlas atlas→peter peter→scout');
 
-    console.log('\nD — Zurück zu live');
-    await tafel(true);
-    await s.click('#agGhArchivZurueck');
+    console.log('\nD — Projekt wählen, während das Archiv steht');
+    await tippen(s, '#agWas li[data-gh="gt40"]');
+    a = await archivVerfolgen(s, 25000);
+    zeile('oben rechts', await kopf(s), 'GT40 Baubuch · Archiv');
+    zeile('nur die gt40-Flüge', a.folge.join(' '), 'peter→nova peter→scout');
+    zeile('liegt: die beiden offenen gt40-Bälle', liegendText(a.st), 'B1@nova,C1@scout');
+
+    console.log('\nE — Live');
+    zeile('Live antippen', await tippen(s, '#agWas li[data-modus="live"]'), true);
     for (let i = 0; i < 80; i++) {
       await s.waitForTimeout(150);
       g = await gh(s); st = await stand(s);
-      if (g.phase === 'verbunden' && g.archiv && !g.archiv.ansicht && liegendText(st)) break;
+      if (g.phase === 'verbunden' && !g.archiv.ansicht && liegendText(st)) break;
     }
-    await tafel(false);
+    await tafelZu();
     await s.waitForTimeout(400);
-    st = await stand(s);
-    zeile('wieder verbunden, keine Archivansicht',
-          g.phase + '/' + (g.archiv && g.archiv.ansicht), 'verbunden/false');
-    zeile('echter Stand: Ball von Lauf 2 und der neue Ball', liegendText(st), 'B1@nova,C1@scout');
+    st = await stand(s); g = await gh(s);
+    zeile('verbunden, keine Archivansicht', g.phase + '/' + g.archiv.ansicht, 'verbunden/false');
+    zeile('echter Stand gt40, mit dem Zurückgestellten', liegendText(st), 'B1@nova,C1@scout');
     zeile('ohne Flug', (st.fliegend || []).length, 0);
-    await s.screenshot({ path: path.join(AUFNAHMEN, '2-zurueck-zu-live.jpg'), type: 'jpeg', quality: 72 });
+    zeile('oben rechts', await kopf(s), 'GT40 Baubuch');
+    zeile('Tempo wieder weg', await sichtbar(s, 'agTempo'), false);
+    zeile('Von vorn wieder weg', await sichtbar(s, 'agVorn'), false);
+    zeile('Tempo zurück auf 1×', await s.evaluate(() =>
+      (document.querySelector('#agTempo label b') || {}).textContent), '1×');
+    await s.screenshot({ path: path.join(AUFNAHMEN, '2-live-gt40.jpg'), type: 'jpeg', quality: 72 });
 
-    /* E: Nebenbefund dieses Nachweises. `bekannte` lebt ueber Neuverbindungen;
-       vorher fiel deshalb beim Trennen und Wiederverbinden in derselben
-       Sitzung die ganze Vorgeschichte als "doppelt" weg -- keine Laeufe, keine
-       liegenden Baelle. */
-    console.log('\nE — Trennen und wieder verbinden in derselben Sitzung');
-    await tafel(true);
+    console.log('\nF — Trennen und wieder verbinden in derselben Sitzung');
+    await s.evaluate(() => { const d = document.getElementById('agGhAuf'); if (d) d.open = true; });
     await s.click('#agGhAus');
     await s.waitForTimeout(300);
     await s.fill('#agGhToken', 'AGMONARCHIV001_Scheintoken_0123456789ab');
     await s.click('#agGhAn');
     await s.waitForTimeout(3500);
-    await tafel(false);
-    await s.waitForTimeout(300);
+    await tafelZu();
     st = await stand(s); g = await gh(s);
-    zeile('verbunden', g.phase, 'verbunden');
-    zeile('alle drei Läufe zur Auswahl', g.archiv ? g.archiv.laeufe : null, 3);
+    zeile('verbunden, Wahl bleibt gt40', g.phase + '/' + g.projekte.wahl, 'verbunden/gt40');
     zeile('Bälle liegen weiter, nicht doppelt', liegendText(st), 'B1@nova,C1@scout');
     zeile('ohne Flug', (st.fliegend || []).length, 0);
+
+    console.log('\nG — Eine Demo und zurück');
+    await tippen(s, '#agWas li[data-nr="0"]');
+    await s.waitForTimeout(600);
+    zeile('Demo läuft', await s.evaluate(() => document.body.getAttribute('data-modus')), 'demo');
+    zeile('Blatt bietet Demo · Archiv', await modi(s), 'demo* archiv');
+    await tippen(s, '#agWas li[data-gh="gt40"]');
+    for (let i = 0; i < 80; i++) {
+      await s.waitForTimeout(150);
+      g = await gh(s); st = await stand(s);
+      if (g.phase === 'verbunden' && liegendText(st)) break;
+    }
+    await s.waitForTimeout(400);
+    st = await stand(s);
+    zeile('zurück live', await s.evaluate(() => document.body.getAttribute('data-modus')), 'live');
+    zeile('echter Stand gt40 wieder da', liegendText(st), 'B1@nova,C1@scout');
+    zeile('Blatt bietet wieder Archiv · Live', await modi(s), 'archiv live*');
     zeile('keine Seitenfehler', seitenFehler.length, 0);
     if (seitenFehler.length) console.log('        ' + seitenFehler.join('\n        '));
     await q.close();
@@ -252,5 +331,5 @@ const vor = (min) => new Date(Date.now() - min * 60000).toISOString();
   }
   if (fehler) { console.log('\nABWEICHUNG in ' + fehler + ' Prüfung(en).'); process.exit(1); }
   console.log('\nALLES WIE VEREINBART — keine Abweichung.');
-  console.log('Scheintoken, Probekörper. Keine Abnahme am iPad.');
+  console.log('Scheintoken, Probekörper, Verzeichnis als Attrappe. Keine Abnahme am iPad.');
 })().catch(e => { console.log('\nUNGEPRÜFT: ' + (e && e.stack || e)); process.exit(2); });
