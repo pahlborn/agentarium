@@ -2429,7 +2429,7 @@
 
      Der Bauzeitpunkt kommt beim Bauen aus der Uhr. Von Hand gepflegte
      Datumsangaben sind nach der zweiten Änderung falsch. */
-  var FASSUNG = '78', GEBAUT = '2026-10-25T04:12Z';
+  var FASSUNG = '79', GEBAUT = '2026-10-25T04:58Z';
 
   /* AG-GH-LIVE-001: JEDE TEXTSENKE MASKIERT.
      Seit Live-Daten von aussen kommen (GitHub-Kommentare, one-event.json),
@@ -7769,7 +7769,17 @@
          Aufgabe zu haengen. */
       lebenszyklus: 'gemeldet-v5',
       akteure: AGENTEN.map(function (a) { return a.name; }),
-      istLive: function () { return MODUS === 'live'; }
+      istLive: function () { return MODUS === 'live'; },
+      /* AG-MON-ARCHIV-001: Vor dem Nachspielen eines Laufs und vor der
+         Rueckkehr zum Live-Stand beginnt das Original neu -- mit GENAU dem
+         Neubeginn, den es beim Umschalten in den Livebetrieb ohnehin macht
+         (`modusSetzen`): Liveliste, Zaehler, Kopf, Bild. Keine zweite
+         Ruecksetzlogik. Ausserhalb des Livebetriebs geschieht nichts. */
+      neuBeginnen: function () {
+        if (MODUS !== 'live') return false;
+        modusSetzen('live');
+        return true;
+      }
     };
     var s = document.createElement('script');
     s.src = 'github-live.js?v=' + FASSUNG;
