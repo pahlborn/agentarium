@@ -262,8 +262,9 @@ async function seite(b, tisch, antwortRef) {
     }
     await s.waitForTimeout(400);
     st = await stand(s);
-    const soll2 = 'A1-N@nova·t,A2-F@forge·t,A2-G@argus·t,A2-N@nova·t,A2@atlas';
-    zeile('A1 zurück, der unerledigte Teilball bei nova bleibt', liegendText(st), soll2);
+    /* Seit Schritt 3 liegt A1 bei Peter, bis Atlas die Annahme meldet. */
+    const soll2 = 'A1-N@nova·t,A1@peter,A2-F@forge·t,A2-G@argus·t,A2-N@nova·t,A2@atlas';
+    zeile('A1 bei Peter, der unerledigte Teilball bei nova bleibt', liegendText(st), soll2);
     zeile('keine Seitenfehler', seitenFehler.length, 0);
     await q.close();
 

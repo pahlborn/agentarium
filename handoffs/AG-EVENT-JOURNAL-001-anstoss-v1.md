@@ -37,6 +37,13 @@ Dass eine Rückgabe als Ball erscheint, ist eine eigene, spätere Bildänderung
    zurück. Gemeldet wird es vom Agenten selbst oder, wie bisher, von Atlas
    für ihn.
 4. **Abschluss.** Das Ergebnis geht als `contribution` von Atlas an Peter.
+   Im Monitor fliegt Peters Ball zu ihm und **liegt dort bis zur Annahme**.
+4a. **Annahme durch Peter** (Peter, 24.10.). Sagt Peter Atlas, dass er das
+   Ergebnis annimmt, meldet Atlas für ihn `accepted` mit `actor: peter`,
+   `reporter: atlas` und derselben `task_id` wie der Anstoß (Baustein 5).
+   Erst dann verschwindet Peters Ball. Das ist die **einzige** Meldung für
+   einen anderen, die der Monitor gelten lässt, und sie wirkt nur auf den
+   Ball.
 5. **Reihenfolge am Gerät.** Peter verbindet den Monitor, **bevor** er die
    Aufgabe schickt. Was beim Verbinden schon da liegt, wird bewusst nicht
    nachgespielt (Regel vom 21.10.).
@@ -191,6 +198,28 @@ Zu ersetzen ist alles in `<…>`. Die `id` ist je Ereignis neu und eindeutig.
   "reporter": "atlas",
   "kind": "contribution",
   "title": "Atlas gibt Peter das Ergebnis: <kurz, was>",
+  "occurred_at": "<ISO-Zeit>",
+  "source_evidence": "reported_checkpoint",
+  "source_tool_id": "atlas-current-chat"
+}
+```
+````
+
+**5. Annahme durch Peter** (Atlas meldet für Peter, erst wenn Peter es sagt)
+
+````
+<!-- AGENTARIUM_EVENT_V1 -->
+```json
+{
+  "schema": "agentarium.github-event.v1",
+  "id": "<AUFGABE>-ANNAHME-<zeitstempel>",
+  "project_id": "<PROJEKT-ID>",
+  "run_id": "<KÜRZEL>-<LAUF>",
+  "task_id": "<AUFGABE>",
+  "actor": "peter",
+  "reporter": "atlas",
+  "kind": "accepted",
+  "title": "Peter nimmt an: <kurz, was>",
   "occurred_at": "<ISO-Zeit>",
   "source_evidence": "reported_checkpoint",
   "source_tool_id": "atlas-current-chat"
