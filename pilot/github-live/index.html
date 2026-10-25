@@ -2467,7 +2467,7 @@
 
      Der Bauzeitpunkt kommt beim Bauen aus der Uhr. Von Hand gepflegte
      Datumsangaben sind nach der zweiten Änderung falsch. */
-  var FASSUNG = '84', GEBAUT = '2026-10-25T17:00Z';
+  var FASSUNG = '85', GEBAUT = '2026-10-25T19:33Z';
 
   /* AG-GH-LIVE-001: JEDE TEXTSENKE MASKIERT.
      Seit Live-Daten von aussen kommen (GitHub-Kommentare, one-event.json),
@@ -3196,6 +3196,12 @@
     if (MODUS === 'live' && !E.beobachtet) baelleEinholen(E.von);
     var A = nachName[E.von], B = nachName[E.an] || A;
     var p = heimat(A), z = heimat(B);
+    /* Ballspiel, Schritt 3: Gibt der HALTER von Peters Ball das Ergebnis an
+       Peter, fliegt der ganze Ball zu ihm zurueck. Gibt ein anderer Peter
+       etwas, bleibt es ein Wurf -- Peters Ball hat er nicht. Entschieden am
+       verbuchten Stand (Meldungsreihenfolge), nicht am gezeichneten. */
+    if (E.beobachtet && E.spur && E.art === 'contribution' && E.an === 'peter' &&
+        ballspielHaelt(E.spur, E.von)) { E.alsBall = true; E.gross = 1.0; }
     var m = ARTEN[E.art] || ARTEN.handoff;
     /* Ballspiel, Schritt 2: Die Rueckgabe zwischen Agenten fliegt als
        Teilball. Die Art bleibt (Beschriftung, Nachhall), nur die Gestalt
@@ -3282,6 +3288,9 @@
                (nachName[E.an] && nachName[E.an].aussen),
       art: E.art, text: E.text, von: E.von, an: E.an, kern: null, ende: 0, kopf: 0
     });
+    /* Ballspiel: verbucht wird BEIM WURF, in Meldungsreihenfolge; die
+       Landung macht den Ball nur sichtbar. */
+    if (E.beobachtet && E.spur) ballspielGeworfen(E, baelle[baelle.length - 1]);
     /* Der Einsatz. Atlas sitzt am ersten Pult, und ein Konzertmeister
        zeigt an, wer dran ist — bevor der Ton kommt, nicht danach. Also
        ein kurzer Strich von seinem Platz in die Richtung dessen, der
@@ -3744,22 +3753,44 @@
     return sp.project_id + '\u0001' + sp.run_id + '\u0001' + sp.task_id;
   }
 
+  /* ============ MELDUNGSREIHENFOLGE, NICHT LANDUNGSREIHENFOLGE ============
+     Peter, 25.10.: "Es liegt dennoch ein unerklaerbarer Ball bei Atlas."
+     Nachgerechnet an AG-RETURN-AUDIT-001: Anstoss (19:24:28) und Rueckgabe
+     an Peter (19:24:38) kamen in DERSELBEN Abfrage. Live flogen beide
+     zugleich los; die Rueckgabe -- ein kurzer Wurf -- landete VOR dem
+     Anstoss-Ball, fand bei Atlas noch keinen Ball und tat nichts. Dann
+     landete der Anstoss und blieb liegen; die Annahme fand bei Peter keinen
+     Ball. Beim Neuverbinden (gefaltet in Meldungsreihenfolge) stimmte alles.
+     Darum wird jetzt BEIM WURF verbucht, in der Reihenfolge der Meldungen;
+     ein Ball, der noch unterwegs ist, traegt seinen Flug (`flug`) und wird
+     erst gezeichnet, wenn genau dieser Flug gelandet ist. */
+  function ballspielHaelt(spur, wer) {
+    var k = ballspielSchluessel(spur);
+    for (var i = 0; i < liegend.length; i++)
+      if (!liegend[i].teil && liegend[i].schluessel === k && liegend[i].bei === wer) return true;
+    return false;
+  }
   function ballspielGelandet(b) {
-    var k = ballspielSchluessel(b.spur), i;
-    if (b.art === 'handoff' && b.von === 'peter' && nachName[b.an]) {
-      for (i = 0; i < liegend.length; i++) if (liegend[i].schluessel === k) break;
-      if (i < liegend.length) { liegend[i].bei = b.an; return; }
-      liegend.push({ schluessel: k, aufgabe: b.spur.task_id, bei: b.an,
-                     von: 'peter', t: 0 });
+    for (var i = 0; i < liegend.length; i++)
+      if (liegend[i].flug === b) { liegend[i].flug = null; liegend[i].t = 0; }
+  }
+  function ballspielGeworfen(E, b) {
+    var k = ballspielSchluessel(E.spur), i;
+    if (E.art === 'handoff' && E.von === 'peter' && nachName[E.an]) {
+      for (i = 0; i < liegend.length; i++)
+        if (!liegend[i].teil && liegend[i].schluessel === k) break;
+      if (i < liegend.length) { liegend[i].bei = E.an; liegend[i].flug = b; return; }
+      liegend.push({ schluessel: k, aufgabe: E.spur.task_id, bei: E.an,
+                     von: 'peter', t: 0, flug: b });
       return;
     }
-    if (b.art === 'contribution' && b.an === 'peter') {
+    if (E.art === 'contribution' && E.an === 'peter') {
       /* Schritt 3 (Peter, 24.10.): Der Ball LIEGT BEI PETER, bis er annimmt
          -- erst die Annahme nimmt ihn weg (`ballspielAngenommen`). Nur der
          Halter gibt ihn zurueck. */
       for (i = 0; i < liegend.length; i++)
-        if (!liegend[i].teil && liegend[i].schluessel === k && liegend[i].bei === b.von) {
-          liegend[i].bei = 'peter'; liegend[i].t = 0; break;
+        if (!liegend[i].teil && liegend[i].schluessel === k && liegend[i].bei === E.von) {
+          liegend[i].bei = 'peter'; liegend[i].flug = b; break;
         }
       /* Die TEILBAELLE des Laufs bleiben liegen, bis ihr Agent selbst
          zurueckgibt -- auch wenn Peters Ball schon zurueck ist. Peter,
@@ -3770,16 +3801,17 @@
       return;
     }
     /* Schritt 2: Weitergabe zwischen Agenten -> Teilball beim Empfaenger. */
-    if (b.art === 'handoff' && b.an !== 'peter' && nachName[b.an]) {
-      var kt = k + '\u0001' + b.an;
+    if (E.art === 'handoff' && E.an !== 'peter' && nachName[E.an]) {
+      var kt = k + '\u0001' + E.an;
       for (i = 0; i < liegend.length; i++) if (liegend[i].schluessel === kt) return;
-      liegend.push({ schluessel: kt, aufgabe: b.spur.task_id, bei: b.an,
-                     von: b.von, t: 0, teil: true });
+      liegend.push({ schluessel: kt, aufgabe: E.spur.task_id, bei: E.an,
+                     von: E.von, t: 0, teil: true, flug: b });
       return;
     }
-    /* Schritt 2: Rueckgabe an einen Agenten -> der Teilball des Absenders geht. */
-    if (b.art === 'contribution' && b.an !== 'peter') {
-      var kr = k + '\u0001' + b.von;
+    /* Schritt 2: Rueckgabe an einen Agenten -> der Teilball des Absenders
+       geht; er ist ja der Ball, der jetzt zurueckfliegt. */
+    if (E.art === 'contribution' && E.an !== 'peter') {
+      var kr = k + '\u0001' + E.von;
       for (i = liegend.length - 1; i >= 0; i--)
         if (liegend[i].schluessel === kr) liegend.splice(i, 1);
     }
@@ -3807,7 +3839,8 @@
   function liegendOrt(l) {
     var halter = nachName[l.bei];
     if (!halter) return null;
-    var dort = liegend.filter(function (x) { return x.bei === l.bei; });
+    /* Gefaechert wird, was dort SICHTBAR liegt -- ein Ball im Flug nicht. */
+    var dort = liegend.filter(function (x) { return x.bei === l.bei && !x.flug; });
     var n = dort.length, k = dort.indexOf(l);
     var p = heimat(halter);
     /* 0,9 rad Abstand: Bei 0,5 lagen zwei Baelle so dicht, dass sie als ein
@@ -3820,6 +3853,13 @@
   function liegendeZeichnen(dt) {
     for (var i = liegend.length - 1; i >= 0; i--) {
       var l = liegend[i];
+      /* Noch unterwegs: verbucht, aber erst nach der Landung zu sehen. Ist
+         der Flug nicht mehr da, ohne gelandet zu sein, liegt der Ball --
+         ein verbuchter Ball darf nie dauerhaft unsichtbar bleiben. */
+      if (l.flug) {
+        if (baelle.indexOf(l.flug) >= 0) continue;
+        l.flug = null;
+      }
       l.t += dt;
       var o = liegendOrt(l);
       /* Ein Ball bei niemandem ist kein Ball (siehe `ballOrt`). */
@@ -5904,7 +5944,9 @@
              ball: derBall ? derBall.bei : null,
              /* Ballspiel: die liegenden Live-Baelle, je Aufgabe einer. */
              liegend: liegend.map(function (l) {
-               return { aufgabe: l.aufgabe, bei: l.bei, teil: !!l.teil }; }),
+               return { aufgabe: l.aufgabe, bei: l.bei, teil: !!l.teil,
+                        /* verbucht, aber noch im Flug (nicht gezeichnet) */
+                        fliegt: !!l.flug }; }),
              /* Die fliegenden Baelle, damit sich das Einholen nachmessen
                 laesst: Wer wirft, wohin, wie weit ist er, wie lange soll
                 der Flug noch dauern. */
@@ -7093,16 +7135,9 @@
         if (art === 'contribution' && an && an !== 'peter') {
           E.alsBall = true; E.gross = ARTEN.handoff.gross;
         }
-        /* Schritt 3: Gibt der HALTER von Peters Ball das Ergebnis an Peter,
-           fliegt der ganze Ball zu ihm zurueck. Gibt ein anderer Peter etwas,
-           bleibt es ein Wurf -- Peters Ball hat er nicht. */
-        if (art === 'contribution' && an === 'peter' && spur) {
-          var kz = ballspielSchluessel(spur);
-          for (var hz = 0; hz < liegend.length; hz++)
-            if (!liegend[hz].teil && liegend[hz].schluessel === kz && liegend[hz].bei === von) {
-              E.alsBall = true; E.gross = 1.0; break;
-            }
-        }
+        /* Schritt 3 (Rueckgabe des Halters als ganzer Ball) wird NICHT hier
+           entschieden, sondern in `wirf` -- dort ist der Anstoss davor schon
+           verbucht, auch wenn er noch fliegt. Siehe "MELDUNGSREIHENFOLGE". */
       }
     }
     /* Melder und die daraus abgeleitete Aussage werden mitgefuehrt, aber
