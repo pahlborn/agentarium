@@ -221,6 +221,12 @@
      der Historie. Daraus wird beim Verbinden gefaltet, welcher Ball noch wo
      liegt -- ohne Flug. Siehe `baelleFalten`. */
   var basisBall = [];
+  /* AG-MON-ARCHIV-001: jedes angenommene Ereignis, aus der Historie UND aus
+     dem laufenden Strom -- Stoff fuer "Lauf nachspielen". Nur geprueft
+     angenommene (nach Doppel- und Konfliktpruefung), nichts Erfundenes. */
+  var archivAlle = [], archivLaeuft = false, archivAnsicht = false,
+      archivUhren = [], archivStand = -1;
+  var ARCHIV_MIN = 900, ARCHIV_MAX = 4000, ARCHIV_RAFFUNG = 30;
   var basisGrenzen = { seitenDeckel: false, konflikte: 0, fremdaussagen: 0,
                        /* SELBSTANNAHME IST KEIN KONFLIKT UND KEINE
                           FREMDAUSSAGE, darum eine eigene Zahl. Ein
@@ -376,7 +382,29 @@
                    Sie beendet nichts und beginnt nichts. */
                 'Blockade lässt die Aufgabe liegen; eine Auflösung betrifft genau ' +
                 'diese Blockade und behauptet keinen Beginn und keinen Abschluss. ' + ADAPTER);
-  [kopf, zeile, satzEl, ablaufZeile, ablaufText, ablaufHilfe, letztesEl, zahlEl, grundEl, fuss].forEach(function (x) { auf.appendChild(x); });
+  /* ===================== LAUF NACHSPIELEN (AG-MON-ARCHIV-001) =====================
+     Peter, 25.10.: Wenn das Archiv funktioniert, lassen sich Aenderungen am
+     Monitor ansehen, OHNE dass Atlas' Team dafuer neue Aufgaben erledigt.
+     Der Monitor kennt nur eine Quelle, die Kommentare auf #2. Wer dieselben
+     Ereignisse in derselben Reihenfolge durch DENSELBEN Eingang schickt
+     (`zeigen` -> `__agEreignis`), bekommt dasselbe Verhalten. Genau das
+     geschieht hier -- nicht die Faltung beim Verbinden, die bewusst nichts
+     abspielt. Waehrend des Nachspielens werden echte neue Ereignisse
+     zurueckgestellt, nicht vermischt; "Zurueck zu live" baut den echten
+     Stand neu auf wie beim Verbinden. */
+  var archivZeile = el('div', { 'class': 'ghZ', id: 'agGhArchiv' });
+  var archivLab = el('label', { 'for': 'agGhArchivWahl' }, 'Lauf nachspielen');
+  var archivWahl = el('select', { id: 'agGhArchivWahl' });
+  archivWahl.style.cssText = 'font:inherit;background:#080c13;color:#e8f0ea;' +
+    'border:1px solid #3a4658;border-radius:3px;max-width:100%';
+  var archivAn = el('button', { id: 'agGhArchivAn', type: 'button' }, 'Abspielen');
+  var archivZurueck = el('button', { id: 'agGhArchivZurueck', type: 'button' }, 'Zurück zu live');
+  archivZeile.appendChild(archivLab); archivZeile.appendChild(archivWahl);
+  archivZeile.appendChild(archivAn); archivZeile.appendChild(archivZurueck);
+  var archivText = el('div', { id: 'agGhArchivText' },
+    'Nach dem Verbinden stehen hier die Läufe aus der Vorgeschichte.');
+  [kopf, zeile, satzEl, ablaufZeile, ablaufText, ablaufHilfe, letztesEl, zahlEl, grundEl,
+   archivZeile, archivText, fuss].forEach(function (x) { auf.appendChild(x); });
   tafel.appendChild(auf);
   document.body.appendChild(tafel);
   /* Die Tafel ruehrt nicht im Feld und blendet keine Knoepfe ein. */
@@ -388,13 +416,17 @@
     ev.stopPropagation();
     if (ev.key === 'Enter') verbinden();
   });
-  knAn.addEventListener('click', verbinden);
+  knAn.addEventListener('click', function () { verbinden(); });
+  archivAn.addEventListener('click', function () { archivAbspielen(); });
+  archivZurueck.addEventListener('click', function () { archivZurueckLive(); });
+  archivWahl.addEventListener('change', function (ev) { ev.stopPropagation(); });
   knAus.addEventListener('click', function () { trennen('getrennt — Token aus dem Speicher entfernt.'); });
 
   var PHASE = { getrennt: 'getrennt', aufbau: 'verbinde …', verbunden: 'verbunden',
                 fehler: 'Fehler' };
   function anzeigen(text) {
     if (text != null) Z.fehler = text;
+    archivListeAuffrischen();
     var p = PHASE[Z.phase] || Z.phase;
     var ablauf = ablaufStand();
     ablaufText.textContent = ablauf.text;
@@ -634,10 +666,19 @@
       abweisen('Original nicht im Live-Betrieb, ' + ev.id + ' nicht gezeigt');
       return;
     }
+    /* AG-MON-ARCHIV-001: In der Archivansicht wird ein echtes neues Ereignis
+       nicht in den nachgespielten Lauf gemischt. Es geht nicht verloren:
+       "Zurueck zu live" baut den Stand aus GitHub neu auf, und dort steht es. */
+    if (archivAnsicht && wie !== 'Archiv') {
+      vermerk('während des Nachspielens zurückgestellt: ' + ev.id);
+      return;
+    }
     var lauf = ev.project_id + '|' + ev.run_id;
     if (lauf !== aktuellerLauf) {
       var r0 = window.__agLauf({ project_id: ev.project_id, titel: ev.run_id,
-                                 ablage: 'GitHub · pahlborn/agentarium #2' });
+                                 ablage: wie === 'Archiv'
+                                   ? 'Archiv · nachgespielt aus GitHub #2'
+                                   : 'GitHub · pahlborn/agentarium #2' });
       if (r0 && r0.angenommen) aktuellerLauf = lauf;
     }
     /* Volle Schluessel und Herkunft gehen mit; `gh_beobachtet` sagt dem
@@ -739,9 +780,27 @@
           abweisen('gleiche Kennung, anderer Inhalt: ' + ev.id, cid);
           continue;
         }
+        /* AUS EINER FRUEHEREN VERBINDUNG BEKANNT (gefunden mit
+           AG-MON-ARCHIV-001): `bekannte` lebt ueber Neuverbindungen, damit
+           live Gesehenes nicht noch einmal fliegt. Beim Neuaufbau fiel damit
+           aber die ganze Vorgeschichte als "doppelt" weg -- keine Laeufe zur
+           Auswahl und keine liegenden Baelle nach Trennen/Verbinden. Gezeigt
+           wird so ein Ereignis weiterhin nicht; es gehoert aber zur
+           Vorgeschichte. Die Baelle duerfen mit: das Original fuehrt sie ueber
+           ihren Schluessel zusammen, doppelt liegt nichts. */
+        if (modus === 'basis' && !basisIds.hat(ev.id)) {
+          basisIds.add(ev.id);
+          archivAlle.push({ ev: ev, recorded_at: c.created_at || '', kommentar: Number(cid) || 0 });
+          if ((ev.kind === 'handoff' && ev.actor === 'peter') ||
+              (ev.kind === 'contribution' && ev.recipient === 'peter')) {
+            basisBall.push({ ev: ev, recorded_at: c.created_at || '',
+                             kommentar: Number(cid) || 0 });
+          }
+        }
         zahl.duplikate++; vermerk('doppelt ' + ev.id); continue;
       }
       abdruckLegen(ev.id, fa);
+      archivAlle.push({ ev: ev, recorded_at: c.created_at || '', kommentar: Number(cid) || 0 });
       if (modus === 'basis') {
         basisIds.add(ev.id);
         var t = Date.parse(c.created_at);
@@ -1130,6 +1189,7 @@
     Z.kommentare.leeren(); Z.etags = {}; Z.seite = 1; Z.anzahl = 0;
     zahl.basisKommentare = 0; zahl.basisMarkiert = 0;
     basisLeben.length = 0; basisBall.length = 0;
+    archivAlle.length = 0; archivStand = -1;
     basisGrenzen = { seitenDeckel: false, konflikte: 0, fremdaussagen: 0,
                      selbstannahmen: 0 };
     zahl.wieder = 0; zahl.wiederKlemmt = 0; zahl.abdeckung = '';
@@ -1251,8 +1311,103 @@
     if (g === gen && token) planen(warte);
   }
 
-  function verbinden() {
-    var t = feld.value.trim();
+  /* ================= LAUF NACHSPIELEN: Liste, Abspielen, Rueckkehr ================= */
+  function archivOrdnung(p, q) {
+    if (p.ev.occurred_at !== q.ev.occurred_at)
+      return p.ev.occurred_at < q.ev.occurred_at ? -1 : 1;
+    if (p.recorded_at !== q.recorded_at) return p.recorded_at < q.recorded_at ? -1 : 1;
+    return p.kommentar - q.kommentar;
+  }
+  function archivLaeufe() {
+    var nach = Object.create(null), r = [];
+    archivAlle.forEach(function (x) {
+      var k = x.ev.project_id + '\u0001' + x.ev.run_id;
+      if (!nach[k]) { nach[k] = { k: k, projekt: x.ev.project_id, lauf: x.ev.run_id,
+                                  n: 0, zuletzt: '' }; r.push(nach[k]); }
+      nach[k].n++;
+      if (x.ev.occurred_at > nach[k].zuletzt) nach[k].zuletzt = x.ev.occurred_at;
+    });
+    return r.sort(function (a, b) { return a.zuletzt < b.zuletzt ? 1 : -1; });
+  }
+  function archivListeAuffrischen() {
+    if (archivStand === archivAlle.length) return;
+    archivStand = archivAlle.length;
+    var vorher = archivWahl.value;
+    archivWahl.innerHTML = '';
+    archivLaeufe().forEach(function (L) {
+      var o = el('option', { value: L.k },
+        L.projekt + ' / ' + L.lauf + ' · ' + L.n + ' Ereignis' + (L.n === 1 ? '' : 'se') +
+        ' · ' + (L.zuletzt ? deutsch(L.zuletzt) + ' ' + L.zuletzt.slice(11, 16) + ' UTC' : ''));
+      archivWahl.appendChild(o);
+    });
+    if (vorher) archivWahl.value = vorher;
+    if (!archivAnsicht && Z.phase === 'verbunden')
+      archivText.textContent = archivAlle.length
+        ? 'Wähle einen Lauf. Er wird mit denselben Ereignissen nachgespielt, gerafft.'
+        : 'Keine Läufe in der Vorgeschichte.';
+  }
+  function archivAbspielen() {
+    if (archivLaeuft) return;
+    if (Z.phase !== 'verbunden') { archivText.textContent = 'Erst verbinden.'; return; }
+    var k = archivWahl.value;
+    var liste = archivAlle.filter(function (x) {
+      return x.ev.project_id + '\u0001' + x.ev.run_id === k; }).sort(archivOrdnung);
+    if (!liste.length) { archivText.textContent = 'Kein Lauf gewählt.'; return; }
+    if (typeof B.neuBeginnen !== 'function' || !B.neuBeginnen()) {
+      archivText.textContent = 'Das Original kann nicht neu beginnen (ältere Fassung).';
+      return;
+    }
+    archivUhren.forEach(clearTimeout); archivUhren = [];
+    archivAnsicht = true; archivLaeuft = true; aktuellerLauf = '';
+    var name = liste[0].ev.project_id + ' / ' + liste[0].ev.run_id;
+    archivText.textContent = 'Nachspielen: ' + name + ' · ' + liste.length + ' Ereignisse …';
+    var t = 0, vorher = NaN;
+    liste.forEach(function (x, i) {
+      var jetzt = Date.parse(x.ev.occurred_at);
+      var luecke = (isNaN(vorher) || isNaN(jetzt)) ? 0 : Math.max(0, jetzt - vorher);
+      /* Die Reihenfolge bleibt, die Pausen werden gerafft: echte Luecke
+         geteilt durch ARCHIV_RAFFUNG, aber nie unter ARCHIV_MIN (damit
+         jeder Flug zu sehen ist) und nie ueber ARCHIV_MAX (damit niemand
+         eine Stunde auf das naechste Ereignis wartet). */
+      t += (i === 0) ? 300 : Math.min(ARCHIV_MAX, Math.max(ARCHIV_MIN, luecke / ARCHIV_RAFFUNG));
+      if (!isNaN(jetzt)) vorher = jetzt;
+      archivUhren.push(setTimeout(function () {
+        if (!archivLaeuft) return;
+        zeigen(x.ev, 'Archiv');
+        archivText.textContent = 'Nachspielen: ' + name + ' · ' + (i + 1) + ' von ' + liste.length;
+        /* "Fertig" erst, wenn der letzte Ball gelandet ist -- der Flug
+           beginnt ein Bild nach der Uebergabe und dauert. */
+        if (i === liste.length - 1) archivUhren.push(setTimeout(function () {
+          if (!archivLaeuft) return;
+          archivLaeuft = false;
+          archivText.textContent = 'Nachgespielt: ' + name + ' · ' + liste.length +
+            ' Ereignisse. Echte neue Ereignisse sind zurückgestellt — ' +
+            '„Zurück zu live" zeigt wieder den echten Stand.';
+        }, 3000));
+      }, t));
+    });
+  }
+  function archivZurueckLive() {
+    archivUhren.forEach(clearTimeout); archivUhren = [];
+    var warAnsicht = archivAnsicht;
+    archivLaeuft = false; archivAnsicht = false;
+    if (!token) { archivText.textContent = 'Nicht verbunden.'; return; }
+    /* Die Buehne ist danach leer, also gibt es nichts mehr, das vor einem
+       zweiten Flug zu schuetzen waere: Das Gedaechtnis wird mit geleert, und
+       der Neuaufbau stellt ALLES Offene wieder her (Aufgaben und Baelle). */
+    if (warAnsicht && typeof B.neuBeginnen === 'function') {
+      B.neuBeginnen();
+      bekannte.leeren();
+    }
+    archivText.textContent = 'Zurück zu live: Stand wird neu aufgebaut …';
+    /* Dasselbe wie Verbinden, nur ohne erneute Eingabe: das Token geht als
+       Wert weiter, nicht ueber das Eingabefeld. */
+    verbinden(token);
+  }
+
+  function verbinden(tokenWeiter) {
+    var t = (typeof tokenWeiter === 'string') ? tokenWeiter : feld.value.trim();
+    tokenWeiter = null;
     feld.value = '';
     if (!/^[A-Za-z0-9_]{20,255}$/.test(t)) {
       anzeigen('Token-Format nicht erkannt — nichts gesendet');
@@ -1273,6 +1428,9 @@
   function trennen(text) {
     gen++;
     token = null;
+    /* Ein laufendes Nachspielen endet mit der Verbindung. */
+    archivUhren.forEach(clearTimeout); archivUhren = [];
+    archivLaeuft = false; archivAnsicht = false;
     if (ctrl) { try { ctrl.abort(); } catch (x) {} }
     ctrl = null;
     clearTimeout(uhr); uhr = null;
@@ -1300,7 +1458,9 @@
         ablaufDatum: ablaufDatum, ablaufTage: ablaufStand().tage,
         seite: Z.seite, anzahl: Z.anzahl, schnitt: Z.schnittIso, intervall: Z.intervall,
         pausiert: Z.pausiert, fehler: Z.fehler, grund: letzterGrund, zahl: zahl,
-        letztes: letztes, bekannteIds: bekannte.groesse(), log: log }));
+        letztes: letztes, bekannteIds: bekannte.groesse(), log: log,
+        archiv: { laeuft: archivLaeuft, ansicht: archivAnsicht,
+                  ereignisse: archivAlle.length, laeufe: archivLaeufe().length } }));
     }
   });
 })();
