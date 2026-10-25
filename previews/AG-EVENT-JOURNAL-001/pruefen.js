@@ -1807,8 +1807,19 @@ function koerper(f) {
   zeile('L20 behält den Beleg der ersten Vergabe', L20 ? String(L20.beleg) : null, '90801');
   zeile('genau dieser Widerspruch ist gezählt',
         (st.vergabekonflikte || 0) - vorL20, 1);
-  zeile('und er steht in der Zählzeile',
-        rL20.zahlen.indexOf('live ' + (st.vergabekonflikte || 0) + ' Widerspruch') >= 0, true);
+  /* GEWARTET, NICHT GERATEN (25.10., Pruefauf 40174361134, Versuch 1):
+     Auf dem GitHub-Rechner war der Widerspruch schon gezaehlt (Zeile
+     darueber gruen), die Zaehlzeile nach den festen 2,8 s von `liefern`
+     aber noch nicht nachgezogen -- rot ohne Fehler im Monitor; Versuch 2
+     gruen, lokal dreimal gruen. Gefragt ist, OB die Zeile den Widerspruch
+     zeigt, nicht ob sie es nach genau 2,8 s tut. Also wird bis zu 5 s auf
+     die Zeile gewartet; erscheint er nicht, bleibt die Pruefung rot. */
+  const sollL20 = 'live ' + (st.vergabekonflikte || 0) + ' Widerspruch';
+  const zeigtL20 = rL20.zahlen.indexOf(sollL20) >= 0 ||
+    await s.waitForFunction(soll =>
+      ((document.getElementById('agGhZahlen') || {}).textContent || '').indexOf(soll) >= 0,
+      sollL20, { timeout: 5000 }).then(() => true, () => false);
+  zeile('und er steht in der Zählzeile', zeigtL20, true);
 
   /* Eine Story darunter, einzeln gemeldet. */
   const rn2 = await liefern('N:story', koerper({
