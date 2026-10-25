@@ -212,6 +212,12 @@ const TYPEN = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; ch
     const l = await s.evaluate(() => ({
       modus: document.body.getAttribute('data-modus'),
       verborgen: (document.getElementById('agTempo') || {}).hidden,
+      /* WIRKLICH unsichtbar, nicht nur so markiert: `#agTempo{display:flex}`
+         uebersteuerte das Merkmal `hidden`, und der Regler stand von
+         Fassung 75 bis 80 auch live im Bild -- mit gruener Zeile darueber.
+         Gefunden am 25.10. auf einer Aufnahme von AG-PROJEKTE-002. */
+      anzeige: (function () { const t = document.getElementById('agTempo');
+        return t ? getComputedStyle(t).display : null; })(),
       wert: (document.getElementById('agSchnell') || {}).value,
       wort: (document.querySelector('#agTempo label b') || {}).textContent
     }));
@@ -223,6 +229,7 @@ const TYPEN = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; ch
     } else {
       zeile('Betriebsart', l.modus, 'live');
       zeile('die Zeile ist verborgen', l.verborgen, true);
+      zeile('und wirklich nicht zu sehen', l.anzeige, 'none');
       zeile('der Regler steht wieder auf Normalablauf', l.wert, '0');
       zeile('und sagt das auch', l.wort, '1×');
       /* Und die Uhr darf dort nicht mehr mit 10x laufen. */
