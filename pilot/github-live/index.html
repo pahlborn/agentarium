@@ -1024,6 +1024,33 @@
   #agGesetz .gDau{color:#6B7689; font-size:11px; white-space:nowrap;
     font-family:ui-monospace,SFMono-Regular,Menlo,monospace;}
   #agGesetz .gFuss{margin:30px 0 0; color:#7F8FA8; max-width:40em;}
+  /* AUF EINEN BLICK (Peter, 25.10.: "nicht kompliziert und uebersichtlich").
+     Oben die Komposition -- Projekt, Lauf, Aufgabe -- und was man dazu
+     sieht; die bisherige Legende bleibt vollstaendig, nur zugeklappt. */
+  #agGesetz .gBau{max-width:46em; margin:4px 0 22px;}
+  #agGesetz .gEbene{border-left:1px solid rgba(150,170,200,.28);
+    padding:8px 0 8px 16px; margin-left:6px;}
+  #agGesetz .gBau > .gEbene{border-left:none; margin-left:0; padding-left:0;}
+  #agGesetz .gName{display:inline-block; min-width:7.5em; color:#E6EEFB;
+    font:400 12px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;
+    letter-spacing:.14em; text-transform:uppercase;}
+  #agGesetz .gSieht{color:#AFC0D8;}
+  #agGesetz .gBall{display:inline-block; width:12px; height:12px; border-radius:50%;
+    margin-right:8px; vertical-align:-1px;
+    background:radial-gradient(circle,#FFFBE0 0,#FFE14D 45%,rgba(255,200,40,.15) 75%);}
+  #agGesetz .gBall.gHalb{width:7px; height:7px; margin:0 10px 0 2px; vertical-align:1px;}
+  #agGesetz .gKopf{display:inline-block; width:12px; margin-right:8px;
+    border-top:2px solid #8FA3C0; vertical-align:4px;}
+  #agGesetz .gStand{font:400 10px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;
+    letter-spacing:.1em; text-transform:uppercase; white-space:nowrap;}
+  #agGesetz .gHeute{color:#7FD1A0;}
+  #agGesetz .gGeplant{color:#E8C878;}
+  #agGesetz details.gMehr{margin-top:34px;}
+  #agGesetz details.gMehr > summary{cursor:pointer; color:#8FA3C0; font-size:11px;
+    letter-spacing:.2em; text-transform:uppercase; list-style:none;}
+  #agGesetz details.gMehr > summary::-webkit-details-marker{display:none;}
+  #agGesetz details.gMehr > summary::before{content:'\25B8  ';}
+  #agGesetz details.gMehr[open] > summary::before{content:'\25BE  ';}
   .z-bleibt{color:#E8D9A8;} .z-verblasst{color:#8FA3C0;} .z-nichts{color:#6B7689;}
   .agZeile u{text-decoration:none; font-size:10px; letter-spacing:.12em;
     text-transform:uppercase;}
@@ -2429,7 +2456,7 @@
 
      Der Bauzeitpunkt kommt beim Bauen aus der Uhr. Von Hand gepflegte
      Datumsangaben sind nach der zweiten Änderung falsch. */
-  var FASSUNG = '79', GEBAUT = '2026-10-25T04:58Z';
+  var FASSUNG = '80', GEBAUT = '2026-10-25T07:25Z';
 
   /* AG-GH-LIVE-001: JEDE TEXTSENKE MASKIERT.
      Seit Live-Daten von aussen kommen (GitHub-Kommentare, one-event.json),
@@ -7099,7 +7126,72 @@
       return '<tr><td class="gArt">' + a + '</td><td class="gWas">' + b +
              '</td><td class="gRes" colspan="2">' + c + '</td></tr>';
     }
-    legende.innerHTML = h;
+
+    /* AUF EINEN BLICK. Peter am 25.10.: "das ist sehr komplex ... ich
+       brauche das ganze visualisiert ... nicht kompliziert und
+       uebersichtlich." Oben steht deshalb nur noch die Komposition, wie sie
+       mit ihm festgelegt wurde (Projekt -> Laeufe -> Aufgaben), und was man
+       dazu im Feld sieht. Jede Zeile sagt, ob es HEUTE so ist oder ob es
+       vereinbart und noch nicht gebaut ist -- eine Legende, die Kommendes
+       als Vorhandenes ausgibt, waere dieselbe stille Luege wie ein Knopf,
+       der nichts tut. Die bisherige Legende bleibt ganz erhalten, nur
+       zugeklappt darunter. */
+    function stand(heute, geplant) {
+      return '<td class="gStand">' +
+        (heute ? '<span class="gHeute">heute</span>' : '') +
+        (heute && geplant ? '<br>' : '') +
+        (geplant ? '<span class="gGeplant">' + geplant + '</span>' : '') + '</td>';
+    }
+    function was(a, b, heute, geplant) {
+      return '<tr><td class="gWas">' + a + '</td><td class="gRes">' + b +
+             '</td>' + stand(heute, geplant) + '</tr>';
+    }
+    var blick =
+      '<h4>Auf einen Blick</h4>' +
+      '<div class="gBau"><div class="gEbene">' +
+        '<span class="gName"><i class="gKopf"></i>Projekt</span>' +
+        '<span class="gSieht">steht oben rechts. Antippen: Projekt und ' +
+        'Betriebsart wählen.</span>' +
+        '<div class="gEbene">' +
+          '<span class="gName"><i class="gBall"></i>Lauf</span>' +
+          '<span class="gSieht">dein Auftrag an Atlas — der goldene Ball.</span>' +
+          '<div class="gEbene">' +
+            '<span class="gName"><i class="gBall gHalb"></i>Aufgabe</span>' +
+            '<span class="gSieht">Arbeit, die Atlas weitergibt — ein Teilball.</span>' +
+          '</div>' +
+        '</div>' +
+      '</div></div>' +
+      '<p class="gSatz">Ein Projekt hat viele Läufe, ein Lauf viele Aufgaben. ' +
+      'Die Frage im Bild bleibt: <b>Bei wem liegt gerade der Ball?</b></p>' +
+
+      '<h4>Was geschieht — was du siehst</h4><table>' +
+      was('Du gibst Atlas einen Auftrag',
+          'Der goldene Ball fliegt zu Atlas und bleibt dort liegen.', true, '') +
+      was('Atlas gibt Arbeit weiter',
+          'Ein Ball fliegt zum Agenten. Künftig als halber Teilball, ' +
+          'und Atlas behält deinen Ball.', true, 'Teilball geplant') +
+      was('Ein Agent meldet einen Arbeitsschritt',
+          'Eine kurze Meldung an seinem Platz, die verblasst.', true, '') +
+      was('Ein Agent gibt sein Ergebnis zurück',
+          'Ein Ball fliegt zurück zu dem, der die Arbeit gegeben hat.', true, '') +
+      was('Etwas klemmt',
+          'Rechts zählt „Blockiert", bis die Klemme gelöst ist.', true, '') +
+      was('Atlas gibt dir das Ergebnis',
+          'Der Ball fliegt zu dir. Künftig bleibt er bei dir liegen, ' +
+          'bis du ihn annimmst.', true, 'Liegen geplant') +
+      '</table>' +
+
+      '<h4>Betriebsarten</h4><table>' +
+      was('Demo', 'Ein ausgedachtes Stück (NACHTPOST V1/V2), läuft in ' +
+          'Schleife.', true, '') +
+      was('Archiv', 'Ein Projekt von Anfang bis Ende abspielen, mit Tempo. ' +
+          'Heute nur für die Demo-Stücke.', true, 'echte Projekte geplant') +
+      was('Live', 'Was gerade geschieht. Läufe können parallel laufen.', true, '') +
+      '</table>';
+
+    legende.innerHTML = blick +
+      '<details class="gMehr"><summary>Einzelheiten: Name, Gesetz, ' +
+      'alle Nachrichtenarten</summary>' + h + '</details>';
   })();
 
   /* Die Namen am Ring — ruhig, und sie verschwinden nicht. */
