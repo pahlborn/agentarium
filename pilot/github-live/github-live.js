@@ -858,8 +858,7 @@
         if (modus === 'basis' && !basisIds.hat(ev.id)) {
           basisIds.add(ev.id);
           archivAlle.push({ ev: ev, recorded_at: c.created_at || '', kommentar: Number(cid) || 0 });
-          if ((ev.kind === 'handoff' && ev.actor === 'peter') ||
-              (ev.kind === 'contribution' && ev.recipient === 'peter')) {
+          if (ev.kind === 'handoff' || ev.kind === 'contribution') {
             basisBall.push({ ev: ev, recorded_at: c.created_at || '',
                              kommentar: Number(cid) || 0 });
           }
@@ -884,11 +883,11 @@
         /* BALLSPIEL, Schritt 1b (AG-MON-BALLSPIEL-001): Peter am 25.10.:
            "Wenn der Ball liegen bleiben wuerde, waere es egal, ob ich zu
            spaet komme." Darum werden genau zwei Arten aus der Historie
-           mitgenommen -- Peters Anstoss und die Rueckgabe an Peter. Sie
-           treiben keinen AUFGABENZUSTAND (der Satz oben gilt weiter), nur
-           die Frage, bei wem Peters Ball liegt. */
-        if ((ev.kind === 'handoff' && ev.actor === 'peter') ||
-            (ev.kind === 'contribution' && ev.recipient === 'peter')) {
+           mitgenommen -- Uebergaben und Rueckgaben (seit Schritt 2 auch die
+           zwischen Agenten, fuer die Teilbaelle). Sie treiben keinen
+           AUFGABENZUSTAND (der Satz oben gilt weiter), nur die Frage, bei
+           wem welcher Ball liegt. */
+        if (ev.kind === 'handoff' || ev.kind === 'contribution') {
           basisBall.push({ ev: ev, recorded_at: c.created_at || '',
                            kommentar: Number(cid) || 0 });
         }
@@ -1046,12 +1045,25 @@
       var e = x.ev;
       var k = e.project_id + '\u0001' + e.run_id + '\u0001' + e.task_id;
       if (e.kind === 'handoff' && e.actor === 'peter' && e.recipient) {
-        if (!lage[k]) reihe.push(k);
+        if (!(k in lage)) reihe.push(k);
         lage[k] = { project_id: e.project_id, run_id: e.run_id,
                     task_id: e.task_id, bei: e.recipient };
-      } else if (e.kind === 'contribution' && e.recipient === 'peter' &&
-                 lage[k] && lage[k].bei === e.actor) {
-        lage[k] = null;
+      } else if (e.kind === 'contribution' && e.recipient === 'peter') {
+        /* Teilbaelle bleiben, bis ihr Agent selbst zurueckgibt -- der
+           Monitor dient der Kontrolle (Peter, 25.10.; siehe Original). */
+        if (lage[k] && lage[k].bei === e.actor) lage[k] = null;
+      } else if (e.kind === 'handoff' && e.recipient && e.recipient !== 'peter') {
+        /* Schritt 2: Teilball beim Empfaenger, Schluessel mit Empfaenger --
+           dieselbe Regel wie live (`ballspielGelandet`). */
+        var kt = k + '\u0001' + e.recipient;
+        if (!(kt in lage)) reihe.push(kt);
+        if (!lage[kt]) lage[kt] = { project_id: e.project_id, run_id: e.run_id,
+                                    task_id: e.task_id, bei: e.recipient, teil: true };
+      } else if (e.kind === 'contribution' && e.recipient) {
+        /* Schritt 2: Rueckgabe an einen Agenten nimmt den Teilball des
+           Absenders weg. */
+        var kr = k + '\u0001' + e.actor;
+        if (lage[kr]) lage[kr] = null;
       }
     });
     return reihe.filter(function (k) { return lage[k]; })

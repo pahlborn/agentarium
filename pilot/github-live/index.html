@@ -2467,7 +2467,7 @@
 
      Der Bauzeitpunkt kommt beim Bauen aus der Uhr. Von Hand gepflegte
      Datumsangaben sind nach der zweiten Änderung falsch. */
-  var FASSUNG = '82', GEBAUT = '2026-10-25T15:10Z';
+  var FASSUNG = '83', GEBAUT = '2026-10-25T15:44Z';
 
   /* AG-GH-LIVE-001: JEDE TEXTSENKE MASKIERT.
      Seit Live-Daten von aussen kommen (GitHub-Kommentare, one-event.json),
@@ -3197,6 +3197,10 @@
     var A = nachName[E.von], B = nachName[E.an] || A;
     var p = heimat(A), z = heimat(B);
     var m = ARTEN[E.art] || ARTEN.handoff;
+    /* Ballspiel, Schritt 2: Die Rueckgabe zwischen Agenten fliegt als
+       Teilball. Die Art bleibt (Beschriftung, Nachhall), nur die Gestalt
+       wird die eines Balls. */
+    if (E.alsBall) { m = Object.create(m); m.gestalt = 'sonne'; }
     /* Widerspruch, Änderung und Fehler treffen die Sache, nicht die Person
        — solange eine Sache auf dem Tisch liegt. Liegt nichts dort, gehen
        sie wie bisher an den Platz des Empfängers; es gibt dann ja nichts,
@@ -3717,11 +3721,21 @@
      er stattdessen als Ball zu Peter und liegt dort bis zur Annahme (Peters
      Entscheidung vom 24.10.).
 
-     NOCH NICHT (bewusst, eigene Schritte): Teilbaelle bei Weitergabe
-     (Schritt 2), Rueckflug als Ball und Annahme (Schritt 3), Antippen zeigt die
-     Aufgabe. Nichts davon wird hier
-     vorweggenommen. Ohne Meldung kein Ball -- nichts wird erfunden. */
-  var liegend = [];   /* { schluessel, aufgabe, bei, von, t } */
+     TEILBAELLE (Schritt 2, Lots Grundsatz: Wer delegiert, gibt die Aufgabe
+     nicht ab, er gibt Arbeit daran ab): Eine Weitergabe zwischen Agenten
+     legt beim Empfaenger einen TEILBALL hin, halb so gross; der ganze Ball
+     bleibt, wo er ist. Mehrere Teilbaelle gleichzeitig sind moeglich, bei
+     verschiedenen Agenten oder mehrere bei einem. Eine Rueckgabe des
+     Empfaengers an einen Agenten nimmt seinen Teilball wieder weg -- er
+     fliegt als Teilball zurueck (siehe `alsBall`).
+     SCHLUESSEL: Aufgabe PLUS Empfaenger. Die Meldeanweisung gibt der
+     Weitergabe oft dieselbe task_id wie Peters Auftrag; ohne den Empfaenger
+     im Schluessel ueberschriebe der Teilball den ganzen Ball.
+
+     NOCH NICHT (bewusst, eigener Schritt): Rueckflug zu Peter als Ball und
+     Annahme (Schritt 3), Antippen zeigt die Aufgabe. Ohne Meldung kein Ball
+     -- nichts wird erfunden. */
+  var liegend = [];   /* { schluessel, aufgabe, bei, von, t, teil } */
 
   function ballspielSchluessel(sp) {
     return sp.project_id + '\u0001' + sp.run_id + '\u0001' + sp.task_id;
@@ -3739,6 +3753,27 @@
     if (b.art === 'contribution' && b.an === 'peter') {
       for (i = liegend.length - 1; i >= 0; i--)
         if (liegend[i].schluessel === k && liegend[i].bei === b.von) liegend.splice(i, 1);
+      /* Die TEILBAELLE des Laufs bleiben liegen, bis ihr Agent selbst
+         zurueckgibt -- auch wenn Peters Ball schon zurueck ist. Peter,
+         25.10.: Bei einigen Agenten blieben Auftraege liegen, weil sie nicht
+         vollendet wurden; der Monitor hat geholfen, sie zu erkennen. "Dafuer
+         ist der Monitor auch da: zur Kontrolle." Unerledigtes wird nie
+         stillschweigend weggeraeumt. */
+      return;
+    }
+    /* Schritt 2: Weitergabe zwischen Agenten -> Teilball beim Empfaenger. */
+    if (b.art === 'handoff' && b.an !== 'peter' && nachName[b.an]) {
+      var kt = k + '\u0001' + b.an;
+      for (i = 0; i < liegend.length; i++) if (liegend[i].schluessel === kt) return;
+      liegend.push({ schluessel: kt, aufgabe: b.spur.task_id, bei: b.an,
+                     von: b.von, t: 0, teil: true });
+      return;
+    }
+    /* Schritt 2: Rueckgabe an einen Agenten -> der Teilball des Absenders geht. */
+    if (b.art === 'contribution' && b.an !== 'peter') {
+      var kr = k + '\u0001' + b.von;
+      for (i = liegend.length - 1; i >= 0; i--)
+        if (liegend[i].schluessel === kr) liegend.splice(i, 1);
     }
   }
 
@@ -3764,7 +3799,10 @@
       var o = liegendOrt(l);
       /* Ein Ball bei niemandem ist kein Ball (siehe `ballOrt`). */
       if (!o) { liegend.splice(i, 1); continue; }
-      var rad = Math.min(W(), H()) * 0.021 * (1 + 0.09 * Math.sin(l.t * 1.1 + i));
+      /* Ein Teilball ist halb so gross wie der ganze -- dieselbe Regel wie
+         im Demo-Modus ("knapp halb so gross, der Ball bleibt ganz"). */
+      var rad = Math.min(W(), H()) * 0.021 * (l.teil ? 0.5 : 1) *
+                (1 + 0.09 * Math.sin(l.t * 1.1 + i));
       window.__feld.sonne(o[0], o[1], 0, 0, rad * 0.38, 0.88, 0.115, 0, 20);
       window.__feld.sonne(o[0], o[1], 0, 0, rad,        0.70, 0.115, 0, 52);
       window.__feld.sonne(o[0], o[1], 0, 0, rad * 1.75, 0.48, 0.115, 0, 26);
@@ -5837,13 +5875,16 @@
                gegen: geraten.gegen, antwort: geraten.antwort },
              ball: derBall ? derBall.bei : null,
              /* Ballspiel: die liegenden Live-Baelle, je Aufgabe einer. */
-             liegend: liegend.map(function (l) { return { aufgabe: l.aufgabe, bei: l.bei }; }),
+             liegend: liegend.map(function (l) {
+               return { aufgabe: l.aufgabe, bei: l.bei, teil: !!l.teil }; }),
              /* Die fliegenden Baelle, damit sich das Einholen nachmessen
                 laesst: Wer wirft, wohin, wie weit ist er, wie lange soll
                 der Flug noch dauern. */
              fliegend: baelle.map(function (b) {
                return { von: b.von, an: b.an, u: +b.u.toFixed(3),
-                        dauer: +b.dauer.toFixed(3) }; }),
+                        dauer: +b.dauer.toFixed(3),
+                        /* Ballspiel, Schritt 2: als Ball oder als Schweif, und wie gross */
+                        ball: !!b.sonne, gross: +(+b.gross).toFixed(2) }; }),
              still: tunStill,
              arbeiten: (function () { var r = [];
                for (var n in arbeit) if (!arbeit[n].aus && arbeit[n].liste.length)
@@ -6902,11 +6943,13 @@
     var baelleWieder = 0;
     if (Array.isArray(d.liegend)) d.liegend.forEach(function (L) {
       if (!L || !L.project_id || !L.run_id || !L.task_id || !nachName[L.bei]) return;
-      var k = ballspielSchluessel(L);
+      /* Schritt 2: Teilbaelle mit demselben Schluessel wie live (Aufgabe
+         plus Empfaenger); ein ganzer Ball wandert, ein Teilball nicht. */
+      var k = ballspielSchluessel(L) + (L.teil ? '\u0001' + L.bei : '');
       for (var j = 0; j < liegend.length; j++)
-        if (liegend[j].schluessel === k) { liegend[j].bei = L.bei; return; }
+        if (liegend[j].schluessel === k) { if (!L.teil) liegend[j].bei = L.bei; return; }
       liegend.push({ schluessel: k, aufgabe: L.task_id, bei: L.bei,
-                     von: 'peter', t: 0 });
+                     von: L.teil ? '' : 'peter', t: 0, teil: !!L.teil });
       baelleWieder++;
     });
     wiederhergestellt = n;
@@ -7012,6 +7055,16 @@
          ganzen Aufruf geworfen. */
       if (art !== 'progress' && !GH_LEBEN[art]) {
         E.beobachtet = true; E.gross = ARTEN[art].gross || 0.5;
+        /* BALLSPIEL, Schritt 2 (Peter 23./24.10.): Peters Anstoss ist der
+           GANZE Ball -- er fliegt in der Groesse, in der er danach liegt.
+           Eine Weitergabe bleibt ein Teilball (halb so gross). Und eine
+           Rueckgabe zwischen Agenten fliegt als Teilball zurueck, nicht als
+           duenner Schweif: Man soll sehen, dass die Arbeit zurueckkommt. Die
+           Rueckgabe an Peter ist Schritt 3. */
+        if (art === 'handoff' && von === 'peter') E.gross = 1.0;
+        if (art === 'contribution' && an && an !== 'peter') {
+          E.alsBall = true; E.gross = ARTEN.handoff.gross;
+        }
       }
     }
     /* Melder und die daraus abgeleitete Aussage werden mitgefuehrt, aber
@@ -7274,12 +7327,13 @@
       was('Du gibst Atlas einen Auftrag',
           'Der goldene Ball fliegt zu Atlas und bleibt dort liegen.', true, '') +
       was('Atlas gibt Arbeit weiter',
-          'Ein Ball fliegt zum Agenten. Künftig als halber Teilball, ' +
-          'und Atlas behält deinen Ball.', true, 'Teilball geplant') +
+          'Ein Teilball, halb so groß, fliegt zum Agenten und bleibt dort ' +
+          'liegen. Atlas behält deinen Ball.', true, '') +
       was('Ein Agent meldet einen Arbeitsschritt',
           'Eine kurze Meldung an seinem Platz, die verblasst.', true, '') +
       was('Ein Agent gibt sein Ergebnis zurück',
-          'Ein Ball fliegt zurück zu dem, der die Arbeit gegeben hat.', true, '') +
+          'Sein Teilball fliegt zurück zu dem, der die Arbeit gegeben hat, ' +
+          'und geht dort auf.', true, '') +
       was('Etwas klemmt',
           'Rechts zählt „Blockiert", bis die Klemme gelöst ist.', true, '') +
       was('Atlas gibt dir das Ergebnis',

@@ -223,7 +223,9 @@ async function waehlen(s, id) {
     st = await stand(s); g = await gh(s);
     zeile('Wahl gt40, verbunden', g.projekte.wahl + '/' + g.phase, 'gt40/verbunden');
     zeile('oben rechts', await kopf(s), 'GT40 Baubuch');
-    zeile('liegend: nur gt40', liegendText(st), 'GT-T1@scout');
+    /* GT-T2@forge ist ein Teilball (Weitergabe atlas -> forge in B; seit
+       AG-MON-BALLSPIEL-002 bleibt er liegen). */
+    zeile('liegend: nur gt40', liegendText(st), 'GT-T1@scout,GT-T2@forge');
     zeile('kein Flug beim Wechsel', (st.fliegend || []).length, 0);
     antwort.liste = antwort.liste.concat([
       kommentar(jetzt(), { project_id: 'agentarium', run_id: 'AG-P-3', task_id: 'AG-T3',
@@ -247,7 +249,7 @@ async function waehlen(s, id) {
     zeile('Wahl alle, verbunden', g.projekte.wahl + '/' + g.phase, '*/verbunden');
     zeile('oben rechts', await kopf(s), 'Alle Projekte');
     zeile('liegend: alles Verzeichnete, auch AG-T3',
-          liegendText(st), 'AG-T1@nova,AG-T3@argus,GT-T1@scout');
+          liegendText(st), 'AG-T1@nova,AG-T3@argus,GT-T1@scout,GT-T2@forge,GT-T4@nova');
     zeile('kein Flug beim Wechsel', (st.fliegend || []).length, 0);
     await s.screenshot({ path: path.join(AUFNAHMEN, '3-alle-projekte.jpg'), type: 'jpeg', quality: 75 });
     zeile('keine Seitenfehler', seitenFehler.length, 0);

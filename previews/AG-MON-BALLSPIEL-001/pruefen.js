@@ -194,20 +194,26 @@ async function warten(s, pruef, ms) {
     console.log('\nD — Weitergabe atlas → forge: Peters Ball bleibt bei atlas');
     schicke({ task_id: T1, kind: 'handoff', actor: 'atlas', recipient: 'forge', reporter: 'atlas',
               title: 'Atlas gibt Forge Arbeit an A (Probe).' });
-    st = await warten(s, x => (x.ausgegeben || 0) >= 3);
-    zeile('Peters Bälle liegen weiter bei atlas', liegendText(st), 'A@atlas,B@atlas');
+    /* Seit Schritt 2 (AG-MON-BALLSPIEL-002) legt die Weitergabe einen
+       TEILBALL bei forge hin -- Peters Baelle bleiben trotzdem bei atlas.
+       Gewartet wird deshalb auf drei liegende Baelle, nicht auf den Flug. */
+    st = await warten(s, x => (x.liegend || []).length === 3);
+    zeile('Peters Bälle liegen weiter bei atlas', liegendText(st), 'A@atlas,A@forge,B@atlas');
 
     console.log('\nE — Ein Fremder gibt Peter etwas: Peters Ball bleibt');
     schicke({ task_id: T2, kind: 'contribution', actor: 'forge', recipient: 'peter', reporter: 'forge',
               title: 'Forge schickt Peter etwas zu B (Probe).' });
     st = await warten(s, x => (x.ausgegeben || 0) >= 4);
-    zeile('nur der Halter gibt den Ball zurück', liegendText(st), 'A@atlas,B@atlas');
+    zeile('nur der Halter gibt den Ball zurück', liegendText(st), 'A@atlas,A@forge,B@atlas');
 
     console.log('\nF — atlas gibt Peter das Ergebnis zu A: genau dieser Ball geht');
     schicke({ task_id: T1, kind: 'contribution', actor: 'atlas', recipient: 'peter', reporter: 'atlas',
               title: 'Atlas gibt Peter das Ergebnis zu A (Probe).' });
-    st = await warten(s, x => (x.liegend || []).length === 1);
-    zeile('Ball A ist weg, Ball B liegt weiter', liegendText(st), 'B@atlas');
+    /* Seit Schritt 2 bleibt der Teilball bei forge liegen: Forge hat nie
+       zurueckgegeben, und genau das soll man sehen (Peter, 25.10.: der
+       Monitor dient der Kontrolle). */
+    st = await warten(s, x => (x.liegend || []).length === 2);
+    zeile('Ball A ist weg, Ball B liegt weiter', liegendText(st), 'A@forge,B@atlas');
     zeile('Aufnahme: ein Ball bleibt bei atlas', await bild('3-ein-ball-bleibt.jpg'), true);
 
     console.log('\nG — Nichts verloren');
