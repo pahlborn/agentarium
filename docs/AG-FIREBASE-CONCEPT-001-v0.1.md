@@ -1,5 +1,5 @@
 # AG-FIREBASE-CONCEPT-001 — Agentarium ohne eigenen Host
-Version 0.1 · 25.10.2026 · Atlas-Konzept und Spezifikationsentwurf, **nicht freigegeben**.
+Version 0.2 · 25.10.2026 · Atlas-Konzept und Spezifikationsentwurf, **nicht freigegeben**.
 Baseline: `a4e10c6e0f4c98fa160112e20a1ba06d81b76b63`. Keine Einrichtung, Implementierung, Migration oder Veröffentlichung beauftragt.
 
 ## 1. Auftrag, Ziel und Grenzen
@@ -63,6 +63,7 @@ Der Leser ist eine Funktion eines Monitor-Browsers, kein neuer Rechner/Dienst. E
 | IF-08 | Adapter → vorhandene Bühne | Bestehende Verträge von Lot bestätigen; Rendernachweis getrennt von Empfang |
 
 Normaler Ablauf: Anmeldung → Aufnahme/Freigabe → Listener → Leserwahl → neuer GitHub-Kommentar → validierter Eintrag im Puffer → alle zugelassenen Monitore erhalten dasselbe Ereignis.
+Die technische Spezifikation definiert Erzeuger, Inhalt und Version des Zustandssnapshots sowie den Wiederaufbau bei überschrittener Pufferaufbewahrung; ein Cursor allein ist kein wiederherstellbarer Zustand.
 Beim Verbinden zuerst Zustand aufbauen, dann Livegrenze setzen. Wiederverbindungen dürfen keine neuen Flüge für bereits abgeschlossene Historie vortäuschen.
 Archibald/Forge/Cadence bleiben echte Claude-Rollen; Änderungen am Transport dürfen deren Identität nicht mit Host/Publisher verwechseln.
 
@@ -102,7 +103,7 @@ GitHub-Token bleibt ausschließlich im berechtigten Browser nach bestehender Tok
 | REQ-06 | Echte Ereignisse auf zwei Geräten, gleiche Originalbelege | Echter Auftragskommentar bis tatsächlich gezeichneter Übergabe auf iPad und PC; keine Attrappe |
 | REQ-07 | Lücken/Wiederverbindung ohne alte Ballflüge | Unterbrechung, Snapshot und neue Livegrenze; Reihenfolge/Duplikate/Lücken messbar |
 | REQ-08 | Zugriff serverseitig geschützt | Nicht zugelassenes Gerät kann Daten nicht lesen, Einspeisung/Steuerung nicht ändern; kein Tokenabfluss |
-| REQ-09 | GitHub-/Firebase-Nutzung belegbar reduzieren | HTTP- und quotenbelastete Anfragen sowie Firebase-Downloads getrennt, vergleichbare Sitzung messen |
+| REQ-09 | GitHub-Nutzung gegenüber bisherigem Mehrmonitorbetrieb reduzieren; Firebase-Verbrauch separat begrenzen | Vergleichbare Sitzungen: HTTP- und quotenbelastete GitHub-Anfragen messen; neue Firebase-Downloads separat gegen vereinbarte Obergrenzen prüfen |
 | REQ-10 | Ausfälle ehrlich sichtbar | Rate-Limit, Null-Leser, Firebase-Quota und Netzunterbrechung führen zu benanntem veraltet/unterbrochen statt Fake-Live |
 
 Zeitgrenzen, maximal aktive Geräte, Aufbewahrung und konkrete Nutzungsobergrenzen sind offene Parameter, keine geratenen Sollwerte. Keine pauschale Sekunden-/Kostenersparnis zusagen.
@@ -145,3 +146,7 @@ Kein Firebase-Projekt angelegt, kein SDK eingebaut, keine Rules geändert, kein 
 - GitHub ETag/304: https://docs.github.com/en/rest/using-the-rest-api/best-practices-for-using-the-rest-api
 
 Scout `/root/scout_firebase_concept` hat Firebase-Fakten und Grenzen unabhängig recherchiert. Atlas hat den Ist-Code geprüft und diesen Entwurf verfasst. Keine Lot-/Archibald-Mitwirkung behauptet. Das Dokument ist weder technische Freigabe noch getestete Umsetzung.
+
+## 13. Unabhängige Konzeptdurchsicht
+Argus `/root/argus_firebase_concept` prüfte ausschließlich Version0.1 am Commit `ee39647c60565432c1f6470d8ad4a4abf8f60072`. Urteil: **READY_FOR_TECHNICAL_REFINEMENT**, nicht freigegeben für Backlog, Einrichtung oder Implementierung. Keine Tests/Code-/Quellenprüfung durch Argus.
+Zwei Hinweise übernommen in Version0.2: REQ-09 trennt GitHub-Reduktion von neuem Firebase-Verbrauch; IF-07 benennt Snapshot-Erzeuger/Inhalt/Version und Wiederaufbau nach Pufferablauf als notwendige Spezifikationsarbeit. Diese Textkorrekturen sind Atlas' Nachführung, keine zusätzliche Archibald- oder Lot-Lieferung. Ein Review der vollständigen technischen Spezifikation steht aus.
