@@ -18,6 +18,9 @@
         Peters Ball bleibt, wo er ist
      D  Annahme mit falschem Melder oder fuer einen Ball, der nicht bei
         peter liegt: wirkt nicht; Annahme durch atlas: der Ball geht
+     F  Anstoss, Rueckgabe und Annahme in DERSELBEN Abfrage (wie der echte
+        Lauf AG-RETURN-AUDIT-001): verbucht in Meldungsreihenfolge, nicht in
+        Landungsreihenfolge -- kein Ball bleibt bei atlas haengen
      E  nach Neuladen und Verbinden dieselbe Lage, ohne Flug
 
    GRENZEN: Attrappe mit Scheintoken, Probekoerper. Keine Abnahme am iPad.  */
@@ -242,13 +245,32 @@ async function seite(b, tisch, antwortRef) {
     st = await bisLage(s, x => !/A1@peter/.test(x), 8000);
     zeile('A1 von atlas angenommen: weg', liegendText(st), 'A3@peter,A5@atlas');
     await s.screenshot({ path: path.join(AUFNAHMEN, '3-nach-annahme.jpg'), type: 'jpeg', quality: 75 });
+
+    /* F: GEFUNDEN AM ECHTEN LAUF AG-RETURN-AUDIT-001 (Peter, 25.10.: "es
+       liegt dennoch ein unerklaerbarer Ball bei Atlas"). Anstoss und
+       Rueckgabe kamen in derselben Abfrage; live landete die Rueckgabe vor
+       dem Anstoss, und der Ball blieb bei atlas liegen. Verbucht wird jetzt
+       in Meldungsreihenfolge. */
+    console.log('\nF — Alles in derselben Abfrage (wie AG-RETURN-AUDIT-001)');
+    antwort.liste = antwort.liste.concat([
+      anstoss(jetzt(), 'AG-B3-L6', 'A6'), abschluss(jetzt(), 'AG-B3-L6', 'A6'),
+      annahme(jetzt(), 'AG-B3-L6', 'A6'),
+      anstoss(jetzt(), 'AG-B3-L7', 'A7'), abschluss(jetzt(), 'AG-B3-L7', 'A7')
+    ]);
+    st = await bisLage(s, (x, y) => /A7@peter/.test(x) && !(y.fliegend || []).length &&
+                                    !(y.liegend || []).some(l => l.fliegt), 12000);
+    await s.waitForTimeout(1500);
+    st = await stand(s);
+    zeile('A6 angenommen: liegt nirgends', /A6@/.test(liegendText(st)), false);
+    zeile('A7 zurück: liegt bei Peter, nicht bei atlas', liegendText(st), 'A3@peter,A5@atlas,A7@peter');
+    zeile('kein Ball mehr unterwegs', (st.liegend || []).some(l => l.fliegt), false);
     zeile('keine Seitenfehler', seitenFehler.length, 0);
     await q.close();
 
     console.log('\nE — Neu laden und verbinden');
     const r2 = await seite(b, tisch, antwort);
     st = await stand(r2.s);
-    zeile('dieselbe Lage', liegendText(st), 'A3@peter,A5@atlas');
+    zeile('dieselbe Lage', liegendText(st), 'A3@peter,A5@atlas,A7@peter');
     zeile('ohne Flug', (st.fliegend || []).length, 0);
     zeile('keine Seitenfehler', r2.seitenFehler.length, 0);
     await r2.q.close();
