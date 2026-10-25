@@ -276,3 +276,18 @@ TK022-Quellenroute: Anzeige/Verbraucher und Erzeugung getrennt. Atlas meldet eig
 Peters Routingkorrektur vom2026-10-23: Atlas beauftragt Archibald direkt, nicht über Lot. Die Host-/Reload-Abhängigkeit von Lots laufender Sitzung in TK021/NachtragV1.4 ist als regulärer Ausführungsweg aufgehoben. Lot bleibt Implementierungsowner des Monitors, Archibald/spec-agent bleibt Spezifikationsowner, Atlas verantwortet seinen direkten Aufruf.
 
 Aktuell verifizierte bestehende Route: relay/claude_public_relay_v2.py enthält spec-agent in ROLES. Der alte archibald-relay.yml-Identitätstest ist nicht die einzige Route. Direct-Relay-Unterstützung ist keine bestätigte aktuelle Ausführung; API-Worker-Aktivierung verlangt weiterhin konkrete Kostenautorität und geprüftes versioniertes Paket. Keine Aktivierung durch dieses Dokument. TK021: direkte Beauftragung durch Atlas, worker_started nicht belegt. Frühere pauschale Aussage, es gebe keinen Archibald-Weg, wird entsprechend eingeschränkt: direkter Sessionconnector hier nicht vorhanden, vorhandener API-Relay-Weg unterstützt die Rolle.
+
+
+## Atlas session state
+
+Governance adoption task: AG-RULEBOOK-014. This section stores cursors and Cadence trigger state, not inferred product progress.
+
+| Field | Value |
+|---|---|
+| Last contiguously inspected Issue #2 comment ID / time | unknown — no full continuity reconciliation performed during this bounded governance change |
+| Last Cadence review-run reference | unknown — the Ballbrause Cadence contribution is not assumed to reset the new five-task review counter |
+| Closed tasks since last review | unknown — reconcile task closure records before first operational trigger decision; do not assume zero |
+| Trigger/finding keys already dispatched | none recorded under 1.4 yet; historical dispatches must be checked before duplicate invocation |
+| Next owner/action | Atlas: reconcile cursor/count at the next session start and dispatch due findings once, preserving unknowns |
+
+Update at session start and task closure under Process 1.4 §§0,4,5. Preserve originals and record trigger key, status, review reference and next review event. Do not count comments, commits, subtasks or CI attempts as separate closed tasks by default.

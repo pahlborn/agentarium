@@ -1,4 +1,6 @@
 # Agentarium Process 1.2
+
+> Historical version. Superseded by `agentarium-process-v1.4.md` when the 1.4 package is integrated. Retained unchanged below for evidence; not the current instruction source.
 Companion to `agentarium-rulebook-v1.2.md`; same adoption/authority limits. Applies to task routing, not a mandatory ceremony.
 
 1. **Reconstruct:** Atlas checks current task, baseline, original handbacks and outstanding decisions. State unknowns; reconcile duplicate/stale records.

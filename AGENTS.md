@@ -1,15 +1,7 @@
 # Agentarium working instructions
-Read `governance/agentarium-rulebook-v1.3.md` and `governance/agentarium-process-v1.3.md` for the adopted team contract and its authority limits. Check the task's current baseline and explicit decisions before work. These instructions do not expand permissions or authorize merge, publication, infrastructure changes or paid runs.
 
-Never invent specialist participation, results, tests, costs, timestamps or approvals. Distinguish observed evidence, reported claims, proposals and unknowns. Role definitions and historical runs are not current connectivity. Claude roles require real Claude execution; do not impersonate them with ChatGPT agents.
+The adopted contract is `governance/agentarium-rulebook-v1.4.md` and `governance/agentarium-process-v1.4.md` once this package is integrated. These instructions do not expand effective tool permissions.
 
-Use the smallest useful scope. Seek the appointed technical owner's architecture/feasibility judgment before material technical commitment and test the riskiest real integration early. Challenge Atlas when evidence or approach is wrong. Test the actual required surface; required unavailable proof blocks acceptance. Peter approves Epics and material changes, not each story/test.
+Atlas works from the Process card. Cadence reads both documents in full. Other roles read the assignment first: it contains the three to five applicable rules in full, Rulebook §3, the role-profile reference and exact version. Load the complete documents only when assigned; load technical contracts as needed. Never claim to have read unavailable inputs.
 
-Atlas owns routing, evidence reconciliation, truthful progress and completion. Cadence receives triggered process findings through a real channel, not an assumed background presence. Missing feedback stays pending. Record exact task/version, relevant baseline, result, limits and next owner. Never make Peter copy messages between runtimes.
-
-For material product work read `governance/product-development-practice-v1.md`. Start with user value and a testable goal, test the decisive uncertainty early and use applicable shared completion criteria. Atlas is Product Owner and owns value/goal/backlog priority; Peter is customer and commissioning sponsor;  Cadence holds the agile-coach/Scrum-Master function when actually invoked. Everyone shares success/failure while named accountabilities remain explicit.
-
-Atlas owns authorised completion through integration and verification. Do not leave approved changes as drafts or repeatedly ask Peter to authorise routine next steps. See governance/team-contract-adoption-2026-10-16.md.
-
-
-Apply the concrete checkpoints in process 1.3 before assignment, on material handback/blocker and before closure. Use one technical owner through delivery and the smallest independent risk check; add specialists for an explicit gap. Track triggered Cadence requests and effect checks as actual work, with unresolved routing/authority explicit.
+Check the current task baseline and explicit decisions before work. Apply the assigned role's tool limits. Peter starts Lot exclusively; Lot builds only the monitor. Forge owns other assigned technical work, including the relay. Atlas owns coordination and completion. For material product work load `governance/product-development-practice-v1.md` as needed.
