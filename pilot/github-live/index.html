@@ -892,6 +892,18 @@
     background:rgba(9,13,20,.82); box-shadow:inset 0 0 0 1px rgba(150,170,200,.12);
     pointer-events:auto; transition:opacity .55s ease;}
   #agTempo.leise{opacity:0; pointer-events:none;}
+  /* ANTIPPEN ZEIGT AUFGABE UND HALTER (AG-MON-BALLSPIEL-004). Ein kleines
+     Schild neben dem Ball; es faengt keine Beruehrung ab. */
+  #agBallInfo{position:fixed; z-index:6; pointer-events:none; display:none;
+    max-width:260px; padding:7px 10px 8px; border-radius:6px;
+    background:rgba(9,13,20,.88); box-shadow:inset 0 0 0 1px rgba(232,200,120,.35);
+    color:#D6E0F0; font:400 12px/1.4 -apple-system,system-ui,sans-serif;}
+  #agBallInfo.auf{display:block;}
+  #agBallInfo b{display:block; color:#E8D9A8; font-weight:500;
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:11px;
+    letter-spacing:.06em; word-break:break-all;}
+  #agBallInfo span{display:block;}
+  #agBallInfo small{display:block; color:#7F8FA8; font-size:10px; word-break:break-all;}
   /* `hidden` allein genuegt hier nicht: `display:flex` oben ist eine
      ID-Regel und schlaegt die Voreinstellung des Browsers fuer [hidden].
      Ohne diese Zeile stand der Regler auch live im Bild (bis Fassung 80). */
@@ -2467,7 +2479,7 @@
 
      Der Bauzeitpunkt kommt beim Bauen aus der Uhr. Von Hand gepflegte
      Datumsangaben sind nach der zweiten Änderung falsch. */
-  var FASSUNG = '85', GEBAUT = '2026-10-25T19:33Z';
+  var FASSUNG = '86', GEBAUT = '2026-10-25T20:04Z';
 
   /* AG-GH-LIVE-001: JEDE TEXTSENKE MASKIERT.
      Seit Live-Daten von aussen kommen (GitHub-Kommentare, one-event.json),
@@ -3833,6 +3845,94 @@
       }
     return false;
   }
+
+  /* ============ ANTIPPEN ZEIGT AUFGABE UND HALTER (AG-MON-BALLSPIEL-004) ======
+     Peter, 24.10.: "Alle Baelle golden. Antippen zeigt Aufgabe und Halter."
+     Peter, 25.10.: "eine id am ball wuerde helfen" -- ein Ball bei Atlas war
+     nicht zu erklaeren, weil man ihm nicht ansah, wessen Aufgabe er ist.
+     Ein KURZES Tippen ohne Bewegung auf einen liegenden Ball zeigt daneben
+     Kuerzel und Aufgabe, was fuer ein Ball es ist, bei wem er liegt und den
+     Lauf. Mitruehren bleibt, was es war: Wer zieht, ruehrt -- dieser
+     Zuhoerer greift nur, wenn sich der Finger kaum bewegt hat, und haelt
+     nichts an (kein preventDefault, kein stopPropagation).
+     Die Texte kommen aus Meldungen und werden deshalb als TEXT gesetzt, nie
+     als HTML. */
+  var ballInfoEl = document.createElement('div');
+  ballInfoEl.id = 'agBallInfo';
+  document.body.appendChild(ballInfoEl);
+  var ballInfoUhr = null;
+  function ballName(n) { return n ? n.charAt(0).toUpperCase() + n.slice(1) : ''; }
+  function ballInfoWeg() {
+    clearTimeout(ballInfoUhr); ballInfoUhr = null;
+    ballInfoEl.classList.remove('auf');
+    ballInfoEl.removeAttribute('data-aufgabe');
+  }
+  function ballInfoZeigen(l, o) {
+    var teile = l.schluessel.split('\u0001');          /* projekt, lauf, aufgabe[, halter] */
+    var projekt = teile[0] || '', lauf = teile[1] || '';
+    var kz = projekt;
+    if (typeof ghProjekte !== 'undefined' && ghProjekte && ghProjekte.liste)
+      for (var i = 0; i < ghProjekte.liste.length; i++)
+        if (ghProjekte.liste[i].id === projekt) { kz = ghProjekte.liste[i].kuerzel; break; }
+    var was = l.teil
+      ? 'Teilball · bei ' + ballName(l.bei) + (l.von ? ' · von ' + ballName(l.von) : '')
+      : (l.bei === 'peter' ? 'Dein Auftrag · zurück bei dir · wartet auf Annahme'
+                           : 'Dein Auftrag · bei ' + ballName(l.bei));
+    ballInfoEl.textContent = '';
+    var z1 = document.createElement('b');     z1.textContent = kz + ' · ' + l.aufgabe;
+    var z2 = document.createElement('span');  z2.textContent = was;
+    var z3 = document.createElement('small'); z3.textContent = 'Lauf ' + lauf;
+    ballInfoEl.appendChild(z1); ballInfoEl.appendChild(z2); ballInfoEl.appendChild(z3);
+    ballInfoEl.setAttribute('data-aufgabe', l.aufgabe);
+    ballInfoEl.classList.add('auf');
+    /* Neben den Ball, aber im Bild halten. */
+    var bw = ballInfoEl.offsetWidth || 220, bh = ballInfoEl.offsetHeight || 60;
+    var x = o[0] + 18, y = o[1] - bh / 2;
+    if (x + bw > window.innerWidth - 8) x = o[0] - 18 - bw;
+    y = Math.max(8, Math.min(window.innerHeight - bh - 8, y));
+    ballInfoEl.style.left = Math.round(Math.max(8, x)) + 'px';
+    ballInfoEl.style.top = Math.round(y) + 'px';
+    clearTimeout(ballInfoUhr);
+    ballInfoUhr = setTimeout(ballInfoWeg, 6000);
+  }
+  /* Welcher liegende, SICHTBARE Ball ist am naechsten? Der Fangkreis ist
+     groesser als der Ball -- ein Finger ist kein Mauszeiger. */
+  function ballGetroffen(x, y) {
+    var best = null, bd = 1e9;
+    for (var i = 0; i < liegend.length; i++) {
+      var l = liegend[i];
+      if (l.flug) continue;
+      var o = liegendOrt(l);
+      if (!o) continue;
+      var r = Math.max(26, Math.min(W(), H()) * 0.021 * (l.teil ? 0.5 : 1) * 2.2);
+      var d = Math.hypot(x - o[0], y - o[1]);
+      if (d < r && d < bd) { bd = d; best = { l: l, o: o }; }
+    }
+    return best;
+  }
+  /* SEITENWEIT, NICHT NUR AM FELD: Peters Ball liegt direkt neben seinem
+     Namen, und das Namensschild liegt UEBER dem Feld -- am Feld allein kam
+     das Tippen dort nie an (gemessen mit AG-MON-BALLSPIEL-004). Ausgenommen
+     ist alles, was selbst bedient wird: Knoepfe, Tafeln, Eingaben. */
+  (function () {
+    var ab = null;
+    var BEDIENT = 'button, input, select, textarea, a, details, summary, ' +
+                  '#agWas, #agKopf, #agTasten, #agTempo, #agGesetz, [id^="agGh"]';
+    function bedient(z) { return !!(z && z.closest && z.closest(BEDIENT)); }
+    window.addEventListener('pointerdown', function (e) {
+      ab = bedient(e.target) ? null
+         : { x: e.clientX, y: e.clientY, t: performance.now(), id: e.pointerId };
+    }, true);
+    window.addEventListener('pointerup', function (e) {
+      if (!ab || ab.id !== e.pointerId) return;
+      var weit = Math.hypot(e.clientX - ab.x, e.clientY - ab.y);
+      var lang = performance.now() - ab.t;
+      ab = null;
+      if (weit > 12 || lang > 500) return;          /* das war Ruehren */
+      var t = ballGetroffen(e.clientX, e.clientY);
+      if (t) ballInfoZeigen(t.l, t.o); else ballInfoWeg();
+    }, true);
+  })();
 
   /* Neben dem Namen, wie `ballOrt` -- liegen mehrere bei einem Halter,
      faechern sie um die Richtung zur Mitte auf. */
@@ -5944,9 +6044,14 @@
              ball: derBall ? derBall.bei : null,
              /* Ballspiel: die liegenden Live-Baelle, je Aufgabe einer. */
              liegend: liegend.map(function (l) {
+               var o = l.flug ? null : liegendOrt(l);
                return { aufgabe: l.aufgabe, bei: l.bei, teil: !!l.teil,
                         /* verbucht, aber noch im Flug (nicht gezeichnet) */
-                        fliegt: !!l.flug }; }),
+                        fliegt: !!l.flug,
+                        /* wo er liegt, in Bildpunkten -- zum Antippen im Nachweis */
+                        ort: o ? [Math.round(o[0]), Math.round(o[1])] : null }; }),
+             /* Was das Schild am Ball gerade zeigt (leer = zu). */
+             ballInfo: ballInfoEl.classList.contains('auf') ? ballInfoEl.textContent : '',
              /* Die fliegenden Baelle, damit sich das Einholen nachmessen
                 laesst: Wer wirft, wohin, wie weit ist er, wie lange soll
                 der Flug noch dauern. */
@@ -7019,7 +7124,8 @@
       for (var j = 0; j < liegend.length; j++)
         if (liegend[j].schluessel === k) { if (!L.teil) liegend[j].bei = L.bei; return; }
       liegend.push({ schluessel: k, aufgabe: L.task_id, bei: L.bei,
-                     von: L.teil ? '' : 'peter', t: 0, teil: !!L.teil });
+                     von: L.teil ? (nachName[L.von] ? L.von : '') : 'peter',
+                     t: 0, teil: !!L.teil });
       baelleWieder++;
     });
     wiederhergestellt = n;
@@ -7414,6 +7520,9 @@
       was('Du nimmst an (Atlas meldet es für dich)',
           'Dein Ball verschwindet. Teilbälle, die nie zurückkamen, bleiben ' +
           'liegen — zur Kontrolle.', true, '') +
+      was('Du tippst einen liegenden Ball an',
+          'Daneben steht kurz Kürzel und Aufgabe, bei wem er liegt und der Lauf.',
+          true, '') +
       '</table>' +
 
       '<h4>Betriebsarten</h4><table>' +
@@ -7978,7 +8087,7 @@
     for (var n1 in arbeit) delete arbeit[n1];
     for (var n2 in stopper) delete stopper[n2];
     for (var n3 in erwartung) { weiterSagen(n3, 0); delete erwartung[n3]; }
-    tisch.length = 0; derBall = null; liegend.length = 0;
+    tisch.length = 0; derBall = null; liegend.length = 0; ballInfoWeg();
     bausteine.length = 0; produkt = 0; ratNull();
     register.length = 0; aufgabenAuf = 0; aufgabenZu = 0;
     werkEl.innerHTML = ''; rufeEl.innerHTML = '';
