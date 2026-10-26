@@ -1103,7 +1103,7 @@
 <div id="agStoppSchilder"></div>
 <div id="agStopp"></div>
 <div id="agLive"></div>
-<div id="agTasten"><button id="agListe" type="button" class="an">Was geschieht</button><button id="agMotor" type="button">LLM &amp; Kosten</button>
+<div id="agTasten"><button id="agListe" type="button" class="an">Was geschieht</button><button id="agTexte" type="button">Texte: kurz</button><button id="agMotor" type="button">LLM &amp; Kosten</button>
 <button id="agLeg" type="button">Gesetz</button>
 <button id="agHalt" type="button">Halt</button>
 <button id="agVorn" type="button">Von vorn</button>
@@ -2479,7 +2479,7 @@
 
      Der Bauzeitpunkt kommt beim Bauen aus der Uhr. Von Hand gepflegte
      Datumsangaben sind nach der zweiten Änderung falsch. */
-  var FASSUNG = '86', GEBAUT = '2026-10-25T20:04Z';
+  var FASSUNG = '87', GEBAUT = '2026-10-26T05:50Z';
 
   /* AG-GH-LIVE-001: JEDE TEXTSENKE MASKIERT.
      Seit Live-Daten von aussen kommen (GitHub-Kommentare, one-event.json),
@@ -6052,6 +6052,8 @@
                         ort: o ? [Math.round(o[0]), Math.round(o[1])] : null }; }),
              /* Was das Schild am Ball gerade zeigt (leer = zu). */
              ballInfo: ballInfoEl.classList.contains('auf') ? ballInfoEl.textContent : '',
+             /* Texte im Feld: kurz · voll · aus */
+             feldText: feldText,
              /* Die fliegenden Baelle, damit sich das Einholen nachmessen
                 laesst: Wer wirft, wohin, wie weit ist er, wie lange soll
                 der Flug noch dauern. */
@@ -6633,7 +6635,46 @@
     return { top: parseFloat(e.style.top), rest: 1 };
   }
 
+  /* ======================= TEXTE IM FELD: KURZ · VOLL · AUS =======================
+     Peter, 25.10.: Der Text am Ball ist dieselbe Meldung wie die Zeile in
+     der Liste -- "dann haette ich gerne, dass die fliegenden texte kuenftig
+     reduzierter erscheinen ... ggf. einen Schalter fuer ein, aus,
+     reduziert". Also drei Stufen, auf dem Geraet gespeichert:
+       kurz  (Grundeinstellung) von -> an · Art auf Deutsch, darunter der Titel
+       voll  wie bisher, mit der ganzen Herkunftszeile
+       aus   kein Text im Feld; Baelle und Fluege bleiben
+     Die LISTE bleibt in jeder Stufe vollstaendig -- dort steht alles nach. */
+  var FELDTEXT_SPEICHER = 'agentarium-feldtexte';
+  var FELDTEXT_STUFEN = ['kurz', 'voll', 'aus'];
+  var feldText = 'kurz';
+  try {
+    var ftG = localStorage.getItem(FELDTEXT_SPEICHER);
+    if (FELDTEXT_STUFEN.indexOf(ftG) >= 0) feldText = ftG;
+  } catch (x) {}
+  var ART_WORT = {
+    handoff: 'Übergabe', contribution: 'Rückgabe', assigned: 'vergeben',
+    received: 'erhalten', started: 'begonnen', delivered: 'geliefert',
+    reviewed: 'geprüft', accepted: 'angenommen', merged: 'gemergt',
+    published: 'veröffentlicht', blocked: 'blockiert', resolved: 'gelöst',
+    aborted: 'abgebrochen', progress: 'Fortschritt',
+    request: 'Auftrag', answer: 'Antwort', question: 'Rückfrage',
+    proposal: 'Vorschlag', recommendation: 'Empfehlung', objection: 'Widerspruch',
+    change_request: 'Änderungswunsch', defect: 'Fehler', open_state: 'offen',
+    stop: 'Stop', resume: 'weiter', artifact: 'Ergebnis', decision: 'Entscheidung',
+    test_result: 'Prüfergebnis', review_result: 'Review'
+  };
+  function feldTextSetzen(stufe) {
+    if (FELDTEXT_STUFEN.indexOf(stufe) < 0) return;
+    feldText = stufe;
+    try { localStorage.setItem(FELDTEXT_SPEICHER, stufe); } catch (x) {}
+    var k = document.getElementById('agTexte');
+    if (k) k.textContent = 'Texte: ' + stufe;
+    /* "aus" heisst sofort aus -- was gerade schwebt, geht mit. */
+    if (stufe === 'aus') rufeEl.innerHTML = '';
+  }
+
   function melden(von, an, art, text, m, zusatz) {
+    if (feldText === 'aus') return;
     var A = nachName[an] || nachName[von];
     if (!A || !nachName[von]) return;
     var o = heimat(A);
@@ -6664,10 +6705,20 @@
       ',' + (Math.sin(zm) > 0 ? '0' : '-100%') + ')';
     e.style.textAlign = Math.cos(zm) < -0.25 ? 'right' : 'left';
     var zu = zustandVon(m);
-    e.innerHTML = '<u style="color:' + hex(nachName[von].farbe) + '">' +
-                  esc(von) + '</u> <s class="z-' + zu[0] + '">' + esc(art) + '</s>' +
-                  '<br><span>' + esc(text) + '</span>' +
-                  (zusatz ? '<br><small class="agHerkunft">' + esc(zusatz) + '</small>' : '');
+    if (feldText === 'kurz') {
+      /* Zwei Zeilen: wer an wen, was -- und der Titel. Die Herkunftszeile
+         steht in der Liste. */
+      var B2 = (an && an !== von) ? nachName[an] : null;
+      e.innerHTML = '<u style="color:' + hex(nachName[von].farbe) + '">' + esc(von) + '</u>' +
+                    (B2 ? ' \u2192 <u style="color:' + hex(B2.farbe) + '">' + esc(an) + '</u>' : '') +
+                    ' <s class="z-' + zu[0] + '">' + esc(ART_WORT[art] || art) + '</s>' +
+                    '<br><span>' + esc(text) + '</span>';
+    } else {
+      e.innerHTML = '<u style="color:' + hex(nachName[von].farbe) + '">' +
+                    esc(von) + '</u> <s class="z-' + zu[0] + '">' + esc(art) + '</s>' +
+                    '<br><span>' + esc(text) + '</span>' +
+                    (zusatz ? '<br><small class="agHerkunft">' + esc(zusatz) + '</small>' : '');
+    }
     rufeEl.appendChild(e);
     /* Nach außen schreiben ist richtig, solange außen Platz ist. Seit der
        Kreis nach rechts gewandert ist, stehen Nova, Argus und Archibald
@@ -7533,7 +7584,9 @@
       was('Live', 'Was gerade geschieht. Läufe können parallel laufen.', true, '') +
       '</table>' +
       '<p class="gFuss">Oben rechts wählst du: ein echtes Projekt hat ' +
-      '<b>Archiv · Live</b>, eine Demo hat <b>Demo · Archiv</b>.</p>';
+      '<b>Archiv · Live</b>, eine Demo hat <b>Demo · Archiv</b>.</p>' +
+      '<p class="gFuss">Der Knopf <b>Texte</b> stellt die Texte im Feld auf ' +
+      'kurz, voll oder aus. Die Liste „Was geschieht" zeigt immer alles.</p>';
 
     legende.innerHTML = blick +
       '<details class="gMehr"><summary>Einzelheiten: Name, Gesetz, ' +
@@ -8280,6 +8333,18 @@
       an = !an;
       k.classList.toggle('an', an);
       ecke.classList.toggle('leise', !an);
+    });
+  })();
+
+  /* „Texte" schaltet die Texte im Feld weiter: kurz -> voll -> aus -> kurz.
+     Die Aufschrift sagt, was gerade gilt. */
+  (function () {
+    var k = document.getElementById('agTexte');
+    if (!k) return;
+    k.textContent = 'Texte: ' + feldText;
+    k.addEventListener('click', function () {
+      tastenZeigen();
+      feldTextSetzen(FELDTEXT_STUFEN[(FELDTEXT_STUFEN.indexOf(feldText) + 1) % FELDTEXT_STUFEN.length]);
     });
   })();
 
