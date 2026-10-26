@@ -2479,7 +2479,7 @@
 
      Der Bauzeitpunkt kommt beim Bauen aus der Uhr. Von Hand gepflegte
      Datumsangaben sind nach der zweiten Änderung falsch. */
-  var FASSUNG = '87', GEBAUT = '2026-10-26T05:50Z';
+  var FASSUNG = '88', GEBAUT = '2026-10-26T16:01Z';
 
   /* AG-GH-LIVE-001: JEDE TEXTSENKE MASKIERT.
      Seit Live-Daten von aussen kommen (GitHub-Kommentare, one-event.json),
@@ -3817,7 +3817,10 @@
       var kt = k + '\u0001' + E.an;
       for (i = 0; i < liegend.length; i++) if (liegend[i].schluessel === kt) return;
       liegend.push({ schluessel: kt, aufgabe: E.spur.task_id, bei: E.an,
-                     von: E.von, t: 0, teil: true, flug: b });
+                     von: E.von, t: 0, teil: true, flug: b,
+                     /* Zu welcher Aufgabe gehoert die Teilarbeit? Aus `parent_id`
+                        (Peter, 26.10.: eigene ID je Teilaufgabe, mit Verweis). */
+                     eltern: E.eEltern || '' });
       return;
     }
     /* Schritt 2: Rueckgabe an einen Agenten -> der Teilball des Absenders
@@ -3875,7 +3878,8 @@
       for (var i = 0; i < ghProjekte.liste.length; i++)
         if (ghProjekte.liste[i].id === projekt) { kz = ghProjekte.liste[i].kuerzel; break; }
     var was = l.teil
-      ? 'Teilball · bei ' + ballName(l.bei) + (l.von ? ' · von ' + ballName(l.von) : '')
+      ? 'Teilball · bei ' + ballName(l.bei) + (l.von ? ' · von ' + ballName(l.von) : '') +
+        (l.eltern ? ' · gehört zu ' + l.eltern : '')
       : (l.bei === 'peter' ? 'Dein Auftrag · zurück bei dir · wartet auf Annahme'
                            : 'Dein Auftrag · bei ' + ballName(l.bei));
     ballInfoEl.textContent = '';
@@ -6045,7 +6049,7 @@
              /* Ballspiel: die liegenden Live-Baelle, je Aufgabe einer. */
              liegend: liegend.map(function (l) {
                var o = l.flug ? null : liegendOrt(l);
-               return { aufgabe: l.aufgabe, bei: l.bei, teil: !!l.teil,
+               return { aufgabe: l.aufgabe, bei: l.bei, teil: !!l.teil, eltern: l.eltern || '',
                         /* verbucht, aber noch im Flug (nicht gezeichnet) */
                         fliegt: !!l.flug,
                         /* wo er liegt, in Bildpunkten -- zum Antippen im Nachweis */
@@ -7176,7 +7180,8 @@
         if (liegend[j].schluessel === k) { if (!L.teil) liegend[j].bei = L.bei; return; }
       liegend.push({ schluessel: k, aufgabe: L.task_id, bei: L.bei,
                      von: L.teil ? (nachName[L.von] ? L.von : '') : 'peter',
-                     t: 0, teil: !!L.teil });
+                     t: 0, teil: !!L.teil,
+                     eltern: (L.teil && typeof L.eltern === 'string') ? ghKenn(L.eltern) : '' });
       baelleWieder++;
     });
     wiederhergestellt = n;

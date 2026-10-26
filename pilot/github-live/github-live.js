@@ -1071,7 +1071,7 @@
            (AG-MON-BALLSPIEL-004). */
         if (!lage[kt]) lage[kt] = { project_id: e.project_id, run_id: e.run_id,
                                     task_id: e.task_id, bei: e.recipient, teil: true,
-                                    von: e.actor };
+                                    von: e.actor, eltern: e.parent_id || '' };
       } else if (e.kind === 'contribution' && e.recipient) {
         /* Schritt 2: Rueckgabe an einen Agenten nimmt den Teilball des
            Absenders weg. */

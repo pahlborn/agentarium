@@ -33,9 +33,14 @@ Dass eine Rückgabe als Ball erscheint, ist eine eigene, spätere Bildänderung
 2. **Weitergabe.** Gibt Atlas eine Aufgabe an einen Agenten weiter, meldet er
    **zuerst** `handoff` von Atlas an den Agenten (der Ball) und **dann**
    `assigned` an den Agenten (legt die Aufgabe an).
+   **Jede Teilaufgabe hat ihre eigene `task_id`** (`<AUFGABE>-01`,
+   `<AUFGABE>-02`, …) und trägt `parent_id: <AUFGABE>`, also die ID des
+   Auftrags, zu dem sie gehört (Peter, 26.10.). Sonst fallen zwei Weitergaben
+   an denselben Agenten im Monitor zu **einem** Teilball zusammen.
 3. **Ergebnis.** Der Agent gibt sein Ergebnis als `contribution` an Atlas
-   zurück. Gemeldet wird es vom Agenten selbst oder, wie bisher, von Atlas
-   für ihn.
+   zurück, mit der `task_id` **seiner Teilaufgabe** und derselben
+   `parent_id`. Gemeldet wird es vom Agenten selbst oder, wie bisher, von
+   Atlas für ihn.
 4. **Abschluss.** Das Ergebnis geht als `contribution` von Atlas an Peter.
    Im Monitor fliegt Peters Ball zu ihm und **liegt dort bis zur Annahme**.
 4a. **Annahme durch Peter** (Peter, 24.10.). Sagt Peter Atlas, dass er das
@@ -49,7 +54,8 @@ Dass eine Rückgabe als Ball erscheint, ist eine eigene, spätere Bildänderung
    nachgespielt (Regel vom 21.10.).
 
 Alle Ereignisse einer Aufgabe tragen dieselbe `project_id`, `run_id` und
-`task_id`.
+`task_id`. Anstoß, Abschluss und Annahme tragen die ID von Peters Auftrag,
+Weitergabe, Vergabe und Ergebnis die ID der Teilaufgabe.
 
 ## Projekt und Lauf (Peter, 25.10.)
 
@@ -88,6 +94,8 @@ Der Monitor zeigt künftig nur Projekte aus dem Verzeichnis.
 
 Zu ersetzen ist alles in `<…>`. Die `id` ist je Ereignis neu und eindeutig.
 `<PROJEKT-ID>` und `<KÜRZEL>` stehen in `projekte/verzeichnis.json`.
+`<AUFGABE>` ist die ID von Peters Auftrag, `<TEILAUFGABE>` die eigene ID
+einer weitergegebenen Teilaufgabe (`<AUFGABE>-01`, `<AUFGABE>-02`, …).
 
 **1. Anstoß: Peter → Atlas** (Atlas meldet)
 
@@ -119,10 +127,11 @@ Zu ersetzen ist alles in `<…>`. Die `id` ist je Ereignis neu und eindeutig.
 ```json
 {
   "schema": "agentarium.github-event.v1",
-  "id": "<AUFGABE>-WEITER-<agent>-<zeitstempel>",
+  "id": "<TEILAUFGABE>-WEITER-<agent>-<zeitstempel>",
   "project_id": "<PROJEKT-ID>",
   "run_id": "<KÜRZEL>-<LAUF>",
-  "task_id": "<AUFGABE>",
+  "task_id": "<TEILAUFGABE>",
+  "parent_id": "<AUFGABE>",
   "actor": "atlas",
   "recipient": "<agent>",
   "reporter": "atlas",
@@ -142,10 +151,11 @@ Zu ersetzen ist alles in `<…>`. Die `id` ist je Ereignis neu und eindeutig.
 ```json
 {
   "schema": "agentarium.github-event.v1",
-  "id": "<AUFGABE>-VERGABE-<agent>-<zeitstempel>",
+  "id": "<TEILAUFGABE>-VERGABE-<agent>-<zeitstempel>",
   "project_id": "<PROJEKT-ID>",
   "run_id": "<KÜRZEL>-<LAUF>",
-  "task_id": "<AUFGABE>",
+  "task_id": "<TEILAUFGABE>",
+  "parent_id": "<AUFGABE>",
   "actor": "atlas",
   "recipient": "<agent>",
   "reporter": "atlas",
@@ -166,10 +176,11 @@ Zu ersetzen ist alles in `<…>`. Die `id` ist je Ereignis neu und eindeutig.
 ```json
 {
   "schema": "agentarium.github-event.v1",
-  "id": "<AUFGABE>-ERGEBNIS-<agent>-<zeitstempel>",
+  "id": "<TEILAUFGABE>-ERGEBNIS-<agent>-<zeitstempel>",
   "project_id": "<PROJEKT-ID>",
   "run_id": "<KÜRZEL>-<LAUF>",
-  "task_id": "<AUFGABE>",
+  "task_id": "<TEILAUFGABE>",
+  "parent_id": "<AUFGABE>",
   "actor": "<agent>",
   "recipient": "atlas",
   "reporter": "<agent, oder atlas wenn Atlas für ihn meldet>",
