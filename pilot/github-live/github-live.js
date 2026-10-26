@@ -1067,8 +1067,11 @@
            dieselbe Regel wie live (`ballspielGelandet`). */
         var kt = k + '\u0001' + e.recipient;
         if (!(kt in lage)) reihe.push(kt);
+        /* `von`: wer die Arbeit gegeben hat -- das Schild am Ball nennt es
+           (AG-MON-BALLSPIEL-004). */
         if (!lage[kt]) lage[kt] = { project_id: e.project_id, run_id: e.run_id,
-                                    task_id: e.task_id, bei: e.recipient, teil: true };
+                                    task_id: e.task_id, bei: e.recipient, teil: true,
+                                    von: e.actor };
       } else if (e.kind === 'contribution' && e.recipient) {
         /* Schritt 2: Rueckgabe an einen Agenten nimmt den Teilball des
            Absenders weg. */
