@@ -13,6 +13,12 @@
       "kuerzel": "ALLG",
       "name": "Allgemein",
       "repo": null
+    },
+    {
+      "id": "gt40-engine",
+      "kuerzel": "GT40",
+      "name": "GT40 Engine",
+      "repo": "pahlborn/gt40-engine"
     }
   ]
 }
