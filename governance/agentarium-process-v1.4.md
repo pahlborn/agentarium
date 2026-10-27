@@ -21,6 +21,7 @@ Persist the last read Issue #2 comment ID/time and the Cadence closure count in 
 Four short lines are enough when nothing is open.
 
 ### 1. At assignment
+Before reporting the first event of a new task, Atlas checks the last commit of `handoffs/AG-EVENT-JOURNAL-001-anstoss-v1.md`; if it is newer than the commit recorded in the “Atlas session state”, he rereads the file and records the new commit there (Peter, 2026-10-26: rule changes reach every Atlas session without being relayed).
 Atlas reads the current original task, implementation state and outstanding replies. The technical owner confirms what exists, the exact missing connection and the cheapest valid proof of the critical assumption before expanding.
 
 **Task record** — one, compact, reusing the existing issue/PR: outcome; exact baseline; technical owner; scope and authority; decisive acceptance evidence and environment; exclusions; bounded read list (exact files/versions or comment IDs, line ranges where practical); next action and owner. Unknowns stay explicit. A small fix fits in a few lines and needs no new Epic, story set or specification. Requirements cover applicable normal, failure and recovery behavior. New material scope returns to Peter.
