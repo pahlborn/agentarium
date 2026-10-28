@@ -118,10 +118,54 @@ function tischen(wurzel) {
                     headers: { ETag: 'W/"ag-relay-live-' + abrufe + '"' },
                     body: JSON.stringify(antwort) });
   });
+  /* AUF DAS EREIGNIS WARTEN, NICHT AUF DIE UHR (AG-CI-NACHWEISE-003-02, #94;
+     dasselbe Zeichen wie Schritt 1 im Journal, #91). Hier stand ein festes
+     `waitForTimeout(2800)` je Lieferung.
+     Gewartet wird auf das Zeichen, dass der Adapter GENAU DIESEN Kommentar
+     verarbeitet hat -- seine Kennung, kein Zaehler allein:
+       - angenommen: `#agGhLetztes` nennt "Beleg Kommentar <id>";
+       - abgewiesen: `#agGhGrund` nennt "(Kommentar <id>)".
+     Die Kennung wird mit Grenze verglichen, damit 91000 nicht 910000
+     bestaetigt. Ein frueheres Zeichen bestaetigt nichts: Jede Lieferung hat
+     eine neue Nummer.
+     ANDERS ALS IM JOURNAL wird nach Ablauf der Frist NICHT trotzdem
+     abgelesen: Bleibt das Zeichen aus, ist das eine eigene FEHL-Zeile mit
+     dem Namen der Lieferung. Nur eine Zeitueberschreitung wird so
+     behandelt; jeder andere Fehler (Seite geschlossen, abgestuerzt) geht an
+     den aeusseren Abbruch und wird nicht als "kein Zeichen" verschluckt.
+     Die Schleife danach (angenommen == verarbeitet, also die Zeichenschleife
+     des Bildes) bleibt wie sie war.
+
+     Gegenprobe, nur von Hand: AG_GEGENPROBE=ausbleiben liefert die erste
+     Lieferung gar nicht aus, AG_GEGENPROBE=falsche-kennung liefert sie
+     unter einer anderen Kommentarnummer. Beide muessen rot enden. */
+  const EREIGNIS_HOECHSTENS_MS = 10000;
+  const GEGENPROBE = process.env.AG_GEGENPROBE || '';
+  if (GEGENPROBE && GEGENPROBE !== 'ausbleiben' && GEGENPROBE !== 'falsche-kennung')
+    ungeprueft('AG_GEGENPROBE unbekannt: ' + GEGENPROBE);
+  const wartezeiten = [];
   async function nachliefern(name, id) {
-    antwort = [{ id: id, body: koerper[name],
-                 user: { login: 'github-actions[bot]', id: 41898282 } }];
-    await s.waitForTimeout(2800);
+    const erste = wartezeiten.length === 0;
+    const geliefert = (erste && GEGENPROBE === 'falsche-kennung') ? id + 500000 : id;
+    if (!(erste && GEGENPROBE === 'ausbleiben'))
+      antwort = [{ id: geliefert, body: koerper[name],
+                   user: { login: 'github-actions[bot]', id: 41898282 } }];
+    const t0 = Date.now();
+    let zeichen = 'keines';
+    try {
+      const h = await s.waitForFunction((kommentar) => {
+        const txt = (k) => (document.getElementById(k) || {}).textContent || '';
+        const genau = (t, vor) => new RegExp(vor.replace(/[()]/g, '\\$&') + kommentar + '(?!\\d)').test(t);
+        if (genau(txt('agGhLetztes'), 'Beleg Kommentar ')) return 'angenommen';
+        if (genau(txt('agGhGrund'), '(Kommentar ')) return 'abgewiesen';
+        return false;
+      }, String(id), { timeout: EREIGNIS_HOECHSTENS_MS, polling: 50 });
+      zeichen = await h.jsonValue();
+    } catch (e) {
+      if (!(e && e.name === 'TimeoutError')) throw e;
+    }
+    wartezeiten.push({ name: name, ms: Date.now() - t0, zeichen: zeichen });
+    zeile(name + ': Zeichen des Adapters', zeichen === 'keines' ? 'ausgeblieben' : 'da', 'da');
     /* Bis sich "angenommen" und "gezeichnet" gefangen haben: Die zweite Zahl
        steigt erst, wenn die Zeichenschleife das Ereignis genommen hat. Ohne
        dieses Warten entscheidet der Zufall, siehe AG-LIVE-LATENCY-001. */
@@ -227,6 +271,14 @@ function tischen(wurzel) {
   await b.close();
   n.s.close();
   fs.rmSync(ablage, { recursive: true, force: true });
+  {
+    const summe = wartezeiten.reduce((a, w) => a + w.ms, 0);
+    console.log('\nWarten auf Ereignisse: ' + wartezeiten.length + ' Lieferungen, ' +
+                (summe / 1000).toFixed(1) + ' s gesamt (vorher fest ' +
+                (wartezeiten.length * 2.8).toFixed(1) + ' s) · ' +
+                wartezeiten.map(w => w.zeichen).join(', ') +
+                (GEGENPROBE ? ' · GEGENPROBE ' + GEGENPROBE : ''));
+  }
   console.log('');
   if (fehler) { console.log('ABWEICHUNG in ' + fehler + ' Prüfung(en).'); process.exit(1); }
   console.log('ALLES WIE VEREINBART — keine Abweichung.');
