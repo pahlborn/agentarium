@@ -197,7 +197,11 @@
   var zahl = { anfragen: 0, n200: 0, n304: 0, basisKommentare: 0, basisMarkiert: 0,
                waehrendAufbau: 0, gezeigt: 0, duplikate: 0, abgewiesen: 0, ohneMarker: 0,
                konflikte: 0, abbrueche: 0, klemmen: 0,
-               wieder: 0, wiederKlemmt: 0, abdeckung: '', ausgeblendet: 0 };
+               wieder: 0, wiederKlemmt: 0, abdeckung: '', ausgeblendet: 0,
+               /* AG-MON-ARCHIV-002 Teil B: alle Kommentare auf #2, die diese
+                  Verbindung gelesen hat (Basis und live, mit und ohne
+                  Marker), und wie lange das Verbinden gedauert hat. */
+               kommentareGesamt: 0, verbindenMs: 0 };
 
   /* ================= DAS PROJEKTVERZEICHNIS (AG-PROJEKTE-002) =================
      Peter, 25.10.: Projekt -> Laeufe -> Aufgaben. Nur Projekte aus dem
@@ -321,7 +325,11 @@
      dem laufenden Strom -- Stoff fuer das Archiv. Nur geprueft angenommene
      (nach Doppel- und Konfliktpruefung), nichts Erfundenes. */
   var archivAlle = [], archivLaeuft = false, archivAnsicht = false,
-      archivStand = -1, archivTakt = null, archivFolge = [], archivIdx = 0, archivEnde = 0;
+      archivStand = -1, archivTakt = null, archivFolge = [], archivIdx = 0, archivEnde = 0,
+      /* AG-MON-ARCHIV-002 Teil D: Nach einem Sprung beginnt die Monitoruhr
+         wieder bei null; `archivVersatz` ist die Archivzeit, die dieser Null
+         entspricht. Ohne Sprung bleibt er 0. */
+      archivVersatz = 0;
   /* In SEKUNDEN DER MONITORUHR (AG-PROJEKTE-003), nicht der echten Uhr:
      So beschleunigt das Tempo das Archiv, und Halt haelt es an. */
   var ARCHIV_START = 0.3, ARCHIV_MIN = 0.9, ARCHIV_MAX = 4, ARCHIV_RAFFUNG = 30,
@@ -408,6 +416,10 @@
     'white-space:nowrap;overflow:hidden;text-overflow:ellipsis}' +
     '#agGhWarnung{display:block;white-space:normal;overflow-wrap:anywhere;' +
     'color:#ffc58f;font-weight:bold;margin:1px 0}' +
+    /* Teil B: ruhig in gedecktem Blau, deutlich wie die Ablaufwarnung. */
+    '#agGhPlatz{display:block;white-space:normal;overflow-wrap:anywhere;' +
+    'color:#a9bcd2;margin:1px 0}' +
+    '#agGhPlatz[data-stufe="deutlich"]{color:#ffc58f;font-weight:bold}' +
     '#agGithub .ghZ{display:flex;gap:4px;align-items:center;margin:4px 0;flex-wrap:wrap}' +
     '#agGithub input{font:inherit;width:12em;background:#0b1018;color:#e8f0ea;' +
     'border:1px solid #3a4658;border-radius:3px;padding:3px 4px}' +
@@ -440,8 +452,14 @@
                     'GitHub-Live · getrennt');
   var warnEl = el('span', { id: 'agGhWarnung', role: 'status', 'aria-live': 'polite' });
   warnEl.style.display = 'none';
+  /* Teil B steht in der Kopfzeile, nicht im Inneren: Die Tafel ist nach dem
+     Verbinden zugeklappt, und ein Hinweis, den man erst aufklappen muss,
+     erreicht niemanden. Dieselbe Stelle wie die Ablaufwarnung. */
+  var platzEl = el('span', { id: 'agGhPlatz', role: 'status', 'aria-live': 'polite' });
+  platzEl.style.display = 'none';
   kopf.appendChild(statusEl);
   kopf.appendChild(warnEl);
+  kopf.appendChild(platzEl);
   var zeile = el('div', { 'class': 'ghZ' });
   var lab = el('label', { 'for': 'agGhToken' }, 'Lesetoken');
   var feld = el('input', { id: 'agGhToken', type: 'password', autocomplete: 'off',
@@ -501,6 +519,49 @@
   knAn.addEventListener('click', function () { verbinden(); });
   knAus.addEventListener('click', function () { trennen('getrennt — Token aus dem Speicher entfernt.'); });
 
+  /* ============ AG-MON-ARCHIV-002 TEIL B: WENN DER PLATZ ENG WIRD ============
+     Peter, 28.10.: "Wichtig ist, dass wir nicht an irgendwelche Grenzen
+     kommen." Die Grenze ist die eigene des Monitors: MAX_IDS Meldungen im
+     Gedaechtnis. Gezaehlt werden ALLE Kommentare auf #2, die diese
+     Verbindung gelesen hat -- auch die ohne Marker, denn auch sie belegen
+     Platz im Gedaechtnis (`Z.kommentare`).
+     Stufen nach Peter: ab 70 % ruhig, ab 90 % deutlich, darunter nichts.
+     Dazu die Verbindungsdauer: ab 5 s ebenfalls ein ruhiger Hinweis.
+     Kein Blinken, keine Bewegung: eine Zeile in der Tafel und eine im Blatt. */
+  var PLATZ_GRENZE = MAX_IDS, PLATZ_RUHIG = 3500, PLATZ_DEUTLICH = 4500,
+      LANGSAM_MS = 5000;
+  function tausender(n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '.'); }
+  function sekunden(ms) { return (Math.round(ms / 100) / 10).toFixed(1).replace('.', ','); }
+  function platzStand() {
+    var n = zahl.kommentareGesamt, an = Z.phase === 'verbunden';
+    var stufe = !an ? '' : (n >= PLATZ_DEUTLICH ? 'deutlich' : (n >= PLATZ_RUHIG ? 'ruhig' : ''));
+    var langsam = an && zahl.verbindenMs >= LANGSAM_MS;
+    var teile = [];
+    if (stufe)
+      teile.push('Meldungen: ' + (basisGrenzen.seitenDeckel ? 'mindestens ' : '') +
+                 tausender(n) + ' von ' + tausender(PLATZ_GRENZE) + ' — ' +
+                 (stufe === 'deutlich' ? 'fast voll, bitte aufräumen' : 'Aufräumen empfohlen'));
+    if (langsam)
+      teile.push('Verbinden dauerte ' + sekunden(zahl.verbindenMs) + ' s — Aufräumen empfohlen');
+    return { stufe: stufe || (langsam ? 'ruhig' : ''), text: teile.join(' · '),
+             kommentare: n, grenze: PLATZ_GRENZE, verbindenMs: zahl.verbindenMs,
+             langsam: langsam };
+  }
+  var platzGemeldet = null;
+  function platzZeigen() {
+    var P = platzStand();
+    if (platzEl.textContent !== P.text) platzEl.textContent = P.text;
+    platzEl.setAttribute('data-stufe', P.stufe);
+    platzEl.style.display = P.text ? '' : 'none';
+    /* Ins Blatt oben rechts nur bei einer Aenderung: `kopfSetzen` baut das
+       Blatt neu, und das soll nicht alle zwei Sekunden geschehen. */
+    var schluessel = P.stufe + '|' + P.text;
+    if (schluessel === platzGemeldet) return;
+    platzGemeldet = schluessel;
+    if (typeof B.platz === 'function')
+      B.platz(P.text ? { stufe: P.stufe, text: P.text } : null);
+  }
+
   var PHASE = { getrennt: 'getrennt', aufbau: 'verbinde …', verbunden: 'verbunden',
                 fehler: 'Fehler' };
   function anzeigen(text) {
@@ -514,6 +575,7 @@
       (Z.fehler ? ' · ' + Z.fehler : '');
     if (warnEl.textContent !== ablauf.warnung) warnEl.textContent = ablauf.warnung;
     warnEl.style.display = ablauf.warnung ? '' : 'none';
+    platzZeigen();
     tafel.setAttribute('data-phase', Z.phase);
     zahlEl.textContent =
       (Z.schnittIso ? 'Basis bis ' + Z.schnittIso + ' (Geräteuhr): ' + zahl.basisKommentare +
@@ -848,6 +910,7 @@
       if (!cid) { abweisen('Kommentar ohne id'); continue; }
       if (Z.kommentare.hat(cid)) continue;            /* schon gesehen (Seiten, Neulesen) */
       Z.kommentare.add(cid);
+      zahl.kommentareGesamt++;
       if (modus === 'basis') zahl.basisKommentare++;
       var p = pruefen(c);
       if (p.art === 'ohne') { zahl.ohneMarker++; continue; }
@@ -937,6 +1000,9 @@
       if (ev.kind === 'blocked') zahl.klemmen++;
       zeigen(ev, 'live');
     }
+    /* Teil B: Der Hinweis folgt der Zahl sofort, nicht erst am Ende des
+       Abrufzyklus -- hinter einer vollen Seite folgt noch ein Abruf. */
+    if (Z.phase === 'verbunden') platzZeigen();
   }
 
   /* ---------------------------------------------------------- Abruf */
@@ -1308,6 +1374,7 @@
   async function aufbau(g) {
     Z.kommentare.leeren(); Z.etags = {}; Z.seite = 1; Z.anzahl = 0;
     zahl.basisKommentare = 0; zahl.basisMarkiert = 0;
+    zahl.kommentareGesamt = 0; zahl.verbindenMs = 0;
     basisLeben.length = 0; basisBall.length = 0;
     archivAlle.length = 0; archivStand = -1;
     basisGrenzen = { seitenDeckel: false, konflikte: 0, fremdaussagen: 0,
@@ -1328,7 +1395,11 @@
     /* Erst jetzt, nach der letzten Basisseite, gilt die Verbindung. */
     basisIds.alle().forEach(function (id) { bekannte.add(id); });
     Z.phase = 'verbunden';
-    vermerk('verbunden; Basis ' + zahl.basisKommentare + ' Kommentare bis ' + Z.schnittIso);
+    /* Teil B: vom Antippen von "Verbinden" bis hierher, also mit dem
+       Projektverzeichnis und allen Basisseiten -- das, worauf Peter wartet. */
+    zahl.verbindenMs = Date.now() - Z.schnitt;
+    vermerk('verbunden; Basis ' + zahl.basisKommentare + ' Kommentare bis ' + Z.schnittIso +
+            ' in ' + sekunden(zahl.verbindenMs) + ' s');
     if (window.__agStrom) { window.__agStrom.an(); window.__agStrom.lebenszeichen(); }
     for (var i = 0; i < spaeter.length; i++) {
       zahl.waehrendAufbau++; zeigen(spaeter[i], 'während Aufbau');
@@ -1485,6 +1556,8 @@
     if (archivTakt) { clearInterval(archivTakt); archivTakt = null; }
     var war = archivAnsicht;
     archivLaeuft = false; archivAnsicht = false; archivFolge = []; archivIdx = 0;
+    archivVersatz = 0;
+    leisteAus();
     if (war && typeof B.archivAnzeige === 'function') B.archivAnzeige(false);
   }
   function archivProjekt() {
@@ -1501,16 +1574,19 @@
       t += (i === 0) ? ARCHIV_START
                      : Math.min(ARCHIV_MAX, Math.max(ARCHIV_MIN, luecke / ARCHIV_RAFFUNG));
       if (!isNaN(jetzt)) vorher = jetzt;
-      return { t: t, ev: x.ev };
+      /* `x` mit: Ein Sprung faltet den Stand aus genau diesen Eintraegen,
+         mit beiden Zeiten und der Kommentarnummer wie beim Verbinden. */
+      return { t: t, ev: x.ev, x: x };
     });
     if (archivTakt) { clearInterval(archivTakt); archivTakt = null; }
     B.neuBeginnen();
     archivAnsicht = true; archivLaeuft = archivFolge.length > 0;
-    archivIdx = 0; aktuellerLauf = '';
+    archivIdx = 0; aktuellerLauf = ''; archivVersatz = 0;
     /* "Durchgespielt" erst, wenn der letzte Ball gelandet sein kann. */
     archivEnde = t + ARCHIV_NACHLAUF;
     B.archivAnzeige(true, function () { archivProjekt(); });
     B.abspielen();
+    leisteBauen();
     vermerk('Archiv: ' + archivFolge.length + ' Ereignisse, ' +
             (wahl === '*' ? 'alle Projekte' : wahl));
     archivTakt = setInterval(archivSchritt, 100);
@@ -1518,9 +1594,10 @@
   }
   function archivSchritt() {
     if (!archivAnsicht) return;
-    var u = B.uhr();
+    var u = B.uhr() + archivVersatz;
     while (archivIdx < archivFolge.length && archivFolge[archivIdx].t <= u)
       zeigen(archivFolge[archivIdx++].ev, 'Archiv');
+    leisteMarke();
     if (archivLaeuft && archivIdx >= archivFolge.length && u >= archivEnde) {
       archivLaeuft = false;
       vermerk('Archiv: durchgespielt');
@@ -1540,6 +1617,267 @@
        Wert weiter, nicht ueber das Eingabefeld. */
     verbinden(token);
   }
+
+
+  /* ================= AG-MON-ARCHIV-002 TEIL D: DIE AKTIVITAETSLEISTE =================
+     Peter, 28.10.: "Startzeitpunkt kann der geneigte Zuseher eh nicht
+     fassen, es sei denn, es gibt eine Timeline ... zu der dann bei Bedarf
+     gescrollt werden kann."
+
+     NUR IM ARCHIV. Eine schmale Leiste am unteren Rand, je Kalendertag ein
+     Balken, so hoch wie die Zahl der Meldungen an dem Tag (Tage ohne
+     Meldung stehen als Strich da, damit die Zeit nicht zusammenschnurrt).
+     Eine Marke zeigt, wo das Abspielen steht.
+
+     ANTIPPEN ODER ZIEHEN SPRINGT. Waehrend des Ziehens wandert nur die
+     Marke; gesprungen wird beim Loslassen, einmal. Der Sprung macht, was
+     das Verbinden macht: Neubeginn im Original, dann den Stand AUS DER
+     VORGESCHICHTE FALTEN (`faltenZuZustand`, `baelleFalten`) und ueber
+     `__agWiederherstellen` hinlegen -- als Zustand, ohne Flug. Danach
+     spielt das Archiv von dort weiter, an derselben Monitoruhr; Tempo, Halt
+     und Von vorn bleiben, wie sie sind.
+
+     Die Tage sind Tage DIESES GERAETS (Ortszeit), wie Peter sie liest.
+     Dieselbe Ordnung wie das Abspielen (`archivOrdnung`), also ist "vor der
+     Stelle" genau das, was bis dahin abgespielt worden waere.
+
+     Antippen eines Tages zeigt kurz das Datum und die Laeufe des Tages
+     (Bezeichnung aus dem Anstoss, sonst die Laufkennung). */
+  var LEISTE_H = 44, SCHILD_MS = 4000;
+  var WOCHENTAG = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
+  var stilLeiste = el('style');
+  stilLeiste.textContent =
+    '#agLeiste{position:fixed;z-index:12;display:none;box-sizing:border-box;' +
+    'left:max(14px,env(safe-area-inset-left));right:max(14px,env(safe-area-inset-right));' +
+    'bottom:max(8px,env(safe-area-inset-bottom));height:' + LEISTE_H + 'px;' +
+    'background:rgba(9,13,20,.78);border-radius:6px;' +
+    'box-shadow:inset 0 0 0 1px rgba(150,170,200,.14);touch-action:none;' +
+    'pointer-events:auto;-webkit-tap-highlight-color:transparent;cursor:pointer}' +
+    '#agLeiste.an{display:block}' +
+    '#agLeiste .lTage{position:absolute;left:8px;right:8px;top:7px;bottom:7px;' +
+    'display:flex;align-items:flex-end;gap:1px}' +
+    '#agLeiste .lTag{flex:1 1 0;min-width:1px;border-radius:1px 1px 0 0;' +
+    'background:rgba(143,163,192,.55)}' +
+    '#agLeiste .lTag.leer{background:rgba(143,163,192,.16)}' +
+    '#agLeiste .lTag.hier{background:rgba(184,198,220,.85)}' +
+    '#agLeiste .lMarke{position:absolute;top:-4px;bottom:-4px;width:2px;margin-left:-1px;' +
+    'background:#E8C878;box-shadow:0 0 6px rgba(232,200,120,.55);pointer-events:none}' +
+    '#agLeisteSchild{position:fixed;z-index:12;display:none;max-width:280px;' +
+    'padding:7px 10px 8px;border-radius:6px;background:rgba(9,13,20,.9);' +
+    'box-shadow:inset 0 0 0 1px rgba(232,200,120,.35);color:#D6E0F0;' +
+    'font:400 12px/1.4 -apple-system,system-ui,sans-serif;pointer-events:none}' +
+    '#agLeisteSchild b{font-weight:600;color:#E6EEFB}';
+  document.head.appendChild(stilLeiste);
+  var leiste = el('div', { id: 'agLeiste', role: 'slider', 'aria-valuemin': '0',
+                           'aria-label': 'Aktivität je Tag — antippen springt dorthin' });
+  var leisteTage = el('div', { 'class': 'lTage' });
+  var leisteMarkeEl = el('div', { 'class': 'lMarke' });
+  leisteTage.appendChild(leisteMarkeEl);
+  leiste.appendChild(leisteTage);
+  var schild = el('div', { id: 'agLeisteSchild', role: 'status', 'aria-live': 'polite' });
+  document.body.appendChild(leiste);
+  document.body.appendChild(schild);
+  var tage = [], schildUhr = null, ziehen = null, spruenge = 0;
+
+  function ortsTag(iso) {
+    var d = new Date(Date.parse(iso));
+    if (isNaN(d.getTime())) return '';
+    return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' +
+           ('0' + d.getDate()).slice(-2);
+  }
+  function naechsterTag(tag) {
+    var d = new Date(+tag.slice(0, 4), +tag.slice(5, 7) - 1, +tag.slice(8, 10) + 1);
+    return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' +
+           ('0' + d.getDate()).slice(-2);
+  }
+  /* Je Kalendertag von der ersten bis zur letzten Meldung: wo seine
+     Meldungen in `archivFolge` beginnen, wie viele es sind, welche Laeufe. */
+  function tageRechnen() {
+    var r = [], letzter = '';
+    archivFolge.forEach(function (f, i) {
+      var tag = ortsTag(f.ev.occurred_at) || letzter;
+      /* Die Folge ist nach `occurred_at` als Text geordnet; mit anderem
+         Zeitversatz kann ein Tag frueher wirken. Er zaehlt dann zum
+         laufenden Tag, damit die Leiste nie rueckwaerts laeuft. */
+      if (letzter && tag < letzter) tag = letzter;
+      if (!r.length || tag !== letzter) {
+        /* Luecke ohne Meldung: eigene, leere Tage */
+        while (r.length && naechsterTag(letzter) < tag) {
+          letzter = naechsterTag(letzter);
+          r.push({ tag: letzter, von: i, n: 0, laeufe: [] });
+        }
+        r.push({ tag: tag, von: i, n: 0, laeufe: [], gesehen: Object.create(null) });
+        letzter = tag;
+      }
+      var T = r[r.length - 1];
+      T.n++;
+      var k = f.ev.project_id + '\u0001' + f.ev.run_id;
+      if (T.gesehen && !T.gesehen[k]) {
+        T.gesehen[k] = 1;
+        T.laeufe.push({ projekt: f.ev.project_id, lauf: f.ev.run_id });
+      }
+    });
+    r.forEach(function (T) { delete T.gesehen; });
+    return r;
+  }
+  function leisteAn(an) {
+    leiste.classList.toggle('an', !!an);
+    /* Was unten sitzt (Liste, Knoepfe, Tempo), ruecht um die Leiste nach
+       oben -- ueber eine Groesse, die das Original in seine Abstaende
+       rechnet. Ohne Leiste ist sie 0, und alles steht wie bisher. */
+    document.documentElement.style.setProperty('--agLeisteH', an ? (LEISTE_H + 6) + 'px' : '0px');
+    if (!an) schildZu();
+  }
+  function leisteAus() { tage = []; ziehen = null; leisteAn(false); }
+  function leisteBauen() {
+    tage = tageRechnen();
+    while (leisteTage.firstChild !== leisteMarkeEl) leisteTage.removeChild(leisteTage.firstChild);
+    var max = 1;
+    tage.forEach(function (T) { if (T.n > max) max = T.n; });
+    tage.forEach(function (T, i) {
+      var b = el('div', { 'class': 'lTag' + (T.n ? '' : ' leer'), 'data-tag': T.tag,
+                          'data-n': String(T.n) });
+      b.style.height = T.n ? Math.max(14, Math.round(T.n / max * 100)) + '%' : '2px';
+      leisteTage.insertBefore(b, leisteMarkeEl);
+    });
+    leiste.setAttribute('aria-valuemax', String(archivFolge.length));
+    leisteAn(tage.length > 0);
+    leisteMarke();
+  }
+  /* Stelle in der Folge -> Anteil der Leistenbreite, und zurueck. Jeder Tag
+     hat dieselbe Breite; innerhalb eines Tages verteilen sich seine
+     Meldungen gleichmaessig. */
+  function anteilVon(idx) {
+    if (!tage.length) return 0;
+    for (var d = tage.length - 1; d >= 0; d--)
+      if (tage[d].n && tage[d].von <= idx) {
+        var innen = Math.min(1, (idx - tage[d].von) / tage[d].n);
+        return (d + innen) / tage.length;
+      }
+    return 0;
+  }
+  function stelleBei(anteil) {
+    var a = Math.max(0, Math.min(0.999999, anteil));
+    var d = Math.floor(a * tage.length), T = tage[d];
+    var innen = a * tage.length - d;
+    /* Gerundet, nicht abgeschnitten: So erreicht der rechte Rand eines Tages
+       sein Ende (am letzten Tag: alles gespielt), und die Marke steht nach
+       dem Sprung genau dort, wo der Finger war (`anteilVon` rechnet zurueck). */
+    return { tag: d, idx: Math.min(archivFolge.length, T.von + Math.round(innen * T.n)) };
+  }
+  function leisteMarke(anteil) {
+    if (!tage.length) return;
+    var a = (typeof anteil === 'number') ? anteil : anteilVon(archivIdx);
+    leisteMarkeEl.style.left = (a * 100).toFixed(3) + '%';
+    leiste.setAttribute('aria-valuenow', String(archivIdx));
+  }
+  function datumText(tag) {
+    var d = new Date(+tag.slice(0, 4), +tag.slice(5, 7) - 1, +tag.slice(8, 10));
+    return WOCHENTAG[d.getDay()] + ' ' + tag.slice(8, 10) + '.' + tag.slice(5, 7) + '.';
+  }
+  function kuerzelVon(projekt) {
+    return (verz && verz.nach[projekt]) ? verz.nach[projekt].kuerzel : '';
+  }
+  function schildZeigen(d, x) {
+    var T = tage[d];
+    if (!T) return;
+    schild.textContent = '';
+    schild.appendChild(el('b', {}, datumText(T.tag) + ' · ' +
+      (T.n ? T.n + (T.n === 1 ? ' Meldung' : ' Meldungen') : 'keine Meldung')));
+    T.laeufe.slice(0, 6).forEach(function (L) {
+      var kz = (wahl === '*') ? kuerzelVon(L.projekt) : '';
+      schild.appendChild(el('div', {}, (kz ? kz + ' · ' : '') +
+        (laufName(L.projekt, L.lauf) || L.lauf)));
+    });
+    if (T.laeufe.length > 6)
+      schild.appendChild(el('div', {}, '… und ' + (T.laeufe.length - 6) + ' weitere'));
+    var r = leiste.getBoundingClientRect();
+    schild.style.display = 'block';
+    var w = schild.offsetWidth;
+    schild.style.left = Math.max(8, Math.min(window.innerWidth - w - 8, x - w / 2)) + 'px';
+    schild.style.bottom = (window.innerHeight - r.top + 8) + 'px';
+    Array.prototype.forEach.call(leisteTage.querySelectorAll('.lTag'), function (b, i) {
+      b.classList.toggle('hier', i === d);
+    });
+    clearTimeout(schildUhr);
+    schildUhr = setTimeout(schildZu, SCHILD_MS);
+  }
+  function schildZu() {
+    clearTimeout(schildUhr); schildUhr = null;
+    schild.style.display = 'none';
+    Array.prototype.forEach.call(leisteTage.querySelectorAll('.lTag.hier'), function (b) {
+      b.classList.remove('hier');
+    });
+  }
+  /* DER SPRUNG. `idx` ist die erste Meldung, die NACH dem Sprung noch
+     abgespielt wird; alles davor ist Vorgeschichte und wird gefaltet. */
+  function springen(idx) {
+    if (!archivAnsicht || typeof B.neuBeginnen !== 'function') return false;
+    idx = Math.max(0, Math.min(archivFolge.length, idx | 0));
+    var vorher = archivFolge.slice(0, idx).map(function (f) { return f.x; });
+    var leben = vorher.filter(function (x) { return LEBEN[x.ev.kind]; });
+    var ball = vorher.filter(function (x) {
+      var k = x.ev.kind;
+      return k === 'handoff' || k === 'contribution' || (k === 'accepted' && x.ev.actor === 'peter');
+    });
+    B.neuBeginnen();
+    aktuellerLauf = '';
+    var w = null;
+    if (typeof window.__agWiederherstellen === 'function') {
+      try {
+        w = window.__agWiederherstellen({
+          aufgaben: faltenZuZustand(leben), abdeckung: 'partial',
+          gelesen: idx, markiert: idx,
+          grenzen: { seitenDeckel: false, konflikte: 0, fremdaussagen: 0, selbstannahmen: 0 },
+          schnitt: idx < archivFolge.length ? archivFolge[idx].ev.occurred_at : '',
+          liegend: baelleFalten(ball) });
+      } catch (x) { vermerk('Archiv: Sprung scheiterte — ' + (x && x.message)); }
+    }
+    archivIdx = idx;
+    /* Die Uhr beginnt nach dem Neubeginn bei 0; die naechste Meldung kommt
+       nach derselben kurzen Pause wie beim Start des Archivs. */
+    archivVersatz = (idx < archivFolge.length ? archivFolge[idx].t : archivEnde) - ARCHIV_START;
+    archivLaeuft = true;
+    if (!archivTakt) archivTakt = setInterval(archivSchritt, 100);
+    B.abspielen();
+    spruenge++;
+    leisteMarke();
+    vermerk('Archiv: Sprung zu Meldung ' + idx + ' von ' + archivFolge.length +
+            (w && typeof w.angenommen === 'number' ? ', ' + w.angenommen + ' offen gefaltet' : ''));
+    return true;
+  }
+  function anteilAus(ev) {
+    var r = leisteTage.getBoundingClientRect();
+    return r.width ? (ev.clientX - r.left) / r.width : 0;
+  }
+  leiste.addEventListener('pointerdown', function (ev) {
+    if (!tage.length) return;
+    ev.preventDefault();
+    try { leiste.setPointerCapture(ev.pointerId); } catch (x) {}
+    ziehen = { id: ev.pointerId };
+    var a = anteilAus(ev), s = stelleBei(a);
+    leisteMarke(Math.max(0, Math.min(1, a)));
+    schildZeigen(s.tag, ev.clientX);
+  });
+  leiste.addEventListener('pointermove', function (ev) {
+    if (!ziehen || ziehen.id !== ev.pointerId) return;
+    var a = anteilAus(ev), s = stelleBei(a);
+    leisteMarke(Math.max(0, Math.min(1, a)));
+    schildZeigen(s.tag, ev.clientX);
+  });
+  function loslassen(ev, abbrechen) {
+    if (!ziehen || ziehen.id !== ev.pointerId) return;
+    ziehen = null;
+    if (abbrechen) { leisteMarke(); return; }
+    springen(stelleBei(anteilAus(ev)).idx);
+  }
+  leiste.addEventListener('pointerup', function (ev) { loslassen(ev, false); });
+  leiste.addEventListener('pointercancel', function (ev) { loslassen(ev, true); });
+  /* Die Leiste ruehrt nicht im Feld und blendet keine Knoepfe ein. */
+  ['pointerdown', 'pointermove', 'pointerup', 'click', 'touchstart', 'touchmove',
+   'wheel'].forEach(function (n) {
+    leiste.addEventListener(n, function (ev) { ev.stopPropagation(); }, { passive: n !== 'pointerdown' });
+  });
 
   function verbinden(tokenWeiter) {
     var t = (typeof tokenWeiter === 'string') ? tokenWeiter : feld.value.trim();
@@ -1597,9 +1935,17 @@
         seite: Z.seite, anzahl: Z.anzahl, schnitt: Z.schnittIso, intervall: Z.intervall,
         pausiert: Z.pausiert, fehler: Z.fehler, grund: letzterGrund, zahl: zahl,
         letztes: letztes, bekannteIds: bekannte.groesse(), log: log,
+        platz: platzStand(),
         archiv: { laeuft: archivLaeuft, ansicht: archivAnsicht,
                   ereignisse: archivAlle.length, laeufe: archivLaeufe().length,
-                  folge: archivFolge.length, gezeigt: archivIdx },
+                  folge: archivFolge.length, gezeigt: archivIdx,
+                  /* Teil D: die Leiste, wie sie gebaut ist */
+                  leiste: leiste.classList.contains('an'), spruenge: spruenge,
+                  versatz: archivVersatz,
+                  tage: tage.map(function (T) {
+                    return { tag: T.tag, von: T.von, n: T.n,
+                             laeufe: T.laeufe.map(function (L) { return L.projekt + '/' + L.lauf; }) };
+                  }) },
         projekte: { verzeichnis: !!verz, wahl: wahl,
                     liste: verz ? verz.liste.map(function (p) { return p.id; }) : [] } }));
     }
