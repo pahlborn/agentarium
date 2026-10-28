@@ -2479,7 +2479,7 @@
 
      Der Bauzeitpunkt kommt beim Bauen aus der Uhr. Von Hand gepflegte
      Datumsangaben sind nach der zweiten Änderung falsch. */
-  var FASSUNG = '88', GEBAUT = '2026-10-26T16:01Z';
+  var FASSUNG = '89', GEBAUT = '2026-10-28T05:40Z';
 
   /* AG-GH-LIVE-001: JEDE TEXTSENKE MASKIERT.
      Seit Live-Daten von aussen kommen (GitHub-Kommentare, one-event.json),
@@ -3885,7 +3885,15 @@
     ballInfoEl.textContent = '';
     var z1 = document.createElement('b');     z1.textContent = kz + ' · ' + l.aufgabe;
     var z2 = document.createElement('span');  z2.textContent = was;
-    var z3 = document.createElement('small'); z3.textContent = 'Lauf ' + lauf;
+    /* Die Bezeichnung des Laufs kennt der Adapter (Titel des Anstosses,
+       Peter 26.10.); ohne ihn bleibt es bei der Lauf-ID. */
+    var laufBez = '';
+    try {
+      if (window.__agGithub && typeof window.__agGithub.laufName === 'function')
+        laufBez = window.__agGithub.laufName(projekt, lauf) || '';
+    } catch (x) {}
+    var z3 = document.createElement('small');
+    z3.textContent = 'Lauf ' + lauf + (laufBez ? ' · ' + laufBez : '');
     ballInfoEl.appendChild(z1); ballInfoEl.appendChild(z2); ballInfoEl.appendChild(z3);
     ballInfoEl.setAttribute('data-aufgabe', l.aufgabe);
     ballInfoEl.classList.add('auf');

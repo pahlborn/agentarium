@@ -245,6 +245,29 @@
     if (!verz.nach[ev.project_id]) return false;
     return wahl === '*' || ev.project_id === wahl;
   }
+  /* ===================== DIE BEZEICHNUNG EINES LAUFS =====================
+     Peter, 26.10.: Als Bezeichnung dient der Titel des Anstosses -- Atlas
+     schreibt dort ohnehin, worum es geht ("Peter gibt Atlas: Rueckgaben
+     abgleichen"). Kein neues Feld, keine neue Meldepflicht. Der Vorspann
+     bis zum ersten Doppelpunkt ("Peter gibt Atlas:", "Peter beauftragt
+     Atlas:") faellt weg, sofern er mit "Peter" beginnt. Gemerkt aus der
+     Historie UND aus dem laufenden Strom; der erste Anstoss eines Laufs
+     zaehlt. */
+  var laufNamen = Object.create(null);
+  function laufNameAus(titel) {
+    var t = String(titel || '').trim();
+    var m = /^Peter\b[^:]{0,40}:\s*(.+)$/.exec(t);
+    return (m ? m[1] : t).slice(0, 80);
+  }
+  function laufNameMerken(ev) {
+    if (!(ev && ev.kind === 'handoff' && ev.actor === 'peter')) return;
+    var k = ev.project_id + '\u0001' + ev.run_id;
+    if (!laufNamen[k]) laufNamen[k] = laufNameAus(ev.title);
+  }
+  function laufName(projekt, lauf) {
+    return laufNamen[projekt + '\u0001' + lauf] || '';
+  }
+
   function projekteMelden() {
     if (typeof B.projekte !== 'function') return;
     B.projekte(verz ? { liste: verz.liste, wahl: wahl, waehlen: projektWaehlen,
@@ -737,7 +760,10 @@
     }
     var lauf = ev.project_id + '|' + ev.run_id;
     if (lauf !== aktuellerLauf) {
-      var r0 = window.__agLauf({ project_id: ev.project_id, titel: ev.run_id,
+      /* Lauf-ID und, wenn bekannt, die Bezeichnung aus dem Anstoss. */
+      var ln = laufName(ev.project_id, ev.run_id);
+      var r0 = window.__agLauf({ project_id: ev.project_id,
+                                 titel: ev.run_id + (ln ? ' · ' + ln : ''),
                                  ablage: wie === 'Archiv'
                                    ? 'Archiv · nachgespielt aus GitHub #2'
                                    : 'GitHub · pahlborn/agentarium #2' });
@@ -858,6 +884,7 @@
         if (modus === 'basis' && !basisIds.hat(ev.id)) {
           basisIds.add(ev.id);
           archivAlle.push({ ev: ev, recorded_at: c.created_at || '', kommentar: Number(cid) || 0 });
+          laufNameMerken(ev);
           if (ev.kind === 'handoff' || ev.kind === 'contribution' ||
               (ev.kind === 'accepted' && ev.actor === 'peter')) {
             basisBall.push({ ev: ev, recorded_at: c.created_at || '',
@@ -868,6 +895,7 @@
       }
       abdruckLegen(ev.id, fa);
       archivAlle.push({ ev: ev, recorded_at: c.created_at || '', kommentar: Number(cid) || 0 });
+      laufNameMerken(ev);
       if (modus === 'basis') {
         basisIds.add(ev.id);
         var t = Date.parse(c.created_at);
@@ -1559,6 +1587,9 @@
   window.__agGithub = Object.freeze({
     version: ADAPTER,
     endpoint: ENDPOINT,
+    /* Die Bezeichnung eines Laufs (Titel des Anstosses), fuer das Schild am
+       Ball. Nur lesend; leer, wenn kein Anstoss gemeldet wurde. */
+    laufName: function (projekt, lauf) { return laufName(String(projekt), String(lauf)); },
     stand: function () {
       return JSON.parse(JSON.stringify({
         phase: Z.phase, verbunden: Z.phase === 'verbunden', hatToken: !!token,
