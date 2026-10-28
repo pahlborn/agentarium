@@ -147,9 +147,11 @@ jobs:
           test -x "$PFAD" || { echo "::error::kein ausführbares Chromium unter $PFAD"; exit 1; }
           "$PFAD" --version
 
-      # AG-CI-NACHWEISE-002: Auswahl und gleichzeitiger Lauf stehen in
+      # AG-CI-NACHWEISE-002: Auswahl und Lauf stehen in
       # `.github/scripts/browsernachweise.sh` (Begruendung und Messung dort).
       # Auf `main` laufen weiterhin alle; im Pull Request die betroffenen.
+      # Die Nachweise laufen nacheinander (gleichzeitig war im Lauf
+      # 40459863327 rot, siehe Skript).
       # Das Skript laeuft in einer eigenen `bash` ohne `-e`; es sammelt alle
       # Ergebnisse selbst und gibt erst am Ende 0 oder 1 zurueck -- die Lehre
       # vom 20.10. (errexit brach die Sammlung ab, gefunden von Sentinel) gilt

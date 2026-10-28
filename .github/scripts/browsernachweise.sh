@@ -12,10 +12,16 @@
 #  - Im Pull Request laufen nur die Nachweise, die die Aenderung beruehren
 #    kann (Regeln in `auswahl`). Aendert sich Monitor-Code oder dieser
 #    Pruefablauf, laufen alle.
-#  - Die Nachweise laufen gleichzeitig (Standard 4). Jeder holt sich seinen
-#    Port selbst (`listen(0, ...)`, an allen 18 nachgesehen), sie kommen sich
-#    also nicht in die Quere. Nachweise, die Zeiten messen, laufen danach
-#    allein, damit fremde Last ihre Messung nicht verfaelscht.
+#  - Die Nachweise laufen NACHEINANDER, wie bisher. Gleichzeitig zu viert
+#    war im Lauf 40459863327 (PR #87) rot: Auf dem Laeufer wurde jeder
+#    Nachweis zwei- bis dreimal langsamer (BALLSPIEL-002 98 s statt 34 s,
+#    PLATZ 125 s statt 63 s), und fuenf scheiterten an Zeitablaeufen und
+#    Animationen (AG-BLOCK-001, AG-EVENT-JOURNAL-001, AG-MON-ANSTOSS-001,
+#    AG-MON-ARCHIV-001, AG-MON-BALLSPIEL-001). Zeitkritisch sind also weit
+#    mehr als die zwei, die Zeiten ausdruecklich messen. Lokal auf einem
+#    staerkeren Rechner war derselbe Lauf gruen -- das war der Trugschluss.
+#    Die Moeglichkeit bleibt ueber NACHWEISE_PARALLEL erhalten, Standard 1.
+#    Echte Gleichzeitigkeit braucht einen eigenen Laeufer je Nachweis.
 #  - Jede Rueckgabe ausser 0 faellt weiterhin durch, auch die 2 fuer
 #    "ungeprueft". Alle Ergebnisse werden gesammelt, nicht beim ersten Fehler
 #    abgebrochen. Kein Nachweis ausgewaehlt ist kein Erfolg.
@@ -27,7 +33,7 @@ set -uo pipefail
 # Nachweise, die Laufzeiten messen. Wer einen neuen zeitkritischen Nachweis
 # anlegt, traegt ihn hier ein.
 ZEITKRITISCH="AG-LIVE-LATENCY-001 AG-TEMPO-001"
-PARALLEL="${NACHWEISE_PARALLEL:-4}"
+PARALLEL="${NACHWEISE_PARALLEL:-1}"
 
 alle() { ls previews/*/pruefen.js 2>/dev/null; }
 
@@ -91,7 +97,7 @@ lauf() {
     esac
   done
   t0="$(date +%s)"
-  echo "gleichzeitig ($PARALLEL): ${#gleichzeitig[@]} · allein danach: ${#allein[@]}"
+  echo "Nachweise: ${#liste[@]} · davon zugleich je Runde: $PARALLEL · zeitmessende zuletzt: ${#allein[@]}"
   if [ "${#gleichzeitig[@]}" -gt 0 ]; then
     printf '%s\n' "${gleichzeitig[@]}" | xargs -P "$PARALLEL" -I{} bash -c 'einer "$1"' _ {}
   fi
