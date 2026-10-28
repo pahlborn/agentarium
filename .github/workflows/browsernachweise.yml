@@ -34,6 +34,7 @@ on:
       - 'pilot/github-live/**'
       - 'projekte/**'
       - '.github/workflows/browsernachweise.yml'
+      - '.github/scripts/browsernachweise.sh'
   pull_request:
     paths:
       - 'previews/**'
@@ -43,6 +44,7 @@ on:
       # ausloesen, sonst bliebe genau sie ungeprueft.
       - 'projekte/**'
       - '.github/workflows/browsernachweise.yml'
+      - '.github/scripts/browsernachweise.sh'
 
 # Nur Lesen. Dieser Lauf schreibt nichts, nirgends.
 permissions:
@@ -145,45 +147,26 @@ jobs:
           test -x "$PFAD" || { echo "::error::kein ausführbares Chromium unter $PFAD"; exit 1; }
           "$PFAD" --version
 
-      - name: Alle Browsernachweise
+      # AG-CI-NACHWEISE-002: Auswahl und Lauf stehen in
+      # `.github/scripts/browsernachweise.sh` (Begruendung und Messung dort).
+      # Auf `main` laufen weiterhin alle; im Pull Request die betroffenen.
+      # Die Nachweise laufen nacheinander (gleichzeitig war im Lauf
+      # 40459863327 rot, siehe Skript).
+      # Das Skript laeuft in einer eigenen `bash` ohne `-e`; es sammelt alle
+      # Ergebnisse selbst und gibt erst am Ende 0 oder 1 zurueck -- die Lehre
+      # vom 20.10. (errexit brach die Sammlung ab, gefunden von Sentinel) gilt
+      # damit weiter.
+      - name: Auswahl der Browsernachweise
+        env:
+          EREIGNIS: ${{ github.event_name }}
         run: |
-          set -uo pipefail
-          # Jeder `previews/*/pruefen.js` laeuft, und JEDE Rueckgabe ausser 0
-          # faellt durch -- auch die 2 fuer "ungeprueft". Ein Nachweis, der
-          # sich selbst fuer ungeprueft erklaert, ist kein bestandener.
-          # Gesammelt statt beim ersten Fehlschlag abgebrochen: wer drei
-          # Nachweise hat, will alle drei Ergebnisse sehen, nicht das erste.
-          gefunden=0
-          schlecht=0
-          for n in previews/*/pruefen.js; do
-            [ -e "$n" ] || continue
-            gefunden=$((gefunden + 1))
-            echo "::group::$n"
-            # ERREXIT-SICHER, UND ZWAR GEMESSEN. GitHub startet `run:` mit
-            # `bash --noprofile --norc -eo pipefail`; `set -uo pipefail` oben
-            # schaltet das `-e` NICHT ab. Ein nacktes `node "$n"` beendete den
-            # Schritt deshalb beim ersten Fehlschlag -- `rc=$?`, die eigene
-            # Fehlermeldung und die restlichen Nachweise wurden nie erreicht.
-            # Die Zusage "alle laufen, Fehler werden gesammelt" war damit
-            # falsch. Gefunden von Sentinel am 20.10.
-            # Mein Trockenlauf hatte es nicht gefangen, weil ich `bash lauf.sh`
-            # ohne `-e` benutzte -- dieselbe Logik, andere Shell. Nachgemessen
-            # in `bash --noprofile --norc -eo pipefail`: alt bricht nach dem
-            # ersten Nachweis ab, neu sammelt alle drei.
-            if node "$n"; then rc=0; else rc=$?; fi
-            echo "::endgroup::"
-            if [ "$rc" -eq 0 ]; then
-              echo "  bestanden : $n"
-            else
-              echo "::error file=$n::Rückgabe $rc (0 = bestanden, 1 = Abweichung, 2 = ungeprüft)"
-              schlecht=$((schlecht + 1))
-            fi
-          done
-          # Kein Nachweis gefunden ist ebenfalls kein Erfolg: sonst waere ein
-          # verschobenes Verzeichnis ein gruener Lauf.
-          if [ "$gefunden" -eq 0 ]; then
-            echo "::error::kein previews/*/pruefen.js gefunden"
-            exit 1
+          set -euo pipefail
+          BASIS=""
+          if [ "$EREIGNIS" = "pull_request" ]; then
+            BASIS="$(git merge-base origin/main HEAD)"
           fi
-          echo "gelaufen: $gefunden, davon durchgefallen: $schlecht"
-          [ "$schlecht" -eq 0 ]
+          bash .github/scripts/browsernachweise.sh auswahl "$EREIGNIS" "$BASIS" > "$RUNNER_TEMP/auswahl.txt"
+          echo "ausgewählt:"; sed 's/^/  /' "$RUNNER_TEMP/auswahl.txt"
+
+      - name: Browsernachweise
+        run: bash .github/scripts/browsernachweise.sh lauf < "$RUNNER_TEMP/auswahl.txt"
