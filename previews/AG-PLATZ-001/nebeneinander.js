@@ -22,9 +22,12 @@ const PILOT = path.resolve(__dirname, '..', '..', 'pilot');
    werden mit jeder Aenderung mitgezogen" in Blatt und Malstudio. */
 const VORRAT = (function () {
   const t = fs.readFileSync(path.join(PILOT, 'github-live', 'sw.js'), 'utf8');
-  const m = t.match(/VORRAT\s*=\s*'([^']+)'/);
-  if (!m) throw new Error('sw.js: kein VORRAT gefunden');
-  return m[1];
+  /* Seit AG-SW-CACHE-001 setzt sich der Name aus `EIGEN` und der Nummer
+     zusammen (`const VORRAT = EIGEN + '90'`). */
+  const e = t.match(/EIGEN\s*=\s*'([^']+)'/);
+  const m = t.match(/VORRAT\s*=\s*EIGEN\s*\+\s*'([^']+)'/);
+  if (!e || !m) throw new Error('sw.js: kein VORRAT gefunden');
+  return e[1] + m[1];
 })();
 let fehler = 0;
 function zeile(w, ist, soll) {
