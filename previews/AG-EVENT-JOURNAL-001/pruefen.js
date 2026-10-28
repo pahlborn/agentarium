@@ -525,11 +525,50 @@ function koerper(f) {
     markiert: document.querySelectorAll('.wProjekte li.hier').length
   }));
 
+  /* AUF DAS EREIGNIS WARTEN, NICHT AUF DIE UHR (AG-CI-NACHWEISE-003,
+     Schritt 1; Befund von Lot in #89, 28.10.). Hier stand ein festes
+     `waitForTimeout(2800)`: 71 Lieferungen mal 2,8 s waren rund 199 der
+     214 s dieses Nachweises, und eine feste Zeit ist unter Last zu kurz
+     (zufaelliges Rot) und sonst zu lang.
+     Gewartet wird jetzt auf das Zeichen, dass der Adapter GENAU DIESEN
+     Kommentar verarbeitet hat -- eine Kennung, kein Zaehler allein (Atlas
+     in #89):
+       - angenommen: die Tafel nennt "Beleg Kommentar <cid>" (`zeigen`);
+       - abgewiesen: die Tafel nennt "(Kommentar <cid>)" (`abweisen`);
+       - Transportduplikat: der Zaehler der Duplikate steigt UND das
+         Protokoll nennt "doppelt <Ereigniskennung>".
+     Danach 450 ms: Die Tafel frischt 400 ms nach dem Zeigen noch einmal
+     auf (`setTimeout(anzeigen, 400)` im Adapter); erst dann stehen alle
+     Zahlen. Kommt binnen 10 s kein Zeichen, wird trotzdem abgelesen -- die
+     Pruefungen danach entscheiden, ein Ausbleiben bleibt also sichtbar. */
+  const EREIGNIS_HOECHSTENS_MS = 10000, TAFEL_NACHLAUF_MS = 450;
+  const wartezeiten = [];
   async function liefern(name, body, cid) {
+    const m = /"id"\s*:\s*"([^"]+)"/.exec(body);
+    const evId = m ? m[1] : '';
+    const dup0 = await s.evaluate(() => {
+      const g = window.__agGithub && window.__agGithub.stand();
+      return g && g.zahl ? (g.zahl.duplikate || 0) : 0;
+    });
+    const t0 = Date.now();
     antwort = [{ id: cid, body: body,
                  user: { login: 'github-actions[bot]', id: 41898282 },
                  created_at: new Date().toISOString() }];
-    await s.waitForTimeout(2800);
+    let zeichen = 'keines';
+    try {
+      const h = await s.waitForFunction(([kommentar, kennung, dupVorher]) => {
+        const txt = (id) => (document.getElementById(id) || {}).textContent || '';
+        if (txt('agGhLetztes').indexOf('Beleg Kommentar ' + kommentar) >= 0) return 'angenommen';
+        if (txt('agGhGrund').indexOf('(Kommentar ' + kommentar + ')') >= 0) return 'abgewiesen';
+        const g = window.__agGithub && window.__agGithub.stand();
+        if (kennung && g && g.zahl && (g.zahl.duplikate || 0) > dupVorher &&
+            (g.log || []).some(z => z.indexOf('doppelt ' + kennung) >= 0)) return 'doppelt';
+        return false;
+      }, [String(cid), evId, dup0], { timeout: EREIGNIS_HOECHSTENS_MS, polling: 50 });
+      zeichen = await h.jsonValue();
+    } catch (e) { /* kein Zeichen binnen 10 s: ablesen, die Pruefungen entscheiden */ }
+    if (zeichen === 'angenommen') await s.waitForTimeout(TAFEL_NACHLAUF_MS);
+    wartezeiten.push({ name: name, ms: Date.now() - t0, zeichen: zeichen });
     return await s.evaluate(() => ({
       letztes: (document.getElementById('agGhLetztes') || {}).textContent || '',
       zahlen: (document.getElementById('agGhZahlen') || {}).textContent || '',
@@ -2153,6 +2192,20 @@ function koerper(f) {
 
   await b.close();
   n.s.close();
+
+  /* Wie lange auf die Ereignisse gewartet wurde, und woran sie erkannt
+     wurden. "keines" heisst: 10 s ohne Zeichen -- dann lag es nicht an der
+     Uhr, und die Pruefungen dazu stehen oben. */
+  {
+    const summe = wartezeiten.reduce((a, w) => a + w.ms, 0);
+    const je = {};
+    wartezeiten.forEach(w => { je[w.zeichen] = (je[w.zeichen] || 0) + 1; });
+    console.log('\nWarten auf Ereignisse: ' + wartezeiten.length + ' Lieferungen, ' +
+                (summe / 1000).toFixed(1) + ' s gesamt (vorher fest ' +
+                (wartezeiten.length * 2.8).toFixed(1) + ' s) · ' + JSON.stringify(je));
+    wartezeiten.filter(w => w.zeichen === 'keines')
+      .forEach(w => console.log('  ohne Zeichen: ' + w.name));
+  }
 
   if (fehler) {
     console.log('\n' + fehler + ' ABWEICHUNG' + (fehler > 1 ? 'EN' : '') + '.');
