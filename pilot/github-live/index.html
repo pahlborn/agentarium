@@ -1615,7 +1615,13 @@
        ist hier also keine neue Farbe, sondern Amber bei Weißglut — und es
        ist fast genau Peters Ton (0,11), was richtig ist: Die Aufgabe kommt
        von ihm. */
-    sonne: function (x, y, gx, gy, r, hitze, ton, abgabe, wieviele) {
+    /* `leben` (wahlfrei, AG-MON-RESONANZ-001): eine laengere Lebensdauer fuer
+       STILL liegende Baelle. Wer weniger Punkte je Bild setzt, braucht sie
+       laenger, damit die Kugel gleich dicht bleibt; die Drehung wird im
+       selben Mass langsamer, damit sie dabei nicht zerfliesst. Ohne `leben`
+       ist alles wie bisher (Flug, Demo-Ball). */
+    sonne: function (x, y, gx, gy, r, hitze, ton, abgabe, wieviele, leben) {
+      var dreh = (leben > 0) ? 0.25 / leben : 1;
       for (var m = 0; m < wieviele; m++) {
         var w = rnd() * 6.2832;
         /* Wurzel, damit die Punkte gleichmäßig über die Fläche liegen und
@@ -1626,8 +1632,8 @@
         px[i] = x + Math.cos(w) * rr; py[i] = y + Math.sin(w) * rr;
         /* Der Ball dreht sich, während er fliegt: Die Punkte am Rand laufen
            quer zur Flugrichtung mit. */
-        vx[i] = gx * 0.55 - Math.sin(w) * rr * 3.4;
-        vy[i] = gy * 0.55 + Math.cos(w) * rr * 3.4;
+        vx[i] = gx * 0.55 - Math.sin(w) * rr * 3.4 * dreh;
+        vy[i] = gy * 0.55 + Math.cos(w) * rr * 3.4 * dreh;
         /* Innen heiß, außen kühler — das gibt den Rand, ohne ihn zu malen. */
         var k = 1 - (rr / r) * 0.45;
         hz[i] = hitze * k; tn[i] = ton;
@@ -1656,7 +1662,8 @@
         /* Kurz: Was vom vorigen Bild noch liegt, ist der Schweif — und ein
            Schweif soll kurz sein. Mit 0,30 + 0,18 stand über die halbe
            Flugstrecke ein Band. */
-        lm[i] = 0.20 + 0.10 * rnd(); lf[i] = lm[i]; art[i] = 3;
+        lm[i] = (leben > 0) ? leben * (0.8 + 0.4 * rnd()) : 0.20 + 0.10 * rnd();
+        lf[i] = lm[i]; art[i] = 3;
         abg[i] = abgabe;
       }
     },
@@ -2487,7 +2494,7 @@
 
      Der Bauzeitpunkt kommt beim Bauen aus der Uhr. Von Hand gepflegte
      Datumsangaben sind nach der zweiten Änderung falsch. */
-  var FASSUNG = '91', GEBAUT = '2026-10-28T15:38Z';
+  var FASSUNG = '92', GEBAUT = '2026-10-29T13:57Z';
 
   /* AG-GH-LIVE-001: JEDE TEXTSENKE MASKIERT.
      Seit Live-Daten von aussen kommen (GitHub-Kommentare, one-event.json),
@@ -3970,7 +3977,27 @@
     return [p[0] + Math.cos(zm) * d, p[1] + Math.sin(zm) * d];
   }
 
+  /* ===== DAS BUDGET DER LIEGENDEN BAELLE (AG-MON-RESONANZ-001) =====
+     Peter, 28.10.: "Man sieht jetzt zwar die Baelle, aber die
+     Resonanzeffekte sind verschwunden. Das war etwas anregend Schoenes."
+     Ursache: Das Feld hat EINEN Ring von N = 14.000 Punkten; jeder neue
+     Punkt ueberschreibt den aeltesten, auch einen Faden des Mediums. Ein
+     liegender Ball setzte wie der Demo-Ball 98 Punkte je Bild (rund 5.900
+     je Sekunde) -- und JEDER liegende Ball tat es. Mit acht Baellen (echter
+     Stand: sieben Teilbaelle) waren es ueber 40.000 je Sekunde; der Ring war
+     alle gut 0,3 s einmal ueberschrieben, die Faeden konnten sich nie
+     entfalten. Seit den Teilbaellen (Fassung 83) moeglich.
+     Jetzt teilen sich ALLE liegenden Baelle das Budget EINES Demo-Balls
+     (98 je Bild). Gewichtet nach Flaeche: ein Teilball (halber Radius) zaehlt
+     ein Viertel. Wer dadurch weniger Punkte bekommt, bekommt laengeres Leben
+     (`leben`), damit die Kugel gleich dicht bleibt -- ein liegender Ball
+     steht still, laengeres Leben kostet keine Ueberschreibung. Ab vier
+     vollen Ballgewichten wird er sichtbar duenner statt teurer. */
+  var LIEGEND_BUDGET = 98;            /* Punkte je Bild, alle liegenden zusammen */
+  var LIEGEND_LEBEN_MAX = 1.0;        /* Sekunden */
+  var liegendGezaehlt = 0;            /* fuer den Nachweis: gesetzte Punkte */
   function liegendeZeichnen(dt) {
+    var sichtbar = [];
     for (var i = liegend.length - 1; i >= 0; i--) {
       var l = liegend[i];
       /* Noch unterwegs: verbucht, aber erst nach der Landung zu sehen. Ist
@@ -3984,13 +4011,28 @@
       var o = liegendOrt(l);
       /* Ein Ball bei niemandem ist kein Ball (siehe `ballOrt`). */
       if (!o) { liegend.splice(i, 1); continue; }
+      sichtbar.push({ l: l, o: o, i: i });
+    }
+    var gewicht = 0;
+    for (var s = 0; s < sichtbar.length; s++) gewicht += sichtbar[s].l.teil ? 0.25 : 1;
+    if (!gewicht) return;
+    /* Anteil des vollen Satzes, den ein volles Ballgewicht bekommt (<= 1),
+       und die Lebensdauer, die den Ausfall an Dichte ausgleicht. */
+    var anteil = Math.min(1, 1 / gewicht);
+    var leben = Math.min(LIEGEND_LEBEN_MAX, 0.25 / anteil);
+    for (var q = 0; q < sichtbar.length; q++) {
+      var b = sichtbar[q], w = b.l.teil ? 0.25 : 1;
       /* Ein Teilball ist halb so gross wie der ganze -- dieselbe Regel wie
          im Demo-Modus ("knapp halb so gross, der Ball bleibt ganz"). */
-      var rad = Math.min(W(), H()) * 0.021 * (l.teil ? 0.5 : 1) *
-                (1 + 0.09 * Math.sin(l.t * 1.1 + i));
-      window.__feld.sonne(o[0], o[1], 0, 0, rad * 0.38, 0.88, 0.115, 0, 20);
-      window.__feld.sonne(o[0], o[1], 0, 0, rad,        0.70, 0.115, 0, 52);
-      window.__feld.sonne(o[0], o[1], 0, 0, rad * 1.75, 0.48, 0.115, 0, 26);
+      var rad = Math.min(W(), H()) * 0.021 * (b.l.teil ? 0.5 : 1) *
+                (1 + 0.09 * Math.sin(b.l.t * 1.1 + b.i));
+      var f = w * anteil;
+      var n1 = Math.max(1, Math.round(20 * f)), n2 = Math.max(2, Math.round(52 * f)),
+          n3 = Math.max(1, Math.round(26 * f));
+      window.__feld.sonne(b.o[0], b.o[1], 0, 0, rad * 0.38, 0.88, 0.115, 0, n1, leben);
+      window.__feld.sonne(b.o[0], b.o[1], 0, 0, rad,        0.70, 0.115, 0, n2, leben);
+      window.__feld.sonne(b.o[0], b.o[1], 0, 0, rad * 1.75, 0.48, 0.115, 0, n3, leben);
+      liegendGezaehlt += n1 + n2 + n3;
     }
   }
 
