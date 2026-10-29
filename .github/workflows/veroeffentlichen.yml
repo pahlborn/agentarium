@@ -1,0 +1,158 @@
+# AG-CI-NACHWEISE-003, B1 — veroeffentlicht wird nur, was vollstaendig geprueft ist.
+#
+# Bisher baute Pages direkt aus `main` (Zweigquelle): Jeder Merge stand sofort
+# auf Peters iPad, auch wenn der Volllauf der Browsernachweise danach rot
+# wurde. Ab der Umstellung der Pages-Quelle auf "GitHub Actions" veroeffentlicht
+# nur noch dieser Ablauf -- und nur einen Stand, der in allen gepruefen Pfaden
+# einem gruenen Nachweislauf auf `main` gleicht. Regel, Begruendung und
+# Rueckrollweg: `.github/scripts/veroeffentlichen.sh`. Konzept/Review: #89.
+#
+# Solange Pages noch aus dem Zweig baut, entscheidet der erste Job "nein" und
+# es geschieht nichts.
+#
+# Die Actions sind auf Commit-Hashes festgenagelt, nachgeschlagen am 28.10.2026
+# ueber die GitHub-API (git/ref/tags), nicht aus dem Gedaechtnis:
+#   actions/configure-pages      v6.0.0  45bfe0192ca1faeb007ade9deae92b16b8254a0d
+#   actions/jekyll-build-pages   v1.0.13 44a6e6beabd48582f863aeeb6cb2151cc1716697
+#   actions/upload-pages-artifact v5.0.0 fc324d3547104276b827a68afc52ff2a11cc49c9
+#   actions/deploy-pages         v5.0.1  368f82528645a54fb793d4d04e342629a3f51346
+#   actions/checkout: derselbe Hash wie in browsernachweise.yml
+# Jekyll baut wie die bisherige Zweigquelle (kein .nojekyll im Repo), damit
+# sich an den ausgelieferten Seiten nichts aendert ausser dem Zeitpunkt.
+name: Veroeffentlichen
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/veroeffentlichen.yml'
+      - '.github/scripts/veroeffentlichen.sh'
+      - '.github/scripts/test_veroeffentlichen.py'
+  # Nach jedem abgeschlossenen Nachweislauf auf main, gruen oder rot.
+  # Entschieden wird im Skript, und zwar fuer den aktuellen Kopf von main.
+  workflow_run:
+    workflows: [Browsernachweise]
+    types: [completed]
+    branches: [main]
+  # Jeder Push auf main. Aendert er keine gepruefen Pfade, ist er sofort
+  # veroeffentlichbar; sonst wartet er auf den gruenen Volllauf.
+  push:
+    branches: [main]
+  # Von Hand: leer = aktueller Kopf; mit Commit = Rueckrollen auf diesen Stand
+  # (derselbe Nachweis noetig).
+  workflow_dispatch:
+    inputs:
+      sha:
+        description: 'Commit auf main (leer = aktueller Kopf)'
+        required: false
+        default: ''
+
+permissions:
+  contents: read
+
+# Nie zwei Veroeffentlichungen gleichzeitig. Eine wartende spaetere ersetzt
+# eine wartende fruehere; jede entscheidet beim Start neu fuer den Kopf.
+concurrency:
+  group: veroeffentlichen
+  cancel-in-progress: false
+
+jobs:
+  pruefen:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Entscheidungs- und Herkunftsgegenproben ohne Netz
+        run: |
+          bash -n .github/scripts/veroeffentlichen.sh
+          python3 .github/scripts/test_veroeffentlichen.py
+
+  entscheiden:
+    needs: pruefen
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      actions: read
+      deployments: read
+      pages: read
+    outputs:
+      los: ${{ steps.e.outputs.los }}
+      sha: ${{ steps.e.outputs.sha }}
+      gruen: ${{ steps.e.outputs.gruen }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.workflow_sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - id: e
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          EREIGNIS: ${{ github.event_name }}
+          EINGABE_SHA: ${{ github.event.inputs.sha }}
+        run: |
+          set -euo pipefail
+          # Von Hand ohne Commit verhaelt sich wie automatisch (nur vorwaerts).
+          if [ "$EREIGNIS" = "workflow_dispatch" ] && [ -z "$EINGABE_SHA" ]; then
+            EREIGNIS=push
+          fi
+          export EREIGNIS
+          bash .github/scripts/veroeffentlichen.sh entscheiden
+
+  veroeffentlichen:
+    needs: [pruefen, entscheiden]
+    if: needs.entscheiden.outputs.los == 'ja'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+      deployments: write
+    environment:
+      name: github-pages
+      url: ${{ steps.bereitstellen.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.workflow_sha }}
+          path: .b1-control
+          persist-credentials: false
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ needs.entscheiden.outputs.sha }}
+          path: .b1-site
+          persist-credentials: false
+      - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
+      - name: Seiten bauen wie bisher (Jekyll)
+        uses: actions/jekyll-build-pages@44a6e6beabd48582f863aeeb6cb2151cc1716697 # v1.0.13
+        with:
+          source: ./.b1-site
+          destination: ./_site
+          build_revision: ${{ needs.entscheiden.outputs.sha }}
+      - id: artefakt
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: ./_site
+      - id: bereitstellen
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
+      - name: Veroeffentlichten Stand nennen
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          SHA: ${{ needs.entscheiden.outputs.sha }}
+          GRUEN_SHA: ${{ needs.entscheiden.outputs.gruen }}
+          EVENT_SHA: ${{ github.sha }}
+          ARTEFAKT_ID: ${{ steps.artefakt.outputs.artifact_id }}
+          URL: ${{ steps.bereitstellen.outputs.page_url }}
+        run: |
+          set -euo pipefail
+          bash .b1-control/.github/scripts/veroeffentlichen.sh belegen
+          echo "veröffentlicht: $SHA → $URL"
+          echo "### Veröffentlicht: \`${SHA:0:7}\` → $URL" >> "$GITHUB_STEP_SUMMARY"
