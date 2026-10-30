@@ -6,7 +6,11 @@
 <title>Agentarium</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Resonanz">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<!-- `black`, nicht `black-translucent`: Peter am 30.10., als Home-Bildschirm-App
+     fehlten oben Titel und GitHub-Live, im Browser nicht. Durchsichtig legt iOS
+     die Statusleiste UEBER die Seite, den Platz muss die Seite selbst freihalten.
+     `black` setzt die Leiste darueber; der Grund ist ohnehin fast schwarz. -->
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="theme-color" content="#05070C">
 <style>
   :root{ --grund:#05070C; --agHell:1; }
@@ -2494,7 +2498,7 @@
 
      Der Bauzeitpunkt kommt beim Bauen aus der Uhr. Von Hand gepflegte
      Datumsangaben sind nach der zweiten Änderung falsch. */
-  var FASSUNG = '93', GEBAUT = '2026-10-30T05:31Z';
+  var FASSUNG = '94', GEBAUT = '2026-10-30T08:21Z';
 
   /* AG-GH-LIVE-001: JEDE TEXTSENKE MASKIERT.
      Seit Live-Daten von aussen kommen (GitHub-Kommentare, one-event.json),

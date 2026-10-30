@@ -22,7 +22,7 @@
    zu Ende laufen duerfen.
 */
 const EIGEN = 'agentarium-pilot-v';
-const VORRAT = EIGEN + '93';
+const VORRAT = EIGEN + '94';
 const STUECKE = ['./', 'index.html', 'manifest.webmanifest', 'github-live.js',
                  'icon-120.png', 'icon-152.png', 'icon-180.png',
                  'icon-192.png', 'icon-512.png'];
