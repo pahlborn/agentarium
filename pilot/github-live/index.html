@@ -2477,7 +2477,7 @@
      nicht veralten.
      ==================================================================== */
 
-  var AGENTEN = [{"name": "peter", "farbe": 0.11, "winkel": 180, "nah": 1.28, "rolle": "Auftraggeber", "platt": "mensch", "weise": "kreisen", "kennung": "", "bereich": [], "verbote": [], "auftrag": "Entscheidet. Ohne ihn wird nichts zusammengef\u00fchrt und nichts ver\u00f6ffentlicht."}, {"name": "nova", "farbe": 0.86, "winkel": 22.5, "nah": 1.0, "rolle": "Vision", "platt": "chatgpt", "weise": "erfinden", "kennung": "create-vision-with-nova", "bereich": ["vision", "experience", "vision_drift"], "verbote": ["code", "merge", "publish", "approve_release"], "auftrag": "Erlebnis und Vision entwickeln; eigene Vorschl\u00e4ge und R\u00fcckfragen erw\u00fcnscht."}, {"name": "atlas", "farbe": 0.15, "winkel": 67.5, "nah": 1.0, "rolle": "Orchestrator", "platt": "chatgpt", "weise": "kreisen", "kennung": "operate-as-atlas", "bereich": [], "verbote": [], "auftrag": "Koordiniert, aktiviert und motiviert. Routet Gegenfragen und gibt Antworten zur\u00fcck; offene Kl\u00e4rung wird nicht durch eine erfundene Antwort ersetzt."}, {"name": "cadence", "farbe": 0.6, "winkel": 112.5, "nah": 1.0, "rolle": "Prozess", "platt": "claude", "weise": "ordnen", "kennung": "process-agent", "bereich": ["process_maintenance", "process_improvement"], "verbote": [], "auftrag": "H\u00e4lt den Prozess instand und verbessert ihn; erkennt doppelte Arbeit."}, {"name": "scout", "farbe": 0.41, "winkel": 157.5, "nah": 1.0, "rolle": "Recherche", "platt": "chatgpt", "weise": "holen", "kennung": "build-research-knowledge", "bereich": [], "verbote": [], "auftrag": "Baut Wissen auf. Sortiert Fundst\u00fccke aus und revidiert Regeln an Gegenbeispielen."}, {"name": "forge", "farbe": 0.02, "winkel": 202.5, "nah": 1.0, "rolle": "Entwicklung", "platt": "claude", "weise": "bauen", "kennung": "coding-agent", "bereich": ["implementation"], "verbote": [], "auftrag": "Baut. Meldet technische Abh\u00e4ngigkeiten selbst, statt sie zu umgehen."}, {"name": "sentinel", "farbe": 0.34, "winkel": 247.5, "nah": 1.0, "rolle": "Qualit\u00e4t", "platt": "chatgpt", "weise": "takten", "kennung": "qa-agent-sentinel", "bereich": [], "verbote": [], "auftrag": "Stellt Fehler nach, pr\u00fcft Regressionen und benennt die Grenzen der Pr\u00fcfung."}, {"name": "archibald", "farbe": 0.5, "winkel": 292.5, "nah": 1.0, "rolle": "Spezifikation", "platt": "claude", "weise": "schaerfen", "kennung": "spec-agent", "bereich": ["specification"], "verbote": [], "auftrag": "Macht Anforderungen pr\u00fcfbar und verlangt unterscheidbare Ergebnisse."}, {"name": "argus", "farbe": 0.73, "winkel": 337.5, "nah": 1.0, "rolle": "Review", "platt": "chatgpt", "weise": "pruefen", "kennung": "review-agent-argus", "bereich": [], "verbote": [], "auftrag": "Hinterfragt aktiv, auch scheinbar Harmloses; liefert Gegenbeispiele statt Meinungen."}, {"name": "lot", "farbe": 0.245, "winkel": 0, "nah": 1.28, "rolle": "Darstellung", "platt": "claude", "weise": "kreisen", "kennung": "", "bereich": ["visualization", "interface"], "verbote": ["merge", "publish"], "auftrag": "Baut Darstellung und Bedienung. Misst nach, statt eine Wirkung zu behaupten."}];
+  var AGENTEN = [{"name": "peter", "farbe": 0.11, "winkel": 180, "nah": 1.28, "rolle": "Auftraggeber", "platt": "mensch", "weise": "kreisen", "kennung": "", "bereich": [], "verbote": [], "auftrag": "Entscheidet. Ohne ihn wird nichts zusammengef\u00fchrt und nichts ver\u00f6ffentlicht."}, {"name": "nova", "farbe": 0.86, "winkel": 22.5, "nah": 1.0, "rolle": "Vision", "platt": "chatgpt", "weise": "erfinden", "kennung": "create-vision-with-nova", "bereich": ["vision", "experience", "vision_drift"], "verbote": ["code", "merge", "publish", "approve_release"], "auftrag": "Erlebnis und Vision entwickeln; eigene Vorschl\u00e4ge und R\u00fcckfragen erw\u00fcnscht."}, {"name": "atlas", "farbe": 0.15, "winkel": 67.5, "nah": 1.0, "rolle": "Orchestrator", "platt": "chatgpt", "weise": "dirigieren", "kennung": "operate-as-atlas", "bereich": [], "verbote": [], "auftrag": "Koordiniert, aktiviert und motiviert. Routet Gegenfragen und gibt Antworten zur\u00fcck; offene Kl\u00e4rung wird nicht durch eine erfundene Antwort ersetzt."}, {"name": "cadence", "farbe": 0.6, "winkel": 112.5, "nah": 1.0, "rolle": "Prozess", "platt": "claude", "weise": "ordnen", "kennung": "process-agent", "bereich": ["process_maintenance", "process_improvement"], "verbote": [], "auftrag": "H\u00e4lt den Prozess instand und verbessert ihn; erkennt doppelte Arbeit."}, {"name": "scout", "farbe": 0.41, "winkel": 157.5, "nah": 1.0, "rolle": "Recherche", "platt": "chatgpt", "weise": "holen", "kennung": "build-research-knowledge", "bereich": [], "verbote": [], "auftrag": "Baut Wissen auf. Sortiert Fundst\u00fccke aus und revidiert Regeln an Gegenbeispielen."}, {"name": "forge", "farbe": 0.02, "winkel": 202.5, "nah": 1.0, "rolle": "Entwicklung", "platt": "claude", "weise": "bauen", "kennung": "coding-agent", "bereich": ["implementation"], "verbote": [], "auftrag": "Baut. Meldet technische Abh\u00e4ngigkeiten selbst, statt sie zu umgehen."}, {"name": "sentinel", "farbe": 0.34, "winkel": 247.5, "nah": 1.0, "rolle": "Qualit\u00e4t", "platt": "chatgpt", "weise": "takten", "kennung": "qa-agent-sentinel", "bereich": [], "verbote": [], "auftrag": "Stellt Fehler nach, pr\u00fcft Regressionen und benennt die Grenzen der Pr\u00fcfung."}, {"name": "archibald", "farbe": 0.5, "winkel": 292.5, "nah": 1.0, "rolle": "Spezifikation", "platt": "claude", "weise": "schaerfen", "kennung": "spec-agent", "bereich": ["specification"], "verbote": [], "auftrag": "Macht Anforderungen pr\u00fcfbar und verlangt unterscheidbare Ergebnisse."}, {"name": "argus", "farbe": 0.73, "winkel": 337.5, "nah": 1.0, "rolle": "Review", "platt": "chatgpt", "weise": "pruefen", "kennung": "review-agent-argus", "bereich": [], "verbote": [], "auftrag": "Hinterfragt aktiv, auch scheinbar Harmloses; liefert Gegenbeispiele statt Meinungen."}, {"name": "lot", "farbe": 0.245, "winkel": 0, "nah": 1.28, "rolle": "Darstellung", "platt": "claude", "weise": "zeichnen", "kennung": "", "bereich": ["visualization", "interface"], "verbote": ["merge", "publish"], "auftrag": "Baut Darstellung und Bedienung. Misst nach, statt eine Wirkung zu behaupten."}];
   var ARTEN = {"request": {"abgabe": 0.0, "nachhall": 3.8, "gestalt": "sonne", "kraft": 0.95, "tempo": 0.55, "gross": 1.0, "was": "Peter wirft den goldenen Ball an"}, "handoff": {"abgabe": 0.0, "nachhall": 3.2, "gestalt": "sonne", "kraft": 0.72, "tempo": 0.85, "gross": 0.48, "was": "Ein St\u00fcck vom Ball wird abgeworfen"}, "answer": {"abgabe": 0.0, "nachhall": 3.0, "gestalt": "pfeil", "kraft": 0.62, "tempo": 1.2, "was": "Antwort auf eine R\u00fcckfrage"}, "contribution": {"abgabe": 0.0, "nachhall": 3.0, "gestalt": "wurf", "kraft": 0.62, "tempo": 1.0, "was": "Beitrag zur\u00fcckgegeben"}, "proposal": {"abgabe": 0.0, "nachhall": 3.6, "gestalt": "wurf", "kraft": 0.68, "tempo": 1.0, "was": "Vorschlag, noch nicht beschlossen"}, "recommendation": {"abgabe": 0.0, "nachhall": 3.6, "gestalt": "wurf", "kraft": 0.64, "tempo": 1.0, "was": "Empfehlung, noch nicht beschlossen"}, "question": {"abgabe": 0.0, "nachhall": 0.9, "gestalt": "pfeil", "kraft": 0.45, "tempo": 1.5, "was": "R\u00fcckfrage, noch unbeantwortet"}, "objection": {"abgabe": 0.0, "nachhall": 1.1, "gestalt": "gegen", "kraft": 0.85, "tempo": 1.5, "was": "Widerspruch aus dem Review"}, "change_request": {"abgabe": 0.0, "nachhall": 1.1, "gestalt": "gegen", "kraft": 0.7, "tempo": 1.3, "was": "\u00c4nderung verlangt"}, "defect": {"abgabe": 0.0, "nachhall": 0.8, "gestalt": "bersten", "kraft": 0.9, "tempo": 1.8, "was": "Fehler gefunden"}, "open_state": {"abgabe": 0.0, "nachhall": 0.9, "gestalt": "pfeil", "kraft": 0.38, "tempo": 0.6, "was": "etwas bleibt offen"}, "stop": {"abgabe": 0.0, "nachhall": 0.0, "gestalt": "zustand", "kraft": 0.0, "tempo": 1.0, "was": "Ein Stop: der Betroffene kann nicht weiter"}, "resume": {"abgabe": 0.0, "nachhall": 0.0, "gestalt": "zustand", "kraft": 0.0, "tempo": 1.0, "was": "Der Stop ist aufgehoben"}, "artifact": {"abgabe": 4.0, "nachhall": 2.6, "gestalt": "wurf", "kraft": 0.95, "tempo": 0.9, "was": "Ergebnis geliefert: Epics, Stories, Code"}, "decision": {"abgabe": 4.0, "nachhall": 2.6, "gestalt": "wurf", "kraft": 1.0, "tempo": 0.8, "was": "Peter entscheidet"}, "test_result": {"abgabe": 4.0, "nachhall": 2.4, "gestalt": "wurf", "kraft": 0.8, "tempo": 1.1, "was": "Pr\u00fcfung bestanden"}, "review_result": {"abgabe": 4.0, "nachhall": 2.4, "gestalt": "wurf", "kraft": 0.8, "tempo": 1.1, "was": "Review abgeschlossen"}};
   /* Mehrere Stücke auf derselben Bühne. Das war von Anfang an die
      Aufgabe — „je nachdem umschaltbar auf Protokolldaten" —, und es ist
@@ -2494,7 +2494,7 @@
 
      Der Bauzeitpunkt kommt beim Bauen aus der Uhr. Von Hand gepflegte
      Datumsangaben sind nach der zweiten Änderung falsch. */
-  var FASSUNG = '92', GEBAUT = '2026-10-29T13:57Z';
+  var FASSUNG = '93', GEBAUT = '2026-10-30T05:31Z';
 
   /* AG-GH-LIVE-001: JEDE TEXTSENKE MASKIERT.
      Seit Live-Daten von aussen kommen (GitHub-Kommentare, one-event.json),
@@ -3931,7 +3931,7 @@
       if (l.flug) continue;
       var o = liegendOrt(l);
       if (!o) continue;
-      var r = Math.max(26, Math.min(W(), H()) * 0.021 * (l.teil ? 0.5 : 1) * 2.2);
+      var r = Math.max(26, Math.min(W(), H()) * 0.021 * LIEGEND_GROESSE * (l.teil ? 0.5 : 1) * 2.2);
       var d = Math.hypot(x - o[0], y - o[1]);
       if (d < r && d < bd) { bd = d; best = { l: l, o: o }; }
     }
@@ -3994,6 +3994,11 @@
      steht still, laengeres Leben kostet keine Ueberschreibung. Ab vier
      vollen Ballgewichten wird er sichtbar duenner statt teurer. */
   var LIEGEND_BUDGET = 98;            /* Punkte je Bild, alle liegenden zusammen */
+  /* Peter, 29.10.: "Die Baelle, wenn sie liegen, koennten auch etwas kleiner
+     sein ... der Flug eines Balles ist schon phaenomenal, der duerfte
+     weiterhin deutlich sichtbar und aufregend sein." Also nur der LIEGENDE
+     Ball schrumpft; der Flug bleibt, wie er ist. */
+  var LIEGEND_GROESSE = 0.7;
   var LIEGEND_LEBEN_MAX = 1.0;        /* Sekunden */
   var liegendGezaehlt = 0;            /* fuer den Nachweis: gesetzte Punkte */
   function liegendeZeichnen(dt) {
@@ -4024,7 +4029,7 @@
       var b = sichtbar[q], w = b.l.teil ? 0.25 : 1;
       /* Ein Teilball ist halb so gross wie der ganze -- dieselbe Regel wie
          im Demo-Modus ("knapp halb so gross, der Ball bleibt ganz"). */
-      var rad = Math.min(W(), H()) * 0.021 * (b.l.teil ? 0.5 : 1) *
+      var rad = Math.min(W(), H()) * 0.021 * LIEGEND_GROESSE * (b.l.teil ? 0.5 : 1) *
                 (1 + 0.09 * Math.sin(b.l.t * 1.1 + b.i));
       var f = w * anteil;
       var n1 = Math.max(1, Math.round(20 * f)), n2 = Math.max(2, Math.round(52 * f)),
@@ -5322,7 +5327,430 @@
     }
   }
 
+  /* ================ DAS GEMEINSAME BUDGET (AG-MON-WEISE-001) ================
+     Alle Weisen und der Leerlauf teilen sich je Bild hoechstens so viele
+     neue Punkte wie EIN fliegender Ball (98). Das Feld hat einen Ring von
+     14.000 Punkten; wer mehr setzt, ueberschreibt die Resonanz (gemessen an
+     den liegenden Baellen, AG-MON-RESONANZ-001). Arbeiten viele zugleich,
+     wird jede Weise leiser -- nicht die Resonanz kaputt.
+     `weiseStaerke` (0..1) macht eine Weise leise: vergeben 0,4, Leerlauf
+     0,33; Ausbrueche (Funken, Einsturz) gibt es nur bei voller Staerke. */
+  var WEISE_BUDGET = 98;
+  var effektRest = 0, weiseAnteil = WEISE_BUDGET, weiseStaerke = 1, weiseGezaehlt = 0;
+  function effStrang(x, y, gx, gy, hitze, dauer, ton, abgabe) {
+    if (effektRest <= 0) return;
+    if (weiseStaerke < 1 && Math.random() > weiseStaerke) return;
+    effektRest--; weiseGezaehlt++;
+    window.__feld.strang(x, y, gx, gy, hitze, dauer, ton, abgabe);
+  }
+  function effKnoten(x, y, hitze, ton, abgabe, wieviele, dauer) {
+    var n = Math.max(1, Math.round((wieviele || 18) * weiseStaerke));
+    if (effektRest < n) return;
+    effektRest -= n; weiseGezaehlt += n;
+    window.__feld.knoten(x, y, hitze, ton, abgabe, n, dauer);
+  }
+  function effAustreiben(x, y, ton, wieviele, abgabe) {
+    if (weiseStaerke < 1 || effektRest < wieviele * 16) return;
+    effektRest -= wieviele * 16; weiseGezaehlt += wieviele * 16;
+    window.__feld.austreiben(x, y, ton, wieviele, abgabe);
+  }
+  function effEinsturz(x, y, ton) {
+    if (weiseStaerke < 1 || effektRest < 27) return;
+    effektRest -= 27; weiseGezaehlt += 27;
+    einsturz(x, y, ton);
+  }
+  /* Zeichnet die Weise einer Rolle mit ihrem Anteil am Budget. */
+  function weiseAusfuehren(A, S, p, dt, staerke) {
+    var f = WEISEN[A.weise];
+    if (!f) return;
+    effektRest = weiseAnteil; weiseStaerke = staerke;
+    f(A, S, p, dt);
+    weiseStaerke = 1; effektRest = 0;
+  }
+  /* Wer arbeitet gerade (nicht im Ausklang)? Fuer Atlas und Argus. */
+  function arbeitendeAusser(name) {
+    var r = [];
+    for (var n in arbeit) if (n !== name && !arbeit[n].aus && nachName[n]) r.push(nachName[n]);
+    return r;
+  }
+
+  /* --- Die drei neuen Weisen (AG-MON-WEISE-001, Teil 1) ------------------ */
+  /* Argus ohne Stueck auf dem Tisch: ein BLICK -- ein kurzer Strang zu einem,
+     der gerade arbeitet; arbeitet niemand, zu einem Nachbarn. Hinterfragen
+     heisst hinsehen, und zwar bei anderen. */
+  function weiseBlick(A, S, p, dt) {
+    S.blick = (S.blick || 0) - dt;
+    if (S.blick > 0) return;
+    S.blick = 1.3;
+    var ziele = arbeitendeAusser(A.name);
+    if (!ziele.length)
+      for (var i = 0; i < AGENTEN.length; i++)
+        if (AGENTEN[i].name !== A.name && AGENTEN[i].name !== 'peter') ziele.push(AGENTEN[i]);
+    if (!ziele.length) return;
+    var z = heimat(ziele[(Math.random() * ziele.length) | 0]);
+    var dx = z[0] - p[0], dy = z[1] - p[1];
+    for (var k = 0; k < 7; k++) {
+      var f = k / 7;
+      effStrang(p[0] + dx * f * 0.35, p[1] + dy * f * 0.35, dx * 1.6, dy * 1.6,
+        0.28 * (1 - f * 0.5), 0.45 + 0.2 * Math.random(), A.farbe, 0);
+    }
+  }
+  /* Atlas DIRIGIERT: Er sammelt die Staende ein. Von jedem, der gerade
+     arbeitet, zieht ein feiner Sog in dessen Farbe zu ihm. Arbeitet niemand
+     sonst, laeuft ein UMLAUF-Faden um den Kreis -- er dreht seine Runde. */
+  function weiseDirigieren(A, S, p, dt) {
+    var andere = arbeitendeAusser(A.name);
+    if (andere.length) {
+      S.sog = (S.sog || 0) - dt;
+      if (S.sog > 0) return;
+      S.sog = 0.35;
+      for (var i = 0; i < andere.length; i++) {
+        var q = heimat(andere[i]), dx = p[0] - q[0], dy = p[1] - q[1];
+        for (var k = 0; k < 3; k++)
+          effStrang(q[0] + dx * 0.15 * k, q[1] + dy * 0.15 * k, dx * 3, dy * 3,
+            0.16, 1.1 + 0.4 * Math.random(), andere[i].farbe, 0);
+      }
+      return;
+    }
+    var cx = mx(), cy = my(), r = Math.hypot(p[0] - cx, p[1] - cy) || 1;
+    var w = Math.atan2(p[1] - cy, p[0] - cx) + S.t * 0.9;
+    effStrang(cx + Math.cos(w) * r, cy + Math.sin(w) * r,
+      -Math.sin(w) * r * 0.9, Math.cos(w) * r * 0.9, 0.22, 0.9, A.farbe, 0);
+  }
+  /* Lot ZEICHNET: Darstellung heisst Linien ziehen. Eine Schleife (liegende
+     Acht) wird neben seinem Platz Punkt fuer Punkt gezogen; die Punkte
+     bleiben kurz stehen, so sieht man die Linie entstehen und vergehen. */
+  function weiseZiehen(A, S, p, dt) {
+    var r = Math.min(W(), H()) * 0.045;
+    var aus = Math.atan2(p[1] - my(), p[0] - mx());
+    var ox = p[0] + Math.cos(aus) * r * 1.2, oy = p[1] + Math.sin(aus) * r * 1.2;
+    var u = S.t * 1.6;
+    var x = ox + Math.sin(u) * r, y = oy + Math.sin(u) * Math.cos(u) * r * 0.9;
+    effStrang(x, y, 0, 0, 0.30, 1.6 + 0.4 * Math.random(), A.farbe, 0);
+    effStrang(x, y, 0, 0, 0.22, 1.2, A.farbe, 0);
+  }
+
+  /* ============ EFFEKT JE AUFGABENART (AG-MON-WEISE-001, Teil 2) ============
+     Ein Arbeitsschritt hatte live immer denselben kurzen Puls. Jetzt hat
+     jede Art ihren Ausdruck aus dem Wortschatz der Resonanz. Was hier
+     nicht steht, bekommt weiter den Puls. Einmalige Ereignisse, darum
+     ausserhalb des Budgets der Weisen. */
+  function aufgabenEffekt(E) {
+    var A = nachName[E.von];
+    if (!A || !window.__feld) return false;
+    var p = heimat(A), F = window.__feld, k;
+    switch (E.art) {
+      case 'assigned':                         /* Knoten beim Empfaenger */
+        var B = nachName[E.an];
+        if (!B) return false;
+        var q = heimat(B);
+        F.knoten(q[0], q[1], 0.6, B.farbe, 0, 14, 0.9);
+        return true;
+      case 'delivered':                        /* Stimmen: heller Knoten, Puls */
+        F.knoten(p[0], p[1], 0.85, A.farbe, 0, 26, 1.1);
+        pulsAn(E.von);
+        return true;
+      case 'blocked':                          /* Stoss mit Funken */
+        F.austreiben(p[0], p[1], A.farbe, 2, 0);
+        return true;
+      case 'resolved':                         /* loest sich in Stroemung */
+        for (k = 0; k < 10; k++) {
+          var w = k * 0.6283;
+          F.strang(p[0] + Math.cos(w) * 10, p[1] + Math.sin(w) * 10,
+            Math.cos(w) * 60, Math.sin(w) * 60, 0.2, 1.6, A.farbe, 0);
+        }
+        return true;
+      case 'aborted':                          /* Einsturz */
+        einsturz(p[0], p[1], A.farbe);
+        return true;
+      case 'merged': case 'published':         /* Knoten in der Mitte: das Produkt */
+        F.knoten(mx(), my(), 0.7, A.farbe, 0, 22, 1.2);
+        return true;
+      case 'accepted':                         /* Peters Annahme: Niederschlag */
+        if (E.von !== 'peter' || !nachName.peter) return false;
+        /* Nur Beschlossenes bleibt (das Gesetz): eine goldene Spur mit
+           Abgabe, die liegen bleibt -- wie die Landung eines Ergebnisses. */
+        var P = heimat(nachName.peter);
+        F.knoten(P[0], P[1], 0.62, 0.115, 4, 110, 2.6);
+        return true;
+    }
+    return false;
+  }
+
+  /* ================= DER LEERLAUF (AG-MON-WEISE-001, Teil 3) =================
+     Peter, 29.10.: Es gab "mehr interessante Bewegung am Schirm ... auch wenn
+     nichts gearbeitet wird". Bisher kam das Feld ohne Ereignis ganz zur Ruhe
+     ("beginnt nie von selbst etwas Neues"). Jetzt atmet es: Nach 20 s ohne
+     Ereignis, Flug und Finger zeigt alle 20-40 s EINE Rolle fuer 2,5 s ihre
+     Weise, leise (ein Drittel). Bevorzugt die, die zuletzt gearbeitet haben.
+     Nie zwei zugleich; das erste Ereignis oder ein Finger beendet es. Nur
+     live, nicht im Archiv; Peter und Lot sind ausgenommen. */
+  var LEERLAUF_NACH = 20, LEERLAUF_PAUSE = [20, 40], LEERLAUF_DAUER = 2.5, LEERLAUF_STAERKE = 0.33;
+  var ruheSeit = 0, leerlauf = null, leerlaufNaechster = 0, leerlaufAnzahl = 0, zuletztAktiv = [];
+  function ruheMelden(wer) {
+    ruheSeit = performance.now();
+    leerlauf = null;
+    if (wer && nachName[wer] && wer !== 'peter') {
+      var i = zuletztAktiv.indexOf(wer);
+      if (i >= 0) zuletztAktiv.splice(i, 1);
+      zuletztAktiv.unshift(wer);
+      if (zuletztAktiv.length > 4) zuletztAktiv.length = 4;
+    }
+  }
+  window.addEventListener('pointerdown', function () { ruheMelden(); }, true);
+  function leerlaufWaehlen() {
+    var kand = [];
+    for (var i = 0; i < AGENTEN.length; i++) {
+      var a = AGENTEN[i];
+      if (a.name === 'peter' || a.name === 'lot' || !WEISEN[a.weise]) continue;
+      if (arbeit[a.name] && !arbeit[a.name].aus) continue;    /* der arbeitet schon */
+      kand.push(a.name);
+    }
+    if (!kand.length) return '';
+    var juengst = zuletztAktiv.filter(function (n) { return kand.indexOf(n) >= 0; });
+    if (juengst.length && Math.random() < 0.6) return juengst[(Math.random() * juengst.length) | 0];
+    return kand[(Math.random() * kand.length) | 0];
+  }
+  function leerlaufSchritt(dt) {
+    var jetzt = performance.now();
+    if (!ruheSeit) ruheSeit = jetzt;
+    if (MODUS !== 'live' || ghArchiv || baelle.length ||
+        jetzt - ruheSeit < LEERLAUF_NACH * 1000) { leerlauf = null; return; }
+    if (!leerlauf) {
+      if (jetzt < leerlaufNaechster) return;
+      var n = leerlaufWaehlen();
+      if (!n) return;
+      leerlauf = { name: n, S: { t: 0, liste: [] } };
+      leerlaufAnzahl++;
+    }
+    var A = nachName[leerlauf.name];
+    leerlauf.S.t += dt;
+    if (!A || leerlauf.S.t > LEERLAUF_DAUER) {
+      leerlauf = null;
+      leerlaufNaechster = jetzt + (LEERLAUF_PAUSE[0] +
+        (LEERLAUF_PAUSE[1] - LEERLAUF_PAUSE[0]) * Math.random()) * 1000;
+      return;
+    }
+    weiseAusfuehren(A, leerlauf.S, heimat(A), dt, LEERLAUF_STAERKE);
+  }
+
+  /* ================= DIE WEISEN DER ROLLEN (AG-MON-WEISE-001) =================
+     Jede Rolle zeigt ihre Arbeit auf ihre Weise -- abgeleitet aus dem, was
+     sie im Team TUT, nicht aus dem, was huebsch aussieht. Bis Fassung 92
+     stand das als Kette von `if (A.weise === ...)` in `arbeitSchritt`; jetzt
+     ist es EINE Tabelle (Peter, 29.10.: "der Monitor ist schon so
+     angewachsen ... entschlanken"). Die Koerper der bisherigen Weisen sind
+     woertlich uebernommen; gezeichnet wird ueber das gemeinsame Budget
+     (`effStrang` & Co.), damit viele gleichzeitig Arbeitende die Resonanz
+     nicht verdraengen -- dieselbe Lehre wie bei den liegenden Baellen.
+     Aufruf je Bild: (A = Agent, S = sein Arbeitsstand, p = Platz, dt). */
+  var WEISEN = {
+    /* Argus prüft, und Prüfen heißt HINGEHEN. Sein Ring sitzt nicht an
+    seinem Platz, sondern an dem Stück, das auf dem Tisch liegt — er
+    arbeitet an der Sache, nicht an sich. Liegt nichts dort (live der
+    Normalfall), wirft er einen BLICK auf einen, der gerade arbeitet
+    (`weiseBlick`, AG-MON-WEISE-001). */
+    pruefen: function (A, S, p, dt) {
+      if (!tisch.length) { weiseBlick(A, S, p, dt); return; }
+        var zo = tischOrt(tisch.length - 1);
+        var rz = Math.min(W(), H()) * 0.046;
+        for (var z1 = 0; z1 < 2; z1++) {
+          var wz = S.t * 1.5 + z1 * Math.PI;
+          effStrang(zo[0] + Math.cos(wz) * rz, zo[1] + Math.sin(wz) * rz,
+            -Math.sin(wz) * rz * 1.1, Math.cos(wz) * rz * 1.1,
+            0.30, 0.4 + 0.2 * Math.random(), A.farbe, 0);
+        }
+    },
+
+    /* Sentinel prüft WIEDERHOLT. Also ein Takt statt eines Kreises: Alle
+    1,1 Sekunden ein kurzer Strich, immer derselbe, immer wieder —
+    und jedes Mal ein Stück weitergedreht, damit man sieht, dass es
+    Durchgänge sind und nicht ein Stillstand. */
+    takten: function (A, S, p, dt) {
+        S.takt = (S.takt || 0) - dt;
+        if (S.takt <= 0) {
+          S.takt = 1.1;
+          S.durchgang = (S.durchgang || 0) + 0.7;
+          var rt = Math.min(W(), H()) * 0.040;
+          for (var k2 = 0; k2 < 9; k2++) {
+            var ft = k2 / 9;
+            var wt = S.durchgang;
+            effStrang(
+              p[0] + Math.cos(wt) * rt * (0.2 + ft * 0.9),
+              p[1] + Math.sin(wt) * rt * (0.2 + ft * 0.9),
+              Math.cos(wt) * 95, Math.sin(wt) * 95,
+              0.42 * (1 - ft * 0.5), 0.3 + 0.2 * Math.random(), A.farbe, 0);
+          }
+        }
+    },
+
+    /* Forge BAUT, also wächst etwas. Was er legt, bleibt stehen und wird
+    mehr, solange er arbeitet — eine kleine Struktur, die sich auffüllt
+    und beim Liefern verschwindet. Der Unterschied zum Produkt in der
+    Mitte: Dieses hier ist noch nicht angenommen, es ist Baustelle. */
+    bauen: function (A, S, p, dt) {
+        S.hoch = Math.min(1, (S.hoch || 0) + dt * 0.055);
+        var rb = Math.min(W(), H()) * 0.040;
+        for (var k3 = 0; k3 < 3; k3++) {
+          var wb = Math.random() * 6.2832;
+          var db = rb * Math.sqrt(Math.random()) * (0.3 + 0.7 * S.hoch);
+          effStrang(p[0] + Math.cos(wb) * db, p[1] + Math.sin(wb) * db,
+            0, 0, 0.13 + 0.16 * S.hoch, 0.9 + 0.5 * Math.random(), A.farbe, 0);
+        }
+    },
+
+    /* Archibald macht UNTERSCHEIDBAR. Also zwei Bögen, die sich
+    voneinander wegdrehen — aus einem wird zweierlei, und man sieht
+    die Lücke dazwischen. */
+    schaerfen: function (A, S, p, dt) {
+        var rs2 = Math.min(W(), H()) * 0.034;
+        var sp = 0.35 + 0.55 * (0.5 + 0.5 * Math.sin(S.t * 0.8));
+        for (var se = -1; se <= 1; se += 2) {
+          for (var k4 = 0; k4 < 4; k4++) {
+            var ws = S.t * 0.5 + se * sp + k4 * 0.22 * se;
+            effStrang(p[0] + Math.cos(ws) * rs2, p[1] + Math.sin(ws) * rs2,
+              -Math.sin(ws) * rs2 * se, Math.cos(ws) * rs2 * se,
+              0.30, 0.35 + 0.2 * Math.random(), A.farbe, 0);
+          }
+        }
+    },
+
+    /* Cadence ORDNET. Ein völlig gleichmäßiger Ring, ohne Atem und ohne
+    Herzschlag — das Metronom im Bild. Die Regelmäßigkeit IST die
+    Aussage; alles andere hier atmet. */
+    ordnen: function (A, S, p, dt) {
+        var rc = Math.min(W(), H()) * 0.036;
+        for (var k5 = 0; k5 < 4; k5++) {
+          var wc = S.t * 0.9 + k5 * 1.5708;
+          effStrang(p[0] + Math.cos(wc) * rc, p[1] + Math.sin(wc) * rc,
+            -Math.sin(wc) * rc * 0.8, Math.cos(wc) * rc * 0.8,
+            0.26, 0.42, A.farbe, 0);
+        }
+    },
+
+    /* --- Scout: Er greift nach außen. ---------------------------------
+    Seine Fäden entstehen JENSEITS DES BILDRANDES und laufen auf
+    seinen Platz zu. Das ist die einzige Stelle, an der etwas von
+    außerhalb des Rahmens kommt — und genau das ist der Punkt: Der
+    Rahmen ist nicht die Welt. Es gibt eine Wissenswelt dahinter, und
+    Recherche heißt, von dort etwas hereinzuholen.
+    Die Hitze bleibt unter 0,20, der Schwelle, ab der Resonanz von
+    selbst Korn aussät: Was hereingeholt wird, soll ankommen und nicht
+    unterwegs funken. */
+    holen: function (A, S, p, dt) {
+        var aus0 = Math.atan2(p[1] - my(), p[0] - mx());
+
+        /* 1. DAS DRAUSSEN IST DA, auch bevor jemand hinlangt.
+           Ein paar sehr blasse, stillstehende Punkte weit außerhalb des
+           Kreises — kein Zufluss, ein Ort. Vorher war das Universum nur
+           ein Strom, der anfing, wenn Scout arbeitete; etwas, das erst
+           entsteht, wenn man hineingreift, ist kein Universum, sondern
+           ein Hahn. */
+        for (var u0 = 0; u0 < 7; u0++) {
+          var wu = aus0 + (Math.random() - 0.5) * 2.3;
+          var cu = Math.cos(wu), su = Math.sin(wu);
+          var tu = Math.min(
+            Math.abs(cu) > 1e-3 ? 0.5 * W() / Math.abs(cu) : 1e9,
+            Math.abs(su) > 1e-3 ? 0.5 * H() / Math.abs(su) : 1e9);
+          var rr2 = tu * (0.62 + 0.55 * Math.random());
+          effStrang(W() / 2 + cu * rr2, H() / 2 + su * rr2, 0, 0,
+            0.05 + 0.08 * Math.random(), 0.8 + 0.6 * Math.random(),
+            A.farbe, 0);
+        }
+
+        /* 2. NEUN STATT DREI, und über eine breitere Front: Recherche ist
+           kein Faden, sie ist ein Zug. */
+        for (var g = 0; g < 9; g++) {
+          var wk = aus0 + (Math.random() - 0.5) * 2.1;
+          var cw = Math.cos(wk), sw = Math.sin(wk);
+          /* Zwei Grenzen der Maschine, in die ich beide gelaufen bin:
+             Resonanz sammelt ein, was weiter als 18 % vor dem Rand liegt;
+             und ein verankerter Faden verliert seine Geschwindigkeit mit
+             etwa 5 je Sekunde, kommt also nur rund v/5 weit. Also knapp
+             hinter dem sichtbaren Rand beginnen und schnell hereinkommen. */
+          var tm = Math.min(
+            Math.abs(cw) > 1e-3 ? 0.42 * W() / Math.abs(cw) : 1e9,
+            Math.abs(sw) > 1e-3 ? 0.46 * H() / Math.abs(sw) : 1e9);
+          var raus = 25 + 85 * Math.random();
+          var qx = mx() + cw * (tm + raus), qy = my() + sw * (tm + raus);
+          var dx = p[0] - qx, dy = p[1] - qy, dl = Math.hypot(dx, dy) || 1;
+          var v0 = 1000 + 700 * Math.random();
+          effStrang(qx, qy, dx / dl * v0, dy / dl * v0,
+            0.19, 2.2 + 1.0 * Math.random(), A.farbe, 0);
+        }
+
+        /* 3. ES KOMMT AN. Vorher bremsten die Fäden irgendwo aus; ein Fund
+           hat aber einen Augenblick, in dem er da ist. */
+        S.fund = (S.fund || 0) - dt;
+        if (S.fund <= 0) {
+          S.fund = 0.55 + 0.5 * Math.random();
+          /* 4. UND NICHT ALLES ÜBERLEBT. Euer Konzept sagt es selbst:
+             „Ein eindrucksvolles Rezept ohne nachvollziehbare Grundlage
+             wird verworfen." Jeder vierte Fund stürzt unterwegs ein,
+             statt anzukommen — mit derselben Bewegung wie ein verworfenes
+             Tischstück, damit man es wiedererkennt. */
+          if (Math.random() < 0.26) {
+            var wf = aus0 + (Math.random() - 0.5) * 1.3;
+            var df = Math.min(W(), H()) * (0.10 + 0.14 * Math.random());
+            effEinsturz(p[0] + Math.cos(wf) * df, p[1] + Math.sin(wf) * df, A.farbe);
+          } else {
+            effKnoten(p[0], p[1], 0.58, A.farbe, 0, 12, 0.6);
+          }
+        }
+    },
+
+    /* --- Nova: Sie bringt hervor. -------------------------------------
+    Ihre Punkte kommen nirgends her. Sie stehen still, sind plötzlich
+    da und vergehen wieder — kein Zufluss, kein Weg, keine Herkunft.
+    Und ab und zu verdichtet sich einer zu einem hellen Knoten: eine
+    Vision. Das Gegenteil von Scouts Bewegung, mit Absicht. */
+    erfinden: function (A, S, p, dt) {
+        /* Zwölf Punkte auf 0,135 statt fünf auf 0,095: zu wenig und zu eng,
+           um als Sphäre gelesen zu werden, in der etwas entstehen kann. */
+        var rr0 = Math.min(W(), H()) * 0.135;
+        for (var g2 = 0; g2 < 12; g2++) {
+          var w3 = Math.random() * 6.2832, d3 = rr0 * Math.sqrt(Math.random());
+          effStrang(p[0] + Math.cos(w3) * d3, p[1] + Math.sin(w3) * d3,
+            0, 0, 0.07 + 0.14 * Math.random(),
+            1.4 + 1.1 * Math.random(), A.farbe, 0);
+        }
+        /* Eine Vision ENTSTEHT, sie erscheint nicht. Vorher sprang alle
+           zwei bis vier Sekunden ein fertiger Knoten irgendwo hin — das
+           las sich als Blinken, nicht als Einfall. Jetzt verdichtet sich
+           eine Stelle über anderthalb Sekunden: Die Punkte ringsum ziehen
+           zu ihr hin und werden heller, und erst dann steht sie da. */
+        if (!S.traum || S.traum.t > 1.9) {
+          var wv = Math.random() * 6.2832, dv = rr0 * (0.25 + 0.6 * Math.random());
+          S.traum = { x: p[0] + Math.cos(wv) * dv,
+                      y: p[1] + Math.sin(wv) * dv, t: 0 };
+        }
+        var T = S.traum; T.t += dt;
+        var reif = Math.min(1, T.t / 1.4);
+        for (var g3 = 0; g3 < 4; g3++) {
+          var w5 = Math.random() * 6.2832;
+          var d5 = Math.min(W(), H()) * 0.055 * (1 - reif * 0.75);
+          effStrang(T.x + Math.cos(w5) * d5, T.y + Math.sin(w5) * d5,
+            -Math.cos(w5) * 70 * reif, -Math.sin(w5) * 70 * reif,
+            0.12 + 0.34 * reif, 0.35 + 0.25 * Math.random(), A.farbe, 0);
+        }
+        if (T.t > 1.4 && !T.da) {
+          T.da = 1;
+          /* Da ist sie. Hell, kurz — und sie hinterlässt nichts: Eine Idee
+             ist noch kein Ergebnis. Dasselbe Gesetz wie überall. */
+          effKnoten(T.x, T.y, 0.88, A.farbe, 0, 22, 1.2);
+          effAustreiben(T.x, T.y, A.farbe, 3, 0);
+        }
+    },
+    dirigieren: weiseDirigieren,
+    zeichnen: weiseZiehen
+  };
+
   function arbeitSchritt(dt) {
+    /* Anteil jeder Weise am gemeinsamen Budget dieses Bildes. */
+    var aktiv = leerlauf ? 1 : 0;
+    for (var an0 in arbeit)
+      if (!arbeit[an0].aus && nachName[an0] && WEISEN[nachName[an0].weise]) aktiv++;
+    weiseAnteil = Math.max(4, Math.floor(WEISE_BUDGET / Math.max(1, aktiv)));
     for (var name in arbeit) {
       var A = nachName[name], S = arbeit[name];
       S.t += dt;
@@ -5435,207 +5863,9 @@
         window.__feld.knoten(p[0], p[1], 0.62, A.farbe, 0, 10, 0.75);
       }
 
-      /* ================= DIE WEISE DER ÜBRIGEN ROLLEN ==================
-         Bis hierher kreisten sechs von acht gleich. Das Bild sagte damit
-         „Arbeit ist Arbeit", und das stimmt nicht: Prüfen ist nicht Bauen,
-         und Ordnen ist nicht Hinterfragen. Jede Weise unten ist aus dem
-         abgeleitet, was die Rolle im Team TUT — nicht aus dem, was hübsch
-         aussieht. */
-
-      /* Argus prüft, und Prüfen heißt HINGEHEN. Sein Ring sitzt nicht an
-         seinem Platz, sondern an dem Stück, das auf dem Tisch liegt — er
-         arbeitet an der Sache, nicht an sich. Liegt nichts dort, bleibt er
-         sitzen; es gibt dann nichts zu prüfen. */
-      if (A.weise === 'pruefen' && !S.aus && tisch.length) {
-        var zo = tischOrt(tisch.length - 1);
-        var rz = Math.min(W(), H()) * 0.046;
-        for (var z1 = 0; z1 < 2; z1++) {
-          var wz = S.t * 1.5 + z1 * Math.PI;
-          window.__feld.strang(zo[0] + Math.cos(wz) * rz, zo[1] + Math.sin(wz) * rz,
-            -Math.sin(wz) * rz * 1.1, Math.cos(wz) * rz * 1.1,
-            0.30, 0.4 + 0.2 * Math.random(), A.farbe, 0);
-        }
-      }
-
-      /* Sentinel prüft WIEDERHOLT. Also ein Takt statt eines Kreises: Alle
-         1,1 Sekunden ein kurzer Strich, immer derselbe, immer wieder —
-         und jedes Mal ein Stück weitergedreht, damit man sieht, dass es
-         Durchgänge sind und nicht ein Stillstand. */
-      if (A.weise === 'takten' && !S.aus) {
-        S.takt = (S.takt || 0) - dt;
-        if (S.takt <= 0) {
-          S.takt = 1.1;
-          S.durchgang = (S.durchgang || 0) + 0.7;
-          var rt = Math.min(W(), H()) * 0.040;
-          for (var k2 = 0; k2 < 9; k2++) {
-            var ft = k2 / 9;
-            var wt = S.durchgang;
-            window.__feld.strang(
-              p[0] + Math.cos(wt) * rt * (0.2 + ft * 0.9),
-              p[1] + Math.sin(wt) * rt * (0.2 + ft * 0.9),
-              Math.cos(wt) * 95, Math.sin(wt) * 95,
-              0.42 * (1 - ft * 0.5), 0.3 + 0.2 * Math.random(), A.farbe, 0);
-          }
-        }
-      }
-
-      /* Forge BAUT, also wächst etwas. Was er legt, bleibt stehen und wird
-         mehr, solange er arbeitet — eine kleine Struktur, die sich auffüllt
-         und beim Liefern verschwindet. Der Unterschied zum Produkt in der
-         Mitte: Dieses hier ist noch nicht angenommen, es ist Baustelle. */
-      if (A.weise === 'bauen' && !S.aus) {
-        S.hoch = Math.min(1, (S.hoch || 0) + dt * 0.055);
-        var rb = Math.min(W(), H()) * 0.040;
-        for (var k3 = 0; k3 < 3; k3++) {
-          var wb = Math.random() * 6.2832;
-          var db = rb * Math.sqrt(Math.random()) * (0.3 + 0.7 * S.hoch);
-          window.__feld.strang(p[0] + Math.cos(wb) * db, p[1] + Math.sin(wb) * db,
-            0, 0, 0.13 + 0.16 * S.hoch, 0.9 + 0.5 * Math.random(), A.farbe, 0);
-        }
-      }
-
-      /* Archibald macht UNTERSCHEIDBAR. Also zwei Bögen, die sich
-         voneinander wegdrehen — aus einem wird zweierlei, und man sieht
-         die Lücke dazwischen. */
-      if (A.weise === 'schaerfen' && !S.aus) {
-        var rs2 = Math.min(W(), H()) * 0.034;
-        var sp = 0.35 + 0.55 * (0.5 + 0.5 * Math.sin(S.t * 0.8));
-        for (var se = -1; se <= 1; se += 2) {
-          for (var k4 = 0; k4 < 4; k4++) {
-            var ws = S.t * 0.5 + se * sp + k4 * 0.22 * se;
-            window.__feld.strang(p[0] + Math.cos(ws) * rs2, p[1] + Math.sin(ws) * rs2,
-              -Math.sin(ws) * rs2 * se, Math.cos(ws) * rs2 * se,
-              0.30, 0.35 + 0.2 * Math.random(), A.farbe, 0);
-          }
-        }
-      }
-
-      /* Cadence ORDNET. Ein völlig gleichmäßiger Ring, ohne Atem und ohne
-         Herzschlag — das Metronom im Bild. Die Regelmäßigkeit IST die
-         Aussage; alles andere hier atmet. */
-      if (A.weise === 'ordnen' && !S.aus) {
-        var rc = Math.min(W(), H()) * 0.036;
-        for (var k5 = 0; k5 < 4; k5++) {
-          var wc = S.t * 0.9 + k5 * 1.5708;
-          window.__feld.strang(p[0] + Math.cos(wc) * rc, p[1] + Math.sin(wc) * rc,
-            -Math.sin(wc) * rc * 0.8, Math.cos(wc) * rc * 0.8,
-            0.26, 0.42, A.farbe, 0);
-        }
-      }
-
-      /* --- Scout: Er greift nach außen. ---------------------------------
-         Seine Fäden entstehen JENSEITS DES BILDRANDES und laufen auf
-         seinen Platz zu. Das ist die einzige Stelle, an der etwas von
-         außerhalb des Rahmens kommt — und genau das ist der Punkt: Der
-         Rahmen ist nicht die Welt. Es gibt eine Wissenswelt dahinter, und
-         Recherche heißt, von dort etwas hereinzuholen.
-         Die Hitze bleibt unter 0,20, der Schwelle, ab der Resonanz von
-         selbst Korn aussät: Was hereingeholt wird, soll ankommen und nicht
-         unterwegs funken. */
-      if (A.weise === 'holen' && !S.aus) {
-        var aus0 = Math.atan2(p[1] - my(), p[0] - mx());
-
-        /* 1. DAS DRAUSSEN IST DA, auch bevor jemand hinlangt.
-           Ein paar sehr blasse, stillstehende Punkte weit außerhalb des
-           Kreises — kein Zufluss, ein Ort. Vorher war das Universum nur
-           ein Strom, der anfing, wenn Scout arbeitete; etwas, das erst
-           entsteht, wenn man hineingreift, ist kein Universum, sondern
-           ein Hahn. */
-        for (var u0 = 0; u0 < 7; u0++) {
-          var wu = aus0 + (Math.random() - 0.5) * 2.3;
-          var cu = Math.cos(wu), su = Math.sin(wu);
-          var tu = Math.min(
-            Math.abs(cu) > 1e-3 ? 0.5 * W() / Math.abs(cu) : 1e9,
-            Math.abs(su) > 1e-3 ? 0.5 * H() / Math.abs(su) : 1e9);
-          var rr2 = tu * (0.62 + 0.55 * Math.random());
-          window.__feld.strang(W() / 2 + cu * rr2, H() / 2 + su * rr2, 0, 0,
-            0.05 + 0.08 * Math.random(), 0.8 + 0.6 * Math.random(),
-            A.farbe, 0);
-        }
-
-        /* 2. NEUN STATT DREI, und über eine breitere Front: Recherche ist
-           kein Faden, sie ist ein Zug. */
-        for (var g = 0; g < 9; g++) {
-          var wk = aus0 + (Math.random() - 0.5) * 2.1;
-          var cw = Math.cos(wk), sw = Math.sin(wk);
-          /* Zwei Grenzen der Maschine, in die ich beide gelaufen bin:
-             Resonanz sammelt ein, was weiter als 18 % vor dem Rand liegt;
-             und ein verankerter Faden verliert seine Geschwindigkeit mit
-             etwa 5 je Sekunde, kommt also nur rund v/5 weit. Also knapp
-             hinter dem sichtbaren Rand beginnen und schnell hereinkommen. */
-          var tm = Math.min(
-            Math.abs(cw) > 1e-3 ? 0.42 * W() / Math.abs(cw) : 1e9,
-            Math.abs(sw) > 1e-3 ? 0.46 * H() / Math.abs(sw) : 1e9);
-          var raus = 25 + 85 * Math.random();
-          var qx = mx() + cw * (tm + raus), qy = my() + sw * (tm + raus);
-          var dx = p[0] - qx, dy = p[1] - qy, dl = Math.hypot(dx, dy) || 1;
-          var v0 = 1000 + 700 * Math.random();
-          window.__feld.strang(qx, qy, dx / dl * v0, dy / dl * v0,
-            0.19, 2.2 + 1.0 * Math.random(), A.farbe, 0);
-        }
-
-        /* 3. ES KOMMT AN. Vorher bremsten die Fäden irgendwo aus; ein Fund
-           hat aber einen Augenblick, in dem er da ist. */
-        S.fund = (S.fund || 0) - dt;
-        if (S.fund <= 0) {
-          S.fund = 0.55 + 0.5 * Math.random();
-          /* 4. UND NICHT ALLES ÜBERLEBT. Euer Konzept sagt es selbst:
-             „Ein eindrucksvolles Rezept ohne nachvollziehbare Grundlage
-             wird verworfen." Jeder vierte Fund stürzt unterwegs ein,
-             statt anzukommen — mit derselben Bewegung wie ein verworfenes
-             Tischstück, damit man es wiedererkennt. */
-          if (Math.random() < 0.26) {
-            var wf = aus0 + (Math.random() - 0.5) * 1.3;
-            var df = Math.min(W(), H()) * (0.10 + 0.14 * Math.random());
-            einsturz(p[0] + Math.cos(wf) * df, p[1] + Math.sin(wf) * df, A.farbe);
-          } else {
-            window.__feld.knoten(p[0], p[1], 0.58, A.farbe, 0, 12, 0.6);
-          }
-        }
-      }
-
-      /* --- Nova: Sie bringt hervor. -------------------------------------
-         Ihre Punkte kommen nirgends her. Sie stehen still, sind plötzlich
-         da und vergehen wieder — kein Zufluss, kein Weg, keine Herkunft.
-         Und ab und zu verdichtet sich einer zu einem hellen Knoten: eine
-         Vision. Das Gegenteil von Scouts Bewegung, mit Absicht. */
-      if (A.weise === 'erfinden' && !S.aus) {
-        /* Zwölf Punkte auf 0,135 statt fünf auf 0,095: zu wenig und zu eng,
-           um als Sphäre gelesen zu werden, in der etwas entstehen kann. */
-        var rr0 = Math.min(W(), H()) * 0.135;
-        for (var g2 = 0; g2 < 12; g2++) {
-          var w3 = Math.random() * 6.2832, d3 = rr0 * Math.sqrt(Math.random());
-          window.__feld.strang(p[0] + Math.cos(w3) * d3, p[1] + Math.sin(w3) * d3,
-            0, 0, 0.07 + 0.14 * Math.random(),
-            1.4 + 1.1 * Math.random(), A.farbe, 0);
-        }
-        /* Eine Vision ENTSTEHT, sie erscheint nicht. Vorher sprang alle
-           zwei bis vier Sekunden ein fertiger Knoten irgendwo hin — das
-           las sich als Blinken, nicht als Einfall. Jetzt verdichtet sich
-           eine Stelle über anderthalb Sekunden: Die Punkte ringsum ziehen
-           zu ihr hin und werden heller, und erst dann steht sie da. */
-        if (!S.traum || S.traum.t > 1.9) {
-          var wv = Math.random() * 6.2832, dv = rr0 * (0.25 + 0.6 * Math.random());
-          S.traum = { x: p[0] + Math.cos(wv) * dv,
-                      y: p[1] + Math.sin(wv) * dv, t: 0 };
-        }
-        var T = S.traum; T.t += dt;
-        var reif = Math.min(1, T.t / 1.4);
-        for (var g3 = 0; g3 < 4; g3++) {
-          var w5 = Math.random() * 6.2832;
-          var d5 = Math.min(W(), H()) * 0.055 * (1 - reif * 0.75);
-          window.__feld.strang(T.x + Math.cos(w5) * d5, T.y + Math.sin(w5) * d5,
-            -Math.cos(w5) * 70 * reif, -Math.sin(w5) * 70 * reif,
-            0.12 + 0.34 * reif, 0.35 + 0.25 * Math.random(), A.farbe, 0);
-        }
-        if (T.t > 1.4 && !T.da) {
-          T.da = 1;
-          /* Da ist sie. Hell, kurz — und sie hinterlässt nichts: Eine Idee
-             ist noch kein Ergebnis. Dasselbe Gesetz wie überall. */
-          window.__feld.knoten(T.x, T.y, 0.88, A.farbe, 0, 22, 1.2);
-          window.__feld.austreiben(T.x, T.y, A.farbe, 3, 0);
-        }
-      }
+      /* Die Weise der Rolle aus der Tabelle WEISEN -- leise, solange nur
+         vergeben ist, voll, sobald begonnen wurde (AG-MON-WEISE-001, Teil 2). */
+      if (!S.aus) weiseAusfuehren(A, S, p, dt, irgendBegonnen ? 1 : 0.4);
 
       /* Und das Medium dreht mit: Die Arbeit rührt ihren eigenen kleinen
          Wirbel, ohne dafür einen Kern zu belegen — die sind für Bälle da.
@@ -5652,6 +5882,7 @@
          deshalb sauber; die Arbeit braucht sie ebensowenig, um als Drehung
          gelesen zu werden — sie hat ihren Atem und ihren Herzschlag. */
     }
+    leerlaufSchritt(dt);
     /* Am Ring sieht man es auch ohne hinzusehen: Wer arbeitet, leuchtet. */
     if (ring.children.length) {
       for (var i = 0; i < AGENTEN.length; i++) {
@@ -5968,7 +6199,8 @@
              die Umdeutung, die der Auftrag verbietet. */
           melden(E.von, '', E.art, E.text, FORTSCHRITT,
                  E.spur ? spurWort(E) : (E.id + ' \u00b7 ' + herkunftWort(E.herkunft)));
-          pulsAn(E.von);
+          /* AG-MON-WEISE-001, Teil 2: der Ausdruck der Aufgabenart, sonst Puls. */
+          if (!aufgabenEffekt(E)) pulsAn(E.von);
           if (MODUS === 'live') ausgegeben++;   /* Meldung UND Puls sind raus */
           tunStill = 0;
           continue;
@@ -6114,6 +6346,9 @@
                         ort: o ? [Math.round(o[0]), Math.round(o[1])] : null }; }),
              /* Was das Schild am Ball gerade zeigt (leer = zu). */
              ballInfo: ballInfoEl.classList.contains('auf') ? ballInfoEl.textContent : '',
+             /* AG-MON-WEISE-001: Punkte der Weisen bisher, laufender Leerlauf */
+             weisePunkte: weiseGezaehlt,
+             leerlauf: leerlauf ? leerlauf.name : '', leerlaufAnzahl: leerlaufAnzahl,
              /* Texte im Feld: kurz · voll · aus */
              feldText: feldText,
              /* Die fliegenden Baelle, damit sich das Einholen nachmessen
@@ -7433,6 +7668,7 @@
     if (typeof e.occurred_at === 'string') E.occurred_at = e.occurred_at;
 
     liveListe.push(E);
+    ruheMelden(E.von);       /* AG-MON-WEISE-001: Ein Ereignis beendet den Leerlauf. */
     /* Ein eingetroffenes Ereignis ist ebenso ein Beleg fuer eine lebende
        Leitung wie ein Lebenszeichen. */
     verbunden = true; jeLZ = true; letztesLZ = Date.now();
@@ -7629,7 +7865,10 @@
           'Ein Teilball, halb so groß, fliegt zum Agenten und bleibt dort ' +
           'liegen. Atlas behält deinen Ball.', true, '') +
       was('Ein Agent meldet einen Arbeitsschritt',
-          'Eine kurze Meldung an seinem Platz, die verblasst.', true, '') +
+          'Eine kurze Meldung an seinem Platz. Jede Art hat ihren Ausdruck: ' +
+          'vergeben ein Knoten, geliefert ein heller Knoten, blockiert ein Stoß ' +
+          'mit Funken, abgebrochen ein Einsturz. Wer arbeitet, zeigt seine ' +
+          'eigene Weise — leise, solange nur vergeben ist.', true, '') +
       was('Ein Agent gibt sein Ergebnis zurück',
           'Sein Teilball fliegt zurück zu dem, der die Arbeit gegeben hat, ' +
           'und geht dort auf.', true, '') +
@@ -7638,8 +7877,10 @@
       was('Atlas gibt dir das Ergebnis',
           'Dein Ball fliegt zu dir und bleibt bei dir liegen.', true, '') +
       was('Du nimmst an (Atlas meldet es für dich)',
-          'Dein Ball verschwindet. Teilbälle, die nie zurückkamen, bleiben ' +
-          'liegen — zur Kontrolle.', true, '') +
+          'Dein Ball verschwindet, eine goldene Spur bleibt bei dir liegen. ' +
+          'Teilbälle, die nie zurückkamen, bleiben liegen — zur Kontrolle.', true, '') +
+      was('Eine Weile geschieht nichts',
+          'Ab und zu zeigt eine Rolle leise ihre Weise — das Feld atmet.', true, '') +
       was('Du tippst einen liegenden Ball an',
           'Daneben steht kurz Kürzel und Aufgabe, bei wem er liegt und der Lauf.',
           true, '') +
