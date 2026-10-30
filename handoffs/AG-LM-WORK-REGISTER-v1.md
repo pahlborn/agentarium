@@ -291,3 +291,26 @@ Governance adoption task: AG-RULEBOOK-014. This section stores cursors and Caden
 | Next owner/action | Atlas: reconcile cursor/count at the next session start and dispatch due findings once, preserving unknowns |
 
 Update at session start and task closure under Process 1.4 §§0,4,5. Preserve originals and record trigger key, status, review reference and next review event. Do not count comments, commits, subtasks or CI attempts as separate closed tasks by default.
+
+
+### GT40-V113 — scoped Atlas session state, 2026-10-30
+<!-- GT40-V113-SESSION-CHECKPOINT -->
+
+This checkpoint is scoped to gt40-engine / GT40-V113-PRUEFUNG. It does not advance the unreconciled global journal cursor or Cadence count above.
+
+| Field | Observed value |
+|---|---|
+| Event-instruction file / last file commit checked | handoffs/AG-EVENT-JOURNAL-001-anstoss-v1.md @02124bf52519e1ff032abc00ad918b7956ddf5a1; unchanged from previously loaded text |
+| Loaded governance | Rulebook/Process 1.4 @033247914d0034b03651210a30e4cd8485bb708f |
+| Approved plan / target | Plan V1, Peter explicitly approved; gt40-engine@18b5de58ea24d373409c758cb9a386cca7affb88 (v113), not v114 |
+| Actual workers | /root/scout_gt40_v113, /root/argus_gt40_v113, /root/sentinel_gt40_v113; all completed, reports actually received |
+| Durable reports and open owners | https://github.com/pahlborn/gt40-engine/issues/67#issuecomment-6515976270; originals and fresh QA evidence linked there |
+| Result / next owner | Review V1 delivered, technical FAIL; Peter identifies actual ARP kit and matching instruction/revision; Atlas evaluates that evidence next |
+| Follow-up corrections | gt40-engine issues68–78, eleven separate backlog items, none implemented |
+| Main-task return event | agentarium Issue2 comment6516004614; contribution Atlas to Peter, customer acceptance not reported |
+| Journal reading limit | Own task events and specifically inspected recent records only; global contiguous cursor remains unknown, no gap silently skipped |
+| Cadence closure counter | unknown, unchanged; this main review is delivered with safety clarification/customer acceptance pending, no inferred global reset |
+| Evidence correction | Initial local mutation-log reuse was identified; the same35 cases reran freshly without cache,29red/6green, all13tests have at least one red case. Original report and addendum preserved |
+| Background / implementation | No unattended worker remains; no motor project files changed; only authorized review issues/comments and separate PR51 closure |
+
+Next observable condition: Peter's kit/instruction evidence or explicit result acceptance. Preserve known finding history and do not restart the three completed reviews by default.
