@@ -65,51 +65,36 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  nachweise:
-    # DAS ABBILD IST FESTGENAGELT, UND ZWAR GEMESSEN.
-    #
-    # `ubuntu-latest` ist am 21.10.2026 zwischen 16:48 und 20:42 von
-    # ubuntu-24.04 auf ubuntu-26.04 umgezogen. Damit brach Schritt 4 mit
-    #   "ERROR: Playwright does not support chromium on ubuntu26.04-x64"
-    # und die Nachweise liefen gar nicht mehr (Schritt 5 und 6 uebersprungen).
-    # Nachgelesen in den Laufprotokollen, nicht vermutet:
-    #   Lauf 39637128431, 16:42, gruen  -> Image: ubuntu-24.04
-    #   Lauf 39638041060, 16:48, gruen  -> Image: ubuntu-24.04
-    #   Lauf 39672592846, 20:42, rot    -> Image: ubuntu-26.04
-    #
-    # Gewaehlt ist das Abbild, auf dem alle bisherigen Laeufe gruen waren --
-    # nicht eine neuere Playwright-Fassung, von der ich nur VERMUTE, dass sie
-    # 26.04 kann. Playwright steht hier bewusst auf einer festen Nummer; ein
-    # geratenes Upgrade wuerde die Festnagelung gegen eine Hoffnung tauschen.
-    #
-    # Und das ist derselbe Fehler wie der Rest dieses Tages, nur auf der
-    # Infrastrukturebene: `latest` als etwas Festes behandeln. Was sich
-    # bewegen darf, bewegt sich irgendwann -- und dann faellt ein Lauf aus,
-    # der mit dem Kandidaten nichts zu tun hat.
+  # B4 (AG-CI-NACHWEISE-003, 30.10.): EIN EIGENER LAEUFER JE NACHWEIS.
+  #
+  # Warum. Der Volllauf auf `main` lief nacheinander auf einem Laeufer und
+  # wuchs mit jedem Nachweis: 26.10. 18 Nachweise 718 s, 29.10. 22 Nachweise
+  # 1001 s (Lauf 40895621368). Gleichzeitig auf EINEM Laeufer war rot
+  # (Lauf 40459863327: geteilte Rechenleistung, Zeitablaeufe). Ein eigener
+  # Laeufer je Nachweis teilt nichts -- jeder Nachweis laeuft so wie bisher
+  # allein, nur alle zugleich. Lots Review in #89: tragfaehig, Ruestzeit je
+  # Laeufer gemessen 23-34 s.
+  #
+  # Aufbau: `auswahl` bestimmt die Nachweise (Regeln unveraendert im Skript),
+  # `nachweis` laeuft je Nachweis als eigener Job, `nachweise` sammelt das
+  # Ergebnis unter dem bisherigen Namen. Gruen ist der Lauf nur, wenn alle
+  # ausgewaehlten Nachweise gruen sind; kein Nachweis ausgewaehlt ist kein
+  # Erfolg. Rueckgabe 2 ("ungeprueft") bleibt rot.
+
+  auswahl:
     runs-on: ubuntu-24.04
-    # GEMESSEN IM LAUF 39390390569, nicht geschaetzt: der Schritt mit beiden
-    # Nachweisen brauchte 118 Sekunden (08:01:29 bis 08:03:27), der ganze Job
-    # 2 min 25 s einschliesslich Browser-Download. Ich hatte vorher "rund
-    # fuenf Minuten" geschrieben -- das war geraten und um das Dreifache zu
-    # hoch; die Zahl steht jetzt so da, wie sie gemessen ist.
-    # 25 Minuten lassen also reichlich Luft fuer weitere Nachweise und einen
-    # langsamen Laeufer, ohne dass ein haengender Lauf eine Stunde kostet.
-    timeout-minutes: 25
+    timeout-minutes: 5
+    outputs:
+      liste: ${{ steps.a.outputs.liste }}
+      anzahl: ${{ steps.a.outputs.anzahl }}
     steps:
       - name: Kandidat holen, nicht einen festen Ref
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
-          # DER TATSAECHLICH GEPRUEFTE COMMIT, und zwar ausdruecklich.
-          # `relay-offline-tests.yml` nagelt einen Ref von Hand fest
-          # (9bb7ce6, Stand 18.10.) und prueft damit seit Wochen denselben
-          # alten Baum -- gruen, egal was im Kandidaten steht. Genau das
-          # soll hier nicht passieren.
           # Bei `pull_request` zeigt GITHUB_SHA auf den Mischcommit; der Kopf
           # des Kandidaten ist `pull_request.head.sha`. Bei `push` ist beides
           # dasselbe.
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
-          # Der Blocknachweis vergleicht gegen `origin/main` (`git show`).
-          # Ohne die Geschichte endet er mit Rueckgabe 2, also ungeprueft.
           fetch-depth: 0
           persist-credentials: false
 
@@ -120,43 +105,11 @@ jobs:
           echo "geprüfter Commit : $(git rev-parse HEAD)"
           echo "Vergleichsstand  : $(git rev-parse origin/main)"
 
-      # KEIN setup-node. Der Laeufer bringt Node mit, und ein Aktionspin
-      # weniger ist einer weniger, den jemand nachsehen muss -- ich haette
-      # seinen Commit-Hash aus dem Gedaechtnis geschrieben, und das ist in
-      # diesem Repository genau der Fehler, der nicht mehr vorkommen soll.
-      # Der Hash von actions/checkout oben ist nicht geraten: er steht so
-      # schon in `claude-public-relay-v2.yml` auf `main`.
-      - name: Playwright und Chromium, auf Fassung festgenagelt
-        run: |
-          set -euo pipefail
-          npm install --no-save --no-package-lock --no-audit --no-fund playwright@1.56.1
-          npx --no-install playwright install --with-deps chromium
-
-      - name: Browser nachweisen, bevor irgendetwas gruen werden kann
-        run: |
-          set -euo pipefail
-          # KEIN BROWSER DARF NIE ALS BESTANDEN DURCHGEHEN. Die Nachweise
-          # selbst enden dann mit Rueckgabe 2 ("ungeprueft") -- das faellt im
-          # Lauf ebenfalls durch, weil 2 nicht 0 ist. Diese Stufe faellt
-          # frueher und mit klarer Ursache, statt die Diagnose dem Leser zu
-          # ueberlassen.
-          PFAD="$(node -e "console.log(require('playwright').chromium.executablePath())")"
-          echo "Node       : $(node --version)"
-          echo "Playwright : $(node -e "console.log(require('playwright/package.json').version)")"
-          echo "Chromium   : $PFAD"
-          test -x "$PFAD" || { echo "::error::kein ausführbares Chromium unter $PFAD"; exit 1; }
-          "$PFAD" --version
-
-      # AG-CI-NACHWEISE-002: Auswahl und Lauf stehen in
-      # `.github/scripts/browsernachweise.sh` (Begruendung und Messung dort).
-      # Auf `main` laufen weiterhin alle; im Pull Request die betroffenen.
-      # Die Nachweise laufen nacheinander (gleichzeitig war im Lauf
-      # 40459863327 rot, siehe Skript).
-      # Das Skript laeuft in einer eigenen `bash` ohne `-e`; es sammelt alle
-      # Ergebnisse selbst und gibt erst am Ende 0 oder 1 zurueck -- die Lehre
-      # vom 20.10. (errexit brach die Sammlung ab, gefunden von Sentinel) gilt
-      # damit weiter.
+      # Regeln: `.github/scripts/browsernachweise.sh`, Funktion `auswahl`.
+      # Auf `main` alle; im Pull Request die betroffenen (B0) bzw. der Kern
+      # bei Monitor-Code (B2).
       - name: Auswahl der Browsernachweise
+        id: a
         env:
           EREIGNIS: ${{ github.event_name }}
         run: |
@@ -167,6 +120,97 @@ jobs:
           fi
           bash .github/scripts/browsernachweise.sh auswahl "$EREIGNIS" "$BASIS" > "$RUNNER_TEMP/auswahl.txt"
           echo "ausgewählt:"; sed 's/^/  /' "$RUNNER_TEMP/auswahl.txt"
+          liste="$(sed -n 's#^previews/\([^/]*\)/pruefen\.js$#\1#p' "$RUNNER_TEMP/auswahl.txt" \
+                   | jq -R -s -c 'split("\n") | map(select(length > 0))')"
+          echo "liste=$liste" >> "$GITHUB_OUTPUT"
+          echo "anzahl=$(printf '%s' "$liste" | jq 'length')" >> "$GITHUB_OUTPUT"
 
-      - name: Browsernachweise
-        run: bash .github/scripts/browsernachweise.sh lauf < "$RUNNER_TEMP/auswahl.txt"
+  nachweis:
+    needs: auswahl
+    if: needs.auswahl.outputs.anzahl != '0'
+    name: nachweis (${{ matrix.id }})
+    strategy:
+      # Alle Ergebnisse sehen, nicht nur das erste Rot.
+      fail-fast: false
+      matrix:
+        id: ${{ fromJSON(needs.auswahl.outputs.liste) }}
+    # DAS ABBILD IST FESTGENAGELT, UND ZWAR GEMESSEN.
+    #
+    # `ubuntu-latest` ist am 21.10.2026 zwischen 16:48 und 20:42 von
+    # ubuntu-24.04 auf ubuntu-26.04 umgezogen. Damit brach die Installation mit
+    #   "ERROR: Playwright does not support chromium on ubuntu26.04-x64"
+    # Nachgelesen in den Laufprotokollen 39637128431, 39638041060 (gruen,
+    # ubuntu-24.04) und 39672592846 (rot, ubuntu-26.04). Playwright steht
+    # bewusst auf einer festen Nummer.
+    runs-on: ubuntu-24.04
+    # Je Nachweis; der laengste brauchte am 29.10. 175 s (EVENT-JOURNAL).
+    timeout-minutes: 15
+    steps:
+      - name: Kandidat holen, nicht einen festen Ref
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          # Der Blocknachweis vergleicht gegen `origin/main` (`git show`).
+          # Ohne die Geschichte endet er mit Rueckgabe 2, also ungeprueft.
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Vergleichsstand bereitstellen
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin main:refs/remotes/origin/main
+
+      # KEIN setup-node. Der Laeufer bringt Node mit, und ein Aktionspin
+      # weniger ist einer weniger, den jemand nachsehen muss.
+      - name: Playwright und Chromium, auf Fassung festgenagelt
+        run: |
+          set -euo pipefail
+          npm install --no-save --no-package-lock --no-audit --no-fund playwright@1.56.1
+          npx --no-install playwright install --with-deps chromium
+
+      - name: Browser nachweisen, bevor irgendetwas gruen werden kann
+        run: |
+          set -euo pipefail
+          # KEIN BROWSER DARF NIE ALS BESTANDEN DURCHGEHEN.
+          PFAD="$(node -e "console.log(require('playwright').chromium.executablePath())")"
+          echo "Node       : $(node --version)"
+          echo "Playwright : $(node -e "console.log(require('playwright/package.json').version)")"
+          echo "Chromium   : $PFAD"
+          test -x "$PFAD" || { echo "::error::kein ausführbares Chromium unter $PFAD"; exit 1; }
+          "$PFAD" --version
+
+      # Derselbe Ablauf wie bisher, nur mit genau einem Nachweis: Rueckgabe
+      # 1 und 2 sind rot, die Ausgabe steht gruppiert im Protokoll.
+      - name: Nachweis ${{ matrix.id }}
+        env:
+          ID: ${{ matrix.id }}
+        run: echo "previews/$ID/pruefen.js" | bash .github/scripts/browsernachweise.sh lauf
+
+  nachweise:
+    # Sammelstufe unter dem bisherigen Namen `nachweise`.
+    needs: [auswahl, nachweis]
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Gesamtergebnis
+        env:
+          AUSWAHL: ${{ needs.auswahl.result }}
+          ANZAHL: ${{ needs.auswahl.outputs.anzahl }}
+          NACHWEIS: ${{ needs.nachweis.result }}
+        run: |
+          set -euo pipefail
+          echo "Auswahl: $AUSWAHL · ausgewählt: ${ANZAHL:-?} · Nachweise: $NACHWEIS"
+          echo "### Browsernachweise: ${ANZAHL:-?} ausgewählt, Ergebnis $NACHWEIS" >> "$GITHUB_STEP_SUMMARY"
+          if [ "$AUSWAHL" != "success" ]; then
+            echo "::error::Auswahl nicht erfolgreich ($AUSWAHL)"; exit 1
+          fi
+          # Kein Nachweis gefunden ist kein Erfolg: sonst waere ein
+          # verschobenes Verzeichnis ein gruener Lauf.
+          if [ -z "$ANZAHL" ] || [ "$ANZAHL" = "0" ]; then
+            echo "::error::kein previews/*/pruefen.js ausgewählt"; exit 1
+          fi
+          if [ "$NACHWEIS" != "success" ]; then
+            echo "::error::mindestens ein Nachweis nicht bestanden ($NACHWEIS)"; exit 1
+          fi
+          echo "alle $ANZAHL Nachweise bestanden"
