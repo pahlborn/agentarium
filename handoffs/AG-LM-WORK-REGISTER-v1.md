@@ -306,7 +306,7 @@ This checkpoint is scoped to gt40-engine / GT40-V113-PRUEFUNG. It does not advan
 | Actual workers | /root/scout_gt40_v113, /root/argus_gt40_v113, /root/sentinel_gt40_v113; all completed, reports actually received |
 | Durable reports and open owners | https://github.com/pahlborn/gt40-engine/issues/67#issuecomment-6515976270; originals and fresh QA evidence linked there |
 | Result / next owner | Review V1 delivered, technical FAIL; Peter identifies actual ARP kit and matching instruction/revision; Atlas evaluates that evidence next |
-| Follow-up corrections | gt40-engine issues68–78, eleven separate backlog items, none implemented |
+| Follow-up corrections at original review delivery | gt40-engine issues68–78, eleven separate backlog items; later implementations: #71/#72 via v115/PR79 and #70/#77 via v116/PR80, see pump checkpoint below |
 | Main-task return event | agentarium Issue2 comment6516004614; contribution Atlas to Peter, customer acceptance not reported |
 | Journal reading limit | Own task events and specifically inspected recent records only; global contiguous cursor remains unknown, no gap silently skipped |
 | Cadence closure counter | unknown, unchanged; this main review is delivered with safety clarification/customer acceptance pending, no inferred global reset |
@@ -314,3 +314,24 @@ This checkpoint is scoped to gt40-engine / GT40-V113-PRUEFUNG. It does not advan
 | Background / implementation | No unattended worker remains; no motor project files changed; only authorized review issues/comments and separate PR51 closure |
 
 Next observable condition: Peter's kit/instruction evidence or explicit result acceptance. Preserve known finding history and do not restart the three completed reviews by default.
+
+
+<!-- GT40-PUMPE-MESSBLATT-001 -->
+
+### Pump sheet follow-up — 2026-10-30
+
+Scoped task GT40-PUMPE-MESSBLATT-001, explicitly commissioned by Peter after the v113 review. Current instructions override the old read-only review scope for this named follow-up only.
+
+| Field | Observed value |
+|---|---|
+| Loaded governance / journal | Rulebook and Process1.4 including §7 @aff38dabb8dabc0c5b1d90e6b0ce2edd59d7f49c; journal file last commit02124bf52519e1ff032abc00ad918b7956ddf5a1 rechecked unchanged before first event |
+| Baseline / delivered source | v115 b00902691743002a5994f6e1bcf7fc4f156ef3d5 → v116 4a9697b2360b6303514717d46b58c3e51fb4c8e8; PR80 merged; treee787ff11911efeb16a9a72937ebb271469648a0c |
+| Work / actual roles | Atlas authored and integrated directly commissioned documentation/field markup using existing storage; real /root/sentinel_pump_sheet independently reviewed field wiring, counterchecks and actual CI logs; completed. No Claude worker simulated or paid relay called |
+| Durable result | https://github.com/pahlborn/gt40-engine/pull/80 ; consolidated update https://github.com/pahlborn/gt40-engine/issues/67#issuecomment-6519268619 |
+| Checks / publication | PR41030622198 and main41031361512 green; main includes live smoke7/7 at v116; Pages41031360779 green. Live version.js/specs.html Gitblobs exactly match delivered source. Field suite75/75 including expected red single-handler counterexample |
+| User surface | https://pahlborn.github.io/gt40-engine/specs.html#waterpump-measurements ;16 empty pump/cooling observation fields, existing AutoSave/persistence |
+| Decisions / real evidence | Peter confirms old pump has backplate; Milodon excluded for appearance by explicit choice, no further closure-method research. Exact old pump number, hub height/reference, both small-port identities and real cooling line endpoints still open |
+| Correction issues | #70 and #77 closed for erroneous document assertions only. Original v113 review remains FAIL with other findings and ARP safety clarification pending |
+| Next owner/action | Peter records physical measurements and actual connection endpoints in the sheet; Atlas evaluates actual pump identification and applicable source. Proposed future drawing: checked port/connection table → generated SVG → independent technical check; no finished hydraulic drawing or approval claimed |
+| Main task return / acceptance | agentarium Issue2 comment6519268993, contribution Atlas→Peter. Customer acceptance not yet reported; never infer it from acknowledgement |
+| Background / counters | No worker or unattended follow-up remains. Global journal contiguous cursor and Cadence closure count remain unknown; this scoped checkpoint does not silently advance/reset them |
