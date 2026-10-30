@@ -329,9 +329,27 @@ Scoped task GT40-PUMPE-MESSBLATT-001, explicitly commissioned by Peter after the
 | Work / actual roles | Atlas authored and integrated directly commissioned documentation/field markup using existing storage; real /root/sentinel_pump_sheet independently reviewed field wiring, counterchecks and actual CI logs; completed. No Claude worker simulated or paid relay called |
 | Durable result | https://github.com/pahlborn/gt40-engine/pull/80 ; consolidated update https://github.com/pahlborn/gt40-engine/issues/67#issuecomment-6519268619 |
 | Checks / publication | PR41030622198 and main41031361512 green; main includes live smoke7/7 at v116; Pages41031360779 green. Live version.js/specs.html Gitblobs exactly match delivered source. Field suite75/75 including expected red single-handler counterexample |
-| User surface | https://pahlborn.github.io/gt40-engine/specs.html#waterpump-measurements ;16 empty pump/cooling observation fields, existing AutoSave/persistence |
+| User surface at v116 delivery — superseded | The16-field sheet was rejected by Peter and removed in v120/PR85; see removal checkpoint below. Do not restore it or its extra measurement demands |
 | Decisions / real evidence | Peter confirms old pump has backplate; Milodon excluded for appearance by explicit choice, no further closure-method research. Exact old pump number, hub height/reference, both small-port identities and real cooling line endpoints still open |
 | Correction issues | #70 and #77 closed for erroneous document assertions only. Original v113 review remains FAIL with other findings and ARP safety clarification pending |
-| Next owner/action | Peter records physical measurements and actual connection endpoints in the sheet; Atlas evaluates actual pump identification and applicable source. Proposed future drawing: checked port/connection table → generated SVG → independent technical check; no finished hydraulic drawing or approval claimed |
-| Main task return / acceptance | agentarium Issue2 comment6519268993, contribution Atlas→Peter. Customer acceptance not yet reported; never infer it from acknowledgement |
+| Next owner/action after customer correction | Peter reads the old pump identifier; Atlas maps it to standard manufacturer data. The16-field measurement assignment is withdrawn. No finished cooling drawing claimed |
+| Main task return / customer outcome | agentarium Issue2 comment6519268993 was a contribution only. Peter subsequently rejected the overdimensioned sheet and ordered removal; no acceptance of v116 inferred |
 | Background / counters | No worker or unattended follow-up remains. Global journal contiguous cursor and Cadence closure count remain unknown; this scoped checkpoint does not silently advance/reset them |
+
+
+<!-- GT40-PUMPE-MESSBLATT-ENTFERNEN-001 -->
+
+### Customer correction: pump sheet removed — 2026-10-30
+
+Peter explicitly rejected the unnecessary measurement list and ordered its removal. This supersedes the v116 sheet assignment; do not recreate its16 fields or ask for their measurements.
+
+| Field | Observed value |
+|---|---|
+| Journal instruction commit |02124bf52519e1ff032abc00ad918b7956ddf5a1 checked unchanged before first event |
+| Current source | v119 bf4daef836aeefe3944a89f9eaa70e1170168cbe → v120 99fac0de2219296d73aea9d22b61533d564d8f2c; PR85 merged, tree7422b8ecb1beed1e42af293b54b3cab4a9c94aa1 |
+| Actual work | Atlas directly removed the form,16 extra inputs, measuring demands, translations and Build Log link, plus obsolete form-specific browser tests. No new specialist participation claimed |
+| Evidence | PR-CI41104481435 and main-CI41105430179 successful;73/73 field tests,17/17 pump tests. Local reintroduction of sheet, input or measuring demand each turns the new guard red. Pages41105428187 successful; live smoke7/7 confirms v120; direct HTTP/version/specs Gitblobs match |
+| Durable result / return | https://github.com/pahlborn/gt40-engine/pull/85 ; agentarium Issue2 contribution6530352161; customer acceptance not inferred |
+| User outcome / next action | Sheet and all extra fields gone. Keep confirmed backplate and explicit Milodon appearance exclusion. Only next pump identification input is its existing identifier; Atlas maps standard manufacturer data after receipt. No bespoke pump measuring assignment |
+| Product/process finding | Prior16-field expansion was overdimensioned: functional test success did not establish customer value. Peter rejected it. Corrected by bounded removal; evidence and lesson in PR85. No new standing rule or simulated Cadence run |
+| Limits / state | Other motor findings not re-reviewed here; no stored user values deleted. No unattended worker remains. Global journal contiguous cursor and Cadence closure count remain unknown and unchanged |
