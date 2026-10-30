@@ -1,6 +1,6 @@
 # Agentarium Process 1.4
 
-Status: Integration candidate approved for preparation by Peter, 2026-10-25; runtime adoption remains to be verified. Supersedes Process 1.3 when integrated; its content is preserved. Principles are in `agentarium-rulebook-v1.4.md`. This file says **what to do at which moment**. It grants no publication, permission expansion, infrastructure activation or paid call.
+Status: Integration candidate approved for preparation by Peter, 2026-10-25; runtime adoption remains to be verified. Supersedes Process 1.3 when integrated; its content is preserved. Principles are in `agentarium-rulebook-v1.4.md`. This file says **what to do at which moment**. It grants no publication, permission expansion, infrastructure activation or paid call. Section 7 (checks by moment) added by Peter's decision on 2026-10-30 after review in #103.
 
 ### Who does the work
 For a small, low-risk task, Atlas or the addressed role works directly. A task is small when it changes nothing on Peter's device, needs no merge and needs no second role.
@@ -72,6 +72,17 @@ Cadence's report is the relay handback file. Atlas takes it up at the next sessi
 
 ### 6. Value and friction
 After a bounded delivery — and in Cadence's review run — assess useful outcome and quality together with observed elapsed time, avoidable handoffs and questions, corrective iterations and Peter's required interventions. Use existing records only; no extra telemetry or model calls for bookkeeping. Unrecorded values stay unknown. Do not claim savings against an unmeasured baseline.
+
+### 7. Checks by moment — Peter, 2026-10-30 (#103)
+Adopted from Sentinel's proposal in #103 (reviewed with Atlas). The change type sets a default, not an exclusion; risk decides.
+
+- **At assignment:** Atlas and the technical owner choose checks and environment by the risk of the change. For a decisive risk, involve Sentinel early for behavior or Argus for assumptions, design and evidence, and settle the smallest normal, failure and recovery cases before implementation.
+- **Before merge:** The author supplies own checks and, for a new or materially changed test, a meaningful counter-check: the relevant assertion fails on the targeted fault, the earlier faulty state or an independent counterexample; a setup crash does not count; record mutation, commit, command and expected/actual signal, or state why it is not feasible. Atlas checks version-bound CI and, where needed, independent evidence; additional runs only for a named gap. A CI run is reproducible but does not make the author's test design independent.
+- **After merge:** Confirm separately the full run on `main`, the actual publication and its source record. Device checks follow the affected iPad/Safari capabilities (display and interaction: portrait, landscape, without hover; cache, offline, service worker, connection, suspend/resume where touched) and record version and environment. Peter decides customer acceptance.
+- **On failure or missing required evidence:** FAIL or BLOCKED with owner and next action. After correction repeat the affected check and relevant regression; keep the failure history. Never bypass the publication gate by hand.
+- **At closure or a Cadence trigger:** evaluate existing evidence for duration, unstable red and unnecessary double checks. No automatic extra test series.
+
+Reference, not rule: `governance/teststrategie.md` (stages, defaults per change type, core set, counter-check conventions, runtime guide).
 
 ### Adoption
 Active task authority and safety limits take precedence. Running sessions must reload changed definitions; a commit does not reload a worker. A clean-context dry run tests decision behavior only; a later real task tests effectiveness. Claude tools, model and effort limits are unchanged by this file.
