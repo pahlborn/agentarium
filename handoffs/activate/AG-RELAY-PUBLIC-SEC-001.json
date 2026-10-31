@@ -1,0 +1,12 @@
+{
+  "schema": "agentarium.relay-activation.v2",
+  "task_id": "AG-CAD-GT40-ABSCHLUSS-20261031",
+  "authorized": true,
+  "source_commit": "c168d59af062c4efce446fc5b154b9205640d7a3",
+  "role": "process-agent",
+  "request": "handoffs/AG-CAD-GT40-ABSCHLUSS-20261031-request.json",
+  "handback": "handoffs/AG-CAD-GT40-ABSCHLUSS-20261031-handback.md",
+  "model": "opus",
+  "max_turns": 8,
+  "max_budget_usd": 1.5
+}
