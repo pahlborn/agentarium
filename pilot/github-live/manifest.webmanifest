@@ -2,7 +2,7 @@
   "name": "Agentarium",
   "short_name": "Agentarium",
   "description": "See intelligence move.",
-  "start_url": "./",
+  "start_url": "./?live=github",
   "scope": "./",
   "display": "standalone",
   "orientation": "any",
