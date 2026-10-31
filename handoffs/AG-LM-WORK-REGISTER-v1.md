@@ -372,3 +372,25 @@ Peter explicitly rejected the unnecessary measurement list and ordered its remov
 | Current return | agentarium Issue2 contribution6540320649; customer acceptance not inferred. Next Peter inputs are kit/pump identifiers and eventual accessible pointer position. Atlas owns#108 routing and any separately commissioned1968 setup. PR89 and other running work were not taken over |
 | Reading/provenance limit | A local truncated file suffix was caught by Gitblob validation before publication; complete remote bytes reloaded/verified and no partial source published. Future local files are not assumed equal to remote without a bound source. Journal metadata audit is not an assertion of semantic review of all historical free-text reports |
 | Background / global counters | Both workers stopped; no unattended agent remains. Global semantic journal cursor and Cadence closure counter remain unreconciled/unknown, not zero; scoped audit does not silently reset them |
+
+<!-- GT40-ABSCHLUSS-20261031 -->
+
+### Completion batch — 2026-10-31
+
+| Field | Verified state |
+|---|---|
+| Authority | Peter: "bitte alles abschließen, es sind zu viele punkte offen"; bounded closure of previously listed corrections/monitor/pointer/cooling work |
+| Governance / journal | Rulebook/Process1.4 loaded at41f8007; updated bounded #108 journal/Rulebook at911c1a63002f116849d49814d4563c805e7eeaf1 read. Latest journal-file commit911c1a6, blob34079b889117467a0e4b028931abc8a1c975ef1b |
+| GT40 delivered | PR95, v126 maina1dfab64545f8daeec7e3a8478dda247f7edc2f3. #74/#75/#76/#78 and umbrella67 closed. Historical v113 FAIL retained. Actual ARP kit/instruction gate remains #68, ownerPeter thenAtlas; no inferred torque or assembly approval |
+| Product additions | Concrete pointer workflow/primary sources in Build; exact SVGcooling graph docs/kuehlkreislauf.svg based on owner record. Unknown E-pump/ports visibly open. Rejected16-field pump sheet remains absent; saved field IDs unchanged |
+| Actual roles | Native scout_final_hardware, argus_cam94, sentinel_test78, argus_monitor108 completed. Atlas actual author/integrator; no Forge/Lot execution. Scoped operative acceptance recorded, not customer acceptance |
+| GT40 checks / release | PR41221659551, main41222197103 including liveSmoke124600302191 successful; Pages41222196799 successful. Live versionblob750b47e2484ca6573916aa1abc92d6d82b77c071/SVGf83104fbb5a04413fc53cbfdb06a0e832eff2416 match |
+| Preserved failure history | Own changelog format/type caused firstCI failure; fixed beforemerge. Inherited Cam test seed reset on every reload and did not propagate summary failure; assertions retained, seed-if-empty/process.exit fixed. Sentinel extracted-callback/exit counterproof; all final CI successful |
+| Monitor delivered | PR111, F98 main911c1a6. PR41221940400 and full24proofs41222320793 green. Actual workflow_run publication41222694742/deploy124600443819 successful; initial push41222320799 was a correct skipped publication. Fresh HTTPindex145961f9d1a49a1a3921e31f2daa3672fba3a63c/adapter68cd6a4be2775a56ee170fbee0540fed35ebf229 match |
+| Monitor truth / cleanup | All10 original Atlas assignments lack parent_id and have prior genuine Peter acceptance.66scoped events fold0open under new code. Existing rejected-sheet abort6540231798 plus truthful historical supersessions clear old return balls after F98. New result awaits Peter; no fake acceptance or device observation |
+| Own return | Issue2 contribution6546560410; original reports in gt40Issue67, PR95/AgentariumPR111. Physical customer/device acceptance not inferred |
+| New parallel work | GT40PR96 is a newly commissioned visual Cam draft in another task; coordination comment6546425882 requires rebase onto releasedv126/nextv127 and preservation of reviewed statements/harness. Never claim all independent chats idle |
+| Cadence trigger / attempt | Five actual correction closures in this batch plus Peter reminder; canonical childGT40-ABSCHLUSS-20261031-05. Real public relay transportAG-CAD-GT40-ABSCHLUSS-20261031, sourcec168d59af062c4efce446fc5b154b9205640d7a3, activation1eb5ace2a5afb0220535dd2d5eccfe61262e21b5, run41222672090. Budget capUSD1.50/max8/Opus per profile; no repeat |
+| Cadence result / next owner | BLOCKED result6546493940: RuntimeError changed-path boundary mismatch (empty changed list), no handback. Session/usage/cost unavailable, not zero. No scholarly Cadence verdict or Forge participation invented. Atlas owns pending relay/handback recovery; do not broaden capabilities or make Peter transport messages. No automatic paid retry from absent checkpoint |
+| Global continuity | Scoped metadata audits only, including66events for10IDs and current tails. Global semantic contiguous Issue2 cursor and historical Cadence count remain unknown, not reset by this review attempt |
+| Background | Four native workers completed; Relay stopped/blocked; no unattended work promised by this chat. Actual independent PR96 availability is outside native tree |
