@@ -16,9 +16,14 @@
      C  nur vergeben ist leiser als begonnen
      D  Aufgabenart: Peters Annahme hinterlaesst goldenen Niederschlag
         (Knoten mit Abgabe bei Peter), Blockade einen Stoss mit Funken
-     E  Leerlauf: nach 20 s Ruhe zeigt eine Rolle (nicht Peter, nicht Lot)
-        ihre Weise; ein Finger beendet ihn sofort
+     E  Leerlauf: nach 8 s Ruhe zieht ein Strang, eine Schleife oder ein
+        Wurf von einer Rolle (nicht Peter, nicht Lot) zu einer anderen; er
+        ist auf dem BILD zu sehen (Peter am 31.10.: "ich sehe keine Effekte,
+        wenn die Arbeit ruht" -- gezaehlt wurde damals nur, ob er beginnt);
+        ein Finger beendet ihn sofort
      F  liegende Baelle sind kleiner (70 %), der Flug bleibt
+     G  liegende Baelle funken ab und zu, jeder in seinem Takt -- vorbei-
+        ziehende Faeden lassen sie nicht mehr dauernd zerspringen
 
    GRENZEN: Attrappe, Probekoerper. Ob es "anregend schoen" ist und die
    Rollen erkennbar sind, entscheidet Peter am iPad.                      */
@@ -228,18 +233,54 @@ async function weiseJeBild(s, ms) {
     console.log('\nE — Leerlauf');
     r = await seite(b, tisch, [kommentar(30, { task_id: 'Z', kind: 'progress', actor: 'scout',
                                                reporter: 'scout', title: 'Scout meldet etwas.' })]);
-    let ll = { anzahl: 0, name: '' }, namen = new Set();
-    for (let i = 0; i < 60; i++) {           /* bis zu 30 s */
-      await r.s.waitForTimeout(500);
+    /* Rechnen in eigenem Fenster; die Seite bleibt vorn, sonst drosselt der
+       Browser ihre Bilder auf eines je Sekunde und der Zug kriecht. */
+    const rq = await b.newContext(); const rechner = await rq.newPage();
+    await r.s.bringToFront();
+    const geaendert = (a, c) => rechner.evaluate(async ([a, c]) => {
+      const lade = u => new Promise(f => { const i = new Image(); i.onload = () => f(i); i.src = u; });
+      const [A, C] = await Promise.all([lade(a), lade(c)]);
+      const cv = document.createElement('canvas'); cv.width = A.width; cv.height = A.height;
+      const g = cv.getContext('2d');
+      g.drawImage(A, 0, 0); const da = g.getImageData(0, 0, cv.width, cv.height).data;
+      g.drawImage(C, 0, 0); const dc = g.getImageData(0, 0, cv.width, cv.height).data;
+      let n = 0;
+      for (let i = 0; i < da.length; i += 4)
+        if (Math.abs(da[i] - dc[i]) + Math.abs(da[i + 1] - dc[i + 1]) + Math.abs(da[i + 2] - dc[i + 2]) > 60) n++;
+      return n;
+    }, [a, c]);
+    /* Gezaehlt wird nur das Feld: Namen, Kopf und Liste atmen selbst und
+       wuerden sonst mitzaehlen (Gegenprobe mit Fassung 95). */
+    const bild = async () => {
+      const st = await r.s.addStyleTag({ content: 'body *:not(#feld){visibility:hidden !important}' });
+      const png = await r.s.screenshot();
+      await st.evaluate(e => e.remove());
+      return 'data:image/png;base64,' + png.toString('base64');
+    };
+    let ll = { anzahl: 0, name: '' }, namen = new Set(), ruhig = null, sicht = 0, bestes = null;
+    for (let i = 0; i < 80; i++) {           /* bis zu etwa 30 s */
       const x = await r.s.evaluate(() => { const s = window.__agStand(); return { anzahl: s.leerlaufAnzahl, name: s.leerlauf }; });
-      if (x.name) namen.add(x.name);
+      const png = await bild();
+      if (x.name) {
+        namen.add(x.name);
+        if (ruhig) { const n = await geaendert(ruhig, png); if (n > sicht) { sicht = n; bestes = await r.s.screenshot(); } }
+      } else if (ll.name) break;             /* ein ganzer Zug ist gemessen */
+      else ruhig = png;
       ll = x;
-      if (x.anzahl >= 1 && x.name) break;
+      await r.s.waitForTimeout(250);
     }
-    console.log('        Leerlauf: ' + ll.anzahl + ' begonnen, Rolle(n): ' + [...namen].join(', '));
+    console.log('        Leerlauf: ' + ll.anzahl + ' begonnen, Rolle(n): ' + [...namen].join(', ') +
+                '; sichtbar geänderte Bildpunkte: ' + sicht);
     zeile('nach Ruhe beginnt ein Leerlauf', ll.anzahl >= 1, true);
     zeile('… nicht Peter, nicht Lot', [...namen].every(n => n !== 'peter' && n !== 'lot'), true);
-    await r.s.screenshot({ path: path.join(AUFNAHMEN, '3-leerlauf.jpg'), type: 'jpeg', quality: 80 });
+    /* Nur das Feld gezaehlt, 31.10. auf 1194 x 834: Fassung 95 190-305 je
+       Zug (11 Zuege), Fassung 96 854-1156. Die Schwelle liegt dazwischen. */
+    zeile('… und man sieht ihn (≥ 600 Bildpunkte im Feld)', sicht >= 600, true);
+    if (bestes) fs.writeFileSync(path.join(AUFNAHMEN, '3-leerlauf.png'), bestes);
+    await rq.close();
+    /* Fuer den Finger: einen neuen Zug abwarten. */
+    for (let i = 0; i < 80 && !(await r.s.evaluate(() => window.__agStand().leerlauf)); i++)
+      await r.s.waitForTimeout(250);
     await r.s.mouse.move(100, 400); await r.s.mouse.down(); await r.s.mouse.up();
     await r.s.waitForTimeout(150);
     zeile('ein Finger beendet ihn sofort', await r.s.evaluate(() => window.__agStand().leerlauf), '');
@@ -257,6 +298,39 @@ async function weiseJeBild(s, ms) {
     const soll = Math.min(1194, 834) * 0.021 * 0.7 * 1.75 * 1.1;
     console.log('        größter Radius eines liegenden Balls: ' + rMax.toFixed(1) + ' px (Grenze ' + soll.toFixed(1) + ')');
     zeile('liegender Ball höchstens 70 % (mit Atmen)', rMax > 0 && rMax <= soll, true);
+    await r.q.close();
+
+    /* G: Peter, 31.10.: "die Bälle bei Peter müssten nicht so immens im
+       Millisekunden-Takt explodieren. Bei jedem Ball ab und zu ist ok."
+       Gezählt werden Bilder mit neuen Funken (PULS.funken). Fassung 95 mit
+       drei Bällen bei Peter und Fingerzügen: 810 von etwa 900 Bildern. */
+    console.log('\nG — Funken an liegenden Bällen: ab und zu, nicht dauernd');
+    const drei = [];
+    for (const L of ['1', '2', '3']) {
+      drei.push(kommentar(40 - +L, { run_id: 'AG-WEISE-F' + L, task_id: 'F' + L, kind: 'handoff', actor: 'peter',
+                                     recipient: 'atlas', title: 'Peter gibt Atlas: F' + L }));
+      drei.push(kommentar(30 - +L, { run_id: 'AG-WEISE-F' + L, task_id: 'F' + L, kind: 'contribution', actor: 'atlas',
+                                     recipient: 'peter', title: 'zurück F' + L }));
+    }
+    r = await seite(b, tisch, drei);
+    await r.s.bringToFront();
+    const funkenBilder = (ms) => r.s.evaluate((ms) => new Promise(fertig => {
+      let n = 0, alt = (window.PULS || {}).funken || 0, aus = false;
+      const f = () => { const w = (window.PULS || {}).funken || 0; if (w !== alt) { n++; alt = w; } if (!aus) requestAnimationFrame(f); };
+      requestAnimationFrame(f); setTimeout(() => { aus = true; fertig(n); }, ms);
+    }), ms);
+    const still = await funkenBilder(20000);
+    const mitFinger = funkenBilder(15000);
+    for (let k = 0; k < 14; k++) {
+      await r.s.mouse.move(150, 150); await r.s.mouse.down();
+      await r.s.mouse.move(700, 700, { steps: 6 }); await r.s.mouse.up();
+      await r.s.waitForTimeout(700);
+    }
+    const finger = await mitFinger;
+    console.log('        Bilder mit neuen Funken: ohne Finger ' + still + ' in 20 s, Finger durchs Feld ' + finger + ' in 15 s');
+    zeile('ab und zu ein Funke (1–12 in 20 s, drei Bälle)', still >= 1 && still <= 12, true);
+    zeile('Fäden lassen Bälle nicht zerspringen (≤ 150)', finger <= 150, true);
+    zeile('keine Seitenfehler', r.seitenFehler.length, 0);
     await r.q.close();
   } finally {
     await b.close();
