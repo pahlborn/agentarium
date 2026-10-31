@@ -274,8 +274,10 @@ async function weiseJeBild(s, ms) {
     zeile('nach Ruhe beginnt ein Leerlauf', ll.anzahl >= 1, true);
     zeile('… nicht Peter, nicht Lot', [...namen].every(n => n !== 'peter' && n !== 'lot'), true);
     /* Nur das Feld gezaehlt, 31.10. auf 1194 x 834: Fassung 95 190-305 je
-       Zug (11 Zuege), Fassung 96 854-1156. Die Schwelle liegt dazwischen. */
-    zeile('… und man sieht ihn (≥ 600 Bildpunkte im Feld)', sicht >= 600, true);
+       Zug (11 Zuege), Fassung 96 854-1156 lokal, 651 auf dem langsameren
+       Pruefrechner (Lauf 41179345664). Die Schwelle liegt mit Abstand nach
+       beiden Seiten dazwischen. */
+    zeile('… und man sieht ihn (≥ 450 Bildpunkte im Feld)', sicht >= 450, true);
     if (bestes) fs.writeFileSync(path.join(AUFNAHMEN, '3-leerlauf.png'), bestes);
     await rq.close();
     /* Fuer den Finger: einen neuen Zug abwarten. */
@@ -314,10 +316,12 @@ async function weiseJeBild(s, ms) {
     }
     r = await seite(b, tisch, drei);
     await r.s.bringToFront();
+    /* Gezaehlt: Bilder mit neuen Funken UND alle Bilder -- der Anteil
+       haengt nicht davon ab, wie schnell der Rechner zeichnet. */
     const funkenBilder = (ms) => r.s.evaluate((ms) => new Promise(fertig => {
-      let n = 0, alt = (window.PULS || {}).funken || 0, aus = false;
-      const f = () => { const w = (window.PULS || {}).funken || 0; if (w !== alt) { n++; alt = w; } if (!aus) requestAnimationFrame(f); };
-      requestAnimationFrame(f); setTimeout(() => { aus = true; fertig(n); }, ms);
+      let n = 0, alle = 0, alt = (window.PULS || {}).funken || 0, aus = false;
+      const f = () => { alle++; const w = (window.PULS || {}).funken || 0; if (w !== alt) { n++; alt = w; } if (!aus) requestAnimationFrame(f); };
+      requestAnimationFrame(f); setTimeout(() => { aus = true; fertig({ n, alle }); }, ms);
     }), ms);
     const still = await funkenBilder(20000);
     const mitFinger = funkenBilder(15000);
@@ -327,9 +331,13 @@ async function weiseJeBild(s, ms) {
       await r.s.waitForTimeout(700);
     }
     const finger = await mitFinger;
-    console.log('        Bilder mit neuen Funken: ohne Finger ' + still + ' in 20 s, Finger durchs Feld ' + finger + ' in 15 s');
-    zeile('ab und zu ein Funke (1–12 in 20 s, drei Bälle)', still >= 1 && still <= 12, true);
-    zeile('Fäden lassen Bälle nicht zerspringen (≤ 150)', finger <= 150, true);
+    const anteil = finger.n / Math.max(1, finger.alle);
+    console.log('        Bilder mit neuen Funken: ohne Finger ' + still.n + ' in 20 s, Finger durchs Feld ' +
+                finger.n + ' von ' + finger.alle + ' Bildern (' + Math.round(anteil * 100) + ' %)');
+    zeile('ab und zu ein Funke (1–12 in 20 s, drei Bälle)', still.n >= 1 && still.n <= 12, true);
+    /* Fassung 95: 810 von etwa 900 Bildern (90 %); Fassung 96: 4 % lokal,
+       der Rest sind die Funken des Fingers selbst. */
+    zeile('Fäden lassen Bälle nicht zerspringen (≤ 40 % der Bilder)', anteil <= 0.40, true);
     zeile('keine Seitenfehler', r.seitenFehler.length, 0);
     await r.q.close();
   } finally {

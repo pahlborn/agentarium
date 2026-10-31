@@ -18,6 +18,8 @@
      B  "Texte" -> voll: die Herkunftszeile steht wieder im Feld
      C  "Texte" -> aus: kein Text im Feld, aber Flug und Listenzeile
      D  die Stufe bleibt nach Neuladen erhalten; noch einmal -> kurz
+     E  der Text startet beim Absender, fliegt mit dem Ball und bleibt beim
+        Empfaenger stehen, ohne auf einem Namen zu liegen (Peter, 31.10.)
 
    GRENZEN: Attrappe mit Scheintoken, Probekoerper. Keine Abnahme am iPad.  */
 'use strict';
@@ -199,6 +201,52 @@ async function beobachten(s, titel, ms) {
     zeile('Stand nennt die Stufe', await s.evaluate(() => window.__agStand().feldText), 'aus');
     await tippen();
     zeile('noch einmal: zurück auf kurz', await knopf(), 'Texte: kurz');
+
+    /* E: Peter, 31.10.: "die fliegenden Texte/Aufgaben starten nicht bei den
+       jeweiligen Agenten, sie erscheinen irgendwie irgendwo." Bis Fassung 96
+       stand der Text vom ersten Bild an beim Empfaenger und lag im Bild auch
+       auf dessen Namen. */
+    console.log('\nE — Der Text fliegt mit dem Ball');
+    const namen = () => s.evaluate(() => {
+      const r = {};
+      document.querySelectorAll('#agRing .agName').forEach(e => {
+        const k = e.getBoundingClientRect();
+        r[e.getAttribute('data-wer')] = { x: k.left + k.width / 2, y: k.top + k.height / 2,
+                                          l: k.left, r: k.right, o: k.top, u: k.bottom };
+      });
+      return r;
+    });
+    const N = await namen();
+    liste.push(weitergabe('T4', 'forge'));
+    const spur = [];
+    let gelandet = null;
+    for (let t = 0; t < 9000; t += 60) {
+      const r = await s.evaluate(tt => {
+        const f = [...document.querySelectorAll('.agRuf')].find(e => e.textContent.indexOf(tt) >= 0);
+        const fl = (window.__agStand().fliegend || []).some(b => b.an === 'forge');
+        if (!f) return { fl };
+        const k = f.getBoundingClientRect();
+        return { fl, x: k.left + k.width / 2, y: k.top + k.height / 2, l: k.left, r: k.right, o: k.top, u: k.bottom };
+      }, 'Atlas gibt forge T4.');
+      if (r.x != null && r.fl) spur.push(r);
+      if (r.x != null && !r.fl && spur.length) { gelandet = r; break; }
+      await s.waitForTimeout(60);
+    }
+    const d = (p, n) => Math.hypot(p.x - n.x, p.y - n.y);
+    const erst = spur[0];
+    console.log('        Text unterwegs gesehen: ' + spur.length + ' mal' +
+                (erst ? '; zuerst ' + Math.round(d(erst, N.atlas)) + ' px von Atlas, ' + Math.round(d(erst, N.forge)) + ' px von Forge' : '') +
+                (gelandet ? '; gelandet ' + Math.round(d(gelandet, N.forge)) + ' px von Forge' : ''));
+    zeile('startet beim Absender (näher an Atlas)', !!erst && d(erst, N.atlas) < d(erst, N.forge), true);
+    const weg = spur.length > 1 ? Math.hypot(spur[spur.length - 1].x - erst.x, spur[spur.length - 1].y - erst.y) : 0;
+    zeile('fliegt mit (wandert > 100 px)', weg > 100, true);
+    zeile('bleibt beim Empfänger (näher an Forge)', !!gelandet && d(gelandet, N.forge) < d(gelandet, N.atlas), true);
+    const aufName = gelandet ? Object.keys(N).filter(n => {
+      const m = N[n];
+      return !(gelandet.r <= m.l || m.r <= gelandet.l || gelandet.u <= m.o || m.u <= gelandet.o);
+    }) : ['?'];
+    zeile('liegt auf keinem Namen', aufName.join(',') || '-', '-');
+    await s.screenshot({ path: path.join(AUFNAHMEN, '3-gelandet.jpg'), type: 'jpeg', quality: 78 });
     zeile('keine Seitenfehler', seitenFehler.length, 0);
     if (seitenFehler.length) console.log('        ' + seitenFehler.join('\n        '));
     await q.close();

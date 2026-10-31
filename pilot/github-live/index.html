@@ -2503,7 +2503,7 @@
 
      Der Bauzeitpunkt kommt beim Bauen aus der Uhr. Von Hand gepflegte
      Datumsangaben sind nach der zweiten Änderung falsch. */
-  var FASSUNG = '96', GEBAUT = '2026-10-31T06:51Z';
+  var FASSUNG = '97', GEBAUT = '2026-10-31T07:26Z';
 
   /* AG-GH-LIVE-001: JEDE TEXTSENKE MASKIERT.
      Seit Live-Daten von aussen kommen (GitHub-Kommentare, one-event.json),
@@ -3361,7 +3361,39 @@
     }
 
     stromZeile(E, m);
-    melden(E.von, E.an, E.art, E.text, m, E.beobachtet ? spurWort(E) : '');
+    var flug = baelle[baelle.length - 1];
+    var ruf = melden(E.von, E.an, E.art, E.text, m, E.beobachtet ? spurWort(E) : '');
+    if (ruf && flug && E.an && E.an !== E.von) rufMitfliegen(ruf, flug);
+  }
+
+  /* DER TEXT FLIEGT MIT. Peter, 31.10.: "die fliegenden Texte/Aufgaben
+     starten nicht bei den jeweiligen Agenten, sie erscheinen irgendwie
+     irgendwo." Gemessen: Der Ball startete beim Absender, sein Text stand
+     im selben Augenblick schon beim Empfaenger und rueckte dort zur Seite.
+     Jetzt startet der Text am Ball, fliegt mit ihm und bleibt nach der
+     Landung an dem Platz stehen, den `melden` beim Empfaenger ausgesucht
+     hat -- neu freigemacht, denn unterwegs kann sich dort etwas bewegt
+     haben. */
+  function rufMitfliegen(e, b) {
+    e.__ziel = { left: e.style.left, top: e.style.top,
+                 transform: e.style.transform, align: e.style.textAlign };
+    e.__fliegt = b;
+    b.ruf = e;
+    e.style.transform = 'translate(-50%,-130%)';
+    e.style.textAlign = 'center';
+    rufFolgen(e, b.x, b.y);
+  }
+  function rufFolgen(e, x, y) {
+    e.style.left = Math.round(x) + 'px';
+    e.style.top = Math.round(y) + 'px';
+  }
+  function rufLanden(e) {
+    var z = e.__ziel;
+    e.__fliegt = null;
+    if (!z) return;
+    e.style.left = z.left; e.style.top = z.top;
+    e.style.transform = z.transform; e.style.textAlign = z.align;
+    rufFreimachen(e);
   }
 
   /* Eine Nachricht ist kein Punkt, der fliegt, sondern eine Spur, die
@@ -3420,6 +3452,9 @@
         if (st > Z.s) Z.s = st;
       }
     }
+
+    /* Der Text reist mit (siehe `rufMitfliegen`). */
+    if (b.ruf && b.ruf.__fliegt === b && b.u < 1) rufFolgen(b.ruf, x, y);
 
     /* Die Grenze liegt auf halbem Weg: Dort ist das Tor. */
     if (b.quert && !b.durch && b.u >= 0.5) {
@@ -3572,6 +3607,7 @@
     /* --- das Ankommen: der Knoten -------------------------------------- */
     if (b.u >= 1 && !b.ende) {
       b.ende = 1;
+      if (b.ruf && b.ruf.__fliegt === b) rufLanden(b.ruf);
       /* Der Knoten ist das Ankommen. Was dort geschrieben wird, hängt an
          der Abgabe; wie lange er im Medium leuchtet, am Nachhall. */
       var schreibend = b.abgabe > 0;
@@ -6902,9 +6938,11 @@
      `__heim` ist die Stelle, an die sie gehoert. Von dort wird jedes Mal
      neu gesucht, nicht vom zuletzt erreichten Platz -- sonst wandert eine
      Meldung bei jedem Durchgang ein Stueck weiter und verlaesst ihren
-     Agenten. */
+     Agenten.
+     Seit Fassung 97 weicht sie auch den NAMEN aus: Im Bild vom 31.10. lag
+     "atlas -> forge Uebergabe" auf dem Namen FORGE. */
   function rufFreimachen(e) {
-    if (e.__heim == null) return;
+    if (e.__heim == null || e.__fliegt) return;   /* unterwegs folgt er dem Ball */
     /* Zuerst nach aussen, wie es sich gehoert -- und wenn dort kein Platz
        ist, nach innen. Gemessen auf den flachen Telefonen: Peter steht
        mit 1,28 Radien am weitesten draussen, seine Meldungen haben nach
@@ -6949,7 +6987,7 @@
       var andere = document.querySelectorAll(
         '#agMotoren [data-wer], #agMotoren .agBasis, ' +
         '#agTun [data-wer], #agRufe .agRuf, #agTasten, ' +
-        '#agKostenEbene .agKosten, #agWerkName');
+        '#agKostenEbene .agKosten, #agWerkName, #agRing .agName');
       for (var ai = 0; ai < andere.length; ai++) {
         if (andere[ai] === e) continue;
         var f = andere[ai].getBoundingClientRect();
@@ -6982,7 +7020,7 @@
       var andere = document.querySelectorAll(
         '#agMotoren [data-wer], #agMotoren .agBasis, ' +
         '#agTun [data-wer], #agRufe .agRuf, #agTasten, ' +
-        '#agKostenEbene .agKosten, #agWerkName');
+        '#agKostenEbene .agKosten, #agWerkName, #agRing .agName');
       for (var ai = 0; ai < andere.length; ai++) {
         if (andere[ai] === e) continue;
         var f = andere[ai].getBoundingClientRect();
@@ -7142,6 +7180,7 @@
       e.style.top = (parseFloat(e.style.top) + (8 - k2.top)) + 'px';
     setTimeout(function () { if (e.parentNode) e.remove(); }, 7400);
     while (rufeEl.children.length > 7) rufeEl.removeChild(rufeEl.firstChild);
+    return e;
   }
 
   function hex(h) {
