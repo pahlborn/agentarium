@@ -353,3 +353,22 @@ Peter explicitly rejected the unnecessary measurement list and ordered its remov
 | User outcome / next action | Sheet and all extra fields gone. Keep confirmed backplate and explicit Milodon appearance exclusion. Only next pump identification input is its existing identifier; Atlas maps standard manufacturer data after receipt. No bespoke pump measuring assignment |
 | Product/process finding | Prior16-field expansion was overdimensioned: functional test success did not establish customer value. Peter rejected it. Corrected by bounded removal; evidence and lesson in PR85. No new standing rule or simulated Cadence run |
 | Limits / state | Other motor findings not re-reviewed here; no stored user values deleted. No unattended worker remains. Global journal contiguous cursor and Cadence closure count remain unknown and unchanged |
+
+
+<!-- GT40-KLAERUNG-20261031 -->
+
+### Two identifiers, old-engine inventory, pointer and monitor audit — 2026-10-31
+
+| Field | Observed value |
+|---|---|
+| Authority / governance | Peter explicitly requested one ARP kit field and one pump identifier field; asked for1968-project inventory and pointer advice. Rulebook/Process1.4 loaded @985d6599246c0edb75bac3e03df966b5bb07513a. Journal file commit02124bf52519e1ff032abc00ad918b7956ddf5a1 rechecked unchanged |
+| Source / result | gt40 main2ab51ff v122 → PR90 merged8b0b4cd95a0eb73edbe68a892d5299de3d90d845, v123. Fields arp_kit_number and waterpump_identifier are blank, editable and auto-saved; no measurement sheet restored |
+| Validation | PR41177656610/main41178078580/Pages41178078077 successful. Real UI filling, AutoSave/reload and targeted missing-field counterexample; field suite75/75. Live smoke7/7 v123; direct HTTP/specs/version blobs match |
+| Real workers | /root/scout_1968_inventory and /root/argus_pointer_options completed, actual returns received and operatively accepted. Reports https://github.com/pahlborn/gt40-engine/pull/90#issuecomment-6540222082 and #issuecomment-6540222213 |
+|1968 inventory | Existing Notion backup page https://app.notion.com/p/35060540826181d18061ea66f2e3b3f3 found, dated28.04.2026. No separate1968 repo proved in13 connected pahlborn repos. April new-piston plan conflicts with later September user reuse decision. Separate restoration doc should begin from backup inventory, not copied BOSS values. No repo or Notion changes commissioned/created |
+| Pointer advice | FordD302 has11-/2-o'clock marks; MSD89889=11,89888=10. First determine actually visible position inGT40, then standard pointer/mount match and trueTDC zero check. ScottC2OZ-6023-B's repo11-o'clock assertion lacks primary confirmation; keep open, not guaranteed. Milodon65781/65782 are verified11-/2-o'clock alternatives with OD condition |
+| Monitor diagnosis | Specific count audit inspected547 comments as event metadata (pages1–6) through6540127200 and subsequent tail through6540231798, solely to resolve reported10 Atlas tasks/3 Peter balls. Ten Atlas tasks have Peter acceptance reported byAtlas; contract applies it to ball only, not task state. Two older Atlas tasks had real Argus acceptance and close correctly. Defect/contract gap recorded https://github.com/pahlborn/agentarium/issues/108; no monitor code changed |
+| Three earlier return balls | GT40-V113-PRUEFUNG; GT40-PUMPE-MESSBLATT-001; GT40-PUMPE-MESSBLATT-ENTFERNEN-001. Old16-field sheet explicitly rejected; truthful aborted event6540231798 recorded, no fictitious customer acceptance. Ball removal for rejection is part of#108 |
+| Current return | agentarium Issue2 contribution6540320649; customer acceptance not inferred. Next Peter inputs are kit/pump identifiers and eventual accessible pointer position. Atlas owns#108 routing and any separately commissioned1968 setup. PR89 and other running work were not taken over |
+| Reading/provenance limit | A local truncated file suffix was caught by Gitblob validation before publication; complete remote bytes reloaded/verified and no partial source published. Future local files are not assumed equal to remote without a bound source. Journal metadata audit is not an assertion of semantic review of all historical free-text reports |
+| Background / global counters | Both workers stopped; no unattended agent remains. Global semantic journal cursor and Cadence closure counter remain unreconciled/unknown, not zero; scoped audit does not silently reset them |
