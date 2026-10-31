@@ -205,6 +205,7 @@ if(process.argv.includes('--offline')) process.exit(fehler?1:0);
       zeile('Nach Wiederverbinden identisch '+viewport.width,liegendText(st),'SELF@peter');
       zeile('Nach Wiederverbinden Aufgaben '+viewport.width,taskIds(st),'SELF');
       zeile('Keine Seitenfehler '+viewport.width,reload.seitenFehler.length,0);
+      await reload.s.click('#agKopf');
       await reload.s.click('#agWas li[data-modus="archiv"]');
       await reload.s.waitForFunction(()=>window.__agGithub.stand().archiv.leiste);
       const archived=await reload.s.evaluate(()=>{
