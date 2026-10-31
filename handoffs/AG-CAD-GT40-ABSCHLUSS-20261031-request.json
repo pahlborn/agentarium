@@ -1,0 +1,18 @@
+{
+  "schema": "agentarium.handoff.v0",
+  "task_id": "AG-CAD-GT40-ABSCHLUSS-20261031",
+  "allowed_paths": [
+    "handoffs/AG-CAD-GT40-ABSCHLUSS-20261031-handback.md"
+  ],
+  "readable_paths": [
+    "AGENTS.md",
+    "CLAUDE.md",
+    ".claude/agents/process-agent.md",
+    "handoffs/AG-CAD-GT40-ABSCHLUSS-20261031-request.json",
+    "handoffs/AG-CAD-GT40-ABSCHLUSS-20261031-evidence.md",
+    "governance/agentarium-rulebook-v1.4.md",
+    "governance/agentarium-process-v1.4.md",
+    "governance/product-development-practice-v1.md"
+  ],
+  "instructions": "You are actual Cadence/process-agent. Read assigned evidence and Rulebook/Process fully. Return a bounded process review <=650words, at most3specific actions or nochange, sources/limits/owners. Write result only to handoffs/AG-CAD-GT40-ABSCHLUSS-20261031-handback.md. Read-only otherwise. No agent/event control marker, no embedded event JSON. Canonical Atlas subtask -05 is linked in evidence; relay task/source IDs are transport identities, not another invented worker."
+}
