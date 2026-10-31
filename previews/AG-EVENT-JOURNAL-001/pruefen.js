@@ -694,7 +694,8 @@ function koerper(f) {
     return { archibald: w('archibald'), argus: w('argus'), scout: w('scout') };
   });
   zeile('archibald: begonnen und geklemmt → klemmt', schilder.archibald, 'klemmt');
-  zeile('argus: nur zugewiesen → liegt', schilder.argus, 'liegt');
+  /* Seit Fassung 96 "zugewiesen" statt "liegt" (Peter, 31.10.). */
+  zeile('argus: nur zugewiesen → zugewiesen', schilder.argus, 'zugewiesen');
   zeile('scout: begonnen und frei → arbeitet', schilder.scout, 'arbeitet');
 
   console.log('\nA6 — Die ganze Kette, und wo sie stehen bleibt');

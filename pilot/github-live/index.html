@@ -1657,8 +1657,13 @@
            DRITTE Ballpunkt — bei 42 Punkten je Bild ein Dauerregen, der sich
            am Abwurfort, wo der Ball noch fast steht, zum Strahlenkranz
            sammelte. Unter 1,2 ist der Punkt genauso rund und dicht, aber er
-           zerfällt still. Funken soll der Ball nur beim Aufschlag. */
-        korn[i] = 1.0;
+           zerfällt still. Funken soll der Ball nur beim Aufschlag.
+           0,85 und nicht 1,0: Über 0,9 gilt ein Punkt als Lichtpunkt, den
+           jeder schnelle Faden zerspringen lässt. Ein liegender Ball lebt
+           lange genug dafür, und Peter sah am 31.10. seine Bälle "im
+           Millisekunden-Takt explodieren". Ab und zu funkt jetzt jeder
+           liegende Ball von selbst (`liegendeZeichnen`). */
+        korn[i] = 0.85;
         /* Lang genug, dass sich die Punkte bei JEDER Bildrate überlappen.
            Bei 0,22 s und neun Punkten je Bild stand auf dem Prüfrechner
            (12 Bilder je Sekunde) eine Handvoll verstreuter Tupfen statt
@@ -2498,7 +2503,7 @@
 
      Der Bauzeitpunkt kommt beim Bauen aus der Uhr. Von Hand gepflegte
      Datumsangaben sind nach der zweiten Änderung falsch. */
-  var FASSUNG = '95', GEBAUT = '2026-10-31T04:52Z';
+  var FASSUNG = '96', GEBAUT = '2026-10-31T06:51Z';
 
   /* AG-GH-LIVE-001: JEDE TEXTSENKE MASKIERT.
      Seit Live-Daten von aussen kommen (GitHub-Kommentare, one-event.json),
@@ -4042,6 +4047,14 @@
       window.__feld.sonne(b.o[0], b.o[1], 0, 0, rad,        0.70, 0.115, 0, n2, leben);
       window.__feld.sonne(b.o[0], b.o[1], 0, 0, rad * 1.75, 0.48, 0.115, 0, n3, leben);
       liegendGezaehlt += n1 + n2 + n3;
+      /* Ab und zu ein Funke, jeder Ball in seinem eigenen Takt (8-16 s),
+         nicht alle zugleich und nicht bei jedem Faden, der vorbeizieht. */
+      if (b.l.funke == null) b.l.funke = 3 + 10 * Math.random();
+      b.l.funke -= dt;
+      if (b.l.funke <= 0 && window.__funkeAn) {
+        b.l.funke = 8 + 8 * Math.random();
+        window.__funkeAn(b.o[0], b.o[1], 0.115);
+      }
     }
   }
 
@@ -5288,7 +5301,10 @@
     if (frei) return 'arbeitet';
     if (begonnen) return 'klemmt';
     if (wartet) return 'wartet';
-    return 'liegt';
+    /* "zugewiesen", nicht "liegt": Peter am 31.10. las "liegt" wie den
+       liegenden Ball und fragte, warum der Agent dann nicht arbeitet. Es
+       heisst nur: zugewiesen, Beginn noch nicht gemeldet. */
+    return 'zugewiesen';
   }
 
   function tunZeigen(dt) {
@@ -5323,7 +5339,10 @@
               die Zahl daneben eine Wiederholung. */
            (tunWort(S) === 'arbeitet' && klemmtWer(S)
               ? ' · ' + klemmtWer(S) + ' klemmt' : '') +
-           (lang ? '<b>die anderen warten</b>' : '') + '</div>';
+           /* Hier stand bei 4,5 s Stille im Feld "die anderen warten" --
+              eine Behauptung aus dem Demostueck, die live keine Meldung
+              deckt (Peter, 31.10.). Die Stille hebt nur das Schild hervor. */
+           '</div>';
     }
     if (h !== tunEl.__h) {
       tunEl.innerHTML = h; tunEl.__h = h;
@@ -5337,8 +5356,9 @@
      14.000 Punkten; wer mehr setzt, ueberschreibt die Resonanz (gemessen an
      den liegenden Baellen, AG-MON-RESONANZ-001). Arbeiten viele zugleich,
      wird jede Weise leiser -- nicht die Resonanz kaputt.
-     `weiseStaerke` (0..1) macht eine Weise leise: vergeben 0,4, Leerlauf
-     0,33; Ausbrueche (Funken, Einsturz) gibt es nur bei voller Staerke. */
+     `weiseStaerke` (0..1) macht eine Weise leise: vergeben 0,4; der Zug im
+     Leerlauf hat volle Staerke. Ausbrueche (Funken, Einsturz) gibt es nur
+     bei voller Staerke. */
   var WEISE_BUDGET = 98;
   var effektRest = 0, weiseAnteil = WEISE_BUDGET, weiseStaerke = 1, weiseGezaehlt = 0;
   function effStrang(x, y, gx, gy, hitze, dauer, ton, abgabe) {
@@ -5482,14 +5502,18 @@
   }
 
   /* ================= DER LEERLAUF (AG-MON-WEISE-001, Teil 3) =================
-     Peter, 29.10.: Es gab "mehr interessante Bewegung am Schirm ... auch wenn
-     nichts gearbeitet wird". Bisher kam das Feld ohne Ereignis ganz zur Ruhe
-     ("beginnt nie von selbst etwas Neues"). Jetzt atmet es: Nach 20 s ohne
-     Ereignis, Flug und Finger zeigt alle 20-40 s EINE Rolle fuer 2,5 s ihre
-     Weise, leise (ein Drittel). Bevorzugt die, die zuletzt gearbeitet haben.
-     Nie zwei zugleich; das erste Ereignis oder ein Finger beendet es. Nur
-     live, nicht im Archiv; Peter und Lot sind ausgenommen. */
-  var LEERLAUF_NACH = 20, LEERLAUF_PAUSE = [20, 40], LEERLAUF_DAUER = 2.5, LEERLAUF_STAERKE = 0.33;
+     Peter, 29.10.: "Wurf, Knoten, Strang, Stoss, Schleife, welches ab und zu
+     randomized durch den Bildschirm zieht, auch wenn nichts gearbeitet wird."
+     Fassung 93 zeigte alle 20-40 s eine Rolle 2,5 s lang zu einem Drittel an
+     ihrem Platz -- Peter am 31.10.: "ich sehe keine Effekte, wenn die Arbeit
+     ruht" (gemessen: kaum ein Bildpunkt). Jetzt ein ZUG: Nach 8 s Ruhe zieht
+     alle 8-15 s ein Strang, eine Schleife oder ein Wurf in voller Staerke
+     6 s lang von einer Rolle zu einer anderen und endet dort als Knoten oder
+     Stoss. Nie zwei zugleich, im gemeinsamen Budget; das erste Ereignis oder
+     ein Finger beendet ihn. Nur live, nicht im Archiv; Peter und Lot sind
+     weder Start noch Ziel. Kein Regler -- Peter: sonst wird es ein Monster. */
+  var LEERLAUF_NACH = 8, LEERLAUF_PAUSE = [8, 15], LEERLAUF_DAUER = 6;
+  var LEERLAUF_FORMEN = ['strang', 'schleife', 'wurf'];
   var ruheSeit = 0, leerlauf = null, leerlaufNaechster = 0, leerlaufAnzahl = 0, zuletztAktiv = [];
   function ruheMelden(wer) {
     ruheSeit = performance.now();
@@ -5515,6 +5539,18 @@
     if (juengst.length && Math.random() < 0.6) return juengst[(Math.random() * juengst.length) | 0];
     return kand[(Math.random() * kand.length) | 0];
   }
+  /* Ort des Zugs bei u (0..1): von p nach q, seitlich ausgelenkt je Form. */
+  function leerlaufOrt(L, p, q, u) {
+    var dx = q[0] - p[0], dy = q[1] - p[1], len = Math.hypot(dx, dy) || 1;
+    var nx = -dy / len, ny = dx / len, b = Math.sin(Math.PI * u) * L.seite;
+    var aus = L.form === 'wurf' ? 0.32 : (L.form === 'schleife' ? 0.10 : 0.06);
+    var x = p[0] + dx * u + nx * b * aus * len, y = p[1] + dy * u + ny * b * aus * len;
+    if (L.form === 'schleife') {          /* zwei Schlingen unterwegs */
+      var w = u * Math.PI * 4, r = len * 0.07 * Math.sin(Math.PI * u);
+      x += Math.cos(w) * r - r; y += Math.sin(w) * r;
+    }
+    return [x, y];
+  }
   function leerlaufSchritt(dt) {
     var jetzt = performance.now();
     if (!ruheSeit) ruheSeit = jetzt;
@@ -5524,18 +5560,50 @@
       if (jetzt < leerlaufNaechster) return;
       var n = leerlaufWaehlen();
       if (!n) return;
-      leerlauf = { name: n, S: { t: 0, liste: [] } };
+      /* Das Ziel liegt auf der anderen Seite: die entferntere Haelfte. */
+      var ps = heimat(nachName[n]);
+      var ziele = AGENTEN.filter(function (a) {
+        return a.name !== n && a.name !== 'peter' && a.name !== 'lot';
+      }).sort(function (a, b) {
+        var pa = heimat(a), pb = heimat(b);
+        return Math.hypot(pb[0] - ps[0], pb[1] - ps[1]) - Math.hypot(pa[0] - ps[0], pa[1] - ps[1]);
+      });
+      ziele = ziele.slice(0, Math.max(1, Math.ceil(ziele.length / 2)));
+      if (!ziele.length) return;
+      leerlauf = { name: n, ziel: ziele[(Math.random() * ziele.length) | 0].name,
+                   form: LEERLAUF_FORMEN[(Math.random() * LEERLAUF_FORMEN.length) | 0],
+                   seite: Math.random() < 0.5 ? -1 : 1, t: 0 };
       leerlaufAnzahl++;
     }
-    var A = nachName[leerlauf.name];
-    leerlauf.S.t += dt;
-    if (!A || leerlauf.S.t > LEERLAUF_DAUER) {
+    var L = leerlauf, A = nachName[L.name], B = nachName[L.ziel];
+    var u0 = L.t / LEERLAUF_DAUER;
+    L.t += dt;
+    var u = L.t / LEERLAUF_DAUER;
+    effektRest = weiseAnteil; weiseStaerke = 1;
+    if (!A || !B || u >= 1) {
+      if (A && B) {                       /* Ankunft: Knoten, nach einem Wurf ein Stoss */
+        var z = heimat(B);
+        if (L.form === 'wurf') effAustreiben(z[0], z[1], B.farbe, 1, 0);
+        else effKnoten(z[0], z[1], 0.7, B.farbe, 0, 24, 1.1);
+      }
+      effektRest = 0;
       leerlauf = null;
       leerlaufNaechster = jetzt + (LEERLAUF_PAUSE[0] +
         (LEERLAUF_PAUSE[1] - LEERLAUF_PAUSE[0]) * Math.random()) * 1000;
       return;
     }
-    weiseAusfuehren(A, leerlauf.S, heimat(A), dt, LEERLAUF_STAERKE);
+    var p = heimat(A), q = heimat(B);
+    var o0 = leerlaufOrt(L, p, q, u0), o = leerlaufOrt(L, p, q, u);
+    var vx = (o[0] - o0[0]) / Math.max(dt, 0.001), vy = (o[1] - o0[1]) / Math.max(dt, 0.001);
+    var ton = u < 0.5 ? A.farbe : B.farbe;
+    var sl = Math.hypot(vx, vy) || 1, sx = -vy / sl, sy = vx / sl;
+    for (var k = 0; k < 4; k++) {         /* Kopf des Zugs; die Spur bleibt stehen und vergeht */
+      var hx = o0[0] + (o[0] - o0[0]) * k / 4, hy = o0[1] + (o[1] - o0[1]) * k / 4;
+      effStrang(hx, hy, vx * 0.15, vy * 0.15, 0.5, 2.4 + 0.6 * Math.random(), ton, 0);
+      var b2 = (Math.random() - 0.5) * 7;
+      effStrang(hx + sx * b2, hy + sy * b2, vx * 0.1, vy * 0.1, 0.32, 1.8 + 0.6 * Math.random(), ton, 0);
+    }
+    effektRest = 0;
   }
 
   /* ================= DIE WEISEN DER ROLLEN (AG-MON-WEISE-001) =================
@@ -7884,7 +7952,7 @@
           'Dein Ball verschwindet, eine goldene Spur bleibt bei dir liegen. ' +
           'Teilbälle, die nie zurückkamen, bleiben liegen — zur Kontrolle.', true, '') +
       was('Eine Weile geschieht nichts',
-          'Ab und zu zeigt eine Rolle leise ihre Weise — das Feld atmet.', true, '') +
+          'Alle paar Sekunden zieht ein Strang, eine Schleife oder ein Wurf von einer Rolle zur anderen — das Feld lebt.', true, '') +
       was('Du tippst einen liegenden Ball an',
           'Daneben steht kurz Kürzel und Aufgabe, bei wem er liegt und der Lauf.',
           true, '') +
