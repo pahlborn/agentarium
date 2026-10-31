@@ -949,7 +949,7 @@
           archivAlle.push({ ev: ev, recorded_at: c.created_at || '', kommentar: Number(cid) || 0 });
           laufNameMerken(ev);
           if (ev.kind === 'handoff' || ev.kind === 'contribution' ||
-              (ev.kind === 'accepted' && ev.actor === 'peter')) {
+              (ev.kind === 'accepted' && ev.actor === 'peter') || ev.kind === 'aborted') {
             basisBall.push({ ev: ev, recorded_at: c.created_at || '',
                              kommentar: Number(cid) || 0 });
           }
@@ -981,7 +981,7 @@
            wem welcher Ball liegt. Seit Schritt 3 dazu Peters Annahme, die
            seinen Ball wegnimmt. */
         if (ev.kind === 'handoff' || ev.kind === 'contribution' ||
-            (ev.kind === 'accepted' && ev.actor === 'peter')) {
+            (ev.kind === 'accepted' && ev.actor === 'peter') || ev.kind === 'aborted') {
           basisBall.push({ ev: ev, recorded_at: c.created_at || '',
                            kommentar: Number(cid) || 0 });
         }
@@ -1145,12 +1145,16 @@
       if (e.kind === 'handoff' && e.actor === 'peter' && e.recipient) {
         if (!(k in lage)) reihe.push(k);
         lage[k] = { project_id: e.project_id, run_id: e.run_id,
-                    task_id: e.task_id, bei: e.recipient };
+                    task_id: e.task_id, bei: e.recipient, auftragnehmer: e.recipient };
       } else if (e.kind === 'contribution' && e.recipient === 'peter') {
         /* Schritt 3: Der Ball liegt danach bei Peter, bis er annimmt.
            Teilbaelle bleiben, bis ihr Agent selbst zurueckgibt -- der
            Monitor dient der Kontrolle (Peter, 25.10.; siehe Original). */
         if (lage[k] && lage[k].bei === e.actor) lage[k].bei = 'peter';
+      } else if (e.kind === 'aborted') {
+        // #108: nur wahrer eigener Atlas-Abbruch, exakt dieser Hauptball.
+        if (e.actor === 'atlas' && e.reporter === 'atlas' &&
+            lage[k] && !lage[k].teil && lage[k].auftragnehmer === 'atlas') lage[k] = null;
       } else if (e.kind === 'accepted') {
         /* Schritt 3: Peters Annahme, von Atlas fuer ihn gemeldet -- die
            einzige Fremdaussage, die wirkt, und nur auf den Ball. */
@@ -1281,7 +1285,9 @@
           eFassung = e.item_version || '';
           return;
         }
-        if (!selbst) { basisGrenzen.fremdaussagen++; return; }
+        var peterAtlasAnnahme = e.kind === 'accepted' && e.actor === 'peter' &&
+          e.reporter === 'atlas' && halter === 'atlas' && !eEltern;
+        if (!selbst && !peterAtlasAnnahme) { basisGrenzen.fremdaussagen++; return; }
         /* HALTERGEBUNDEN ODER NICHT -- dieselbe Unterscheidung wie live.
            Atlas' Befund vom 21.10.: Pruefung und Annahme waren hier an
            `e.actor === halter` gebunden, also konnte Argus' eigene Pruefung
@@ -1818,7 +1824,7 @@
     var leben = vorher.filter(function (x) { return LEBEN[x.ev.kind]; });
     var ball = vorher.filter(function (x) {
       var k = x.ev.kind;
-      return k === 'handoff' || k === 'contribution' || (k === 'accepted' && x.ev.actor === 'peter');
+      return k === 'handoff' || k === 'contribution' || k === 'aborted' || (k === 'accepted' && x.ev.actor === 'peter');
     });
     B.neuBeginnen();
     aktuellerLauf = '';

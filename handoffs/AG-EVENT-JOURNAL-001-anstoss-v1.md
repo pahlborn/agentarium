@@ -258,3 +258,11 @@ Folge 1 → 2a/2b → 3 → 4 ein und nimmt je Ball ein Bild im Flug auf.
 
 Lokal am 23.10.: 18 von 18 bestanden. Auf den Bildern sind Ball 1 und 2
 deutlich zu sehen, 3 und 4 nur als Schweif (siehe oben).
+
+## Abschlussabgleich #108 — Peter beauftragt, 31.10.2026
+
+Die vorhandene Ausnahme `accepted`, actor `peter`, reporter `atlas` schließt zusätzlich die exakt zugehörige Atlas-Hauptaufgabe ohne parent_id. Sie wirkt weiterhin nicht als Selbstannahme, auf fremde Rollen oder Atlas-Teilaufgaben. Die echte Kundenannahme bleibt erforderlich; vorhandene Annahmen werden wieder gefaltet, nicht erfunden oder erneut als Flug abgespielt.
+
+Ein tatsächlich eigener Abbruch `aborted`, actor `atlas`, reporter `atlas` beendet zusätzlich den zugehörigen Hauptball, wenn dessen ursprünglicher Auftragnehmer Atlas war. Projekt, Lauf und Aufgabe müssen exakt übereinstimmen. Fremde/fehlende Auftragnehmer, andere Aufgaben und Teilbälle bleiben erhalten. Das gilt live, beim Wiederverbinden und Archivsprung. Keine Annahme des verworfenen Ergebnisses wird fingiert.
+
+Dieser begrenzte Nachtrag ersetzt für diese beiden Fälle frühere Aussagen „nur auf den Ball“ bzw. „nur accepted entfernt den Hauptball“. Übrige Regeln bleiben bestehen. Implementierung/Prüfung im Abschluss-PR zu #108, tatsächlicher Autor Atlas; Lot wurde nicht gestartet.

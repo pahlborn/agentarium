@@ -2503,7 +2503,7 @@
 
      Der Bauzeitpunkt kommt beim Bauen aus der Uhr. Von Hand gepflegte
      Datumsangaben sind nach der zweiten Änderung falsch. */
-  var FASSUNG = '97', GEBAUT = '2026-10-31T07:26Z';
+  var FASSUNG = '98', GEBAUT = '2026-10-31T16:43Z';
 
   /* AG-GH-LIVE-001: JEDE TEXTSENKE MASKIERT.
      Seit Live-Daten von aussen kommen (GitHub-Kommentare, one-event.json),
@@ -3851,9 +3851,9 @@
     if (E.art === 'handoff' && E.von === 'peter' && nachName[E.an]) {
       for (i = 0; i < liegend.length; i++)
         if (!liegend[i].teil && liegend[i].schluessel === k) break;
-      if (i < liegend.length) { liegend[i].bei = E.an; liegend[i].flug = b; return; }
+      if (i < liegend.length) { liegend[i].bei = E.an; liegend[i].auftragnehmer = E.an; liegend[i].flug = b; return; }
       liegend.push({ schluessel: k, aufgabe: E.spur.task_id, bei: E.an,
-                     von: 'peter', t: 0, flug: b });
+                     von: 'peter', auftragnehmer: E.an, t: 0, flug: b });
       return;
     }
     if (E.art === 'contribution' && E.an === 'peter') {
@@ -3896,7 +3896,7 @@
      Peter, 24.10.: Der Ball liegt bei ihm bis zur Annahme. Peter meldet
      selbst nicht; Atlas meldet fuer ihn: `accepted` mit `actor: peter` und
      `reporter: atlas`. Das ist die EINZIGE Fremdaussage, die hier wirkt --
-     und sie wirkt nur auf den BALL. Den Aufgabenzustand treibt sie nicht;
+     bis Fassung97 wirkte sie nur auf den BALL. Seit #108 schließt sie auch eine Atlas-Hauptaufgabe;
      dort gilt weiter: Wer meldet, muss der Akteur sein. */
   function ballspielAngenommen(E) {
     if (!(E && E.art === 'accepted' && E.von === 'peter' && E.melder === 'atlas' &&
@@ -3907,6 +3907,22 @@
         liegend.splice(i, 1); return true;
       }
     return false;
+  }
+
+  // #108: Hauptauftrag abgebrochen/ersetzt, ohne Kundenannahme zu erfinden.
+  function ballspielAbgebrochen(E) {
+    if (!(E && E.art === 'aborted' && E.von === 'atlas' && E.melder === 'atlas' && E.spur && E.spur.task_id)) return false;
+    var k = ballspielSchluessel(E.spur);
+    for (var i = liegend.length - 1; i >= 0; i--)
+      if (!liegend[i].teil && liegend[i].schluessel === k && liegend[i].auftragnehmer === 'atlas') {
+        liegend.splice(i, 1); return true;
+      }
+    return false;
+  }
+  function peterNimmtAtlasAufgabeAn(E) {
+    if (!(E && E.art === 'accepted' && E.von === 'peter' && E.melder === 'atlas' && E.spur && E.spur.task_id)) return false;
+    var f = aufgabeSuchen(kennung(E.spur));
+    return !!(f && !f.mehrfach && f.wer === 'atlas' && !arbeit.atlas.liste[f.i].eEltern);
   }
 
   /* ============ ANTIPPEN ZEIGT AUFGABE UND HALTER (AG-MON-BALLSPIEL-004) ======
@@ -6185,9 +6201,9 @@
            er trieb den Ball, ich hatte nur an `arbeitAn` gedacht.
            Gefunden vom eigenen Nachweis, nicht im Betrieb. */
         if (E.art === 'progress' || GH_LEBEN[E.art]) {
-          /* Ballspiel, Schritt 3: Peters Annahme nimmt seinen Ball weg. Nur
-             der Ball -- der Zustand darunter bleibt unberuehrt. */
+          /* Ballspiel, Schritt 3: Peters Annahme nimmt seinen Ball weg. Seit #108 auch die exakt zugehörige Atlas-Hauptaufgabe, weiterhin keine allgemeine Fremdmeldungswirkung. */
           if (E.art === 'accepted') ballspielAngenommen(E);
+          if (E.art === 'aborted') ballspielAbgebrochen(E);
           /* ===== DER ZUSTAND FOLGT DEM BELEG, NICHT DER ANIMATION =====
 
              Welches Ereignis darf welchen Uebergang treiben? Die Regel hat
@@ -6227,7 +6243,7 @@
                            { typ: E.eTyp || 'task', eltern: E.eEltern || '',
                              fassung: E.eFassung || '' },
                            1);          /* R3: Widersprueche zaehlen */
-          } else if (E.selbstauskunft && E.spur && E.spur.task_id) {
+          } else if ((E.selbstauskunft || peterNimmtAtlasAufgabeAn(E)) && E.spur && E.spur.task_id) {
             /* Die Kette: received/started/delivered/reviewed stellen den
                Zustand weiter, accepted und aborted beenden die Aufgabe.
                `merged` und `published` stehen hier NICHT -- siehe unten. */
@@ -7587,10 +7603,10 @@
          plus Empfaenger); ein ganzer Ball wandert, ein Teilball nicht. */
       var k = ballspielSchluessel(L) + (L.teil ? '\u0001' + L.bei : '');
       for (var j = 0; j < liegend.length; j++)
-        if (liegend[j].schluessel === k) { if (!L.teil) liegend[j].bei = L.bei; return; }
+        if (liegend[j].schluessel === k) { if (!L.teil) { liegend[j].bei = L.bei; liegend[j].auftragnehmer = L.auftragnehmer || ''; } return; }
       liegend.push({ schluessel: k, aufgabe: L.task_id, bei: L.bei,
                      von: L.teil ? (nachName[L.von] ? L.von : '') : 'peter',
-                     t: 0, teil: !!L.teil,
+                     t: 0, teil: !!L.teil, auftragnehmer: L.auftragnehmer || '',
                      eltern: (L.teil && typeof L.eltern === 'string') ? ghKenn(L.eltern) : '' });
       baelleWieder++;
     });
