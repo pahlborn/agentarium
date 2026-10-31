@@ -113,7 +113,7 @@ function arbeit(wer, begonnen, min) {
 }
 const ALLE = ['nova', 'scout', 'archibald', 'forge', 'argus', 'sentinel', 'cadence', 'atlas', 'lot'];
 
-async function seite(b, tisch, liste) {
+async function seite(b, tisch, liste, funkenZaehlen) {
   const q = await b.newContext({ viewport: { width: 1194, height: 834 } });
   const s = await q.newPage();
   const seitenFehler = [];
@@ -125,6 +125,15 @@ async function seite(b, tisch, liste) {
     abrufe++;
     r.fulfill({ status: 200, contentType: 'application/json',
                 headers: { ETag: 'W/"ag-weise-' + abrufe + '"' }, body: JSON.stringify(liste) });
+  });
+  /* Fuer G: jeden Funkenausbruch zaehlen. Das Feld schreibt `PULS.funken`
+     bei jedem Ausbruch neu; `window.PULS` wird vor der Seite angelegt und
+     von ihr uebernommen (`window.PULS || ...`). */
+  if (funkenZaehlen) await s.addInitScript(() => {
+    window.__funkenAusbrueche = 0;
+    window.PULS = new Proxy({}, { set(t, k, v) {
+      if (k === 'funken') window.__funkenAusbrueche++;
+      t[k] = v; return true; } });
   });
   await s.goto(tisch.adr + '?live=github', { waitUntil: 'load' });
   await s.waitForTimeout(2200);
@@ -274,8 +283,10 @@ async function weiseJeBild(s, ms) {
     zeile('nach Ruhe beginnt ein Leerlauf', ll.anzahl >= 1, true);
     zeile('… nicht Peter, nicht Lot', [...namen].every(n => n !== 'peter' && n !== 'lot'), true);
     /* Nur das Feld gezaehlt, 31.10. auf 1194 x 834: Fassung 95 190-305 je
-       Zug (11 Zuege), Fassung 96 854-1156. Die Schwelle liegt dazwischen. */
-    zeile('… und man sieht ihn (≥ 600 Bildpunkte im Feld)', sicht >= 600, true);
+       Zug (11 Zuege), Fassung 96 854-1156 lokal, 651 auf dem langsameren
+       Pruefrechner (Lauf 41179345664). Die Schwelle liegt mit Abstand nach
+       beiden Seiten dazwischen. */
+    zeile('… und man sieht ihn (≥ 450 Bildpunkte im Feld)', sicht >= 450, true);
     if (bestes) fs.writeFileSync(path.join(AUFNAHMEN, '3-leerlauf.png'), bestes);
     await rq.close();
     /* Fuer den Finger: einen neuen Zug abwarten. */
@@ -302,8 +313,10 @@ async function weiseJeBild(s, ms) {
 
     /* G: Peter, 31.10.: "die Bälle bei Peter müssten nicht so immens im
        Millisekunden-Takt explodieren. Bei jedem Ball ab und zu ist ok."
-       Gezählt werden Bilder mit neuen Funken (PULS.funken). Fassung 95 mit
-       drei Bällen bei Peter und Fingerzügen: 810 von etwa 900 Bildern. */
+       Gezählt werden Funkenausbrüche (nicht Bilder: der Prüfrechner zeichnet
+       nur etwa 11 je Sekunde, dort hat fast jedes Bild Funken vom Finger).
+       Dieselben Fingerzüge laufen einmal mit drei Bällen bei Peter und
+       einmal ohne Ball; was die Bälle auslösen, ist der Unterschied. */
     console.log('\nG — Funken an liegenden Bällen: ab und zu, nicht dauernd');
     const drei = [];
     for (const L of ['1', '2', '3']) {
@@ -312,26 +325,38 @@ async function weiseJeBild(s, ms) {
       drei.push(kommentar(30 - +L, { run_id: 'AG-WEISE-F' + L, task_id: 'F' + L, kind: 'contribution', actor: 'atlas',
                                      recipient: 'peter', title: 'zurück F' + L }));
     }
-    r = await seite(b, tisch, drei);
+    const ausbrueche = (s) => s.evaluate(() => window.__funkenAusbrueche || 0);
+    const fingerZuege = async (s) => {
+      const a = await ausbrueche(s);
+      for (let k = 0; k < 14; k++) {
+        await s.mouse.move(150, 150); await s.mouse.down();
+        await s.mouse.move(700, 700, { steps: 6 }); await s.mouse.up();
+        await s.waitForTimeout(700);
+      }
+      return (await ausbrueche(s)) - a;
+    };
+    r = await seite(b, tisch, drei, true);
     await r.s.bringToFront();
-    const funkenBilder = (ms) => r.s.evaluate((ms) => new Promise(fertig => {
-      let n = 0, alt = (window.PULS || {}).funken || 0, aus = false;
-      const f = () => { const w = (window.PULS || {}).funken || 0; if (w !== alt) { n++; alt = w; } if (!aus) requestAnimationFrame(f); };
-      requestAnimationFrame(f); setTimeout(() => { aus = true; fertig(n); }, ms);
-    }), ms);
-    const still = await funkenBilder(20000);
-    const mitFinger = funkenBilder(15000);
-    for (let k = 0; k < 14; k++) {
-      await r.s.mouse.move(150, 150); await r.s.mouse.down();
-      await r.s.mouse.move(700, 700, { steps: 6 }); await r.s.mouse.up();
-      await r.s.waitForTimeout(700);
-    }
-    const finger = await mitFinger;
-    console.log('        Bilder mit neuen Funken: ohne Finger ' + still + ' in 20 s, Finger durchs Feld ' + finger + ' in 15 s');
-    zeile('ab und zu ein Funke (1–12 in 20 s, drei Bälle)', still >= 1 && still <= 12, true);
-    zeile('Fäden lassen Bälle nicht zerspringen (≤ 150)', finger <= 150, true);
-    zeile('keine Seitenfehler', r.seitenFehler.length, 0);
+    let a0 = await ausbrueche(r.s);
+    await r.s.waitForTimeout(20000);
+    const still = (await ausbrueche(r.s)) - a0;
+    const mitBaellen = await fingerZuege(r.s);
+    const fehlerG = r.seitenFehler.length;
     await r.q.close();
+    r = await seite(b, tisch, [kommentar(30, { task_id: 'Z', kind: 'progress', actor: 'scout',
+                                               reporter: 'scout', title: 'Scout meldet etwas.' })], true);
+    await r.s.bringToFront();
+    const ohneBall = await fingerZuege(r.s);
+    await r.q.close();
+    const durchBaelle = mitBaellen - ohneBall;
+    console.log('        Funkenausbrüche: ohne Finger ' + still + ' in 20 s (drei Bälle); Fingerzüge mit Bällen ' +
+                mitBaellen + ', ohne Ball ' + ohneBall + ' -> durch die Bälle ' + durchBaelle);
+    /* Ein Funke von selbst sind drei Ausbrueche (`__funkeAn`). */
+    zeile('ab und zu ein Funke (3–45 Ausbrüche in 20 s)', still >= 3 && still <= 45, true);
+    /* Lokal 31.10.: Fassung 97 21 (fast nur die eigenen Funken der Baelle),
+       Fassung 95 15.202. */
+    zeile('Fäden lassen Bälle nicht zerspringen (≤ 150)', durchBaelle <= 150, true);
+    zeile('keine Seitenfehler', fehlerG, 0);
   } finally {
     await b.close();
     tisch.s.close();
