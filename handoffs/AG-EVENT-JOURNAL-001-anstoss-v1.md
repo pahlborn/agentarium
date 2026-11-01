@@ -266,3 +266,68 @@ Die vorhandene Ausnahme `accepted`, actor `peter`, reporter `atlas` schließt zu
 Ein tatsächlich eigener Abbruch `aborted`, actor `atlas`, reporter `atlas` beendet zusätzlich den zugehörigen Hauptball, wenn dessen ursprünglicher Auftragnehmer Atlas war. Projekt, Lauf und Aufgabe müssen exakt übereinstimmen. Fremde/fehlende Auftragnehmer, andere Aufgaben und Teilbälle bleiben erhalten. Das gilt live, beim Wiederverbinden und Archivsprung. Keine Annahme des verworfenen Ergebnisses wird fingiert.
 
 Dieser begrenzte Nachtrag ersetzt für diese beiden Fälle frühere Aussagen „nur auf den Ball“ bzw. „nur accepted entfernt den Hauptball“. Übrige Regeln bleiben bestehen. Implementierung/Prüfung im Abschluss-PR zu #108, tatsächlicher Autor Atlas; Lot wurde nicht gestartet.
+
+## Teilaufgaben-Vertretung — AG-MON-VERTRETUNG-001 (Peter, 01.11.2026)
+
+`reassigned` ist eine eigene, atomare Übergabe derselben **delegierten Teilaufgabe**.
+Peters Hauptauftrag und Hauptball bleiben bei Atlas. Ein `handoff` oder zweites
+`assigned` ist kein Ersatz für eine Vertretungsübergabe. Ein zusätzlicher Ball
+wird dabei nicht angelegt. Die ursprüngliche Vergabe und Übergabehistorie bleiben
+nachvollziehbar.
+
+Erlaubt ausschließlich mit `actor: atlas`, `reporter: atlas`, bekanntem
+`recipient`, unverändertem `project_id`, `run_id`, `task_id` und nichtleerem,
+unverändertem `parent_id`. Zusatzfelder (nur hier erlaubt):
+
+- `previous_holder`: exakt bisheriger Halter;
+- `stop_ref`: konkreter GitHub-Beleg des beendeten Laufs oder des wirksamen
+  Entzugs seines Auftrags. Ein bloßer Timeout oder Schweigen reicht nicht;
+- `checkpoint_ref`: konkreter GitHub-Beleg des geprüften Arbeitsstands;
+  ausdrücklich `no-checkpoint`, wenn kein verwertbarer Stand vorhanden ist.
+  Der Verlust ist dann in `title`/Begleittext zu nennen.
+
+Atlas prüft den Inhalt der Originalbelege vor der Meldung. Der Monitor validiert
+Form und Zuständigkeitsbezug; eine URL allein ist **kein** verifizierter Stop.
+Ohne bestätigten Stop/Entzug bleibt die Übernahme blockiert. Vertreter werden
+als eigene tatsächliche Identität/Plattform ausgewiesen (`springer`: ChatGPT/Codex),
+nicht als vermeintlicher Claude-Lauf. `reassigned` bedeutet zugewiesen, nicht
+empfangen/begonnen oder fachlich abgeschlossen. Späte Meldungen des abgelösten
+Halters ändern den Nachfolger nicht. Ein Transfer des Hauptballs wird abgewiesen.
+Offene Sachblockaden bleiben erhalten und werden als übernommene offene Blockaden
+angezeigt; der Vertreter löst nur die konkret behobene Blockade mit `resolved`.
+
+Ist ein Worker ausgefallen, darf Atlas eine **eigene Blockadefeststellung** melden:
+`kind: blocked`, `actor: atlas`, `reporter: atlas`, `recipient: <aktueller Halter>`,
+`blocker_id`, exakter Aufgabenschlüssel und belegter Grund. Das ist keine
+Selbstauskunft des ausgefallenen Workers. Es wirkt nur auf dessen exakt passende
+bestehende Aufgabe. Schweigen ohne Nachweis wird nicht zum Ausfall umgedeutet.
+
+```json
+{
+  "schema": "agentarium.github-event.v1",
+  "id": "AG-BEISPIEL-01-VERTRETUNG-1",
+  "project_id": "agentarium",
+  "run_id": "AG-BEISPIEL",
+  "task_id": "AG-BEISPIEL-01",
+  "parent_id": "AG-BEISPIEL",
+  "actor": "atlas",
+  "reporter": "atlas",
+  "recipient": "springer",
+  "kind": "reassigned",
+  "previous_holder": "forge",
+  "stop_ref": "https://github.com/pahlborn/agentarium/issues/2#issuecomment-123456789",
+  "checkpoint_ref": "no-checkpoint",
+  "title": "Synthetisches Muster: Vertreter übernimmt; kein verwertbarer Checkpoint",
+  "occurred_at": "2026-11-01T06:00:00Z",
+  "source_evidence": "reported_checkpoint",
+  "source_tool_id": "atlas-current-chat"
+}
+```
+
+Das Muster ist keine echte Übergabe und darf nicht als solche gemeldet werden.
+Technische GitHub-Läufe erscheinen separat im Livefach (höchstens fünf neueste
+je verzeichnetem Repository, frühestens alle 60 Sekunden bei sichtbarer,
+verbundener Seite). Ein erfolgreicher Lauf beweist keinen Agentenstart und keinen
+fachlichen Abschluss. Lesefehler bleiben unbekannt. Keine Hintergrund-Worker,
+Modellaufrufe, automatische bezahlte Wiederholung oder automatische Vertreterwahl
+werden dadurch aktiviert; Atlas führt die Übergabe im aktiven Auftrag aus.

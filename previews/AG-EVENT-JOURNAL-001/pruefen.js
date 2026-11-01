@@ -166,7 +166,7 @@ function koerper(f) {
      ein stiller Verlust eines anderen Namens waere dieselbe Sperre fuer
      den Betroffenen. */
   zeile('Akteure (die Liste des Adapters)', z.akteure.join(','),
-        'archibald,argus,atlas,cadence,forge,lot,nova,peter,scout,sentinel');
+        'archibald,argus,atlas,cadence,forge,lot,nova,peter,scout,sentinel,springer');
 
   /* ===== SCHRITT 2b: WAS BEIM VERBINDEN SCHON OFFEN WAR =====
      Eine Historie mit drei Aufgaben, die sich unterscheiden MUESSEN:

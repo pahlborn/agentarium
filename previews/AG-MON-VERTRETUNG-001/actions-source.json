@@ -1,0 +1,46 @@
+{
+  "source": "https://api.github.com/repos/pahlborn/agentarium/actions/runs?per_page=5",
+  "note": "Echter, gekürzter Quellsnapshot; keine synthetische Arbeitsaktivität und kein aktueller Live-Status.",
+  "workflow_runs": [
+    {
+      "id": 41223422789,
+      "name": "Veroeffentlichen",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/pahlborn/agentarium/actions/runs/41223422789",
+      "updated_at": "2026-10-31T17:14:01Z"
+    },
+    {
+      "id": 41223283159,
+      "name": "Veroeffentlichen",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/pahlborn/agentarium/actions/runs/41223283159",
+      "updated_at": "2026-10-31T17:12:03Z"
+    },
+    {
+      "id": 41222694742,
+      "name": "Veroeffentlichen",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/pahlborn/agentarium/actions/runs/41222694742",
+      "updated_at": "2026-10-31T17:05:08Z"
+    },
+    {
+      "id": 41222672090,
+      "name": "Claude public relay v2",
+      "status": "completed",
+      "conclusion": "failure",
+      "html_url": "https://github.com/pahlborn/agentarium/actions/runs/41222672090",
+      "updated_at": "2026-10-31T17:05:11Z"
+    },
+    {
+      "id": 41222320799,
+      "name": "Veroeffentlichen",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/pahlborn/agentarium/actions/runs/41222320799",
+      "updated_at": "2026-10-31T17:01:06Z"
+    }
+  ]
+}

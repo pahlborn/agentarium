@@ -92,14 +92,14 @@
      sagt, WAS diese Kennung benennt. */
   var OPTIONAL = ['recipient', 'reporter', 'blocker_id',
                   'artifact_id', 'artifact_version',
-                  'item_type', 'parent_id', 'item_version'];  /* nie Pflicht fuer progress */
+                  'item_type', 'parent_id', 'item_version', 'previous_holder', 'checkpoint_ref', 'stop_ref'];  /* nie Pflicht fuer progress */
   /* Genau die drei Arten aus Atlas' Register. Eine Aufzaehlung, kein freier
      Text: "Epic", "EPIC" oder "epik" waeren drei Dinge, die eines meinen. */
   var ELEMENTARTEN = { epic: 1, story: 1, task: 1 };
   var ARTEN = { progress: 1, handoff: 1, contribution: 1,
                 assigned: 1, received: 1, started: 1, delivered: 1,
                 reviewed: 1, accepted: 1, merged: 1, published: 1,
-                blocked: 1, resolved: 1, aborted: 1 };
+                blocked: 1, resolved: 1, aborted: 1, reassigned: 1 };
   var KOMM = { handoff: 1, contribution: 1 };    /* nur beobachtet, kein Zustand */
   /* Arten, die einen Aufgabenzustand treiben DUERFEN -- und nur bei
      Selbstauskunft. `assigned` ist dabei die Ausnahme: Die Vergabe meldet
@@ -107,7 +107,7 @@
      deshalb eine Aufgabe als ZUGEWIESEN an und behauptet keinen Beginn. */
   var LEBEN = { assigned: 1, received: 1, started: 1, delivered: 1,
                 reviewed: 1, accepted: 1, merged: 1, published: 1,
-                blocked: 1, resolved: 1, aborted: 1 };
+                blocked: 1, resolved: 1, aborted: 1, reassigned: 1 };
   /* BLOCKADE IST KEIN ABBRUCH, UND DAS WAR MEIN FEHLER.
      Atlas hatte am 21.10. ausdruecklich entschieden: Die Abbruchzahl kommt
      aus typisierten Abbruchereignissen, "nicht aus Titeln und nicht aus
@@ -118,7 +118,7 @@
      gescheitert und endet. Wer beides zusammenzaehlt, misst nicht, was im
      Review bearbeitet werden soll. */
   var ABBRUCHARTEN = { aborted: 1 };
-  var BRAUCHT_EMPF = { assigned: 1 };            /* an wen vergeben wurde */
+  var BRAUCHT_EMPF = { assigned: 1, reassigned:1 };            /* an wen vergeben wurde */
   /* BLOCKADE IST KEIN ZUSTAND, SIE LIEGT NEBEN EINEM. Eine Blockade laesst
      die Aufgabe liegen: `zugewiesen` bleibt `zugewiesen`, `begonnen` bleibt
      `begonnen`. Eine Aufloesung nimmt genau eine Klemme weg und behauptet
@@ -236,7 +236,7 @@
           typeof p.name !== 'string' || !p.name.trim() || nach[p.id] || kz[p.kuerzel]) {
         vermerk('Verzeichniseintrag übergangen: ' + (p && p.id)); return;
       }
-      var e = { id: p.id, kuerzel: p.kuerzel, name: p.name.trim().slice(0, 60) };
+      var e = { id: p.id, kuerzel: p.kuerzel, name: p.name.trim().slice(0, 60), repo:/^pahlborn\/[A-Za-z0-9_.-]+$/.test(p.repo||'')?p.repo:null };
       nach[e.id] = e; kz[e.kuerzel] = 1; liste.push(e);
     });
     if (!liste.length) { vermerk('Projektverzeichnis leer — alle Projekte'); return null; }
@@ -768,13 +768,19 @@
        die Unterscheidung ist der ganze Zweck des Feldes. Lieber abweisen als
        raten; geraten wird in diesem Monitor nichts mehr. */
     if (LEBEN[d.kind] && !hatMeld) return nein('reporter fehlt bei ' + d.kind);
+    var transferFields=['previous_holder','checkpoint_ref','stop_ref'];
+    if(d.kind==='reassigned') {
+      if(d.actor!=='atlas'||d.reporter!=='atlas'||!AKTEURE[d.previous_holder]||d.recipient===d.previous_holder||
+          !window.__agWorkStatus||!window.__agWorkStatus.githubRef(d.stop_ref)||
+          !(d.checkpoint_ref==='no-checkpoint'||window.__agWorkStatus.githubRef(d.checkpoint_ref))) return nein('Vertretungsbelege oder Atlas-Zuordnung fehlen');
+    } else if(transferFields.some(function(f){return Object.prototype.hasOwnProperty.call(d,f);})) return nein('Vertretungsfelder nur bei reassigned');
     var titel = d.title.trim();
     if (!titel || titel.length > MAX_TITEL) return nein('title leer oder länger als ' + MAX_TITEL);
     if (STEUER.test(titel)) return nein('title enthält Steuerzeichen');
     if (!ISO.test(d.occurred_at) || isNaN(Date.parse(d.occurred_at))) return nein('occurred_at ungültig');
     if (!HERKUNFT[d.source_evidence]) return nein('source_evidence nicht erlaubt');
     return { art: 'ok', ev: { id: d.id, project_id: d.project_id, run_id: d.run_id,
-      task_id: d.task_id, actor: d.actor, kind: d.kind,
+      task_id: d.task_id, actor: d.actor, kind: d.kind, previous_holder:d.previous_holder||'', checkpoint_ref:d.checkpoint_ref||'', stop_ref:d.stop_ref||'',
       recipient: hatEmpf ? d.recipient : '', title: titel, occurred_at: d.occurred_at,
       source_evidence: d.source_evidence, source_tool_id: d.source_tool_id,
       reporter: hatMeld ? d.reporter : '',
@@ -843,6 +849,7 @@
       fictional: false, gh_beobachtet: true, project_id: ev.project_id,
       run_id: ev.run_id, task_id: ev.task_id, source_tool_id: ev.source_tool_id };
     if (ev.recipient) aus.recipient = ev.recipient;
+    if(ev.kind==='reassigned'){aus.previous_holder=ev.previous_holder;aus.checkpoint_ref=ev.checkpoint_ref;aus.stop_ref=ev.stop_ref;}
     /* AG-EVENT-JOURNAL-001: Melder und die daraus abgeleitete, PRUEFBARE
        Aussage gehen mit. Das Original entscheidet selbst, was es damit tut
        -- hier wird nichts behauptet, nur weitergegeben. */
@@ -928,7 +935,7 @@
                 ev.recipient, ev.reporter, ev.blocker_id,
                 ev.artifact_id, ev.artifact_version,
                 ev.item_type, ev.parent_id, ev.item_version, ev.title,
-                ev.occurred_at, ev.source_evidence, ev.source_tool_id].join('\u0001');
+                ev.occurred_at, ev.source_evidence, ev.source_tool_id,ev.previous_holder,ev.checkpoint_ref,ev.stop_ref].join('\u0001');
       if (bekannte.hat(ev.id) || (basisIds && basisIds.hat(ev.id))) {
         var frueher = abdruck[ev.id];
         if (frueher !== undefined && frueher !== fa) {
@@ -949,7 +956,7 @@
           archivAlle.push({ ev: ev, recorded_at: c.created_at || '', kommentar: Number(cid) || 0 });
           laufNameMerken(ev);
           if (ev.kind === 'handoff' || ev.kind === 'contribution' ||
-              (ev.kind === 'accepted' && ev.actor === 'peter') || ev.kind === 'aborted') {
+              (ev.kind === 'accepted' && ev.actor === 'peter') || ev.kind === 'aborted' || ev.kind === 'reassigned') {
             basisBall.push({ ev: ev, recorded_at: c.created_at || '',
                              kommentar: Number(cid) || 0 });
           }
@@ -981,7 +988,7 @@
            wem welcher Ball liegt. Seit Schritt 3 dazu Peters Annahme, die
            seinen Ball wegnimmt. */
         if (ev.kind === 'handoff' || ev.kind === 'contribution' ||
-            (ev.kind === 'accepted' && ev.actor === 'peter') || ev.kind === 'aborted') {
+            (ev.kind === 'accepted' && ev.actor === 'peter') || ev.kind === 'aborted' || ev.kind === 'reassigned') {
           basisBall.push({ ev: ev, recorded_at: c.created_at || '',
                            kommentar: Number(cid) || 0 });
         }
@@ -1142,6 +1149,18 @@
     s.forEach(function (x) {
       var e = x.ev;
       var k = e.project_id + '\u0001' + e.run_id + '\u0001' + e.task_id;
+      var current=lage[k] || lage[k+'\u0001'+e.previous_holder];
+      if(e.kind==='reassigned') {
+        if(!current)return;
+        var tr=window.__agWorkStatus.transfer({holder:current.bei,parent:current.eltern||'',history:current.vertretungen||[]},e);
+        if(!tr)return;
+        var oldKey=current.teil?k+'\u0001'+current.bei:k;
+        var newKey=current.teil?k+'\u0001'+tr.holder:k;
+        if(oldKey!==newKey){lage[oldKey]=null;if(!(newKey in lage))reihe.push(newKey);}
+        current.bei=tr.holder;current.vertretungen=tr.history;lage[newKey]=current;return;
+      }
+      var held=reihe.map(function(kk){return lage[kk];}).filter(function(b){return b&&b.project_id===e.project_id&&b.run_id===e.run_id&&b.task_id===e.task_id&&b.vertretungen&&b.vertretungen.length;})[0];
+      if(held&&(held.vertretungen.some(function(h){return h.from===e.actor&&e.actor!==held.bei;}) || ((e.kind==='handoff'||e.kind==='assigned')&&e.recipient!==held.bei)))return;
       if (e.kind === 'handoff' && e.actor === 'peter' && e.recipient) {
         if (!(k in lage)) reihe.push(k);
         lage[k] = { project_id: e.project_id, run_id: e.run_id,
@@ -1206,7 +1225,7 @@
       var ZU = { received: 'empfangen', started: 'begonnen',
                  delivered: 'geliefert', reviewed: 'geprueft' };
       var halter = '', zustand = '', titel = '', zu = false, letzte = null,
-          klemmt = [], belegVergabe = 0,
+          klemmt = [], belegVergabe = 0, vertretungen=[],
           eTyp = 'task', eEltern = '', eFassung = '',
           /* R3: Ob schon EINE Vergabe gesprochen hat. Nicht `eTyp !== ''`
              pruefen -- der Vorgabewert ist `task`, also waere eine erste
@@ -1225,6 +1244,13 @@
             widersprueche++;
           return;
         }
+        if (e.kind==='reassigned') {
+          var moved=window.__agWorkStatus.transfer({holder:halter,parent:eEltern,type:eTyp,closed:zu,history:vertretungen},e);
+          if(!moved){widersprueche++;return;}
+          halter=moved.holder;vertretungen=moved.history;zustand='zugewiesen';letzte=x;return;
+        }
+        if(vertretungen.length && (vertretungen.some(function(h){return h.from===e.actor&&e.actor!==halter;}) ||
+           (e.kind==='assigned'&&e.recipient!==halter))) return;
         if (e.kind === 'assigned' && e.recipient) {
           /* ===== R3, NACHBESSERUNG (Aufgabe 46-8): ERST PRUEFEN, DANN AENDERN =====
              Atlas' Befund 6359816846 vom 23.10.: Hier liefen Halter, Stufe,
@@ -1335,12 +1361,12 @@
            Vorwaerts gefaltet wie alles andere: Eine Aufloesung ohne
            passende offene Klemme ist ein Widerspruch, keine stille
            Korrektur. */
-        if (e.kind === 'blocked' && halter && e.actor === halter &&
+        if (e.kind === 'blocked' && halter && (e.actor === halter || (e.actor==='atlas'&&e.reporter==='atlas'&&e.recipient===halter)) &&
             e.blocker_id) {
           for (var bz = 0; bz < klemmt.length; bz++)
             if (klemmt[bz].id === e.blocker_id) return;   /* Duplikat */
           /* Mit dem Beleg: WELCHER Kommentar die Klemme gemeldet hat. */
-          klemmt.push({ id: e.blocker_id, grund: e.title, beleg: x.kommentar });
+          klemmt.push({ id: e.blocker_id, grund: e.title, beleg: x.kommentar, occurred_at:e.occurred_at });
           letzte = x; return;
         }
         if (e.kind === 'resolved' && halter && e.actor === halter &&
@@ -1364,7 +1390,7 @@
       if (!zu && halter && zustand) {
         offen.push({ projekt: g[0].ev.project_id, lauf: g[0].ev.run_id,
                      aufgabe: g[0].ev.task_id, wer: halter, zustand: zustand,
-                     titel: titel, klemmt: klemmt,
+                     titel: titel, klemmt: klemmt, vertretungen:vertretungen,
                      occurred_at: letzte ? letzte.ev.occurred_at : '',
                      recorded_at: letzte ? letzte.recorded_at : '',
                      eTyp: eTyp, eEltern: eEltern, eFassung: eFassung,
@@ -1392,6 +1418,29 @@
        damit ein neues Projekt mit dem naechsten Verbinden erscheint. */
     anzeigen('lese das Projektverzeichnis …');
     verz = await verzeichnisLaden();
+    if(window.__agWorkStatus&&window.__agWorkStatus.ui) {
+      var repos=(verz&&verz.liste||[]).map(function(p){return p.repo;}).filter(Boolean);
+      window.__agWorkStatus.ui.connect(repos,async function(repo){
+        if(!token||!/^pahlborn\/[A-Za-z0-9_.-]+$/.test(repo))throw Error('getrennt');
+        var g=gen,parent=ctrl, own=typeof AbortController==='function'?new AbortController():null;
+        var cancel=function(){if(own)own.abort();}, timer=setTimeout(cancel,12000);
+        if(parent)parent.signal.addEventListener('abort',cancel,{once:true});
+        try {
+          var response=await fetch('https://api.github.com/repos/'+repo+'/actions/runs?per_page=5',{
+            headers:{Accept:'application/vnd.github+json',Authorization:'Bearer '+token},
+            credentials:'omit',redirect:'error',referrerPolicy:'no-referrer',cache:'no-cache',signal:own?own.signal:undefined});
+          if(g!==gen)throw Error('getrennt');
+          if(!response.ok){var er=Error('Status unbekannt');
+            var retry=Number(response.headers.get('Retry-After')),reset=Number(response.headers.get('X-RateLimit-Reset'));
+            if(response.status===429||response.status===403){er.retryAt=Math.max(Date.now()+300000,Number.isFinite(retry)&&retry>0?Date.now()+retry*1000:0,Number.isFinite(reset)?reset*1000:0);}
+            throw er;
+          }
+          var data=await response.json();if(g!==gen)throw Error('getrennt');return data;
+        } finally {clearTimeout(timer);if(parent)parent.signal.removeEventListener('abort',cancel);}
+
+      });
+    }
+
     if (g !== gen) throw ABBRUCH;
     if (verz && wahl !== '*' && !verz.nach[wahl]) wahl = '*';
     projekteMelden();
@@ -1488,6 +1537,7 @@
   }
 
   async function zyklus() {
+    if(window.__agWorkStatus&&window.__agWorkStatus.ui)window.__agWorkStatus.ui.refresh();
     uhr = null;
     if (!token || laufend) return;
     if (Z.nichtVor > Date.now()) {
@@ -1824,7 +1874,7 @@
     var leben = vorher.filter(function (x) { return LEBEN[x.ev.kind]; });
     var ball = vorher.filter(function (x) {
       var k = x.ev.kind;
-      return k === 'handoff' || k === 'contribution' || k === 'aborted' || (k === 'accepted' && x.ev.actor === 'peter');
+      return k === 'handoff' || k === 'contribution' || k === 'reassigned' || k === 'aborted' || (k === 'accepted' && x.ev.actor === 'peter');
     });
     B.neuBeginnen();
     aktuellerLauf = '';
@@ -1906,6 +1956,7 @@
   }
 
   function trennen(text) {
+    if(window.__agWorkStatus&&window.__agWorkStatus.ui)window.__agWorkStatus.ui.disconnect();
     gen++;
     token = null;
     /* Ein laufendes Archiv endet mit der Verbindung. */

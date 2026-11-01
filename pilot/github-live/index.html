@@ -2516,7 +2516,7 @@
 
      Der Bauzeitpunkt kommt beim Bauen aus der Uhr. Von Hand gepflegte
      Datumsangaben sind nach der zweiten Änderung falsch. */
-  var FASSUNG = '99', GEBAUT = '2026-11-01T04:59Z';
+  var FASSUNG = '100', GEBAUT = '2026-11-01T08:08Z';
 
   /* AG-GH-LIVE-001: JEDE TEXTSENKE MASKIERT.
      Seit Live-Daten von aussen kommen (GitHub-Kommentare, one-event.json),
@@ -2615,6 +2615,10 @@
   var stueckNr = 0;
   var STUECK = STUECKE[0];
 
+  if (new URLSearchParams(location.search).get('live') === 'github') AGENTEN.push({
+    name:'springer', farbe:0.08, winkel:90, nah:1.9, rolle:'Vertretung · Codex', platt:'chatgpt',
+    weise:'bauen', kennung:'codex-vertretung', bereich:['authorized_substitution'], verbote:['self_approval'],
+    auftrag:'Eigenständiger ChatGPT/Codex-Vertreter mit dokumentiertem Auftrag; weder Forge noch Lot.' });
   var nachName = {};
   AGENTEN.forEach(function (a) { nachName[a.name] = a; });
 
@@ -3958,6 +3962,7 @@
     clearTimeout(ballInfoUhr); ballInfoUhr = null;
     ballInfoEl.classList.remove('auf');
     ballInfoEl.removeAttribute('data-aufgabe');
+    ballInfoEl.removeAttribute('data-schluessel');
   }
   function ballInfoZeigen(l, o) {
     var teile = l.schluessel.split('\u0001');          /* projekt, lauf, aufgabe[, halter] */
@@ -3985,6 +3990,7 @@
     z3.textContent = 'Lauf ' + lauf + (laufBez ? ' · ' + laufBez : '');
     ballInfoEl.appendChild(z1); ballInfoEl.appendChild(z2); ballInfoEl.appendChild(z3);
     ballInfoEl.setAttribute('data-aufgabe', l.aufgabe);
+    ballInfoEl.setAttribute('data-schluessel', l.schluessel.split('\u0001').slice(0,3).join('\u0001'));
     ballInfoEl.classList.add('auf');
     /* Neben den Ball, aber im Bild halten. */
     var bw = ballInfoEl.offsetWidth || 220, bh = ballInfoEl.offsetHeight || 60;
@@ -4872,6 +4878,22 @@
     luecke(was);
     return false;
   }
+  function arbeitUebertragen(E) {
+    var f=aufgabeSuchen(kennung(E.spur));
+    if (!f || f.mehrfach || !E.uebergabe || !window.__agWorkStatus) return false;
+    var L=arbeit[f.wer].liste[f.i], u=window.__agWorkStatus.transfer({holder:f.wer,parent:L.eEltern||'',type:L.eTyp||'task',history:L.vertretungen||[]},E.uebergabe);
+    if (!u) return false;
+    var ziel=arbeit[u.holder];
+    if (!ziel || ziel.aus) ziel=arbeit[u.holder]={t:0,liste:[]};
+    arbeit[f.wer].liste.splice(f.i,1);
+    L.zustand='zugewiesen'; L.beginn=null; L.modell=''; L.vertretungen=u.history; ziel.liste.push(L);
+    var k=ballspielSchluessel(E.spur);
+    if(ballInfoEl.getAttribute('data-schluessel')===k)ballInfoWeg();
+    liegend.forEach(function(b){if ((b.schluessel===k || b.schluessel===k+'\u0001'+E.uebergabe.previous_holder) && b.bei===E.uebergabe.previous_holder) {
+      b.bei=u.holder;b.flug=null;if(b.teil)b.schluessel=k+'\u0001'+u.holder;
+    }});
+    return true;
+  }
   function arbeitBeginnen(name, kenn) {
     return arbeitStufe(name, kenn, 'begonnen', 'beginn');
   }
@@ -4912,7 +4934,7 @@
          hat. Fuer eine wiederhergestellte Klemme ist das der einzige Weg
          zurueck zur Quelle -- sie hat keine Listenzeile. */
       L.klemmt.push({ id: klemme, grund: grund || '', seit: zeit,
-                      beleg: (beleg && beleg.nr) || '' });
+                      beleg: (beleg && beleg.nr) || '', occurred_at:(beleg&&beleg.occurred_at)||'' });
       return true;
     }
     /* Keine Aufgabe dieser Kennung: Es wird KEINE angelegt. Eine Blockade
@@ -6204,6 +6226,11 @@
              LISTE[naechstes].t <= zeit) {
           var E = LISTE[naechstes++];
           if (MODUS === 'live') verarbeitet++;
+          var oldFund=E.spur&&aufgabeSuchen(kennung(E.spur)),oldTask=oldFund&&!oldFund.mehrfach?arbeit[oldFund.wer].liste[oldFund.i]:null;
+          if(oldTask&&oldTask.vertretungen&&oldTask.vertretungen.length&&E.art!=='reassigned'&&
+             (oldTask.vertretungen.some(function(h){return h.from===E.von&&E.von!==oldFund.wer;})||
+              ((E.art==='assigned'||E.art==='handoff')&&E.an!==oldFund.wer)))continue;
+
         /* AG-GH-LIVE-001: Fortschritt ist eine Meldung AM PLATZ, kein Flug.
            Er beendet keinen Auftrag, eroeffnet keinen, blockiert nichts und
            hinterlaesst nichts -- ein kurzer Puls und eine lesbare Zeile.
@@ -6252,7 +6279,13 @@
              stillschweigende Luecke. Sie an die Aufgabe zu haengen waere
              bequem und falsch: Eine Aufgabe ist mit der ANNAHME erledigt,
              nicht mit dem Merge. */
-          if (E.art === 'assigned' && E.an && E.spur && E.spur.task_id) {
+          var vfund=E.spur&&aufgabeSuchen(kennung(E.spur)), vtask=vfund&&!vfund.mehrfach?arbeit[vfund.wer].liste[vfund.i]:null;
+          if (vtask && vtask.vertretungen && vtask.vertretungen.length && E.art!=='reassigned' &&
+              (vtask.vertretungen.some(function(h){return h.from===E.von&&E.von!==vfund.wer;}) ||
+               ((E.art==='assigned'||E.art==='handoff')&&E.an!==vfund.wer))) continue;
+          if (E.art === 'reassigned') {
+            if (!arbeitUebertragen(E)) { vergabekonflikte++; continue; }
+          } else if (E.art === 'assigned' && E.an && E.spur && E.spur.task_id) {
             /* Die GANZE Spur, nicht nur die Aufgabenkennung: project_id und
                run_id gehoeren zur Identitaet. Siehe `kennung`/`trifft`. */
             arbeitZuweisen(E.an, E.spur, E.text,
@@ -6260,6 +6293,10 @@
                            { typ: E.eTyp || 'task', eltern: E.eEltern || '',
                              fassung: E.eFassung || '' },
                            1);          /* R3: Widersprueche zaehlen */
+          } else if (E.art==='blocked' && E.von==='atlas' && E.melder==='atlas' && E.an) {
+            var af=aufgabeSuchen(kennung(E.spur));
+            if(af&&!af.mehrfach&&af.wer===E.an) arbeitKlemmt(E.an,E.spur,E.klemme,E.text,{nr:E.beleg||'',occurred_at:E.occurred_at||''});
+            else vergabekonflikte++;
           } else if ((E.selbstauskunft || peterNimmtAtlasAufgabeAn(E)) && E.spur && E.spur.task_id) {
             /* Die Kette: received/started/delivered/reviewed stellen den
                Zustand weiter, accepted und aborted beenden die Aufgabe.
@@ -6329,7 +6366,7 @@
                eine Rolle an einer Klemme, die ein anderer behauptet hat. */
             else if (E.art === 'blocked')
               arbeitKlemmt(E.von, E.spur, E.klemme, E.text,
-                           { nr: E.beleg || '' });
+                           { nr: E.beleg || '', occurred_at:E.occurred_at||'' });
             else if (E.art === 'resolved')
               arbeitLoest(E.von, E.spur, E.klemme);
           }
@@ -6480,7 +6517,7 @@
              /* Ballspiel: die liegenden Live-Baelle, je Aufgabe einer. */
              liegend: liegend.map(function (l) {
                var o = l.flug ? null : liegendOrt(l);
-               return { aufgabe: l.aufgabe, bei: l.bei, teil: !!l.teil, eltern: l.eltern || '',
+               return { projekt: l.schluessel.split('\u0001')[0], lauf:l.schluessel.split('\u0001')[1], aufgabe: l.aufgabe, bei: l.bei, teil: !!l.teil, eltern: l.eltern || '',
                         /* verbucht, aber noch im Flug (nicht gezeichnet) */
                         fliegt: !!l.flug,
                         /* wo er liegt, in Bildpunkten -- zum Antippen im Nachweis */
@@ -6536,7 +6573,7 @@
                for (var n in arbeit) {
                  if (arbeit[n].aus) continue;
                  arbeit[n].liste.forEach(function (L) {
-                   r.push({ wer: n, aufgabe: L.aufgabe, zustand: L.zustand,
+                   r.push({ wer: n, aufgabe: L.aufgabe, zustand: L.zustand, vertretungen:L.vertretungen||[],
                             projekt: L.projekt || '', lauf: L.lauf || '',
                             wieder: !!L.wieder,
                             /* Kennung UND Grund. Der Grund steht im Bild
@@ -6548,7 +6585,7 @@
                                statt unsichtbar. */
                             klemmt: (L.klemmt || []).map(function (K) {
                               return { id: K.id, grund: K.grund,
-                                       beleg: K.beleg || '' }; }),
+                                       beleg: K.beleg || '', occurred_at:K.occurred_at||'' }; }),
                             /* Der Originalbeleg der Aufgabe: Nummer und
                                aufloesbare Adresse. Damit laesst sich von
                                aussen pruefen, dass eine Anzeige an einer
@@ -7342,7 +7379,7 @@
   var GH_ARTEN = { progress: 1, handoff: 1, contribution: 1,
                    assigned: 1, received: 1, started: 1, delivered: 1,
                    reviewed: 1, accepted: 1, merged: 1, published: 1,
-                   blocked: 1, resolved: 1, aborted: 1 };
+                   blocked: 1, resolved: 1, aborted: 1, reassigned: 1 };
   /* Arten, die eine Klemmenkennung MITBRINGEN MUESSEN. Ohne sie liesse sich
      "genau diese Blockade" nicht sagen, und die Aufloesung muesste sich
      eine aussuchen. Geraten wird in diesem Monitor nichts. */
@@ -7361,7 +7398,7 @@
      Agenten, die vergeht -- und erfinden damit keinen Zustand. */
   var GH_LEBEN = { assigned: 1, received: 1, started: 1, delivered: 1,
                    reviewed: 1, accepted: 1, merged: 1, published: 1,
-                   blocked: 1, resolved: 1, aborted: 1 };
+                   blocked: 1, resolved: 1, aborted: 1, reassigned: 1 };
   var GH_KENNUNG = new RegExp('^[A-Za-z0-9][A-Za-z0-9._:/-]{0,119}$');
   function ghKenn(x) { return (typeof x === 'string' && GH_KENNUNG.test(x)) ? x : ''; }
   /* ============ DIE ELTERNKETTE, UND SIE ENDET IMMER ============
@@ -7569,6 +7606,7 @@
                             fassung: (typeof A.eFassung === 'string' &&
                                       GH_KENNUNG.test(A.eFassung)) ? A.eFassung : '' }))
         { abgewiesen++; return; }      /* schon da: kein zweiter Ring */
+      if (Array.isArray(A.vertretungen)) { var vf=aufgabeSuchen(kenn);if(vf&&!vf.mehrfach)arbeit[vf.wer].liste[vf.i].vertretungen=A.vertretungen; }
       if (zu !== 'zugewiesen') arbeitStufe(wer, kenn, zu, 'stufe');
       /* DIE KLEMMEN KOMMEN MIT, SONST ERGIBT DIE WIEDERHERSTELLUNG EINE
          ANDERE LAGE ALS DER LIVEBETRIEB. Atlas' Bedingung vom 21.10.
@@ -7590,7 +7628,7 @@
           if (!/^[0-9]{1,24}$/.test(kb)) kb = '';
           if (arbeitKlemmt(wer, kenn, ki,
                            (K && typeof K.grund === 'string') ? K.grund : '',
-                           { nr: kb }))
+                           { nr: kb, occurred_at:K.occurred_at||'' }))
             gelegt++;
         });
         /* Gezaehlt wird, was WIRKLICH gelegt wurde. Die Zahl in der Tafel
@@ -7602,6 +7640,7 @@
          beobachtetem Verkehr. Die Herkunft einer Anzeige gehoert zur
          Anzeige. */
       var S = arbeit[wer];
+      if (Array.isArray(A.vertretungen) && S && S.liste.length) S.liste[S.liste.length-1].vertretungen=A.vertretungen;
       if (S) S.liste.forEach(function (L) { if (trifft(L, kennung(kenn))) L.wieder = 1; });
       n++;
     });
@@ -7639,7 +7678,7 @@
 
     var von = (typeof e.actor === 'string') ? e.actor.trim().toLowerCase() : '';
     if (!von) return nein('actor fehlt');
-    if (!nachName[von]) return nein('actor unbekannt: ' + von);
+    if (!Object.prototype.hasOwnProperty.call(nachName,von)) return nein('actor unbekannt: ' + von);
 
     var art = (typeof e.kind === 'string') ? e.kind.trim() : '';
     if (!art) return nein('kind fehlt');
@@ -7693,7 +7732,7 @@
 
     var an = (typeof e.recipient === 'string') ? e.recipient.trim().toLowerCase() : '';
     if (KOMMUNIKATION[art] && !an) return nein('recipient fehlt bei ' + art);
-    if (an && !nachName[an]) return nein('recipient unbekannt: ' + an);
+    if (an && !Object.prototype.hasOwnProperty.call(nachName,an)) return nein('recipient unbekannt: ' + an);
 
     var E = { id: (typeof e.id === 'string' && e.id) ? e.id : ('L' + (++liveNr)),
               t: zeit, von: von, an: an || '', art: art, text: text,
@@ -7811,6 +7850,21 @@
     if (typeof e.fictional === 'boolean') E.fictional = e.fictional;
     if (typeof e.occurred_at === 'string') E.occurred_at = e.occurred_at;
 
+    if (gh && E.spur && E.spur.task_id) {
+      var tf = aufgabeSuchen(kennung(E.spur)), tl = tf && !tf.mehrfach ? arbeit[tf.wer].liste[tf.i] : null;
+      if (tl && tl.vertretungen && tl.vertretungen.length && art !== 'reassigned') {
+        if (tl.vertretungen.some(function(h){ return h.from === von && von !== tf.wer; }) ||
+            ((art === 'assigned' || art === 'handoff') && an !== tf.wer)) return nein('alter Halter nach Vertretungsübergabe');
+      }
+    }
+    if (art === 'reassigned') {
+      if (!gh || !window.__agWorkStatus || !window.__agWorkStatus.githubRef(e.stop_ref) ||
+          !(e.checkpoint_ref === 'no-checkpoint' || window.__agWorkStatus.githubRef(e.checkpoint_ref)) ||
+          von !== 'atlas' || e.reporter !== 'atlas' || !Object.prototype.hasOwnProperty.call(nachName,e.previous_holder) || !an)
+        return nein('Vertretungsbelege oder Atlas-Zuordnung fehlen');
+      E.uebergabe = {kind:art,actor:von,reporter:e.reporter,recipient:an,previous_holder:e.previous_holder,
+        checkpoint_ref:e.checkpoint_ref,stop_ref:e.stop_ref,parent_id:e.parent_id||'',item_type:e.item_type||'',occurred_at:e.occurred_at};
+    }
     liveListe.push(E);
     ruheMelden(E.von);       /* AG-MON-WEISE-001: Ein Ereignis beendet den Leerlauf. */
     /* Ein eingetroffenes Ereignis ist ebenso ein Beleg fuer eine lebende
@@ -8738,6 +8792,12 @@
       },
       /* AG-PROJEKTE-003: Die Uhr, nach der der Adapter das Archiv taktet --
          dieselbe, die das Tempo beschleunigt und Halt anhaelt. */
+      /* Statusabzeichen liegen über dem Ball. Ihr Tap öffnet weiterhin
+         dasselbe bestehende Aufgabenschild, einschließlich Elternbezug. */
+      ballInfo: function (x,y) {
+        var hit=ballGetroffen(x,y);if(!hit)return false;
+        ballInfoZeigen(hit.l,hit.o);return true;
+      },
       uhr: function () { return zeit; },
       /* Startet die Uhr fuer das Archiv. Im Livebetrieb steht sie, bis das
          erste Ereignis kommt; das Archiv soll aber sofort laufen. */
@@ -8764,6 +8824,9 @@
         return true;
       }
     };
+    var statusScript=document.createElement('script');statusScript.src='work-status.js?v='+FASSUNG;
+    statusScript.onload=function(){ document.head.appendChild(s); };
+    statusScript.onerror=function(){var h=document.getElementById('hinweis');if(h)h.textContent='Arbeitsstatus-Modul fehlt; GitHub-Live nicht verbunden.';};
     var s = document.createElement('script');
     s.src = 'github-live.js?v=' + FASSUNG;
     s.async = true;
@@ -8772,7 +8835,7 @@
       if (hw) { hw.textContent = 'GitHub-Live: github-live.js nicht geladen.';
                 hw.style.opacity = '1'; }
     };
-    document.body.appendChild(s);
+    document.head.appendChild(statusScript);
   })();
 
   /* Der Hinweis „Du darfst mitrühren" stammt aus Resonanz, wo er den
