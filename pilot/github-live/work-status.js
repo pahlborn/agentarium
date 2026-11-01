@@ -60,12 +60,12 @@
       });Object.keys(badges).forEach(function(k){if(!alive[k]){badges[k].remove();delete badges[k];}});
     }
     function clear(){generation++;read=null;sources=[];last=0;busy=false;results=[];close();Object.keys(badges).forEach(function(k){badges[k].remove();delete badges[k];});summary.textContent='GitHub-Läufe · getrennt';list.textContent='';}
-    async function refresh(){if(!read||busy||d.hidden||Date.now()-last<60000)return;busy=true;last=Date.now();var g=generation;var fn=read, out=[];
+    async function refresh(){if(!read||busy||d.hidden||Date.now()-last<60000)return;busy=true;last=Date.now();var checkedAt=last,g=generation;var fn=read, out=[];
       for(var i=0;i<sources.length;i++){var repo=sources[i];try{var r=await fn(repo);if(g!==generation)return;
         if(!r||!Array.isArray(r.workflow_runs))throw Error('Antwort ungültig');
         r.workflow_runs.slice(0,5).forEach(function(x){var v=runView(repo,x);if(v)out.push(v);});
       }catch(e){if(g!==generation)return;if(e&&e.retryAt)last=Math.max(last,e.retryAt-60000);out.push({repo:repo,error:'Status unbekannt / nicht abrufbar'});}}
-      if(g!==generation)return;results=out;list.textContent='';summary.textContent='GitHub-Läufe · '+new Date(last).toLocaleTimeString();
+      if(g!==generation)return;results=out;list.textContent='';summary.textContent='GitHub-Läufe · '+new Date(checkedAt).toLocaleTimeString();
       out.forEach(function(r){var el=d.createElement(r.url?'a':'p');el.textContent=r.error?r.repo+' · '+r.error:r.repo+' · '+r.text;if(r.url){el.href=r.url;el.target='_blank';el.rel='noopener noreferrer';}list.appendChild(el);});busy=false;
     }
     w.setInterval(paint,300);

@@ -9,7 +9,8 @@
 # am Commit, und jeder kann das Ergebnis nachlesen.
 #
 # WAS HIER NICHT PASSIERT: kein Modellaufruf, kein Geheimnis, keine
-# Aktivierung, kein Netz ausser npm und dem Browser-Download. Die Nachweise
+# Aktivierung. Netz nur für npm, Browser-Download und im gezielten Vertretungsnachweis
+# einen öffentlichen read-only GitHub-Actions-GET. Die übrigen Nachweise
 # selbst tischen ihre Seiten auf 127.0.0.1 auf.
 name: Browsernachweise
 
@@ -184,7 +185,19 @@ jobs:
       - name: Nachweis ${{ matrix.id }}
         env:
           ID: ${{ matrix.id }}
+          AG_AUFNAHMEN: ${{ runner.temp }}/ag-vertretung-aufnahmen
         run: echo "previews/$ID/pruefen.js" | bash .github/scripts/browsernachweise.sh lauf
+
+      # Nur die zwei gezielten UI-Bilder dieses Auftrags, keine Tokens/Logs.
+      # Bestehender Projektpin, gegen actions/upload-artifact v4 geprüft.
+      - name: Vertretungsanzeige für unabhängige Sichtprüfung sichern
+        if: always() && matrix.id == 'AG-MON-VERTRETUNG-001'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: vertretung-ansichten-${{ github.event.pull_request.head.sha || github.sha }}
+          path: ${{ runner.temp }}/ag-vertretung-aufnahmen/*.png
+          if-no-files-found: error
+          retention-days: 3
 
   nachweise:
     # Sammelstufe unter dem bisherigen Namen `nachweise`.

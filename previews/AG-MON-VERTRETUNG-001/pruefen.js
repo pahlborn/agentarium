@@ -181,6 +181,9 @@ zeile('Kein Transfer eines Peter-Hauptballs',api.transfer({holder:'atlas',parent
 const snapshot=JSON.parse(fs.readFileSync(path.join(__dirname,'actions-source.json'),'utf8'));
 zeile('Echter Actions-Snapshot enthält Fehler',snapshot.workflow_runs.some(r=>api.runView('pahlborn/agentarium',r)?.conclusion==='failure'),true);
 zeile('Fremder html_url nicht anklickbar',api.runView('pahlborn/agentarium',{id:1,name:'X',status:'completed',html_url:'https://evil.example'}),null);
+const timecheck=require('child_process').spawnSync(process.execPath,[path.join(__dirname,'timecheck.js')],{encoding:'utf8'});
+if(timecheck.stdout)process.stdout.write(timecheck.stdout);if(timecheck.stderr)process.stderr.write(timecheck.stderr);
+zeile('HTTP403-Anzeigezeit ist keine Backoff-Zukunft',timecheck.status,0);
 if(process.argv.includes('--offline'))process.exit(fehler?1:0);
 (async()=>{
  let chromium;try{chromium=require('playwright').chromium;}catch(e){}
@@ -189,10 +192,16 @@ if(process.argv.includes('--offline'))process.exit(fehler?1:0);
  const tisch=await tischen(WURZEL);
  const comment=e=>({id:9960000000+(++nr),created_at:e.occurred_at,user:{login:'pahlborn'},body:'<!-- AGENTARIUM_EVENT_V1 -->\n```json\n'+JSON.stringify(e)+'\n```'});
  try{for(const viewport of [{width:834,height:1194},{width:1194,height:834}]){
-   const response={liste:normal.map(comment),actions:snapshot};
+   const waiting=[baseEvent('handoff','atlas','atlas',{recipient:'scout',task_id:'AG-VERT-WAIT'}),baseEvent('assigned','atlas','atlas',{recipient:'scout',task_id:'AG-VERT-WAIT'})];
+   const response={liste:normal.concat(waiting).map(comment),actions:snapshot};
    const a=await seite(b,tisch,response,viewport);
    await a.s.waitForFunction(()=>document.querySelector('.agWorkBadge.blocked'));
    zeile('Blockade sichtbar '+viewport.width,await a.s.locator('.agWorkBadge.blocked').count(),1);
+   zeile('Zugewiesener Ball zeigt Warteuhr '+viewport.width,await a.s.locator('.agWorkBadge.waiting').count(),1);
+   zeile('Warteuhr ist ohne Hover sichtbar '+viewport.width,await a.s.locator('.agWorkBadge.waiting').isVisible(),true);
+   await a.s.click('.agWorkBadge.waiting');
+   const waitingText=await a.s.locator('#agWorkDetail').innerText();
+   zeile('Warten behauptet keinen Ausfall '+viewport.width,waitingText.includes('Start noch nicht gemeldet')&&waitingText.includes('Keine Ausfallbehauptung'),true);
    await a.s.click('.agWorkBadge.blocked');
    zeile('Tap zeigt Grund und Quelle '+viewport.width,(await a.s.locator('#agWorkDetail').innerText()).includes('OFFLINE'),true);
    await a.s.locator('#agRunStatus summary').click();
@@ -205,6 +214,29 @@ if(process.argv.includes('--offline'))process.exit(fehler?1:0);
      zeile('Sichtbarer Status entspricht echtem API-Ergebnis '+viewport.width,actual.every(r=>shown.includes('pahlborn/agentarium · '+r.text)),true);
      console.log('  Quelle: öffentlicher Live-GET, Run-IDs '+actual.map(r=>r.id).join(',')+'; kein Agentenlauf ausgelöst.');
    } else zeile('Actions-Quellsnapshot gerendert '+viewport.width,await a.s.locator('#agRunStatus a').count(),snapshot.workflow_runs.length);
+   // Kleiner Fehler-/Recoveryfall: echte HTTP403-Antwort im kontrollierten Actionskanal.
+   // Disconnect/Reconnect hebt den Backoff nur durch die ausdrückliche Bedienhandlung auf.
+   if(viewport.width===834){
+     const actionsURL='https://api.github.com/repos/pahlborn/agentarium/actions/runs?per_page=5';
+     const denied=r=>r.fulfill({status:403,contentType:'application/json',body:JSON.stringify({message:'Synthetic permission failure'})});
+     const taskShape=async()=>a.s.evaluate(()=>window.__agStand().aufgaben.map(t=>[t.aufgabe,t.wer,t.zustand]).sort().join('|'));
+     const before=await taskShape();
+     async function reconnect(){
+       await a.s.evaluate(()=>document.getElementById('agGhAuf').open=true);
+       await a.s.click('#agGhAus');await a.s.fill('#agGhToken','AGVERTRETUNG_Scheintoken_0123456789ab');await a.s.click('#agGhAn');
+     }
+     await a.s.route(actionsURL,denied);await reconnect();
+     await a.s.waitForFunction(()=>document.getElementById('agRunStatus').textContent.includes('Status unbekannt'));
+     await a.s.evaluate(()=>document.getElementById('agRunStatus').open=true);
+     zeile('HTTP403 wird sichtbar unbekannt',await a.s.locator('#agRunStatus').isVisible()&&(await a.s.locator('#agRunStatus').innerText()).includes('Status unbekannt'),true);
+     zeile('HTTP403 schließt keine fachliche Aufgabe',await taskShape(),before);
+     await a.s.unroute(actionsURL,denied);await reconnect();
+     await a.s.waitForFunction(()=>document.querySelectorAll('#agRunStatus a').length>0);
+     await a.s.evaluate(()=>document.getElementById('agRunStatus').open=true);
+     zeile('Wiederverbinden ersetzt Lesefehler durch Quelle',await a.s.locator('#agRunStatus a').first().isVisible()&&!(await a.s.locator('#agRunStatus').innerText()).includes('Status unbekannt'),true);
+     zeile('Erholter technischer Lauf schließt keine Aufgabe',await taskShape(),before);
+     await a.s.evaluate(()=>document.getElementById('agGhAuf').open=false);
+   }
    const live={...change,id:'AG-VERT-LIVE-'+viewport.width,occurred_at:new Date().toISOString()};response.liste.push(comment(live));
    await a.s.waitForFunction(()=>window.__agStand().aufgaben.some(t=>t.wer==='springer'));
    let st=await stand(a.s);zeile('Live atomarer Taskwechsel '+viewport.width,st.aufgaben.filter(x=>x.aufgabe==='AG-VERT-T').length,1);
@@ -221,6 +253,17 @@ if(process.argv.includes('--offline'))process.exit(fehler?1:0);
    zeile('Restore identischer Halter '+viewport.width,st.aufgaben.find(x=>x.aufgabe==='AG-VERT-T')?.wer,'springer');
    zeile('Restore identischer Ball '+viewport.width,st.liegend.find(x=>x.aufgabe==='AG-VERT-T')?.bei,'springer');
    zeile('Restore identische Transferhistory '+viewport.width,st.aufgaben.find(x=>x.aufgabe==='AG-VERT-T')?.vertretungen?.length,1);
+   if(viewport.width===834){
+     await reload.s.click('#agKopf');await reload.s.click('#agWas li[data-modus="archiv"]');
+     await reload.s.waitForFunction(()=>window.__agGithub.stand().archiv.leiste);
+     const archived=await reload.s.evaluate(()=>{
+       const el=document.getElementById('agLeiste'),r=el.getBoundingClientRect();
+       const opt={bubbles:true,cancelable:true,pointerId:9,pointerType:'touch',isPrimary:true,clientX:r.right-1,clientY:r.top+r.height/2};
+       el.dispatchEvent(new PointerEvent('pointerdown',opt));el.dispatchEvent(new PointerEvent('pointerup',opt));return window.__agStand();
+     });
+     zeile('Archivende behält Vertreter '+viewport.width,archived.aufgaben.find(x=>x.aufgabe==='AG-VERT-T')?.wer,'springer');
+     zeile('Archivende hat genau einen Teilball '+viewport.width,archived.liegend.filter(x=>x.aufgabe==='AG-VERT-T').length,1);
+   }
    await reload.q.close();
  }}finally{await b.close();tisch.s.close();}
  process.exit(fehler?1:0);
