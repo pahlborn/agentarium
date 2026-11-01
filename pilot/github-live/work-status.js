@@ -56,7 +56,11 @@
         if(!el){el=d.createElement('button');el.type='button';badges[id]=el;d.body.appendChild(el);}
         el.className='agWorkBadge'+(t.klemmt.length?' blocked':' waiting');el.textContent=t.klemmt.length?'Ⅱ':'◷';
         el.setAttribute('aria-label',ball.aufgabe+' · '+(t.klemmt.length?'blockiert':'wartet auf Startmeldung'));
-        el.style.left=ball.ort[0]+'px';el.style.top=ball.ort[1]+'px';el.onclick=function(){show(t,ball);};
+        el.style.left=ball.ort[0]+'px';el.style.top=ball.ort[1]+'px';el.onclick=function(){
+          var current=w.__agGithubBruecke;
+          if(current&&typeof current.ballInfo==='function')current.ballInfo(ball.ort[0],ball.ort[1]);
+          show(t,ball);
+        };
       });Object.keys(badges).forEach(function(k){if(!alive[k]){badges[k].remove();delete badges[k];}});
     }
     function clear(){generation++;read=null;sources=[];last=0;busy=false;results=[];close();Object.keys(badges).forEach(function(k){badges[k].remove();delete badges[k];});summary.textContent='GitHub-Läufe · getrennt';list.textContent='';}

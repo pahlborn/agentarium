@@ -200,6 +200,8 @@ if(process.argv.includes('--offline'))process.exit(fehler?1:0);
    zeile('Zugewiesener Ball zeigt Warteuhr '+viewport.width,await a.s.locator('.agWorkBadge.waiting').count(),1);
    zeile('Warteuhr ist ohne Hover sichtbar '+viewport.width,await a.s.locator('.agWorkBadge.waiting').isVisible(),true);
    await a.s.click('.agWorkBadge.waiting');
+   zeile('Statusabzeichen erhält bisheriges Ballschild '+viewport.width,(await stand(a.s)).ballInfo.startsWith('AG · AG-VERT-WAIT'),true);
+   zeile('Bisheriges Schild behält Elternbezug '+viewport.width,(await stand(a.s)).ballInfo.includes('gehört zu AG-VERT-MAIN'),true);
    const waitingText=await a.s.locator('#agWorkDetail').innerText();
    zeile('Warten behauptet keinen Ausfall '+viewport.width,waitingText.includes('Start noch nicht gemeldet')&&waitingText.includes('Keine Ausfallbehauptung'),true);
    await a.s.click('.agWorkBadge.blocked');

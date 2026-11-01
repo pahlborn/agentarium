@@ -8772,6 +8772,12 @@
       },
       /* AG-PROJEKTE-003: Die Uhr, nach der der Adapter das Archiv taktet --
          dieselbe, die das Tempo beschleunigt und Halt anhaelt. */
+      /* Statusabzeichen liegen über dem Ball. Ihr Tap öffnet weiterhin
+         dasselbe bestehende Aufgabenschild, einschließlich Elternbezug. */
+      ballInfo: function (x,y) {
+        var hit=ballGetroffen(x,y);if(!hit)return false;
+        ballInfoZeigen(hit.l,hit.o);return true;
+      },
       uhr: function () { return zeit; },
       /* Startet die Uhr fuer das Archiv. Im Livebetrieb steht sie, bis das
          erste Ereignis kommt; das Archiv soll aber sofort laufen. */
