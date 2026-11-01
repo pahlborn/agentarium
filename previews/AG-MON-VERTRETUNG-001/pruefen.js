@@ -168,7 +168,12 @@ zeile('Teilball liegt beim Vertreter',balls(normal.concat(change).map(raw))[0].b
 for(const [name,extra] of [['falscher alter Halter',{previous_holder:'scout'}],['Parentwechsel',{parent_id:'ANDERS'}],['Typwechsel',{item_type:'story'}],['Stop fehlt',{stop_ref:''}],['fremder Link',{stop_ref:'https://evil.example/stop'}],['falscher Melder',{reporter:'forge'}]])
  zeile(name+' wird abgewiesen',fold(normal.concat(move(extra)).map(raw))[0].wer,'forge');
 const delayed=['blocked','resolved','received','started','delivered','aborted','assigned'].map(k=>baseEvent(k,k==='assigned'?'atlas':'forge',k==='assigned'?'atlas':'forge',{...(k==='assigned'?{recipient:'forge'}:{}),...(['blocked','resolved'].includes(k)?{blocker_id:'OFFLINE'}:{})}));
+delayed.push(baseEvent('handoff','atlas','atlas',{recipient:'forge'}));
+delayed.push(baseEvent('handoff','atlas','atlas',{recipient:'scout'}));
+delayed.push(baseEvent('contribution','forge','forge',{recipient:'peter'}));
 const final=normal.concat(change,...delayed);
+zeile('Alte/fremde handoff-Empfänger erzeugen keinen zweiten Ball',balls(final.map(raw)).length,1);
+zeile('Alte contribution zu Peter bewegt Vertreterball nicht',balls(final.map(raw))[0].bei,'springer');
 zeile('Verspätete alte Meldungen ändern Halter nicht',fold(final.map(raw))[0].wer,'springer');
 zeile('Verspäteter Abbruch schließt Vertreter nicht',fold(final.map(raw)).length,1);
 zeile('Übernommene Sachblockade bleibt explizit',fold(final.map(raw))[0].klemmt.length,1);
@@ -190,11 +195,13 @@ if(process.argv.includes('--offline'))process.exit(fehler?1:0);
    zeile('Blockade sichtbar '+viewport.width,await a.s.locator('.agWorkBadge.blocked').count(),1);
    await a.s.click('.agWorkBadge.blocked');
    zeile('Tap zeigt Grund und Quelle '+viewport.width,(await a.s.locator('#agWorkDetail').innerText()).includes('OFFLINE'),true);
+   await a.s.locator('#agRunStatus summary').click();
    if(process.env.AG_REAL_ACTIONS !== '0'){
      zeile('Echter öffentlicher Actions-GET '+viewport.width,!!response.realActions?.workflow_runs?.length,true);
      const actual=(response.realActions?.workflow_runs||[]).slice(0,5).map(r=>api.runView('pahlborn/agentarium',r)).filter(Boolean);
      zeile('Echte API-Läufe gerendert '+viewport.width,await a.s.locator('#agRunStatus a').count(),actual.length);
      const shown=await a.s.locator('#agRunStatus a').allTextContents();
+     zeile('Konkreter echter Runlink sichtbar '+viewport.width,actual.length>0&&await a.s.locator('#agRunStatus a').first().isVisible(),true);
      zeile('Sichtbarer Status entspricht echtem API-Ergebnis '+viewport.width,actual.every(r=>shown.includes('pahlborn/agentarium · '+r.text)),true);
      console.log('  Quelle: öffentlicher Live-GET, Run-IDs '+actual.map(r=>r.id).join(',')+'; kein Agentenlauf ausgelöst.');
    } else zeile('Actions-Quellsnapshot gerendert '+viewport.width,await a.s.locator('#agRunStatus a').count(),snapshot.workflow_runs.length);
@@ -204,6 +211,7 @@ if(process.argv.includes('--offline'))process.exit(fehler?1:0);
    zeile('Live atomarer Ballwechsel '+viewport.width,st.liegend.filter(x=>x.aufgabe==='AG-VERT-T')[0]?.bei,'springer');
    response.liste.push(...delayed.map(e=>comment({...e,id:e.id+'-LIVE-'+viewport.width,occurred_at:new Date().toISOString()})));
    await a.s.waitForTimeout(2600);st=await stand(a.s);zeile('Alte Events wirkungslos '+viewport.width,st.aufgaben.find(x=>x.aufgabe==='AG-VERT-T')?.wer,'springer');
+   zeile('Live alter handoff erzeugt keinen Zusatzball '+viewport.width,st.liegend.filter(x=>x.aufgabe==='AG-VERT-T').length,1);
    zeile('Keine Seitenfehler '+viewport.width,a.seitenFehler.length,0);
    await a.s.emulateMedia({reducedMotion:'reduce'});
    zeile('Reduced motion stoppt Puls '+viewport.width,await a.s.locator('.agWorkBadge.blocked').evaluate(e=>getComputedStyle(e,'::before').animationName),'none');

@@ -6209,7 +6209,7 @@
           var oldFund=E.spur&&aufgabeSuchen(kennung(E.spur)),oldTask=oldFund&&!oldFund.mehrfach?arbeit[oldFund.wer].liste[oldFund.i]:null;
           if(oldTask&&oldTask.vertretungen&&oldTask.vertretungen.length&&E.art!=='reassigned'&&
              (oldTask.vertretungen.some(function(h){return h.from===E.von&&E.von!==oldFund.wer;})||
-              (E.art==='assigned'&&E.an!==oldFund.wer)))continue;
+              ((E.art==='assigned'||E.art==='handoff')&&E.an!==oldFund.wer)))continue;
 
         /* AG-GH-LIVE-001: Fortschritt ist eine Meldung AM PLATZ, kein Flug.
            Er beendet keinen Auftrag, eroeffnet keinen, blockiert nichts und
@@ -6262,7 +6262,7 @@
           var vfund=E.spur&&aufgabeSuchen(kennung(E.spur)), vtask=vfund&&!vfund.mehrfach?arbeit[vfund.wer].liste[vfund.i]:null;
           if (vtask && vtask.vertretungen && vtask.vertretungen.length && E.art!=='reassigned' &&
               (vtask.vertretungen.some(function(h){return h.from===E.von&&E.von!==vfund.wer;}) ||
-               (E.art==='assigned'&&E.an!==vfund.wer))) continue;
+               ((E.art==='assigned'||E.art==='handoff')&&E.an!==vfund.wer))) continue;
           if (E.art === 'reassigned') {
             if (!arbeitUebertragen(E)) { vergabekonflikte++; continue; }
           } else if (E.art === 'assigned' && E.an && E.spur && E.spur.task_id) {
@@ -7834,7 +7834,7 @@
       var tf = aufgabeSuchen(kennung(E.spur)), tl = tf && !tf.mehrfach ? arbeit[tf.wer].liste[tf.i] : null;
       if (tl && tl.vertretungen && tl.vertretungen.length && art !== 'reassigned') {
         if (tl.vertretungen.some(function(h){ return h.from === von && von !== tf.wer; }) ||
-            (art === 'assigned' && an !== tf.wer)) return nein('alter Halter nach Vertretungsübergabe');
+            ((art === 'assigned' || art === 'handoff') && an !== tf.wer)) return nein('alter Halter nach Vertretungsübergabe');
       }
     }
     if (art === 'reassigned') {

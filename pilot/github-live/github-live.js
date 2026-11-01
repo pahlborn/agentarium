@@ -1160,7 +1160,7 @@
         current.bei=tr.holder;current.vertretungen=tr.history;lage[newKey]=current;return;
       }
       var held=reihe.map(function(kk){return lage[kk];}).filter(function(b){return b&&b.project_id===e.project_id&&b.run_id===e.run_id&&b.task_id===e.task_id&&b.vertretungen&&b.vertretungen.length;})[0];
-      if(held&&held.vertretungen.some(function(h){return h.from===e.actor&&e.actor!==held.bei;}))return;
+      if(held&&(held.vertretungen.some(function(h){return h.from===e.actor&&e.actor!==held.bei;}) || ((e.kind==='handoff'||e.kind==='assigned')&&e.recipient!==held.bei)))return;
       if (e.kind === 'handoff' && e.actor === 'peter' && e.recipient) {
         if (!(k in lage)) reihe.push(k);
         lage[k] = { project_id: e.project_id, run_id: e.run_id,
