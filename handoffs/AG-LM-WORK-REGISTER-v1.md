@@ -396,3 +396,18 @@ Peter explicitly rejected the unnecessary measurement list and ordered its remov
 | Background | Four native workers completed; Relay stopped/blocked; no unattended work promised by this chat. Actual independent PR96 availability is outside native tree |
 
 Final targeted reconciliation 31.10.2026: GT40PR96 is closed without merge; no openGT40PR returned by current collection, no claim about unpublished independent-chat work. Relay's wrong forge-labeled HOST_RECEIVED/BLOCKED monitor blocks in comments6546479967/6546493940 corrected byAtlas to truthful progress/host-status, preserving original technical metadata and GitHub edit history. Canonical Cadence subtask remains blocked; no fabricated worker contribution or acceptance.
+
+
+### Blockadeanzeige und echte Vertretung — 01.11.2026
+<!-- AG-MON-VERTRETUNG-001-SESSION -->
+
+| Field | Value |
+|---|---|
+| Task / authority | AG-MON-VERTRETUNG-001, Issue #112; Peter: „Ok, bitte umsetzen“ nach Vorschlag für sichtbare Blockade und tatsächliche Vertretung |
+| Baseline | main 1c498d077f99cdb9973232aa35f24394da1abb85, F98; Rulebook/Process 1.4 geladen |
+| Journal freshness | letzter dateibezogener Commit 911c1a63002f116849d49814d4563c805e7eeaf1 am 01.11.2026 vor neuer Meldung geprüft, unverändert gegenüber vorherigem Sitzungsstand |
+| Scoped event inspection | Issue #2 seit 2026-10-31T17:12:44Z: acht zurückgegebene Kommentare 6548589676 … 6554369697 anhand Metadaten und Anfangszeilen gesichtet; vollständiger früherer semantischer Cursor bleibt unbekannt, keine Lücke rückwirkend übersprungen |
+| Technical owner | echter separater Codex/ChatGPT-Worker /root/codex_springer, Task …-01, als Springer ausgewiesen; kein Forge-/Lot-/Cadence-Lauf |
+| Independent check | echter separater QA-Worker /root/sentinel_vertretung, Task …-02; Produkt-/Übergabe-/Herkunftsgrenzen |
+| Limits | keine Claude-Aufrufe/keine automatische bezahlte Wiederholung; kein unbeaufsichtigter Vertreterdienst; Kosten und globaler Abschlusszähler unbekannt, nicht null |
+| Evidence / next action | Anstoß6554369415; Übergabe/Vergabe Springer6554369552/6554369697, QA6554386619/6554386757; Atlas integriert nach versionsgebundenen Prüfungen und belegt tatsächliche Veröffentlichung |
