@@ -1874,7 +1874,7 @@
     var leben = vorher.filter(function (x) { return LEBEN[x.ev.kind]; });
     var ball = vorher.filter(function (x) {
       var k = x.ev.kind;
-      return k === 'handoff' || k === 'contribution' || k === 'aborted' || (k === 'accepted' && x.ev.actor === 'peter');
+      return k === 'handoff' || k === 'contribution' || k === 'reassigned' || k === 'aborted' || (k === 'accepted' && x.ev.actor === 'peter');
     });
     B.neuBeginnen();
     aktuellerLauf = '';

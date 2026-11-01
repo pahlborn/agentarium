@@ -33,23 +33,29 @@
       '.agWorkBadge{position:fixed;z-index:7;width:34px;height:34px;padding:0;border:0;border-radius:50%;background:#142334dd;color:#f1c26c;font:600 18px system-ui;transform:translate(-50%,-50%);cursor:pointer}' +
       '.agWorkBadge.blocked:before{content:"";position:absolute;inset:-5px;border:2px dashed #e7ad49;border-radius:50%;animation:agBlocked 3.5s ease-in-out infinite}' +
       '@keyframes agBlocked{50%{opacity:.4;transform:scale(1.12)}}@media(prefers-reduced-motion:reduce){.agWorkBadge.blocked:before{animation:none}}' +
-      '#agWorkDetail{position:fixed;z-index:30;bottom:12px;left:12px;max-width:min(440px,calc(100vw - 48px));max-height:35vh;overflow:auto;padding:14px;background:#142334;color:#d5e0ed;border:1px solid #e7ad49;border-radius:8px;font:13px/1.5 system-ui}#agWorkDetail button{float:right;margin-left:12px}';
+      '#agWorkDetail a{color:#b7cce4;overflow-wrap:anywhere}#agWorkDetail{position:fixed;z-index:30;bottom:12px;left:12px;max-width:min(440px,calc(100vw - 48px));max-height:35vh;overflow:auto;padding:14px;background:#142334;color:#d5e0ed;border:1px solid #e7ad49;border-radius:8px;font:13px/1.5 system-ui}#agWorkDetail button{float:right;margin-left:12px}';
     d.head.appendChild(style);
     var panel=d.createElement('details');panel.id='agRunStatus'; var summary=d.createElement('summary');summary.textContent='GitHub-Läufe · noch nicht abgefragt';panel.appendChild(summary);
     var list=d.createElement('div');panel.appendChild(list);var note=d.createElement('small');note.textContent='Technischer Laufstatus; kein Nachweis eines Agentenstarts oder fachlichen Abschlusses. Maximal 5 neueste Läufe je Projekt.';panel.appendChild(note);
     var detail=d.createElement('div');detail.id='agWorkDetail';detail.hidden=true;d.body.appendChild(detail);
     var badges=Object.create(null), sources=[], last=0, generation=0, busy=false, read=null, results=[];
-    function close(){detail.hidden=true;detail.textContent='';}
+    var openedDetail=null;
+    function fingerprint(t){return JSON.stringify([t.wer,t.zustand,t.klemmt,(t.vertretungen||[]).length]);}
+    function close(){openedDetail=null;detail.hidden=true;detail.textContent='';}
     function show(task, ball){detail.textContent=''; var b=d.createElement('button');b.textContent='Schließen';b.onclick=close;detail.appendChild(b);
       var p=d.createElement('div');p.textContent=ball.aufgabe+' · '+ball.bei+' · '+(task.klemmt.length?'Blockiert':'Zugewiesen · Start noch nicht gemeldet');detail.appendChild(p);
       task.klemmt.forEach(function(k){var t=d.createElement('p');t.textContent=(task.vertretungen&&task.vertretungen.length?'Übernommene offene Blockade · ':'')+k.grund+' · Blockade '+k.id+' · Seit: '+(k.occurred_at||'Zeit unbekannt');detail.appendChild(t);
       if(/^[0-9]{1,24}$/.test(String(k.beleg||''))){var a=d.createElement('a');a.textContent='Originalmeldung';a.href='https://github.com/pahlborn/agentarium/issues/2#issuecomment-'+k.beleg;a.target='_blank';a.rel='noopener noreferrer';detail.appendChild(a);}});
       var n=d.createElement('p');n.textContent=task.klemmt.length?'Nächster Verantwortlicher: Atlas klärt Blockade oder übernimmt die belegte Vertretungsübergabe.':'Keine Ausfallbehauptung: Ein geplanter Start oder eine Empfangsmeldung kann noch ausstehen.';detail.appendChild(n);
-      (task.vertretungen||[]).forEach(function(h){var t=d.createElement('p');t.textContent='Vertretung: '+h.from+' → '+h.to+' · '+h.at;detail.appendChild(t);});detail.hidden=false; }
+      (task.vertretungen||[]).forEach(function(h){var t=d.createElement('p');t.textContent='Vertretung: '+h.from+' → '+h.to+' · '+h.at;detail.appendChild(t);});openedDetail={key:taskKey(ball.projekt,ball.lauf,ball.aufgabe),fingerprint:fingerprint(task)};detail.hidden=false; }
     function paint(){var host=d.getElementById('agGithub');if(!panel.parentNode&&host)host.appendChild(panel);
       var bridge=w.__agGithubBruecke, st=w.__agStand&&w.__agStand(), alive=Object.create(null);
-      if(!st||!bridge||!bridge.istLive())return;
+      var archived=w.__agGithub&&w.__agGithub.stand&&w.__agGithub.stand().archiv;
+      if(!st||!bridge||!bridge.istLive()||(archived&&archived.ansicht)){
+        close();Object.keys(badges).forEach(function(k){badges[k].remove();delete badges[k];});return;
+      }
       var tasks=Object.create(null);(st.aufgaben||[]).forEach(function(t){tasks[taskKey(t.projekt,t.lauf,t.aufgabe)]=t;});
+      if(openedDetail&&(!tasks[openedDetail.key]||fingerprint(tasks[openedDetail.key])!==openedDetail.fingerprint))close();
       (st.liegend||[]).forEach(function(ball){if(!ball.ort||ball.fliegt)return;var key=taskKey(ball.projekt,ball.lauf,ball.aufgabe),t=tasks[key];
         if(!t||t.wer!==ball.bei||(!t.klemmt.length&&t.zustand!=='zugewiesen'))return;
         var id=key+'\u0001'+ball.bei, el=badges[id];alive[id]=true;

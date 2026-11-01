@@ -239,14 +239,27 @@ if(process.argv.includes('--offline'))process.exit(fehler?1:0);
      zeile('Erholter technischer Lauf schließt keine Aufgabe',await taskShape(),before);
      await a.s.evaluate(()=>document.getElementById('agGhAuf').open=false);
    }
+   await a.s.click('.agWorkBadge.blocked');
    const live={...change,id:'AG-VERT-LIVE-'+viewport.width,occurred_at:new Date().toISOString()};response.liste.push(comment(live));
    await a.s.waitForFunction(()=>window.__agStand().aufgaben.some(t=>t.wer==='springer'));
+   await a.s.waitForFunction(()=>document.getElementById('agWorkDetail').hidden);
+   zeile('Alte Halterdetailbox nach Wechsel geschlossen '+viewport.width,await a.s.locator('#agWorkDetail').isHidden(),true);
    let st=await stand(a.s);zeile('Live atomarer Taskwechsel '+viewport.width,st.aufgaben.filter(x=>x.aufgabe==='AG-VERT-T').length,1);
    zeile('Live atomarer Ballwechsel '+viewport.width,st.liegend.filter(x=>x.aufgabe==='AG-VERT-T')[0]?.bei,'springer');
    response.liste.push(...delayed.map(e=>comment({...e,id:e.id+'-LIVE-'+viewport.width,occurred_at:new Date().toISOString()})));
    await a.s.waitForTimeout(2600);st=await stand(a.s);zeile('Alte Events wirkungslos '+viewport.width,st.aufgaben.find(x=>x.aufgabe==='AG-VERT-T')?.wer,'springer');
    zeile('Live alter handoff erzeugt keinen Zusatzball '+viewport.width,st.liegend.filter(x=>x.aufgabe==='AG-VERT-T').length,1);
    zeile('Keine Seitenfehler '+viewport.width,a.seitenFehler.length,0);
+   const layout=await a.s.evaluate(()=>{
+     const e=document.querySelector('#agRing .agName[data-wer="springer"]');if(!e)return {exists:false};
+     const r=e.getBoundingClientRect(),p=document.getElementById('agGithub').getBoundingClientRect();
+     const intersects=(a,b)=>a.left<b.right&&a.right>b.left&&a.top<b.bottom&&a.bottom>b.top;
+     const others=[...document.querySelectorAll('#agRing .agName')].filter(x=>x!==e).map(x=>x.getBoundingClientRect());
+     return {exists:true,inViewport:r.top>=0&&r.bottom<=innerHeight&&r.left>=0&&r.right<=innerWidth,
+       sourceClear:!intersects(r,p),rolesClear:others.every(o=>!intersects(r,o))};
+   });
+   zeile('Springername lesbar außerhalb Quellfach '+viewport.width,layout.exists&&layout.inViewport&&layout.sourceClear,true);
+   zeile('Springername überlagert keine andere Rolle '+viewport.width,layout.rolesClear,true);
    await a.s.emulateMedia({reducedMotion:'reduce'});
    zeile('Reduced motion stoppt Puls '+viewport.width,await a.s.locator('.agWorkBadge.blocked').evaluate(e=>getComputedStyle(e,'::before').animationName),'none');
    await a.s.screenshot({path:path.join(AUFNAHMEN,'vertretung-'+viewport.width+'.png')});
@@ -265,6 +278,10 @@ if(process.argv.includes('--offline'))process.exit(fehler?1:0);
      });
      zeile('Archivende behält Vertreter '+viewport.width,archived.aufgaben.find(x=>x.aufgabe==='AG-VERT-T')?.wer,'springer');
      zeile('Archivende hat genau einen Teilball '+viewport.width,archived.liegend.filter(x=>x.aufgabe==='AG-VERT-T').length,1);
+     zeile('Archivende erhält unabhängigen WAIT-Teilball '+viewport.width,archived.liegend.filter(x=>x.aufgabe==='AG-VERT-WAIT'&&x.bei==='scout').length,1);
+     await reload.s.waitForTimeout(400);
+     zeile('Archiv trägt keine alten Liveabzeichen '+viewport.width,await reload.s.locator('.agWorkBadge').count(),0);
+     zeile('Archiv trägt keine alte Detailbox '+viewport.width,await reload.s.locator('#agWorkDetail').isHidden(),true);
    }
    await reload.q.close();
  }}finally{await b.close();tisch.s.close();}
