@@ -1352,7 +1352,7 @@
 
   /* Halbwertszeiten in Sekunden: was schwach ist, was stark ist.
      1e9 heißt: bleibt für immer. */
-  var blassAkku = 0, abklingen = 0;
+  var blassAkku = 0, abklingen = 0, STARK_HALB = 60;
   /* Für die Schicht darüber: Räum die Fläche über so viele Sekunden.
      Der einzige Weg, ein Stück zu beenden und wieder von vorn beginnen zu
      lassen — ohne diesen Hahn bleibt der Niederschlag für immer, und das
@@ -1381,7 +1381,16 @@
     /* Der Ausklang: Für eine begrenzte Zeit vergeht auch das Starke, und
        der Abzug greift überall — sonst friert das Bild auf halbem Weg ein,
        denn Multiplizieren erreicht bei 8 Bit die Null nie. */
-    var starkHalb = 1e9, mindest = 0;
+    /* ALLES VERBLASST (Fassung 99). Peter, 31.10.: "eigentlich soll alles
+       verblassen, bei grossen Projekten wird es sonst zu bunt." Bis Fassung
+       98 stand das Starke auf "fuer immer" (1e9). Jetzt halbiert es sich
+       jede Minute, und ein fester Abzug von 2,2 Stufen je Sekunde bringt
+       es bei 8 Bit sicher auf null: Je Schritt (viermal je Sekunde) muss
+       mehr als eine halbe Stufe fallen, sonst rundet der Wert auf sich
+       selbst zurueck und bleibt stehen -- nachgerechnet blieb ein kleinerer
+       Abzug bei etwa 140 von 255 haengen. Eine goldene Spur ist so nach
+       ein bis zwei Minuten fort. */
+    var starkHalb = STARK_HALB, mindest = Math.min(0.02, d * 2.2 / 255);
     if (abklingen > 0) {
       abklingen -= d;
       starkHalb = 2.4; mindest = Math.min(0.02, d * 2.5 / 255);
@@ -2478,6 +2487,10 @@
          Nur Beschlossenes bleibt. Verkehr verblasst. Offenes hinterlässt
          nichts.
 
+     Seit Fassung 99 (Peter, 31.10.: "eigentlich soll alles verblassen, bei
+     grossen Projekten wird es sonst zu bunt"): Auch Beschlossenes vergeht,
+     nur langsamer -- es halbiert sich jede Minute (`STARK_HALB`).
+
      Vorher blieben Wirbel stehen, und niemand wusste, warum. Das war kein
      Darstellungsfehler, sondern ein fehlendes Gesetz: Es gab keinen Grund,
      an dem man ablesen konnte, weshalb etwas da war. Jetzt gibt es einen,
@@ -2503,7 +2516,7 @@
 
      Der Bauzeitpunkt kommt beim Bauen aus der Uhr. Von Hand gepflegte
      Datumsangaben sind nach der zweiten Änderung falsch. */
-  var FASSUNG = '98', GEBAUT = '2026-10-31T16:43Z';
+  var FASSUNG = '99', GEBAUT = '2026-11-01T04:59Z';
 
   /* AG-GH-LIVE-001: JEDE TEXTSENKE MASKIERT.
      Seit Live-Daten von aussen kommen (GitHub-Kommentare, one-event.json),
@@ -5146,9 +5159,11 @@
                    t: 0, lebt: 2.2 + Math.random() * 1.6 });
   }
 
-  function kometSchritt(dt) {
+  /* `saeen`: Im Ausklang eines Stuecks kommen sie von selbst nach; in der
+     Ruhe des Livebetriebs schickt DIE RUHE einzelne (siehe dort). */
+  function kometSchritt(dt, saeen) {
     kometUhr -= dt;
-    if (kometUhr <= 0) { kometSaeen(); kometUhr = 3.5 + Math.random() * 5; }
+    if (saeen && kometUhr <= 0) { kometSaeen(); kometUhr = 3.5 + Math.random() * 5; }
     for (var i = kometen.length - 1; i >= 0; i--) {
       var K2 = kometen[i];
       K2.t += dt;
@@ -5190,16 +5205,14 @@
   function bereitschaft(dt) {
     bereitUhr += dt;
 
-    /* DAS UNIVERSUM IST IMMER DA.
-       Vorher hing es an Scouts laufender Arbeit — und die dauert in V1
-       ganze SIEBEN von 120 Sekunden (Auftrag t=3, Lieferung t=10). Der
-       Zufluss war 113 Sekunden lang aus, und das sah aus, als gäbe es
-       draußen nichts. Ein Ort hört aber nicht auf zu bestehen, wenn gerade
-       niemand hinsieht. Die fernen Punkte liegen deshalb dauernd da, nur
-       sehr blass; was beim Arbeiten dazukommt, ist der ZUG hinein. */
+    /* DAS UNIVERSUM, SOLANGE SCOUT SAMMELT.
+       Bis Fassung 98 lag es dauernd da ("Ein Ort hoert nicht auf zu
+       bestehen"). Peter, 31.10.: "aktuell stroemt es permanent zu ihm, nicht
+       nur, wenn er arbeitet" -- und: Arbeitseffekte nur bei Arbeit, sonst
+       Puls. Also gehoert das Universum zu Scouts Arbeit. */
     for (var u = 0; u < AGENTEN.length; u++) {
       var AS = AGENTEN[u];
-      if (AS.weise !== 'holen') continue;
+      if (AS.weise !== 'holen' || !arbeitetWirklich(arbeit[AS.name])) continue;
       var ps = heimat(AS), a0 = Math.atan2(ps[1] - my(), ps[0] - mx());
       for (var q0 = 0; q0 < 5; q0++) {
         var wq = a0 + (Math.random() - 0.5) * 2.5;
@@ -5216,7 +5229,9 @@
 
     for (var i = 0; i < AGENTEN.length; i++) {
       var A = AGENTEN[i];
-      if (arbeit[A.name]) continue;
+      /* Puls hat jeder, der nicht wirklich arbeitet -- auch wer eine
+         Aufgabe nur zugewiesen hat (vorher hatte der gar nichts). */
+      if (arbeitetWirklich(arbeit[A.name])) continue;
       var ph = bereitUhr * 0.85 + i * 0.7;
       var s = 0.5 + 0.5 * Math.sin(ph);
       /* Im Ausklang zeigen alle ihre Rufbereitschaft AKTIV: Der Puls läuft
@@ -5228,12 +5243,16 @@
          also nicht da. Die Hitze bleibt trotzdem unter 0,20, denn das ist
          die Schwelle, ab der Resonanz von selbst Korn aussät; darüber wäre
          Bereitschaft kein Warten mehr, sondern Betrieb. */
-      var q = heimat(A), r = Math.min(W(), H()) * 0.015;
-      for (var c = 0; c < 3; c++) {
-        var w = bereitUhr * 0.45 + i + c * 2.0944;
+      /* Ein wenig kraeftiger seit Fassung 99 (Peter, 31.10.: "den Puls kann
+         ich kaum erkennen, vielleicht ein klein wenig verstaerken"): vier
+         Punkte statt drei, etwas groesserer Kreis, Hitze 0,11-0,195 statt
+         0,085-0,18 -- weiter unter 0,20. */
+      var q = heimat(A), r = Math.min(W(), H()) * 0.018;
+      for (var c = 0; c < 4; c++) {
+        var w = bereitUhr * 0.45 + i + c * 1.5708;
         window.__feld.strang(q[0] + Math.cos(w) * r, q[1] + Math.sin(w) * r,
           -Math.sin(w) * r * 0.8, Math.cos(w) * r * 0.8,
-          (rufbereit ? 0.125 : 0.085) + 0.095 * s,
+          (rufbereit ? 0.125 : 0.11) + 0.085 * s,
           0.9 + 0.4 * Math.random(), A.farbe, 0);
       }
     }
@@ -5408,9 +5427,9 @@
      14.000 Punkten; wer mehr setzt, ueberschreibt die Resonanz (gemessen an
      den liegenden Baellen, AG-MON-RESONANZ-001). Arbeiten viele zugleich,
      wird jede Weise leiser -- nicht die Resonanz kaputt.
-     `weiseStaerke` (0..1) macht eine Weise leise: vergeben 0,4; der Zug im
-     Leerlauf hat volle Staerke. Ausbrueche (Funken, Einsturz) gibt es nur
-     bei voller Staerke. */
+     `weiseStaerke` (0..1) kann eine Weise leise machen; seit Fassung 99
+     laeuft sie nur noch bei echter Arbeit und dann voll. Ausbrueche
+     (Funken, Einsturz) gibt es nur bei voller Staerke. */
   var WEISE_BUDGET = 98;
   var effektRest = 0, weiseAnteil = WEISE_BUDGET, weiseStaerke = 1, weiseGezaehlt = 0;
   function effStrang(x, y, gx, gy, hitze, dauer, ton, abgabe) {
@@ -5544,8 +5563,9 @@
         return true;
       case 'accepted':                         /* Peters Annahme: Niederschlag */
         if (E.von !== 'peter' || !nachName.peter) return false;
-        /* Nur Beschlossenes bleibt (das Gesetz): eine goldene Spur mit
-           Abgabe, die liegen bleibt -- wie die Landung eines Ergebnisses. */
+        /* Beschlossenes leuchtet am laengsten (das Gesetz): eine goldene
+           Spur mit Abgabe, die langsam verblasst -- wie die Landung eines
+           Ergebnisses. */
         var P = heimat(nachName.peter);
         F.knoten(P[0], P[1], 0.62, 0.115, 4, 110, 2.6);
         return true;
@@ -5553,111 +5573,99 @@
     return false;
   }
 
-  /* ================= DER LEERLAUF (AG-MON-WEISE-001, Teil 3) =================
-     Peter, 29.10.: "Wurf, Knoten, Strang, Stoss, Schleife, welches ab und zu
-     randomized durch den Bildschirm zieht, auch wenn nichts gearbeitet wird."
-     Fassung 93 zeigte alle 20-40 s eine Rolle 2,5 s lang zu einem Drittel an
-     ihrem Platz -- Peter am 31.10.: "ich sehe keine Effekte, wenn die Arbeit
-     ruht" (gemessen: kaum ein Bildpunkt). Jetzt ein ZUG: Nach 8 s Ruhe zieht
-     alle 8-15 s ein Strang, eine Schleife oder ein Wurf in voller Staerke
-     6 s lang von einer Rolle zu einer anderen und endet dort als Knoten oder
-     Stoss. Nie zwei zugleich, im gemeinsamen Budget; das erste Ereignis oder
-     ein Finger beendet ihn. Nur live, nicht im Archiv; Peter und Lot sind
-     weder Start noch Ziel. Kein Regler -- Peter: sonst wird es ein Monster. */
-  var LEERLAUF_NACH = 8, LEERLAUF_PAUSE = [8, 15], LEERLAUF_DAUER = 6;
-  var LEERLAUF_FORMEN = ['strang', 'schleife', 'wurf'];
-  var ruheSeit = 0, leerlauf = null, leerlaufNaechster = 0, leerlaufAnzahl = 0, zuletztAktiv = [];
-  function ruheMelden(wer) {
+  /* ===================== DIE RUHE (AG-MON-WEISE-001, Teil 3) =====================
+     Wenn im ganzen Team niemand arbeitet und nichts fliegt, ist das Feld
+     nicht tot. Peter, 31.10.: "es darf auch ab und zu ein Wirbel, ein
+     Knoten, ein Korn und Funken erscheinen ... aber bitte nicht zu unruhig
+     und zu schnell hintereinander." Dazu sein Komet: "Ab und zu darf ein
+     Komet den Bildschirm ueberqueren. Er kommt aus dem Universum und kreuzt
+     nur kurz unsere Bahn." Alles aus dem Wortschatz von Resonanz -- keine
+     eigenen Linien mehr (Fassung 96/97: "schrecklich, ja unbedingt weg").
+     Nach 12 s Ruhe EINE Erscheinung, dann 12-25 s Pause; nie zweimal
+     dieselbe hintereinander. Ein Ereignis oder ein Finger beendet die Ruhe.
+     Nur live, nicht im Archiv. Kein Regler. */
+  var RUHE_NACH = 12, RUHE_PAUSE = [12, 25];
+  var RUHE_ARTEN = ['komet', 'wirbel', 'knoten', 'korn'];
+  var ruheSeit = 0, leerlauf = null, leerlaufNaechster = 0, leerlaufAnzahl = 0, ruheLetzte = '';
+  function ruheMelden() {
     ruheSeit = performance.now();
     leerlauf = null;
-    if (wer && nachName[wer] && wer !== 'peter') {
-      var i = zuletztAktiv.indexOf(wer);
-      if (i >= 0) zuletztAktiv.splice(i, 1);
-      zuletztAktiv.unshift(wer);
-      if (zuletztAktiv.length > 4) zuletztAktiv.length = 4;
-    }
   }
   window.addEventListener('pointerdown', function () { ruheMelden(); }, true);
-  function leerlaufWaehlen() {
-    var kand = [];
-    for (var i = 0; i < AGENTEN.length; i++) {
-      var a = AGENTEN[i];
-      if (a.name === 'peter' || a.name === 'lot' || !WEISEN[a.weise]) continue;
-      if (arbeit[a.name] && !arbeit[a.name].aus) continue;    /* der arbeitet schon */
-      kand.push(a.name);
-    }
-    if (!kand.length) return '';
-    var juengst = zuletztAktiv.filter(function (n) { return kand.indexOf(n) >= 0; });
-    if (juengst.length && Math.random() < 0.6) return juengst[(Math.random() * juengst.length) | 0];
-    return kand[(Math.random() * kand.length) | 0];
+  function teamRuht() {
+    if (baelle.length) return false;
+    for (var n in arbeit) if (arbeitetWirklich(arbeit[n])) return false;
+    return true;
   }
-  /* Ort des Zugs bei u (0..1): von p nach q, seitlich ausgelenkt je Form. */
-  function leerlaufOrt(L, p, q, u) {
-    var dx = q[0] - p[0], dy = q[1] - p[1], len = Math.hypot(dx, dy) || 1;
-    var nx = -dy / len, ny = dx / len, b = Math.sin(Math.PI * u) * L.seite;
-    var aus = L.form === 'wurf' ? 0.32 : (L.form === 'schleife' ? 0.10 : 0.06);
-    var x = p[0] + dx * u + nx * b * aus * len, y = p[1] + dy * u + ny * b * aus * len;
-    if (L.form === 'schleife') {          /* zwei Schlingen unterwegs */
-      var w = u * Math.PI * 4, r = len * 0.07 * Math.sin(Math.PI * u);
-      x += Math.cos(w) * r - r; y += Math.sin(w) * r;
-    }
-    return [x, y];
+  /* Irgendwo im Kreis, nicht auf den Namen. */
+  function ruheOrt() {
+    var w = Math.random() * 6.2832, r = ringR() * (0.2 + 0.6 * Math.random());
+    return [mx() + Math.cos(w) * r, my() + Math.sin(w) * r * 0.92];
   }
+  function ruheFarbe() {
+    var a = AGENTEN[1 + ((Math.random() * (AGENTEN.length - 1)) | 0)] || AGENTEN[0];
+    return a.farbe;
+  }
+  var RUHE = {
+    /* Er kommt von aussen, kreuzt und geht (siehe DER KOMET). */
+    komet: function (L) { kometSaeen(); L.dauer = 4; },
+    /* Ein Wirbel wie unter dem Finger in Resonanz: Er dreht das Medium,
+       treibt langsam weiter und klingt von selbst ab. */
+    wirbel: function (L) {
+      var o = ruheOrt(), K = window.__feld.kern(o[0], o[1]), w = Math.random() * 6.2832,
+          v = 30 + 35 * Math.random();
+      K.s = 0.5 + 0.15 * Math.random();
+      K.om = (Math.random() < 0.5 ? -1 : 1) * (2.4 + 1.4 * Math.random());
+      K.ton = ruheFarbe(); K.hell = 0.5; K.fest = 0;
+      K.dvx = Math.cos(w) * v; K.dvy = Math.sin(w) * v;
+      L.dauer = 8;
+    },
+    /* Ein Knoten: ein Lichtpunkt, der aufgeht und vergeht. */
+    knoten: function (L) {
+      var o = ruheOrt();
+      window.__feld.knoten(o[0], o[1], 0.7, ruheFarbe(), 0, 36, 2.2);
+      L.dauer = 3;
+    },
+    /* Korn: ein paar Lichtpunkte, die nach einem Augenblick in Funken
+       springen (der zweite Teil steht in `leerlaufSchritt`). */
+    korn: function (L) {
+      var o = ruheOrt(), ton = ruheFarbe(), n = 3 + ((Math.random() * 2) | 0);
+      L.orte = [];
+      for (var k = 0; k < n; k++) {
+        var x = o[0] + (Math.random() - 0.5) * 90, y = o[1] + (Math.random() - 0.5) * 70;
+        window.__feld.knoten(x, y, 0.85, ton, 0, 7, 1.8);
+        /* Nur ein oder zwei springen, nacheinander -- alle zugleich war ein
+           Feuerwerk, und das ist nicht "ruhig". Die anderen verglimmen. */
+        if (k < 1 + (Math.random() < 0.5 ? 1 : 0)) L.orte.push([x, y, ton, 1.4 + k * 0.6]);
+      }
+      L.dauer = 3.2;
+    }
+  };
   function leerlaufSchritt(dt) {
     var jetzt = performance.now();
     if (!ruheSeit) ruheSeit = jetzt;
-    if (MODUS !== 'live' || ghArchiv || baelle.length ||
-        jetzt - ruheSeit < LEERLAUF_NACH * 1000) { leerlauf = null; return; }
-    if (!leerlauf) {
-      if (jetzt < leerlaufNaechster) return;
-      var n = leerlaufWaehlen();
-      if (!n) return;
-      /* Das Ziel liegt auf der anderen Seite: die entferntere Haelfte. */
-      var ps = heimat(nachName[n]);
-      var ziele = AGENTEN.filter(function (a) {
-        return a.name !== n && a.name !== 'peter' && a.name !== 'lot';
-      }).sort(function (a, b) {
-        var pa = heimat(a), pb = heimat(b);
-        return Math.hypot(pb[0] - ps[0], pb[1] - ps[1]) - Math.hypot(pa[0] - ps[0], pa[1] - ps[1]);
+    if (kometen.length && !ausklang) kometSchritt(dt, false);
+    if (MODUS !== 'live' || ghArchiv || !teamRuht() ||
+        jetzt - ruheSeit < RUHE_NACH * 1000) { leerlauf = null; return; }
+    if (leerlauf) {
+      leerlauf.t += dt;
+      if (leerlauf.orte) leerlauf.orte.forEach(function (o) {
+        if (!o[4] && leerlauf.t > o[3] && window.__funkeAn) { o[4] = 1; window.__funkeAn(o[0], o[1], o[2]); }
       });
-      ziele = ziele.slice(0, Math.max(1, Math.ceil(ziele.length / 2)));
-      if (!ziele.length) return;
-      leerlauf = { name: n, ziel: ziele[(Math.random() * ziele.length) | 0].name,
-                   form: LEERLAUF_FORMEN[(Math.random() * LEERLAUF_FORMEN.length) | 0],
-                   seite: Math.random() < 0.5 ? -1 : 1, t: 0 };
-      leerlaufAnzahl++;
-    }
-    var L = leerlauf, A = nachName[L.name], B = nachName[L.ziel];
-    var u0 = L.t / LEERLAUF_DAUER;
-    L.t += dt;
-    var u = L.t / LEERLAUF_DAUER;
-    effektRest = weiseAnteil; weiseStaerke = 1;
-    if (!A || !B || u >= 1) {
-      if (A && B) {                       /* Ankunft: Knoten, nach einem Wurf ein Stoss */
-        var z = heimat(B);
-        if (L.form === 'wurf') effAustreiben(z[0], z[1], B.farbe, 1, 0);
-        else effKnoten(z[0], z[1], 0.7, B.farbe, 0, 24, 1.1);
-      }
-      effektRest = 0;
+      if (leerlauf.t < leerlauf.dauer) return;
       leerlauf = null;
-      leerlaufNaechster = jetzt + (LEERLAUF_PAUSE[0] +
-        (LEERLAUF_PAUSE[1] - LEERLAUF_PAUSE[0]) * Math.random()) * 1000;
+      leerlaufNaechster = jetzt + (RUHE_PAUSE[0] +
+        (RUHE_PAUSE[1] - RUHE_PAUSE[0]) * Math.random()) * 1000;
       return;
     }
-    var p = heimat(A), q = heimat(B);
-    var o0 = leerlaufOrt(L, p, q, u0), o = leerlaufOrt(L, p, q, u);
-    var vx = (o[0] - o0[0]) / Math.max(dt, 0.001), vy = (o[1] - o0[1]) / Math.max(dt, 0.001);
-    var ton = u < 0.5 ? A.farbe : B.farbe;
-    var sl = Math.hypot(vx, vy) || 1, sx = -vy / sl, sy = vx / sl;
-    for (var k = 0; k < 4; k++) {         /* Kopf des Zugs; die Spur bleibt stehen und vergeht */
-      var hx = o0[0] + (o[0] - o0[0]) * k / 4, hy = o0[1] + (o[1] - o0[1]) * k / 4;
-      effStrang(hx, hy, vx * 0.15, vy * 0.15, 0.5, 2.4 + 0.6 * Math.random(), ton, 0);
-      var b2 = (Math.random() - 0.5) * 7;
-      effStrang(hx + sx * b2, hy + sy * b2, vx * 0.1, vy * 0.1, 0.32, 1.8 + 0.6 * Math.random(), ton, 0);
-    }
-    effektRest = 0;
+    if (jetzt < leerlaufNaechster) return;
+    var wahl = RUHE_ARTEN.filter(function (a) { return a !== ruheLetzte; });
+    var art = wahl[(Math.random() * wahl.length) | 0];
+    leerlauf = { name: art, art: art, t: 0, dauer: 3 };
+    RUHE[art](leerlauf);
+    ruheLetzte = art;
+    leerlaufAnzahl++;
   }
-
   /* ================= DIE WEISEN DER ROLLEN (AG-MON-WEISE-001) =================
      Jede Rolle zeigt ihre Arbeit auf ihre Weise -- abgeleitet aus dem, was
      sie im Team TUT, nicht aus dem, was huebsch aussieht. Bis Fassung 92
@@ -5869,11 +5877,25 @@
     zeichnen: weiseZiehen
   };
 
+  /* ARBEITET ER WIRKLICH? Nur wer eine Aufgabe BEGONNEN hat und nicht
+     klemmt. Peter, 31.10.: "Arbeitseffekte sollten bei allen Agenten nur
+     erscheinen, sobald sie arbeiten. Ansonsten Puls." Vorher lief die Weise
+     schon bei einer bloss zugewiesenen Aufgabe leise mit -- bei Scout
+     stroemte es dadurch dauernd. Eine Antwort fuer alle Stellen: Weise,
+     Herzschlag, leuchtender Name, Bereitschaftspuls. */
+  function arbeitetWirklich(S) {
+    if (!S || S.aus) return false;
+    for (var i = 0; i < S.liste.length; i++)
+      if (S.liste[i].zustand === 'begonnen' &&
+          !(S.liste[i].klemmt && S.liste[i].klemmt.length)) return true;
+    return false;
+  }
+
   function arbeitSchritt(dt) {
     /* Anteil jeder Weise am gemeinsamen Budget dieses Bildes. */
-    var aktiv = leerlauf ? 1 : 0;
+    var aktiv = 0;
     for (var an0 in arbeit)
-      if (!arbeit[an0].aus && nachName[an0] && WEISEN[nachName[an0].weise]) aktiv++;
+      if (arbeitetWirklich(arbeit[an0]) && nachName[an0] && WEISEN[nachName[an0].weise]) aktiv++;
     weiseAnteil = Math.max(4, Math.floor(WEISE_BUDGET / Math.max(1, aktiv)));
     for (var name in arbeit) {
       var A = nachName[name], S = arbeit[name];
@@ -5976,20 +5998,16 @@
       /* Und eine GEKLEMMTE Aufgabe schlaegt auch nicht: Sie ist begonnen,
          aber es geht gerade nichts voran. Der Takt behauptete sonst eine
          Taetigkeit, von der der Melder selbst gesagt hat, dass sie haengt. */
-      var irgendBegonnen = false;
-      for (var hb = 0; hb < S.liste.length; hb++)
-        if (S.liste[hb].zustand === 'begonnen' &&
-            !(S.liste[hb].klemmt && S.liste[hb].klemmt.length))
-          { irgendBegonnen = true; break; }
+      var irgendBegonnen = arbeitetWirklich(S);
       S.schlag = (S.schlag || 0) - dt;
-      if (S.schlag <= 0 && !S.aus && irgendBegonnen) {
+      if (S.schlag <= 0 && irgendBegonnen) {
         S.schlag = 1.5;
         window.__feld.knoten(p[0], p[1], 0.62, A.farbe, 0, 10, 0.75);
       }
 
-      /* Die Weise der Rolle aus der Tabelle WEISEN -- leise, solange nur
-         vergeben ist, voll, sobald begonnen wurde (AG-MON-WEISE-001, Teil 2). */
-      if (!S.aus) weiseAusfuehren(A, S, p, dt, irgendBegonnen ? 1 : 0.4);
+      /* Die Weise der Rolle aus der Tabelle WEISEN -- nur, wer wirklich
+         arbeitet (siehe `arbeitetWirklich`). */
+      if (irgendBegonnen) weiseAusfuehren(A, S, p, dt, 1);
 
       /* Und das Medium dreht mit: Die Arbeit rührt ihren eigenen kleinen
          Wirbel, ohne dafür einen Kern zu belegen — die sind für Bälle da.
@@ -6012,8 +6030,7 @@
       for (var i = 0; i < AGENTEN.length; i++) {
         var e = ring.children[i];
         if (!e) continue;
-        var W2 = arbeit[AGENTEN[i].name];
-        var an = !!(W2 && !W2.aus);
+        var an = arbeitetWirklich(arbeit[AGENTEN[i].name]);
         if (e.__an !== an) { e.__an = an; e.classList.toggle('arbeitet', an); }
       }
     }
@@ -6400,7 +6417,7 @@
         if (ausklang) {
           ausklang -= dt;
           ausklangStufen();
-          kometSchritt(dt);
+          kometSchritt(dt, true);
           /* Der Ball bleibt jetzt liegen, statt sich aufzulösen. Vorher
              verschwand er in den letzten vier Sekunden — das war falsch:
              Eine erledigte Aufgabe ist nicht weg, sie ist ABGELIEFERT, und
@@ -6862,7 +6879,7 @@
       rufeEl   = document.getElementById('agRufe');
 
   var ZUSTAND = [
-    ['bleibt',    'bleibt',
+    ['bleibt',    'verblasst langsam',
       function (a) { return a.abgabe > 0; }],
     ['verblasst', 'verblasst',
       function (a) { return a.abgabe === 0 && a.nachhall > 3; }],
@@ -7858,7 +7875,7 @@
                   '„Bei wem liegt gerade der Ball?"', '') +
             '</table>' +
             '<h4>Das Gesetz</h4>' +
-            '<p class="gSatz">Nur Beschlossenes <b>bleibt</b>. ' +
+            '<p class="gSatz">Beschlossenes <b>verblasst langsam</b> (nach Minuten). ' +
             'Verkehr <b>verblasst</b>. Offenes <b>hinterlässt nichts</b>. ' +
             'Verworfenes <b>stürzt ein</b>.</p>';
     ZUSTAND.forEach(function (Z) {
@@ -8004,10 +8021,10 @@
       was('Atlas gibt dir das Ergebnis',
           'Dein Ball fliegt zu dir und bleibt bei dir liegen.', true, '') +
       was('Du nimmst an (Atlas meldet es für dich)',
-          'Dein Ball verschwindet, eine goldene Spur bleibt bei dir liegen. ' +
+          'Dein Ball verschwindet, eine goldene Spur leuchtet bei dir nach und verblasst langsam. ' +
           'Teilbälle, die nie zurückkamen, bleiben liegen — zur Kontrolle.', true, '') +
       was('Eine Weile geschieht nichts',
-          'Alle paar Sekunden zieht ein Strang, eine Schleife oder ein Wurf von einer Rolle zur anderen — das Feld lebt.', true, '') +
+          'Ab und zu kreuzt ein Komet, dreht ein Wirbel, leuchtet ein Knoten oder springt Korn in Funken — ruhig, mit Pausen.', true, '') +
       was('Du tippst einen liegenden Ball an',
           'Daneben steht kurz Kürzel und Aufgabe, bei wem er liegt und der Lauf.',
           true, '') +

@@ -271,8 +271,12 @@ async function durchgang(b, adr, wann) {
     zeile('das Elternteil wird NICHT erfunden', lage.US, 0);
     zeile('und trotzdem ist der Bezug notiert', lage.kinderVonUS, 1);
 
-    /* Die Aktivitaet in diesem Weg: sentinel haelt eine Aufgabe, also
-       arbeitet sein Platz -- und zwar ANDERS als die der uebrigen neun.
+    /* Die Aktivitaet in diesem Weg: sentinel haelt eine Aufgabe -- aber sie
+       ist GELIEFERT, er wartet auf die Annahme und arbeitet nicht. Seit
+       Fassung 99 leuchtet ein Name nur noch bei echter Arbeit (Peter, 31.10.:
+       "Arbeitseffekte sollten bei allen Agenten nur erscheinen, sobald sie
+       arbeiten. Ansonsten Puls."). Bis Fassung 98 stand hier die umgekehrte
+       Erwartung: sentinel bewegt sich anders als die ohne Aufgabe.
        Gemessen am aufgeloesten `animationName`, nicht an einer Klasse: Am
        21.10. trug ein Schild die Klasse `agGhPuls` ohne jede CSS-Regel, der
        Nachweis war gruen und sichtbar war nichts. */
@@ -285,10 +289,8 @@ async function durchgang(b, adr, wann) {
     });
     console.log('        sentinel: ' + tiere.sentinel +
                 '   ·   forge (ohne Aufgabe): ' + tiere.forge);
-    zeile('sentinel bewegt sich anders als die ohne Aufgabe',
-          tiere.sentinel !== tiere.forge, true);
-    zeile('und es ist überhaupt eine Animation', !!tiere.sentinel &&
-          tiere.sentinel !== 'none', true);
+    zeile('sentinel (geliefert, wartet) leuchtet nicht als arbeitend',
+          tiere.sentinel === tiere.forge, true);
     zeile('keine Seitenfehler in der Faltung',
           H.fehlerSeite.length ? H.fehlerSeite[0] : 'keine', 'keine');
     await H.q.close();
