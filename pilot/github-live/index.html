@@ -3949,6 +3949,7 @@
     clearTimeout(ballInfoUhr); ballInfoUhr = null;
     ballInfoEl.classList.remove('auf');
     ballInfoEl.removeAttribute('data-aufgabe');
+    ballInfoEl.removeAttribute('data-schluessel');
   }
   function ballInfoZeigen(l, o) {
     var teile = l.schluessel.split('\u0001');          /* projekt, lauf, aufgabe[, halter] */
@@ -3976,6 +3977,7 @@
     z3.textContent = 'Lauf ' + lauf + (laufBez ? ' · ' + laufBez : '');
     ballInfoEl.appendChild(z1); ballInfoEl.appendChild(z2); ballInfoEl.appendChild(z3);
     ballInfoEl.setAttribute('data-aufgabe', l.aufgabe);
+    ballInfoEl.setAttribute('data-schluessel', l.schluessel.split('\u0001').slice(0,3).join('\u0001'));
     ballInfoEl.classList.add('auf');
     /* Neben den Ball, aber im Bild halten. */
     var bw = ballInfoEl.offsetWidth || 220, bh = ballInfoEl.offsetHeight || 60;
@@ -4873,6 +4875,7 @@
     arbeit[f.wer].liste.splice(f.i,1);
     L.zustand='zugewiesen'; L.beginn=null; L.modell=''; L.vertretungen=u.history; ziel.liste.push(L);
     var k=ballspielSchluessel(E.spur);
+    if(ballInfoEl.getAttribute('data-schluessel')===k)ballInfoWeg();
     liegend.forEach(function(b){if ((b.schluessel===k || b.schluessel===k+'\u0001'+E.uebergabe.previous_holder) && b.bei===E.uebergabe.previous_holder) {
       b.bei=u.holder;b.flug=null;if(b.teil)b.schluessel=k+'\u0001'+u.holder;
     }});

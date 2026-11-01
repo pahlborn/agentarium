@@ -244,6 +244,7 @@ if(process.argv.includes('--offline'))process.exit(fehler?1:0);
    await a.s.waitForFunction(()=>window.__agStand().aufgaben.some(t=>t.wer==='springer'));
    await a.s.waitForFunction(()=>document.getElementById('agWorkDetail').hidden);
    zeile('Alte Halterdetailbox nach Wechsel geschlossen '+viewport.width,await a.s.locator('#agWorkDetail').isHidden(),true);
+   zeile('Bisheriges Ballschild behauptet keinen alten Halter '+viewport.width,(await stand(a.s)).ballInfo.includes('bei Forge'),false);
    let st=await stand(a.s);zeile('Live atomarer Taskwechsel '+viewport.width,st.aufgaben.filter(x=>x.aufgabe==='AG-VERT-T').length,1);
    zeile('Live atomarer Ballwechsel '+viewport.width,st.liegend.filter(x=>x.aufgabe==='AG-VERT-T')[0]?.bei,'springer');
    response.liste.push(...delayed.map(e=>comment({...e,id:e.id+'-LIVE-'+viewport.width,occurred_at:new Date().toISOString()})));
