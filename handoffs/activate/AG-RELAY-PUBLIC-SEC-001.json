@@ -1,0 +1,12 @@
+{
+  "schema": "agentarium.relay-activation.v2",
+  "task_id": "AG-LAUFZEIT-001-09",
+  "authorized": true,
+  "source_commit": "bec3196eb7416327cbcb93209aefe319b089ed19",
+  "role": "spec-agent",
+  "request": "handoffs/AG-LAUFZEIT-001-error-canary-request-v1.json",
+  "handback": "handoffs/AG-LAUFZEIT-001-error-canary-handback-v1.md",
+  "model": "opus",
+  "max_turns": 1,
+  "max_budget_usd": 0.5
+}
