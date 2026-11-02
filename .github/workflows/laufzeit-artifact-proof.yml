@@ -1,0 +1,73 @@
+name: AG-LAUFZEIT-001 synthetic artifact transport proof
+on:
+  push:
+    branches: ['agent/ag-laufzeit-proof-*']
+    paths:
+      - '.github/workflows/laufzeit-artifact-proof.yml'
+      - 'relay/proofs/ag_laufzeit_artifacts.py'
+permissions:
+  contents: read
+concurrency:
+  group: laufzeit-synthetic-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  producer:
+    if: github.repository == 'pahlborn/agentarium' && github.actor_id == '277496791'
+    name: proof-${{ matrix.case }}
+    strategy:
+      fail-fast: false
+      matrix:
+        case: [normal, killed]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Launch synthetic detached supervisor; no key or model
+        run: python3 relay/proofs/ag_laufzeit_artifacts.py launch '${{ matrix.case }}'
+      - name: Observe synthetic start in a separate step
+        run: python3 relay/proofs/ag_laufzeit_artifacts.py await-start '${{ matrix.case }}'
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: ag-laufzeit-proof-${{ matrix.case }}-start-${{ github.run_id }}-${{ github.run_attempt }}
+          path: laufzeit-proof/${{ matrix.case }}/start.json
+          if-no-files-found: error
+          retention-days: 7
+      - name: End normal synthetic worker or deliberately kill negative case
+        run: |
+          if [ '${{ matrix.case }}' = 'normal' ]; then
+            python3 relay/proofs/ag_laufzeit_artifacts.py await-end normal
+          else
+            python3 relay/proofs/ag_laufzeit_artifacts.py kill killed
+          fi
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: matrix.case == 'normal'
+        with:
+          name: ag-laufzeit-proof-normal-end-${{ github.run_id }}-${{ github.run_attempt }}
+          path: laufzeit-proof/normal/end.json
+          if-no-files-found: error
+          retention-days: 7
+  reader:
+    if: github.repository == 'pahlborn/agentarium' && github.actor_id == '277496791'
+    name: parallel-reader
+    permissions:
+      contents: read
+      actions: read
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Read artifacts while producers are running; log only
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 relay/proofs/ag_laufzeit_artifacts.py reader
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: success()
+        with:
+          name: ag-laufzeit-synthetic-reader-proof-${{ github.run_id }}-${{ github.run_attempt }}
+          path: laufzeit-proof/reader-proof.json
+          if-no-files-found: error
+          retention-days: 7
