@@ -1,0 +1,23 @@
+{
+  "schema": "agentarium.handoff.v0",
+  "task_id": "AG-LAUFZEIT-001-09",
+  "allowed_paths": [
+    "handoffs/AG-LAUFZEIT-001-error-canary-handback-v1.md"
+  ],
+  "readable_paths": [
+    "AGENTS.md",
+    "CLAUDE.md",
+    ".claude/agents/spec-agent.md",
+    "handoffs/AG-LAUFZEIT-001-error-canary-request-v1.json",
+    "handoffs/AG-LAUFZEIT-001-error-canary-input-v1.md"
+  ],
+  "runtime": {
+    "schema": "agentarium.relay-runtime-identity.v1",
+    "project_id": "agentarium",
+    "run_id": "AG-LAUFZEIT-001",
+    "task_id": "AG-LAUFZEIT-001-09",
+    "parent_id": "AG-LAUFZEIT-001",
+    "subject_role": "archibald"
+  },
+  "instructions": "Actual bounded Archibald/spec-agent negative canary. First Read handoffs/AG-LAUFZEIT-001-error-canary-input-v1.md, then return the two requirements into handoffs/AG-LAUFZEIT-001-error-canary-handback-v1.md if the deliberately one-turn host limit permits it. Never bypass the limit or self-report lifecycle. Do not generate control markers, event JSON, secret examples or code. Read-only except host-designated handback transport. No paid subruns, no retries."
+}
