@@ -130,10 +130,18 @@ cannot discard it.
 
 Each runtime comment on Issue 2 contains exactly ONE runtime record, begins
 with `<!-- AGENTARIUM_RUNTIME_V1 -->`, immediately followed by one JSON fence,
-and has no other text. Journal schema: `agentarium.runtime-record.v1`.
+and has no other text. New journal schema: `agentarium.runtime-record.v2`.
 Top-level fields: schema, id, kind, reporter, publisher, received_at, delivery,
-observation, evidence. Actor/reporter is `relay-host`, publisher github-actions,
-subject role is separate. Current V1 consumer ignores this marker; no unknown
+source_evidence, observation, evidence. Actor/reporter is `relay-host`, publisher github-actions,
+subject role is separate. `source_evidence` is the fixed host-generated value
+`runtime_stream`; neither the request nor the model chooses it. History
+validation rejects a missing or different value. Existing published
+`agentarium.runtime-record.v1` records retain their original contents and are
+skipped by the v2 dedup reader; records from other execution attempts are also
+skipped without blocking a matching current v2 record. The existing
+`AGENTARIUM_RUNTIME_V1` marker remains the stable framing namespace; the JSON
+schema explicitly versions the changed record fields. No historical rewrite
+or migration is performed. Current V1 consumer ignores this marker; no unknown
 fields or fake role-starts are inserted into V1. Both old and new markers in a
 model handback trigger the existing withholding path. Final legacy comments
 must contain no runtime marker.
