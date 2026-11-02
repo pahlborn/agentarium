@@ -269,9 +269,9 @@ def ag_terminal(meta: dict, role: str = "coding-agent", context: dict | None = N
                         "Rücklauf liegt vor — keine Abnahme, keine Annahme",
                         "reported_checkpoint", recipient="atlas", **envelope)
     if meta.get("failure") == "RUN_JOB_NO_RESULT":
-        titel = f"Lauf lieferte kein Ergebnis — über {subject} ist nichts beobachtet"
+        titel = "Lauf lieferte kein Ergebnis — Workerstatus in diesem Rücklauf unbekannt"
     else:
-        titel = f"Lauf blockiert, Ergebnis zurückgehalten — über {subject} ist nichts belegt"
+        titel = "Lauf blockiert, Ergebnis zurückgehalten"
     return ag_block(task_id, run_id, "BLOCKED", "progress", "atlas",
                     titel, "reported_checkpoint", **envelope)
 
