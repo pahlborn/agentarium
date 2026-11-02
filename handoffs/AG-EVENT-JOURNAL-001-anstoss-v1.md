@@ -29,7 +29,8 @@ Dass eine Rückgabe als Ball erscheint, ist eine eigene, spätere Bildänderung
 1. **Anstoß.** Erhält Atlas eine Aufgabe von Peter, ist sein **erstes**
    Ereignis ein `handoff` mit `actor: peter`, `recipient: atlas`,
    `reporter: atlas` und der `task_id` der Aufgabe. Erst danach folgen
-   `assigned` und `started`.
+   `assigned`. `started` folgt nur aus einem belegten tatsächlichen
+   Workerbeginn nach der Laufzeitregel unten; die Auftragsannahme reicht nicht.
 2. **Weitergabe.** Gibt Atlas eine Aufgabe an einen Agenten weiter, meldet er
    **zuerst** `handoff` von Atlas an den Agenten (der Ball) und **dann**
    `assigned` an den Agenten (legt die Aufgabe an).
@@ -49,8 +50,9 @@ Dass eine Rückgabe als Ball erscheint, ist eine eigene, spätere Bildänderung
    Erst dann verschwindet Peters Ball. Das ist die **einzige** Meldung für
    einen anderen, die der Monitor gelten lässt, und sie wirkt nur auf den
    Ball.
-5. **Reihenfolge am Gerät.** Peter verbindet den Monitor, **bevor** er die
-   Aufgabe schickt. Was beim Verbinden schon da liegt, wird bewusst nicht
+5. **Reihenfolge am Gerät bei gewählter Live-Anzeige.** Peter verbindet den Monitor, **bevor** er die
+   Aufgabe schickt. Ohne Live-Anzeige wird dieselbe Arbeit dauerhaft journalisiert.
+   Was beim Verbinden schon da liegt, wird bewusst nicht
    nachgespielt (Regel vom 21.10.).
 
 Alle Ereignisse einer Aufgabe tragen dieselbe `project_id`, `run_id` und
@@ -238,6 +240,59 @@ einer weitergegebenen Teilaufgabe (`<AUFGABE>-01`, `<AUFGABE>-02`, …).
 ```
 ````
 
+## Laufzeitmeldungen aller Rollen — AG-LAUFZEIT-001 (Peter, 02.11.2026)
+
+Die tatsächlich ausführende **Startstelle** meldet Beginn und Ende ihrer
+Workerausführung. Die Sprachmodellrolle wird dafür nicht zum Selbstauskunftgeber.
+Das gilt für alle maschinellen Rollen und echte Vertreter. Eine Hostmeldung
+über ihren eigenen beobachteten Worker ist keine als Eigenmeldung der Rolle
+verkleidete Fremdmeldung. Die oben beschriebene Ausnahme für Peters Annahme
+betrifft Kundenautorität; sie ersetzt keinen Laufzeitbeleg.
+
+### Pflichtbausteine der Startstelle
+
+| Baustein | Auslöser und Aussage | Erforderliche Zuordnung |
+|---|---|---|
+| Beginn `started` | Beobachteter Beginn der beauftragten Workerarbeit; kein bloßer Empfang, Workflow-/Prozessstart oder Session-Init | Projekt, logischer Lauf, Aufgabe, Elternauftrag falls vorhanden, Arbeitsrolle, echte Startstelle und eindeutiger Ausführungsversuch; überprüfbarer konkreter Laufbeleg |
+| Ende `delivered` | Der gleiche Worker hat seinen Ergebnislauf beendet; Ergebnis darf fachlich FAIL oder BLOCKED lauten | Dieselbe Versuchsbindung und originaler Endbeleg; keine Annahme oder Abnahme |
+| Ende `aborted` | Der gleiche belegte Versuch wurde tatsächlich abgebrochen/fehlgeschlagen beendet | Dieselbe Versuchsbindung und beobachteter Abbruchbeleg; kein erfundener Stop bei Schweigen |
+
+Alle drei tragen `source_evidence: runtime_stream`, **nur wenn** der Ursprung
+geprüft und dem konkreten Lauf zugeordnet ist. Arbeitsrolle, meldende Startstelle
+und technischer Publisher bleiben unterscheidbar. Der Reporter ist die wahre
+Startstelle; Atlas setzt nicht den Rollennamen eines anderen als Reporter ein.
+Ein frei gesetzter Name oder URL beweist nichts. Das konkrete, versionierte
+Feldschema für Hostidentität, Versuchs- und Laufbeleg ist Teil des zu prüfenden
+Produzentenvertrags; diese Tabelle behauptet keine bereits akzeptierten neuen
+V1-Felder. Keine Platzhalter oder unbekannten Felder in den heutigen Kanal senden.
+
+Die Startstelle hält Ereigniszeit und Empfangs-/Veröffentlichungszeit auseinander.
+Die `run_id` des fachlichen Auftrags bleibt erhalten; GitHub-Workflowlauf und
+Sitzung gehören zum konkreten Ausführungsbeleg. Wiederholungen/Fortsetzungen
+bekommen eigene Versuche. Zustellwiederholung erhält dieselbe Ereigniskennung;
+ein spätes Ende darf keinen anderen Versuch beenden. Ein späterer Fehler darf
+einen früher sicher beobachteten Start nicht aus der Historie löschen.
+
+Fehlt ein Start- oder Endbeleg, bleibt die entsprechende Aussage **unbekannt**.
+Keine Ersatzregel aus Übergabe, Queue, Reporterliteral oder vermuteteter Arbeit.
+Ohne gültigen aktuellen Arbeitsbeleg bleibt es beim Puls. Bei Quellenverlust
+oder fehlendem Ende ist der aktuelle Zustand mit dem echten Host abzugleichen,
+nicht aus einem alten `started` als heutige Arbeit zu behaupten.
+
+Read-only-Rollen erhalten keine zusätzlichen Schreibrechte. Unverfügbare native
+Hostanschlüsse werden mit Verantwortlichem und nächstem Nachweis als Lücke
+geführt, nicht durch Rollenwechsel oder neue Secrets verdeckt. Dauerhafte,
+bereinigte Belege und dasselbe append-only Journal dienen Live und Archiv,
+auch wenn keine Live-Anzeige gewählt ist. Fehlende historische Ereignisse
+werden nicht nachgebaut.
+
+**Einführung:** Die bisherigen Kommunikationsbausteine bleiben bestehen.
+Ein `contribution`, auch wahrheitsgemäß von Atlas veröffentlicht, ist weiterhin
+kein Arbeitsbeleg. Neue Laufzeitbausteine werden erst mit geprüftem konkretem
+Produzentenvertrag und kompatibler Konsumentenversion aktiviert. Keine Änderung
+am Monitor vor den belegten Teilen 1 und 2; die Regeländerung allein beweist
+keinen funktionierenden Anschluss und gibt keine Infrastruktur frei.
+
 ## Was das nicht ist
 
 - Kein Arbeitsbeginn und keine Abnahme. `handoff` und `contribution` sind
@@ -331,3 +386,4 @@ verbundener Seite). Ein erfolgreicher Lauf beweist keinen Agentenstart und keine
 fachlichen Abschluss. Lesefehler bleiben unbekannt. Keine Hintergrund-Worker,
 Modellaufrufe, automatische bezahlte Wiederholung oder automatische Vertreterwahl
 werden dadurch aktiviert; Atlas führt die Übergabe im aktiven Auftrag aus.
+
