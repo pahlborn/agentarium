@@ -1,0 +1,23 @@
+{
+  "schema": "agentarium.handoff.v0",
+  "task_id": "AG-LAUFZEIT-001-04",
+  "parent_id": "AG-LAUFZEIT-001",
+  "project_id": "agentarium",
+  "run_id": "AG-LAUFZEIT-001",
+  "source_version": 2,
+  "allowed_paths": [
+    "handoffs/AG-LAUFZEIT-001-forge-architecture-handback-v2.md"
+  ],
+  "readable_paths": [
+    "AGENTS.md",
+    "CLAUDE.md",
+    ".claude/agents/coding-agent.md",
+    "handoffs/AG-LAUFZEIT-001-forge-architecture-request-v2.json",
+    "handoffs/AG-LAUFZEIT-001-forge-architecture-input-v2.md",
+    "handoffs/AG-LAUFZEIT-001-forge-architecture-input-v1.md",
+    "handoffs/AG-LAUFZEIT-001-forge-architecture-handback-v1.md",
+    "relay/claude_public_relay_v2.py",
+    ".github/workflows/claude-public-relay-v2.yml"
+  ],
+  "instructions": "Read handoffs/AG-LAUFZEIT-001-forge-architecture-input-v2.md, your original handback and the first rule package. Reassess only the documented existing artifact-channel possibility and the precise start-evidence corrections. Delayed post-run publication is explicitly rejected. Do not prescribe any unverified new infrastructure. Replace '# Handback\\n' in handoffs/AG-LAUFZEIT-001-forge-architecture-handback-v2.md using Edit with <=650words CA_ADVICE or exact BLOCKED; no implementation, execution, tests, control markers or further runs."
+}
