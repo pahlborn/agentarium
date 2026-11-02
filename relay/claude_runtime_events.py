@@ -353,6 +353,12 @@ def consume(command, work, environment, raw_path, err_path, observer):
                 stop_child(proc)
                 observer.worker_state = 'stopped'
                 observer.ended = observer.ended or utc()
+            except Exception:
+                # Activity was observed, but cleanup did not establish a stop.
+                observer.worker_state = 'unknown'
+                observer.signal = 'supervisor_error'
+                observer.ended = utc()
+                raise
             finally:
                 for stream in (proc.stdout, proc.stderr):
                     if stream is not None:
