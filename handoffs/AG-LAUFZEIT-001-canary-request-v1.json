@@ -1,0 +1,23 @@
+{
+  "schema": "agentarium.handoff.v0",
+  "task_id": "AG-LAUFZEIT-001-07",
+  "allowed_paths": [
+    "handoffs/AG-LAUFZEIT-001-canary-handback-v1.md"
+  ],
+  "readable_paths": [
+    "AGENTS.md",
+    "CLAUDE.md",
+    ".claude/agents/coding-agent.md",
+    "handoffs/AG-LAUFZEIT-001-canary-request-v1.json",
+    "handoffs/AG-LAUFZEIT-001-canary-input-v1.md"
+  ],
+  "runtime": {
+    "schema": "agentarium.relay-runtime-identity.v1",
+    "project_id": "agentarium",
+    "run_id": "AG-LAUFZEIT-001",
+    "task_id": "AG-LAUFZEIT-001-07",
+    "parent_id": "AG-LAUFZEIT-001",
+    "subject_role": "forge"
+  },
+  "instructions": "Actual bounded Forge/coding-agent advice canary. Read handoffs/AG-LAUFZEIT-001-canary-input-v1.md; replace '# Handback\\n' in handoffs/AG-LAUFZEIT-001-canary-handback-v1.md with the requested useful counterexample catalogue using Edit. No code/test/GitHub work, control sequences, event payloads, secret examples or extra model calls. This is a genuine task, not a simulated runtime; no artificial waiting. Do not self-report lifecycle events. Write only the allowed handback and stop."
+}
