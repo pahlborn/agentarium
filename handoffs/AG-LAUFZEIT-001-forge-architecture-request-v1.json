@@ -1,0 +1,24 @@
+{
+  "schema": "agentarium.handoff.v0",
+  "task_id": "AG-LAUFZEIT-001-02",
+  "parent_id": "AG-LAUFZEIT-001",
+  "project_id": "agentarium",
+  "run_id": "AG-LAUFZEIT-001",
+  "source_version": 1,
+  "role": "forge",
+  "technical_agent": "coding-agent",
+  "base_commit": "37f6a5e2b3d3daebc197602c2161f5ffb46bb953",
+  "allowed_paths": [
+    "handoffs/AG-LAUFZEIT-001-forge-architecture-handback-v1.md"
+  ],
+  "readable_paths": [
+    "AGENTS.md",
+    "CLAUDE.md",
+    ".claude/agents/coding-agent.md",
+    "handoffs/AG-LAUFZEIT-001-forge-architecture-request-v1.json",
+    "handoffs/AG-LAUFZEIT-001-forge-architecture-input-v1.md",
+    "relay/claude_public_relay_v2.py",
+    ".github/workflows/claude-public-relay-v2.yml"
+  ],
+  "instructions": "Read handoffs/AG-LAUFZEIT-001-forge-architecture-input-v1.md, then inspect only the relevant relay/workflow functions. You are actual Forge/coding-agent in architecture-only mode. Replace the existing '# Handback\\n' in handoffs/AG-LAUFZEIT-001-forge-architecture-handback-v1.md with your <=1100word CA_ADVICE or precise BLOCKED result using Edit. This file change is REQUIRED. No implementation, tests, shell, GitHub, agent/event control markers or follow-up runs. Return facts, route, prerequisites, minimum real proof, implementation cut and costs within the given10USD whole-task ceiling. Exact source baseline and roles/budget/permission boundaries are in the evidence file."
+}
