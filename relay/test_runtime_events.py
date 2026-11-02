@@ -7,7 +7,7 @@ import os
 from pathlib import Path
 import tempfile
 import unittest
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 import urllib.error
 import zipfile
 
@@ -131,6 +131,61 @@ class RuntimeTests(unittest.TestCase):
             obs.worker_state = 'unknown'
             obs.finish(True, 'unknown')
             self.assertEqual(json.loads((root / 'end.json').read_text())['outcome'], 'observation_lost')
+
+    def test_real_consume_cleanup_failure_keeps_observation_lost_record(self):
+        # Real selector/os.read path over fixture pipes; no real child/kill claim.
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            obs = runtime.Observer(context(), root / 'observations')
+            streams = []
+            for payload in ((json.dumps(activity()) + '\n').encode(), b''):
+                read_fd, write_fd = os.pipe()
+                os.write(write_fd, payload)
+                os.close(write_fd)
+                streams.append(os.fdopen(read_fd, 'rb'))
+            proc = Mock(stdout=streams[0], stderr=streams[1], returncode=0)
+            proc.poll.return_value = proc.wait.return_value = 0
+            with patch.object(runtime.subprocess, 'Popen', return_value=proc), \
+                 patch.object(runtime, 'stop_child', side_effect=RuntimeError('synthetic cleanup uncertainty')):
+                with self.assertRaisesRegex(RuntimeError, 'cleanup uncertainty'):
+                    runtime.consume(['synthetic-fixture'], root, {}, root / 'raw', root / 'err', obs)
+            self.assertTrue((obs.root / 'start.json').is_file())
+            self.assertEqual(obs.worker_state, 'unknown')
+            obs.finish(True, 'unknown')
+            end = runtime.validate(json.loads((obs.root / 'end.json').read_text()), context())
+            self.assertEqual(end['outcome'], 'observation_lost')
+            self.assertEqual(runtime.lifecycle_kind(end), 'observation_lost')
+            self.assertNotEqual(runtime.lifecycle_kind(end), 'delivered')
+
+    def test_v1_explicit_identity_has_logical_payload_and_unique_attempt_ids(self):
+        def payload(block):
+            return json.loads(block.split('```json\n')[1].split('\n```')[0])
+        ctx = context('spec-agent')
+        meta = {'phase': 'result_ready', 'task_id': ctx['activation']['task_id'], 'run_id': ctx['run_id']}
+        for builder in (lambda c: driver.ag_host_received(c),
+                        lambda c: driver.ag_terminal(meta, context=c)):
+            first = payload(builder(ctx))
+            self.assertEqual(first['project_id'], ctx['request']['runtime']['project_id'])
+            self.assertEqual(first['run_id'], ctx['request']['runtime']['run_id'])
+            self.assertNotEqual(first['run_id'], ctx['run_id'])
+            self.assertEqual(first['task_id'], ctx['request']['runtime']['task_id'])
+            self.assertEqual(set(first) - {'recipient'}, set(driver.AG_FIELDS))
+            retried = copy.deepcopy(ctx)
+            retried['run_attempt'] = '2'
+            second = payload(builder(retried))
+            self.assertEqual(first['run_id'], second['run_id'])
+            self.assertNotEqual(first['id'], second['id'])
+        self.assertEqual(payload(driver.ag_terminal(meta, context=ctx))['actor'], 'archibald')
+        legacy = copy.deepcopy(ctx)
+        del legacy['request']['runtime']
+        received = payload(driver.ag_host_received(legacy))
+        terminal = payload(driver.ag_terminal(meta, 'spec-agent', legacy))
+        self.assertEqual(received['run_id'], '42')
+        self.assertEqual(received['id'], 'AG-TEST-0001:42:HOST_RECEIVED')
+        self.assertEqual(terminal['run_id'], '42')
+        self.assertEqual(terminal['id'], 'AG-TEST-0001:42:RESULT_READY')
+        self.assertEqual(terminal['project_id'], driver.AG_PROJECT)
+        self.assertEqual(terminal['actor'], 'archibald')
 
     def test_roles_attempts_identity_and_legacy(self):
         for role, subject in runtime.ROLE_MAP.items():
