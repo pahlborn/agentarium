@@ -251,6 +251,35 @@ class RuntimeTests(unittest.TestCase):
         with patch.object(runtime, 'pages', return_value=[{'body': body, 'user': {'id': 41898282}}]):
             self.assertEqual(runtime.journal(context()), set())
 
+    def test_fixed_host_evidence_and_versioned_history_compatibility(self):
+        def comment(record):
+            body = runtime.MARKER + '\n```json\n' + runtime.serialized(record).decode() + '\n```'
+            return {'body': body, 'user': {'id': 41898282}}
+        for phase in ('start', 'end'):
+            value = observation(phase)
+            row, job, _ = platform(phase, value)
+            current = runtime.record(value, row, job, 'archive')
+            self.assertEqual(current['schema'], 'agentarium.runtime-record.v2')
+            self.assertEqual(current['source_evidence'], 'runtime_stream')
+            for forged_value in ('reported_checkpoint', 'model_claim', None):
+                forged = dict(current, source_evidence=forged_value)
+                with self.subTest(phase=phase, forged_value=forged_value), \
+                     patch.object(runtime, 'pages', return_value=[comment(forged)]):
+                    self.assertEqual(runtime.journal(context()), set())
+            historical = dict(current, schema='agentarium.runtime-record.v1')
+            del historical['source_evidence']
+            original_history = copy.deepcopy(historical)
+            other_context = context()
+            other_context['run_attempt'] = '2'
+            other_value = dict(value, **runtime.identity(other_context))
+            other_row = dict(row, name=runtime.artifact_name(other_context, phase))
+            other = runtime.record(other_value, other_row, job, 'archive')
+            with patch.object(runtime, 'pages', return_value=[comment(historical), comment(other)]):
+                self.assertEqual(runtime.journal(context()), set())
+            with patch.object(runtime, 'pages', return_value=[comment(historical), comment(other), comment(current)]):
+                self.assertEqual(runtime.journal(context()), {runtime.event_id(value)})
+            self.assertEqual(historical, original_history)
+
     def test_late_duplicate_and_terminal_prevent_live_label(self):
         self.assertEqual(runtime.select_delivery('start', False, True), 'live_observed')
         self.assertEqual(runtime.select_delivery('start', True, True), 'archive')
