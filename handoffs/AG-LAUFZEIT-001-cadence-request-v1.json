@@ -1,0 +1,25 @@
+{
+  "schema": "agentarium.handoff.v0",
+  "task_id": "AG-LAUFZEIT-001-10",
+  "allowed_paths": [
+    "handoffs/AG-LAUFZEIT-001-cadence-handback-v1.md"
+  ],
+  "readable_paths": [
+    "AGENTS.md",
+    "CLAUDE.md",
+    ".claude/agents/process-agent.md",
+    "handoffs/AG-LAUFZEIT-001-cadence-request-v1.json",
+    "handoffs/AG-LAUFZEIT-001-cadence-input-v1.md",
+    "governance/agentarium-rulebook-v1.4.md",
+    "governance/agentarium-process-v1.4.md"
+  ],
+  "runtime": {
+    "schema": "agentarium.relay-runtime-identity.v1",
+    "project_id": "agentarium",
+    "run_id": "AG-LAUFZEIT-001",
+    "task_id": "AG-LAUFZEIT-001-10",
+    "parent_id": "AG-LAUFZEIT-001",
+    "subject_role": "cadence"
+  },
+  "instructions": "Actual process-agent/Cadence event review for findingAG-LAUFZEIT-001-PF-001 under existing standing authorization. Read Rulebook/Process fully and handoffs/AG-LAUFZEIT-001-cadence-input-v1.md. Return <=650words/max3evidence-based improvements or nochange, not a newgate. Edit only handoffs/AG-LAUFZEIT-001-cadence-handback-v1.md replacing '# Handback\\n'. No tests, publication, agents, modelcalls, control markers or eventJSON. Budget0.75USD/8Turns for this attempt, whole10USDmandate; stop after handback."
+}
