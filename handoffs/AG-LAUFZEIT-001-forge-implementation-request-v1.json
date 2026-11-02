@@ -1,0 +1,22 @@
+{
+  "schema": "agentarium.handoff.v0",
+  "task_id": "AG-LAUFZEIT-001-06",
+  "parent_id": "AG-LAUFZEIT-001",
+  "project_id": "agentarium",
+  "run_id": "AG-LAUFZEIT-001",
+  "source_version": 1,
+  "allowed_paths": [
+    "handoffs/AG-LAUFZEIT-001-forge-implementation-handback-v1.md"
+  ],
+  "readable_paths": [
+    "AGENTS.md",
+    "CLAUDE.md",
+    ".claude/agents/coding-agent.md",
+    "handoffs/AG-LAUFZEIT-001-forge-implementation-request-v1.json",
+    "handoffs/AG-LAUFZEIT-001-forge-implementation-input-v1.md",
+    "handoffs/AG-LAUFZEIT-001-forge-architecture-handback-v2.md",
+    "relay/claude_public_relay_v2.py",
+    ".github/workflows/claude-public-relay-v2.yml"
+  ],
+  "instructions": "Actual Forge, now authorized bounded producer implementation. Read handoffs/AG-LAUFZEIT-001-forge-implementation-input-v1.md and your V2 owner architecture. Produce CA_PATCH_READY plus one valid unified diff for the allowed producer/helper/tests/workflow/contract files, in handoffs/AG-LAUFZEIT-001-forge-implementation-handback-v1.md using Edit to replace '# Handback\\n'. Do not edit other files in the isolated workspace, run tests, invent tools or claim applied code. Preserve security/content guards: no literal existing Agentarium control marker or sample event blocks, no encoding to bypass guards. No monitor edits/role migration/new scope. Source identity, proof, permissions, budget and exact acceptance requirements are in the input. Max8Turns/3USD this attempt, whole package10USD."
+}
