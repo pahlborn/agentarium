@@ -176,12 +176,13 @@ def marker(task_id: str, source_commit: str, phase: str,
 
 
 def ag_block(task_id: str, run_id: str, phase: str, kind: str, actor: str,
-             title: str, evidence: str, recipient: str | None = None) -> str:
+             title: str, evidence: str, recipient: str | None = None, *,
+             project_id: str = AG_PROJECT, event_id: str | None = None) -> str:
     """Einen vertragsgueltigen Agentarium-Block bauen, oder gar keinen."""
     event = {
         "schema": AG_SCHEMA,
-        "id": f"{task_id}:{run_id}:{phase}",
-        "project_id": AG_PROJECT,
+        "id": event_id if event_id is not None else f"{task_id}:{run_id}:{phase}",
+        "project_id": project_id,
         "run_id": str(run_id),
         "task_id": str(task_id),
         "actor": actor,
@@ -216,15 +217,30 @@ def ag_control_in_handback(data: bytes) -> bool:
     return AG_MARKER.encode() in data or runtime.MARKER.encode() in data
 
 
+def ag_context_binding(context: dict | None, task_id: str, workflow_run_id: str,
+                       phase: str) -> tuple[str, str, dict]:
+    binding = (runtime.identity(context) if context is not None and
+               context.get("request", {}).get("runtime") is not None else None)
+    if binding is None:
+        return task_id, str(workflow_run_id), {}
+    if binding["task_id"] != task_id or binding["github_run_id"] != str(workflow_run_id):
+        raise RuntimeError("communication/runtime identity mismatch")
+    # Payload groups the logical run; IDs still distinguish actual run/attempt.
+    event_id = f"{task_id}:{binding['github_run_id']}:{binding['github_run_attempt']}:{phase}"
+    return binding["task_id"], binding["run_id"], {
+        "project_id": binding["project_id"], "event_id": event_id}
+
+
 def ag_host_received(context: dict) -> str:
     a = context["activation"]
-    return ag_block(a["task_id"], str(context["run_id"]), "HOST_RECEIVED",
+    task_id, run_id, envelope = ag_context_binding(context, a["task_id"], str(context["run_id"]), "HOST_RECEIVED")
+    return ag_block(task_id, run_id, "HOST_RECEIVED",
                     "handoff", "atlas",
                     "Auftrag transportiert und empfangen — kein belegter Arbeitsbeginn",
-                    "runtime_stream", recipient=runtime.ROLE_MAP.get(a.get("role"), "forge"))
+                    "runtime_stream", recipient=runtime.ROLE_MAP.get(a.get("role"), "forge"), **envelope)
 
 
-def ag_terminal(meta: dict, role: str = "coding-agent") -> str:
+def ag_terminal(meta: dict, role: str = "coding-agent", context: dict | None = None) -> str:
     """Die Abschlussmeldung als Vertragsereignis.
 
     KEIN `forge` BEI BLOCKED, UND DAS IST EINE ABWEICHUNG MIT GRUND.
@@ -243,18 +259,21 @@ def ag_terminal(meta: dict, role: str = "coding-agent") -> str:
     Absicht ("eine feste Forge-Zuordnung waere eine falsche
     Tatsachenbehauptung"), nicht ihr Gegenteil.
     """
-    task_id, run_id = meta["task_id"], meta["run_id"]
+    phase = "RESULT_READY" if meta["phase"] == "result_ready" else "BLOCKED"
+    task_id, run_id, envelope = ag_context_binding(context, meta["task_id"], meta["run_id"], phase)
+    if context is not None:
+        role = context["activation"]["role"]
     subject = runtime.ROLE_MAP[role]
     if meta["phase"] == "result_ready":
         return ag_block(task_id, run_id, "RESULT_READY", "contribution", runtime.ROLE_MAP[role],
                         "Rücklauf liegt vor — keine Abnahme, keine Annahme",
-                        "reported_checkpoint", recipient="atlas")
+                        "reported_checkpoint", recipient="atlas", **envelope)
     if meta.get("failure") == "RUN_JOB_NO_RESULT":
         titel = f"Lauf lieferte kein Ergebnis — über {subject} ist nichts beobachtet"
     else:
         titel = f"Lauf blockiert, Ergebnis zurückgehalten — über {subject} ist nichts belegt"
     return ag_block(task_id, run_id, "BLOCKED", "progress", "atlas",
-                    titel, "reported_checkpoint")
+                    titel, "reported_checkpoint", **envelope)
 
 
 def trusted_terminal_row(row: object, task_id: str, source_commit: str) -> bool:
@@ -789,7 +808,7 @@ def publish() -> None:
         if secret_hit(data) or sha256(data) != meta.get("handback_sha256"):
             raise RuntimeError("publish integrity/secret check failed")
         body += "\n\n" + data.decode(errors="replace")[:4000]
-    body += "\n\n" + ag_terminal(meta, context["activation"]["role"])
+    body += "\n\n" + ag_terminal(meta, context["activation"]["role"], context)
     if secret_hit(body.encode()):
         raise RuntimeError("final comment secret check failed")
     if body.count(AG_MARKER) != 1:
