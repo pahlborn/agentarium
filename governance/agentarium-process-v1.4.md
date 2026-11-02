@@ -34,6 +34,8 @@ Atlas reads the current original task, implementation state and outstanding repl
 
 **Dispatch:** start each role as soon as its actual inputs exist, not in fixed rounds. Before dispatch, verify the receiving channel and that the input package contains the files the run requires. A subscribed PR, a worker call or a bridge receipt is evidence for its own context only. Report the transfer in the monitor (Rulebook §10) before the worker starts. Host receipt is not worker start. Workers report their own transitions as they happen, not in a final summary; a host attests only what it observed, with provenance. Read-only roles return only.
 
+**Runtime reporting — AG-LAUFZEIT-001, Peter, 02.11.2026.** Before dispatch, record the actual execution host, role, logical run/task/parent and unique attempt, its observable start/terminal signals and the verified journal transport. The host owns start/end emission from its own runtime observation; the preceding sentence about workers reporting their own transitions does not require language-model self-report or grant read-only roles publication rights. Distinguish subject role, reporting host and publisher. A dispatch or workflow job is not a worker start. When the host export is unavailable, record that exact gap instead of substituting an Atlas report for runtime evidence. On handback or failure, reconcile the same attempt and preserve prior observed start/usage safely; missing values stay unknown. Publish retries idempotently. This producer duty applies with live display off as well; live and archive share the journal. Schema rollout and the monitor depend on the verified producer contract under Rulebook §10, not on this text alone.
+
 ### 2. Prove the critical path early
 For cross-system work, exercise one real source-to-product path before expanding status types, architecture or decoration. For Agentarium live work this means a real event reaching the intended consumer with the claimed visible effect. A queue counter or synthetic fixture is not a rendered or device result. State what the chosen environment can prove and what stays blocked.
 
@@ -93,3 +95,4 @@ Active task authority and safety limits take precedence. Running sessions must r
 
 ### Temporary
 #46 was to be transferred as tasks 46-1 … 46-10 per Peter's Zuarbeit and closed without merge in 46-10. This historical instruction authorizes no reopening or merge; verify the actual current closure record before acting.
+
