@@ -27,7 +27,7 @@ REPO = 'pahlborn/agentarium'
 API = 'https://api.github.com/repos/' + REPO
 ROOT = Path('relay-runtime').resolve()
 SCHEMA = 'agentarium.runtime-observation.v1'
-JOURNAL_SCHEMA = 'agentarium.runtime-record.v1'
+JOURNAL_SCHEMA = 'agentarium.runtime-record.v2'
 MARKER = '<!-- AGENTARIUM_RUNTIME_V1 -->'
 ROLE_MAP = {'coding-agent': 'forge', 'spec-agent': 'archibald', 'process-agent': 'cadence'}
 LIMIT_SECONDS = 23 * 60
@@ -488,7 +488,7 @@ def lifecycle_kind(value):
 
 def record(value, row, job, delivery):
     return dict(schema=JOURNAL_SCHEMA, id=event_id(value), kind=lifecycle_kind(value), reporter='relay-host', publisher='github-actions',
-                received_at=utc(), delivery=delivery, observation=value,
+                received_at=utc(), delivery=delivery, source_evidence='runtime_stream', observation=value,
                 evidence={'repository': REPO, 'artifact_id': row['id'], 'artifact_name': row['name'],
                           'artifact_digest': row['digest'], 'artifact_created_at': row['created_at'],
                           'job_id': job['id'], 'job_url': f"https://github.com/{REPO}/actions/runs/{value['github_run_id']}/job/{job['id']}",
@@ -509,9 +509,10 @@ def journal(context):
             continue
         try:
             value = json.loads(body[len(prefix):-4])
-            if (set(value) != {'schema', 'id', 'kind', 'reporter', 'publisher', 'received_at', 'delivery', 'observation', 'evidence'} or
+            if (set(value) != {'schema', 'id', 'kind', 'reporter', 'publisher', 'received_at', 'delivery', 'source_evidence', 'observation', 'evidence'} or
                     value['schema'] != JOURNAL_SCHEMA or value['reporter'] != 'relay-host' or
-                    value['publisher'] != 'github-actions' or value['delivery'] not in ('live_observed', 'archive') or
+                    value['publisher'] != 'github-actions' or value['source_evidence'] != 'runtime_stream' or
+                    value['delivery'] not in ('live_observed', 'archive') or
                     not clean(serialized(value))):
                 continue
             observation = validate(value['observation'], context)
