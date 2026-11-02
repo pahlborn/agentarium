@@ -1,0 +1,12 @@
+{
+  "schema": "agentarium.relay-activation.v2",
+  "task_id": "AG-LAUFZEIT-001-02",
+  "authorized": true,
+  "source_commit": "aa0907cecacb045304c737f0cf81962a13872a64",
+  "role": "coding-agent",
+  "request": "handoffs/AG-LAUFZEIT-001-forge-architecture-request-v1.json",
+  "handback": "handoffs/AG-LAUFZEIT-001-forge-architecture-handback-v1.md",
+  "model": "sonnet",
+  "max_turns": 8,
+  "max_budget_usd": 1.5
+}
