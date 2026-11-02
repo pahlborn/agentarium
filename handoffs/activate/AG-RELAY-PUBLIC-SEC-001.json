@@ -1,0 +1,12 @@
+{
+  "schema": "agentarium.relay-activation.v2",
+  "task_id": "AG-LAUFZEIT-001-10",
+  "authorized": true,
+  "source_commit": "94043e8b132882b16f26185dce21494478fd18c5",
+  "role": "process-agent",
+  "request": "handoffs/AG-LAUFZEIT-001-cadence-request-v1.json",
+  "handback": "handoffs/AG-LAUFZEIT-001-cadence-handback-v1.md",
+  "model": "opus",
+  "max_turns": 8,
+  "max_budget_usd": 0.75
+}
