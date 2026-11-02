@@ -40,6 +40,13 @@ Actions run/attempt, host execution attempt and CLI session UUID. A rerun needs
 its own matching prepared artifact; an old bundle cannot silently bind a new
 attempt.
 
+For validated runtime requests, the existing V1 receipt/result communication
+payloads also use that logical project/run/task identity. Their existing `id`
+field remains unique per task, actual Actions run, attempt and phase; the outer
+technical relay marker/run URL retain the Actions run for terminal dedup.
+No V1 fields or lifecycle claims are added. Requests without runtime identity
+retain the exact legacy payload/ID fallback and activation-based role mapping.
+
 ## Observations, not model self-reports
 
 The existing pinned CLI gets `--include-partial-messages`. First nonempty
@@ -91,7 +98,9 @@ retains the original Read/Edit and handback-only permission boundary. The
 supervisor drains both streams without blocking, caps total stream at 64 MiB,
 line at 2 MiB and child duration at 23 minutes. On error/timeout/normal exit it
 signals only its owned child process group, applies TERM then KILL as needed,
-and reaps the direct child. Same-UID execution is not security isolation; a
+and reaps the direct child. If cleanup throws, worker_state is explicitly
+unknown and the surviving supervisor preserves an observation_lost end record;
+this does not claim that the child terminated. Same-UID execution is not security isolation; a
 compromised runtime could modify observations or suppress uploads. This patch
 claims platform provenance and host observation, not protection against a
 compromised same-UID host.
@@ -145,7 +154,7 @@ before a response remain unknown. `delivered` means a normally ended technical
 runtime, never task acceptance or a role self-report. `aborted` requires a
 known stop or a known not-launched child; it cannot hide an unknown worker
 stop. A journal record whose kind contradicts its nested observation is
-rejected. These fields belong solely to the new namespace; V1 is unchanged.
+rejected. These fields belong solely to the new namespace; the V1 schema is unchanged.
 
 Journal ID is `<execution_attempt>:<phase>`. The nested observation retains
 original time. received_at is publisher time. Evidence includes exact
