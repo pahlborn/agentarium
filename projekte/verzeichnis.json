@@ -19,6 +19,12 @@
       "kuerzel": "GT40",
       "name": "GT40 Engine",
       "repo": "pahlborn/gt40-engine"
+    },
+    {
+      "id": "sbf-1968-302",
+      "kuerzel": "SBF68",
+      "name": "Ford 302 von 1968 – Restaurierung",
+      "repo": null
     }
   ]
 }
