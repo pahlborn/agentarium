@@ -195,17 +195,27 @@ if(process.argv.includes('--offline'))process.exit(fehler?1:0);
    const waiting=[baseEvent('handoff','atlas','atlas',{recipient:'scout',task_id:'AG-VERT-WAIT'}),baseEvent('assigned','atlas','atlas',{recipient:'scout',task_id:'AG-VERT-WAIT'})];
    const response={liste:normal.concat(waiting).map(comment),actions:snapshot};
    const a=await seite(b,tisch,response,viewport);
-   await a.s.waitForFunction(()=>document.querySelector('.agWorkBadge.blocked'));
-   zeile('Blockade sichtbar '+viewport.width,await a.s.locator('.agWorkBadge.blocked').count(),1);
-   zeile('Zugewiesener Ball zeigt Warteuhr '+viewport.width,await a.s.locator('.agWorkBadge.waiting').count(),1);
-   zeile('Warteuhr ist ohne Hover sichtbar '+viewport.width,await a.s.locator('.agWorkBadge.waiting').isVisible(),true);
-   await a.s.click('.agWorkBadge.waiting');
-   zeile('Statusabzeichen erhält bisheriges Ballschild '+viewport.width,(await stand(a.s)).ballInfo.startsWith('AG · AG-VERT-WAIT'),true);
+   /* AG-MON-ABZEICHEN-001 (Peter, 10.11.): keine runden Abzeichen mehr über
+      liegenden Bällen. Geprüft wird der ZUSTAND (blockiert, zugewiesen),
+      dass kein Abzeichen erscheint, und dass das bisherige Ballschild beim
+      Antippen des Balls bleibt. Der Blockadegrund steht in der Liste. */
+   await a.s.waitForFunction(()=>window.__agStand().aufgaben.some(t=>t.klemmt&&t.klemmt.length));
+   await a.s.waitForTimeout(600);
+   let st0=await stand(a.s);
+   zeile('Blockade im Zustand '+viewport.width,st0.aufgaben.filter(t=>t.klemmt&&t.klemmt.length).length,1);
+   zeile('Zugewiesene Aufgabe wartet ohne Arbeit '+viewport.width,(st0.aufgaben.find(t=>t.aufgabe==='AG-VERT-WAIT')||{}).zustand,'zugewiesen');
+   zeile('Kein Abzeichen über liegenden Bällen '+viewport.width,await a.s.locator('.agWorkBadge, #agWorkDetail').count(),0);
+   const wartBall=st0.liegend.find(l=>l.aufgabe==='AG-VERT-WAIT'&&l.ort);
+   zeile('Ball antippen öffnet bisheriges Ballschild '+viewport.width,!!wartBall&&await a.s.evaluate(o=>window.__agGithubBruecke.ballInfo(o[0],o[1]),wartBall.ort),true);
+   zeile('Ballschild nennt die Aufgabe '+viewport.width,(await stand(a.s)).ballInfo.startsWith('AG · AG-VERT-WAIT'),true);
    zeile('Bisheriges Schild behält Elternbezug '+viewport.width,(await stand(a.s)).ballInfo.includes('gehört zu AG-VERT-MAIN'),true);
-   const waitingText=await a.s.locator('#agWorkDetail').innerText();
-   zeile('Warten behauptet keinen Ausfall '+viewport.width,waitingText.includes('Start noch nicht gemeldet')&&waitingText.includes('Keine Ausfallbehauptung'),true);
-   await a.s.click('.agWorkBadge.blocked');
-   zeile('Tap zeigt Grund und Quelle '+viewport.width,(await a.s.locator('#agWorkDetail').innerText()).includes('OFFLINE'),true);
+   /* Der Grund einer Blockade aus der Vorgeschichte hat keine Listenzeile;
+      bisher stand er in der Detailtafel der Abzeichen, jetzt im Ballschild. */
+   const klemmAufg=st0.aufgaben.find(t=>t.klemmt&&t.klemmt.length);
+   const klemmBall=klemmAufg&&st0.liegend.find(l=>l.aufgabe===klemmAufg.aufgabe&&l.bei===klemmAufg.wer&&l.ort);
+   zeile('Blockierten Ball antippen öffnet Ballschild '+viewport.width,!!klemmBall&&await a.s.evaluate(o=>window.__agGithubBruecke.ballInfo(o[0],o[1]),klemmBall.ort),true);
+   zeile('Ballschild nennt Blockade und Grund '+viewport.width,/Blockiert · .*OFFLINE/.test((await stand(a.s)).ballInfo),true);
+   zeile('Wartender Ball nennt keine Blockade '+viewport.width,await a.s.evaluate(o=>{window.__agGithubBruecke.ballInfo(o[0],o[1]);return window.__agStand().ballInfo.includes('Blockiert');},wartBall.ort),false);
    await a.s.locator('#agRunStatus summary').click();
    if(process.env.AG_REAL_ACTIONS !== '0'){
      zeile('Echter öffentlicher Actions-GET '+viewport.width,!!response.realActions?.workflow_runs?.length,true);
@@ -239,11 +249,8 @@ if(process.argv.includes('--offline'))process.exit(fehler?1:0);
      zeile('Erholter technischer Lauf schließt keine Aufgabe',await taskShape(),before);
      await a.s.evaluate(()=>document.getElementById('agGhAuf').open=false);
    }
-   await a.s.click('.agWorkBadge.blocked');
    const live={...change,id:'AG-VERT-LIVE-'+viewport.width,occurred_at:new Date().toISOString()};response.liste.push(comment(live));
    await a.s.waitForFunction(()=>window.__agStand().aufgaben.some(t=>t.wer==='springer'));
-   await a.s.waitForFunction(()=>document.getElementById('agWorkDetail').hidden);
-   zeile('Alte Halterdetailbox nach Wechsel geschlossen '+viewport.width,await a.s.locator('#agWorkDetail').isHidden(),true);
    zeile('Bisheriges Ballschild behauptet keinen alten Halter '+viewport.width,(await stand(a.s)).ballInfo.includes('bei Forge'),false);
    let st=await stand(a.s);zeile('Live atomarer Taskwechsel '+viewport.width,st.aufgaben.filter(x=>x.aufgabe==='AG-VERT-T').length,1);
    zeile('Live atomarer Ballwechsel '+viewport.width,st.liegend.filter(x=>x.aufgabe==='AG-VERT-T')[0]?.bei,'springer');
@@ -261,8 +268,6 @@ if(process.argv.includes('--offline'))process.exit(fehler?1:0);
    });
    zeile('Springername lesbar außerhalb Quellfach '+viewport.width,layout.exists&&layout.inViewport&&layout.sourceClear,true);
    zeile('Springername überlagert keine andere Rolle '+viewport.width,layout.rolesClear,true);
-   await a.s.emulateMedia({reducedMotion:'reduce'});
-   zeile('Reduced motion stoppt Puls '+viewport.width,await a.s.locator('.agWorkBadge.blocked').evaluate(e=>getComputedStyle(e,'::before').animationName),'none');
    await a.s.screenshot({path:path.join(AUFNAHMEN,'vertretung-'+viewport.width+'.png')});
    await a.q.close();
    const reload=await seite(b,tisch,response,viewport);st=await stand(reload.s);

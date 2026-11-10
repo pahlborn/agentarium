@@ -916,6 +916,8 @@
     letter-spacing:.06em; word-break:break-all;}
   #agBallInfo span{display:block;}
   #agBallInfo small{display:block; color:#7F8FA8; font-size:10px; word-break:break-all;}
+  /* AG-MON-ABZEICHEN-001: die Blockade im Ballschild, gedeckt, kein Symbol. */
+  #agBallInfo small.klemmt{color:#D9B26A; word-break:normal;}
   /* `hidden` allein genuegt hier nicht: `display:flex` oben ist eine
      ID-Regel und schlaegt die Voreinstellung des Browsers fuer [hidden].
      Ohne diese Zeile stand der Regler auch live im Bild (bis Fassung 80). */
@@ -3989,6 +3991,22 @@
     var z3 = document.createElement('small');
     z3.textContent = 'Lauf ' + lauf + (laufBez ? ' · ' + laufBez : '');
     ballInfoEl.appendChild(z1); ballInfoEl.appendChild(z2); ballInfoEl.appendChild(z3);
+    /* AG-MON-ABZEICHEN-001: Die runden Abzeichen ueber dem Ball sind weg
+       (Peter, 10.11.). Was ihre Detailtafel sagte, steht jetzt HIER, beim
+       Antippen des Balls, ohne Symbol im Feld: ob die Aufgabe des Halters
+       klemmt, und warum -- auch fuer eine Blockade aus der Vorgeschichte,
+       die in der Liste keine Zeile hat. Kein Satz zu "wartet": Wer nicht
+       arbeitet, zeigt keinen Effekt, das sagt schon das Bild. */
+    var fund = aufgabeSuchen(kennung({ project_id: projekt, run_id: lauf, task_id: l.aufgabe }));
+    var LA = (fund && !fund.mehrfach && fund.wer === l.bei) ? arbeit[fund.wer].liste[fund.i] : null;
+    if (LA && LA.klemmt && LA.klemmt.length) {
+      LA.klemmt.forEach(function (k) {
+        var z4 = document.createElement('small');
+        z4.className = 'klemmt';
+        z4.textContent = 'Blockiert · ' + (k.grund || 'Grund nicht gemeldet') + ' · ' + k.id;
+        ballInfoEl.appendChild(z4);
+      });
+    }
     ballInfoEl.setAttribute('data-aufgabe', l.aufgabe);
     ballInfoEl.setAttribute('data-schluessel', l.schluessel.split('\u0001').slice(0,3).join('\u0001'));
     ballInfoEl.classList.add('auf');
@@ -8899,8 +8917,10 @@
       },
       /* AG-PROJEKTE-003: Die Uhr, nach der der Adapter das Archiv taktet --
          dieselbe, die das Tempo beschleunigt und Halt anhaelt. */
-      /* Statusabzeichen liegen über dem Ball. Ihr Tap öffnet weiterhin
-         dasselbe bestehende Aufgabenschild, einschließlich Elternbezug. */
+      /* Öffnet das bestehende Aufgabenschild des Balls an (x, y),
+         einschließlich Elternbezug. Die Statusabzeichen, für die das gebaut
+         war, sind seit AG-MON-ABZEICHEN-001 entfernt; der Nachweis
+         AG-MON-VERTRETUNG-001 tippt den Ball hierüber an. */
       ballInfo: function (x,y) {
         var hit=ballGetroffen(x,y);if(!hit)return false;
         ballInfoZeigen(hit.l,hit.o);return true;
