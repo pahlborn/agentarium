@@ -916,6 +916,8 @@
     letter-spacing:.06em; word-break:break-all;}
   #agBallInfo span{display:block;}
   #agBallInfo small{display:block; color:#7F8FA8; font-size:10px; word-break:break-all;}
+  /* AG-MON-ABZEICHEN-001: die Blockade im Ballschild, gedeckt, kein Symbol. */
+  #agBallInfo small.klemmt{color:#D9B26A; word-break:normal;}
   /* `hidden` allein genuegt hier nicht: `display:flex` oben ist eine
      ID-Regel und schlaegt die Voreinstellung des Browsers fuer [hidden].
      Ohne diese Zeile stand der Regler auch live im Bild (bis Fassung 80). */
@@ -2516,7 +2518,7 @@
 
      Der Bauzeitpunkt kommt beim Bauen aus der Uhr. Von Hand gepflegte
      Datumsangaben sind nach der zweiten Änderung falsch. */
-  var FASSUNG = '102', GEBAUT = '2026-11-10T12:54Z';
+  var FASSUNG = '103', GEBAUT = '2026-11-10T13:49Z';
 
   /* AG-GH-LIVE-001: JEDE TEXTSENKE MASKIERT.
      Seit Live-Daten von aussen kommen (GitHub-Kommentare, one-event.json),
@@ -3989,6 +3991,22 @@
     var z3 = document.createElement('small');
     z3.textContent = 'Lauf ' + lauf + (laufBez ? ' · ' + laufBez : '');
     ballInfoEl.appendChild(z1); ballInfoEl.appendChild(z2); ballInfoEl.appendChild(z3);
+    /* AG-MON-ABZEICHEN-001: Die runden Abzeichen ueber dem Ball sind weg
+       (Peter, 10.11.). Was ihre Detailtafel sagte, steht jetzt HIER, beim
+       Antippen des Balls, ohne Symbol im Feld: ob die Aufgabe des Halters
+       klemmt, und warum -- auch fuer eine Blockade aus der Vorgeschichte,
+       die in der Liste keine Zeile hat. Kein Satz zu "wartet": Wer nicht
+       arbeitet, zeigt keinen Effekt, das sagt schon das Bild. */
+    var fund = aufgabeSuchen(kennung({ project_id: projekt, run_id: lauf, task_id: l.aufgabe }));
+    var LA = (fund && !fund.mehrfach && fund.wer === l.bei) ? arbeit[fund.wer].liste[fund.i] : null;
+    if (LA && LA.klemmt && LA.klemmt.length) {
+      LA.klemmt.forEach(function (k) {
+        var z4 = document.createElement('small');
+        z4.className = 'klemmt';
+        z4.textContent = 'Blockiert · ' + (k.grund || 'Grund nicht gemeldet') + ' · ' + k.id;
+        ballInfoEl.appendChild(z4);
+      });
+    }
     ballInfoEl.setAttribute('data-aufgabe', l.aufgabe);
     ballInfoEl.setAttribute('data-schluessel', l.schluessel.split('\u0001').slice(0,3).join('\u0001'));
     ballInfoEl.classList.add('auf');
@@ -5267,7 +5285,7 @@
        Puls. Also gehoert das Universum zu Scouts Arbeit. */
     for (var u = 0; u < AGENTEN.length; u++) {
       var AS = AGENTEN[u];
-      if (AS.weise !== 'holen' || !arbeitetWirklich(arbeit[AS.name])) continue;
+      if (AS.weise !== 'holen' || !laeuftJetzt(AS.name)) continue;
       var ps = heimat(AS), a0 = Math.atan2(ps[1] - my(), ps[0] - mx());
       for (var q0 = 0; q0 < 5; q0++) {
         var wq = a0 + (Math.random() - 0.5) * 2.5;
@@ -5286,7 +5304,7 @@
       var A = AGENTEN[i];
       /* Puls hat jeder, der nicht wirklich arbeitet -- auch wer eine
          Aufgabe nur zugewiesen hat (vorher hatte der gar nichts). */
-      if (arbeitetWirklich(arbeit[A.name])) continue;
+      if (laeuftJetzt(A.name)) continue;
       var ph = bereitUhr * 0.85 + i * 0.7;
       var s = 0.5 + 0.5 * Math.sin(ph);
       /* Im Ausklang zeigen alle ihre Rufbereitschaft AKTIV: Der Puls läuft
@@ -5650,6 +5668,7 @@
   function teamRuht() {
     if (baelle.length) return false;
     for (var n in arbeit) if (arbeitetWirklich(arbeit[n])) return false;
+    for (var nl in laufzeit) if (laufzeitAktiv(nl)) return false;
     return true;
   }
   /* Irgendwo im Kreis, nicht auf den Namen. */
@@ -5946,11 +5965,64 @@
     return false;
   }
 
+  /* ============ AG-LAUFZEIT-001 TEIL 3: ARBEIT AUS DER LAUFZEIT ============
+     Peter, 02.11.: tragfaehig statt Zwischenbehelf. Nicht die Rolle meldet,
+     dass sie arbeitet, sondern die Stelle, die sie tatsaechlich startet --
+     fuer die Claude-Rollen das Relais (`relay-host`, Vertrag
+     `handoffs/AG-LAUFZEIT-001-runtime-contract-v1.md`). Der Adapter prueft
+     die Laufzeitmeldung und gibt hier nur das Ergebnis weiter:
+       an   -- ein LIVE beobachteter Start eines Versuchs (`live_observed`),
+               mit der Restzeit bis zur Hoechstdauer eines Laufs;
+       aus  -- das Ende desselben Versuchs (geliefert, abgebrochen oder
+               Beobachtung verloren).
+     Laufzeit ist ein ZWEITER Beleg fuer "arbeitet", neben dem eigenen
+     `started` -- kein Ersatz und keine Ableitung: Uebergabe, Rueckgabe,
+     Fortschritt oder Lieferung starten hier nichts. Die Aufgabenliste bleibt
+     unberuehrt; es entsteht keine Aufgabe und kein Zustand im V1-Vertrag.
+     Laeuft die Hoechstdauer ab, ohne dass ein Ende kam, hoert der Effekt auf:
+     Laenger kann der Lauf nach Vertrag nicht laufen, das Ende ist dann
+     unbekannt, nicht geliefert. */
+  var laufzeit = Object.create(null);   /* name -> { versuch: {bis, ...} } */
+  var laufzeitS = Object.create(null);  /* Arbeitsstand fuer Rollen ohne Aufgabe */
+  function laufzeitAktiv(name) {
+    var L = laufzeit[name];
+    if (!L) return false;
+    var jetzt = performance.now(), da = false;
+    for (var v in L) { if (L[v].bis > jetzt) da = true; else delete L[v]; }
+    if (!da) delete laufzeit[name];
+    return da;
+  }
+  /* Arbeitet die Rolle -- belegt durch eigenes `started` ODER durch einen
+     laufenden, beobachteten Lauf? Eine Stelle fuer alle Fragen danach. */
+  function laeuftJetzt(name) {
+    return arbeitetWirklich(arbeit[name]) || laufzeitAktiv(name);
+  }
+  window.__agLaufzeit = function (d) {
+    if (MODUS !== 'live') return { angenommen: false, grund: 'nicht im Live-Betrieb' };
+    if (!d || typeof d !== 'object') return { angenommen: false, grund: 'keine Angabe' };
+    var name = (typeof d.rolle === 'string') ? d.rolle : '';
+    var v = (typeof d.versuch === 'string') ? d.versuch : '';
+    /* Eigene Eintraege, keine geerbten Namen wie `constructor`. */
+    if (!Object.prototype.hasOwnProperty.call(nachName, name) || !v)
+      return { angenommen: false, grund: 'Rolle oder Versuch fehlt' };
+    if (d.an) {
+      var rest = +d.restMs;
+      if (!(rest > 0)) return { angenommen: false, grund: 'keine Restzeit' };
+      (laufzeit[name] || (laufzeit[name] = Object.create(null)))[v] =
+        { bis: performance.now() + Math.min(rest, 24 * 60 * 1000),
+          aufgabe: String(d.aufgabe || ''), beleg: String(d.beleg || '') };
+      pulsAn(name);
+    } else if (laufzeit[name]) {
+      delete laufzeit[name][v];
+    }
+    return { angenommen: true, aktiv: laufzeitAktiv(name) };
+  };
+
   function arbeitSchritt(dt) {
     /* Anteil jeder Weise am gemeinsamen Budget dieses Bildes. */
     var aktiv = 0;
-    for (var an0 in arbeit)
-      if (arbeitetWirklich(arbeit[an0]) && nachName[an0] && WEISEN[nachName[an0].weise]) aktiv++;
+    for (var an0 in nachName)
+      if (laeuftJetzt(an0) && WEISEN[nachName[an0].weise]) aktiv++;
     weiseAnteil = Math.max(4, Math.floor(WEISE_BUDGET / Math.max(1, aktiv)));
     for (var name in arbeit) {
       var A = nachName[name], S = arbeit[name];
@@ -6053,7 +6125,7 @@
       /* Und eine GEKLEMMTE Aufgabe schlaegt auch nicht: Sie ist begonnen,
          aber es geht gerade nichts voran. Der Takt behauptete sonst eine
          Taetigkeit, von der der Melder selbst gesagt hat, dass sie haengt. */
-      var irgendBegonnen = arbeitetWirklich(S);
+      var irgendBegonnen = laeuftJetzt(name);
       S.schlag = (S.schlag || 0) - dt;
       if (S.schlag <= 0 && irgendBegonnen) {
         S.schlag = 1.5;
@@ -6079,13 +6151,25 @@
          deshalb sauber; die Arbeit braucht sie ebensowenig, um als Drehung
          gelesen zu werden — sie hat ihren Atem und ihren Herzschlag. */
     }
+    /* AG-LAUFZEIT-001: Wer nur durch die Laufzeit arbeitet und keine Aufgabe
+       im Bild hat, bekommt denselben Herzschlag und dieselbe Weise -- aus
+       einem eigenen Arbeitsstand, damit keine Aufgabe erfunden wird. */
+    for (var ln in laufzeit) {
+      if ((arbeit[ln] && !arbeit[ln].aus) || !nachName[ln] || !laufzeitAktiv(ln)) continue;
+      var LS = laufzeitS[ln] || (laufzeitS[ln] = { t: 0, liste: [] }), LA = nachName[ln];
+      LS.t += dt;
+      var lp = heimat(LA);
+      LS.schlag = (LS.schlag || 0) - dt;
+      if (LS.schlag <= 0) { LS.schlag = 1.5; window.__feld.knoten(lp[0], lp[1], 0.62, LA.farbe, 0, 10, 0.75); }
+      weiseAusfuehren(LA, LS, lp, dt, 1);
+    }
     leerlaufSchritt(dt);
     /* Am Ring sieht man es auch ohne hinzusehen: Wer arbeitet, leuchtet. */
     if (ring.children.length) {
       for (var i = 0; i < AGENTEN.length; i++) {
         var e = ring.children[i];
         if (!e) continue;
-        var an = arbeitetWirklich(arbeit[AGENTEN[i].name]);
+        var an = laeuftJetzt(AGENTEN[i].name);
         if (e.__an !== an) { e.__an = an; e.classList.toggle('arbeitet', an); }
       }
     }
@@ -6584,6 +6668,8 @@
                 angenommen und nicht gezeichnet worden. */
              verarbeitet: verarbeitet, ausgegeben: ausgegeben,
              wiederhergestellt: wiederhergestellt, abdeckung: liveAbdeckung,
+             /* AG-LAUFZEIT-001: Rollen mit laufendem, beobachtetem Lauf */
+             laufzeit: Object.keys(laufzeit).filter(laufzeitAktiv).sort(),
              selbstannahmenGemeldet: selbstannahmenGemeldet,
              luecken: luecken.gesamt,
              /* Eigene Zahl, nicht in `luecken.gesamt` -- siehe dort. */
@@ -6700,6 +6786,10 @@
     /* Jeder Wechsel setzt den Livepuffer zurueck. Was ein voriger Strom
        geliefert hat, gehoert nicht in den naechsten. */
     liveListe.length = 0;
+    /* AG-LAUFZEIT-001: auch die beobachteten Laeufe -- der Adapter liest sie
+       beim Neuaufbau wieder ein, das Archiv zeigt sie nicht. */
+    for (var lz in laufzeit) delete laufzeit[lz];
+    for (var lzs in laufzeitS) delete laufzeitS[lzs];
     verarbeitet = 0; ausgegeben = 0;
     wiederhergestellt = 0; liveAbdeckung = ''; selbstannahmenGemeldet = 0;
     /* Auch die Live-Identitaet: Was ein voriger Strom gemeldet hat, ist
@@ -8800,6 +8890,10 @@
          halb, und halb hiesse hier: eine Blockade anzeigen, ohne sie an die
          Aufgabe zu haengen. */
       lebenszyklus: 'gemeldet-v5',
+      /* AG-LAUFZEIT-001: Zusage, dass Laufzeitbelege (`__agLaufzeit`) hier
+         als Arbeitsbeleg ankommen duerfen. Eine aeltere Fassung bekommt sie
+         nicht. */
+      laufzeit: 'runtime-v2',
       akteure: AGENTEN.map(function (a) { return a.name; }),
       istLive: function () { return MODUS === 'live'; },
       /* AG-MON-ARCHIV-001: Vor dem Nachspielen eines Laufs und vor der
@@ -8825,8 +8919,10 @@
       },
       /* AG-PROJEKTE-003: Die Uhr, nach der der Adapter das Archiv taktet --
          dieselbe, die das Tempo beschleunigt und Halt anhaelt. */
-      /* Statusabzeichen liegen über dem Ball. Ihr Tap öffnet weiterhin
-         dasselbe bestehende Aufgabenschild, einschließlich Elternbezug. */
+      /* Öffnet das bestehende Aufgabenschild des Balls an (x, y),
+         einschließlich Elternbezug. Die Statusabzeichen, für die das gebaut
+         war, sind seit AG-MON-ABZEICHEN-001 entfernt; der Nachweis
+         AG-MON-VERTRETUNG-001 tippt den Ball hierüber an. */
       ballInfo: function (x,y) {
         var hit=ballGetroffen(x,y);if(!hit)return false;
         ballInfoZeigen(hit.l,hit.o);return true;

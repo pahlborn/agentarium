@@ -1,4 +1,4 @@
-/* Der Arbeiter. Fassung 102.
+/* Der Arbeiter. Fassung 103.
 
    Zwei Dinge sind hier mit Absicht so und nicht anders:
 
@@ -22,7 +22,7 @@
    zu Ende laufen duerfen.
 */
 const EIGEN = 'agentarium-pilot-v';
-const VORRAT = EIGEN + '102';
+const VORRAT = EIGEN + '103';
 const STUECKE = ['./', 'index.html', 'manifest.webmanifest', 'github-live.js', 'work-status.js',
                  'icon-120.png', 'icon-152.png', 'icon-180.png',
                  'icon-192.png', 'icon-512.png'];
