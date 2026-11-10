@@ -25,3 +25,11 @@ Peter bestätigte die Sichtbarkeit im Monitor und gab die Umsetzung frei. M-N5 i
 **Artefakte.** [Entwurfs-PR #180](https://github.com/pahlborn/bis-school-app_src/pull/180) · [Quellcommit `2de079c4`](https://github.com/pahlborn/bis-school-app_src/commit/2de079c4095079eb978c4ecb09eef6174480c69b) · [Sentinel-Rücklauf im Journal](https://github.com/pahlborn/agentarium/issues/2#issuecomment-6767821068).
 
 **Nächster fachlicher Schnitt.** M-N3 ergänzt Runden mit Abstandsbegründung als zweiten Fall für die Zuordnung. Korrektur, Rücknahme, Upgrade-Abgleich und Systemabnahme auf Stufe 3c sind offen. Die Eingabe ist bis zum Upgrade-Nachweis auf den lokalen Testaufbau mit lokalem Speicher begrenzt.
+
+### 10.11.2026 · Zweiter fachlicher Schnitt M-N3
+
+M-N3 verwendet die vorhandene Rounding-Road-Aufgabe. Das Kind vergleicht die Abstände zu den benachbarten Hundertern und wählt die passende Begründung. Sind M-N3 und M-N5 zugleich als Fokus freigegeben, erhält jede Kompetenz einen Platz in derselben Tagesrunde. Hilfsaufgaben können reservierte Karten nicht mehr verdrängen.
+
+112 gezielte Modul- und Regressionstests bestanden. Der getrennte Chromium-Lauf bestätigte beide Einträge nach Abgleich, beide Kartentypen in derselben Runde sowie zwei unabhängig nachgerechnete Rundungsvarianten und drei Subtraktionsvarianten. [Sentinel-Rücklauf](https://github.com/pahlborn/agentarium/issues/2#issuecomment-6768499820) · [Entwurfs-PR #180](https://github.com/pahlborn/bis-school-app_src/pull/180) · [Quellcommit](https://github.com/pahlborn/bis-school-app_src/commit/f90271412eb336995183ef3b4e6cfe6cad6ec537)
+
+Als Nächstes sind Korrektur und Rücknahme bestätigter Einträge vorgesehen. Upgrade-Abgleich und Systemabnahme auf Stufe 3c sind offen. Der Schreibweg bleibt auf den lokalen Testaufbau begrenzt.
