@@ -275,6 +275,11 @@ async function bis(s, test, arg, ms) {
          ausgegeben -- der Host stuft ihn als delivered ein. */
       ['sauberer Abschluss als observation_lost', kommentar(ableiten(forgeEnde, versuch(), vor(1), 'archive',
         r => { r.kind = 'observation_lost'; }))],
+      /* Zweiter Befund Atlas, #129: ein Start mit Ende-Ergebnis. */
+      ['Start mit outcome process_exited', kommentar(ableiten(forgeStart, versuch(), vor(1), 'live_observed',
+        r => { r.observation.outcome = 'process_exited'; }))],
+      ['Start mit worker_state stopped', kommentar(ableiten(forgeStart, versuch(), vor(1), 'live_observed',
+        r => { r.observation.worker_state = 'stopped'; }))],
       ['Bot-Name mit fremder Nummer', (() => { const k = kommentar(ableiten(forgeStart, versuch(), vor(1),
         'live_observed')); k.user.id = 1; return k; })()]
     ];

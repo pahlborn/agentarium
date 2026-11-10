@@ -861,6 +861,11 @@
        Zeile nachgebildet. Erste Fassung nahm `observation_lost` fuer jedes
        Ende an, also auch fuer einen sauberen Abschluss, den der Host als
        `delivered` einstuft (Befund Atlas, #129, 10.11.). */
+    /* Und vorher, wie beim Host: `lifecycle_kind` setzt `validate()` voraus.
+       Fehlt diese Pruefung, gilt z. B. ein Start mit `process_exited` als
+       Start (zweiter Befund Atlas, #129, 10.11.). */
+    var ungueltig = laufzeitUngueltig(o);
+    if (ungueltig) return nein('Laufzeit: ' + ungueltig);
     if (d.kind !== laufzeitArt(o)) return nein('Laufzeit: Art widerspricht der Beobachtung');
     var ids = ['project_id', 'run_id', 'task_id'];
     for (var i = 0; i < ids.length; i++)
@@ -871,13 +876,43 @@
     if (d.id !== o.execution_attempt + ':' + o.phase) return nein('Laufzeit: Kennung passt nicht');
     if (typeof o.subject_role !== 'string' || !AKTEURE[o.subject_role])
       return nein('Laufzeit: Rolle unbekannt');
-    if (typeof o.start_observed_at !== 'string' || !ISO.test(o.start_observed_at) ||
-        isNaN(Date.parse(o.start_observed_at))) return nein('Laufzeit: Startzeit ungültig');
+    /* Ein Ende darf ohne Startzeit kommen (nie gestartet); ein Start nicht. */
+    var mitStart = o.start_observed_at !== null && o.start_observed_at !== undefined;
+    if ((mitStart || o.phase === 'start') &&
+        (typeof o.start_observed_at !== 'string' || !ISO.test(o.start_observed_at) ||
+         isNaN(Date.parse(o.start_observed_at)))) return nein('Laufzeit: Startzeit ungültig');
     if (e.repository !== 'pahlborn/agentarium' || typeof e.job_url !== 'string' ||
         e.job_url.indexOf(LZ_BELEG) !== 0) return nein('Laufzeit: Beleg ungültig');
     return { art: 'ok', r: { id: d.id, kind: d.kind, live: d.delivery === 'live_observed',
       rolle: o.subject_role, project_id: o.project_id, run_id: o.run_id, task_id: o.task_id,
-      versuch: o.execution_attempt, startMs: Date.parse(o.start_observed_at), beleg: e.job_url } };
+      versuch: o.execution_attempt, startMs: mitStart ? Date.parse(o.start_observed_at) : NaN,
+      beleg: e.job_url } };
+  }
+  /* Die Phasenpruefung aus `validate()` in `relay/claude_runtime_events.py`,
+     soweit sie die Beobachtung selbst betrifft. Leer heisst gueltig. */
+  var LZ_START_SIGNAL = { content_delta: 1, assistant_content: 1 };
+  var LZ_END_SIGNAL = { process_exit: 1, supervisor_error: 1, timeout: 1 };
+  var LZ_END_OUTCOME = { process_exited: 1, unknown_no_activity_observed: 1, error_before_activity: 1,
+                         error_after_activity: 1, safety_blocked: 1, observation_lost: 1 };
+  var LZ_END_STATE = { stopped: 1, not_launched: 1, unknown: 1 };
+  var LZ_END_SAFETY = { passed: 1, blocked: 1, unknown: 1 };
+  function laufzeitUngueltig(o) {
+    if (o.actual_start_unknown !== true) return 'genauer Rechenbeginn ist nie bekannt';
+    var started = o.start_observed_at;
+    if (o.phase === 'start') {
+      if (started !== o.observed_at || typeof o.session_id !== 'string' || !o.session_id ||
+          !LZ_START_SIGNAL[o.signal] || o.outcome !== 'activity_observed' ||
+          o.worker_state !== 'observed_active' || o.safety !== 'pending') return 'falscher Start';
+      return '';
+    }
+    if (!LZ_END_SIGNAL[o.signal] || !LZ_END_OUTCOME[o.outcome] ||
+        !LZ_END_STATE[o.worker_state] || !LZ_END_SAFETY[o.safety]) return 'falsches Ende';
+    var hatStart = started !== null && started !== undefined;
+    if (hatStart && o.outcome === 'error_before_activity') return 'Fehler vor Aktivität widerspricht dem Start';
+    if (!hatStart && (o.outcome === 'process_exited' || o.outcome === 'error_after_activity'))
+      return 'Ende ohne Start';
+    if (o.worker_state === 'unknown' && o.outcome !== 'observation_lost') return 'unbekannter Stopp ohne observation_lost';
+    return '';
   }
   function laufzeitArt(o) {
     if (o.phase === 'start') return 'started';
