@@ -293,6 +293,14 @@ Governance adoption task: AG-RULEBOOK-014. This section stores cursors and Caden
 Update at session start and task closure under Process 1.4 §§0,4,5. Preserve originals and record trigger key, status, review reference and next review event. Do not count comments, commits, subtasks or CI attempts as separate closed tasks by default.
 
 
+### Big Quest und Monitorabgleich · 2026-11-10
+
+- Regelbasis: Rulebook und Process 1.4 am eingesehenen main-Stand d182a8580faaea6012b8a5ec1a82c5948b5af1e2 einschließlich aktuellem Ereignisvertrag geprüft.
+- Issue #2: sieben Seiten und die neuen Kommentare bis [6765128460](https://github.com/pahlborn/agentarium/issues/2#issuecomment-6765128460) vom 2026-11-10T10:35:29Z für die Monitorzustände geprüft. Das ist der fortlaufend geprüfte Monitor-Cursor. Die historische Cadence-Abschlusszählung bleibt unbekannt.
+- Zehn belegte Teilaufgaben geschlossen. Vier frühere Aufgaben bleiben offen. [Abgleich mit Originalbelegen und nächsten Verantwortlichen](https://github.com/pahlborn/agentarium/issues/2#issuecomment-6765060043).
+- BQ-EVAL-01: [Projekt und Archivstand](https://github.com/pahlborn/agentarium/pull/120) integriert, Entwicklungszweig eingerichtet. [Anstoß im Journal](https://github.com/pahlborn/agentarium/issues/2#issuecomment-6765127483). Atlas ist verantwortlich für den nächsten M-N5-Schnitt und die genaue lokale Abnahme. Veröffentlichung im Monitor bleibt an den Hauptprüflauf gebunden.
+- Prozessbefund: Der heutige Adapter kann belegte Hostenden und liegende Teilbälle aus alten Zuordnungen auseinanderlaufen lassen. Teilabnahmen sind abgeglichen. Die Übergabe des Runtime-Konsumenten bleibt bei [AG-LAUFZEIT-001](https://github.com/pahlborn/agentarium/issues/115). Kein erneuter Cadence-Lauf für den bereits dokumentierten fehlgeschlagenen Rückweg veranlasst.
+
 ### GT40-V113 — scoped Atlas session state, 2026-10-30
 <!-- GT40-V113-SESSION-CHECKPOINT -->
 
