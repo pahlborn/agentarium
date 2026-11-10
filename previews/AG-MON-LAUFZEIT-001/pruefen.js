@@ -280,6 +280,12 @@ async function bis(s, test, arg, ms) {
         r => { r.observation.outcome = 'process_exited'; }))],
       ['Start mit worker_state stopped', kommentar(ableiten(forgeStart, versuch(), vor(1), 'live_observed',
         r => { r.observation.worker_state = 'stopped'; }))],
+      /* Dritter Befund Atlas, #129: geerbte Namen als Tabellenwert. */
+      ['Start mit signal "constructor"', kommentar(ableiten(forgeStart, versuch(), vor(1), 'live_observed',
+        r => { r.observation.signal = 'constructor'; }))],
+      ['Ende mit outcome "toString"', kommentar(ableiten(forgeEnde, versuch(), vor(1), 'archive',
+        r => { r.observation.outcome = 'toString'; r.observation.worker_state = 'stopped';
+               r.kind = 'aborted'; }))],
       ['Bot-Name mit fremder Nummer', (() => { const k = kommentar(ableiten(forgeStart, versuch(), vor(1),
         'live_observed')); k.user.id = 1; return k; })()]
     ];

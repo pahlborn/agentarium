@@ -6002,7 +6002,9 @@
     if (!d || typeof d !== 'object') return { angenommen: false, grund: 'keine Angabe' };
     var name = (typeof d.rolle === 'string') ? d.rolle : '';
     var v = (typeof d.versuch === 'string') ? d.versuch : '';
-    if (!nachName[name] || !v) return { angenommen: false, grund: 'Rolle oder Versuch fehlt' };
+    /* Eigene Eintraege, keine geerbten Namen wie `constructor`. */
+    if (!Object.prototype.hasOwnProperty.call(nachName, name) || !v)
+      return { angenommen: false, grund: 'Rolle oder Versuch fehlt' };
     if (d.an) {
       var rest = +d.restMs;
       if (!(rest > 0)) return { angenommen: false, grund: 'keine Restzeit' };

@@ -824,8 +824,16 @@
   var LZ_MARKER = '<!-- AGENTARIUM_RUNTIME_V1 -->';
   var LZ_FORM = /^\s*<!-- AGENTARIUM_RUNTIME_V1 -->\s*```(?:json)?[ \t]*\r?\n([\s\S]*?)\r?\n[ \t]*```\s*$/;
   var LZ_MAX_MS = 23 * 60 * 1000;
-  var LZ_ARTEN = { started: 1, delivered: 1, aborted: 1, observation_lost: 1 };
-  var LZ_ABBRUCH = { error_before_activity: 1, error_after_activity: 1, safety_blocked: 1 };
+  /* Wertetabellen OHNE Prototyp: In einem gewoehnlichen Objekt gilt auch
+     ein geerbter Name wie `constructor` als Treffer (dritter Befund Atlas,
+     #129, 10.11.: ein Start mit `signal: "constructor"` kam durch). */
+  function lzMenge(liste) {
+    var m = Object.create(null);
+    liste.forEach(function (k) { m[k] = 1; });
+    return m;
+  }
+  var LZ_ARTEN = lzMenge(['started', 'delivered', 'aborted', 'observation_lost']);
+  var LZ_ABBRUCH = lzMenge(['error_before_activity', 'error_after_activity', 'safety_blocked']);
   var LZ_BELEG = 'https://github.com/pahlborn/agentarium/actions/runs/';
   var laufzeitIds = Menge(MAX_IDS), laufzeitEnden = Menge(MAX_IDS), basisLaufzeit = [];
   function pruefenLaufzeit(c) {
@@ -890,12 +898,12 @@
   }
   /* Die Phasenpruefung aus `validate()` in `relay/claude_runtime_events.py`,
      soweit sie die Beobachtung selbst betrifft. Leer heisst gueltig. */
-  var LZ_START_SIGNAL = { content_delta: 1, assistant_content: 1 };
-  var LZ_END_SIGNAL = { process_exit: 1, supervisor_error: 1, timeout: 1 };
-  var LZ_END_OUTCOME = { process_exited: 1, unknown_no_activity_observed: 1, error_before_activity: 1,
-                         error_after_activity: 1, safety_blocked: 1, observation_lost: 1 };
-  var LZ_END_STATE = { stopped: 1, not_launched: 1, unknown: 1 };
-  var LZ_END_SAFETY = { passed: 1, blocked: 1, unknown: 1 };
+  var LZ_START_SIGNAL = lzMenge(['content_delta', 'assistant_content']);
+  var LZ_END_SIGNAL = lzMenge(['process_exit', 'supervisor_error', 'timeout']);
+  var LZ_END_OUTCOME = lzMenge(['process_exited', 'unknown_no_activity_observed', 'error_before_activity',
+                                'error_after_activity', 'safety_blocked', 'observation_lost']);
+  var LZ_END_STATE = lzMenge(['stopped', 'not_launched', 'unknown']);
+  var LZ_END_SAFETY = lzMenge(['passed', 'blocked', 'unknown']);
   function laufzeitUngueltig(o) {
     if (o.actual_start_unknown !== true) return 'genauer Rechenbeginn ist nie bekannt';
     var started = o.start_observed_at;
