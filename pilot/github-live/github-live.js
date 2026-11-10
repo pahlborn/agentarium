@@ -174,6 +174,9 @@
      ausdruecklich, statt sie halb anzuzeigen. Eine aeltere Fassung sagt
      dieses Wort nicht und bekommt die Ereignisse deshalb gar nicht erst. */
   var KANN_LEBEN = B.lebenszyklus === KANN_LEBEN_WORT;
+  /* AG-LAUFZEIT-001: Ein Original, das Laufzeitbelege nicht kennt, bekommt
+     sie nicht -- dieselbe Bauart wie die beiden Zusagen darueber. */
+  var KANN_LAUFZEIT = B.laufzeit === 'runtime-v2' && typeof window.__agLaufzeit === 'function';
 
   function Menge(max) {
     var o = Object.create(null), q = [];
@@ -201,7 +204,9 @@
                /* AG-MON-ARCHIV-002 Teil B: alle Kommentare auf #2, die diese
                   Verbindung gelesen hat (Basis und live, mit und ohne
                   Marker), und wie lange das Verbinden gedauert hat. */
-               kommentareGesamt: 0, verbindenMs: 0 };
+               kommentareGesamt: 0, verbindenMs: 0,
+               /* AG-LAUFZEIT-001: Laufzeitbelege des Relais */
+               laufzeit: 0, laufzeitAbgewiesen: 0, laufzeitUebersprungen: 0 };
 
   /* ================= DAS PROJEKTVERZEICHNIS (AG-PROJEKTE-002) =================
      Peter, 25.10.: Projekt -> Laeufe -> Aufgaben. Nur Projekte aus dem
@@ -800,6 +805,111 @@
       kommentar: String(c.id) } };
   }
 
+  /* ============ AG-LAUFZEIT-001 TEIL 3: LAUFZEITBELEGE LESEN ============
+     Vertrag: `handoffs/AG-LAUFZEIT-001-runtime-contract-v1.md`. Ein eigener
+     Kanal neben dem Ereignisvertrag V1 -- eigener Marker, eigenes Schema,
+     und nichts davon wird in ein V1-Ereignis verwandelt. Angenommen wird nur,
+     was der Vertrag zusagt, Zeichen fuer Zeichen:
+       - ein Kommentar des GitHub-Actions-Bots, der mit dem Marker beginnt
+         und genau einen JSON-Block enthaelt, sonst nichts;
+       - Schema `agentarium.runtime-record.v2` (v1 wird laut Vertrag
+         uebersprungen), Melder `relay-host`, Herkunft `runtime_stream`;
+       - die Art (`kind`) passt zur Beobachtung, wie die Tabelle im Vertrag es
+         festlegt -- sonst wird abgewiesen, nicht umgedeutet.
+     Arbeit zeigt nur ein LIVE beobachteter Start (`live_observed`); ein
+     Start, der erst nach seinem Ende gelesen wurde (`archive`), aktiviert
+     nie. Ein Ende beendet den Versuch; ein spaeter Start danach aendert
+     nichts. Laenger als die Hoechstdauer eines Laufs (23 Minuten, Vertrag)
+     gilt kein Start als laufend. */
+  var LZ_MARKER = '<!-- AGENTARIUM_RUNTIME_V1 -->';
+  var LZ_FORM = /^\s*<!-- AGENTARIUM_RUNTIME_V1 -->\s*```(?:json)?[ \t]*\r?\n([\s\S]*?)\r?\n[ \t]*```\s*$/;
+  var LZ_MAX_MS = 23 * 60 * 1000;
+  var LZ_ARTEN = { started: 1, delivered: 1, aborted: 1, observation_lost: 1 };
+  var LZ_ABBRUCH = { error_before_activity: 1, error_after_activity: 1, safety_blocked: 1 };
+  var LZ_BELEG = 'https://github.com/pahlborn/agentarium/actions/runs/';
+  var laufzeitIds = Menge(MAX_IDS), laufzeitEnden = Menge(MAX_IDS), basisLaufzeit = [];
+  function pruefenLaufzeit(c) {
+    var body = (c && typeof c.body === 'string') ? c.body : '';
+    if (body.indexOf(LZ_MARKER) < 0) return { art: 'ohne' };
+    var login = (c.user && typeof c.user.login === 'string') ? c.user.login : '';
+    if (login !== 'github-actions[bot]') return nein('Laufzeit: Autor nicht der Actions-Bot');
+    if (body.length > MAX_KOERPER) return nein('Laufzeit: Kommentar zu gross');
+    var m = LZ_FORM.exec(body);
+    if (!m) return nein('Laufzeit: nicht genau ein JSON-Block nach dem Marker');
+    var d;
+    try { d = JSON.parse(m[1]); } catch (x) { return nein('Laufzeit: JSON ungültig'); }
+    if (!d || typeof d !== 'object' || Array.isArray(d)) return nein('Laufzeit: kein JSON-Objekt');
+    if (d.schema === 'agentarium.runtime-record.v1') return { art: 'uebersprungen' };
+    if (d.schema !== 'agentarium.runtime-record.v2') return nein('Laufzeit: Schema unbekannt');
+    if (d.reporter !== 'relay-host' || d.publisher !== 'github-actions')
+      return nein('Laufzeit: Melder oder Veröffentlicher falsch');
+    if (d.source_evidence !== 'runtime_stream') return nein('Laufzeit: Herkunft nicht runtime_stream');
+    if (!LZ_ARTEN[d.kind]) return nein('Laufzeit: Art unbekannt');
+    if (d.delivery !== 'live_observed' && d.delivery !== 'archive')
+      return nein('Laufzeit: Zustellung unbekannt');
+    var o = d.observation, e = d.evidence;
+    if (!o || typeof o !== 'object' || !e || typeof e !== 'object')
+      return nein('Laufzeit: Beobachtung oder Beleg fehlt');
+    if (o.schema !== 'agentarium.runtime-observation.v1' || o.actor !== 'relay-host')
+      return nein('Laufzeit: Beobachtung unbekannt');
+    if (o.phase !== 'start' && o.phase !== 'end') return nein('Laufzeit: Phase unbekannt');
+    /* Die Art muss zur Beobachtung passen (Tabelle im Vertrag). */
+    var passt =
+      d.kind === 'started' ? (o.phase === 'start' && o.outcome === 'activity_observed') :
+      d.kind === 'delivered' ? (o.phase === 'end' && o.worker_state === 'stopped' &&
+                                o.signal === 'process_exit' && o.outcome === 'process_exited' &&
+                                o.safety === 'passed') :
+      d.kind === 'aborted' ? (o.phase === 'end' && !!LZ_ABBRUCH[o.outcome] &&
+                              (o.worker_state === 'stopped' || o.worker_state === 'not_launched')) :
+      o.phase === 'end';
+    if (!passt) return nein('Laufzeit: Art widerspricht der Beobachtung');
+    var ids = ['project_id', 'run_id', 'task_id'];
+    for (var i = 0; i < ids.length; i++)
+      if (typeof o[ids[i]] !== 'string' || !KENNUNG.test(o[ids[i]]))
+        return nein('Laufzeit: ' + ids[i] + ' ungültig');
+    if (typeof o.execution_attempt !== 'string' || !/^[0-9a-f]{64}$/.test(o.execution_attempt))
+      return nein('Laufzeit: Versuch ungültig');
+    if (d.id !== o.execution_attempt + ':' + o.phase) return nein('Laufzeit: Kennung passt nicht');
+    if (typeof o.subject_role !== 'string' || !AKTEURE[o.subject_role])
+      return nein('Laufzeit: Rolle unbekannt');
+    if (typeof o.start_observed_at !== 'string' || !ISO.test(o.start_observed_at) ||
+        isNaN(Date.parse(o.start_observed_at))) return nein('Laufzeit: Startzeit ungültig');
+    if (e.repository !== 'pahlborn/agentarium' || typeof e.job_url !== 'string' ||
+        e.job_url.indexOf(LZ_BELEG) !== 0) return nein('Laufzeit: Beleg ungültig');
+    return { art: 'ok', r: { id: d.id, kind: d.kind, live: d.delivery === 'live_observed',
+      rolle: o.subject_role, project_id: o.project_id, run_id: o.run_id, task_id: o.task_id,
+      versuch: o.execution_attempt, startMs: Date.parse(o.start_observed_at), beleg: e.job_url } };
+  }
+  /* Gibt einen geprueften Beleg ans Original. Rueckgabe: ob er Arbeit zeigt. */
+  function laufzeitVerbuchen(r) {
+    if (!KANN_LAUFZEIT) return false;
+    if (r.kind !== 'started') {
+      laufzeitEnden.add(r.versuch);
+      window.__agLaufzeit({ rolle: r.rolle, versuch: r.versuch, an: false });
+      return false;
+    }
+    if (!r.live || laufzeitEnden.hat(r.versuch)) return false;
+    if (!sichtbar({ project_id: r.project_id })) return false;
+    var rest = r.startMs + LZ_MAX_MS - Date.now();
+    if (rest <= 0) return false;
+    var w = window.__agLaufzeit({ rolle: r.rolle, versuch: r.versuch, an: true, restMs: rest,
+      aufgabe: r.project_id + '/' + r.run_id + '/' + r.task_id, beleg: r.beleg });
+    if (w && w.angenommen) vermerk('Laufzeit: ' + r.rolle + ' arbeitet (' + r.task_id + ')');
+    return !!(w && w.angenommen);
+  }
+  /* Ein Kommentar: Laufzeitbeleg oder nicht? `true` heisst "erledigt". */
+  function laufzeitKommentar(c, modus) {
+    var p = pruefenLaufzeit(c);
+    if (p.art === 'ohne') return false;
+    if (p.art === 'uebersprungen') { zahl.laufzeitUebersprungen++; return true; }
+    if (p.art !== 'ok') { zahl.laufzeitAbgewiesen++; vermerk(p.grund); return true; }
+    if (laufzeitIds.hat(p.r.id)) return true;            /* doppelt zugestellt */
+    laufzeitIds.add(p.r.id);
+    zahl.laufzeit++;
+    if (modus === 'basis') basisLaufzeit.push(p.r); else laufzeitVerbuchen(p.r);
+    return true;
+  }
+
   function abweisen(grund, cid) {
     zahl.abgewiesen++;
     letzterGrund = grund + (cid ? ' (Kommentar ' + cid + ')' : '');
@@ -919,6 +1029,7 @@
       Z.kommentare.add(cid);
       zahl.kommentareGesamt++;
       if (modus === 'basis') zahl.basisKommentare++;
+      if (laufzeitKommentar(c, modus)) continue;
       var p = pruefen(c);
       if (p.art === 'ohne') { zahl.ohneMarker++; continue; }
       if (p.art !== 'ok') { abweisen(p.grund, cid); continue; }
@@ -1407,6 +1518,8 @@
     Z.kommentare.leeren(); Z.etags = {}; Z.seite = 1; Z.anzahl = 0;
     zahl.basisKommentare = 0; zahl.basisMarkiert = 0;
     zahl.kommentareGesamt = 0; zahl.verbindenMs = 0;
+    zahl.laufzeit = 0; zahl.laufzeitAbgewiesen = 0; zahl.laufzeitUebersprungen = 0;
+    basisLaufzeit.length = 0; laufzeitIds.leeren(); laufzeitEnden.leeren();
     basisLeben.length = 0; basisBall.length = 0;
     archivAlle.length = 0; archivStand = -1;
     basisGrenzen = { seitenDeckel: false, konflikte: 0, fremdaussagen: 0,
@@ -1505,6 +1618,10 @@
         zahl.abdeckung = 'unavailable';
       }
     }
+    /* AG-LAUFZEIT-001: erst alle Enden, dann die Starts -- ein Start, dessen
+       Ende schon in der Historie steht, zeigt keine Arbeit. */
+    basisLaufzeit.forEach(function (r) { if (r.kind !== 'started') laufzeitEnden.add(r.versuch); });
+    basisLaufzeit.forEach(function (r) { if (r.kind === 'started') laufzeitVerbuchen(r); });
     if (zahl.basisMarkiert && !spaeter.length) {
       letztesEl.textContent =
         'Nichts Neues seit dem Verbinden. ' + zahl.basisMarkiert +
@@ -1993,6 +2110,8 @@
         pausiert: Z.pausiert, fehler: Z.fehler, grund: letzterGrund, zahl: zahl,
         letztes: letztes, bekannteIds: bekannte.groesse(), log: log,
         platz: platzStand(),
+        laufzeit: { kann: KANN_LAUFZEIT, gelesen: zahl.laufzeit, abgewiesen: zahl.laufzeitAbgewiesen,
+                    uebersprungen: zahl.laufzeitUebersprungen },
         archiv: { laeuft: archivLaeuft, ansicht: archivAnsicht,
                   ereignisse: archivAlle.length, laeufe: archivLaeufe().length,
                   folge: archivFolge.length, gezeigt: archivIdx,
