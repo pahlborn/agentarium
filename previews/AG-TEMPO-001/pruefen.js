@@ -148,11 +148,32 @@ const TYPEN = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; ch
 
        NEBENBEFUND FUER PETER: Auf einem langsamen Geraet laeuft ein
        Archivstueck langsamer als seine nominelle Dauer. "480 s bei 10x
-       sind 48 s" gilt, solange das Geraet mitkommt. */
-    console.log('\nB — Die Uhr des Stücks geht wirklich schneller');
-    console.log('    erwartet: streng steigend, je Stufe mindestens das 1,5fache');
-    console.log('              der vorigen, und die höchste mindestens 5× die erste\n');
+       sind 48 s" gilt, solange das Geraet mitkommt.
 
+       UND DIE SCHWELLE HAT DAS WETTER DOCH NICHT FERNGEHALTEN
+       (AG-MON-BROWSER-001, 10.11.): main-Lauf 42822977576 mass
+       1 : 1,85 : 5,15 : 7,17 -- Stufe 3 nur 1,39x Stufe 2, rot, ohne dass
+       sich am Tempo etwas geaendert hatte. Der Grund steht schon oben:
+       Gemessen wurde gegen die WANDUHR. Hoeheres Tempo heisst mehr
+       Ereignisse je Sekunde, mehr Arbeit je Bild, weniger Bilder -- und
+       jedes Bild bringt hoechstens 0,05 s. Das Verhaeltnis zweier Stufen
+       mass also auch, wie sehr die Maschine unter der zweiten Stufe
+       einbricht.
+       Jetzt wird die Uhr gegen das gemessen, was sie antreibt: die Summe
+       der Bildzeiten `dt`, die die Schleife wirklich an `schritt` gibt
+       (`__agSchritt`). Stueckzeit je Bildzeit IST das Tempo, auf jeder
+       Maschine; geprueft wird es deshalb eng (+/- 5 % der Stufe). Die
+       Wanduhr steht weiter daneben, als Auskunft, nicht als Pruefung. */
+    console.log('\nB — Die Uhr des Stücks geht wirklich schneller');
+    console.log('    erwartet: Stückzeit je Bildzeit = die Stufe (± 5 %), streng steigend\n');
+
+    /* Zaehlt jede Bildzeit, die die Schleife an `schritt` gibt. Die Schleife
+       liest `window.__agSchritt` in jedem Bild neu, also greift die Huelle. */
+    await s.evaluate(() => {
+      const alt = window.__agSchritt;
+      window.__agDtSumme = 0;
+      window.__agSchritt = function (dt) { window.__agDtSumme += dt; return alt.apply(this, arguments); };
+    });
     async function faktor(stufe) {
       await s.evaluate((n) => {
         const i = document.getElementById('agSchnell');
@@ -160,11 +181,14 @@ const TYPEN = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; ch
         i.dispatchEvent(new Event('input', { bubbles: true }));
       }, stufe);
       await s.waitForTimeout(300);            /* ein Bild im neuen Tempo */
-      const a0 = await s.evaluate(() => ({ z: window.__agStand().zeit, w: performance.now() }));
+      const a0 = await s.evaluate(() => ({ z: window.__agStand().zeit, w: performance.now(),
+                                            d: window.__agDtSumme }));
       await s.waitForTimeout(1500);
-      const a1 = await s.evaluate(() => ({ z: window.__agStand().zeit, w: performance.now() }));
-      const echt = (a1.w - a0.w) / 1000;
-      return { f: (a1.z - a0.z) / echt, echt: echt };
+      const a1 = await s.evaluate(() => ({ z: window.__agStand().zeit, w: performance.now(),
+                                            d: window.__agDtSumme }));
+      const echt = (a1.w - a0.w) / 1000, bild = a1.d - a0.d;
+      return { f: bild > 0 ? (a1.z - a0.z) / bild : 0, wand: (a1.z - a0.z) / echt,
+               echt: echt, bild: bild };
     }
 
     const STUFEN = [[0, 1], [1, 2], [2, 5], [3, 10]];
@@ -175,21 +199,18 @@ const TYPEN = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; ch
       const wort = await s.evaluate(() =>
         (document.querySelector('#agTempo label b') || {}).textContent);
       console.log('        Stufe ' + stufe + ' (' + soll + '×): ' +
-                  m.f.toFixed(3) + ' Stücksekunden je Sekunde, über ' +
-                  m.echt.toFixed(2) + ' s gemessen');
+                  m.f.toFixed(3) + ' Stücksekunden je Bildsekunde (' +
+                  m.bild.toFixed(2) + ' s Bildzeit) · gegen die Wanduhr ' +
+                  m.wand.toFixed(3) + ' über ' + m.echt.toFixed(2) + ' s');
       zeile('das Schild sagt ' + soll + '×', wort, soll + '×');
+      zeile('die Uhr läuft ' + soll + '× (± 5 %)',
+            m.bild > 0.3 && Math.abs(m.f - soll) <= soll * 0.05, true);
     }
-    /* Stufe 0 ist die eigene Grundlinie DIESER Maschine, nicht die Eins. */
     const grund = gemessen[0];
     zeile('Stufe 0 bewegt die Uhr überhaupt', grund > 0, true);
     console.log('        Verhältnisse gegen Stufe 0: ' +
                 gemessen.map(f => (f / grund).toFixed(2) + '×').join(' · ') +
                 '   (nominell 1 · 2 · 5 · 10)');
-    for (let i = 1; i < gemessen.length; i++)
-      zeile('Stufe ' + i + ' ist mindestens 1,5× Stufe ' + (i - 1),
-            gemessen[i] >= gemessen[i - 1] * 1.5, true);
-    zeile('die höchste Stufe ist mindestens 5× die erste',
-          gemessen[3] >= grund * 5, true);
     /* Die Gegenprobe zum Messgerät: Wäre `tempo` ohne Wirkung, wären
        alle vier Zahlen gleich — dann fielen die Zeilen oben. Wäre die
        Ordnung verdreht, fällt diese. */
