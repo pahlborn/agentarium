@@ -25,6 +25,12 @@
       "kuerzel": "SBF68",
       "name": "Ford 302 von 1968 – Restaurierung",
       "repo": null
+    },
+    {
+      "id": "big-quest",
+      "kuerzel": "BQ",
+      "name": "Big Quest",
+      "repo": "pahlborn/bis-school-app"
     }
   ]
 }
