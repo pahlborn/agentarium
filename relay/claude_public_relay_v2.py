@@ -15,6 +15,7 @@ import math
 import os
 import re
 import shutil
+import signal
 import stat
 import subprocess
 import sys
@@ -22,6 +23,9 @@ import tempfile
 import time
 import urllib.request
 from pathlib import Path, PurePosixPath
+
+sys.dont_write_bytecode = True
+import claude_runtime_events as runtime
 
 REPO = "pahlborn/agentarium"
 API = "https://api.github.com/repos/" + REPO
@@ -172,12 +176,13 @@ def marker(task_id: str, source_commit: str, phase: str,
 
 
 def ag_block(task_id: str, run_id: str, phase: str, kind: str, actor: str,
-             title: str, evidence: str, recipient: str | None = None) -> str:
+             title: str, evidence: str, recipient: str | None = None, *,
+             project_id: str = AG_PROJECT, event_id: str | None = None) -> str:
     """Einen vertragsgueltigen Agentarium-Block bauen, oder gar keinen."""
     event = {
         "schema": AG_SCHEMA,
-        "id": f"{task_id}:{run_id}:{phase}",
-        "project_id": AG_PROJECT,
+        "id": event_id if event_id is not None else f"{task_id}:{run_id}:{phase}",
+        "project_id": project_id,
         "run_id": str(run_id),
         "task_id": str(task_id),
         "actor": actor,
@@ -209,18 +214,33 @@ def ag_control_in_handback(data: bytes) -> bool:
     <!-- AGENTARIUM_EVENT_V1 --> so sieht es aus") wirkt im Browser genauso
     wie eine nackte Zeile -- der Monitor zaehlt Vorkommen, nicht Zeilen.
     """
-    return AG_MARKER.encode() in data
+    return AG_MARKER.encode() in data or runtime.MARKER.encode() in data
+
+
+def ag_context_binding(context: dict | None, task_id: str, workflow_run_id: str,
+                       phase: str) -> tuple[str, str, dict]:
+    binding = (runtime.identity(context) if context is not None and
+               context.get("request", {}).get("runtime") is not None else None)
+    if binding is None:
+        return task_id, str(workflow_run_id), {}
+    if binding["task_id"] != task_id or binding["github_run_id"] != str(workflow_run_id):
+        raise RuntimeError("communication/runtime identity mismatch")
+    # Payload groups the logical run; IDs still distinguish actual run/attempt.
+    event_id = f"{task_id}:{binding['github_run_id']}:{binding['github_run_attempt']}:{phase}"
+    return binding["task_id"], binding["run_id"], {
+        "project_id": binding["project_id"], "event_id": event_id}
 
 
 def ag_host_received(context: dict) -> str:
     a = context["activation"]
-    return ag_block(a["task_id"], str(context["run_id"]), "HOST_RECEIVED",
+    task_id, run_id, envelope = ag_context_binding(context, a["task_id"], str(context["run_id"]), "HOST_RECEIVED")
+    return ag_block(task_id, run_id, "HOST_RECEIVED",
                     "handoff", "atlas",
                     "Auftrag transportiert und empfangen — kein belegter Arbeitsbeginn",
-                    "runtime_stream", recipient="forge")
+                    "runtime_stream", recipient=runtime.ROLE_MAP.get(a.get("role"), "forge"), **envelope)
 
 
-def ag_terminal(meta: dict) -> str:
+def ag_terminal(meta: dict, role: str = "coding-agent", context: dict | None = None) -> str:
     """Die Abschlussmeldung als Vertragsereignis.
 
     KEIN `forge` BEI BLOCKED, UND DAS IST EINE ABWEICHUNG MIT GRUND.
@@ -239,17 +259,21 @@ def ag_terminal(meta: dict) -> str:
     Absicht ("eine feste Forge-Zuordnung waere eine falsche
     Tatsachenbehauptung"), nicht ihr Gegenteil.
     """
-    task_id, run_id = meta["task_id"], meta["run_id"]
+    phase = "RESULT_READY" if meta["phase"] == "result_ready" else "BLOCKED"
+    task_id, run_id, envelope = ag_context_binding(context, meta["task_id"], meta["run_id"], phase)
+    if context is not None:
+        role = context["activation"]["role"]
+    subject = runtime.ROLE_MAP[role]
     if meta["phase"] == "result_ready":
-        return ag_block(task_id, run_id, "RESULT_READY", "contribution", "forge",
+        return ag_block(task_id, run_id, "RESULT_READY", "contribution", runtime.ROLE_MAP[role],
                         "Rücklauf liegt vor — keine Abnahme, keine Annahme",
-                        "reported_checkpoint", recipient="atlas")
+                        "reported_checkpoint", recipient="atlas", **envelope)
     if meta.get("failure") == "RUN_JOB_NO_RESULT":
-        titel = "Lauf lieferte kein Ergebnis — über forge ist nichts beobachtet"
+        titel = "Lauf lieferte kein Ergebnis — Workerstatus in diesem Rücklauf unbekannt"
     else:
-        titel = "Lauf blockiert, Ergebnis zurückgehalten — über forge ist nichts belegt"
+        titel = "Lauf blockiert, Ergebnis zurückgehalten"
     return ag_block(task_id, run_id, "BLOCKED", "progress", "atlas",
-                    titel, "reported_checkpoint")
+                    titel, "reported_checkpoint", **envelope)
 
 
 def trusted_terminal_row(row: object, task_id: str, source_commit: str) -> bool:
@@ -325,7 +349,9 @@ def prepare() -> None:
     handback.write_text("# Handback\n")
     context = {"repository": REPO, "head": head, "source_commit": parent,
                "activation": a, "request": packet, "readable_paths": paths,
-               "prepared_at": now(), "run_id": os.environ.get("GITHUB_RUN_ID")}
+               "prepared_at": now(), "run_id": os.environ.get("GITHUB_RUN_ID"),
+               "run_attempt": os.environ.get("GITHUB_RUN_ATTEMPT")}
+    runtime.identity(context)  # absent is explicitly unsupported legacy; malformed fails before dispatch
     (control / "context.json").write_text(json.dumps(context, indent=2, ensure_ascii=False))
     (control / "settings.json").write_text(json.dumps({"permissions": {
         "blockReadsOutsideWorkingDirectories": True,
@@ -333,6 +359,7 @@ def prepare() -> None:
         "deny": ["Bash", "WebFetch", "WebSearch", "Agent", "mcp__*"],
     }}, indent=2))
     shutil.copy2(Path(__file__).resolve(), PREPARED / "relay_driver.py")
+    shutil.copy2(Path(runtime.__file__).resolve(), PREPARED / "claude_runtime_events.py")
     (PREPARED / "manifest.json").write_text(json.dumps(manifest(PREPARED), indent=2))
 
 
@@ -366,7 +393,8 @@ def make_read_only(root: Path, writable: Path) -> None:
 
 
 def child_environment() -> dict[str, str]:
-    allowed = ("PATH", "HOME", "TMPDIR", "LANG", "LC_ALL", "ANTHROPIC_API_KEY")
+    allowed = ("PATH", "HOME", "TMPDIR", "LANG", "LC_ALL", "ANTHROPIC_API_KEY",
+               "RUNNER_TRACKING_ID")
     return {key: os.environ[key] for key in allowed if key in os.environ}
 
 
@@ -384,6 +412,7 @@ def claude_command(context: dict, settings: Path) -> list[str]:
         "--model", a["model"], "--max-turns", str(a["max_turns"]),
         "--max-budget-usd", str(a["max_budget_usd"]),
         "--no-session-persistence", "--output-format", "stream-json", "--verbose",
+        "--include-partial-messages",
     ]
 
 
@@ -439,10 +468,13 @@ def run_model() -> None:
     result = None
     blocked = None
     meta = None
+    observer = None
+    safety = "unknown"
     try:
         verify_manifest(PREPARED)
         context = json.loads((PREPARED / "control/context.json").read_text())
         a = context["activation"]
+        observer = runtime.Observer(context, exact=api_key or None)
         meta = base_metadata(context)
         write_scanned_metadata(meta, api_key or None)
         work = PREPARED / "workspace"
@@ -454,27 +486,22 @@ def run_model() -> None:
             raise RuntimeError("bare Read permission forbidden")
         if not api_key:
             raise RuntimeError("Missing ANTHROPIC_API_KEY")
-        with raw_tmp.open("w") as raw, err_tmp.open("w") as errors:
-            proc = subprocess.Popen(command, cwd=work, env=child_environment(), stdout=subprocess.PIPE,
-                                    stderr=errors, text=True, bufsize=1)
-            assert proc.stdout is not None
-            for line in proc.stdout:
-                raw.write(line)
-                try:
-                    item = json.loads(line)
-                    if item.get("type") == "result":
-                        result = item
-                except ValueError:
-                    pass
-            proc.wait()
+        result, returncode = runtime.consume(command, work, child_environment(),
+                                             raw_tmp, err_tmp, observer)
         combined = raw_tmp.read_bytes() + err_tmp.read_bytes() + handback.read_bytes()
         if secret_hit(combined, api_key):
+            safety = "blocked"
             raise RuntimeError("secret scan blocked result")
+        if ag_control_in_handback(handback.read_bytes()):
+            safety = "blocked"
+            raise RuntimeError("control sequence in handback")
         after = {str(p.relative_to(work)): p.read_bytes() for p in work.rglob("*") if p.is_file()}
         changed = sorted(name for name in set(before) | set(after) if before.get(name) != after.get(name))
         if changed != [a["handback"]]:
+            safety = "blocked"
             raise RuntimeError("changed-path boundary mismatch: " + ", ".join(changed))
-        if proc.returncode or not result or result.get("is_error"):
+        safety = "passed"
+        if returncode or not result or result.get("is_error"):
             raise RuntimeError("Claude process failed or returned no valid result")
         shutil.copy2(handback, RESULT / "handback.md")
         raw_tmp.rename(RESULT / "stream.jsonl")
@@ -484,8 +511,8 @@ def run_model() -> None:
                     total_cost_usd=result.get("total_cost_usd"), changed_paths=changed,
                     handback_sha256=sha256(handback.read_bytes()), secret_scan="passed")
     except Exception as exc:
-        raw_tmp.unlink(missing_ok=True)
-        err_tmp.unlink(missing_ok=True)
+        for name in ("stream.pending", "stderr.pending", "handback.md", "stream.jsonl", "stderr.txt"):
+            (RESULT / name).unlink(missing_ok=True)
         if meta is None:
             try:
                 context = json.loads((PREPARED / "control/context.json").read_text())
@@ -498,13 +525,14 @@ def run_model() -> None:
                             started_at=now(), changed_paths=[])
         meta.update(phase="blocked", stopped_at=now(), elapsed_seconds=time.monotonic() - start,
                     failure=type(exc).__name__, session_id=None, usage=None,
-                    total_cost_usd=None, handback_sha256=None,
+                    total_cost_usd=None, handback_sha256=None, changed_paths=[],
                     secret_scan="blocked")
         (RESULT / "BLOCKED.txt").write_text("Result withheld by relay safety checks.\n")
         blocked = exc
     try:
         write_scanned_metadata(meta, api_key or None)
     except RuntimeError as exc:
+        safety = "blocked"
         for name in ("handback.md", "stream.jsonl", "stderr.txt"):
             (RESULT / name).unlink(missing_ok=True)
         meta.update(phase="blocked", stopped_at=now(), elapsed_seconds=time.monotonic() - start,
@@ -514,8 +542,97 @@ def run_model() -> None:
         (RESULT / "BLOCKED.txt").write_text("Result withheld by relay safety checks.\n")
         write_scanned_metadata(meta)
         blocked = exc
+    if observer is not None:
+        observer.finish(blocked is not None, safety)
     if blocked is not None:
         raise RuntimeError("relay blocked; sanitized evidence prepared") from blocked
+
+
+def runtime_context(*, worker_launched: bool = False) -> dict:
+    if worker_launched:
+        # The sole authorized mutable file is part of the initial manifest.
+        # Recheck every immutable byte after launch without rejecting its edit.
+        expected = json.loads((PREPARED / "manifest.json").read_text())
+        actual = manifest(PREPARED)
+        if actual.get("control/context.json") != expected.get("control/context.json"):
+            raise RuntimeError("runtime context integrity mismatch")
+        context = json.loads((PREPARED / "control/context.json").read_text())
+        output = "workspace/" + clean_path(context["activation"]["handback"], prefix="handoffs/")
+        if output not in expected or output not in actual:
+            raise RuntimeError("runtime handback missing")
+        del expected[output]
+        del actual[output]
+        if actual != expected:
+            raise RuntimeError("runtime immutable bundle integrity mismatch")
+    else:
+        verify_manifest(PREPARED)
+        context = json.loads((PREPARED / "control/context.json").read_text())
+    if (str(context.get("run_id")) != os.environ.get("GITHUB_RUN_ID") or
+            str(context.get("run_attempt")) != os.environ.get("GITHUB_RUN_ATTEMPT") or
+            context.get("head") != os.environ.get("GITHUB_SHA")):
+        raise RuntimeError("runtime current run/attempt binding mismatch")
+    runtime.identity(context)
+    return context
+
+
+def launch_runtime() -> None:
+    runtime_context()
+    if runtime.ROOT.exists():
+        raise RuntimeError("runtime attempt already launched")
+    runtime.ROOT.mkdir()
+    environment = child_environment()
+    # Keep runner tracking on both supervisor and child. setsid is not an
+    # attempt to escape the runner's job cleanup. No GitHub token is copied.
+    for key in ("GITHUB_RUN_ID", "GITHUB_RUN_ATTEMPT", "GITHUB_SHA"):
+        environment[key] = os.environ[key]
+    with open(os.devnull, "wb") as sink:
+        proc = subprocess.Popen([sys.executable, str(Path(__file__).resolve()), "supervise"],
+                                env=environment, stdin=subprocess.DEVNULL, stdout=sink,
+                                stderr=sink, start_new_session=True)
+    runtime.atomic(runtime.ROOT / "launch.json", {
+        "pid": proc.pid, "launched_at": now(), "deadline": time.time() + runtime.WAIT_SECONDS})
+    # This is dispatch, not a started journal event.
+    print("RUNTIME_SUPERVISOR_DISPATCHED")
+
+
+def supervise_runtime() -> None:
+    runtime_context()
+    def stopped(signum, frame):
+        raise RuntimeError("supervisor stop requested")
+    signal.signal(signal.SIGTERM, stopped)
+    signal.signal(signal.SIGINT, stopped)
+    try:
+        run_model()
+    finally:
+        # Never upload this local coordination marker as a runtime observation.
+        runtime.atomic(runtime.ROOT / "done.json", {"observed_at": now()})
+
+
+def await_runtime(start_only: bool) -> None:
+    runtime_context(worker_launched=True)
+    launch = json.loads((runtime.ROOT / "launch.json").read_text())
+    deadline = launch["deadline"]
+    if not runtime.number(deadline) or deadline > time.time() + runtime.WAIT_SECONDS + 5:
+        raise RuntimeError("invalid runtime deadline")
+    while time.time() < deadline:
+        if (runtime.ROOT / "done.json").is_file():
+            if not start_only:
+                meta = json.loads((RESULT / "metadata.json").read_text())
+                if meta.get("phase") != "result_ready":
+                    raise RuntimeError("worker blocked; sanitized result retained")
+            return
+        if start_only and any((runtime.ROOT / name).is_file() for name in ("start.json", "end.json")):
+            return
+        time.sleep(.25)
+    # No end inferred from a missing marker, and no signal sent to a reused PID.
+    # The supervisor has its own lower deadline; runner tracking handles host loss.
+    if not start_only:
+        raise RuntimeError("supervisor observation unavailable; end unknown")
+
+
+def publish_runtime() -> None:
+    context = runtime_context()
+    runtime.publish(context, post_issue)
 
 
 def ensure_fallback() -> None:
@@ -691,11 +808,13 @@ def publish() -> None:
         if secret_hit(data) or sha256(data) != meta.get("handback_sha256"):
             raise RuntimeError("publish integrity/secret check failed")
         body += "\n\n" + data.decode(errors="replace")[:4000]
-    body += "\n\n" + ag_terminal(meta)
+    body += "\n\n" + ag_terminal(meta, context["activation"]["role"], context)
     if secret_hit(body.encode()):
         raise RuntimeError("final comment secret check failed")
     if body.count(AG_MARKER) != 1:
         raise RuntimeError("agentarium marker must appear exactly once")
+    if runtime.MARKER in body:
+        raise RuntimeError("runtime marker forbidden in legacy publication")
     post_issue(body)
 
 
@@ -845,12 +964,16 @@ def self_test() -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("mode", choices=("prepare", "announce", "run", "fallback", "publish", "self-test"))
+    parser.add_argument("mode", choices=("prepare", "announce", "run", "fallback", "publish", "self-test",
+                                                  "launch", "supervise", "await-start", "await-end", "publish-runtime"))
     args = parser.parse_args()
     {"prepare": prepare, "announce": announce, "run": run_model, "fallback": ensure_fallback,
-     "publish": publish, "self-test": self_test}[args.mode]()
+     "publish": publish, "self-test": self_test, "launch": launch_runtime,
+     "supervise": supervise_runtime, "await-start": lambda: await_runtime(True),
+     "await-end": lambda: await_runtime(False), "publish-runtime": publish_runtime}[args.mode]()
 
 
 if __name__ == "__main__":
     main()
+
 

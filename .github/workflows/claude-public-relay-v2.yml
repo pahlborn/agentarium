@@ -27,7 +27,8 @@ jobs:
           persist-credentials: false
       - name: Free relay security tests
         run: |
-          python3 -m py_compile relay/claude_public_relay_v2.py
+          python3 -m py_compile relay/claude_public_relay_v2.py relay/claude_runtime_events.py
+          python3 -m unittest discover -s relay -p test_runtime_events.py
           python3 relay/claude_public_relay_v2.py self-test
       - name: Prepare immutable least-privilege bundle
         env:
@@ -35,7 +36,7 @@ jobs:
         run: python3 relay/claude_public_relay_v2.py prepare
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: relay-prepared-${{ github.run_id }}
+          name: relay-prepared-${{ github.run_id }}-${{ github.run_attempt }}
           path: relay-prepared/
           include-hidden-files: true
           if-no-files-found: error
@@ -57,18 +58,37 @@ jobs:
     steps:
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
         with:
-          name: relay-prepared-${{ github.run_id }}
+          name: relay-prepared-${{ github.run_id }}-${{ github.run_attempt }}
           path: relay-prepared/
       - name: Install pinned Claude runtime
         run: npm install --global @anthropic-ai/claude-code@2.1.302
-      - name: Run isolated Claude worker
+      - name: Start bounded runtime supervisor
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-        run: python3 relay-prepared/relay_driver.py run
+        run: python3 relay-prepared/relay_driver.py launch
+      - name: Await first observed activity or observation end
+        run: python3 relay-prepared/relay_driver.py await-start
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:
-          name: relay-result-${{ github.run_id }}
+          name: relay-runtime-start-${{ github.run_id }}-${{ github.run_attempt }}
+          path: relay-runtime/start.json
+          if-no-files-found: ignore
+          retention-days: 30
+      - name: Await bounded supervisor completion
+        if: always()
+        run: python3 relay-prepared/relay_driver.py await-end
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: relay-runtime-end-${{ github.run_id }}-${{ github.run_attempt }}
+          path: relay-runtime/end.json
+          if-no-files-found: ignore
+          retention-days: 30
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: relay-result-${{ github.run_id }}-${{ github.run_attempt }}
           path: relay-result/
           if-no-files-found: error
           retention-days: 30
@@ -85,13 +105,13 @@ jobs:
     steps:
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
         with:
-          name: relay-prepared-${{ github.run_id }}
+          name: relay-prepared-${{ github.run_id }}-${{ github.run_attempt }}
           path: relay-prepared/
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
         id: result_download
         continue-on-error: true
         with:
-          name: relay-result-${{ github.run_id }}
+          name: relay-result-${{ github.run_id }}-${{ github.run_attempt }}
           path: relay-result/
       - name: Materialize fixed BLOCKED fallback when run produced no result
         run: python3 relay-prepared/relay_driver.py fallback
@@ -100,3 +120,23 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: python3 relay-prepared/relay_driver.py publish
 
+
+
+  # Runtime phases have exactly one publisher; final paid result stays in publish.
+  publish-runtime:
+    needs: prepare
+    permissions:
+      actions: read
+      issues: write
+      contents: none
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: relay-prepared-${{ github.run_id }}-${{ github.run_attempt }}
+          path: relay-prepared/
+      - name: Publish bounded verified host observations
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 relay-prepared/relay_driver.py publish-runtime
