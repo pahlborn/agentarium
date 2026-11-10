@@ -289,8 +289,20 @@ async function durchgang(b, adr, wann) {
     });
     console.log('        sentinel: ' + tiere.sentinel +
                 '   ·   forge (ohne Aufgabe): ' + tiere.forge);
+    /* GEMESSEN WIRD DAS ARBEITSLEUCHTEN, NICHT DIE GANZE ANIMATIONSLISTE.
+       Bis 10.11. stand hier `tiere.sentinel === tiere.forge`. Jeder Name
+       wechselt aber alle 16 s zwischen Name und Rolle und laeuft dabei
+       1,3 s die Animation `agGuss` (`rollenWechseln`, je Agent versetzt).
+       Fiel der Messaugenblick in den Wechsel von nur einem der beiden,
+       war der Nachweis rot, obwohl niemand arbeitete -- und gruen, wenn
+       beide zufaellig gleichzeitig wechselten (lokal am 10.11. gemessen:
+       "agGuss, agAtem" bei beiden). Arbeit zeigt der Name allein ueber
+       `.agName.arbeitet` = Animation `agPuls` (AG-MON-BROWSER-001). */
+    const leuchtet = (n) => /(^|,\s*)agPuls(\s*,|$)/.test(n || '');
     zeile('sentinel (geliefert, wartet) leuchtet nicht als arbeitend',
-          tiere.sentinel === tiere.forge, true);
+          leuchtet(tiere.sentinel), false);
+    zeile('… genauso wenig wie forge ohne Aufgabe',
+          leuchtet(tiere.forge), false);
     zeile('keine Seitenfehler in der Faltung',
           H.fehlerSeite.length ? H.fehlerSeite[0] : 'keine', 'keine');
     await H.q.close();

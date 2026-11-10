@@ -2516,7 +2516,7 @@
 
      Der Bauzeitpunkt kommt beim Bauen aus der Uhr. Von Hand gepflegte
      Datumsangaben sind nach der zweiten Änderung falsch. */
-  var FASSUNG = '101', GEBAUT = '2026-11-10T11:49Z';
+  var FASSUNG = '102', GEBAUT = '2026-11-10T12:54Z';
 
   /* AG-GH-LIVE-001: JEDE TEXTSENKE MASKIERT.
      Seit Live-Daten von aussen kommen (GitHub-Kommentare, one-event.json),
@@ -4120,16 +4120,24 @@
       var f = w * anteil;
       var basis1 = 20, basis2 = 52, basis3 = 26;
       if (teil) {
-        /* Derselbe kleine Körper, nur zeitlich verteilt. 1/60 s ist die
-           volle Aussaat des großen ruhenden Balls; mit `f` als Flächenanteil
-           kommt der Teilball genau so oft dran, dass sein Durchschnitt zum
-           Budget passt. Die leichte Überlappung hält den Körper zusammen. */
-        var intervall = (1 / 60) / Math.max(0.02, f);
-        if (b.l.saat == null) b.l.saat = Math.random() * intervall;
-        b.l.saat += dt;
-        var lebenTeil = Math.min(LIEGEND_LEBEN_MAX, Math.max(leben, intervall * 4.2));
-        while (b.l.saat >= intervall) {
-          b.l.saat -= intervall;
+        /* Derselbe kleine Körper, nur seltener ausgesät: in jedem Bild mit
+           der Wahrscheinlichkeit seines Anteils `f`, also im Mittel genau
+           sein Teil des Budgets JE BILD -- dieselbe Einheit wie
+           `LIEGEND_BUDGET` und wie beim großen Ball.
+           AG-MON-BROWSER-001 (10.11.): Hier stand eine Uhr in Sekunden mit
+           fest angenommenen 60 Bildern je Sekunde (1/60 s). Bei weniger
+           Bildern je Sekunde säte jeder Teilball dadurch mehrmals im selben
+           Bild; gemessen 223 Punkte je Bild bei acht Teilbällen statt
+           höchstens 110 (AG-MON-RESONANZ-001). Gezählt wird deshalb in
+           Bildern, nicht in Sekunden. Die Gestalt bleibt dieselbe. */
+        var fr = Math.max(0.02, f);
+        if (b.l.saat == null) b.l.saat = Math.random();
+        b.l.saat += fr;
+        /* Leben: der Abstand zweier Aussaaten in Sekunden bei der jetzigen
+           Bildrate, wie bisher mit Überlappung, damit der Körper hält. */
+        var lebenTeil = Math.min(LIEGEND_LEBEN_MAX, Math.max(leben, (dt / fr) * 4.2));
+        while (b.l.saat >= 1) {
+          b.l.saat -= 1;
           window.__feld.sonne(b.o[0], b.o[1], 0, 0, rad * 0.38, 0.88, 0.115, 0, basis1, lebenTeil);
           window.__feld.sonne(b.o[0], b.o[1], 0, 0, rad,        0.70, 0.115, 0, basis2, lebenTeil);
           window.__feld.sonne(b.o[0], b.o[1], 0, 0, rad * 1.75, 0.48, 0.115, 0, basis3, lebenTeil);
