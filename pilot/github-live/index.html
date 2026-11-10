@@ -4111,18 +4111,17 @@
          im Demo-Modus ("knapp halb so gross, der Ball bleibt ganz").
          Peter, 01.11.: "diese Teilbälle sehen schrecklich aus ... bitte
          kleine Bälle nach Muster der großen". Also bleibt der Körper klein,
-         aber er wird nicht so stark ausgedünnt, dass nur noch ein dürres
-         Symbol übrig bleibt. */
+         aber seine Schalen halten länger, damit sie sich wie beim großen
+         Ball überlappen und nicht wie ein dürres Symbol aussehen. */
       var rad = Math.min(W(), H()) * 0.021 * LIEGEND_GROESSE * (b.l.teil ? 0.5 : 1) *
                 (1 + 0.09 * Math.sin(b.l.t * 1.1 + b.i));
       var f = w * anteil;
-      var dichte = teil ? Math.max(0.38, f * 1.8) : f;
-      var n1 = Math.max(teil ? 6 : 1, Math.round(20 * dichte)),
-          n2 = Math.max(teil ? 16 : 2, Math.round(52 * dichte)),
-          n3 = Math.max(teil ? 8 : 1, Math.round(26 * dichte));
-      window.__feld.sonne(b.o[0], b.o[1], 0, 0, rad * 0.38, 0.88, 0.115, 0, n1, leben);
-      window.__feld.sonne(b.o[0], b.o[1], 0, 0, rad,        0.70, 0.115, 0, n2, leben);
-      window.__feld.sonne(b.o[0], b.o[1], 0, 0, rad * 1.75, 0.48, 0.115, 0, n3, leben);
+      var lebenBall = teil ? Math.min(LIEGEND_LEBEN_MAX, leben * 1.8) : leben;
+      var n1 = Math.max(1, Math.round(20 * f)), n2 = Math.max(2, Math.round(52 * f)),
+          n3 = Math.max(1, Math.round(26 * f));
+      window.__feld.sonne(b.o[0], b.o[1], 0, 0, rad * 0.38, 0.88, 0.115, 0, n1, lebenBall);
+      window.__feld.sonne(b.o[0], b.o[1], 0, 0, rad,        0.70, 0.115, 0, n2, lebenBall);
+      window.__feld.sonne(b.o[0], b.o[1], 0, 0, rad * 1.75, 0.48, 0.115, 0, n3, lebenBall);
       liegendGezaehlt += n1 + n2 + n3;
       /* Ab und zu ein Funke, jeder Ball in seinem eigenen Takt (8-16 s),
          nicht alle zugleich und nicht bei jedem Faden, der vorbeizieht. */
