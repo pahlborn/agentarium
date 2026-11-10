@@ -261,8 +261,10 @@ function tischen(wurzel) {
     const ev = JSON.parse(block.split('```json')[1].split('```')[0]);
     zeile(name + ': actor', ev.actor, 'atlas');
     zeile(name + ': kein recipient', 'recipient' in ev ? 'doch' : 'keiner', 'keiner');
-    zeile(name + ': Titel nennt forge nicht als Täter',
-          /über forge ist nichts/.test(ev.title) ? 'ja' : 'nein, ' + ev.title.slice(0, 40), 'ja');
+    const titel = name === 'BLOCKED'
+      ? 'Lauf lieferte kein Ergebnis — Workerstatus in diesem Rücklauf unbekannt'
+      : 'Lauf blockiert, Ergebnis zurückgehalten';
+    zeile(name + ': neutraler Blocktitel', ev.title, titel);
   }
 
   zeile('Konsolenfehler', err.length ? err[0].slice(0, 40) : 'keine', 'keine');
