@@ -831,8 +831,11 @@
   function pruefenLaufzeit(c) {
     var body = (c && typeof c.body === 'string') ? c.body : '';
     if (body.indexOf(LZ_MARKER) < 0) return { art: 'ohne' };
+    /* Name UND Nummer des Bots, wie der Leser im Relais selbst
+       (`relay/claude_runtime_events.py`, `journal`: user.id 41898282). */
     var login = (c.user && typeof c.user.login === 'string') ? c.user.login : '';
-    if (login !== 'github-actions[bot]') return nein('Laufzeit: Autor nicht der Actions-Bot');
+    if (login !== 'github-actions[bot]' || String(c.user.id) !== '41898282')
+      return nein('Laufzeit: Autor nicht der Actions-Bot');
     if (body.length > MAX_KOERPER) return nein('Laufzeit: Kommentar zu gross');
     var m = LZ_FORM.exec(body);
     if (!m) return nein('Laufzeit: nicht genau ein JSON-Block nach dem Marker');
@@ -853,16 +856,12 @@
     if (o.schema !== 'agentarium.runtime-observation.v1' || o.actor !== 'relay-host')
       return nein('Laufzeit: Beobachtung unbekannt');
     if (o.phase !== 'start' && o.phase !== 'end') return nein('Laufzeit: Phase unbekannt');
-    /* Die Art muss zur Beobachtung passen (Tabelle im Vertrag). */
-    var passt =
-      d.kind === 'started' ? (o.phase === 'start' && o.outcome === 'activity_observed') :
-      d.kind === 'delivered' ? (o.phase === 'end' && o.worker_state === 'stopped' &&
-                                o.signal === 'process_exit' && o.outcome === 'process_exited' &&
-                                o.safety === 'passed') :
-      d.kind === 'aborted' ? (o.phase === 'end' && !!LZ_ABBRUCH[o.outcome] &&
-                              (o.worker_state === 'stopped' || o.worker_state === 'not_launched')) :
-      o.phase === 'end';
-    if (!passt) return nein('Laufzeit: Art widerspricht der Beobachtung');
+    /* Die Art muss GENAU die sein, die der Host aus der Beobachtung ableitet
+       -- `lifecycle_kind` in `relay/claude_runtime_events.py`, Zeile fuer
+       Zeile nachgebildet. Erste Fassung nahm `observation_lost` fuer jedes
+       Ende an, also auch fuer einen sauberen Abschluss, den der Host als
+       `delivered` einstuft (Befund Atlas, #129, 10.11.). */
+    if (d.kind !== laufzeitArt(o)) return nein('Laufzeit: Art widerspricht der Beobachtung');
     var ids = ['project_id', 'run_id', 'task_id'];
     for (var i = 0; i < ids.length; i++)
       if (typeof o[ids[i]] !== 'string' || !KENNUNG.test(o[ids[i]]))
@@ -879,6 +878,15 @@
     return { art: 'ok', r: { id: d.id, kind: d.kind, live: d.delivery === 'live_observed',
       rolle: o.subject_role, project_id: o.project_id, run_id: o.run_id, task_id: o.task_id,
       versuch: o.execution_attempt, startMs: Date.parse(o.start_observed_at), beleg: e.job_url } };
+  }
+  function laufzeitArt(o) {
+    if (o.phase === 'start') return 'started';
+    if (o.worker_state === 'unknown') return 'observation_lost';
+    if ((o.worker_state === 'stopped' || o.worker_state === 'not_launched') && LZ_ABBRUCH[o.outcome])
+      return 'aborted';
+    if (o.worker_state === 'stopped' && o.signal === 'process_exit' &&
+        o.outcome === 'process_exited' && o.safety === 'passed') return 'delivered';
+    return 'observation_lost';
   }
   /* Gibt einen geprueften Beleg ans Original. Rueckgabe: ob er Arbeit zeigt. */
   function laufzeitVerbuchen(r) {

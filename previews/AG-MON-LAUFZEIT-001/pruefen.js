@@ -270,7 +270,13 @@ async function bis(s, test, arg, ms) {
       ['Text neben dem Block', kommentar(ableiten(forgeStart, versuch(), vor(1), 'live_observed'),
         { zusatz: '\nforge arbeitet jetzt.' })],
       ['Melder nicht relay-host', kommentar(ableiten(forgeStart, versuch(), vor(1), 'live_observed',
-        r => { r.reporter = 'forge'; }))]
+        r => { r.reporter = 'forge'; }))],
+      /* Befund Atlas, #129: ein sauberer Abschluss, als observation_lost
+         ausgegeben -- der Host stuft ihn als delivered ein. */
+      ['sauberer Abschluss als observation_lost', kommentar(ableiten(forgeEnde, versuch(), vor(1), 'archive',
+        r => { r.kind = 'observation_lost'; }))],
+      ['Bot-Name mit fremder Nummer', (() => { const k = kommentar(ableiten(forgeStart, versuch(), vor(1),
+        'live_observed')); k.user.id = 1; return k; })()]
     ];
     o = await oeffnen(b, tisch, falsch.map(f => f[1]));
     await o.s.waitForTimeout(NACH_PULS);
