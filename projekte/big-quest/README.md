@@ -41,3 +41,13 @@ Eltern können bestätigte Bewertungen korrigieren oder zurücknehmen. Die Evalu
 Der zusammengeführte Browserlauf bestätigte Vorschau, Korrektur, Abgleich, Rücknahme sowie die bestehenden Rundungs- und Subtraktionsvarianten. Sentinel prüfte zusätzlich den Einstufungswechsel von C zu RS. 115 gezielte Regressionstests bestanden. Zwei weitere Integrationstests belegten den Abgleich von Konflikt und Auflösung zwischen zwei Elternkonten und einem Kindkonto, in Simulation und über den lokalen GitHub-Protokollspeicher. [Sentinel-Rücklauf](https://github.com/pahlborn/agentarium/issues/2#issuecomment-6768762515) · [Entwurfs-PR #180](https://github.com/pahlborn/bis-school-app_src/pull/180) · [Quellcommit](https://github.com/pahlborn/bis-school-app_src/commit/aad48d4abc30a81e7100855429a962f12d606529)
 
 Upgrade-Abgleich mit einem Altprofil und Systemabnahme auf Stufe 3c stehen aus. Der Schreibweg ist auf den lokalen Testaufbau begrenzt.
+
+### 10.11.2026 · Upgrade-Abgleich im bestehenden Profil
+
+Peter nahm den lokalen Stand für Korrektur und Rücknahme an und gab den Upgrade-Abgleich frei.
+
+Nach einem Upgrade liest Big Quest jeden bereits bekannten Schulbereich einmal vom Anfang. Der vorhandene Protokollstand und die Paketnummern bleiben erhalten. Die App übernimmt gültige, zuvor übersprungene Bewertungen genau einmal. Bei einem Abbruch bleibt der bisherige Cursor erhalten, sodass der nächste Abgleich erneut ansetzt. Andere Bereiche verwenden ihren vorhandenen Cursor weiter.
+
+Der lokale Chromium-Test belegt den Formatabbruch am historischen App-Stand `eb354e31`, den weitergeschobenen Cursor und die Wiederherstellung derselben Bewertung im selben Browserprofil mit unveränderter Anmeldung und Gerätekennung. Die zugehörige Karte erschien einmal und wurde korrekt gelöst. Der reproduzierbare Browserlauf steht in `tests/evaluation-upgrade-browser.test.mjs`. 117 gezielte Regressionstests bestanden. [Sentinel-Rücklauf](https://github.com/pahlborn/agentarium/issues/2#issuecomment-6769025390) · [Entwurfs-PR #180](https://github.com/pahlborn/bis-school-app_src/pull/180) · [Quellcommit](https://github.com/pahlborn/bis-school-app_src/commit/249e9779b2ddbb24f99f5acd98af2ba92155a2b2)
+
+Der Schreibweg ist weiterhin auf den lokalen Testaufbau begrenzt. Die Systemabnahme auf Stufe 3c bleibt der nächste getrennte Schritt.
