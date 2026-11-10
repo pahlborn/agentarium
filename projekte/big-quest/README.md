@@ -33,3 +33,11 @@ M-N3 verwendet die vorhandene Rounding-Road-Aufgabe. Das Kind vergleicht die Abs
 112 gezielte Modul- und Regressionstests bestanden. Der getrennte Chromium-Lauf bestätigte beide Einträge nach Abgleich, beide Kartentypen in derselben Runde sowie zwei unabhängig nachgerechnete Rundungsvarianten und drei Subtraktionsvarianten. [Sentinel-Rücklauf](https://github.com/pahlborn/agentarium/issues/2#issuecomment-6768499820) · [Entwurfs-PR #180](https://github.com/pahlborn/bis-school-app_src/pull/180) · [Quellcommit](https://github.com/pahlborn/bis-school-app_src/commit/f90271412eb336995183ef3b4e6cfe6cad6ec537)
 
 Als Nächstes sind Korrektur und Rücknahme bestätigter Einträge vorgesehen. Upgrade-Abgleich und Systemabnahme auf Stufe 3c sind offen. Der Schreibweg bleibt auf den lokalen Testaufbau begrenzt.
+
+### 10.11.2026 · Korrektur, Rücknahme und Konflikte
+
+Eltern können bestätigte Bewertungen korrigieren oder zurücknehmen. Die Evaluations-ID bleibt erhalten. Frühere Fassungen sind unter Details sichtbar. Parallele Korrekturen behalten die gemeinsame Ausgangsfassung aktiv. Eine Elternbestätigung kann eine Fassung auswählen und den Konflikt auflösen. Die Rücknahme nimmt den zugehörigen Übungsfokus aus neuen Runden.
+
+Der zusammengeführte Browserlauf bestätigte Vorschau, Korrektur, Abgleich, Rücknahme sowie die bestehenden Rundungs- und Subtraktionsvarianten. Sentinel prüfte zusätzlich den Einstufungswechsel von C zu RS. 115 gezielte Regressionstests bestanden. Zwei weitere Integrationstests belegten den Abgleich von Konflikt und Auflösung zwischen zwei Elternkonten und einem Kindkonto, in Simulation und über den lokalen GitHub-Protokollspeicher. [Sentinel-Rücklauf](https://github.com/pahlborn/agentarium/issues/2#issuecomment-6768762515) · [Entwurfs-PR #180](https://github.com/pahlborn/bis-school-app_src/pull/180) · [Quellcommit](https://github.com/pahlborn/bis-school-app_src/commit/aad48d4abc30a81e7100855429a962f12d606529)
+
+Upgrade-Abgleich mit einem Altprofil und Systemabnahme auf Stufe 3c stehen aus. Der Schreibweg ist auf den lokalen Testaufbau begrenzt.
