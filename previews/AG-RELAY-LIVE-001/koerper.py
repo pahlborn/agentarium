@@ -32,7 +32,12 @@ def laden(arbeit: Path):
     """Das echte Modul laden, mit umgebogenen Verzeichnissen."""
     spec = importlib.util.spec_from_file_location("relay_echt", QUELLE)
     m = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(m)
+    # Python -I does not add the relay directory for sibling imports.
+    sys.path.insert(0, str(QUELLE.parent))
+    try:
+        spec.loader.exec_module(m)
+    finally:
+        sys.path.pop(0)
     m.PREPARED = arbeit / "relay-prepared"
     m.RESULT = arbeit / "relay-result"
     return m
