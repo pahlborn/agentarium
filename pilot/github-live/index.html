@@ -4110,19 +4110,39 @@
       /* Ein Teilball ist halb so gross wie der ganze -- dieselbe Regel wie
          im Demo-Modus ("knapp halb so gross, der Ball bleibt ganz").
          Peter, 01.11.: "diese Teilbälle sehen schrecklich aus ... bitte
-         kleine Bälle nach Muster der großen". Also bleibt der Körper klein,
-         aber seine Schalen halten länger, damit sie sich wie beim großen
-         Ball überlappen und nicht wie ein dürres Symbol aussehen. */
+         kleine Bälle nach Muster der großen". Der Fehler der ersten beiden
+         Versuche: ausgedünnt und damit nur ein Symbol. Hier bleibt der
+         kleine Körper derselbe wie beim großen Ball (dieselben drei
+         Schalen, dieselben Punktzahlen), wird aber SELTENER ausgesät. So
+         passt die Gestalt, ohne das Feld wieder zu überfahren. */
       var rad = Math.min(W(), H()) * 0.021 * LIEGEND_GROESSE * (b.l.teil ? 0.5 : 1) *
                 (1 + 0.09 * Math.sin(b.l.t * 1.1 + b.i));
       var f = w * anteil;
-      var lebenBall = teil ? Math.min(LIEGEND_LEBEN_MAX, leben * 1.8) : leben;
-      var n1 = Math.max(1, Math.round(20 * f)), n2 = Math.max(2, Math.round(52 * f)),
-          n3 = Math.max(1, Math.round(26 * f));
-      window.__feld.sonne(b.o[0], b.o[1], 0, 0, rad * 0.38, 0.88, 0.115, 0, n1, lebenBall);
-      window.__feld.sonne(b.o[0], b.o[1], 0, 0, rad,        0.70, 0.115, 0, n2, lebenBall);
-      window.__feld.sonne(b.o[0], b.o[1], 0, 0, rad * 1.75, 0.48, 0.115, 0, n3, lebenBall);
-      liegendGezaehlt += n1 + n2 + n3;
+      var basis1 = 20, basis2 = 52, basis3 = 26;
+      if (teil) {
+        /* Derselbe kleine Körper, nur zeitlich verteilt. 1/60 s ist die
+           volle Aussaat des großen ruhenden Balls; mit `f` als Flächenanteil
+           kommt der Teilball genau so oft dran, dass sein Durchschnitt zum
+           Budget passt. Die leichte Überlappung hält den Körper zusammen. */
+        var intervall = (1 / 60) / Math.max(0.02, f);
+        if (b.l.saat == null) b.l.saat = Math.random() * intervall;
+        b.l.saat += dt;
+        var lebenTeil = Math.min(LIEGEND_LEBEN_MAX, Math.max(leben, intervall * 4.2));
+        while (b.l.saat >= intervall) {
+          b.l.saat -= intervall;
+          window.__feld.sonne(b.o[0], b.o[1], 0, 0, rad * 0.38, 0.88, 0.115, 0, basis1, lebenTeil);
+          window.__feld.sonne(b.o[0], b.o[1], 0, 0, rad,        0.70, 0.115, 0, basis2, lebenTeil);
+          window.__feld.sonne(b.o[0], b.o[1], 0, 0, rad * 1.75, 0.48, 0.115, 0, basis3, lebenTeil);
+          liegendGezaehlt += basis1 + basis2 + basis3;
+        }
+      } else {
+        var n1 = Math.max(1, Math.round(basis1 * f)), n2 = Math.max(2, Math.round(basis2 * f)),
+            n3 = Math.max(1, Math.round(basis3 * f));
+        window.__feld.sonne(b.o[0], b.o[1], 0, 0, rad * 0.38, 0.88, 0.115, 0, n1, leben);
+        window.__feld.sonne(b.o[0], b.o[1], 0, 0, rad,        0.70, 0.115, 0, n2, leben);
+        window.__feld.sonne(b.o[0], b.o[1], 0, 0, rad * 1.75, 0.48, 0.115, 0, n3, leben);
+        liegendGezaehlt += n1 + n2 + n3;
+      }
       /* Ab und zu ein Funke, jeder Ball in seinem eigenen Takt (8-16 s),
          nicht alle zugleich und nicht bei jedem Faden, der vorbeizieht. */
       if (b.l.funke == null) b.l.funke = 3 + 10 * Math.random();
