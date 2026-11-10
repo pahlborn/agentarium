@@ -19,6 +19,15 @@
      B  acht liegende Baelle (einer ganz, sieben Teilbaelle): zusammen nicht
         mehr als ein Ball, 98 je Bild (+ Rundung)
      C  die Baelle bleiben alle sichtbar (liegend, mit Ort)
+     D  dieselben acht bei STARK GESENKTER Bildrate: dieselbe Grenze je Bild
+        (AG-MON-BROWSER-001, 10.11.: Teilbaelle saeten nach einer Sekundenuhr
+        mit fest angenommenen 60 Bildern je Sekunde; je weniger Bilder, desto
+        mehr Punkte je Bild -- gemessen 223 statt hoechstens 110). Jeder
+        angeforderte Frame wartet vorher 100 ms, also hoechstens rund
+        8 Bilder je Sekunde, gleich wie schnell der Rechner ist. Dass die
+        Rate wirklich sinkt, wird mitgemessen (gegen B), sonst bewiese D
+        nichts. Erster Versuch mit einem uebersprungenen Frame senkte sie im
+        ohnehin langsamen Prueflauf nur von 17 auf 15 je Sekunde.
 
    GRENZEN: Gemessen wird der Verbrauch, nicht die Schoenheit. Ob die
    Resonanz wieder "anregend schoen" ist, entscheidet Peter am iPad.     */
@@ -99,9 +108,16 @@ function kommentar(min, ereignis) {
 }
 const AGENTEN = ['forge', 'nova', 'scout', 'argus', 'sentinel', 'archibald', 'lot'];
 
-async function seite(b, tisch, liste) {
+async function seite(b, tisch, liste, langsam) {
   const q = await b.newContext({ viewport: { width: 1194, height: 834 } });
   const s = await q.newPage();
+  /* Gesenkte Bildrate: jeder angeforderte Frame wartet 100 ms. Der Monitor
+     misst `dt` selbst und sieht damit lange Bilder -- die Lage eines
+     langsamen Geraets. */
+  if (langsam) await s.addInitScript(() => {
+    const raf = window.requestAnimationFrame.bind(window);
+    window.requestAnimationFrame = cb => { setTimeout(() => raf(cb), 100); return 0; };
+  });
   const seitenFehler = [];
   s.on('pageerror', e => seitenFehler.push(String(e.message).slice(0, 110)));
   let abrufe = 0;
@@ -181,6 +197,23 @@ async function messen(s) {
     zeile('alle acht haben einen Ort', (st.liegend || []).filter(l => l.ort).length, 8);
     await r.s.waitForTimeout(2000);
     await r.s.screenshot({ path: path.join(AUFNAHMEN, '1-acht-baelle.jpg'), type: 'jpeg', quality: 80 });
+    zeile('keine Seitenfehler', r.seitenFehler.length, 0);
+    await r.q.close();
+    const rateB = m.bilder / 3;
+
+    console.log('\nD — Dieselben acht bei stark gesenkter Bildrate');
+    r = await seite(b, tisch, liste, true);
+    st = await r.s.evaluate(() => window.__agStand());
+    zeile('acht Bälle liegen', (st.liegend || []).length, 8);
+    m = await messen(r.s);
+    console.log('        ' + m.punkte + ' Punkte in ' + m.bilder + ' Bildern · ' +
+                (m.bilder / 3).toFixed(1) + ' statt ' + rateB.toFixed(1) + ' Bilder/s');
+    zeile('Bildrate wirklich gesenkt (≤ 9 Bilder/s und ≤ 70 % von B)',
+          m.bilder / 3 <= 9 && m.bilder / 3 <= rateB * 0.7, true);
+    zeile('zusammen höchstens ein Ball (≤ 110 je Bild)', m.jeBild <= 110, true);
+    zeile('… und nicht leer (≥ 80 je Bild)', m.jeBild >= 80, true);
+    zeile('alle acht haben einen Ort',
+          ((await r.s.evaluate(() => window.__agStand())).liegend || []).filter(l => l.ort).length, 8);
     zeile('keine Seitenfehler', r.seitenFehler.length, 0);
     await r.q.close();
   } finally {
