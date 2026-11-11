@@ -8,28 +8,23 @@
 <style>
 /* Messgerät, eine Spalte: Urteil oben, die drei Messungen darunter. */
 :root { padding-top: env(safe-area-inset-top, 0px);
-         padding-bottom: env(safe-area-inset-bottom, 0px); color-scheme: light; }
+         padding-bottom: env(safe-area-inset-bottom, 0px); }
+/* Bewusst nur dunkel, keine helle Fassung. Diese Seite steht neben einem
+   Feld aus dunklen Teilchen; auf hellem Grund ist davon fast nichts zu
+   sehen. Sie folgt deshalb NICHT der Einstellung des Betrachters -- in
+   einem Fenster, das "hell" meldet, war sie sonst weiss. */
 :root {
-  --grund:   #f4f5f7;
-  --blatt:   #ffffff;
-  --kante:   #d9dde3;
-  --schrift: #1e242c;
-  --leise:   #646e7b;
-  --ja:      #1f6f63;
-  --nein:    #9a4a35;
-  --offen:   #8a6a1f;
+  --grund:   #15191e;
+  --blatt:   #1d2227;
+  --kante:   #333a42;
+  --schrift: #e6e9ed;
+  --leise:   #99a3ae;
+  --ja:      #6fc3b2;
+  --nein:    #d99478;
+  --offen:   #d4b465;
   --ui:   'IBM Plex Sans', system-ui, sans-serif;
   --zahl: 'IBM Plex Mono', ui-monospace, monospace;
-}
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
-  --grund: #15191e; --blatt: #1d2227; --kante: #333a42;
-  --schrift: #e6e9ed; --leise: #99a3ae;
-  --ja: #6fc3b2; --nein: #d99478; --offen: #d4b465; color-scheme: dark;
-} }
-:root[data-theme="dark"] {
-  --grund: #15191e; --blatt: #1d2227; --kante: #333a42;
-  --schrift: #e6e9ed; --leise: #99a3ae;
-  --ja: #6fc3b2; --nein: #d99478; --offen: #d4b465; color-scheme: dark;
+  color-scheme: dark;
 }
 body { margin: 0; background: var(--grund); color: var(--schrift); font-family: var(--ui);
   font-size: 16px; line-height: 1.55; }
