@@ -451,6 +451,40 @@ class ResultTests(Fixture):
             finally:
                 os.chdir(old)
 
+    def run_wrapper(self, stdout, code=0):
+        with patch.object(driver.subprocess, 'run') as run, tempfile.TemporaryDirectory() as tmp:
+            old = os.getcwd(); os.chdir(tmp)
+            try:
+                run.return_value.returncode = code
+                run.return_value.stdout = stdout
+                raised = None
+                try:
+                    driver.fixed_test()
+                except RuntimeError as error:
+                    raised = error
+                saved = json.loads(Path('relay-tests/test-report.json').read_text())
+            finally:
+                os.chdir(old)
+        return saved, raised
+
+    def test_fixed_executor_exits_nonzero_when_internal_process_reports_fail(self):
+        # Inner process exits 0 but prints status FAIL (ARG-ENV-001).
+        saved, raised = self.run_wrapper(b'{"status":"FAIL","exit_code":1}')
+        self.assertIsInstance(raised, RuntimeError)
+        self.assertEqual((saved['status'], saved['exit_code']), ('FAIL', 1))
+
+    def test_fixed_executor_keeps_nonzero_internal_exit_as_fail(self):
+        saved, raised = self.run_wrapper(b'', code=1)
+        self.assertIsInstance(raised, RuntimeError)
+        self.assertEqual(saved['failure'], 'FIXED_EXECUTOR_FAILED')
+
+    def test_fixed_executor_pass_and_not_run_do_not_raise(self):
+        for status in ('PASS', 'NOT_RUN'):
+            with self.subTest(status=status):
+                saved, raised = self.run_wrapper(json.dumps({'status': status}).encode())
+                self.assertIsNone(raised)
+                self.assertEqual(saved['status'], status)
+
 
 def runde_activation():
     a = activation()

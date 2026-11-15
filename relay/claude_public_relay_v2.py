@@ -1017,7 +1017,7 @@ def fixed_test(internal=False) -> None:
         report = json.loads(completed.stdout)
     (output / "test-report.json").write_text(json.dumps(report, indent=2))
     print(json.dumps(report))
-    if completed.returncode:
+    if completed.returncode or report.get("status") not in ("PASS", "NOT_RUN"):
         raise RuntimeError("fixed executor failed; sanitized report saved")
 
 
