@@ -1,0 +1,41 @@
+{
+  "schema": "agentarium.relay-activation.v3",
+  "task_id": "AG-BQ-ENV-FIX-20261115-ARCHIBALD",
+  "authorized": true,
+  "source_commit": "6a796e5c26cc68ecabb8fb04c895fe35e09dd025",
+  "role": "spec-agent",
+  "request": "handoffs/AG-BQ-ENV-FIX-20261115-archibald-request.json",
+  "handback": "handoffs/AG-BQ-ENV-FIX-20261115-archibald-return.md",
+  "model": "opus",
+  "max_turns": 8,
+  "max_budget_usd": 1.5,
+  "contract": {
+    "schema": "agentarium.project-packet.v1",
+    "repository": "pahlborn/bis-school-app_src",
+    "project_id": "big-quest",
+    "target_commit": "7995d6968e3895b88f8ed2c3b0476683e5720c1a",
+    "mode": "analysis",
+    "read_files": [
+      {
+        "path": "package.json",
+        "git_blob": "fc40de702be7b75c3d07655f8ea8f08a013d9783",
+        "sha256": "4c9fdfbb001276844836447cd9aa3134290354d56d966c5cc54e58cd76e35934"
+      }
+    ],
+    "edit_paths": [],
+    "create_paths": [],
+    "synthetic_files": [],
+    "identity": {
+      "schema": "agentarium.relay-runtime-identity.v1",
+      "project_id": "big-quest",
+      "run_id": "BQ-EVAL-01",
+      "task_id": "BQ-EVAL-01-ENV-FIX-20261115-ARCHIBALD",
+      "parent_id": "BQ-EVAL-01-ENV-FIX-20261115",
+      "subject_role": "archibald"
+    },
+    "max_seconds": 300,
+    "test_profile": "none",
+    "artifact_publication": "host-approved-exact-paths",
+    "journal_delivery": "archive"
+  }
+}
