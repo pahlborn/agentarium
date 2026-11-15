@@ -11,6 +11,7 @@ import os
 from pathlib import Path
 import shutil
 import stat
+import subprocess
 import tempfile
 import unittest
 from unittest.mock import patch
@@ -27,6 +28,10 @@ PACKAGE = b'{"name":"synthetic-package","version":"0.0.0-synthetic"}\n'
 BLOB = hashlib.sha1(b'blob ' + str(len(PACKAGE)).encode() + b'\0' + PACKAGE).hexdigest()
 EDIT = 'relay-proof/existing.md'
 NEW = 'relay-proof/new.md'
+# Synthetic stand-ins for the BigQuest module/test; the real files are fetched by hash.
+RUNDE_JS = b'export function runde(value) {\n  return Math.round(value);\n}\n'
+RUNDE_TEST_JS = b"import test from 'node:test';\nimport assert from 'node:assert';\nimport { runde } from '../../src/module/runde.mjs';\ntest('runde', () => assert.equal(runde(1.4), 1));\n"
+SOURCES = {'package.json': PACKAGE, 'src/module/runde.mjs': RUNDE_JS, 'tests/module/runde.test.mjs': RUNDE_TEST_JS}
 
 
 def activation(role='coding-agent', mode='forge-implementation'):
@@ -103,7 +108,7 @@ class Fixture(unittest.TestCase):
         with patch.object(driver, 'source', side_effect=source), \
              patch.object(driver, 'git', return_value='100644 blob synthetic file'), \
              patch.object(pp, 'source_entry', return_value=None), \
-             patch.object(pp, 'fetch_source', return_value=PACKAGE):
+             patch.object(pp, 'fetch_source', side_effect=lambda c, item: SOURCES[item['path']]):
             pp.prepare(driver, a, PARENT, HEAD, r)
         return pp.verify_prepared(driver)
 
@@ -445,6 +450,117 @@ class ResultTests(Fixture):
                 self.assertEqual(set(kwargs['env']), {'PATH', 'LANG'})
             finally:
                 os.chdir(old)
+
+
+def runde_activation():
+    a = activation()
+    c = a['contract']
+    c.update(read_files=[{'path': n, 'git_blob': hashlib.sha1(b'blob ' + str(len(d)).encode() + b'\0' + d).hexdigest(),
+                          'sha256': pp.digest(d)} for n, d in SOURCES.items()],
+             edit_paths=[pp.RUNDE_MODULE], create_paths=[], synthetic_files=[], test_profile='bq-runde-v1')
+    c['identity'].update(project_id='big-quest', run_id='BQ-EVAL-01',
+                         task_id='BQ-EVAL-01-INT-01-DEV', parent_id='BQ-EVAL-01-INT-01')
+    return a
+
+
+class RundeTests(Fixture):
+    def run_profile(self, run, which='/usr/bin/node'):
+        context = self.prepare(runde_activation())
+        original = self.root / 'original'
+        shutil.copytree(self.prepared, original)
+        meta = self.success(context)
+        environment = {'ANTHROPIC_API_KEY': 'synthetic', 'GH_TOKEN': 'synthetic', 'GITHUB_TOKEN': 'synthetic',
+                       'PATH': '/usr/bin', 'LANG': 'C'}
+        with patch.object(driver, 'PREPARED', original), patch.object(pp.shutil, 'which', return_value=which), \
+             patch.object(pp.subprocess, 'run', side_effect=run), patch.dict(os.environ, environment):
+            return pp.execute_proof(self.result, original, driver), meta, context
+
+    def fake_node(self, calls, code=0, version=b'v22.5.0\n'):
+        def run(argv, **kwargs):
+            calls.append((argv, kwargs))
+            if argv[1:] == ['--version']:
+                return subprocess.CompletedProcess(argv, 0, version, b'')
+            out = b'# tests 1\n# pass 1\n' if code == 0 else b'# tests 1\n# fail 1\n'
+            return subprocess.CompletedProcess(argv, code, out, b'')
+        return run
+
+    def test_runde_profile_runs_existing_test_with_host_command_and_clean_environment(self):
+        calls = []
+        report, meta, context = self.run_profile(self.fake_node(calls))
+        self.assertEqual((report['status'], report['exit_code'], report['profile']), ('PASS', 0, 'bq-runde-v1'))
+        self.assertEqual(report['node_version'], 'v22.5.0')
+        self.assertEqual(len(calls), 2)
+        argv, kwargs = calls[1]
+        self.assertEqual(argv[0], '/usr/bin/node')
+        self.assertEqual(argv[1], '--experimental-permission')
+        self.assertTrue(argv[2].startswith('--allow-fs-read=') and 'relay-runde-test-' in argv[2])
+        self.assertEqual(argv[3:], [pp.RUNDE_TEST])
+        self.assertNotIn('shell', kwargs)
+        self.assertEqual(set(kwargs['env']), {'PATH', 'LANG'})
+        self.assertEqual(kwargs['cwd'].name, 'restored')
+        self.assertNotIn('Synthetic', ' '.join(argv))
+        self.assertNotIn('relay-runde-test-', ' '.join(report['command']))
+        self.assertEqual(report['changes_sha256'], meta['changes_sha256'])
+        inventory = report['restored_inventory']
+        for name, data in SOURCES.items():
+            if name != pp.RUNDE_MODULE:
+                self.assertEqual(inventory[name]['sha256'], pp.digest(data))
+        self.assertNotEqual(inventory[pp.RUNDE_MODULE]['sha256'], pp.digest(RUNDE_JS))
+        result = json.loads((self.result / 'changes.json').read_bytes())
+        self.assertEqual(inventory[pp.RUNDE_MODULE]['sha256'], result['changes'][0]['sha256'])
+        bad = copy.deepcopy(result)
+        bad['changes'][0]['path'] = pp.RUNDE_TEST
+        with self.assertRaises(ValueError):
+            pp.validate_changes(bad, context, driver)
+
+    def test_runde_profile_reports_nonzero_node_exit_as_fail(self):
+        report, _, _ = self.run_profile(self.fake_node([], code=1))
+        self.assertEqual((report['status'], report['exit_code']), ('FAIL', 1))
+        self.assertIn('fail 1', report['stdout_tail'])
+
+    def test_runde_profile_fails_closed_without_node(self):
+        calls = []
+        with self.assertRaisesRegex(ValueError, 'unavailable'):
+            self.run_profile(self.fake_node(calls), which=None)
+        self.assertEqual(calls, [])
+
+    def test_runde_profile_fails_closed_on_node_without_permission_model(self):
+        calls = []
+        with self.assertRaisesRegex(ValueError, 'permission model'):
+            self.run_profile(self.fake_node(calls, version=b'v18.19.0\n'))
+        self.assertEqual(len(calls), 1)
+
+    def test_runde_profile_contract_rejects_other_sources_edits_creates_roles_and_commands(self):
+        driver.validate_activation(runde_activation(), PARENT)
+        seed = '# Synthetic overlay\n'
+        mutations = {
+            'no test source': lambda a: a['contract'].update(read_files=a['contract']['read_files'][:2]),
+            'no module source': lambda a: a['contract'].update(read_files=a['contract']['read_files'][::2]),
+            'edit package': lambda a: a['contract'].update(edit_paths=['package.json']),
+            'edit test': lambda a: a['contract'].update(edit_paths=[pp.RUNDE_TEST]),
+            'edit none': lambda a: a['contract'].update(edit_paths=[]),
+            'create': lambda a: a['contract'].update(create_paths=['src/module/extra.mjs']),
+            'seed': lambda a: a['contract'].update(synthetic_files=[{'path': NEW, 'content': seed, 'sha256': pp.digest(seed.encode())}]),
+            'role': lambda a: a.update(role='spec-agent'),
+            'analysis': lambda a: a['contract'].update(mode='analysis', edit_paths=[]),
+            'command': lambda a: a['contract'].update(test_command='node evil.mjs'),
+            'other profile': lambda a: a['contract'].update(test_profile='bq-runde-v2'),
+            'other repo': lambda a: a['contract'].update(repository='pahlborn/agentarium'),
+            'agentarium identity': lambda a: a['contract']['identity'].update(project_id='agentarium'),
+        }
+        for name, mutate in mutations.items():
+            a = runde_activation()
+            mutate(a)
+            with self.subTest(case=name), self.assertRaises((ValueError, TypeError)):
+                driver.validate_activation(a, PARENT)
+
+    def test_runde_sources_are_readable_in_analysis_without_write_rights(self):
+        a = runde_activation()
+        a['contract'].update(mode='analysis', edit_paths=[], test_profile='none')
+        context = self.prepare(a)
+        command = pp.command(context, driver)
+        self.assertEqual(command[command.index('--tools') + 1], 'Read')
+        self.assertFalse(pp.writable_paths(context))
 
 
 OBSERVER_INIT = runtime.Observer.__init__

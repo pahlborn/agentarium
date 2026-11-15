@@ -23,10 +23,13 @@ SCHEMA = 'agentarium.relay-activation.v3'
 CONTRACT = 'agentarium.project-packet.v1'
 MAX_FILE = 256 * 1024
 MAX_TOTAL = 1024 * 1024
+RUNDE_MODULE = 'src/module/runde.mjs'
+RUNDE_TEST = 'tests/module/runde.test.mjs'
+RUNDE_SOURCES = ('package.json', RUNDE_MODULE, RUNDE_TEST)
 SOURCE_POLICY = {
     'pahlborn/agentarium': ('agentarium', 'AG', {'README.md'}),
     # Explicit source alias of the registered delivery project, not a URL.
-    'pahlborn/bis-school-app_src': ('big-quest', 'BQ', {'package.json'}),
+    'pahlborn/bis-school-app_src': ('big-quest', 'BQ', set(RUNDE_SOURCES)),
 }
 FORBIDDEN = {'.git', '.github', '.aws', '.ssh', '.claude', '.codex', '.agents',
              'node_modules', 'governance', 'handoffs', 'control'}
@@ -103,7 +106,7 @@ def validate_activation(a, parent, driver):
         raise ValueError('only Forge may implement')
     if type(c['max_seconds']) is not int or not 10 <= c['max_seconds'] <= 1200:
         raise ValueError('v3 timeout outside host bound')
-    if c['test_profile'] not in ('none', 'synthetic-doc-v1') or c['journal_delivery'] != 'archive':
+    if c['test_profile'] not in ('none', 'synthetic-doc-v1', 'bq-runde-v1') or c['journal_delivery'] != 'archive':
         raise ValueError('unsupported executor/journal contract')
     # Artifact publication is separately commissioned in the immutable host
     # activation, before any model output exists. It is not a secret-scan flag.
@@ -166,6 +169,11 @@ def validate_activation(a, parent, driver):
             read_paths != ['package.json'] or len(edits) != 1 or len(creates) != 1 or
             set(edits) != set(seed_paths) or any(not p.startswith('relay-proof/') for p in edits + creates)):
         raise ValueError('fixed proof executor contract mismatch')
+    if c['test_profile'] == 'bq-runde-v1' and (
+            c['repository'] != 'pahlborn/bis-school-app_src' or a['role'] != 'coding-agent' or
+            c['mode'] != 'forge-implementation' or identity['project_id'] != 'big-quest' or
+            sorted(read_paths) != sorted(RUNDE_SOURCES) or edits != [RUNDE_MODULE] or creates or seeds):
+        raise ValueError('fixed runde executor contract mismatch')
     return a
 
 
@@ -792,13 +800,16 @@ def publish(driver, context):
 def execute_proof(result_root, prepared, driver):
     """Host-selected fixed test executor, invoked WITHOUT model/GitHub env."""
     context = verify_prepared(driver)
-    if context['activation']['contract']['test_profile'] != 'synthetic-doc-v1':
+    profile = context['activation']['contract']['test_profile']
+    if profile not in ('synthetic-doc-v1', 'bq-runde-v1'):
         return {'status': 'NOT_RUN'}
     meta = json.loads((result_root / 'metadata.json').read_bytes())
     validate_result(meta, context, result_root, driver)
     if meta['phase'] != 'result_ready':
         raise ValueError('cannot test a blocked result')
     result = json.loads((result_root / 'changes.json').read_bytes())
+    if profile == 'bq-runde-v1':
+        return execute_runde(context, meta, result, driver)
     with tempfile.TemporaryDirectory(prefix='relay-proof-test-') as tmp:
         restored = Path(tmp) / 'restored'
         restore(result, context, driver, restored)
@@ -814,3 +825,48 @@ def execute_proof(result_root, prepared, driver):
                 'status': 'PASS', 'packet_binding': context['packet_binding'],
                 'changes_sha256': meta['changes_sha256'], 'checked_at': driver.now(),
                 'restored_inventory': snapshot(restored)}
+
+
+def node_permission_flag(version):
+    match = re.fullmatch(r'v([0-9]+)\.([0-9]+)\.[0-9]+', version.strip())
+    if not match or int(match[1]) < 20:
+        raise ValueError('node >= 20 with permission model required')
+    return '--permission' if (int(match[1]), int(match[2])) >= (23, 5) else '--experimental-permission'
+
+
+def runde_command(node, restored, flag):
+    # Host-owned argv; no part is read from model or result text.
+    return [node, flag, '--allow-fs-read=' + str(restored) + '/*', RUNDE_TEST]
+
+
+def execute_runde(context, meta, result, driver):
+    """Fixed bq-runde-v1 executor: the existing BigQuest test on restored source."""
+    c = context['activation']['contract']
+    if {x['path']: x['operation'] for x in result['changes']} != {RUNDE_MODULE: 'edit'}:
+        raise ValueError('runde proof needs the actual module edit only')
+    env = {k: os.environ[k] for k in ('PATH', 'LANG') if k in os.environ}
+    node = shutil.which('node', path=env.get('PATH'))
+    if node is None:
+        raise ValueError('node unavailable; runde proof cannot run')
+    probe = subprocess.run([node, '--version'], env=env, stdin=subprocess.DEVNULL,
+                           capture_output=True, timeout=20)
+    version = probe.stdout.decode('ascii', 'replace').strip()
+    if probe.returncode != 0:
+        raise ValueError('node version probe failed')
+    flag = node_permission_flag(version)
+    with tempfile.TemporaryDirectory(prefix='relay-runde-test-') as tmp:
+        restored = Path(tmp).resolve() / 'restored'
+        inventory = restore(result, context, driver, restored)
+        argv = runde_command(node, restored, flag)
+        done = subprocess.run(argv, cwd=restored, env=env, stdin=subprocess.DEVNULL,
+                              capture_output=True, timeout=min(c['max_seconds'], 120))
+    out, err = (done.stdout or b'')[-4000:], (done.stderr or b'')[-1000:]
+    if driver.secret_hit(out + err):
+        out = err = b'withheld by secret scan'
+    return {'schema': 'agentarium.fixed-test.v1', 'profile': 'bq-runde-v1',
+            'status': 'PASS' if done.returncode == 0 else 'FAIL', 'exit_code': done.returncode,
+            'node_version': version, 'packet_binding': context['packet_binding'],
+            'command': ['node'] + [x.replace(str(restored), '<restored>') for x in argv[1:]],
+            'changes_sha256': meta['changes_sha256'], 'checked_at': driver.now(),
+            'stdout_tail': out.decode('utf-8', 'replace'), 'stderr_tail': err.decode('utf-8', 'replace'),
+            'restored_inventory': inventory}
