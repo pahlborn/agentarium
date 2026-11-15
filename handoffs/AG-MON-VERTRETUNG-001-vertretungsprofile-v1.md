@@ -1,5 +1,7 @@
 # Echte Vertretung — Profile v1
 
+**Aktuelle Freigabegrenze, Peter 15.11.2026:** Nur bei konkret belegtem technischem Problem UND vorheriger ausdrücklicher Zustimmung Peters zum einzelnen Einsatz. Frühere Beschlüsse und Beispiele unten sind historisch, keine pauschale Dispatch-Freigabe. Maßgeblich: `governance/vertretungen-freigabe-2026-11-15.md`.
+
 Beschlossen: Peter, 01.11.2026 („Ok, bitte umsetzen“). Ergänzt Rulebook 1.4 §§2/8 und Process 1.4 §3. Ein Profil ist keine laufende Instanz und erteilt keine zusätzlichen Werkzeuge oder Ausgabenrechte.
 
 | Vertretene Funktion | Echte Ausführung | Grenze |
@@ -11,7 +13,7 @@ Beschlossen: Peter, 01.11.2026 („Ok, bitte umsetzen“). Ergänzt Rulebook 1.4
 
 ## Atlas startet einen Vertreter
 
-1. Originalstatus einmal prüfen: bestätigter Fehler / Ausführungsgrenze, geplantes Warten oder unbekannt. Keine Ausfallbehauptung aus Schweigen. Ein von Peter ausdrücklich beauftragter Vertreter darf auch direkt starten; das beweist keinen vorangegangenen technischen Ausfall.
+1. Originalstatus einmal prüfen: bestätigter Fehler / Ausführungsgrenze, geplantes Warten oder unbekannt. Keine Ausfallbehauptung aus Schweigen. Auch ein vorgeschlagener Vertreter startet erst nach belegtem technischem Problem und Peters vorheriger ausdrücklicher Zustimmung für den benannten Einsatz; keine pauschale Direktstartausnahme.
 2. Letzten überprüfbaren Arbeitsstand benennen, ohne Checkpoint ausdrücklich `no-checkpoint`; Verlust und erforderliche Wiederholung offen nennen. Alten Worker nachweislich stoppen oder Auftrag wirksam entziehen. Unklarer Stopp blockiert die Übernahme.
 3. Reale separate Instanz mit eigenem Runtime-Identifier starten. Bounded assignment: bestehende Task-/Projekt-/Lauf-/Elternkennung, vertretene Funktion, tatsächliche Plattform, genauer Inputstand, Ergebnis, Rechte, Grenzen und Stopkriterium. Passendes Fachprofil laden. Kein bloßes Umbenennen zu Forge/Archibald/Cadence.
 4. `reassigned` nur für eine delegierte Teilaufgabe mit nichtleerem unverändertem `parent_id` nach technischem Ereignisvertrag melden; Peters Hauptauftrag und Hauptball bleiben bei Atlas. vorherigen Halter, konkreten Stopp-/Entzugsbeleg und Arbeitsstand mitgeben. Der Monitor prüft Zuordnung und Syntax; Atlas prüft den Beleginhalt. Im Monitor meldet sich der Vertreter als `springer`; der Aufgabenbeleg nennt Funktion und echte Runtime. Höchstens ein aktiver Halter pro Aufgabe.

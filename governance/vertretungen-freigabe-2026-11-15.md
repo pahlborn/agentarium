@@ -1,0 +1,14 @@
+# Verbindliche Vertretungsregel
+
+### Vertretungen: technisches Problem und ausdrückliche Zustimmung — Peter, 15.11.2026
+
+Diese jüngste ausdrückliche Nutzerentscheidung ersetzt die früheren pauschalen Vertretungsfreigaben vom 01.11.2026 und die Übergangsfreigabe vom 15.11.2026 für künftige Einsätze/Fortsetzungen.
+
+1. Reguläre Rollen einsetzen. Eine Vertretung ist ausschließlich bei einem konkret belegten technischen Problem zulässig, das die reguläre Rolle am betreffenden Auftrag hindert. Bequemlichkeit, Geschwindigkeit, Parallelisierung, ein ungeprüfter Kanal oder allein ein fehlender lokaler Connector sind kein ausreichender Grund. Vorhandene funktionierende Ausführungswege und aktuelle Belege prüfen; keine teuren Wiederholungsproben ohne neue Diagnose.
+2. Vor JEDEM Vertretungseinsatz fragt Atlas Peter mit dem konkreten Problem/Beleg, der betroffenen Rolle und Aufgabe sowie dem vorgeschlagenen tatsächlichen Vertreter und Umfang. Erst Peters ausdrückliche Zustimmung für diesen Einsatz erlaubt Start, Übergabe oder Fortsetzung. Aufgabenfreigabe, Kostenfreigabe, allgemeines Weiterarbeiten und frühere pauschale Ersatzfreigaben ersetzen diese Zustimmung nicht. Schweigen ist keine Zustimmung.
+3. Eine erteilte Zustimmung gilt für die benannte Aufgabe/Rolle und den vereinbarten Umfang; innerhalb dessen nicht pro Datei oder zulässigem Retest erneut fragen. Materiell anderer Einsatz benötigt neue Zustimmung. Bei fehlender Zustimmung den letzten sicheren Stand erhalten, genaue Blockade und nächste Aktion nennen und unabhängige erlaubte Arbeiten fortführen.
+4. Vor tatsächlicher Übergabe bisherigen Worker/Holder und Checkpoint prüfen, bisherigen Auftrag nachweisbar stoppen/entziehen und genau einen aktiven Halter sicherstellen. Tatsächliche Plattform, Rolle, Autorenschaft, Zustimmungsbeleg und unabhängige Prüfung dokumentieren. Ein Vertreter wird nicht als Forge, Cadence oder Archibald ausgegeben.
+5. Bereits laufende Vertretungen dürfen keine neuen Arbeitspakete oder automatischen Folgeläufe beginnen. Einen sicheren Checkpoint herstellen und vor fachlicher Fortsetzung Peters konkrete Zustimmung einholen; keine Daten durch unkontrollierten Abbruch verlieren. Historische Ergebnisse und tatsächlich bereits erfolgte Ausführung nicht umschreiben. Ein Commit lädt laufende Chats/Worker nicht automatisch neu.
+6. Reguläre ChatGPT-Rollen wie Argus und Sentinel sind bei ihrem eigenen Review-/QA-Auftrag keine Ersatzbesetzung einer Claude-Rolle. Atlas darf eigene Koordinations-/Redaktionsaufgaben weiter selbst ausführen, aber keine andere Fachrolle als Umgehung dieser Regel stillschweigend übernehmen. Rechte, unabhängige Prüfung, Kosten- und Veröffentlichungsgrenzen bleiben unverändert.
+
+Geltungsbereich: Agentarium-Team und daraus beauftragte Projekte einschließlich Big Quest. Quelle: Peters ausdrücklicher Auftrag im zentralen Steuerungschat am 15.11.2026. Kein Ersatz einer technischen Werkzeugfreigabe und kein Hintergrunddienst.
