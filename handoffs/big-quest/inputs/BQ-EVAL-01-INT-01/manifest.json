@@ -1,0 +1,36 @@
+{
+  "task": "BQ-EVAL-01-INT-01",
+  "input_version": "public-v1",
+  "artifacts": [
+    {
+      "file": "gesamtuebergabe-public-v1.zip",
+      "sha256": "ae795684af186fd3fad29c7ff6ff1dd6e4c3e690474d67e37a47b87ab056d77e",
+      "bytes": 1214820,
+      "source_sha256": "f02a1227e9c53283935382a7e3d210ca4d2015adf0ca4ed01d4330042a3da7f9",
+      "publication_changes": {
+        "Quellstand-bereinigt/tests/konto-anmeldung.test.mjs": {
+          "original_account_identifier_occurrences_replaced": 1,
+          "token_shaped_test_values_replaced": 0
+        }
+      },
+      "application_tests_for_publication_edits": "NOT_RUN"
+    },
+    {
+      "file": "cleanup-overlay-public-v1.zip",
+      "sha256": "60bcfad3dfe341c21400a6450f8094bd3af3bf4c4c40562e6d3b81b74bd32ca6",
+      "bytes": 57781,
+      "source_sha256": "f961223ef35a16ab059f7ad63303b394fa323030d574acda4887fa062115dcf7",
+      "publication_changes": {
+        "payload/tests/familienfassung.test.mjs": {
+          "original_account_identifier_occurrences_replaced": 2,
+          "token_shaped_test_values_replaced": 1
+        },
+        "payload/tests/testinstanz.test.mjs": {
+          "original_account_identifier_occurrences_replaced": 1,
+          "token_shaped_test_values_replaced": 1
+        }
+      },
+      "application_tests_for_publication_edits": "NOT_RUN"
+    }
+  ]
+}

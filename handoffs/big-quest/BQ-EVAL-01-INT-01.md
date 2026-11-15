@@ -1,6 +1,6 @@
 # BQ-EVAL-01-INT-01 · Vollständigen bereinigten Entwicklungskandidaten herstellen
 
-Auftragsfassung v1 · 15.11.2026 · Steuerung: Atlas im zentralen Big-Quest-Steuerungschat · Ausführung: Atlas in genau einem separaten Entwicklungs-Chat.
+Auftragsfassung v2 · 15.11.2026 · Steuerung: Atlas im zentralen Big-Quest-Steuerungschat · Ausführung: Atlas in genau einem separaten Entwicklungs-Chat.
 
 ## 1. Startsequenz – vor der Ausführung
 
@@ -21,23 +21,24 @@ Der zentrale Steuerungschat besitzt Priorisierung, nachfolgende Aufträge und ko
 
 ## 3. Eingaben und exakte Referenzen
 
-Im neuen Chat müssen BEIDE Archive angehängt bzw. tatsächlich lesbar bereitliegen. Lokale Pfade eines anderen Chats sind keine Eingaben. Kein Abruf vertraulicher Browsercookies oder Secretwerte zur Umgehung fehlender Dateizugriffe.
+Beide Eingabepakete liegen jetzt in GitHub: [Eingabeindex](inputs/BQ-EVAL-01-INT-01/INPUTS.md) und [Manifest](inputs/BQ-EVAL-01-INT-01/manifest.json). Lade die Dateien selbst vom gleichen Commit wie diesen Auftrag; Peter muss nichts herunterladen oder erneut anhängen. Nutze den vorhandenen GitHub-Zugriff, Raw-HTTPS oder read-only Git-Fetch/git-show, prüfe SHA-256 vor Verwendung und lies PUBLICATION-NOTES.md. Lokale Pfade eines anderen Chats sind keine Eingaben. Kein Abruf vertraulicher Browsercookies oder Secretwerte zur Umgehung fehlender Dateizugriffe.
 
 ### A. Gesamtübergabe
 
-- Dateiname `Big-Quest-Atlas-Gesamtuebergabe (1).zip`; Inhalt beginnt bei `Big-Quest-Atlas-Gesamtuebergabe.md`.
-- ZIP-SHA256 `f02a1227e9c53283935382a7e3d210ca4d2015adf0ca4ed01d4330042a3da7f9`.
-- 227 aufgeführte Dateiprüfsummen wurden im Steuerungschat bestätigt. Diese Feststellung ist keine neue Anwendungsprüfung.
+- Öffentliche Eingabe: [gesamtuebergabe-public-v1.zip](inputs/BQ-EVAL-01-INT-01/gesamtuebergabe-public-v1.zip); Inhalt beginnt bei `Big-Quest-Atlas-Gesamtuebergabe.md`.
+- ZIP-SHA256 `ae795684af186fd3fad29c7ff6ff1dd6e4c3e690474d67e37a47b87ab056d77e`.
+- Ursprünglicher Anhang: `Big-Quest-Atlas-Gesamtuebergabe (1).zip`, SHA256 `f02a1227e9c53283935382a7e3d210ca4d2015adf0ca4ed01d4330042a3da7f9`. Seine 227 aufgeführten Dateiprüfsummen wurden bestätigt. Die öffentliche Variante ersetzt eine verbliebene alte Kontokennung in einer Testdatei, ergänzt den Änderungshinweis und aktualisiert die Prüfsummen. Die beiden Patches sind bytegleich zum Original; keine Anwendungstests für diese reine Publikationsänderung ausgeführt.
 - Jüngster dokumentierter Originalcommit `0a2d92fd1df28bda46fa793cbc8309a63df185be`, Originalbaum `e0474ccb8681592f0ed88bcebc318ab87afd2c12`.
 - Kumulative Patchbasis `7995d6968e3895b88f8ed2c3b0476683e5720c1a`, Basisbaum `ffdc932e6b7f2b4195f7b119d4ba445409512180`; zehn Patch-Commits.
 - Inkrementelle EP06-Basis `9fbd987d4d3f02b1ac890bc0fe508f0bfa73a3e0`, Baum `7493d82b02769d7d0511c66b01f7fe1abc257f67`; vier Patch-Commits. Wähle EINEN passenden Wiederherstellungsweg, nicht beide aufeinander.
 - Der Atlas-Arbeitsstand v15 endet früher bei `7ce56ab`; das ist nicht der jüngste Produktstand. Für den neueren Originalstand sind Übergabevermerk, Release-Dokumentation und beigefügte Protokolle maßgeblich; das Konzept v1.0 definiert den Produktumfang.
-- `Quellstand-bereinigt/` hat Baum `49a4594b0c61bb8620c1e1260f4a4e35979de5f7`, aber 136 Ausschlüsse und Anonymisierungen in 42 Dateien. Unter anderem fehlen `index.html`, `tests/testinstanz.test.mjs`, die Schulfixture und Build-Konfigurationsdateien. Nicht als vollständigen oder abgenommenen Quellstand übernehmen.
+- `Quellstand-bereinigt/` hatte im Originalarchiv Baum `49a4594b0c61bb8620c1e1260f4a4e35979de5f7`; die zusätzliche Kennungsersetzung der öffentlichen Variante verändert diesen Baum. Er ist weder der Original-Prüfbaum noch die Wiederherstellungsbasis. Die Kopie hat 136 Ausschlüsse und Anonymisierungen in ursprünglich 42 Dateien. Unter anderem fehlen `index.html`, `tests/testinstanz.test.mjs`, die Schulfixture und Build-Konfigurationsdateien. Nicht als vollständigen oder abgenommenen Quellstand übernehmen.
 
 ### B. Bereits geprüfte lokale Bereinigung
 
-- Dateiname `BQ-EVAL-01-cleanup-candidate-v1.zip`.
-- ZIP-SHA256 `f961223ef35a16ab059f7ad63303b394fa323030d574acda4887fa062115dcf7`.
+- Öffentliche Eingabe: [cleanup-overlay-public-v1.zip](inputs/BQ-EVAL-01-INT-01/cleanup-overlay-public-v1.zip).
+- ZIP-SHA256 `60bcfad3dfe341c21400a6450f8094bd3af3bf4c4c40562e6d3b81b74bd32ca6`.
+- Ursprüngliches Review-Artefakt: `BQ-EVAL-01-cleanup-candidate-v1.zip`, SHA256 `f961223ef35a16ab059f7ad63303b394fa323030d574acda4887fa062115dcf7`. Die öffentliche Variante ersetzt verbliebene alte Kontokennungen und tokenähnliche Testwerte in zwei Dateien durch deterministische Dummy-Werte und aktualisiert das Payload-Manifest. Keine Anwendungstests für diese Publikationsänderungen ausgeführt; das frühere Review gilt weiterhin nur für seinen ursprünglichen genauen Stand. Die ohnehin geforderte Integration prüft den neuen Kandidaten.
 - Wiederherstellbares Overlay auf Basis `7995d6968e3895b88f8ed2c3b0476683e5720c1a`, keine vollständige Git-Historie.
 - Entfernt `werkzeug/konten.json` und `werkzeug/schuldaten.json`, ignoriert beide optionalen lokalen Pfade, führt eine neue synthetische Kontenfixture ein und stellt acht Tests auf explizit synthetische Daten um. Bestehende Werkzeuge unterstützen fehlende Konfiguration. Keine App-Logik-/Workflow-/Paket-/Lockdateiänderung.
 - Technischer Bearbeiter war der getrennte Codex-Vertreter `/root/codex_bq_cleanup`; unabhängiges Review durch Argus `/root/argus_bq_cleanup`: PASS_WITH_NOTES für exakt diesen lokalen Kandidaten. Kein Forge-Lauf behauptet.
@@ -83,7 +84,7 @@ Liefere eine kurze kopierbare Markdown-Rückgabe und die nötigen herunterladbar
 ```markdown
 # BQ-EVAL-01-INT-01 · Rückgabe v1
 Status: DELIVERED / BLOCKED / NEEDS_DECISION
-Auftragsfassung: v1, unveränderlicher Auftragslink
+Auftragsfassung: v2, unveränderlicher Auftragslink
 Ausführungs-Chat / tatsächliche Rollen- und Laufreferenzen:
 Eingabebasis / Original-Rekonstruktionsbaum:
 Kandidaten-Commit / Baum / Codepaket / SHA256:
