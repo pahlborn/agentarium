@@ -6,7 +6,8 @@ Peter entscheidet: zentrale Übersicht bleibt im Steuerungschat; begrenzte Entwi
 
 | Auftrag | Bestehender Backlog-Bezug | Zustand | Ergebnis / nächster Schritt |
 |---|---|---|---|
-| [BQ-EVAL-01-INT-01 v2](BQ-EVAL-01-INT-01.md) | EP00/EP09, technische Vorbereitung der Basis-/Lieferstand-Stories | PREPARED, kein Worker für diesen neuen Auftrag gestartet | Vollständigen bereinigten Kandidaten aus Stand 06 und geprüftem Cleanup-Overlay herstellen; Peter eröffnet den separaten Ausführungs-Chat mit dem Auftragslink; Atlas lädt die beiden Eingabepakete selbst aus GitHub. |
+| [AG-RELAY-MULTIREPO-001 v1](AG-RELAY-MULTIREPO-001.md) | Eigenständiger Agentarium-Infrastrukturauftrag; Voraussetzung für reguläre Big-Quest-Forge-Arbeit | PREPARED, kein Worker für diesen neuen Auftrag gestartet | Begrenzten Repo-Lesezugriff und Forge-Implementierungsmodus herstellen und unabhängig nachweisen; keine allgemeine Aktivierung oder Main-Merge. |
+| [BQ-EVAL-01-INT-01 v2](BQ-EVAL-01-INT-01.md) | EP00/EP09, technische Vorbereitung der Basis-/Lieferstand-Stories | WAITING_FOR AG-RELAY-MULTIREPO-001; kein Worker für diesen neuen Auftrag gestartet | Erst den geprüften praktischen Claude-Aufrufweg herstellen. Danach vollständigen bereinigten Kandidaten aus Stand 06 und Cleanup-Overlay bearbeiten; Eingaben selbst aus GitHub laden. |
 
 ## Autoritätsgrenzen
 
@@ -23,3 +24,7 @@ Dieses Register ersetzt weder das kanonische Ereignisjournal auf Issue #2 noch d
 ## Änderung v2 – selbstständiger Eingabeabruf
 
 Peter verlangt GitHub-Ablage der tatsächlichen Eingaben statt wiederholtem Dateitransport. Auftrag und Eingabeindex entsprechend aktualisiert. Es wurde keine neue Entwicklung oder Agenten-/Anwendungsprüfung ausgeführt. Review und Originalnachweise behalten ihre exakte ursprüngliche Gültigkeitsgrenze.
+
+## Vorgelagerter Infrastrukturauftrag – 15.11.2026
+
+Peter bittet nach Prüfung der tatsächlichen Relay-Grenzen um einen eigenen Auftrag für die Erweiterung. AG-RELAY-MULTIREPO-001 wird vor INT-01 eingeordnet. Die erweiterten Implementierungs-/Test-/Lieferbefugnisse gelten ausschließlich für diesen ausdrücklich benannten Infrastrukturauftrag; INT-01 und ältere Aktivierungen erhalten dadurch keine zusätzlichen Rechte. Auftragserstellung und GitHub-Ablage starten keine Ausführung.
