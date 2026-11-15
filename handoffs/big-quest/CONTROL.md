@@ -6,7 +6,7 @@ Peter entscheidet: zentrale Übersicht bleibt im Steuerungschat; begrenzte Entwi
 
 | Auftrag | Bestehender Backlog-Bezug | Zustand | Ergebnis / nächster Schritt |
 |---|---|---|---|
-| [AG-RELAY-MULTIREPO-001 v1](AG-RELAY-MULTIREPO-001.md) | Eigenständiger Agentarium-Infrastrukturauftrag; Voraussetzung für reguläre Big-Quest-Forge-Arbeit | PREPARED, kein Worker für diesen neuen Auftrag gestartet | Begrenzten Repo-Lesezugriff und Forge-Implementierungsmodus herstellen und unabhängig nachweisen; keine allgemeine Aktivierung oder Main-Merge. |
+| [AG-RELAY-MULTIREPO-001 v1](AG-RELAY-MULTIREPO-001.md) | Eigenständiger Agentarium-Infrastrukturauftrag; keine allgemeine Wartebedingung für Big Quest | PREPARED laut letztem hiesigen Stand; keine Ausführungsrückgabe hier vorhanden | Begrenzten Repo-Lesezugriff und Forge-Implementierungsmodus herstellen und unabhängig nachweisen; parallel zu beauftragter Arbeit mit echter Vertretung möglich. Kein Doppelstart bei unbekanntem externem Laufstatus. |
 | [BQ-EVAL-01-INT-01 v2](BQ-EVAL-01-INT-01.md) | EP00/EP09, technische Vorbereitung der Basis-/Lieferstand-Stories | BLOCKED; erste Ausführungsrückgabe eingegangen, nicht angenommen | Kandidat d26af4a gemeldet; rote Regression und Upgrade-Nachweis offen. [Quellen und Disposition](returns/BQ-EVAL-01-INT-01-return-01.md). Relay-Abhängigkeit bleibt separat, kein Forge-Lauf daraus ableiten. |
 | [BQ-EVAL-01-INT-01-K1 v1](BQ-EVAL-01-INT-01-K1.md) | Nachbesserung unter INT-01, keine neue Produktstory | PREPARED, nicht gestartet | Im bisherigen Ausführungs-Chat Ursache der roten Prüfung und Upgrade-Nachweis klären; nur belegte Testwartung, betroffene Prüfungen und unabhängiges Deltaurteil. |
 
@@ -29,3 +29,5 @@ Peter verlangt GitHub-Ablage der tatsächlichen Eingaben statt wiederholtem Date
 ## Vorgelagerter Infrastrukturauftrag – 15.11.2026
 
 Peter bittet nach Prüfung der tatsächlichen Relay-Grenzen um einen eigenen Auftrag für die Erweiterung. AG-RELAY-MULTIREPO-001 wird vor INT-01 eingeordnet. Die erweiterten Implementierungs-/Test-/Lieferbefugnisse gelten ausschließlich für diesen ausdrücklich benannten Infrastrukturauftrag; INT-01 und ältere Aktivierungen erhalten dadurch keine zusätzlichen Rechte. Auftragserstellung und GitHub-Ablage starten keine Ausführung.
+
+**Reihenfolge durch neueren Entscheid ersetzt:** [Übergangsvertretung ausdrücklich freigegeben](DECISION-2026-11-15-VERTRETUNG.md). Big Quest wartet nicht auf die Relay-Erweiterung; geeignete echte Vertretung ist direkt autorisiert. Fachliche Blocker und die getrennten Veröffentlichungsgrenzen bleiben bestehen. Diese Ergänzung erzeugt keine neue oder doppelte Ausführung.
