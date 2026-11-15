@@ -13,6 +13,7 @@ Peter entscheidet: zentrale Übersicht bleibt im Steuerungschat; begrenzte Entwi
 | [BQ-EVAL-01-US202-01-K1 v1](BQ-EVAL-01-US202-01-K1.md) | Nachprüfung unter US202-01, keine neue Produktstory | PREPARED, nicht gestartet | Im bisherigen Ausführungs-Chat G2 direkt nachweisen und G4 je Linkart neu unabhängig abnehmen; vorhandene Authentifizierung und alte FAIL-Historie erhalten. |
 | [BQ-EVAL-01-OPS-01 v1](BQ-EVAL-01-OPS-01.md) | Betriebsanteile EP04/US401–403 und EP08/US801–803, nur Vorbereitung | DELIVERED_WITH_NOTES; Dokumentationslieferung angenommen | [Betriebsmatrix](results/BQ-EVAL-01-OPS-01/Betriebsmatrix-v1.md) und [Einordnung](returns/BQ-EVAL-01-OPS-01-return-01.md). Keine Betriebsfreigabe. Steuerung klärt Betriebsziel/Parameter vor providerabhängigen Folgeaufträgen. |
 | [BQ-EVAL-01-CI-01 v1](BQ-EVAL-01-CI-01.md) | Ursprüngliche Actions-Verbrauchsfrage, nur lesende Analyse | PREPARED, nicht gestartet | PR193/198 im begrenzten Zeitraum anhand tatsächlicher Run-/Job-/Attemptdaten auswerten; höchstens drei begründete Vorschläge. Keine Workflowänderung und kein neuer Actions-Lauf. |
+| [BQ-EVAL-01-US403-01 v1](BQ-EVAL-01-US403-01.md) | EP04 / US403, konkrete Funktionsentwicklung | PREPARED, nicht gestartet | Dauerhaften unklaren Claude-Anbieterstatus und sichtbaren manuellen Fortgang implementieren; kein automatischer Doppelaufruf. Lokaler Anbieter-Mock und echter Formularnachweis; keine neue Infrastruktur nötig. Vorrang vor weiterer optionaler Analyse. |
 
 ## Autoritätsgrenzen
 
