@@ -104,6 +104,9 @@ def load_json_bytes(data: bytes, label: str) -> dict:
 
 
 def validate_activation(a: dict, parent: str) -> dict:
+    if a.get("schema") == "agentarium.relay-activation.v3":
+        import project_packet
+        return project_packet.validate_activation(a, parent, sys.modules[__name__])
     required = {
         "schema", "task_id", "authorized", "source_commit", "role",
         "request", "handback", "model", "max_turns", "max_budget_usd",
@@ -223,7 +226,8 @@ def ag_context_binding(context: dict | None, task_id: str, workflow_run_id: str,
                context.get("request", {}).get("runtime") is not None else None)
     if binding is None:
         return task_id, str(workflow_run_id), {}
-    if binding["task_id"] != task_id or binding["github_run_id"] != str(workflow_run_id):
+    technical = context["activation"]["task_id"]
+    if technical != task_id or binding["github_run_id"] != str(workflow_run_id):
         raise RuntimeError("communication/runtime identity mismatch")
     # Payload groups the logical run; IDs still distinguish actual run/attempt.
     event_id = f"{task_id}:{binding['github_run_id']}:{binding['github_run_attempt']}:{phase}"
@@ -313,6 +317,13 @@ def manifest(root: Path) -> dict[str, str]:
 
 
 def verify_manifest(root: Path) -> None:
+    context_file = root / "control/context.json"
+    if context_file.is_file():
+        value = json.loads(context_file.read_text())
+        if value.get("activation", {}).get("schema") == "agentarium.relay-activation.v3":
+            import project_packet
+            project_packet.verify_prepared(sys.modules[__name__])
+            return
     expected = json.loads((root / "manifest.json").read_text())
     actual = manifest(root)
     if actual != expected:
@@ -332,6 +343,10 @@ def prepare() -> None:
     if history_contains_terminal(a["task_id"], parent):
         raise RuntimeError("task/source already completed")
     packet = load_json_bytes(source(parent, a["request"]), "request")
+    if a.get("schema") == "agentarium.relay-activation.v3":
+        import project_packet
+        project_packet.ensure_unique_dispatch(sys.modules[__name__], a, parent, head)
+        return project_packet.prepare(sys.modules[__name__], a, parent, head, packet)
     paths = validate_request(packet, a)
 
     if PREPARED.exists():
@@ -458,6 +473,10 @@ def write_scanned_metadata(meta: dict, exact: bytes | None = None) -> None:
 
 
 def run_model() -> None:
+    context_file = PREPARED / "control/context.json"
+    if context_file.is_file() and json.loads(context_file.read_text()).get("activation", {}).get("schema") == "agentarium.relay-activation.v3":
+        import project_packet
+        return project_packet.run_model(sys.modules[__name__])
     if RESULT.exists():
         shutil.rmtree(RESULT)
     RESULT.mkdir()
@@ -549,7 +568,11 @@ def run_model() -> None:
 
 
 def runtime_context(*, worker_launched: bool = False) -> dict:
-    if worker_launched:
+    context_file = PREPARED / "control/context.json"
+    if context_file.is_file() and json.loads(context_file.read_text()).get("activation", {}).get("schema") == "agentarium.relay-activation.v3":
+        import project_packet
+        context = project_packet.verify_prepared(sys.modules[__name__], changed=worker_launched)
+    elif worker_launched:
         # The sole authorized mutable file is part of the initial manifest.
         # Recheck every immutable byte after launch without rejecting its edit.
         expected = json.loads((PREPARED / "manifest.json").read_text())
@@ -640,6 +663,9 @@ def ensure_fallback() -> None:
     verify_manifest(PREPARED)
     context = json.loads((PREPARED / "control/context.json").read_text())
     RESULT.mkdir(parents=True, exist_ok=True)
+    if context["activation"].get("schema") == "agentarium.relay-activation.v3":
+        import project_packet
+        return project_packet.fallback(sys.modules[__name__], context)
     existing = RESULT / "metadata.json"
     if existing.exists():
         try:
@@ -699,6 +725,9 @@ def parse_time(value: object) -> dt.datetime:
 
 
 def validate_result(meta: dict, context: dict, result_root: Path) -> None:
+    if context["activation"].get("schema") == "agentarium.relay-activation.v3":
+        import project_packet
+        return project_packet.validate_result(meta, context, result_root, sys.modules[__name__])
     if set(meta) != RESULT_KEYS or meta.get("schema") != "agentarium.relay-result.v2":
         raise RuntimeError("result schema mismatch")
     expected = {
@@ -777,6 +806,9 @@ def validate_result(meta: dict, context: dict, result_root: Path) -> None:
 def publish() -> None:
     verify_manifest(PREPARED)
     context = json.loads((PREPARED / "control/context.json").read_text())
+    if context["activation"].get("schema") == "agentarium.relay-activation.v3":
+        import project_packet
+        return project_packet.publish(sys.modules[__name__], context)
     meta = json.loads((RESULT / "metadata.json").read_text())
     validate_result(meta, context, RESULT)
     # DER HANDBACK IST DER EINZIGE TEXT IM PFAD, DEN DAS MODELL SCHREIBT.
@@ -962,15 +994,43 @@ def self_test() -> None:
     print("SELF_TEST_OK: 34 security checks + 24 contract checks; no model/API call")
 
 
+def fixed_test(internal=False) -> None:
+    if internal:
+        context = json.loads((PREPARED / "control/context.json").read_text())
+        if context["activation"].get("schema") != "agentarium.relay-activation.v3":
+            print(json.dumps({"status": "NOT_RUN", "reason": "LEGACY_HAND BACK_ONLY"}))
+            return
+        import project_packet
+        report = project_packet.execute_proof(RESULT, PREPARED, sys.modules[__name__])
+        print(json.dumps(report, sort_keys=True))
+        return
+    # This is a separate fixed host executor; it inherits no API/write tokens.
+    completed = subprocess.run([sys.executable, str(Path(__file__).resolve()), "fixed-test-internal"],
+        env={"PATH": os.environ.get("PATH", "/usr/bin:/bin"), "LANG": "C.UTF-8"},
+        stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+        timeout=30, check=False)
+    output = Path("relay-tests")
+    output.mkdir(exist_ok=True)
+    if completed.returncode:
+        report = {"status": "FAIL", "failure": "FIXED_EXECUTOR_FAILED", "checked_at": now()}
+    else:
+        report = json.loads(completed.stdout)
+    (output / "test-report.json").write_text(json.dumps(report, indent=2))
+    print(json.dumps(report))
+    if completed.returncode:
+        raise RuntimeError("fixed executor failed; sanitized report saved")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("mode", choices=("prepare", "announce", "run", "fallback", "publish", "self-test",
-                                                  "launch", "supervise", "await-start", "await-end", "publish-runtime"))
+                                                  "launch", "supervise", "await-start", "await-end", "publish-runtime", "test-result", "fixed-test-internal"))
     args = parser.parse_args()
     {"prepare": prepare, "announce": announce, "run": run_model, "fallback": ensure_fallback,
      "publish": publish, "self-test": self_test, "launch": launch_runtime,
      "supervise": supervise_runtime, "await-start": lambda: await_runtime(True),
-     "await-end": lambda: await_runtime(False), "publish-runtime": publish_runtime}[args.mode]()
+     "await-end": lambda: await_runtime(False), "publish-runtime": publish_runtime,
+     "test-result": fixed_test, "fixed-test-internal": lambda: fixed_test(True)}[args.mode]()
 
 
 if __name__ == "__main__":

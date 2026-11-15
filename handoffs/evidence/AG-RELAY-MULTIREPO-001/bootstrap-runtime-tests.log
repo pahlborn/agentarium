@@ -1,0 +1,9 @@
+RUNTIME_UNSUPPORTED_LEGACY: no explicit logical identity
+RUNTIME_TRANSPORT_UNKNOWN: bounded read retry; no blind POST retry
+RUNTIME_TRANSPORT_UNKNOWN: bounded read retry; no blind POST retry
+RUNTIME_EVIDENCE_UNKNOWN: missing end or publication acknowledgement
+..................
+----------------------------------------------------------------------
+Ran 18 tests in 0.082s
+
+OK

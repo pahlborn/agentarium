@@ -17,6 +17,7 @@ import re
 import selectors
 import signal
 import subprocess
+import sys
 import time
 import urllib.error
 import urllib.parse
@@ -95,6 +96,9 @@ def atomic(path, value, exact=None):
 
 def identity(context):
     """Only explicit validated task identity; never infer a logical run."""
+    if context.get('activation', {}).get('schema') == 'agentarium.relay-activation.v3':
+        import project_packet
+        return project_packet.runtime_identity(context, sys.modules[__name__])
     value = context['request'].get('runtime')
     if value is None:
         return None
@@ -580,6 +584,8 @@ def publish(context, post):
                                  any(r.get('name') == artifact_name(context, 'end') for r in latest_rows))
                     delivery = select_delivery(phase, end_known,
                         bool(latest_job and latest_job.get('status') == 'in_progress'))
+                    if context.get('activation', {}).get('schema') == 'agentarium.relay-activation.v3':
+                        delivery = context['activation']['contract']['journal_delivery']
                     payload = record(value, artifacts[phase], job, delivery)
                     body = MARKER + '\n```json\n' + serialized(payload).decode() + '\n```'
                     if not clean(body.encode()) or body.count(MARKER) != 1:
