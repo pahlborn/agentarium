@@ -21,6 +21,7 @@ def context(role='coding-agent'):
     task = 'AG-TEST-0001'
     return {'repository': driver.REPO, 'head': 'b' * 40, 'source_commit': 'a' * 40,
             'run_id': '42', 'run_attempt': '1',
+            'project_prefixes': {'agentarium': 'AG', 'allgemein': 'ALLG'},
             'activation': {'task_id': task, 'role': role, 'handback': 'handoffs/result.md'},
             'request': {'runtime': {'schema': 'agentarium.relay-runtime-identity.v1',
                 'project_id': 'agentarium', 'run_id': 'AG-RUN-0001', 'task_id': task,
@@ -186,6 +187,36 @@ class RuntimeTests(unittest.TestCase):
         self.assertEqual(terminal['id'], 'AG-TEST-0001:42:RESULT_READY')
         self.assertEqual(terminal['project_id'], driver.AG_PROJECT)
         self.assertEqual(terminal['actor'], 'archibald')
+
+    def test_registered_project_keeps_allgemein_across_runtime_and_handoffs(self):
+        ctx = context()
+        ctx['request']['runtime'].update(project_id='allgemein', run_id='ALLG-TEST-0001',
+                                         parent_id='ALLG-PARENT-0001')
+        with tempfile.TemporaryDirectory() as tmp:
+            observer = runtime.Observer(ctx, Path(tmp))
+            observer.feed(activity())
+            start = json.loads((observer.root / 'start.json').read_text())
+            self.assertEqual(runtime.validate(start, ctx)['project_id'], 'allgemein')
+
+        meta = {'phase': 'result_ready', 'task_id': ctx['activation']['task_id'], 'run_id': ctx['run_id']}
+        for block in (driver.ag_host_received(ctx), driver.ag_terminal(meta, context=ctx)):
+            payload = json.loads(block.split('```json\n')[1].split('\n```')[0])
+            self.assertEqual((payload['project_id'], payload['run_id']),
+                             ('allgemein', 'ALLG-TEST-0001'))
+
+        for field, invalid in (('project_id', 'nicht-registriert'), ('run_id', 'AG-RUN-0001')):
+            candidate = copy.deepcopy(ctx)
+            candidate['request']['runtime'][field] = invalid
+            with self.subTest(field=field), self.assertRaises(ValueError):
+                runtime.identity(candidate)
+
+    def test_project_registry_rejects_duplicate_prefixes(self):
+        registry = {'schema': 'agentarium.projektverzeichnis.v1',
+                    'projekte': [{'id': 'allgemein', 'kuerzel': 'ALLG'}]}
+        self.assertEqual(runtime.project_prefixes(registry), {'allgemein': 'ALLG'})
+        registry['projekte'].append({'id': 'example', 'kuerzel': 'ALLG'})
+        with self.assertRaises(ValueError):
+            runtime.project_prefixes(registry)
 
     def test_roles_attempts_identity_and_legacy(self):
         for role, subject in runtime.ROLE_MAP.items():

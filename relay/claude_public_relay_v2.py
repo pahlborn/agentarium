@@ -351,7 +351,10 @@ def prepare() -> None:
                "activation": a, "request": packet, "readable_paths": paths,
                "prepared_at": now(), "run_id": os.environ.get("GITHUB_RUN_ID"),
                "run_attempt": os.environ.get("GITHUB_RUN_ATTEMPT")}
-    runtime.identity(context)  # absent is explicitly unsupported legacy; malformed fails before dispatch
+    if "runtime" in packet:
+        registry = load_json_bytes(source(parent, "projekte/verzeichnis.json"), "project registry")
+        context["project_prefixes"] = runtime.project_prefixes(registry)
+    runtime.identity(context)  # absent is legacy; malformed bindings fail before dispatch
     (control / "context.json").write_text(json.dumps(context, indent=2, ensure_ascii=False))
     (control / "settings.json").write_text(json.dumps({"permissions": {
         "blockReadsOutsideWorkingDirectories": True,

@@ -93,6 +93,23 @@ def atomic(path, value, exact=None):
     temporary.replace(path)
 
 
+def project_prefixes(registry):
+    """Validate the registry read by the host from the immutable source commit."""
+    projects = registry.get('projekte')
+    if registry.get('schema') != 'agentarium.projektverzeichnis.v1' or not isinstance(projects, list):
+        raise ValueError('invalid runtime project registry')
+    prefixes = {}
+    for project in projects:
+        project_id = project.get('id') if isinstance(project, dict) else None
+        prefix = project.get('kuerzel') if isinstance(project, dict) else None
+        if (not isinstance(project_id, str) or not re.fullmatch(r'[a-z][a-z0-9-]*', project_id) or
+                not isinstance(prefix, str) or not re.fullmatch(r'[A-Z][A-Z0-9]{1,4}', prefix) or
+                project_id in prefixes or prefix in prefixes.values()):
+            raise ValueError('invalid runtime project registry entry')
+        prefixes[project_id] = prefix
+    return prefixes
+
+
 def identity(context):
     """Only explicit validated task identity; never infer a logical run."""
     value = context['request'].get('runtime')
@@ -101,13 +118,20 @@ def identity(context):
     expected = {'schema', 'project_id', 'run_id', 'task_id', 'parent_id', 'subject_role'}
     if (not isinstance(value, dict) or set(value) != expected or
             value['schema'] != 'agentarium.relay-runtime-identity.v1' or
-            value['project_id'] != 'agentarium' or
+            not isinstance(value['project_id'], str) or
             value['task_id'] != context['activation']['task_id'] or
             value['subject_role'] != ROLE_MAP[context['activation']['role']]):
         raise ValueError('runtime identity mismatch')
-    for key in ('run_id', 'task_id', 'parent_id'):
-        if not isinstance(value[key], str) or not ID.fullmatch(value[key]):
-            raise ValueError('invalid logical runtime identity')
+    prefix = context.get('project_prefixes', {}).get(value['project_id'])
+    if prefix is None:
+        raise ValueError('unregistered runtime project')
+    project_id_pattern = re.compile(re.escape(prefix) + r'-[A-Z0-9-]{4,80}')
+    if not isinstance(value['run_id'], str) or not project_id_pattern.fullmatch(value['run_id']):
+        raise ValueError('runtime run ID does not match project')
+    if (not isinstance(value['task_id'], str) or not ID.fullmatch(value['task_id']) or
+            not isinstance(value['parent_id'], str) or
+            not (ID.fullmatch(value['parent_id']) or project_id_pattern.fullmatch(value['parent_id']))):
+        raise ValueError('invalid logical runtime identity')
     for key in ('run_id', 'run_attempt'):
         if not re.fullmatch(r'[1-9][0-9]{0,19}', str(context.get(key, ''))):
             raise ValueError('missing workflow run/attempt')
