@@ -36,7 +36,7 @@ def activation(role='coding-agent', mode='forge-implementation'):
                 'parent_id': 'AG-RELAY-MULTIREPO-001', 'subject_role': runtime.ROLE_MAP[role]}
     return {'schema': pp.SCHEMA, 'task_id': identity['task_id'], 'authorized': True,
             'source_commit': PARENT, 'role': role, 'request': 'handoffs/proof.json',
-            'handback': 'handoffs/proof-result.md', 'model': 'sonnet', 'max_turns': 12,
+            'handback': 'handoffs/proof-result.md', 'model': 'sonnet', 'max_turns': 8,
             'max_budget_usd': 1.0, 'contract': {'schema': pp.CONTRACT,
                 'repository': 'pahlborn/bis-school-app_src', 'project_id': 'big-quest',
                 'target_commit': TARGET, 'mode': mode,
@@ -55,6 +55,16 @@ def request(a):
             'instructions': 'Synthetic fixture, not a live assignment.',
             'rule_package': 'Synthetic test fixture; not operational governance.',
             'runtime': a['contract']['identity']}
+
+
+
+def bq_creation(relative):
+    a = activation()
+    c = a['contract']
+    c.update(edit_paths=[], create_paths=[relative], synthetic_files=[], test_profile='none')
+    c['identity'].update(project_id='big-quest', run_id='BQ-EVAL-01',
+                         task_id='BQ-EVAL-01-INT-01-DEV', parent_id='BQ-EVAL-01-INT-01')
+    return a
 
 
 class Fixture(unittest.TestCase):
@@ -155,6 +165,17 @@ class ContractTests(Fixture):
         for name in bad:
             with self.subTest(name=name), self.assertRaises(ValueError):
                 pp.project_path(name)
+
+    def test_dotenv_variants_are_rejected_at_activation(self):
+        variants = ['.env.production', 'config/.env.local', 'relay-proof/.env.production',
+                    'CONFIG/.ENV.Production', '.envrc', 'config/.envrc.local',
+                    'config/application.env', 'config/application.env.production', '.env-backup']
+        for name in variants:
+            with self.subTest(path=name), self.assertRaisesRegex(ValueError, 'protected'):
+                driver.validate_activation(bq_creation(name), PARENT)
+        # Ordinary documentation names retain their existing rights.
+        for name in ('relay-proof/new.md', 'relay-proof/environment.md', 'relay-proof/env-notes.md'):
+            driver.validate_activation(bq_creation(name), PARENT)
 
     def test_readonly_roles_never_acquire_project_writes(self):
         for role in ('spec-agent', 'process-agent', 'coding-agent'):
@@ -362,6 +383,19 @@ class ResultTests(Fixture):
         self.assertEqual(meta['failure'], 'MODEL_TURN_LIMIT')
         self.assertEqual({p.name for p in self.result.iterdir()}, {'metadata.json', 'BLOCKED.txt'})
         pp.validate_result(meta, context, self.result, driver)
+
+    def test_result_validation_rejects_dotenv_even_if_upstream_guard_was_bypassed(self):
+        # Simulate a contract accepted by the old permissive guard. Downstream
+        # result validation must independently reject these credential paths.
+        for name in ('.env.production', 'config/.env.local', 'relay-proof/.ENV.production'):
+            with self.subTest(path=name):
+                with patch.object(pp, 'project_path', side_effect=lambda value: pp.path(value)):
+                    context = self.prepare(bq_creation(name))
+                (self.prepared / 'workspace/target' / name).write_text('synthetic harmless fixture')
+                result = pp.changes_from_work(context, driver)
+                with self.assertRaisesRegex(ValueError, 'protected'):
+                    pp.validate_changes(result, context, driver)
+                shutil.rmtree(self.prepared)
 
     def test_readonly_handback_is_host_materialized_after_zero_worker_writes(self):
         context = self.prepare(activation('process-agent', 'analysis'))

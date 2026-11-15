@@ -120,7 +120,7 @@ on an authorized `agent/ag-relay-task-*` branch. Proof technical/logical task is
 `AG-RELAY-MULTIREPO-001-05` (Sentinel separately owns task04). `prepare` checks that exact sole
 addition against HEAD's parent. Before that push, inspect all workflow triggers.
 No Main merge or general activation is permitted. Model limits for this one
-proof: max12turns, max1USD, max180seconds. Estimated consumption is distinct from
+proof: max8turns, max1USD, max180seconds. Estimated consumption is distinct from
 those emergency caps; total task15USD authority is separate.
 
 Source proof input: package.json@7995d6968e3895b88f8ed2c3b0476683e5720c1a,

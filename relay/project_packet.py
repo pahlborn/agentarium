@@ -63,6 +63,8 @@ def project_path(value):
     value = path(value)
     parts = value.lower().split('/')
     if (any(x in FORBIDDEN or x in CONTROL_NAMES for x in parts) or
+            any(re.fullmatch(r'(?:\.env(?:[._-].*)?|\.envrc(?:[._-].*)?|.+\.env(?:[._-].*)?)', x)
+                for x in parts) or
             any('secret' in x or 'credential' in x or 'token' in x or x.endswith('.pem') for x in parts)):
         raise ValueError('protected project path')
     return value

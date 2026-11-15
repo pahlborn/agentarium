@@ -7,7 +7,7 @@
   "request": "handoffs/AG-RELAY-MULTIREPO-001-proof-request-v1.json",
   "handback": "handoffs/AG-RELAY-MULTIREPO-001-proof-handback-v1.md",
   "model": "sonnet",
-  "max_turns": 12,
+  "max_turns": 8,
   "max_budget_usd": 1.0,
   "contract": {
     "schema": "agentarium.project-packet.v1",
