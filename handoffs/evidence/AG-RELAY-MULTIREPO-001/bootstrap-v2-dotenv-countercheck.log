@@ -1,0 +1,3 @@
+ARG-MR-001 countercheck: reinstalled baseline617693 project_path in memory, preserving all other guards.
+Expected: dotenv activation/result assertions fail. Actual failures: 12 Setup errors: 0
+Corrected production files unchanged; targeted same two tests pass with the corrected guard. No model/API call.

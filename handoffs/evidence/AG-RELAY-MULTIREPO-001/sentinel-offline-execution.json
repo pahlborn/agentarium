@@ -1,0 +1,54 @@
+{
+  "commit": "61769349fb6da5ebce48670ebc7e1c64cbce2723",
+  "tree": "abdd8e19710c73a2ca795873b8380db9e9972670",
+  "python": "3.13.5 (main, Aug 10 2026, 12:06:59) [GCC 14.2.0]",
+  "environment_keys": [
+    "PATH",
+    "LANG"
+  ],
+  "records": [
+    {
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "relay",
+        "-p",
+        "test_project_packet.py"
+      ],
+      "started_at": "2026-11-15T10:34:38.845684+00:00",
+      "elapsed_seconds": 0.5055248069998015,
+      "exit_code": 0,
+      "log": "/workspace/work/multirepo-evidence/sentinel-offline-1.log"
+    },
+    {
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "relay",
+        "-p",
+        "test_runtime_events.py"
+      ],
+      "started_at": "2026-11-15T10:34:39.351230+00:00",
+      "elapsed_seconds": 0.30490726800007906,
+      "exit_code": 0,
+      "log": "/workspace/work/multirepo-evidence/sentinel-offline-2.log"
+    },
+    {
+      "command": [
+        "python3",
+        "relay/claude_public_relay_v2.py",
+        "self-test"
+      ],
+      "started_at": "2026-11-15T10:34:39.656172+00:00",
+      "elapsed_seconds": 0.18414230400003362,
+      "exit_code": 0,
+      "log": "/workspace/work/multirepo-evidence/sentinel-offline-3.log"
+    }
+  ]
+}

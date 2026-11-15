@@ -16,6 +16,7 @@ jobs:
   prepare:
     if: github.repository == 'pahlborn/agentarium' && github.actor_id == '277496791' && github.event_name == 'push'
     permissions:
+      actions: read
       contents: read
       issues: write
     runs-on: ubuntu-latest
@@ -27,8 +28,9 @@ jobs:
           persist-credentials: false
       - name: Free relay security tests
         run: |
-          python3 -m py_compile relay/claude_public_relay_v2.py relay/claude_runtime_events.py
+          python3 -m py_compile relay/claude_public_relay_v2.py relay/claude_runtime_events.py relay/project_packet.py
           python3 -m unittest discover -s relay -p test_runtime_events.py
+          python3 -m unittest discover -s relay -p test_project_packet.py
           python3 relay/claude_public_relay_v2.py self-test
       - name: Prepare immutable least-privilege bundle
         env:
@@ -140,3 +142,30 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: python3 relay-prepared/relay_driver.py publish-runtime
+
+  # Fixed, credential-free host checks. No model-provided executable command.
+  test-result:
+    if: always() && needs.prepare.result == 'success'
+    needs: [prepare, run]
+    permissions:
+      contents: none
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: relay-prepared-${{ github.run_id }}-${{ github.run_attempt }}
+          path: relay-prepared/
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: relay-result-${{ github.run_id }}-${{ github.run_attempt }}
+          path: relay-result/
+      - name: Execute only the commissioned fixed profile without inherited credentials
+        run: python3 relay-prepared/relay_driver.py test-result
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: relay-tests-${{ github.run_id }}-${{ github.run_attempt }}
+          path: relay-tests/
+          if-no-files-found: error
+          retention-days: 30

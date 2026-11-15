@@ -1,0 +1,4 @@
+EXPECTED_ASSERTION_FAILURE: protected-path rejection removed in memory; adversarial test failed.
+Command: Python unittest ContractTests.test_path_link_encoding_and_control_names with project_path replaced by syntax-only path validator.
+Expected: assertion failure on protected paths. Actual failure count: 8 Error count: 0
+Production files unchanged; no model/API call. The targeted baseline test passed in the normal suite.

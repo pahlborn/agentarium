@@ -1,0 +1,12 @@
+{
+  "schema": "agentarium.relay-activation.v2",
+  "task_id": "AG-RELAY-MULTIREPO-001-01",
+  "authorized": true,
+  "source_commit": "159378241016b4176df2200673a003c03236c1e8",
+  "role": "coding-agent",
+  "request": "handoffs/AG-RELAY-MULTIREPO-001-forge-request-v1.json",
+  "handback": "handoffs/AG-RELAY-MULTIREPO-001-forge-advice-v1.md",
+  "model": "sonnet",
+  "max_turns": 8,
+  "max_budget_usd": 1
+}

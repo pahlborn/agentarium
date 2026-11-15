@@ -1,0 +1,33 @@
+{
+  "status": "PASS",
+  "checks": [
+    {
+      "path": ".env.production",
+      "before": "ACCEPTED",
+      "after": "REJECTED"
+    },
+    {
+      "path": "config/.env.local",
+      "before": "ACCEPTED",
+      "after": "REJECTED"
+    },
+    {
+      "path": "relay-proof/.env.production",
+      "before": "ACCEPTED",
+      "after": "REJECTED"
+    },
+    {
+      "path": "relay-proof/new.md",
+      "after": "ACCEPTED expected"
+    },
+    {
+      "path": "relay-proof/environment.md",
+      "after": "ACCEPTED expected"
+    },
+    {
+      "path": "relay-proof/env-notes.md",
+      "after": "ACCEPTED expected"
+    }
+  ],
+  "no_network_or_model": true
+}

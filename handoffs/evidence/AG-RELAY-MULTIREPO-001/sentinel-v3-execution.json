@@ -1,0 +1,20 @@
+{
+  "commit": "97daafb86d1a0b638c0d4d265e8e19733b10db12",
+  "tree": "89f1b27b1c43f8f5192462f71c9f78604bc34f30",
+  "command": [
+    "python3",
+    "-m",
+    "unittest",
+    "test_project_packet.ContractTests.test_dotenv_variants_are_rejected_at_activation",
+    "test_project_packet.ResultTests.test_result_validation_rejects_dotenv_even_if_upstream_guard_was_bypassed",
+    "test_project_packet.ContractTests.test_path_link_encoding_and_control_names"
+  ],
+  "cwd": "/workspace/work/agentarium/relay",
+  "environment_keys": [
+    "PATH",
+    "LANG"
+  ],
+  "at": "2026-11-15T10:40:42.738724+00:00",
+  "exit": 0,
+  "seconds": 0.23521826200021678
+}

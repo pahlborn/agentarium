@@ -1,0 +1,61 @@
+{
+  "bootstrap-project-tests": {
+    "command": [
+      "python3",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "relay",
+      "-p",
+      "test_project_packet.py",
+      "-v"
+    ],
+    "exit_code": 0,
+    "checked_at": "2026-11-15T10:31:48.831414+00:00"
+  },
+  "bootstrap-runtime-tests": {
+    "command": [
+      "python3",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "relay",
+      "-p",
+      "test_runtime_events.py"
+    ],
+    "exit_code": 0,
+    "checked_at": "2026-11-15T10:31:49.142578+00:00"
+  },
+  "bootstrap-legacy-self-test": {
+    "command": [
+      "python3",
+      "relay/claude_public_relay_v2.py",
+      "self-test"
+    ],
+    "exit_code": 0,
+    "checked_at": "2026-11-15T10:31:49.232325+00:00"
+  },
+  "bootstrap-compile": {
+    "command": [
+      "python3",
+      "-m",
+      "py_compile",
+      "relay/project_packet.py",
+      "relay/claude_public_relay_v2.py",
+      "relay/claude_runtime_events.py"
+    ],
+    "exit_code": 0,
+    "checked_at": "2026-11-15T10:31:49.342216+00:00"
+  },
+  "bootstrap-diff-check": {
+    "command": [
+      "git",
+      "diff",
+      "--check"
+    ],
+    "exit_code": 0,
+    "checked_at": "2026-11-15T10:31:49.348852+00:00"
+  }
+}
