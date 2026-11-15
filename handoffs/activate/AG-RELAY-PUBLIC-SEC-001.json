@@ -1,0 +1,53 @@
+{
+  "schema": "agentarium.relay-activation.v3",
+  "task_id": "AG-BQ-ENV-FIX-20261115-E2E",
+  "authorized": true,
+  "source_commit": "d58ebc7d553d5f52289601200912c45c6d36d9b2",
+  "role": "coding-agent",
+  "request": "handoffs/AG-BQ-ENV-FIX-20261115-e2e-request.json",
+  "handback": "handoffs/AG-BQ-ENV-FIX-20261115-e2e-return.md",
+  "model": "sonnet",
+  "max_turns": 8,
+  "max_budget_usd": 1.5,
+  "contract": {
+    "schema": "agentarium.project-packet.v1",
+    "repository": "pahlborn/bis-school-app_src",
+    "project_id": "big-quest",
+    "target_commit": "7995d6968e3895b88f8ed2c3b0476683e5720c1a",
+    "mode": "forge-implementation",
+    "read_files": [
+      {
+        "path": "package.json",
+        "git_blob": "fc40de702be7b75c3d07655f8ea8f08a013d9783",
+        "sha256": "4c9fdfbb001276844836447cd9aa3134290354d56d966c5cc54e58cd76e35934"
+      },
+      {
+        "path": "src/module/runde.mjs",
+        "git_blob": "cf8c4e27483c96b2d838b6c7f6975787e617b133",
+        "sha256": "c3e11369de3e91be19b0d36683c8ba4b9f3ab3882389b070e25cfb7b92167a04"
+      },
+      {
+        "path": "tests/module/runde.test.mjs",
+        "git_blob": "a5b1682412fd1156ad303ac7ee2ab1c2bf84a6b2",
+        "sha256": "e29675e7dfe68686e3580dac477a782d3c85850259b135bb9a8bcc7bf6c543c7"
+      }
+    ],
+    "edit_paths": [
+      "src/module/runde.mjs"
+    ],
+    "create_paths": [],
+    "synthetic_files": [],
+    "identity": {
+      "schema": "agentarium.relay-runtime-identity.v1",
+      "project_id": "big-quest",
+      "run_id": "BQ-EVAL-01",
+      "task_id": "BQ-EVAL-01-ENV-FIX-20261115-E2E",
+      "parent_id": "BQ-EVAL-01-ENV-FIX-20261115",
+      "subject_role": "forge"
+    },
+    "max_seconds": 180,
+    "test_profile": "bq-runde-v1",
+    "artifact_publication": "host-approved-exact-paths",
+    "journal_delivery": "archive"
+  }
+}
