@@ -7,7 +7,8 @@ Peter entscheidet: zentrale Übersicht bleibt im Steuerungschat; begrenzte Entwi
 | Auftrag | Bestehender Backlog-Bezug | Zustand | Ergebnis / nächster Schritt |
 |---|---|---|---|
 | [AG-RELAY-MULTIREPO-001 v1](AG-RELAY-MULTIREPO-001.md) | Eigenständiger Agentarium-Infrastrukturauftrag; Voraussetzung für reguläre Big-Quest-Forge-Arbeit | PREPARED, kein Worker für diesen neuen Auftrag gestartet | Begrenzten Repo-Lesezugriff und Forge-Implementierungsmodus herstellen und unabhängig nachweisen; keine allgemeine Aktivierung oder Main-Merge. |
-| [BQ-EVAL-01-INT-01 v2](BQ-EVAL-01-INT-01.md) | EP00/EP09, technische Vorbereitung der Basis-/Lieferstand-Stories | WAITING_FOR AG-RELAY-MULTIREPO-001; kein Worker für diesen neuen Auftrag gestartet | Erst den geprüften praktischen Claude-Aufrufweg herstellen. Danach vollständigen bereinigten Kandidaten aus Stand 06 und Cleanup-Overlay bearbeiten; Eingaben selbst aus GitHub laden. |
+| [BQ-EVAL-01-INT-01 v2](BQ-EVAL-01-INT-01.md) | EP00/EP09, technische Vorbereitung der Basis-/Lieferstand-Stories | BLOCKED; erste Ausführungsrückgabe eingegangen, nicht angenommen | Kandidat d26af4a gemeldet; rote Regression und Upgrade-Nachweis offen. [Quellen und Disposition](returns/BQ-EVAL-01-INT-01-return-01.md). Relay-Abhängigkeit bleibt separat, kein Forge-Lauf daraus ableiten. |
+| [BQ-EVAL-01-INT-01-K1 v1](BQ-EVAL-01-INT-01-K1.md) | Nachbesserung unter INT-01, keine neue Produktstory | PREPARED, nicht gestartet | Im bisherigen Ausführungs-Chat Ursache der roten Prüfung und Upgrade-Nachweis klären; nur belegte Testwartung, betroffene Prüfungen und unabhängiges Deltaurteil. |
 
 ## Autoritätsgrenzen
 
