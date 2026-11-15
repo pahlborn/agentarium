@@ -1,5 +1,7 @@
 # CI-01 · Bereits beauftragte Ergebnisablage ausdrücklich konkretisiert
 
+**Aktueller Zustand: RUHEND / BLOCKED_MISSING_ARTIFACTS.** Die vollständigen Originaltabellen und das Rechenskript sind in den zugänglichen Ablagen nicht verfügbar. Die Freigabe unten bleibt vorhanden, aber dieser Vorgang wird erst bei einem tatsächlich lesbaren Original-Sicherungsort fortgesetzt. Keine erneuten identischen Schreibversuche, Freigabefragen oder erfundenen Originaldateien. [Konsolidierter Eingang und Nachtrag](returns/BQ-EVAL-01-CI-01-return-01.md).
+
 15.11.2026 · zentrale Steuerung · Nachtrag zum vorhandenen CI-01-Auftrag, keine weitere Analyse oder Umsetzung.
 
 Der ursprüngliche Auftrag erlaubt sichere Dokumentationsablage und Archivmeldung ausdrücklich. „Read-only“ bezieht sich hier auf untersuchte Produkt-/Relay-/Workflow-/Billing-Systeme; es verbietet nicht die unten einzeln benannten Ergebnisoperationen. Diese sind durch das bestehende Dokumentationsmandat der zentralen Steuerung gedeckt. Keine erneute allgemeine Freigabefrage an Peter für dieselbe Ablage.
