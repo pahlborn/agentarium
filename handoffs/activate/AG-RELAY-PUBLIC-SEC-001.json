@@ -1,0 +1,12 @@
+{
+  "schema": "agentarium.relay-activation.v2",
+  "task_id": "AG-BQ-ENV-FIX-20261115-DEV",
+  "authorized": true,
+  "source_commit": "2b8b307c39162d5f32db41183c0077038be30c87",
+  "role": "coding-agent",
+  "request": "handoffs/AG-BQ-ENV-FIX-20261115-dev-request.json",
+  "handback": "handoffs/AG-BQ-ENV-FIX-20261115-dev-return.md",
+  "model": "sonnet",
+  "max_turns": 8,
+  "max_budget_usd": 1.5
+}
