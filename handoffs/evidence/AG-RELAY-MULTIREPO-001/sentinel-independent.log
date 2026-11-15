@@ -1,0 +1,31 @@
+{
+  "status": "PASS",
+  "checks": [
+    "local source SHA256",
+    "local source git blob",
+    "package bytes preserved",
+    "trusted governance separate",
+    "no target governance supplied",
+    "every directory0555",
+    "OS rejects sibling creation",
+    "OS rejects deletion",
+    "OS rejects rename",
+    "OS rejects bound source edit",
+    "actual two-operation delta",
+    "restore source unchanged",
+    "restore edit exact",
+    "restore new exact",
+    "stale attempt rejected",
+    "tampered payload rejected",
+    "delete result rejected",
+    "exact Write new slot only",
+    "counterexample writable parent admits sibling",
+    "counterexample caught by full inventory",
+    "readonly coding-agent zero paths",
+    "readonly spec-agent zero paths",
+    "readonly process-agent zero paths"
+  ],
+  "count": 23,
+  "source_fetch": "mocked exact local source bytes; NOT real R1",
+  "model": "NOT_RUN"
+}

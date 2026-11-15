@@ -1,0 +1,7 @@
+test_dotenv_variants_are_rejected_at_activation (test_project_packet.ContractTests.test_dotenv_variants_are_rejected_at_activation) ... ok
+test_result_validation_rejects_dotenv_even_if_upstream_guard_was_bypassed (test_project_packet.ResultTests.test_result_validation_rejects_dotenv_even_if_upstream_guard_was_bypassed) ... ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.036s
+
+OK

@@ -1,0 +1,54 @@
+{
+  "bootstrap-v2-dotenv-targeted": {
+    "command": [
+      "python3",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "relay",
+      "-p",
+      "test_project_packet.py",
+      "-k",
+      "dotenv",
+      "-v"
+    ],
+    "exit_code": 0,
+    "checked_at": "2026-11-15T10:38:38.163972+00:00"
+  },
+  "bootstrap-v2-project-tests": {
+    "command": [
+      "python3",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "relay",
+      "-p",
+      "test_project_packet.py",
+      "-v"
+    ],
+    "exit_code": 0,
+    "checked_at": "2026-11-15T10:38:38.635824+00:00"
+  },
+  "bootstrap-v2-compile": {
+    "command": [
+      "python3",
+      "-m",
+      "py_compile",
+      "relay/project_packet.py",
+      "relay/test_project_packet.py"
+    ],
+    "exit_code": 0,
+    "checked_at": "2026-11-15T10:38:38.697123+00:00"
+  },
+  "bootstrap-v2-diff-check": {
+    "command": [
+      "git",
+      "diff",
+      "--check"
+    ],
+    "exit_code": 0,
+    "checked_at": "2026-11-15T10:38:38.702020+00:00"
+  }
+}
