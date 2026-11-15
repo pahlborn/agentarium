@@ -1,0 +1,51 @@
+{
+  "schema": "agentarium.relay-activation.v3",
+  "task_id": "AG-RELAY-MULTIREPO-001-05",
+  "authorized": true,
+  "source_commit": "0000000000000000000000000000000000000000",
+  "role": "coding-agent",
+  "request": "handoffs/AG-RELAY-MULTIREPO-001-proof-request-v1.json",
+  "handback": "handoffs/AG-RELAY-MULTIREPO-001-proof-handback-v1.md",
+  "model": "sonnet",
+  "max_turns": 12,
+  "max_budget_usd": 1.0,
+  "contract": {
+    "schema": "agentarium.project-packet.v1",
+    "repository": "pahlborn/bis-school-app_src",
+    "project_id": "big-quest",
+    "target_commit": "7995d6968e3895b88f8ed2c3b0476683e5720c1a",
+    "mode": "forge-implementation",
+    "read_files": [
+      {
+        "path": "package.json",
+        "git_blob": "fc40de702be7b75c3d07655f8ea8f08a013d9783",
+        "sha256": "4c9fdfbb001276844836447cd9aa3134290354d56d966c5cc54e58cd76e35934"
+      }
+    ],
+    "edit_paths": [
+      "relay-proof/existing.md"
+    ],
+    "create_paths": [
+      "relay-proof/new.md"
+    ],
+    "synthetic_files": [
+      {
+        "path": "relay-proof/existing.md",
+        "content": "# Synthetic infrastructure proof overlay\nThis is not an existing repository source file.\nPending source observation.\n",
+        "sha256": "0959a403439bb190cf4d68f64830456bdb43056333d00a41f137af9de8766acc"
+      }
+    ],
+    "identity": {
+      "schema": "agentarium.relay-runtime-identity.v1",
+      "project_id": "agentarium",
+      "run_id": "AG-RELAY-MULTIREPO-001",
+      "task_id": "AG-RELAY-MULTIREPO-001-05",
+      "parent_id": "AG-RELAY-MULTIREPO-001",
+      "subject_role": "forge"
+    },
+    "max_seconds": 180,
+    "test_profile": "synthetic-doc-v1",
+    "artifact_publication": "host-approved-exact-paths",
+    "journal_delivery": "archive"
+  }
+}
