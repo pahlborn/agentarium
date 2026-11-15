@@ -1,6 +1,8 @@
 # BQ-EVAL-01-US202-01 · Geräteverbindung lokal durchgängig prüfen und gezielt schließen
 
-Auftragsfassung v1 · 15.11.2026 · Projekt `big-quest` · Lauf `BQ-EVAL-01` · Backlog: EP-02 / US-202, bestehender Bezug PR #194.
+**Verbindliche Personalregel, Peter 15.11.2026:** Reguläre Rollen einsetzen. Vertretung nur bei konkret belegtem technischem Problem UND nach vorheriger ausdrücklicher Zustimmung Peters zum benannten Einsatz. Frühere pauschale Ersatzfreigaben sind widerrufen. Ohne Zustimmung keine neue Vertretung starten oder fachlich fortsetzen; sichere Checkpoints und unabhängige erlaubte Arbeiten bleiben möglich. [Aktuelle Regel](https://github.com/pahlborn/agentarium/blob/main/governance/vertretungen-freigabe-2026-11-15.md). Diese jüngste Nutzerentscheidung geht allen älteren Vertretungsformulierungen dieses Auftrags vor.
+
+Auftragsfassung v2 · 15.11.2026 · Projekt `big-quest` · Lauf `BQ-EVAL-01` · Backlog: EP-02 / US-202, bestehender Bezug PR #194.
 
 ## 1. Startsequenz und Steuerung
 
@@ -8,7 +10,7 @@ Atlas, lade und verwende `operate-as-atlas`. Lies diesen Auftrag, aktuelles `AGE
 
 Die zentrale Steuerung bleibt im bisherigen Chat. Genau diesen Auftrag ausführen und danach Ergebnis oder konkreten Blocker zurückgeben. Keine Folgeaufträge, Plattformänderungen oder Releasearbeit selbst beginnen. Archivmodus `big-quest` / `BQ-EVAL-01`, kein Livebetrieb und keine erneute Live-Frage. Tatsächliche Rollen-/Lauf-/Testnachweise und Archivschritte nach geltendem Vertrag führen; keine unzugänglichen Library-Dateien als gelesen/aktualisiert behaupten.
 
-Peter autorisiert ausdrücklich eine qualifizierte, getrennt gestartete Entwicklungsvertretung, ohne auf Forge oder den Relay-Ausbau zu warten: [Entscheidung](https://github.com/pahlborn/agentarium/blob/d24c87ae11984a669a375b07faf1ff598acbf39d/handoffs/big-quest/DECISION-2026-11-15-VERTRETUNG.md). Forge bleibt reguläre Rolle. Tatsächliche Identität/Autorenschaft nennen; Codex nicht Forge nennen. Ein technischer Halter pro Teilaufgabe; keinen möglicherweise laufenden alten Auftrag doppelt beginnen. Einen unabhängigen Sentinel für den entscheidenden Verbindungsnachweis einsetzen; Argus zusätzlich nur bei einer konkret berührten Sicherheits-/Berechtigungsgrenze. Keine pauschale Agentenkaskade.
+Die frühere pauschale Entwicklungsvertretung ist widerrufen; es gilt die aktuelle Personalregel oben. Historischer Entscheid: [Entscheidung](https://github.com/pahlborn/agentarium/blob/d24c87ae11984a669a375b07faf1ff598acbf39d/handoffs/big-quest/DECISION-2026-11-15-VERTRETUNG.md). Forge bleibt reguläre Rolle. Tatsächliche Identität/Autorenschaft nennen; Codex nicht Forge nennen. Ein technischer Halter pro Teilaufgabe; keinen möglicherweise laufenden alten Auftrag doppelt beginnen. Einen unabhängigen Sentinel für den entscheidenden Verbindungsnachweis einsetzen; Argus zusätzlich nur bei einer konkret berührten Sicherheits-/Berechtigungsgrenze. Keine pauschale Agentenkaskade.
 
 ## 2. Ergebnis und parallele Abgrenzung
 

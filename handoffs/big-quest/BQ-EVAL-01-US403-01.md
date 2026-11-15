@@ -1,12 +1,14 @@
 # BQ-EVAL-01-US403-01 · Verlorene Claude-Antwort verständlich und ohne automatischen Doppelaufruf behandeln
 
-Auftragsfassung v1 · 15.11.2026 · Projekt big-quest · Lauf BQ-EVAL-01 · EP04 / US403. Dies ist ein konkreter Implementierungsauftrag, keine weitere Architektur-/Betriebsstudie.
+**Verbindliche Personalregel, Peter 15.11.2026:** Reguläre Rollen einsetzen. Vertretung nur bei konkret belegtem technischem Problem UND nach vorheriger ausdrücklicher Zustimmung Peters zum benannten Einsatz. Frühere pauschale Ersatzfreigaben sind widerrufen. Ohne Zustimmung keine neue Vertretung starten oder fachlich fortsetzen; sichere Checkpoints und unabhängige erlaubte Arbeiten bleiben möglich. [Aktuelle Regel](https://github.com/pahlborn/agentarium/blob/main/governance/vertretungen-freigabe-2026-11-15.md). Diese jüngste Nutzerentscheidung geht allen älteren Vertretungsformulierungen dieses Auftrags vor.
+
+Auftragsfassung v2 · 15.11.2026 · Projekt big-quest · Lauf BQ-EVAL-01 · EP04 / US403. Dies ist ein konkreter Implementierungsauftrag, keine weitere Architektur-/Betriebsstudie.
 
 ## Startsequenz und Ziel
 
 Atlas, lade und verwende `operate-as-atlas`. Lies aktuellen AGENTS-/Process-/Rulebook-Stand, diesen Auftrag und nur die nötigen vorhandenen Anforderungen. Nenne geladene Regeln/Commit, tatsächliche Quellbasis, vorhandenes Verhalten und technischen Halter. Letzte bekannte Governance: Agentarium Rulebook/Process1.4 an main `9962810b895baf10f8d71dd9a1f7387cca049b77`; aktuell prüfen.
 
-Steuerung und Folgeaufträge bleiben im zentralen Chat. Archivmodus big-quest/BQ-EVAL-01, kein Livebetrieb. Forge ist reguläre Entwicklungsrolle; eine qualifizierte echte getrennte Vertretung ist ausdrücklich erlaubt, ohne auf Relay oder weiteren API-Nachweis zu warten. Ein aktiver technischer Halter; unabhängige Prüfung des entscheidenden Verhaltens durch Sentinel. Weitere Rollen nur für eine konkrete Lücke, keine vollständige Pipeline. Reale Autorenschaft/Läufe und Nachweise nennen; keine Rollen simulieren.
+Steuerung und Folgeaufträge bleiben im zentralen Chat. Archivmodus big-quest/BQ-EVAL-01, kein Livebetrieb. Forge ist reguläre Entwicklungsrolle. Eine Vertretung ist ausschließlich bei belegtem technischem Problem und nach Peters vorheriger ausdrücklicher Zustimmung zum Einsatz zulässig. Ein aktiver technischer Halter; unabhängige Prüfung des entscheidenden Verhaltens durch Sentinel. Weitere Rollen nur für eine konkrete Lücke, keine vollständige Pipeline. Reale Autorenschaft/Läufe und Nachweise nennen; keine Rollen simulieren.
 
 **Nutzerergebnis:** Hat der Anbieter eine Aufbereitung möglicherweise schon angenommen/verarbeitet, aber Big Quest erhält keine verlässliche Antwort, erscheint ein verständlicher unklarer Status. Eingefügter Text und manuelle Änderungen bleiben erhalten. Kein automatischer erneuter Modellaufruf – auch nicht durch Neuladen, Neustart oder dieselbe Request-ID. Manuelle Fertigstellung bleibt möglich. Eine vom Nutzer ausdrücklich gewählte neue Anfrage wird als neuer Versuch geführt; ursprüngliche Ungewissheit bleibt nachvollziehbar.
 

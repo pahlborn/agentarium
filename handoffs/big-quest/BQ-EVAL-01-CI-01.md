@@ -1,12 +1,14 @@
 # BQ-EVAL-01-CI-01 · GitHub-Actions-Verbrauch und vermeidbare Mehrarbeit prüfen
 
-Auftragsfassung v1 · 15.11.2026 · Projekt `big-quest`, Lauf `BQ-EVAL-01`. Eigenständige lesende Betriebs-/Prozessanalyse zur ursprünglichen Verbrauchsfrage, keine Produktentwicklung und keine neue Epic.
+**Verbindliche Personalregel, Peter 15.11.2026:** Reguläre Rollen einsetzen. Vertretung nur bei konkret belegtem technischem Problem UND nach vorheriger ausdrücklicher Zustimmung Peters zum benannten Einsatz. Frühere pauschale Ersatzfreigaben sind widerrufen. Ohne Zustimmung keine neue Vertretung starten oder fachlich fortsetzen; sichere Checkpoints und unabhängige erlaubte Arbeiten bleiben möglich. [Aktuelle Regel](https://github.com/pahlborn/agentarium/blob/main/governance/vertretungen-freigabe-2026-11-15.md). Diese jüngste Nutzerentscheidung geht allen älteren Vertretungsformulierungen dieses Auftrags vor.
+
+Auftragsfassung v2 · 15.11.2026 · Projekt `big-quest`, Lauf `BQ-EVAL-01`. Eigenständige lesende Betriebs-/Prozessanalyse zur ursprünglichen Verbrauchsfrage, keine Produktentwicklung und keine neue Epic.
 
 ## Startsequenz
 
 Atlas, lade und verwende `operate-as-atlas`. Lies aktuelle AGENTS-/Process-/Rulebook-Vorgaben sowie diesen Auftrag. Letzte bekannte Regelbasis: Agentarium Rulebook/Process1.4 an main `9962810b895baf10f8d71dd9a1f7387cca049b77`; aktuellen Stand prüfen. Nenne Regeln, Untersuchungszeitpunkt, Umfang und tatsächliche Ausführung. Zentrale Steuerung und Folgeaufträge bleiben im bisherigen Chat.
 
-Kein Livebetrieb; bestehendes Projekt `big-quest` / Lauf `BQ-EVAL-01` im Archivmodus. Direkte lesende Analyse bevorzugen; keine Rollenpipeline und kein zusätzlicher Claude-Identitätstest. Eine tatsächlich nötige qualifizierte Vertretung ist freigegeben. Rollen, Meldungen und Messungen nicht erfinden. Bereits bekannte Schlussfolgerungen als Hinweise wiederverwenden, aktuelle Originalbelege prüfen.
+Kein Livebetrieb; bestehendes Projekt `big-quest` / Lauf `BQ-EVAL-01` im Archivmodus. Direkte lesende Analyse bevorzugen; keine Rollenpipeline und kein zusätzlicher Claude-Identitätstest. Eine Vertretung ist nur bei belegtem technischem Problem und nach Peters vorheriger ausdrücklicher Zustimmung zum Einsatz zulässig. Rollen, Meldungen und Messungen nicht erfinden. Bereits bekannte Schlussfolgerungen als Hinweise wiederverwenden, aktuelle Originalbelege prüfen.
 
 ## Ziel und enger Umfang
 

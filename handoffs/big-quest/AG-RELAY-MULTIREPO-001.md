@@ -1,6 +1,8 @@
 # AG-RELAY-MULTIREPO-001 · Projektübergreifende Claude-Arbeit mit begrenzten Schreibrechten
 
-Auftragsfassung v1 · 15.11.2026 · Infrastrukturauftrag für Agentarium · Auftraggeber: Peter / zentraler Atlas-Steuerungschat.
+**Verbindliche Personalregel, Peter 15.11.2026:** Reguläre Rollen einsetzen. Vertretung nur bei konkret belegtem technischem Problem UND nach vorheriger ausdrücklicher Zustimmung Peters zum benannten Einsatz. Frühere pauschale Ersatzfreigaben sind widerrufen. Ohne Zustimmung keine neue Vertretung starten oder fachlich fortsetzen; sichere Checkpoints und unabhängige erlaubte Arbeiten bleiben möglich. [Aktuelle Regel](https://github.com/pahlborn/agentarium/blob/main/governance/vertretungen-freigabe-2026-11-15.md). Diese jüngste Nutzerentscheidung geht allen älteren Vertretungsformulierungen dieses Auftrags vor.
+
+Auftragsfassung v2 · 15.11.2026 · Infrastrukturauftrag für Agentarium · Auftraggeber: Peter / zentraler Atlas-Steuerungschat.
 
 ## 1. Startsequenz
 
@@ -41,7 +43,7 @@ Kein Dateitransport durch Peter erforderlich. Nutze vorhandenen GitHub-Dateizugr
 
 Prüfe zuerst den tatsächlichen Empfangs-/Ausführungsweg. Die bestehende v2-Route kann Forge Architektur und eng begrenzte Beratung aus bereits vorbereiteten Dateien liefern lassen. Sie kann noch keine Relay- oder Big-Quest-Quelldateien bearbeiten. Lade keine Dateien oder Toolrechte nur deshalb nach, weil die Modellantwort es fordert.
 
-Forge soll die technische Route beurteilen: kritische Annahme, kleinster tragfähiger Eingriff, Alternativen und kleinster realer Nachweis. Für die lokale Implementierung der Bridge-Erweiterung darf ein vorhandener qualifizierter technischer Ausführer mit tatsächlich passenden Rechten eingesetzt werden. Falls dies ein separater Codex-Entwicklungsvertreter ist, gelten die bestehenden Vertretungsregeln; nenne ihn als tatsächlichen Implementierer und den konkreten bisherigen Werkzeugmangel, nicht als Forge oder als Beleg eines Claude-Ausfalls. Es gibt höchstens einen aktiven Implementierungshalter je Teilaufgabe. Keine erfundene Claude-Autorenschaft für einen lokalen Bootstrap.
+Forge soll die technische Route beurteilen: kritische Annahme, kleinster tragfähiger Eingriff, Alternativen und kleinster realer Nachweis. Für die lokale Implementierung der Bridge-Erweiterung darf ein vorhandener qualifizierter technischer Ausführer mit tatsächlich passenden Rechten eingesetzt werden. Falls hierfür ein separater Codex-Entwicklungsvertreter vorgeschlagen wird, sind zunächst das konkrete technische Problem zu belegen und Peters ausdrückliche Zustimmung zu diesem Einsatz einzuholen; nenne ihn als tatsächlichen Implementierer und den konkreten bisherigen Werkzeugmangel, nicht als Forge oder als Beleg eines Claude-Ausfalls. Es gibt höchstens einen aktiven Implementierungshalter je Teilaufgabe. Keine erfundene Claude-Autorenschaft für einen lokalen Bootstrap.
 
 Eine schmale Fortschreibung des bestehenden Relays hat Vorrang vor einer neuen Agentenplattform. Prüfe zuerst, ob aktuell bereits eine passende Erweiterung existiert. Keine parallel entwickelte zweite Bridge aus Gewohnheit.
 

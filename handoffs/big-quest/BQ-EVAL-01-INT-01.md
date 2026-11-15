@@ -1,6 +1,8 @@
 # BQ-EVAL-01-INT-01 · Vollständigen bereinigten Entwicklungskandidaten herstellen
 
-Auftragsfassung v2 · 15.11.2026 · Steuerung: Atlas im zentralen Big-Quest-Steuerungschat · Ausführung: Atlas in genau einem separaten Entwicklungs-Chat.
+**Verbindliche Personalregel, Peter 15.11.2026:** Reguläre Rollen einsetzen. Vertretung nur bei konkret belegtem technischem Problem UND nach vorheriger ausdrücklicher Zustimmung Peters zum benannten Einsatz. Frühere pauschale Ersatzfreigaben sind widerrufen. Ohne Zustimmung keine neue Vertretung starten oder fachlich fortsetzen; sichere Checkpoints und unabhängige erlaubte Arbeiten bleiben möglich. [Aktuelle Regel](https://github.com/pahlborn/agentarium/blob/main/governance/vertretungen-freigabe-2026-11-15.md). Diese jüngste Nutzerentscheidung geht allen älteren Vertretungsformulierungen dieses Auftrags vor.
+
+Auftragsfassung v3 · 15.11.2026 · Steuerung: Atlas im zentralen Big-Quest-Steuerungschat · Ausführung: Atlas in genau einem separaten Entwicklungs-Chat.
 
 ## 1. Startsequenz – vor der Ausführung
 
@@ -9,7 +11,7 @@ Auftragsfassung v2 · 15.11.2026 · Steuerung: Atlas im zentralen Big-Quest-Steu
 3. Nenne knapp: geladene Regeln mit Commit, lokale Ausgangsbasis, aktuellen GitHub-main-Stand, tatsächlichen Auftrag und Grenzen, vorhandene Eingaben und technische Rollen-/Ausführungswege. Prüfe vorhandene lokale Änderungen, bevor du etwas überschreibst.
 4. Projekt `big-quest`, Lauf `BQ-EVAL-01`, Task `BQ-EVAL-01-INT-01`. Monitor ausschließlich Archivmodus, kein Livebetrieb; diese Wahl ist bereits getroffen und nicht erneut zu erfragen. Vorhandene Ereignisfolge und aktuelle Cursor soweit zugänglich prüfen; Unbekanntes bleibt unbekannt. Nur tatsächliche Schritte, Rollen und Zustellungen journalisieren. Lokale Ereignisvorlagen sind keine veröffentlichte Archivspur. Keine erfundenen Workerstarts oder technischen Stoppbelege.
 5. Rollen gezielt einsetzen: Forge ist regulärer technischer Owner; Argus prüft den entscheidenden Integrations-/Bereinigungsstand unabhängig; Sentinel ergänzt nur eine konkrete wesentliche Prüflücke. Archibald bei materieller Spezifikationslücke, Cadence bei einem tatsächlichen Prozess-Trigger, nicht als Routinezeremonie. Profile und regelkonformes begrenztes Auftragspaket verwenden. Rechte und separaten echten Lauf vor Behauptungen verifizieren.
-6. Peter bestätigt die Claude-API und gestattet gezielt begrenzte Claude-Relay-Actions. Fehlender lokaler CLI/Connector allein ist kein Claude-Ausfall. Der bisher belegte Forge-Lauf gilt für Agentarium; Big-Quest-Zugriff/Mehr-Repo-Ausführung ist noch nicht nachgewiesen. Prüfe den konkreten aktuellen Relay-Vertrag und tatsächliche Rollenrechte. Keine eigenmächtige Relay-/Plattformentwicklung zur Erweiterung. Ersatz nur bei belegter konkreter Blockade, transparent nach geltenden Vertretungsregeln und ohne zwei aktive Halter derselben Aufgabe. Ein alter EP06-Worker wird nicht durch diesen neuen Integrationsauftrag wieder gestartet.
+6. Peter bestätigt die Claude-API und gestattet gezielt begrenzte Claude-Relay-Actions. Fehlender lokaler CLI/Connector allein ist kein Claude-Ausfall. Der bisher belegte Forge-Lauf gilt für Agentarium; Big-Quest-Zugriff/Mehr-Repo-Ausführung ist noch nicht nachgewiesen. Prüfe den konkreten aktuellen Relay-Vertrag und tatsächliche Rollenrechte. Keine eigenmächtige Relay-/Plattformentwicklung zur Erweiterung. Ersatz ausschließlich bei belegtem technischem Problem UND nach Peters vorheriger ausdrücklicher Zustimmung zum konkreten Einsatz, transparent und ohne zwei aktive Halter derselben Aufgabe. Ein alter EP06-Worker wird nicht durch diesen neuen Integrationsauftrag wieder gestartet.
 
 ## 2. Mandat und Ziel
 

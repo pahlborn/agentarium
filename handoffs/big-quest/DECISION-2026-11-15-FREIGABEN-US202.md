@@ -1,5 +1,7 @@
 # Zentrale Klärung · Freigaben, Geräte-Link und Abnahmegrenzen
 
+**Historischer Entscheid, Personalteil ersetzt:** Pauschale Vertretungsfreigaben unten gelten nicht mehr. Maßgeblich ist ausschließlich die [neue Regel](https://github.com/pahlborn/agentarium/blob/main/governance/vertretungen-freigabe-2026-11-15.md): technisches Problem plus vorherige ausdrückliche Zustimmung Peters zum konkreten Einsatz. Andere hier dokumentierte Fach-/Zugriffsentscheidungen bleiben unverändert.
+
 15.11.2026 · Peter verlangt die Auflösung unnötiger Freigabeblockaden. Gilt für die laufenden freigegebenen Aufgaben; keine neue Produkt-/Releasefreigabe und kein fingiertes PASS.
 
 ## Freigaben nicht wiederholt einholen

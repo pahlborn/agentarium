@@ -1,6 +1,8 @@
 # BQ-EVAL-01-INT-01-K1 · Rote Regression und offenen Upgrade-Nachweis klären
 
-Auftragsfassung v1 · 15.11.2026 · Parent `BQ-EVAL-01-INT-01` · Projekt `big-quest` · Lauf `BQ-EVAL-01`.
+**Verbindliche Personalregel, Peter 15.11.2026:** Reguläre Rollen einsetzen. Vertretung nur bei konkret belegtem technischem Problem UND nach vorheriger ausdrücklicher Zustimmung Peters zum benannten Einsatz. Frühere pauschale Ersatzfreigaben sind widerrufen. Ohne Zustimmung keine neue Vertretung starten oder fachlich fortsetzen; sichere Checkpoints und unabhängige erlaubte Arbeiten bleiben möglich. [Aktuelle Regel](https://github.com/pahlborn/agentarium/blob/main/governance/vertretungen-freigabe-2026-11-15.md). Diese jüngste Nutzerentscheidung geht allen älteren Vertretungsformulierungen dieses Auftrags vor.
+
+Auftragsfassung v2 · 15.11.2026 · Parent `BQ-EVAL-01-INT-01` · Projekt `big-quest` · Lauf `BQ-EVAL-01`.
 
 ## Start und Eingaben
 

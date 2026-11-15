@@ -1,12 +1,14 @@
 # BQ-EVAL-01-OPS-01 · Bestehenden Betriebsvertrag und Aktivierungslücken klären
 
-Auftragsfassung v1 · 15.11.2026 · Projekt `big-quest` · Lauf `BQ-EVAL-01`. Vorbereitung der offenen Betriebsanteile aus EP04/US401–403 und EP08/US801–803; keine neue Produktstory und kein zusätzlicher Machbarkeitspilot.
+**Verbindliche Personalregel, Peter 15.11.2026:** Reguläre Rollen einsetzen. Vertretung nur bei konkret belegtem technischem Problem UND nach vorheriger ausdrücklicher Zustimmung Peters zum benannten Einsatz. Frühere pauschale Ersatzfreigaben sind widerrufen. Ohne Zustimmung keine neue Vertretung starten oder fachlich fortsetzen; sichere Checkpoints und unabhängige erlaubte Arbeiten bleiben möglich. [Aktuelle Regel](https://github.com/pahlborn/agentarium/blob/main/governance/vertretungen-freigabe-2026-11-15.md). Diese jüngste Nutzerentscheidung geht allen älteren Vertretungsformulierungen dieses Auftrags vor.
+
+Auftragsfassung v2 · 15.11.2026 · Projekt `big-quest` · Lauf `BQ-EVAL-01`. Vorbereitung der offenen Betriebsanteile aus EP04/US401–403 und EP08/US801–803; keine neue Produktstory und kein zusätzlicher Machbarkeitspilot.
 
 ## Startsequenz und Auftrag
 
 Atlas, lade und verwende `operate-as-atlas`. Lies aktuelle AGENTS-/Process-/Rulebook-Vorgaben und diesen Auftrag. Letzte bekannte Governance: Agentarium Rulebook/Process1.4 an main `9962810b895baf10f8d71dd9a1f7387cca049b77`; aktuellen Stand prüfen. Nenne Regeln/Commit, tatsächlich gelesene Codebasis, Ausführungsrollen und Grenzen. Historische Planung ist keine neue Entwicklungsfreigabe.
 
-Zentrale Steuerung bleibt im bisherigen Chat. Monitor nur Archivmodus `big-quest` / `BQ-EVAL-01`; keine Live-Frage. Fachlich geeignete echte Vertretung ist ausdrücklich erlaubt, ohne auf Forge oder Relay-Ausbau zu warten. Tatsächliche Rolle/Plattform und Nachweise benennen; keine simulierten Konsultationen. Für diese überschaubare lesende Analyse direkt arbeiten oder genau einen nötigen technischen Analysten einsetzen, nicht eine vollständige Rollenpipeline.
+Zentrale Steuerung bleibt im bisherigen Chat. Monitor nur Archivmodus `big-quest` / `BQ-EVAL-01`; keine Live-Frage. Eine Vertretung benötigt ein belegtes technisches Problem und Peters vorherige ausdrückliche Zustimmung zum Einsatz. Tatsächliche Rolle/Plattform und Nachweise benennen; keine simulierten Konsultationen. Für diese überschaubare lesende Analyse direkt arbeiten oder genau einen nötigen technischen Analysten einsetzen, nicht eine vollständige Rollenpipeline.
 
 **Ziel:** Aus dem beschlossenen Konzept und dem vorhandenen Dienstcode eine konkrete, belegte Betriebs- und Entscheidungsunterlage erstellen. Sie muss der zentralen Steuerung zeigen, welche Adapter und Betriebsparameter vorhanden sind, welche fehlen und welche konkrete Entscheidung vor ihrer späteren Umsetzung nötig ist. Keine Architektur neu entwerfen und keinen Anbieter auswählen/beauftragen.
 

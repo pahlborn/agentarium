@@ -1,5 +1,7 @@
 # Big Quest · Übergangsvertretung ausdrücklich freigegeben
 
+**Historischer Entscheid, Personalteil ersetzt:** Pauschale Vertretungsfreigaben unten gelten nicht mehr. Maßgeblich ist ausschließlich die [neue Regel](https://github.com/pahlborn/agentarium/blob/main/governance/vertretungen-freigabe-2026-11-15.md): technisches Problem plus vorherige ausdrückliche Zustimmung Peters zum konkreten Einsatz. Andere hier dokumentierte Fach-/Zugriffsentscheidungen bleiben unverändert.
+
 Peter, 15.11.2026, zentrale Steuerung: „wir müssen nicht warten, bis forge zum einsatz kommt. in der zwischenzeit können wir auch mit einer vertretung vorlieb nehmen“.
 
 ## Wirkung

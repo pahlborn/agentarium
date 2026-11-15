@@ -1,12 +1,14 @@
 # BQ-EVAL-01-US202-01-K1 · G2 nachweisen, G4 korrekt getrennt abnehmen
 
-Auftragsfassung v1 · Parent BQ-EVAL-01-US202-01 · Projekt big-quest · Lauf BQ-EVAL-01.
+**Verbindliche Personalregel, Peter 15.11.2026:** Reguläre Rollen einsetzen. Vertretung nur bei konkret belegtem technischem Problem UND nach vorheriger ausdrücklicher Zustimmung Peters zum benannten Einsatz. Frühere pauschale Ersatzfreigaben sind widerrufen. Ohne Zustimmung keine neue Vertretung starten oder fachlich fortsetzen; sichere Checkpoints und unabhängige erlaubte Arbeiten bleiben möglich. [Aktuelle Regel](https://github.com/pahlborn/agentarium/blob/main/governance/vertretungen-freigabe-2026-11-15.md). Diese jüngste Nutzerentscheidung geht allen älteren Vertretungsformulierungen dieses Auftrags vor.
+
+Auftragsfassung v2 · Parent BQ-EVAL-01-US202-01 · Projekt big-quest · Lauf BQ-EVAL-01.
 
 ## Start
 
 Atlas, lade `operate-as-atlas` und lies aktuelle AGENTS-/Process-/Rulebook-Vorgaben. Lies diesen Nachauftrag, den ursprünglichen US202-Auftrag und [die zentrale Freigabe-/Anforderungsklärung](DECISION-2026-11-15-FREIGABEN-US202.md). Nenne Regelstand und genaue Basis. Im bisherigen Ausführungs-Chat fortsetzen: Kandidat `aab72dbd0585004fd61e4fae296a1fdbd51dadf0`, dort gesicherte private Rückgabe, Original-DEV-/QA-Nachweise. Peter hat den privaten Zugriff bereits erlaubt, und die Herstellung ist archiviert. Keine erneute allgemeine Freigabefrage und kein Dateitransport durch Peter.
 
-Zentrale Steuerung bleibt hierarchie- und prioritätsverantwortlich. Archivmodus, keine Live-Frage. Frühere Worker sind laut Rückgabe gestoppt; vor neuer Zuweisung eigenen aktuellen Kanal prüfen. Ein tatsächlicher technischer Halter je Teilaufgabe und ein unabhängiger Prüfer. Geeignete echte Vertretung ist direkt erlaubt, kein Warten auf Forge/Relay. Keine erfundene Rollenidentität oder Stoppmeldung. Neue Teilaufgaben erhalten eindeutige IDs mit dem bestehenden Parent; keine alten Ereignisse umdeuten.
+Zentrale Steuerung bleibt hierarchie- und prioritätsverantwortlich. Archivmodus, keine Live-Frage. Frühere Worker sind laut Rückgabe gestoppt; vor neuer Zuweisung eigenen aktuellen Kanal prüfen. Ein tatsächlicher technischer Halter je Teilaufgabe und ein unabhängiger Prüfer. Vertretung ausschließlich nach belegtem technischem Problem und vorheriger ausdrücklicher Zustimmung Peters zum Einsatz. Keine erfundene Rollenidentität oder Stoppmeldung. Neue Teilaufgaben erhalten eindeutige IDs mit dem bestehenden Parent; keine alten Ereignisse umdeuten.
 
 ## Ziel und erlaubte Arbeit
 
