@@ -1,0 +1,12 @@
+{
+  "schema": "agentarium.relay-activation.v2",
+  "task_id": "AG-ALLG-FORGE-README-001",
+  "authorized": true,
+  "source_commit": "27f6f840412f80e6308e09380cd0b5b9cedbb1eb",
+  "role": "coding-agent",
+  "request": "handoffs/AG-ALLG-FORGE-README-001-request-v1.json",
+  "handback": "handoffs/AG-ALLG-FORGE-README-001-handback-v1.md",
+  "model": "sonnet",
+  "max_turns": 5,
+  "max_budget_usd": 0.3
+}
