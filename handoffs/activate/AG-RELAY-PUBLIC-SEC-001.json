@@ -1,0 +1,12 @@
+{
+  "schema": "agentarium.relay-activation.v2",
+  "task_id": "AG-BQ-K1-20261116-V4-HOST-TESTS",
+  "authorized": true,
+  "source_commit": "87195d6b6c9b3d37c299390d34c28ce85bb01d15",
+  "role": "coding-agent",
+  "request": "handoffs/AG-BQ-K1-20261116-V4-HOST-TESTS.json",
+  "handback": "handoffs/AG-BQ-K1-20261116-V4-HOST-TESTS-handback.md",
+  "model": "sonnet",
+  "max_turns": 8,
+  "max_budget_usd": 25
+}
