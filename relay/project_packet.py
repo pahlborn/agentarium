@@ -1108,3 +1108,437 @@ def execute_runde(context, meta, result, driver):
             'changes_sha256': meta['changes_sha256'], 'checked_at': driver.now(),
             'stdout_tail': out.decode('utf-8', 'replace'), 'stderr_tail': err.decode('utf-8', 'replace'),
             'restored_inventory': inventory}
+
+ACCESS_TASK = 'AG-BQ-ACCESS-20261116-FORGE-PROOF'
+ACCESS_LOCAL = {'schema': 'agentarium.access-local-execution.v1', 'node': 'v24.22.1', 'chromium': '141.0.7390.37', 'playwright': '1.56.1',
+    'image': 'mcr.microsoft.com/playwright@sha256:f1e7e01021efd65dd1a2c56064be399f3e4de00fd021ac561325f2bfbb2b837a',
+    'fixture_bytes': 1494793, 'fixture_sha256': 'acc34783f4c8ffb868f8a08484e3ab6395988806cc148f8919bf4d580982011e',
+    'tests': ('tests/testinstanz.test.mjs', 'tests/neutral.test.mjs', 'tests/altlasten.test.mjs',
+              'tests/evaluation-upgrade-browser.test.mjs'),
+    'seconds': {'tests': 560, 'build': 120, 'probe': 20}, 'host_seconds': 850}
+ACCESS_EXPECT = {'session_id', 'run_id', 'run_attempt', 'source_commit', 'activation_commit', 'packet_binding', 'changes_sha256'}
+ACCESS_ENV = ('PATH', 'LANG')
+ACCESS_PF_ENV = {'PATH', 'LANG', 'LC_ALL', 'TMPDIR', 'XDG_CONFIG_HOME', 'XDG_CACHE_HOME', 'BQ_LEGACY_HTML',
+                 'PLAYWRIGHT_BROWSERS_PATH', 'GIT_CONFIG_NOSYSTEM', 'GIT_CONFIG_GLOBAL', 'GIT_TERMINAL_PROMPT',
+                 'PWD', 'SHLVL', '_', 'OLDPWD'}
+ACCESS_PHASES = ('tests', 'build', 'probe')
+ACCESS_FACT_ORDER = ('uid', 'env', 'nets', 'capeff', 'nonewprivs', 'seccomp', 'rootfs', 'inputmount', 'fixturemount',
+                     'hostpaths', 'node', 'git', 'copydiff', 'localcommit', 'localtree', 'history', 'remotes',
+                     'gitstatus', 'chromiumfail', 'chromium')
+ACCESS_LOG_LIMIT = 240000
+ACCESS_CUT = b'\n[... middle of log removed by container runner ...]\n'
+ACCESS_SCRIPT = r"""N="$1"
+m() { echo "@@$N $*"; }
+block() { m BLOCKED "$*"; exit 91; }
+umask 022
+mkdir -p /tmp/xdg-config /tmp/xdg-cache /tmp/work/project /tmp/pf || block mkdir
+m PF uid "$(id -u)"
+m PF env "$(env | sed 's/=.*//' | sort | tr '\n' ' ')"
+for v in $(env | sed 's/=.*//'); do case " @ENVALLOW@ " in *" $v "*) ;; *) block "env-not-allowed $v";; esac; done
+m PF nets "$(ls /sys/class/net | tr '\n' ' ')"
+m PF capeff "$(sed -n 's/^CapEff:[[:space:]]*//p' /proc/self/status)"
+m PF nonewprivs "$(sed -n 's/^NoNewPrivs:[[:space:]]*//p' /proc/self/status)"
+m PF seccomp "$(sed -n 's/^Seccomp:[[:space:]]*//p' /proc/self/status)"
+[ "$(id -u)" = 1000 ] && [ "$(ls /sys/class/net | tr '\n' ' ')" = 'lo ' ] || block uid-or-network
+grep -q '^CapEff:[[:space:]]*0000000000000000$' /proc/self/status && grep -q '^NoNewPrivs:[[:space:]]*1$' /proc/self/status || block capabilities
+grep -q '^Seccomp:[[:space:]]*2$' /proc/self/status || block seccomp
+env | sed 's/=.*//' | grep -qiE 'token|key|secret|proxy|docker|credential|password' && block credential-environment
+if touch /access01-probe 2>/dev/null; then m PF rootfs rw; block rootfs-writable; else m PF rootfs ro; fi
+if touch /input/source/.access01-probe 2>/dev/null; then m PF inputmount rw; block source-writable; else m PF inputmount ro; fi
+if touch /input/fixture/.access01-probe 2>/dev/null; then m PF fixturemount rw; block fixture-writable; else m PF fixturemount ro; fi
+hp=""; for p in /workspace /opt/codex /var/run/docker.sock /run/docker.sock /root/.docker /root/.config /root/.ssh; do [ -e "$p" ] && hp="$hp $p"; done
+m PF hostpaths "${hp:-none}"
+[ -z "$hp" ] || block host-paths
+for t in git timeout sha256sum cp diff; do command -v "$t" >/dev/null || block "missing-$t"; done
+[ "$(node --version)" = '@NODE@' ] || block node-version
+m PF node "$(node --version)"
+m PF git "$(git --version)"
+cp -R --preserve=mode /input/source/. /tmp/work/project/ || block copy
+if diff -rq /input/source /tmp/work/project >/dev/null; then m PF copydiff identical; else block copydiff; fi
+cd /tmp/work/project || block cd
+G="git -c user.name=access01-local -c user.email=access01-local@invalid -c commit.gpgsign=false -c core.hooksPath=/dev/null -c init.defaultBranch=main"
+$G init -q . && $G add -A && $G commit -q -m 'ACCESS-01 synthetic local snapshot' || block git-init
+m PF localcommit "$(git rev-parse HEAD)"
+m PF localtree "$(git rev-parse 'HEAD^{tree}')"
+m PF history "$(git rev-list --count HEAD)"
+m PF remotes "$(git remote | wc -l)"
+[ "$(git rev-parse 'HEAD^{tree}')" = '@TREE@' ] || block local-tree
+[ "$(git rev-list --count HEAD)" -eq 1 ] && [ "$(git remote | wc -l)" -eq 0 ] || block git-history
+printf 'node_modules\n' >> .git/info/exclude
+ln -s /runtime/node_modules node_modules || block link
+m PF gitstatus "$(git status --porcelain | wc -l)"
+[ "$(git status --porcelain | wc -l)" -eq 0 ] || block git-dirty
+ln -s /runtime/node_modules /tmp/pf/node_modules
+cat > /tmp/pf/pf.mjs <<'EOF'
+import { chromium } from 'playwright';
+const b = await chromium.launch();
+const p = await b.newPage();
+await p.goto('about:blank');
+console.log('CHROMIUM ' + b.version() + ' title=' + JSON.stringify(await p.title()));
+await b.close();
+EOF
+out=$(timeout -k 5 60 node /tmp/pf/pf.mjs 2>&1 </dev/null) || { m PF chromiumfail "$(echo "$out" | head -c 300 | tr '\n' ' ')"; block chromium; }
+echo "$out" | head -n 1 | grep -qF 'CHROMIUM @CHROMIUM@ ' || block chromium-version
+m PF chromium "$(echo "$out" | head -n 1)"
+run() {
+  name=$1; limit=$2; shift 2
+  s=$(date +%s)
+  timeout -k 10 "$limit" "$@" >"/tmp/log.$name" 2>&1 </dev/null
+  rc=$?
+  e=$(date +%s)
+  size=$(wc -c <"/tmp/log.$name")
+  if [ "$size" -le 240000 ]; then cp "/tmp/log.$name" "/tmp/emit.$name"; cut=0; else { head -c 120000 "/tmp/log.$name"; printf '\n[... middle of log removed by container runner ...]\n'; tail -c 120000 "/tmp/log.$name"; } >"/tmp/emit.$name"; cut=1; fi
+  emitted=$(wc -c <"/tmp/emit.$name")
+  m END "$name" "$rc" "$((e-s))" "$size" "$cut" "$emitted"
+  m LOGBEGIN "$name" "$emitted"
+  head -c "$emitted" "/tmp/emit.$name"
+  echo
+  m LOGEND "$name"
+}
+run tests @TESTSECONDS@ node --test --test-concurrency=1 @TESTS@
+run build @BUILDSECONDS@ node werkzeug/testinstanz.mjs --ziel /tmp/work/dist
+if [ -d /tmp/work/dist ]; then (cd /tmp/work/dist && find . -type f | LC_ALL=C sort | while IFS= read -r f; do m DIST "$(sha256sum "$f" | cut -d' ' -f1) $(wc -c <"$f") $f"; done); fi
+run probe @PROBESECONDS@ node -e 'console.log("ACCESS01_EXECUTOR_FORCED_FAIL");process.exit(37)'
+m DONE
+"""
+
+def _access_safe_path(value):
+    text = str(value)
+    if not re.fullmatch(r'/[A-Za-z0-9_./-]+', text) or '..' in text.split('/'):
+        raise ValueError('host path outside the safe character set')
+    return Path(text)
+
+def _access_disk_tree(root):
+    files = {}
+    for current, directories, names in os.walk(root, followlinks=False):
+        for name in directories + names:
+            item = Path(current) / name
+            details = item.lstat()
+            if stat.S_ISDIR(details.st_mode):
+                continue
+            if not stat.S_ISREG(details.st_mode) or details.st_nlink != 1:
+                raise ValueError('imported tree contains link or nonregular file')
+            relative = item.relative_to(root).as_posix()
+            path(relative)
+            files[relative] = ('100755' if details.st_mode & 0o111 else '100644', item.read_bytes())
+    return files
+
+def _access_verify_import(base):
+    source, evidence = _access_disk_tree(base / 'source'), _access_disk_tree(base / 'evidence')
+    if len(source) != ACCESS_SPEC['archives']['source']['files'] or len(evidence) != ACCESS_SPEC['archives']['evidence']['files']:
+        raise ValueError('fresh import inventory count mismatch')
+    identity = {n: (mode, git_blob_id(data)) for n, (mode, data) in source.items()}
+    if git_tree_id(identity) != ACCESS_SPEC['tree']:
+        raise ValueError('fresh import tree identity mismatch')
+    manifest = json.loads(evidence['source-manifest.json'][1])['manifest']
+    rows = {x['path']: x for x in manifest}
+    if set(rows) != set(source) or len(rows) != len(manifest):
+        raise ValueError('fresh import manifest inventory mismatch')
+    for name, (mode, data) in source.items():
+        row = rows[name]
+        if row['mode'] != mode or row['bytes'] != len(data) or row['sha256'] != digest(data):
+            raise ValueError('fresh import manifest file mismatch')
+    return source, evidence
+
+def _access_redact(driver, data):
+    pieces, last, used = [], 0, 0
+    for match in driver.SUSPICIOUS.finditer(data):
+        if used < STREAM_DECOY_LIMIT and digest(match.group(0)) == ACCESS_DECOY['match_sha256']:
+            pieces += [data[last:match.start()], b'[attested-synthetic-fixture]']
+            last, used = match.end(), used + 1
+    return b''.join(pieces) + data[last:]
+
+def _access_log(driver, raw, out_dir, name, end):
+    text = raw.decode('utf-8', 'replace')
+    counts = {}
+    for key, value in re.findall(r'(?m)^(?:# |\u2139 )(tests|suites|pass|fail|cancelled|skipped|todo) ([0-9]+)', text):
+        counts[key] = int(value)
+    failures = [x.strip()[:200] for x in text.split('\n') if re.match(r'\s*(?:\u2716|not ok) ', x)][:40]
+    failures = [y for y in (_access_redact(driver, x.encode()).decode() for x in failures) if not driver.secret_hit(y.encode(), None)]
+    cleaned = _access_redact(driver, raw)
+    withheld = driver.secret_hit(cleaned, None)
+    entry = {'original_bytes': end['original_log_bytes'], 'captured_bytes': len(raw), 'captured_sha256': digest(raw),
+             'truncated': end['truncated'], 'original_sha256': None,
+             'hash_scope': ('captured emitted bytes only (middle removed by the container runner), before redaction; original log hash not computed'
+                            if end['truncated'] else 'complete original on-disk log, before redaction'),
+             'excerpt_limit_chars': 60000, 'counts': counts, 'failure_lines': failures, 'withheld': withheld}
+    if withheld:
+        entry['excerpt'] = 'withheld by secret scan; counts/exit only'
+    else:
+        show = cleaned.decode('utf-8', 'replace')
+        entry['excerpt'] = show if len(show) <= 60000 else show[:30000] + '\n[... excerpt truncated ...]\n' + show[-30000:]
+        write_file(out_dir, name + '.log', cleaned)
+        (out_dir / (name + '.log')).chmod(0o600)
+    return entry
+
+def _access_parse(data, nonce):
+    """Strict fixed-protocol parser. Log payloads are byte-counted and opaque; the first error stops parsing
+    and everything parsed before it (including the first actual END) is preserved, never overwritten."""
+    prefix = ('@@' + nonce + ' ').encode()
+    found = {'facts': {}, 'ends': {}, 'logs': {}, 'dist': [], 'blocked': None, 'done': False, 'errors': []}
+    number = re.compile(r'[0-9]{1,12}')
+    pos, step, last, want = 0, 0, -1, 'end'
+
+    def bad(message):
+        found['errors'].append(message)
+        return found
+
+    while pos < len(data):
+        stop = data.find(b'\n', pos)
+        if stop < 0:
+            return bad('unterminated control line')
+        line, pos = data[pos:stop], stop + 1
+        if not line.startswith(prefix):
+            return bad('output outside the control protocol')
+        if found['done'] or found['blocked'] is not None:
+            return bad('event after terminal event')
+        word, _, rest = line[len(prefix):].decode('ascii', 'replace').partition(' ')
+        if word == 'PF':
+            key, _, value = rest.partition(' ')
+            if step or want != 'end' or key not in ACCESS_FACT_ORDER or ACCESS_FACT_ORDER.index(key) <= last:
+                return bad('unexpected, unknown or duplicate preflight fact')
+            found['facts'][key] = value
+            last = ACCESS_FACT_ORDER.index(key)
+        elif word == 'BLOCKED':
+            if step or want != 'end':
+                return bad('BLOCKED after execution started')
+            found['blocked'] = rest
+        elif word == 'END':
+            fields = rest.split(' ')
+            if (want != 'end' or step >= 3 or len(fields) != 6 or fields[0] != ACCESS_PHASES[step] or
+                    not all(number.fullmatch(x) for x in fields[1:])):
+                return bad('unexpected or malformed END')
+            if step == 0 and any(k not in found['facts'] for k in ACCESS_FACT_ORDER if k != 'chromiumfail'):
+                return bad('END before complete preflight')
+            code, seconds, size, cut, emitted = (int(x) for x in fields[1:])
+            if not (code <= 255 and ((cut == 0 and emitted == size <= ACCESS_LOG_LIMIT) or
+                                     (cut == 1 and size > ACCESS_LOG_LIMIT and emitted == ACCESS_LOG_LIMIT + len(ACCESS_CUT)))):
+                return bad('inconsistent END fields')
+            found['ends'][fields[0]] = {'exit_code': code, 'seconds': seconds, 'original_log_bytes': size,
+                                        'truncated': bool(cut), 'captured_bytes': emitted}
+            want = 'begin'
+        elif word == 'LOGBEGIN':
+            fields = rest.split(' ')
+            end = found['ends'].get(ACCESS_PHASES[step]) if step < 3 else None
+            if (want != 'begin' or end is None or len(fields) != 2 or fields[0] != ACCESS_PHASES[step] or
+                    fields[1] != str(end['captured_bytes'])):
+                return bad('unexpected LOGBEGIN')
+            size = end['captured_bytes']
+            payload = data[pos:pos + size]
+            found['logs'][fields[0]] = payload
+            if len(payload) != size or data[pos + size:pos + size + 1] != b'\n':
+                return bad('unterminated or inconsistent log payload')
+            pos += size + 1
+            want = 'logend'
+        elif word == 'LOGEND':
+            if want != 'logend' or step >= 3 or rest != ACCESS_PHASES[step]:
+                return bad('unexpected LOGEND')
+            step, want = step + 1, 'end'
+        elif word == 'DIST':
+            parts = rest.split(' ', 2)
+            if (step != 2 or want != 'end' or len(parts) != 3 or not re.fullmatch(r'[0-9a-f]{64}', parts[0]) or
+                    not number.fullmatch(parts[1]) or not re.fullmatch(r'\./[^\x00-\x1f\x7f]+', parts[2]) or
+                    any(x['path'] == parts[2] for x in found['dist'])):
+                return bad('unexpected or duplicate DIST')
+            found['dist'].append({'path': parts[2], 'bytes': int(parts[1]), 'sha256': parts[0]})
+        elif word == 'DONE':
+            if step != 3 or want != 'end' or rest:
+                return bad('unexpected DONE')
+            found['done'] = True
+        else:
+            return bad('unknown control event')
+    if not found['done'] and found['blocked'] is None:
+        found['errors'].append('no terminal DONE or BLOCKED event')
+    return found
+
+def _access_preflight(facts, expected_tree):
+    names = set(facts.get('env', '').split())
+    return {'uid': facts.get('uid') == '1000', 'environment': bool(names) and names <= ACCESS_PF_ENV,
+            'network': facts.get('nets', '').split() == ['lo'], 'capabilities': facts.get('capeff') == '0000000000000000',
+            'no_new_privileges': facts.get('nonewprivs') == '1', 'seccomp': facts.get('seccomp') == '2',
+            'root_readonly': facts.get('rootfs') == 'ro', 'source_readonly': facts.get('inputmount') == 'ro',
+            'fixture_readonly': facts.get('fixturemount') == 'ro', 'host_paths': facts.get('hostpaths') == 'none',
+            'node': facts.get('node') == ACCESS_LOCAL['node'], 'git': facts.get('git', '').startswith('git version '),
+            'copy_identical': facts.get('copydiff') == 'identical', 'local_tree': facts.get('localtree') == expected_tree,
+            'git_clean': facts.get('gitstatus', '').strip() == '0', 'single_local_commit': facts.get('history') == '1', 'no_remotes': facts.get('remotes') == '0',
+            'blank_chromium': facts.get('chromium') == 'CHROMIUM ' + ACCESS_LOCAL['chromium'] + ' title=""'}
+
+def _access_cleanup(docker, env, name, force):
+    """Bounded stop/remove/inspect (<=35s). An unconfirmed stop is reported, never implied."""
+    steps = {}
+
+    def call(label, args, seconds):
+        try:
+            done = subprocess.run([docker] + args, env=env, stdin=subprocess.DEVNULL, capture_output=True, timeout=seconds)
+        except (OSError, subprocess.TimeoutExpired) as exc:
+            steps[label] = type(exc).__name__
+            return None
+        steps[label] = done.returncode
+        return done
+
+    def absent():
+        done = call('inspect', ['inspect', '--type', 'container', '--format', '{{.State.Status}}', name], 5)
+        if done is None:
+            return None
+        if done.returncode == 1 and b'no such' in done.stderr.lower():
+            return True
+        return False if done.returncode == 0 else None
+
+    state = None if force else absent()
+    if state is not True:
+        call('kill', ['kill', name], 10)
+        call('rm', ['rm', '-f', name], 10)
+        state = absent()
+    return {'container': name, 'steps': steps,
+            'state': 'stopped_and_removed' if state is True else 'cleanup_needed' if state is False else 'unknown_cleanup_needed'}
+
+
+def _access_docker(argv, env, timeout, name, docker):
+    proc = subprocess.Popen(argv, env=env, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    try:
+        try:
+            out, err = proc.communicate(timeout=timeout)
+        except subprocess.TimeoutExpired:
+            cleanup = _access_cleanup(docker, env, name, True)
+            proc.kill()
+            try:
+                out, err = proc.communicate(timeout=10)
+            except subprocess.TimeoutExpired as late:
+                out, err, cleanup['client'] = late.stdout or b'', late.stderr or b'', 'unreaped'
+            return proc.returncode, out, err, True, cleanup
+        return proc.returncode, out, err, False, _access_cleanup(docker, env, name, False)
+    except BaseException:
+        _access_cleanup(docker, env, name, True)
+        proc.kill()
+        raise
+
+def execute_access_local(result_root, prepared, driver, workroot, runtime, expect, docker=None, docker_env=None, runner=None):
+    """Fixed local ACCESS-01 executor: verified fresh original + exact proof comment, rootless Docker, no network."""
+    result_root, prepared, base = Path(result_root).resolve(), Path(prepared).resolve(), _access_safe_path(workroot).resolve()
+    if prepared != Path(driver.PREPARED).resolve():
+        raise ValueError('prepared artifact is not the driver artifact')
+    if not base.parent.is_dir() or any(base == x or x in base.parents or base in x.parents for x in (prepared, result_root)):
+        raise ValueError('import destination must be fresh and outside prepared/result trees')
+    context = verify_prepared(driver, changed=True)
+    a, c = context['activation'], context['activation']['contract']
+    if (a['task_id'] != ACCESS_TASK or a['role'] != 'coding-agent' or c['test_profile'] != ACCESS_PROFILE or
+            c['mode'] != 'forge-implementation' or c['edit_paths'] != [ACCESS_PROOF] or c['create_paths'] or
+            c['synthetic_files'] or c['target_commit'] != ACCESS_SPEC['commit']):
+        raise ValueError('not the fixed ACCESS-01 implementation activation')
+    meta = json.loads((result_root / 'metadata.json').read_bytes())
+    validate_result(meta, context, result_root, driver)
+    if (set(expect) != ACCESS_EXPECT or any(meta[k] != expect[k] for k in ACCESS_EXPECT) or meta['phase'] != 'result_ready' or
+            meta['run_attempt'] != '1' or meta['changed_paths'] != [ACCESS_PROOF]):
+        raise ValueError('result is not the expected fresh ready ACCESS-01 run')
+    result = json.loads((result_root / 'changes.json').read_bytes())
+    if len(result['changes']) != 1 or (result['changes'][0]['path'], result['changes'][0]['operation']) != (ACCESS_PROOF, 'edit'):
+        raise ValueError('result must be exactly the proof comment edit')
+    change = result['changes'][0]
+    payload = base64.b64decode(change['content_base64'], validate=True)
+    if set(runtime) != {'node', 'node_modules', 'fixture'}:
+        raise ValueError('runtime inputs must be exactly node, node_modules, fixture')
+    node, modules, fixture = (_access_safe_path(runtime[k]) for k in ('node', 'node_modules', 'fixture'))
+    env = {k: os.environ[k] for k in ACCESS_ENV if k in os.environ} if docker_env is None else dict(docker_env)
+    docker = docker or shutil.which('docker', path=env.get('PATH'))
+    if not docker:
+        raise ValueError('BLOCKED: docker executable unavailable')
+    if not node.is_file() or not modules.is_dir() or fixture.is_symlink() or not fixture.is_file():
+        raise ValueError('BLOCKED: pinned runtime input missing')
+    probe = subprocess.run([str(node), '--version'], env={'PATH': '/usr/bin:/bin'}, stdin=subprocess.DEVNULL, capture_output=True, timeout=20)
+    if probe.stdout.decode('ascii', 'replace').strip() != ACCESS_LOCAL['node']:
+        raise ValueError('BLOCKED: pinned node version mismatch')
+    for package in ('playwright', 'playwright-core'):
+        if json.loads((modules / package / 'package.json').read_bytes()).get('version') != ACCESS_LOCAL['playwright']:
+            raise ValueError('BLOCKED: pinned Playwright dependency mismatch')
+    fixture_bytes = fixture.read_bytes()
+    if len(fixture_bytes) != ACCESS_LOCAL['fixture_bytes'] or digest(fixture_bytes) != ACCESS_LOCAL['fixture_sha256']:
+        raise ValueError('BLOCKED: legacy fixture bytes/hash mismatch')
+    import_originals(destination=base)
+    for current, _dirs, _files in os.walk(base):
+        os.chmod(current, 0o755)
+    source, evidence = _access_verify_import(base)
+    manifest = json.loads((driver.PREPARED / 'manifest.json').read_bytes())
+    for view in ACCESS_SPEC['views']:
+        data = (source if view['archive'] == 'source' else evidence)[view['member']][1]
+        if (digest(data) != view['sha256'] or manifest['workspace/target/' + view['path']]['sha256'] != view['sha256'] or
+                (view['path'] != ACCESS_PROOF and (driver.PREPARED / 'workspace/target' / view['path']).read_bytes() != data)):
+            raise ValueError('prepared view differs from the freshly imported pinned original')
+    original = source[ACCESS_PROOF][1]
+    if payload != ACCESS_PREFIX + original or change['before_sha256'] != digest(original) or digest(payload) != change['sha256']:
+        raise ValueError('result is not exactly the permitted proof-comment prepend')
+    run_dir, out_dir = base / 'verified', base / 'out'
+    for name, (mode, data) in source.items():
+        write_file(run_dir, name, payload if name == ACCESS_PROOF else data)
+        (run_dir / name).chmod(0o755 if mode == '100755' else 0o644)
+    write_file(base, 'fixture/legacy.html', fixture_bytes)
+    (base / 'fixture/legacy.html').chmod(0o644)
+    out_dir.mkdir()
+    for current, _dirs, _files in os.walk(base):
+        os.chmod(current, 0o755)
+    overlaid = _access_disk_tree(run_dir)
+    if (set(overlaid) != set(source) or any(overlaid[n] != source[n] for n in source if n != ACCESS_PROOF) or
+            overlaid[ACCESS_PROOF] != (source[ACCESS_PROOF][0], payload)):
+        raise ValueError('overlay changed more than the proof comment')
+    expected_tree = git_tree_id({n: (m, git_blob_id(d)) for n, (m, d) in overlaid.items()})
+    import secrets
+    nonce = secrets.token_hex(12)
+    script = ACCESS_SCRIPT
+    for key, value in (('@TESTS@', ' '.join(ACCESS_LOCAL['tests'])), ('@NODE@', ACCESS_LOCAL['node']), ('@CHROMIUM@', ACCESS_LOCAL['chromium']),
+                       ('@TESTSECONDS@', str(ACCESS_LOCAL['seconds']['tests'])), ('@BUILDSECONDS@', str(ACCESS_LOCAL['seconds']['build'])),
+                       ('@PROBESECONDS@', str(ACCESS_LOCAL['seconds']['probe']))):
+        script = script.replace(key, value)
+    script = script.replace('@TREE@', expected_tree).replace('@ENVALLOW@', ' '.join(sorted(ACCESS_PF_ENV)))
+    name = 'access01-' + nonce
+    argv = [docker, 'run', '--rm', '--name', name, '--pull', 'never', '--network', 'none', '--read-only', '--user', '1000:1000',
+            '--cap-drop', 'ALL', '--security-opt', 'no-new-privileges', '--pids-limit', '1024', '--memory', '4g',
+            '--memory-swap', '4g', '--cpus', '2', '--shm-size', '512m', '--tmpfs', '/tmp:rw,exec,nosuid,nodev,size=2g,mode=1777',
+            '--entrypoint', '/usr/bin/env']
+    for host, target in ((run_dir, '/input/source'), (base / 'fixture', '/input/fixture'), (modules, '/runtime/node_modules'), (node, '/runtime/bin/node')):
+        argv += ['--mount', 'type=bind,src=' + str(host) + ',dst=' + target + ',readonly']
+    argv += [ACCESS_LOCAL['image'], '-i', 'PATH=/runtime/bin:/usr/local/bin:/usr/bin:/bin', 'LANG=C.UTF-8',
+             'LC_ALL=C.UTF-8', 'TMPDIR=/tmp', 'XDG_CONFIG_HOME=/tmp/xdg-config', 'XDG_CACHE_HOME=/tmp/xdg-cache', 'BQ_LEGACY_HTML=/input/fixture/legacy.html', 'PLAYWRIGHT_BROWSERS_PATH=/ms-playwright',
+             'GIT_CONFIG_NOSYSTEM=1', 'GIT_CONFIG_GLOBAL=/dev/null', 'GIT_TERMINAL_PROMPT=0', '/bin/sh', '-c', script, 'access01', nonce]
+    result = (runner or _access_docker)(argv, env, ACCESS_LOCAL['host_seconds'], name, docker)
+    code, out, err, timed_out = result[:4]
+    cleanup = result[4] if len(result) > 4 else {'state': 'not_reported'}
+    found = _access_parse(out[:3 * _MIB], nonce)
+    if len(out) > 3 * _MIB:
+        found['errors'].append('stdout exceeds protocol bound')
+    blocked = found['blocked'] is not None
+    reasons = list(found['errors'])
+    if code != (91 if blocked else 0):
+        reasons.append('docker exit code ' + str(code))
+    if cleanup.get('state') in ('cleanup_needed', 'unknown_cleanup_needed'):
+        reasons.append('container stop/removal not confirmed')
+    trusted = not timed_out and not found['errors'] and code == (91 if blocked else 0)
+    checks = _access_preflight(found['facts'], expected_tree)
+    phases = {}
+    for phase in ACCESS_PHASES:
+        end = found['ends'].get(phase)
+        status = ('NOT_RUN' if end is None else 'TIMEOUT' if end['exit_code'] in (124, 137) else
+                  'PASS' if end['exit_code'] == 0 else 'FAIL')
+        if status == 'PASS' and not trusted:
+            status = 'UNVERIFIED'
+        payload = found['logs'].get(phase)
+        phases[phase] = dict(end or {}, status=status, log=_access_log(driver, payload, out_dir, phase, end) if end and payload is not None else None)
+    detected = (trusted and found['ends'].get('probe', {}).get('exit_code') == 37 and
+                found['logs'].get('probe') == b'ACCESS01_EXECUTOR_FORCED_FAIL\n')
+    ready = all(checks.values()) and not blocked
+    transport = ('TIMEOUT' if timed_out else 'BLOCKED' if blocked and trusted else 'INFRASTRUCTURE_FAIL' if reasons else
+                 'BLOCKED' if not ready else
+                 'EXECUTED' if found['done'] and detected and all(x['status'] != 'NOT_RUN' for x in phases.values()) else 'INFRASTRUCTURE_FAIL')
+    noise = err[-2000:]
+    return {'schema': ACCESS_LOCAL['schema'], 'profile': ACCESS_PROFILE, 'transport_status': transport,
+            'product_test_status': phases['tests']['status'], 'build_status': phases['build']['status'],
+            'counterprobe_detection': 'PASS' if detected else 'FAIL', 'blocked_reason': found['blocked'],
+            'docker_exit_code': code, 'docker_stderr_tail': ('withheld by secret scan' if driver.secret_hit(noise, None) else noise.decode('utf-8', 'replace')),
+            'binding': {'task_id': a['task_id'], 'packet_binding': context['packet_binding'], 'session_id': meta['session_id'], 'run_id': meta['run_id'],
+                        'run_attempt': meta['run_attempt'], 'source_commit': meta['source_commit'], 'activation_commit': meta['activation_commit'],
+                        'changes_sha256': meta['changes_sha256'], 'original_commit': ACCESS_SPEC['commit'], 'original_tree': ACCESS_SPEC['tree'],
+                        'overlay_tree': expected_tree, 'local_synthetic_commit': found['facts'].get('localcommit'), 'imported_files': len(source)},
+            'runtime': {'image': ACCESS_LOCAL['image'], 'node': ACCESS_LOCAL['node'], 'playwright': ACCESS_LOCAL['playwright'],
+                        'fixture_sha256': ACCESS_LOCAL['fixture_sha256'], 'argv_tests': ['node', '--test', '--test-concurrency=1'] + list(ACCESS_LOCAL['tests']),
+                        'argv_build': ['node', 'werkzeug/testinstanz.mjs', '--ziel', '/tmp/work/dist'], 'host_seconds': ACCESS_LOCAL['host_seconds']},
+            'preflight': {'facts': found['facts'], 'checks': checks}, 'phases': phases, 'dist_inventory': found['dist'],
+            'output_dir': str(out_dir), 'cleanup': cleanup, 'infrastructure_reasons': reasons,
+            'protocol': {'valid': not found['errors'], 'errors': found['errors'][:10]}, 'checked_at': driver.now()}
