@@ -1,0 +1,116 @@
+{
+  "schema": "agentarium.relay-activation.v3",
+  "task_id": "AG-BQ-ACCESS-20261116-ARCHIBALD",
+  "authorized": true,
+  "source_commit": "1fa7bf75cccdd3fdd9ea52e0aaafafcd02421917",
+  "role": "spec-agent",
+  "request": "handoffs/AG-BQ-ACCESS-20261116-archibald.json",
+  "handback": "handoffs/AG-BQ-ACCESS-20261116-archibald-handback.md",
+  "model": "opus",
+  "max_turns": 10,
+  "max_budget_usd": 1.25,
+  "contract": {
+    "schema": "agentarium.project-packet.v1",
+    "repository": "pahlborn/bis-school-app_src",
+    "project_id": "big-quest",
+    "target_commit": "d26af4a38bdc15d3cbfb5305def012f91aacbb28",
+    "mode": "analysis",
+    "read_files": [
+      {
+        "path": "DEVELOPMENT.md",
+        "git_blob": "3f406b5750566645ee2e4149481fc6f10f9764b1",
+        "sha256": "072cf53683ac8d7fce9829f3a482b48d9834edf214e35666205e2831c2333d18"
+      },
+      {
+        "path": "access-evidence/ARGUS-REVIEW.md",
+        "git_blob": "d4da20e20f5091f2ecfc1e727a0fbd7061d11047",
+        "sha256": "df9706e984c6084f0dfb8dd9de23048ce4a60e294de263add3f05d2e280e105f"
+      },
+      {
+        "path": "access-evidence/RESTORE.md",
+        "git_blob": "0c038cf49f89cc2c937f4b1953410545acd87b6d",
+        "sha256": "82ca7bb11c6082a114c992febbe48b6ad3ef65915921119698bc9ac41bd6cf98"
+      },
+      {
+        "path": "access-evidence/source-manifest.json",
+        "git_blob": "458c8a75c22ff996758b05a7cd83e5b92a45186b",
+        "sha256": "f5b2aafcc2b4161bdad9901b559c55ad1ff47285b8fad0134ed9f316a0b1e2fd"
+      },
+      {
+        "path": "access-evidence/test-result-summary.json",
+        "git_blob": "66d2147efb0849857552ec8da37e3fe874931b29",
+        "sha256": "3d12dc11f2ce0984156ad7e75d5705a859830941e13520a78e95d597e791743c"
+      },
+      {
+        "path": "package.json",
+        "git_blob": "fc40de702be7b75c3d07655f8ea8f08a013d9783",
+        "sha256": "4c9fdfbb001276844836447cd9aa3134290354d56d966c5cc54e58cd76e35934"
+      },
+      {
+        "path": "tests/altlasten.test.mjs",
+        "git_blob": "ec7f596523d929f91645bbbdde1fbb80883e33fd",
+        "sha256": "d88e5402895b52dbbe56ce5a8ffa0e0a26f143038e9e11b90ae8d406c4fdf355"
+      },
+      {
+        "path": "tests/app-hilfen.mjs",
+        "git_blob": "8667137cf2ddd496b33cf765dd3d497b39642bef",
+        "sha256": "e3ecd3727c996738b64de8cd635d7b62f541f7c08a1d31793d14745411b38e73"
+      },
+      {
+        "path": "tests/evaluation-upgrade-browser.test.mjs",
+        "git_blob": "c0bec5eb7cd2252a577b23975f57154ade0c1a51",
+        "sha256": "a17efabfdcbd79f2ba1d3f4c9599ef10252a7f0d60e8bad686a5bc6286073576"
+      },
+      {
+        "path": "tests/konten-hilfen.mjs",
+        "git_blob": "733c1fc9e45a27d3a6aa3be6b83e6b99c29e43f9",
+        "sha256": "fae330f448f28d782fd237a4fed318bd6e0375e59542542c0144d773be89be30"
+      },
+      {
+        "path": "tests/neutral.test.mjs",
+        "git_blob": "51b7e7db2086fb44a95c4596630b8cfb2791ee9e",
+        "sha256": "7012d38016b44a49bf7527709fcea5126757291e1cdbf291f08551192c85fc37"
+      },
+      {
+        "path": "tests/testinstanz.test.mjs",
+        "git_blob": "beb353ad3405a26308bd299016c3b7b993a47f30",
+        "sha256": "2788b3ea6302ebe674a1ef3036d1e9c68033ac5bdcb2f166668dea7ef187727b"
+      },
+      {
+        "path": "werkzeug/bauen.mjs",
+        "git_blob": "13a7d9d68a2209072f67e605005ba47c712a7c32",
+        "sha256": "87143283a730e359b0f81a66020bf1891018bd4d33332be275ea2010e5e4f1e2"
+      },
+      {
+        "path": "werkzeug/module.mjs",
+        "git_blob": "97e8dc37ff05742c35e4a4e47df8a167f37282fd",
+        "sha256": "b99b48f1445cca0fa52753a81799de9ce05574280effc1314f30a69e6ae44076"
+      },
+      {
+        "path": "werkzeug/testinstanz-ersatz.json",
+        "git_blob": "2e2c0dc9f91dd309cac4c5e9fa0848c3c4be9116",
+        "sha256": "4b3e3e686e85d8b60740eb4db1640ee5c9e2ffe8af3c65cd8023f2522b56e83a"
+      },
+      {
+        "path": "werkzeug/testinstanz.mjs",
+        "git_blob": "e3dbef5f75d582574b3b4cbf6abb2c0ff30cccdf",
+        "sha256": "e6bc3f63cf10c414a23ed1d68ff13cc0bb6a68da471342d4066200271568f35f"
+      }
+    ],
+    "edit_paths": [],
+    "create_paths": [],
+    "synthetic_files": [],
+    "identity": {
+      "schema": "agentarium.relay-runtime-identity.v1",
+      "project_id": "big-quest",
+      "run_id": "BQ-EVAL-01",
+      "task_id": "BQ-EVAL-01-INT-01-ACCESS-01-ARCHIBALD",
+      "parent_id": "BQ-EVAL-01-INT-01-ACCESS-01",
+      "subject_role": "archibald"
+    },
+    "max_seconds": 600,
+    "test_profile": "bq-access-intake-v1",
+    "artifact_publication": "host-approved-exact-paths",
+    "journal_delivery": "archive"
+  }
+}
