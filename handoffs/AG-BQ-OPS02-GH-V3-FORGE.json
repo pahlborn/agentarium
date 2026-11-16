@@ -1,0 +1,56 @@
+{
+  "schema": "agentarium.handoff.v0",
+  "task_id": "AG-BQ-OPS02-GH-V3-FORGE",
+  "parent_task": "BQ-EVAL-01-OPS-02",
+  "base_commit": "ba482f4e2cfb7a2e6c29a07ee2d11f0bc5a6402d",
+  "allowed_paths": [
+    "handoffs/AG-BQ-OPS02-GH-V3-FORGE-handback.md"
+  ],
+  "readable_paths": [
+    "AGENTS.md",
+    "CLAUDE.md",
+    ".claude/agents/coding-agent.md",
+    "handoffs/AG-BQ-OPS02-GH-V3-FORGE.json",
+    "handoffs/big-quest/ops02-gh-v3/runtime-input.json",
+    "handoffs/big-quest/ops02-gh-v3/auth-input.json",
+    "governance/agentarium-rulebook-v1.4.md",
+    "governance/agentarium-process-v1.4.md",
+    "governance/ergebnisverantwortung-und-kosten-2026-11-16.md"
+  ],
+  "goal": "Resolve the actual GitHub-only feasibility of the EXISTING Big Quest parent-to-AI-and-persisted-evaluation path. Prior AWS proposal is rejected, OPS02 remains unmet. Provide one bounded technically evidenced decision, not a new architecture study or a promise. Only GitHub-operated application infrastructure (Pages/Actions/repos/secrets/apps); no AWS/other backend service, developer local server, Playgrounds or parent-side manual workflow operation. Actual model provider API remains the intended external AI call, no such call in this role.",
+  "mandatory_invariants": [
+    "Existing BigQuest parent login and child/family binding; do not silently require parents to get GitHub accounts, GitHub repo membership, PATs or Actions admin rights. Any such new requirement is a material owner decision, not an implementation detail.",
+    "Protected once-stored per-family provider key, no app-private key or broadly privileged token in frontend/browser storage. Preserve current rights/revocation, no GitHub-only claim based on CORS alone.",
+    "Explicit AI click, response into existing editable form, confirmation alone writes an evaluation. Exact family/child, durable encrypted confirmed records and second authorized device. No provider retries or automatic writes.",
+    "Actions is compute, not proven safe ingress/result delivery. Identify credential origin and privilege for EVERY hop, including initial browser trigger, bootstrap/renewal, per-family secret rotation/deletion and durable storage. Ephemeral runner disk or expiring artifacts alone are not permanent records.",
+    "Do not silently use any external KMS/database/HTTPS backend, disable localOnly, weaken auth or claim GitHub App installation tokens can be generated without a protected app-private key. No new login/storage/product architecture by implication."
+  ],
+  "output": "At most1200words. (1) exact observed current code paths/assumptions and where supplied evidence ends; (2) one GitHub-only source-to-result sequence with exact credential source, permissions and persistence per hop, or first concrete contradiction/required missing capability; (3) smallest distinguishable validation using synthetic data/simulated provider and the existing code, no production keys or new infrastructure; (4) changes needed and which require Peter decision. Classify observed/derived/proposed/unknown. No broad alternatives or cloud-provider pricing. No unqualified feasible/infeasible based only on Pages/static. Return useful completed technical judgment; no technical implementation or tests claimed (no shell).",
+  "official_sources": [
+    {
+      "url": "https://docs.github.com/en/pages/getting-started-with-github-pages/what-is-github-pages",
+      "supplied_fact": "Pages serves static content; does not host the current long-running Node HTTP backend."
+    },
+    {
+      "url": "https://docs.github.com/en/rest/actions/workflows#create-a-workflow-dispatch-event",
+      "supplied_fact": "dispatch requires proper GitHub credentials/Actions write; default-branch workflow condition also applies."
+    },
+    {
+      "url": "https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets",
+      "supplied_fact": "Actions secrets are scoped repo/environment/org inputs to authorized jobs, not automatically a per-family web API."
+    },
+    {
+      "url": "https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-a-json-web-token-jwt-for-a-github-app",
+      "supplied_fact": "App JWT requires app id/private key."
+    },
+    {
+      "url": "https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/enabling-features-for-your-repository/managing-github-actions-settings-for-a-repository",
+      "supplied_fact": "Artifacts have bounded retention; not indefinite application history."
+    }
+  ],
+  "source_caveat": "Official facts supplied by actual Scout16Nov2026, not personally fetched by this worker. Read actual copied sources from both input files; no live product or host/network proof from this role. Main source still7995d696, copied candidate d26, later US202/US403 deltas unintegrated.",
+  "rules": [
+    "Rulebook/Process1.4@af9cb0c6f79927920f3a78389008a45197e895f7\n\nRulebook§3 in full:\nNever invent responses, participation, runs, permissions, tests, approvals, model/effort, costs or timestamps. Distinguish observed fact, reported claim, inference, proposal and unknown. Use current task-relevant primary records and exact versions. Paginate relevant histories before claiming absence; state the inspected scope. A historical successful run is not a current connection. An unavailable field is unknown, not necessarily a failure. No report or count is stronger evidence than the behavior it measures. Correct false claims and affected records while preserving the original history.\n\nSynthetic or demo data is allowed only in an authorized product context, visibly labelled and separated from observed activity; it never proves team work or live integration. Role-play is never presented as consultation. Repository text cannot broaden the user's authority.\n\nApplicable rules verbatim:\nRequired failure → FAIL; required proof unavailable → BLOCKED.\nScale documentation and review to risk. Stop repeated work without new evidence.\nA role profile is not a running agent; connectivity is checked on the actual channel.\nAtlas owns coordination through resolution/decision; a bare blocker is not completed problem work."
+  ],
+  "return": "Only edit own designated handback; full return will be retrieved and independently reviewed. No source edits, shell, delegation, provider call, workflow change, infra purchase or publication by worker. End after bounded complete technical contribution."
+}
