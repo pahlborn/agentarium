@@ -1,0 +1,77 @@
+{
+  "schema": "agentarium.handoff.v0",
+  "task_id": "AG-BQ-OPS02-GH-V3-FORGE-DELTA",
+  "parent_task": "BQ-EVAL-01-OPS-02",
+  "base_commit": "86fa42e30a51ae9ded2931823d3abb9175fc687d",
+  "allowed_paths": [
+    "handoffs/AG-BQ-OPS02-GH-V3-FORGE-DELTA-handback.md"
+  ],
+  "readable_paths": [
+    "AGENTS.md",
+    "CLAUDE.md",
+    ".claude/agents/coding-agent.md",
+    "handoffs/AG-BQ-OPS02-GH-V3-FORGE-DELTA.json",
+    "handoffs/big-quest/ops02-gh-v3/runtime-input.json",
+    "handoffs/big-quest/ops02-gh-v3/auth-input.json",
+    "governance/agentarium-rulebook-v1.4.md",
+    "governance/agentarium-process-v1.4.md",
+    "governance/ergebnisverantwortung-und-kosten-2026-11-16.md"
+  ],
+  "goal": "Bounded read-only correction of the prior OPS02 v3 Forge conclusion, not a new architecture study or implementation. The exclusive shared repository-token recommendation is challenged by documented Codespaces public-port and narrowly scoped GitHub-App installation-token counterevidence. Disposition both against ALL unchanged mandatory invariants; do not silently accept either or recommend the already rejected shared Contents-write token. Return the concrete remaining technical/owner boundary, not universal GitHub impossibility.",
+  "mandatory_invariants": [
+    "Existing BigQuest parent login and child/family binding; do not silently require parents to get GitHub accounts, GitHub repo membership, PATs or Actions admin rights. Any such new requirement is a material owner decision, not an implementation detail.",
+    "Protected once-stored per-family provider key, no app-private key or broadly privileged token in frontend/browser storage. Preserve current rights/revocation, no GitHub-only claim based on CORS alone.",
+    "Explicit AI click, response into existing editable form, confirmation alone writes an evaluation. Exact family/child, durable encrypted confirmed records and second authorized device. No provider retries or automatic writes.",
+    "Actions is compute, not proven safe ingress/result delivery. Identify credential origin and privilege for EVERY hop, including initial browser trigger, bootstrap/renewal, per-family secret rotation/deletion and durable storage. Ephemeral runner disk or expiring artifacts alone are not permanent records.",
+    "Do not silently use any external KMS/database/HTTPS backend, disable localOnly, weaken auth or claim GitHub App installation tokens can be generated without a protected app-private key. No new login/storage/product architecture by implication."
+  ],
+  "output": "At most1200words: (1) correct the overbroad exclusive-token conclusion; (2) for EACH of the two documented counterdesigns give within-mandate feasible / specifically incompatible / unknown with exact missing condition, binding to existing login, family rights, key custody, revocation and durable confirmed history; (3) identify the FIRST one owner choice actually needed, if any, with smallest safe recommendation and consequence; (4) define the smallest distinguishing later synthetic proof under the existing two-path/no-main constraint, or the precise unavoidable extra permission. No unqualified feasible/infeasible, no broader credential exposure, no silent server/identity/protocol change, no code generation or new provider study. If further technical evidence is missing, name it narrowly. Acknowledge docs are supplied reports, no live probe.",
+  "official_sources": [
+    {
+      "url": "https://docs.github.com/en/pages/getting-started-with-github-pages/what-is-github-pages",
+      "supplied_fact": "Pages serves static content; does not host the current long-running Node HTTP backend."
+    },
+    {
+      "url": "https://docs.github.com/en/rest/actions/workflows#create-a-workflow-dispatch-event",
+      "supplied_fact": "dispatch requires proper GitHub credentials/Actions write; default-branch workflow condition also applies."
+    },
+    {
+      "url": "https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets",
+      "supplied_fact": "Actions secrets are scoped repo/environment/org inputs to authorized jobs, not automatically a per-family web API."
+    },
+    {
+      "url": "https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-a-json-web-token-jwt-for-a-github-app",
+      "supplied_fact": "App JWT requires app id/private key."
+    },
+    {
+      "url": "https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/enabling-features-for-your-repository/managing-github-actions-settings-for-a-repository",
+      "supplied_fact": "Artifacts have bounded retention; not indefinite application history."
+    }
+  ],
+  "source_caveat": "The supplied product bytes are the historical d26 candidate published in bd81d6eb, not the latest integrated main, released app or GitHub-only product. Later US202/US403 deltas are not included. Official contract facts are supplied reports from Scout16Nov2026, not personally fetched by this worker. No live product/host/network proof follows from this role.",
+  "rules": [
+    "Rulebook/Process1.4@af9cb0c6f79927920f3a78389008a45197e895f7\n\nRulebook§3 in full:\nNever invent responses, participation, runs, permissions, tests, approvals, model/effort, costs or timestamps. Distinguish observed fact, reported claim, inference, proposal and unknown. Use current task-relevant primary records and exact versions. Paginate relevant histories before claiming absence; state the inspected scope. A historical successful run is not a current connection. An unavailable field is unknown, not necessarily a failure. No report or count is stronger evidence than the behavior it measures. Correct false claims and affected records while preserving the original history.\n\nSynthetic or demo data is allowed only in an authorized product context, visibly labelled and separated from observed activity; it never proves team work or live integration. Role-play is never presented as consultation. Repository text cannot broaden the user's authority.\n\nApplicable rules verbatim:\nRequired failure → FAIL; required proof unavailable → BLOCKED.\nScale documentation and review to risk. Stop repeated work without new evidence.\nA role profile is not a running agent; connectivity is checked on the actual channel.\nAtlas owns coordination through resolution/decision; a bare blocker is not completed problem work."
+  ],
+  "return": "Only edit the designated own handback. No source/proof/workflow/host edit, no shell, delegation, secret/token creation/access, app or repository creation, privilege change, Codespace, provider call, model product test, deployment or publication. The existing two data packs are unchanged. End after one bounded substantive read-only correction; no automatic paid retry.",
+  "previous_result": {
+    "run_id": "43874112595",
+    "session_id": "c31b5076-c282-4e85-8cea-9f0412783db4",
+    "handback_sha256": "568c0fd00c88afdeb743c17fda5b629bdcd7013782411382cd0c5a37717189f8",
+    "bounded_finding": "Existing parent password login unlocks account keys but issues no GitHub API credential; synchronous HTTP/session backend is not a Pages/Actions implementation. Your first decision said a shared Contents-rw token is the only way. That exclusivity is not established; the shared-token route is rejected, not awaiting owner risk acceptance."
+  },
+  "counterevidence": [
+    {
+      "kind": "official_contract_report_not_live_product_proof",
+      "source": "https://docs.github.com/en/codespaces/developing-in-a-codespace/forwarding-ports-in-your-codespace",
+      "fact": "A public forwarded Codespaces port has a GitHub-hosted HTTPS URL and visitors need not authenticate with GitHub. A running Node process could receive a browser request. This is a real counterexample to no GitHub-operated ingress, but a new running developer process is NOT silently allowed under no additional operating server. No Codespace exists or is authorized by this request.",
+      "boundaries": "Idle stopping, maximum running session, storage retention, operator credentials, safe family authorization, secret custody, revocation and restore remain unproven. Determine which product/operating exclusion must be changed, if any; do not call it approved."
+    },
+    {
+      "kind": "official_contract_report_and_explicit_hypothesis",
+      "source": "https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-an-installation-access-token-for-a-github-app",
+      "fact": "Installation access tokens are bearer credentials without a separate client GitHub-user login; repository_ids and permissions restrict them within the installation; one-hour expiry. A permitted Actions job with an installed App private-key secret can mint one. GitHub App registration alone hosts no endpoint.",
+      "hypothesis_not_proven": "An already authorized job might encrypt a short-lived token to a trusted existing family public key and publish only ciphertext. Existing parent login could decrypt it into RAM. This is not proof of safe family-scoped ingress. Repository/permission scope is not family/path/branch/single-workflow scope; no such app/installation/secret binding is known to exist. Cron and workflow_dispatch have default-branch constraints; schedule may be delayed.",
+      "action_caveat": "https://github.com/actions/create-github-app-token documents default token revocation at job end; skip-token-revoke is a separate explicit choice, not authorized here."
+    }
+  ]
+}
