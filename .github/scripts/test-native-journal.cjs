@@ -40,4 +40,6 @@ test('Lot remains excluded',()=>reject({...input('start',[start]),binding:{...b,
 test('forged runtime evidence rejected',()=>reject(input('start',[event('started',{source_evidence:'runtime_stream'})]),/reported_checkpoint/));
 test('unknown binding field rejected',()=>reject({...input('start',[start]),binding:{...b,attempt:'not-v1'}},/exact child binding/));
 test('actual history metadata required',()=>reject(input('start',[start],[{...h[1],id:'not-a-GitHub-id'}]),/actual GitHub/));
+test('missing start is an explicit gap while truthful final can return',()=>assert.equal(prepare(input('final',[event('delivered'),event('contribution')])).warnings.length,1));
+test('partial final cannot finish another holder after transfer',()=>{const move=event('reassigned',{actor:'atlas',reporter:'atlas',recipient:'scout',previous_holder:'sentinel',checkpoint_ref:'https://github.com/pahlborn/agentarium/commit/'+'a'.repeat(40),stop_ref:'https://github.com/pahlborn/agentarium/issues/2#issuecomment-900001'});reject(input('final',[terminal,contribution],ht.concat(history([move]))),/elsewhere/);});
 console.log(count+' guard checks passed; all fixtures local/synthetic.');

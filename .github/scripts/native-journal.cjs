@@ -86,12 +86,15 @@ function prepare(input,options={}){
    if(ownTerminal.length||!row||row.wer!==b.role||row.eEltern!==b.parent_id||!['zugewiesen','empfangen'].includes(row.zustand))fail('attempt is terminal, already started, closed or held elsewhere');
   }else{
    const terminalRecorded=known.has(events[0].id);
+   if(row&&(row.wer!==b.role||row.eEltern!==b.parent_id))fail('final return held elsewhere');
    if(!terminalRecorded&&(!row||row.wer!==b.role||row.eEltern!==b.parent_id||!['zugewiesen','empfangen','begonnen'].includes(row.zustand)))fail('attempt is terminal, closed or held elsewhere');
    const latestStart=scope.filter(x=>bound(x.ev)&&x.ev.kind==='started'&&x.ev.actor===b.role&&x.ev.reporter===b.role).map(x=>Date.parse(x.ev.occurred_at));
    if(latestStart.length&&Date.parse(events[0].occurred_at)<Math.max(...latestStart))fail('terminal predates recorded start');
   }
  }
- const result={comments,skipped};
+ const warnings=[];
+ if(p==='final'&&!scope.some(x=>bound(x.ev)&&x.ev.kind==='started'&&x.ev.actor===b.role&&x.ev.reporter===b.role))warnings.push('No own start in supplied history; retain the evidence gap, never invent a start.');
+ const result={comments,skipped,warnings};
  if(p==='dispatch')result.instruction='When you actually take up this assignment, send Atlas your OWN started V1 object before substantive work. Binding: '+JSON.stringify(b)+'. actor=reporter='+b.role+'; source_evidence=reported_checkpoint; actual ISO time with T/zone, unique event id, actual source_tool_id and title. On final handback send your own delivered (or actual aborted) followed by contribution to atlas with exactly this binding. Intermediate updates are progress. Do not publish GitHub, invent platform evidence, reuse another attempt id or claim PASS merely because execution ended. Atlas alone validates and publishes; missing messages must be reconciled, never fabricated.';
  return result;
 }
