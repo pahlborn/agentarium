@@ -17,6 +17,14 @@
         ist jetzt die Unterkante, die frueher die Kostenzeile war)
      D  wieder aus: alle Schilder weg, der Knopf bleibt
      E  keine Seitenfehler
+     F  ruhige Schilder (AG-MON-FUSS-STABIL-001, Peter 16.11.2026: "die
+        sekündliche einblendung ist in 105 immer noch da"): live, Springer
+        unten in der Mitte mit vier vergebenen Auftraegen, "LLM & Kosten" an.
+        Die Arbeitsanzeige wird wie beim Sekundenwechsel neu angestossen;
+        Schild und Anzeige behalten ihren Platz, die Anzeige bleibt dasselbe
+        Element (nur der Text aendert sich), und die Modellschilder werden
+        nicht mehr in jedem Bild neu gebaut. Grenze: Chromium; das Flackern
+        selbst sah Peter in Safari auf dem iPad.
 
    GRENZEN: Demostueck im Browser, keine echten Daten, keine Abnahme am
    iPad. Das Flackern ist hier nicht gemessen. C trifft im Demostueck
@@ -72,6 +80,82 @@ function tischen(wurzel) {
     });
     s.listen(0, '127.0.0.1', () => r({ s, adr: 'http://127.0.0.1:' + s.address().port + '/' }));
   });
+}
+
+const VERZEICHNIS = {
+  schema: 'agentarium.projektverzeichnis.v1', gepflegt_von: 'atlas',
+  projekte: [{ id: 'agentarium', kuerzel: 'AG', name: 'Agentarium', repo: 'pahlborn/agentarium' }]
+};
+let nr = 0;
+function kommentar(min, ereignis) {
+  nr++;
+  const zeit = new Date(Date.now() - min * 60000 + nr).toISOString();
+  const e = Object.assign({
+    schema: 'agentarium.github-event.v1', id: 'AG-OVERLAY-EREIGNIS-' + nr,
+    project_id: 'agentarium', run_id: 'AG-OVERLAY-L1', occurred_at: zeit, reporter: 'atlas',
+    source_evidence: 'reported_checkpoint', source_tool_id: 'previews/AG-MON-LLM-OVERLAY-001'
+  }, ereignis);
+  return { id: 9998000000 + nr, created_at: zeit, user: { login: 'pahlborn', id: 277496791 },
+           body: '<!-- AGENTARIUM_EVENT_V1 -->\n```json\n' + JSON.stringify(e, null, 2) +
+                 '\n```\nProbe aus AG-MON-LLM-OVERLAY-001, kein echter Auftrag.' };
+}
+async function teilF(b, tisch) {
+  console.log('\nF — ruhige Schilder (live, Springer unten in der Mitte)');
+  const liste = [1, 2, 3, 4].map(k => kommentar(10 - k, { task_id: 'AG-OV-0' + k, kind: 'assigned',
+    actor: 'atlas', recipient: 'springer', item_type: 'task', title: 'Atlas vergibt AG-OV-0' + k + '.' }));
+  const q = await b.newContext({ viewport: { width: 1194, height: 834 }, hasTouch: true });
+  const s = await q.newPage();
+  const seitenFehler = [];
+  s.on('pageerror', e => seitenFehler.push(String(e.message).slice(0, 110)));
+  await s.route('**/projekte/verzeichnis.json', r => r.fulfill({
+    status: 200, contentType: 'application/json', body: JSON.stringify(VERZEICHNIS) }));
+  await s.route('**api.github.com/**', r => r.fulfill({
+    status: 200, contentType: 'application/json', body: JSON.stringify(liste) }));
+  await s.goto(tisch.adr + '?live=github', { waitUntil: 'load' });
+  await s.waitForFunction(() => !!document.getElementById('agGhToken'), null, { timeout: 20000 });
+  await s.fill('#agGhToken', 'AGMONLLMOVERLAY001_Scheintoken_0123456789');
+  await s.click('#agGhAn');
+  await s.waitForFunction(() => window.__agGithub && window.__agGithub.stand().phase === 'verbunden',
+                          null, { timeout: 30000 });
+  await s.evaluate(() => { const d = document.getElementById('agGhAuf'); if (d) d.open = false; });
+  await s.waitForFunction(() => !!document.querySelector('#agTun [data-wer="springer"]'),
+                          null, { timeout: 15000 });
+  await s.tap('#agMotor');
+  await s.waitForTimeout(1500);
+  const m = await s.evaluate(() => new Promise(fertig => {
+    const motoren = document.getElementById('agMotoren'), tun = document.getElementById('agTun');
+    let neuMot = 0, neuTun = 0, bilder = 0;
+    const mo = new MutationObserver(l => l.forEach(x => {
+      if (x.target === motoren) neuMot++; else neuTun++; }));
+    mo.observe(motoren, { childList: true }); mo.observe(tun, { childList: true });
+    const lagen = { mot: new Set(), tun: new Set() };
+    const anzeige0 = document.querySelector('#agTun [data-wer="springer"]');
+    let angestossen = 0;
+    /* Wie beim Sekundenwechsel: die Arbeitsanzeige wird neu gebaut. */
+    const uhr = setInterval(() => { tun.__h = null; angestossen++; }, 400);
+    const t0 = performance.now();
+    (function f() {
+      bilder++;
+      [['mot', '#agMotoren [data-wer="springer"]'], ['tun', '#agTun [data-wer="springer"]']].forEach(([k, sel]) => {
+        const e = document.querySelector(sel);
+        if (e) { const r = e.getBoundingClientRect(); lagen[k].add(Math.round(r.left) + ',' + Math.round(r.top)); }
+      });
+      if (performance.now() - t0 < 3000) requestAnimationFrame(f);
+      else { clearInterval(uhr); mo.disconnect();
+             fertig({ bilder, neuMot, neuTun, angestossen, mot: [...lagen.mot], tun: [...lagen.tun],
+                      dasselbe: document.querySelector('#agTun [data-wer="springer"]') === anzeige0 }); }
+    })();
+  }));
+  console.log('        ' + m.bilder + ' Bilder, ' + m.angestossen + '-mal angestossen, ' + m.neuTun +
+              '-mal neu gebaut; Lagen Schild ' +
+              m.mot.join(' ') + ' · Anzeige ' + m.tun.join(' '));
+  zeile('F  Anzeige wurde angestossen (Probe greift)', m.angestossen >= 5, true);
+  zeile('F  Arbeitsanzeige bleibt dasselbe Element', m.dasselbe, true);
+  zeile('F  Modellschild behält seinen Platz', m.mot.length, 1);
+  zeile('F  Arbeitsanzeige behält ihren Platz', m.tun.length, 1);
+  zeile('F  Modellschilder nicht je Bild neu gebaut', m.neuMot < m.bilder / 4, true);
+  zeile('F  keine Seitenfehler', seitenFehler.join(' | ') || 'keine', 'keine');
+  await q.close();
 }
 
 (async () => {
@@ -132,6 +216,7 @@ function tischen(wurzel) {
       zeile('E  keine Seitenfehler', seitenFehler.join(' | ') || 'keine', 'keine');
       await q.close();
     }
+    await teilF(b, tisch);
   } finally { await b.close(); tisch.s.close(); }
   console.log(fehler ? '\nABWEICHUNG: ' + fehler : '\nALLES WIE VEREINBART — keine Abweichung.');
   console.log('Demostueck im Browser. Keine Abnahme am iPad.');

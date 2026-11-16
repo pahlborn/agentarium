@@ -2503,7 +2503,7 @@
 
      Der Bauzeitpunkt kommt beim Bauen aus der Uhr. Von Hand gepflegte
      Datumsangaben sind nach der zweiten Änderung falsch. */
-  var FASSUNG = '105', GEBAUT = '2026-11-16T12:40Z';
+  var FASSUNG = '106', GEBAUT = '2026-11-16T13:30Z';
 
   /* AG-GH-LIVE-001: JEDE TEXTSENKE MASKIERT.
      Seit Live-Daten von aussen kommen (GitHub-Kommentare, one-event.json),
@@ -5438,7 +5438,7 @@
 
   function tunZeigen(dt) {
     tunStill += dt;
-    var h = '', n;
+    var h = '', n, stuecke = [];
     for (n in arbeit) {
       var S = arbeit[n], A = nachName[n];
       if (!A || S.aus || !S.liste.length) continue;
@@ -5456,10 +5456,10 @@
          Arbeitsanzeige nach der WIRKLICHEN Hoehe des Schildes; ist keines
          da, bleibt es beim alten Abstand. */
       var unten = (motorHoehe[n] && !motorOben[n]) ? 18 + motorHoehe[n] + 5 : 34;
-      h += '<div class="agTut auf' + (lang ? ' lang' : '') +
-           '" data-wer="' + n + '" data-y="' + Math.round(o[1]) +
-           '" style="left:' + o[0] + 'px;top:' + (o[1] + unten) +
-           'px;color:' + hex(A.farbe) + '">' + tunWort(S) + ' · ' + mm + ':' + ss +
+      var st = { wer: n, kl: 'agTut auf' + (lang ? ' lang' : ''), y: Math.round(o[1]),
+                 l: o[0], t: o[1] + unten, farbe: hex(A.farbe), text: '' };
+      stuecke.push(st);
+      st.text = tunWort(S) + ' · ' + mm + ':' + ss +
            (S.liste.length > 1 ? ' · ' + S.liste.length + ' Aufträge' : '') +
            /* DAS WORT ZUM EFFEKT. Der stockende Ring sagt, DASS etwas
               klemmt; das Schild sagt, WIE VIELE. Welche, steht in der
@@ -5467,15 +5467,36 @@
               Nur im MISCHFALL: Heisst das Wort schon "klemmt", waere
               die Zahl daneben eine Wiederholung. */
            (tunWort(S) === 'arbeitet' && klemmtWer(S)
-              ? ' · ' + klemmtWer(S) + ' klemmt' : '') +
+              ? ' · ' + klemmtWer(S) + ' klemmt' : '');
            /* Hier stand bei 4,5 s Stille im Feld "die anderen warten" --
               eine Behauptung aus dem Demostueck, die live keine Meldung
               deckt (Peter, 31.10.). Die Stille hebt nur das Schild hervor. */
-           '</div>';
+      h += '<div class="' + st.kl + '" data-wer="' + n + '" data-y="' + st.y +
+           '" data-l="' + st.l + '" data-t="' + st.t +
+           '" style="left:' + st.l + 'px;top:' + st.t + 'px;color:' + st.farbe + '">' +
+           st.text + '</div>';
     }
-    if (h !== tunEl.__h) {
-      tunEl.innerHTML = h; tunEl.__h = h;
-      fussNeu = true;
+    if (h === tunEl.__h) return;
+    tunEl.__h = h;
+    fussNeu = true;
+    /* DIESELBEN SCHILDER BLEIBEN DIESELBEN ELEMENTE (AG-MON-FUSS-STABIL-001).
+       Die Uhr in der Anzeige aendert sich jede Sekunde; frueher entstand
+       dabei jedes Schild neu. Peter sah am iPad eine "sekündliche
+       Einblendung". Steht dieselbe Reihe von Agenten da, wird jetzt nur
+       geaendert, was sich geaendert hat -- meist nur der Text. Neu gebaut
+       wird nur, wenn ein Agent hinzukommt oder wegfaellt. */
+    var kinder = tunEl.children, gleich = kinder.length === stuecke.length;
+    for (var k = 0; gleich && k < stuecke.length; k++)
+      if (kinder[k].getAttribute('data-wer') !== stuecke[k].wer) gleich = false;
+    if (!gleich) { tunEl.innerHTML = h; return; }
+    for (var j = 0; j < stuecke.length; j++) {
+      var e = kinder[j], z = stuecke[j];
+      if (e.className !== z.kl) e.className = z.kl;
+      if (e.textContent !== z.text) e.textContent = z.text;
+      e.setAttribute('data-y', z.y);
+      e.setAttribute('data-l', z.l);
+      e.setAttribute('data-t', z.t);
+      if (e.style.color !== z.farbe) e.style.color = z.farbe;
     }
   }
 
@@ -8487,6 +8508,23 @@
     var kante = H() - 10, ts = document.getElementById('agTasten');
     if (motorAn && ts) kante = Math.min(kante, ts.getBoundingClientRect().top - 6);
 
+    /* VON VORN ORDNEN, NICHT VON DER LETZTEN LAGE AUS (AG-MON-FUSS-STABIL-001).
+       Peter, 16.11.2026: "die sekündliche einblendung ist in 105 immer noch
+       da". Die Arbeitsanzeige ("zugewiesen · 00:23") wird jede Sekunde neu
+       gebaut und steht dann wieder an ihrem Ausgangsplatz, das Modellschild
+       aber noch dort, wohin es zuvor geklappt war. Aus diesem gemischten
+       Stand ergab sich eine andere Reihenfolge: Bei einem Agenten nahe der
+       Unterkante tauschten Schild und Anzeige im Sekundentakt den Platz.
+       Jetzt beginnt jeder Durchgang fuer ALLE Kaesten am Ausgangsplatz --
+       gleicher Inhalt, gleiches Bild. */
+    Array.prototype.forEach.call(
+      document.querySelectorAll('#agMotoren [data-wer], #agTun [data-wer]'),
+      function (el) {
+        var l0 = el.getAttribute('data-l'), t0 = el.getAttribute('data-t');
+        if (l0 !== null) el.style.left = l0 + 'px';
+        if (t0 !== null) el.style.top = t0 + 'px';
+      });
+
     var kaesten = [];
     Array.prototype.forEach.call(
       document.querySelectorAll('#agMotoren [data-wer], #agTun [data-wer]'),
@@ -8561,7 +8599,10 @@
       motorHoehe = {};
       return;
     }
-    motorEl.__h = null;          /* Verbrauch ändert sich laufend */
+    /* Hier stand `motorEl.__h = null` ("Verbrauch ändert sich laufend"):
+       Die Schilder wurden in JEDEM Bild neu gebaut, auch wenn sich nichts
+       geaendert hatte. Der Vergleich unten erkennt eine geaenderte Zahl
+       selbst -- sie steht im Text (AG-MON-FUSS-STABIL-001). */
     var h = '';
     AGENTEN.forEach(function (A) {
       var S = arbeit[A.name], o = heimat(A);
@@ -8621,6 +8662,7 @@
       }
       h += '<div class="agMot' + ((S && !S.aus) ? ' tut' : '') +
            '" data-wer="' + A.name + '" data-y="' + Math.round(o[1]) +
+           '" data-l="' + o[0] + '" data-t="' + (o[1] + 18) +
            '" style="left:' + o[0] + 'px;top:' + (o[1] + 18) + 'px;color:' +
            hex(A.farbe) + '">' + esc(txt) + zus + '</div>';
     });
