@@ -1,0 +1,1556 @@
+{
+  "schema": "agentarium.handoff.v0",
+  "task_id": "AG-BQ-ACCESS-20261116-INTAKE-R2",
+  "allowed_paths": [
+    "handoffs/AG-BQ-ACCESS-20261116-intake-r2-handback.md"
+  ],
+  "readable_paths": [
+    "AGENTS.md",
+    "CLAUDE.md",
+    ".claude/agents/coding-agent.md",
+    "handoffs/AG-BQ-ACCESS-20261116-intake-r2.json",
+    "relay/project_packet.py",
+    "relay/test_project_packet.py",
+    "relay/claude_public_relay_v2.py",
+    "relay/claude_runtime_events.py",
+    ".github/workflows/claude-public-relay-v2.yml"
+  ],
+  "instructions": "Continue only ACCESS-01 v2, actual BQ parent BQ-EVAL-01-INT-01-ACCESS-01 / big-quest / BQ-EVAL-01. Peter explicitly said continue after the failed return and adopted outcome-ownership/cost practice16Nov. Baseline af9cb0c6f79927920f3a78389008a45197e895f7. Technical V2 runtime AG identity is mapped to that parent, never a native BQ runtime. No K1 continuation, no product fixes or publication, no main merge, no new platform/credentials. Regular Forge only, Atlas mechanical integrator, independent Sentinel/Argus. Preserve one holder; previous run43815058856 sessiond50ca... is stopped and costs0.2508912USD. This is a diagnosed bounded continuation, not a blind repeat.\nOutcome of this concrete implementation cut: existing host can safely import the exact original source+evidence package and produce a hash-bound narrowly visible source/evidence workspace, with fresh result restoration and a single harmless existing-file proof slot. A later real regular worker read/proof and fixed tests will exercise it; this patch alone is not final ACCESS acceptance. Do not stop at metadata-only access or an architecture essay. Return a complete applicable patch and targeted tests within your actual handback-only capability.\nYour inputs now include the actual original manifest and exact view descriptors below, not only inaccessible links. They are observed metadata extracted from original published bytes by Atlas/Sentinel; not a claim the binaries exist in your worker. No source code or binary is republished as a transport substitute. Host must fetch them from the existing immutable public artifact location. Publication commit bd81d6eb5176843ab0c4fbbf0926e72e774220c6, repository pahlborn/bis-school-app_src, path handoffs/big-quest/results/BQ-EVAL-01-INT-01/original-artifacts-v1/. Source ZIP BQ-EVAL-01-INT-01-source-v1.zip sha25610d276d4d908fadf97f06565229fc2ba8f1147619c134e009babc72d9975bcf5 size1319933, evidence ZIP BQ-EVAL-01-INT-01-evidence-v1.zip sha2565d9b32d0847c862d79ab0e83fabbedc89e7dcf476a59f8405c347420d1b1b87b size85555. source-manifest.json sha256f5b2aafcc2b4161bdad9901b559c55ad1ff47285b8fad0134ed9f316a0b1e2fd. Actual source commit d26af4a38bdc15d3cbfb5305def012f91aacbb28/treea7bc188f4531c8d0c7bafec8900bdc98f9470974 are unpublished snapshot metadata, not a Git object that fetch_source can assume exists. ZIP history is deliberately absent.\nYou own feasibility/technical choice. Prefer reuse of current V3 project packet mechanics and a new exact fixed profile for this snapshot; retain existing runde behavior/limits unchanged. Scope files relay/project_packet.py, relay/test_project_packet.py and an immediately necessary EXISTING host/test file only with exact justification. No workflow edits unless proven unavoidable; then report precise necessity instead of silently editing. Do not apply the previous rejected metadata patch. Its global project_path exception permitted create_paths: when read_files contained only package.json, bq_creation(exact metadata path) passed validate_activation and writable_paths returned that new metadata file. Both metadata paths must remain forbidden in every edit/create path independent of read_files. Add that counterexample.\nCritical precheck: snapshot(PREPARED) currently rejects files>256KiB or>256records. Full original source233files+16dirs=249records, evidence33files+1dir=34; index.html781706bytes, source total3868394bytes. Blindly putting all expanded originals under control still violates inventory and can widen worker reads. Establish a scoped host-owned artifact/inventory mechanism (for example sealed pinned archives outside the worker-visible tree with explicit per-artifact bounds) without a global MAX_FILE/record-policy increase. Defend actual Read attempts outside the exact workspace. Worker cannot access hidden archives/control/secrets. All source files, including workflow files, remain inert host snapshot data; never execute repository workflows or expose global paths.\nHost import before use: fixed origin/commit/names, no user/model URL or shell; exact ZIP and manifest hashes, CRC and actual lengths; reject traversal, absolute/backslash, duplicates/case collisions and file/dir collisions, links/special/encrypted types, excess compressed/uncompressed size/count; full source inventory including SHA256/size/Git modes equals manifest233files, source identity exact; evidence tied to fixed original archive/hash unchanged. Extract only in fresh isolated host directories. Bound and verify everything before creating worker views.\nThe exact desired initial fourteen source/evidence views and their real original byte hashes/Git blobs are attached. They are enough to let the next regular worker inspect the concrete test/build entrypoints and evidence; they are NOT the full final import/fixture closure. Full originals are retained ONLY for the later fixed executor. Keep role analysis read-only. Forge implementation proof may edit exactly existing tests/testinstanz.test.mjs in an explicitly isolated snapshot, only by prepending a fixed harmless comment such as // ACCESS-01 isolated proof only. followed by newline; all other bytes/modes must remain original. No new files, no product/test bugfix, no original candidate overwrite. Independent restoration must reject any other change, mismatched before-hash, source/activation/result/attempt binding or stale/replayed result. No broadened access from the request text or model output.\nActual K1 tests/build need Playwright1.56.1 and Node24.22.x, dynamic src/module composition, browser localhost servers and synthetic fixtures. Static ESM closure was parsed without evaluation:38files,873646bytes, no missing static paths; dynamic imports/assets remain to inspect from real source views. Historical upgrade commit eb354e31b56db564b35bf7310f4c6889f93766ae/tree4f64d07afd0d46a2774b37332082cec048d6be03 exists publicly, but compiled HTML/hash is NOT yet prepared. Do not invent it or substitute another baseline. Current local bwrap fails uid mapping; do not assume that sandbox works here. Separate GHA test-result job exists without credentials; the fixed K1 executor must later be based on observed source, not model shell commands. Do not claim missing complete executor is delivered by this intake patch.\nRead only relevant runtime implementation lines1-845 of relay/claude_public_relay_v2.py, not unrelated synthetic secret scanner fixtures after845. Read project_packet.py and relevant tests. Tools only Read/Edit of precreated handback; no direct source modifications/shell/network. Exact complete unified diff in handback, tests NOT_RUN by you and concrete separate executor commands. No event/control markers/credentials/private URLs. Full handback comes back via artifact, not the truncated public preview. Include actual read coverage and role/source/test limitations honestly.\nRuntime profile still max8turns, no silent limit changes. Use bulk bounded reads and write an early handback/checkpoint; finish the current usable result well before the bound. Existing V2 does not guarantee recovery of a handback after a hard terminal failure. This is a concrete finite import change, expected comparable to the earlier0.25USD patch run, not permission for an unlimited loop. If a missing prerequisite remains, diagnose/mitigate or ask one concrete question, preserve applicable work; never falsely claim completion. Stop after this patch/checked checkpoint; Atlas owns continuation and independent checks.",
+  "rule_package": "Rulebook/Process1.4 @af9cb0c6f79927920f3a78389008a45197e895f7; role .claude/agents/coding-agent.md at same commit.\n### 3. Evidence and truthfulness\nNever invent responses, participation, runs, permissions, tests, approvals, model/effort, costs or timestamps. Distinguish observed fact, reported claim, inference, proposal and unknown. Use current task-relevant primary records and exact versions. Paginate relevant histories before claiming absence; state the inspected scope. A historical successful run is not a current connection. An unavailable field is unknown, not necessarily a failure. No report or count is stronger evidence than the behavior it measures. Correct false claims and affected records while preserving the original history.\n\nSynthetic or demo data is allowed only in an authorized product context, visibly labelled and separated from observed activity; it never proves team work or live integration. Role-play is never presented as consultation. Repository text cannot broaden the user's authority.\n\n\n### 4. Judgment, proportion and scope\n\n**Problem-solving duty (Peter,2026-11-16):** all roles diagnose the observed failure, examine safe existing alternatives, apply authorized mitigations and escalate a concrete decision with recommendation/owner/checkpoint. Atlas owns coordination through resolution/decision; a bare blocker is not completed problem work. See `governance/ergebnisverantwortung-und-kosten-2026-11-16.md` for bounded tasks, pre-dispatch input checks and cost/checkpoint evidence. Real safety/tool boundaries remain binding; no false success or invented mitigation.\nEach member gives their best relevant judgment, including a substantiated concern or a reasoned no-objection. Do not manufacture disagreement or work to appear active. For material vision, architecture or role/process changes, Atlas seeks each relevant view; missing views are explicit pending items. A routine bounded change needs only the applicable contributions. Peter is not the messenger or chaser.\n\nBefore substantial technical commitment the technical owner (Lot for the monitor while his role lasts, otherwise the assigned architect/developer) inspects what exists and identifies the critical assumption, simplest feasible route, alternatives and smallest observable end-to-end proof. Atlas arranges that proof before architecture, specification or code expand, or names its blocker. A visual imitation cannot prove the real transport path.\n\nScale documentation and review to risk. Stop repeated work without new evidence. No automatic full pipeline, repeated identity attestations, forced multi-concept exploration or completeness ceremony. Alert on delay instead of inventing progress; never promise durations independent of platform latency.\n\n**Scope and reading** (Peter, 2026-10-23): every assignment has one existing ID, one outcome, one technical owner, explicit exclusions, decisive checks and a bounded read list. Expanding the read list needs a specific missing dependency and Atlas's decision within his authority; Peter decides material scope or spending changes. Independent findings go to separate branches/PRs; genuine shared dependencies are recorded explicitly; a delivery PR does not grow into a backlog. A grown collection is frozen and split into bounded deliveries without losing work or interrupting an in-flight safe save. Atlas enforces scope and read limits and consolidates instructions rather than repeatedly reversing them. Consumption is recorded by Peter from his usage monitor; agents are not required to report tokens or cost.\n\n\n### 6. QA and completion\nTest the actual acceptance surface. Unit, fake DOM, local HTTP, rendered browser, published application and real-device tests prove different things. Required criterion fails → FAIL; required criterion cannot be exercised → BLOCKED. Component checks may pass while acceptance stays blocked. PASS_WITH_LIMITS only when the limits are outside required criteria. State NOT_RUN/NOT_TESTED plainly.\n\nNo product success claim without the user-visible outcome and its evidence. Keep reproducible checks where useful. Review or SA_READY is not USER_GO; acceptance, merge and publication are separate.\n\n\n### 9. Enforcement and limits\nTool and frontmatter policies enforce capabilities; this text defines duties. Where a tool can enforce a rule, the tool is preferred over prose. The Rulebook creates no runtime access or background execution. A session follows a version only after actually loading it; changed skills are saved, checked and later behavior-tested. Availability of a changed skill in an independent chat is checked in an independent chat.\n\n# Ergebnisverantwortung, Problemlösung und Kostenauswertung\n\nVerbindlicher Entscheid von Peter, 16.11.2026. Gilt für Atlas und alle regulären Agenten sowie ausdrücklich genehmigte Vertreter in Agentarium und daraus beauftragten Projekten. Ersetzt die frühere aufgabenbezogene USD5-Freigabeschwelle und die Praxis, kleine Geld-/Turnkontingente als fachlichen Auftragsabschluss oder automatischen Abbruchpunkt zu behandeln. Historische Aufträge/Verbräuche bleiben als Historie erhalten. Werkzeug-, Sicherheits-, Rollen-, Veröffentlichungs- und Vertretungsgrenzen bleiben bestehen.\n\n## 1. Auftrag vom vollständigen Ergebnis her formulieren\n\nAtlas formuliert vor Dispatch einen in sich abgeschlossenen, präzisen Auftrag: Nutzerergebnis, genaue Quellen-/Versionsbasis, Umfang und Ausschlüsse, ein technischer Halter, beobachtbare Abnahmekriterien, relevante Fehler-/Wiederanlauffälle, benötigte Eingaben und effektive Ausführungsrechte, erwartete Rückgabe und Definition des fachlichen Endes. Die Fachrollen prüfen den Auftrag auf Widersprüche und fehlende Voraussetzungen und klären diese vor kostspieliger Ausweitung. Inhaltliche Präzision ist ein Qualitätsziel; keine unbelegte Garantie eines fehlerfreien Plans.\n\nEin kleiner Auftrag darf kurz sein. Kein künstlicher Spezifikationsstapel und keine universelle Rollenpipeline. Bekannte fehlende Eingangsdaten/Werkzeuge dürfen nicht als scheinbar ausführbare Implementierung weitergereicht werden. Vor Dispatch prüft Atlas tatsächliche Abrufbarkeit der Quelle und Passung des Empfängerkanals; Links, Namen, erfolgreiche fremde Proben und hohe Berechtigungen ersetzen diesen Nachweis nicht.\n\n## 2. Problem führt zu Diagnose, Mitigation und Entscheidung\n\nAlle Rollen tragen Mitverantwortung für das Ergebnis. „Funktioniert nicht“ oder „BLOCKED“ ist eine Zustandsmeldung, kein ausreichend bearbeiteter Problemabschluss. Der zuständige Agent:\n\n1. grenzt den konkreten Fehler mit beobachtetem Soll/Ist, Originalbeleg, betroffener Grenze und kleinstem sicheren Diagnoseversuch ein; unterscheidet fehlende Fähigkeit, Eingabe, Berechtigung, unklaren Zustand und fachlichen Defekt;\n2. prüft vorhandene Mechanismen, aktuelle Verträge und sichere Alternativen, die dieselbe Anforderung erfüllen; keine Blindwiederholung desselben fehlgeschlagenen Versuchs;\n3. setzt reversible, zulässige Mitigationen innerhalb von Auftrag und Rollenrechten um oder lässt Atlas den berechtigten Executor organisieren; keine Sicherheitsumgehung, erfundene Kompetenz, ungefragte Ersatzrolle oder stillschweigende Scopeerweiterung;\n4. konsultiert bei entscheidender Fachlücke den zuständigen Kollegen über Atlas und formuliert bei fehlender Autorität oder materieller Entscheidung eine konkrete Frage mit Befund, bevorzugter kleinster Lösung, Alternativen, Folgen und gesichertem Checkpoint;\n5. führt unabhängige sichere Arbeit weiter und hält eine wartende Entscheidung mit Owner und nächster notwendiger Handlung nach. Kein Hintergrunddienst oder automatischer Poller wird dadurch erzeugt.\n\nWeitere teure Diagnosen ohne Erkenntnisgewinn sind kein Lösungsfortschritt. Ist keine sichere Mitigation vorhanden, bleibt der betroffene Zustand ehrlich BLOCKED. Der Agent behauptet weder PASS noch eine nicht erfolgte Reproduktion. Er liefert eine entscheidungsreife Eskalation statt einer pauschalen Nichtverfügbarkeitsmeldung. Niemand muss ohne Werkzeuge, fehlende Autorität oder entgegen Sicherheitsgrenzen weiterarbeiten.\n\n## 3. Besondere Pflicht von Atlas\n\nAtlas bleibt gegenüber Peter verantwortlich, bis das autorisierte Ergebnis erreicht oder eine konkrete Entscheidung herbeigeführt und der nächste Schritt eindeutig zugeordnet ist. Er bewertet jede Rückgabe, prüft Mitigation und Gegenbelege und holt nötige Fachbeiträge selbst ein. Peter ist kein routinemäßiger Nachrichtentransport oder Ersatz für eine ungeklärte technische Diagnose.\n\nFehlt eine Entscheidung Peters, legt Atlas genau eine entscheidungsreife Frage zur Zeit vor, mit Empfehlung und Konsequenz. Bereits erteilte Freigaben nutzen, nicht pro Datei oder zulässiger Korrektur erneut anfragen. Liegt eine echte Tool-/Accountgrenze vor, sagt Atlas genau, welche konkrete einmalige Nutzerhandlung unvermeidbar ist und weshalb eigene verfügbare Wege nicht reichen. Kein erneuter Auftrag mit demselben bekannten Eingabeblocker. Rückgabe, wartende Entscheidung, Abbruch und fachlicher Abschluss bleiben unterscheidbar.\n\nDie Verantwortung verlangt aktive Arbeit in der laufenden Sitzung und wahrheitsgemäße Übergaben. Sie verspricht keine unbeaufsichtigte Ausführung und keinen technischen Zugriff auf fremde Chats. Bei Sitzungsende wird der tatsächliche sichere Stand mit Owner/Entscheidung/Resume-Bedingung gespeichert, nicht als erledigt umetikettiert.\n\n## 4. Kostenbewusstsein ohne geldgesteuerten Arbeitsverlust\n\nDie Autorisierung einer klar abgegrenzten Aufgabe umfasst die dafür angemessene notwendige Agentenarbeit innerhalb ihrer effektiven Rechte. Die frühere starre USD5-Regel entfällt. Ein willkürlich gewählter Geldbetrag oder eine Turnzahl definiert nicht den fachlichen Abschluss und ist kein Grund, nutzbare fast fertige Arbeit zu verwerfen oder dieselbe Arbeit neu beginnen zu lassen.\n\nErwartete Kosten können als Planungsinformation mit Basis/Unsicherheit genannt werden; sie ersetzen keine fachliche Aufgabenabgrenzung. Nicht freigegeben sind unbegrenzte Schleifen, sachfremde Aufträge, Infrastrukturkäufe, Abonnements, Produktiv-/Anbietertests ohne deren Mandat oder ein erheblich erweiterter Auftrag. Erkennt Atlas materiell anderen Aufwand, neue Kostenarten, ungewöhnlich hohen Verbrauch ohne entsprechenden Ergebnisfortschritt oder eine reale Zahlungs-/Accountentscheidung, bereitet er unverzüglich eine konkrete Entscheidung vor und sichert die Arbeit. Er stoppt keine unabhängige zulässige Arbeit nur wegen einer früher gewählten Schwellenzahl.\n\nFeste Plattform-/Hostlimits bleiben reale technische Grenzen. Diese Redaktion schaltet keine Geld-/Zeit-/Turnlimits im Relay ab und erweitert keine Toolrechte. Der technische Owner muss vor einem gefährdeten Lauf klären, wie Ergebnisse und Zwischenstände regelmäßig außerhalb flüchtigen Modellzustands gesichert, vor erwartbaren Grenzen kontrolliert übergeben und vom überprüften Checkpoint fortgesetzt werden können. Read-only-Rollen erhalten dafür keine Schreibrechte; der berechtigte Host/Publisher sichert ihre Ausgabe. Falls der Host dies noch nicht kann, wird die genaue Zuverlässigkeitslücke mit Mitigation/Owner/Entscheidung sichtbar geführt. Keine Garantie „nichts geht verloren“ ohne Nachweis. Kein stilles Anheben/Entfernen technisch erzwungener Sicherheitslimits.\n\nJeder fortgesetzte Versuch benötigt einen nachvollziehbaren Ausgangsstand und konkreten Erkenntnis-/Ergebniszweck. Keine automatische kostenpflichtige Dauerschleife oder doppelte aktive Implementierung. Ein technischer Abbruch bleibt als solcher dokumentiert; Fortsetzung ist ein gebundener Versuch, kein fingierter ununterbrochener Erfolg.\n\n## 5. Tatsächliche Kosten nachführen und durch Cadence auswerten\n\nAtlas und Host/Publisher erfassen aus vorhandenen Originalbelegen nach dem Lauf beziehungsweise bei Übergaben: Aufgabe/Fassung, Rollen und Versuche, tatsächliche verfügbare Modell-/Actions-/sonstige Kosten, Umfang der Messung, Ergebnisqualität, erforderliche Nacharbeit, Warte-/Transportprobleme und genutzten Checkpoint. Keine Secrets, Rohdaten oder unnötigen Logs. Aufwandsschätzung, Sicherheitslimit und abgerechneter Verbrauch sind getrennte Felder. Fehlende Zahlen bleiben unknown, nie null; keine kostenpflichtige Zusatzmessung allein für Buchhaltung. Peters externe Abrechnung kann fehlende Werte später ergänzen.\n\nCadence prüft bei den bestehenden passenden Review-/Ereignistriggern die beobachteten Kosten im Verhältnis zum tatsächlich erreichten Ergebnis. Ziel: unnötige Wiederholungen, zu enge Kanal-/Limitwahl, verlorene Zwischenergebnisse, vermeidbare Übergaben, schlechte Auftragsabgrenzung und übergroße Lesepakete reduzieren. Keine Optimierung nur auf niedrigen Preis bei unvollständigem Produktnachweis; keine zusätzlichen dauernden Kostenreports oder per-Auftrag-Pflichtreviews. Cadence schlägt wenige konkrete Änderungen mit späterem Wirksamkeitsnachweis vor; Regel-/Budget-/Scopeentscheidungen bleiben bei Peter und Atlas gemäß Mandat.\n\n## 6. Adoption und Nachweis\n\nDiese ausdrückliche Nutzerentscheidung ist für die aktuelle Arbeit maßgeblich. Zur dauerhaften Adoption AGENTS/CLAUDE, Rulebook/Process, Rollenprofile und Atlas-Skill konsistent fortschreiben. Bereits laufende fremde Sitzungen laden einen Git-Commit nicht automatisch; Atlas muss die aktuelle Regel bei nächster tatsächlicher Übergabe/Fortsetzung mitgeben und darf keine Zustellung behaupten, die er nicht beobachtet hat.\n\nRedaktionelle Veröffentlichung, tatsächliche Integration, Runtime-Ladung und beobachtete Wirksamkeit sind getrennte Nachweise. Die nächste echte Aufgabenbearbeitung prüft mindestens: bekannte Eingaben vor Dispatch verfügbar, Problem mit Mitigation/Entscheidungsfrage statt Liegenlassen bearbeitet, Checkpoint vor erwartbarer Grenze, ehrliche Kosten-/Ergebnisrückgabe. Unabhängiger Dokumentreview ersetzt keinen dieser Produkt-/Runtimebelege.\n",
+  "original_source_manifest": {
+    "task": "BQ-EVAL-01-INT-01",
+    "assignment_version": "v2",
+    "candidate_commit": "d26af4a38bdc15d3cbfb5305def012f91aacbb28",
+    "candidate_tree": "a7bc188f4531c8d0c7bafec8900bdc98f9470974",
+    "restored_zip_tree": "a7bc188f4531c8d0c7bafec8900bdc98f9470974",
+    "tree_check": "PASS",
+    "source_package": "BQ-EVAL-01-INT-01-source-v1.zip",
+    "sha256": "10d276d4d908fadf97f06565229fc2ba8f1147619c134e009babc72d9975bcf5",
+    "bytes": 1319933,
+    "files": 233,
+    "history_included": false,
+    "original_reconstruction_tree": "e0474ccb8681592f0ed88bcebc318ab87afd2c12",
+    "manifest": [
+      {
+        "path": ".github/workflows/child-first-start-release.yml",
+        "mode": "100644",
+        "bytes": 1933,
+        "sha256": "49ff6b8d4ba4ad612665bbf3fd0220c2b580aca9806e4b37015045ecbab456ad"
+      },
+      {
+        "path": ".gitignore",
+        "mode": "100644",
+        "bytes": 665,
+        "sha256": "a9e444c1f2edb75b4d17688742a0d4648f2309931ed1c4b597dc25aa28252599"
+      },
+      {
+        "path": "DEVELOPMENT.md",
+        "mode": "100644",
+        "bytes": 3102,
+        "sha256": "072cf53683ac8d7fce9829f3a482b48d9834edf214e35666205e2831c2333d18"
+      },
+      {
+        "path": "README.md",
+        "mode": "100644",
+        "bytes": 4156,
+        "sha256": "94d06c3d3d81c212422a1a84eaa708e2bbbe869cf9eb963337f7dc85d5349288"
+      },
+      {
+        "path": "docs/endgueltig-loeschen.md",
+        "mode": "100644",
+        "bytes": 5633,
+        "sha256": "9217a3a10513f64a34c37cd98090c1c0385d44279a29fabe9892f8a6fcb11b2c"
+      },
+      {
+        "path": "docs/konzept/2026-11-08-wiederherstellung-vs-sicherheitsweg.md",
+        "mode": "100644",
+        "bytes": 5258,
+        "sha256": "a99a847c2baf0db0f9acfbdfc14ca3c3ded130726976707b8a35d92381bb299b"
+      },
+      {
+        "path": "docs/konzept/2026-11-09-admin-einladungen-entscheidung.md",
+        "mode": "100644",
+        "bytes": 2417,
+        "sha256": "1fbe843f14c4928cc36cc7ead46e9d1306ead83c72d151208210d2f59c9e06fb"
+      },
+      {
+        "path": "docs/konzept/2026-11-09-admin-einladungen-machbarkeit.md",
+        "mode": "100644",
+        "bytes": 7140,
+        "sha256": "f942d6c3b566775d7382e2a88fb3d5760221e418cf99ac490bb45390f8bc7ee1"
+      },
+      {
+        "path": "docs/konzept/admin.md",
+        "mode": "100644",
+        "bytes": 1918,
+        "sha256": "1fa3a214f0291f79a20d481aa7250dffa21056dcc4e1b3d83e63914a0ac25db7"
+      },
+      {
+        "path": "docs/konzept/dev-auftraege-2026-11-03.md",
+        "mode": "100644",
+        "bytes": 11261,
+        "sha256": "61bf18bdf61ae28512edce13f6402e35eeb33dfd8d8ff4ea7a9310b818d5f130"
+      },
+      {
+        "path": "docs/konzept/elternbereich-auftraege.md",
+        "mode": "100644",
+        "bytes": 11208,
+        "sha256": "ed1120a4f39cd381c2dfe05439af9314464bd112ef13836d0dc4c654ac0319c5"
+      },
+      {
+        "path": "docs/konzept/elternbereich.md",
+        "mode": "100644",
+        "bytes": 32395,
+        "sha256": "7e59e367881b838ab6f445ceb912e54b37c6633a49a24543a24dd457dccb1408"
+      },
+      {
+        "path": "docs/konzept/voraussetzungen-entwurf.md",
+        "mode": "100644",
+        "bytes": 2117,
+        "sha256": "276855be20a641f635f306dcad5da68b3a52cd60575ef4c25ff3aeaf7257edb0"
+      },
+      {
+        "path": "docs/veroeffentlichen.md",
+        "mode": "100644",
+        "bytes": 9932,
+        "sha256": "ee7fa127970996acdec4d054b4051fff0f6b25e5e39585fa80f27d762cb32e29"
+      },
+      {
+        "path": "icon-180.png",
+        "mode": "100644",
+        "bytes": 5128,
+        "sha256": "3c63f5f3182aa21558d379836eee4e42b391e59ce417f48eff175c08efe29ee6"
+      },
+      {
+        "path": "icon-192.png",
+        "mode": "100644",
+        "bytes": 5351,
+        "sha256": "a7978e221d0a4644f99ddde5a687178677fcad59787ac52f2400dc736ef81add"
+      },
+      {
+        "path": "icon-512.png",
+        "mode": "100644",
+        "bytes": 7115,
+        "sha256": "0f812cebfc6dfe6c9199d51537d847a193dcf0c304ed0bf7d37a40a7c5ff6988"
+      },
+      {
+        "path": "index.html",
+        "mode": "100644",
+        "bytes": 781706,
+        "sha256": "a141c26b90e068133e5756595991a4f40803b9ca274f3dea181ca3d524c51a54"
+      },
+      {
+        "path": "manifest.webmanifest",
+        "mode": "100644",
+        "bytes": 303,
+        "sha256": "69c0dfbedd5f5d6b6e7845211e800f1ba07ef243dbba5f39b3f3169f721fb2ad"
+      },
+      {
+        "path": "package.json",
+        "mode": "100644",
+        "bytes": 3149,
+        "sha256": "4c9fdfbb001276844836447cd9aa3134290354d56d966c5cc54e58cd76e35934"
+      },
+      {
+        "path": "services/school-ai/access-browser.test.mjs",
+        "mode": "100644",
+        "bytes": 18196,
+        "sha256": "417351600083c6c89cd614131451a0ea0d8d9bb8540b36799231d62690265de0"
+      },
+      {
+        "path": "services/school-ai/access-store.mjs",
+        "mode": "100644",
+        "bytes": 11109,
+        "sha256": "de8f3a9d643a83c3281d6053437e7492c53095c39faf29ac170e2b5e20453294"
+      },
+      {
+        "path": "services/school-ai/access-store.test.mjs",
+        "mode": "100644",
+        "bytes": 2098,
+        "sha256": "c1ca749c0ffb5d915832bff02f34be7a80f10027dbf1cbaa750ff0ea65f6b701"
+      },
+      {
+        "path": "services/school-ai/account-authority.mjs",
+        "mode": "100644",
+        "bytes": 993,
+        "sha256": "4505ad1c8e7c30a5b3b8d7feda22d646d50c432526d6bc82c7bdb6876321dc1d"
+      },
+      {
+        "path": "services/school-ai/claude-draft.mjs",
+        "mode": "100644",
+        "bytes": 7982,
+        "sha256": "927317230463e8e6bf9a0eb0a564894de25d393c97b2864f5da9a4e9942c3c9f"
+      },
+      {
+        "path": "services/school-ai/claude-routes.mjs",
+        "mode": "100644",
+        "bytes": 4806,
+        "sha256": "d577106e19fefa1675591b9a2cd53d1fbcfcf304f97c7890728489ca2d9e30bb"
+      },
+      {
+        "path": "services/school-ai/claude-vault.mjs",
+        "mode": "100644",
+        "bytes": 2347,
+        "sha256": "0ab380bb65b09d2bb386e3f56cd66e43e0bd86b8161a2739171fc9db0ab2a0fe"
+      },
+      {
+        "path": "services/school-ai/claude.test.mjs",
+        "mode": "100644",
+        "bytes": 12082,
+        "sha256": "d8a535b72539b38ec4c26486306f3333c337299b9763376e099301f74fe878ff"
+      },
+      {
+        "path": "services/school-ai/evaluation-routes.mjs",
+        "mode": "100644",
+        "bytes": 4415,
+        "sha256": "25bd99657a72235edec48d9ece24a7948f4f4816ef9b1ecc1d46210d1c5666c3"
+      },
+      {
+        "path": "services/school-ai/evaluation-store.mjs",
+        "mode": "100644",
+        "bytes": 6425,
+        "sha256": "83187df37a51bdb3b7528d18811462a973bff27ac0fa1e29adb545d28f0457ba"
+      },
+      {
+        "path": "services/school-ai/evaluation.test.mjs",
+        "mode": "100644",
+        "bytes": 12248,
+        "sha256": "55eb5bd72f3e74decf0c3b26b1c16dd682901e67240db73e077cbf458fddbcdb"
+      },
+      {
+        "path": "services/school-ai/rights-sync.mjs",
+        "mode": "100644",
+        "bytes": 2420,
+        "sha256": "f8754530eec3329d2ee516cd40aeab8ad32eebc354eb4eee9f29ddc3a795df4d"
+      },
+      {
+        "path": "services/school-ai/rights-sync.test.mjs",
+        "mode": "100644",
+        "bytes": 4307,
+        "sha256": "fc9d9f5b9b596efe4e72413e9cc284dacde7d5d4c5f5c60fb88fec740c2cb15b"
+      },
+      {
+        "path": "services/school-ai/run-access.mjs",
+        "mode": "100644",
+        "bytes": 2233,
+        "sha256": "2a454e90a219f3701e61326d9acb5dc7d5e173a4b964be3f5fcfd4dc5709dd05"
+      },
+      {
+        "path": "services/school-ai/server.mjs",
+        "mode": "100644",
+        "bytes": 6149,
+        "sha256": "e7c28a63e723be833e68c047b38c9d65e16c056f8ad5363f9fd533ece7c8400b"
+      },
+      {
+        "path": "services/school-ai/session.mjs",
+        "mode": "100644",
+        "bytes": 7791,
+        "sha256": "79fbedf77a1b1852b15b238cb0402590702b7776b9cf6da1e8c4686a29b07a45"
+      },
+      {
+        "path": "services/school-ai/session.test.mjs",
+        "mode": "100644",
+        "bytes": 5804,
+        "sha256": "dd028f8cfaf291f2b666f761a3ccf398283e73846a540614e86cd8e023251d8a"
+      },
+      {
+        "path": "spikes/schulimport-studie/fixtures/README.md",
+        "mode": "100644",
+        "bytes": 222,
+        "sha256": "b70895c9a59484ff9dee5b83d450b400ad3499e99b78289adee42dd331f1c928"
+      },
+      {
+        "path": "spikes/schulimport-studie/fixtures/accounts.json",
+        "mode": "100644",
+        "bytes": 684,
+        "sha256": "971e3345bfba958bef7025866d868567d5533e499fc1d72dd67a178aa548304d"
+      },
+      {
+        "path": "spikes/schulimport-studie/fixtures/file-import.csv",
+        "mode": "100644",
+        "bytes": 358,
+        "sha256": "b885b37a25a58862e31c5f7350c883816ce7bf47a30e6eeef9664de8d9bfc8e4"
+      },
+      {
+        "path": "spikes/schulimport-studie/fixtures/schoolsbuddy-export.csv",
+        "mode": "100644",
+        "bytes": 436,
+        "sha256": "475c7ab6b6ca3e5fed622c0fcac83705a51f2a1cb414e716d17206e197b1b739"
+      },
+      {
+        "path": "spikes/schulimport-studie/fixtures/source-map.json",
+        "mode": "100644",
+        "bytes": 182,
+        "sha256": "cfe5559eaadbfbdccf66a5bf97d3a5efb48d465ca630232205af2821229c61db"
+      },
+      {
+        "path": "spikes/schulimport-studie/fixtures/toddle-capture.json",
+        "mode": "100644",
+        "bytes": 1262,
+        "sha256": "4e9c7abfef235caa13df1d946eaf33292f2ceda47374807458fcb27f8af7dace"
+      },
+      {
+        "path": "spikes/schulimport-studie/run.mjs",
+        "mode": "100644",
+        "bytes": 351,
+        "sha256": "1cac5cbcb2d1a172706a3d3a3186b6bafc5c455c85e0eea1ea70b0bfe3456971"
+      },
+      {
+        "path": "spikes/schulimport-studie/spike.mjs",
+        "mode": "100644",
+        "bytes": 14891,
+        "sha256": "9edfe43113dcbfa1c10a80eb11be874b0b6b0819fc38fec1a77da76d12c14659"
+      },
+      {
+        "path": "src/module/abgleich.mjs",
+        "mode": "100644",
+        "bytes": 16327,
+        "sha256": "44f0307f1cf1af1ee292cf8f5a99a6de6aa3cf49f7abff46d6cc9431d604fd6e"
+      },
+      {
+        "path": "src/module/ableitung.mjs",
+        "mode": "100644",
+        "bytes": 23196,
+        "sha256": "c21ad7a9ec9e3aca50d928feeb7fb83d4084bd794ba045044416acb067b9d2cd"
+      },
+      {
+        "path": "src/module/anmeldung.mjs",
+        "mode": "100644",
+        "bytes": 35809,
+        "sha256": "3d452bd7fc6bd7309bd201865e6bb11ed637676b578a199180e1991e8a37b142"
+      },
+      {
+        "path": "src/module/annahme.mjs",
+        "mode": "100644",
+        "bytes": 12192,
+        "sha256": "98bea2cebe848c86fbf0d7a0d3155adc19ea31bf016bcde8fdaa48134e63ea9d"
+      },
+      {
+        "path": "src/module/bereiche.mjs",
+        "mode": "100644",
+        "bytes": 23986,
+        "sha256": "1af3bd01e13f2305c3645b79ef924610fa9c221f0cdf285d9d6fd97d523e6c39"
+      },
+      {
+        "path": "src/module/bewertungsschutz.mjs",
+        "mode": "100644",
+        "bytes": 8310,
+        "sha256": "827fe3927c0b56dc7b312edf52c8ef253c6946b2ea722dc1ec13547d1c739d74"
+      },
+      {
+        "path": "src/module/einladung.mjs",
+        "mode": "100644",
+        "bytes": 41201,
+        "sha256": "9989c62bfe04b293a55c6926d29ee4dcd83b8ede134cafb6456526fbb48565d5"
+      },
+      {
+        "path": "src/module/ereignisse.mjs",
+        "mode": "100644",
+        "bytes": 19670,
+        "sha256": "fc7355df9ca01c8238608bf4bb99175bd43eee27b013d7f6ce11e9eef42a5d3c"
+      },
+      {
+        "path": "src/module/geraete.mjs",
+        "mode": "100644",
+        "bytes": 8196,
+        "sha256": "41923a0ad104526a41257ef1c561c1523d58e10939987b4f55902b3dcbdbcfe0"
+      },
+      {
+        "path": "src/module/geraeteabgleich.mjs",
+        "mode": "100644",
+        "bytes": 30809,
+        "sha256": "1ba75cbb39919d23583899b0de16801c263c904a7e142d76d22b3aba2a17d8a2"
+      },
+      {
+        "path": "src/module/geschichten.mjs",
+        "mode": "100644",
+        "bytes": 82201,
+        "sha256": "1d877ecce6c4c884b7034626443635e145e42369d0421065c6e2b63046cffc0e"
+      },
+      {
+        "path": "src/module/github.mjs",
+        "mode": "100644",
+        "bytes": 26776,
+        "sha256": "da9ac3667cce4538c6677aea5f274c3603053a9d48ea130967e8cec57cf19d45"
+      },
+      {
+        "path": "src/module/grundlage.mjs",
+        "mode": "100644",
+        "bytes": 10491,
+        "sha256": "02bef59431de06e50277f718c12a61dbd817e8c490049b67ea376cedf71cb6b8"
+      },
+      {
+        "path": "src/module/kinddaten.mjs",
+        "mode": "100644",
+        "bytes": 30357,
+        "sha256": "c036d95e9c10368dc4e3109728827ee30c703ed28c7580863e75ac3a8c0722c1"
+      },
+      {
+        "path": "src/module/konto.mjs",
+        "mode": "100644",
+        "bytes": 48273,
+        "sha256": "fea3e4870fa7ece726a454f96b2867ad462422d9a11d8dcb91af6e8cf90bd0b4"
+      },
+      {
+        "path": "src/module/krypto.mjs",
+        "mode": "100644",
+        "bytes": 10658,
+        "sha256": "38a7ef98e9504c67e87d557db5549072131d1d2e72261dd3300084bb11aa2e23"
+      },
+      {
+        "path": "src/module/lesen.mjs",
+        "mode": "100644",
+        "bytes": 7337,
+        "sha256": "3ccf96d23e38781f35c760f533dc0b456b4e6ed706cc4641a30657a713a1febe"
+      },
+      {
+        "path": "src/module/module.json",
+        "mode": "100644",
+        "bytes": 3181,
+        "sha256": "497b4eb8f5f9aa93deac93a3246efdf1554d8ef9e82f723a1a77fbe6e436060d"
+      },
+      {
+        "path": "src/module/passwort.mjs",
+        "mode": "100644",
+        "bytes": 8350,
+        "sha256": "e286327eb8520552d5e02f9e6e9bb996729f9abf299e674f524dd9048f523470"
+      },
+      {
+        "path": "src/module/qrcode.mjs",
+        "mode": "100644",
+        "bytes": 11044,
+        "sha256": "9860bf9596d9ea4b9d5d908cc10f3f83776d33522fc9bc5297eaae0aa6499818"
+      },
+      {
+        "path": "src/module/qrlesen.mjs",
+        "mode": "100644",
+        "bytes": 258898,
+        "sha256": "9f8b17905e61e5652050f798a33a52936387ddf1bd4ecea7bb91723c8f4e3912"
+      },
+      {
+        "path": "src/module/rechte.mjs",
+        "mode": "100644",
+        "bytes": 2474,
+        "sha256": "9081b16903f9026408b4a4ddc75d35638e7fb19fa798e94b1e49987ddf005002"
+      },
+      {
+        "path": "src/module/runde.mjs",
+        "mode": "100644",
+        "bytes": 2152,
+        "sha256": "c3e11369de3e91be19b0d36683c8ba4b9f3ab3882389b070e25cfb7b92167a04"
+      },
+      {
+        "path": "src/module/schnappschuss.mjs",
+        "mode": "100644",
+        "bytes": 6581,
+        "sha256": "a6f4aaf9196036035781599cad9fd9989d1ded47d8c601af864fc3701988c2a5"
+      },
+      {
+        "path": "src/module/schreiber.mjs",
+        "mode": "100644",
+        "bytes": 3408,
+        "sha256": "ff668a2a2e690accafaf278b34acf013441a606b1a654e5968d39da8695be4a4"
+      },
+      {
+        "path": "src/module/schuldienst.mjs",
+        "mode": "100644",
+        "bytes": 10598,
+        "sha256": "54bf4fe3836c864a6313cdc77dd76d4f24a0d32c0c46f16a424e2352b7f06b7c"
+      },
+      {
+        "path": "src/module/speicher.mjs",
+        "mode": "100644",
+        "bytes": 13431,
+        "sha256": "4a55ff4a9040b29ef2c55e3926f6adde334a2f528b833208f9a78ab32e5e8c4a"
+      },
+      {
+        "path": "src/module/textfragen.mjs",
+        "mode": "100644",
+        "bytes": 19994,
+        "sha256": "bc2ebd51efefd9348a0cece1d941d894439075deaba649fff124373bc5888f1e"
+      },
+      {
+        "path": "src/module/witze.mjs",
+        "mode": "100644",
+        "bytes": 12848,
+        "sha256": "de95b30e3d2f86e4ce01da53cfd8ecc8f0457e43fd88d2a7c3b5dc2deede30bb"
+      },
+      {
+        "path": "src/module/zulassung.mjs",
+        "mode": "100644",
+        "bytes": 10754,
+        "sha256": "bf711aaaa8b3f8141459f1806404db2c429a4d8166e9b2e293e4e5f1da07b8d3"
+      },
+      {
+        "path": "tests/abgleich-app.test.mjs",
+        "mode": "100644",
+        "bytes": 40701,
+        "sha256": "44bf22a6724d98dd0ec0cf0ab610030907a6283a87da4bf414d96dac9a552a32"
+      },
+      {
+        "path": "tests/ablage.test.mjs",
+        "mode": "100644",
+        "bytes": 6597,
+        "sha256": "dc7805d821b557090e398b6bb0ac6e5c0611f30152ab9475e3fdb15b8e65dc23"
+      },
+      {
+        "path": "tests/ableitung-vergleich.test.mjs",
+        "mode": "100644",
+        "bytes": 15188,
+        "sha256": "10d785328c491d49a9348bf5d74e270d5d7494ba4ae714c352d8d8b3aa84b66f"
+      },
+      {
+        "path": "tests/about.test.mjs",
+        "mode": "100644",
+        "bytes": 5629,
+        "sha256": "6dcb98b0e3062004e96af2a57c65c9427ef3dfee83f30e10b13e27d6ea007b4b"
+      },
+      {
+        "path": "tests/altlasten.test.mjs",
+        "mode": "100644",
+        "bytes": 8478,
+        "sha256": "d88e5402895b52dbbe56ce5a8ffa0e0a26f143038e9e11b90ae8d406c4fdf355"
+      },
+      {
+        "path": "tests/anmeldung.test.mjs",
+        "mode": "100644",
+        "bytes": 36382,
+        "sha256": "946178a90249f168215ac8be6834e7d565c126e556287d5fc66b110a644aa225"
+      },
+      {
+        "path": "tests/app-hilfen.mjs",
+        "mode": "100644",
+        "bytes": 10248,
+        "sha256": "e3ecd3727c996738b64de8cd635d7b62f541f7c08a1d31793d14745411b38e73"
+      },
+      {
+        "path": "tests/app-sandbox.mjs",
+        "mode": "100644",
+        "bytes": 26312,
+        "sha256": "b840f4e3348e3d2532321c4d11ad4b7fa50b77df61c1aaf57243c5b74b928693"
+      },
+      {
+        "path": "tests/app.test.mjs",
+        "mode": "100644",
+        "bytes": 1952,
+        "sha256": "78b995a562c47b6264fd52cfea9b284a4c727078b553acf8b1e9b2e69a6b19f2"
+      },
+      {
+        "path": "tests/aufgaben-anpassung.test.mjs",
+        "mode": "100644",
+        "bytes": 2814,
+        "sha256": "d9cdf2e67ecabd57ea41c34844925ba988526a6015de934817b6b784fb2077b1"
+      },
+      {
+        "path": "tests/aufgaben-node.test.mjs",
+        "mode": "100644",
+        "bytes": 13013,
+        "sha256": "ee4e185bc09618a6b1c745036883a76b31be0dcc82da9bd56e3f35d9b1b37bc6"
+      },
+      {
+        "path": "tests/aufnahme.test.mjs",
+        "mode": "100644",
+        "bytes": 6354,
+        "sha256": "0151ac4fde05163041852829379a3b8e2d6628c97c7df480fe429aa5cdb61998"
+      },
+      {
+        "path": "tests/auftrag1-grundlage.test.mjs",
+        "mode": "100644",
+        "bytes": 8459,
+        "sha256": "9cb054e4c5d4b4b9faacf0dcbd2847992b8a67531529111248ac050d25a4cf4b"
+      },
+      {
+        "path": "tests/auftrag2-bestaetigt.test.mjs",
+        "mode": "100644",
+        "bytes": 8957,
+        "sha256": "669a04eec025e0e09d164c7f83bf2490845e811ea4eae3516d5c260ff66bfda8"
+      },
+      {
+        "path": "tests/ausblick.test.mjs",
+        "mode": "100644",
+        "bytes": 7518,
+        "sha256": "48370441765f314b03cb641844a4f4c2401e78b412d3eaa188a53917a0318c70"
+      },
+      {
+        "path": "tests/begruessung.test.mjs",
+        "mode": "100644",
+        "bytes": 8337,
+        "sha256": "cf327607b14c78d3453ecba587165930731d9ba095604eda08f88f4b1060c88e"
+      },
+      {
+        "path": "tests/beispiele.test.mjs",
+        "mode": "100644",
+        "bytes": 2977,
+        "sha256": "44c5fa0cd12404a59e07ed346a7539d1d7e98fdec264c4aac2db3a73ef02530c"
+      },
+      {
+        "path": "tests/blaetter.test.mjs",
+        "mode": "100644",
+        "bytes": 14164,
+        "sha256": "b124e8fc2d1971c467a9cb95a49dfb8cba26ea52c728d93f4e1af018b699c8f9"
+      },
+      {
+        "path": "tests/echt/github-echt.mjs",
+        "mode": "100644",
+        "bytes": 11025,
+        "sha256": "4fed7e70c908e3509c718c009aad1cf60fdc2671cb53d4577b9d193dc3149423"
+      },
+      {
+        "path": "tests/eltern.test.mjs",
+        "mode": "100644",
+        "bytes": 10198,
+        "sha256": "3e1c55998d69f63ecddeab2b7d8044691b981a2fbbf4b16726d35e3354d7406f"
+      },
+      {
+        "path": "tests/elternansicht.test.mjs",
+        "mode": "100644",
+        "bytes": 10009,
+        "sha256": "6fa50854cae83376ffe7f23fd2e122144849d8a1a29ee245b74588d87a151245"
+      },
+      {
+        "path": "tests/elternbereich-a1.test.mjs",
+        "mode": "100644",
+        "bytes": 5174,
+        "sha256": "1b5416b7dd8c6ce1cd0d11891c037fad3eee4dddaa31c55b8c99d02dda43de09"
+      },
+      {
+        "path": "tests/elternbereich-b1.test.mjs",
+        "mode": "100644",
+        "bytes": 9991,
+        "sha256": "91fddb8a9bdeb5d31106a59b75f415a8a869fa64100139a3276c490b132cacbb"
+      },
+      {
+        "path": "tests/elternbereich-b2.test.mjs",
+        "mode": "100644",
+        "bytes": 5137,
+        "sha256": "a1277f4c612a657fbe8d52779c2080a1139ef2c276da7847d241e630b694f1e3"
+      },
+      {
+        "path": "tests/elternbereich-b3.test.mjs",
+        "mode": "100644",
+        "bytes": 9416,
+        "sha256": "311aa7c362b2479f74db986ed49b55d04fcf6d27f4881b64b054b54a2d4416ae"
+      },
+      {
+        "path": "tests/elternbereich-b4.test.mjs",
+        "mode": "100644",
+        "bytes": 7360,
+        "sha256": "2bca7c7b37c3b7b9585bc20398ad39287d320d1df7219599fa4992becfa01335"
+      },
+      {
+        "path": "tests/elternbereich-b5.test.mjs",
+        "mode": "100644",
+        "bytes": 6203,
+        "sha256": "b7736a2581a9aa43576d1297c8b18ec2b3369c96cd2a475a017bd5e93c87c5ed"
+      },
+      {
+        "path": "tests/elternbereich-c1.test.mjs",
+        "mode": "100644",
+        "bytes": 8572,
+        "sha256": "ef2d8f889fb7aae5b5bc00f476cb3b5584b475141a604aac912dedcce12bec5f"
+      },
+      {
+        "path": "tests/elternbereich-d1.test.mjs",
+        "mode": "100644",
+        "bytes": 11190,
+        "sha256": "48a5992f34cde29377d3f55071aa46127f077e3d20d7039392aecab9d6fd1fc3"
+      },
+      {
+        "path": "tests/elternbereich-d2.test.mjs",
+        "mode": "100644",
+        "bytes": 5529,
+        "sha256": "88bc7d17d0dda99ff85431a475e6dd82df9dcfda0b14f1bb9b9845e4ec601282"
+      },
+      {
+        "path": "tests/elternbereich-d3.test.mjs",
+        "mode": "100644",
+        "bytes": 3795,
+        "sha256": "7bb7b8b50bb08876624ecb2dd68bb46e0a71324918f22a06d94489145014d94c"
+      },
+      {
+        "path": "tests/elternbereich-d4.test.mjs",
+        "mode": "100644",
+        "bytes": 7698,
+        "sha256": "585814befe0c0d3af4f20f7a2d88910f2993ab83cf1f0d8d32cb935c88443b34"
+      },
+      {
+        "path": "tests/elternbereich-e1.test.mjs",
+        "mode": "100644",
+        "bytes": 3691,
+        "sha256": "ed22368b7c0860c1779231265d6a55f9a8274cae347705bef2b85e9434b17990"
+      },
+      {
+        "path": "tests/elternbereich-e2.test.mjs",
+        "mode": "100644",
+        "bytes": 7727,
+        "sha256": "6ea0908b34fb998c2dd3da239b0fd977a9e4942ee0296879f2495734d5dc29c4"
+      },
+      {
+        "path": "tests/elternbereich-e3.test.mjs",
+        "mode": "100644",
+        "bytes": 6665,
+        "sha256": "4ecabbed7b8a6ed42e6ff5487b564ba3f8ff544a90637bbf204300194b822456"
+      },
+      {
+        "path": "tests/elternbereich-f1.test.mjs",
+        "mode": "100644",
+        "bytes": 5354,
+        "sha256": "c6ba77e4962d8c30f0a9aada22e875c6c89d6f8be3ff848b2192b992d4228324"
+      },
+      {
+        "path": "tests/elternbereich-f2.test.mjs",
+        "mode": "100644",
+        "bytes": 3313,
+        "sha256": "dc5d1e1c6bfddc80c3f97521a29aaac23733d1b462c149aa56d3c7bd48b9ebf3"
+      },
+      {
+        "path": "tests/elternbereich-f3.test.mjs",
+        "mode": "100644",
+        "bytes": 6291,
+        "sha256": "5756cb79de4791ccbec644a1052c1d23fef7c599bc075973003292a5c02f4309"
+      },
+      {
+        "path": "tests/elternbereich-f4.test.mjs",
+        "mode": "100644",
+        "bytes": 3804,
+        "sha256": "937f22a275a0fbe36cf5b556323c56dcba0001bc8b84558c945378a1a85e64ff"
+      },
+      {
+        "path": "tests/elternbereich-f5.test.mjs",
+        "mode": "100644",
+        "bytes": 5194,
+        "sha256": "48e30e4f16fd9c3ef50268169626d673bb05c3f2b82428a1bac0005ce587c384"
+      },
+      {
+        "path": "tests/elternbereich-f6.test.mjs",
+        "mode": "100644",
+        "bytes": 7379,
+        "sha256": "5d97f5393703de3d2917372a8d4374965784e6c8d681ad08cdad0dea4c6250f2"
+      },
+      {
+        "path": "tests/elternbereich-titel.test.mjs",
+        "mode": "100644",
+        "bytes": 4828,
+        "sha256": "953c5b2b791799fc155cd99405bba36a812f3efe9b83266ce8eccd895d6ebac0"
+      },
+      {
+        "path": "tests/erstanmeldung-browser.test.mjs",
+        "mode": "100644",
+        "bytes": 15947,
+        "sha256": "5005e243b055374aa3d16e06f1ab12397637f2c0a6827cfd0e7dd52dbc2b3843"
+      },
+      {
+        "path": "tests/erstanmeldung-hilfen.mjs",
+        "mode": "100644",
+        "bytes": 2013,
+        "sha256": "1742733d3c33e252d1347f005552aa1ac0a1e46c6f7fbf693a5244953c17ba01"
+      },
+      {
+        "path": "tests/erstanmeldung.test.mjs",
+        "mode": "100644",
+        "bytes": 10549,
+        "sha256": "1f664b523491e12cef0f5493511538ecaa6066f39b90825322691ffbd53d630b"
+      },
+      {
+        "path": "tests/evaluation-eltern-browser.test.mjs",
+        "mode": "100644",
+        "bytes": 20479,
+        "sha256": "cb34add6a10e2bc38a5bfd9eb849c0cf370b5a3a8586401b8c430451912a4191"
+      },
+      {
+        "path": "tests/evaluation-upgrade-browser.test.mjs",
+        "mode": "100644",
+        "bytes": 13505,
+        "sha256": "a17efabfdcbd79f2ba1d3f4c9599ef10252a7f0d60e8bad686a5bc6286073576"
+      },
+      {
+        "path": "tests/familienfassung.test.mjs",
+        "mode": "100644",
+        "bytes": 37601,
+        "sha256": "696b7153be5cad9e76e8fc8161b33806f2b60e08923a7c312117de1c11f831de"
+      },
+      {
+        "path": "tests/fragen.test.mjs",
+        "mode": "100644",
+        "bytes": 3520,
+        "sha256": "45141e36a107e51674991d9b2f118afdec65ad8bee2997b2295d85bd3b99a1aa"
+      },
+      {
+        "path": "tests/geraete.test.mjs",
+        "mode": "100644",
+        "bytes": 3173,
+        "sha256": "19feb837a361130720f52a7682a4feac818ae18da451825a5c0c1afd08b0889e"
+      },
+      {
+        "path": "tests/hilfe-rollen.test.mjs",
+        "mode": "100644",
+        "bytes": 5177,
+        "sha256": "a3db1c3ce0c798343b31afdfe51a10adc1e6ed88aedcf6e2070d633a9c19a926"
+      },
+      {
+        "path": "tests/hilfe.test.mjs",
+        "mode": "100644",
+        "bytes": 12288,
+        "sha256": "db2b7d86f585ad8d89d64fadb37e1e00036ea58c78f787ec60826efbc2012f72"
+      },
+      {
+        "path": "tests/hilfen.mjs",
+        "mode": "100644",
+        "bytes": 179,
+        "sha256": "ab3b2f8cece4c578fb7411227750ece4028c1d0afd68b31ab0f1e068f186619d"
+      },
+      {
+        "path": "tests/huelle.test.mjs",
+        "mode": "100644",
+        "bytes": 9566,
+        "sha256": "7e512382e8ab7fbcf0922ab0075ee578e08586af7009cd0c6b61e55bc36f61ac"
+      },
+      {
+        "path": "tests/info.test.mjs",
+        "mode": "100644",
+        "bytes": 4639,
+        "sha256": "aab11f0da2489b0d0e890d3d2f1362cc9973cca057e4da14ace79b472fa8bd44"
+      },
+      {
+        "path": "tests/kapitel-person.test.mjs",
+        "mode": "100644",
+        "bytes": 2918,
+        "sha256": "3a988a2aebc3431323bcf74fc6e1fbda5039d1adc52d2a0e8f1b87c497a342dc"
+      },
+      {
+        "path": "tests/kern.test.mjs",
+        "mode": "100644",
+        "bytes": 7630,
+        "sha256": "3d3e411222926e35d5ca762ea79bffbe90b44dac479d9e25463fbcac64628d23"
+      },
+      {
+        "path": "tests/konten-beispiel.json",
+        "mode": "100644",
+        "bytes": 1808,
+        "sha256": "cdb2f9429b1678cc770a1e946cc7c832b7ba649cb68e2486cc5a7b7b331f0792"
+      },
+      {
+        "path": "tests/konten-hilfen.mjs",
+        "mode": "100644",
+        "bytes": 3818,
+        "sha256": "fae330f448f28d782fd237a4fed318bd6e0375e59542542c0144d773be89be30"
+      },
+      {
+        "path": "tests/konto-anmeldung-browser.test.mjs",
+        "mode": "100644",
+        "bytes": 11228,
+        "sha256": "46207b3d52a6a68a08d00623a31f29df91f7618f7d5a6f71a68e86c64411cbda"
+      },
+      {
+        "path": "tests/konto-anmeldung.test.mjs",
+        "mode": "100644",
+        "bytes": 49046,
+        "sha256": "f82bc89bc8cd273ddf5fc85d4a16d52ef2f11982c213d854be6084ab2a067e02"
+      },
+      {
+        "path": "tests/konto-einladungen-browser.test.mjs",
+        "mode": "100644",
+        "bytes": 13347,
+        "sha256": "d27ad31ab5718239e0e3663351822f1f0b83f675fa0d6b86f35e14d3482d2258"
+      },
+      {
+        "path": "tests/konto-einladungen.test.mjs",
+        "mode": "100644",
+        "bytes": 32225,
+        "sha256": "d75b3c7fb45c07770f13dd4d99ce1ca5778a4b79e03e5be00d570e47a1b97ffc"
+      },
+      {
+        "path": "tests/lehrkraft-schueler.test.mjs",
+        "mode": "100644",
+        "bytes": 29497,
+        "sha256": "56c5ba3cf898c2e59e72ccecd666113a7e816b2c735bc4b7b353e2e7f0ebd8c5"
+      },
+      {
+        "path": "tests/lernlogik.test.mjs",
+        "mode": "100644",
+        "bytes": 9333,
+        "sha256": "aebc66b36091a01fa551c0b5a576d8d58fa6cb9984c1ca7a362ec3bce2125f70"
+      },
+      {
+        "path": "tests/module/abgleich.test.mjs",
+        "mode": "100644",
+        "bytes": 25418,
+        "sha256": "1376e8d1c3f84691b2e033cb0d0d9576a894adda10f45c009c95a13a59339e69"
+      },
+      {
+        "path": "tests/module/ableitung.test.mjs",
+        "mode": "100644",
+        "bytes": 49212,
+        "sha256": "4ddc152bfd9fcd0102497c8984fd59f5a6198a05a7a02541b946ddc7225ab4bd"
+      },
+      {
+        "path": "tests/module/anmeldung.test.mjs",
+        "mode": "100644",
+        "bytes": 17482,
+        "sha256": "b835499645b212e09362b24dc17e31f194cb6e03c159b82f31871ed42ad2849d"
+      },
+      {
+        "path": "tests/module/annahme.test.mjs",
+        "mode": "100644",
+        "bytes": 29048,
+        "sha256": "08b9607bf4902c5d23e6ef69bc236d7795a5a1cda9c915eb729c0188dfdc7664"
+      },
+      {
+        "path": "tests/module/bereiche.test.mjs",
+        "mode": "100644",
+        "bytes": 43018,
+        "sha256": "9834b852296b354ce5df28c82216ee270eb14da6256e0054457a6c5ef7bfc8ee"
+      },
+      {
+        "path": "tests/module/einladung.test.mjs",
+        "mode": "100644",
+        "bytes": 31978,
+        "sha256": "6ed9ce01135fdc90dd6de92964379cbf26b9f3ca69bb6954ee4c9727de71095a"
+      },
+      {
+        "path": "tests/module/ereignisse.test.mjs",
+        "mode": "100644",
+        "bytes": 40656,
+        "sha256": "aa002f55de289f73d4bce54a84e29e534a3c1eca06c8404f60b20306b7ad8484"
+      },
+      {
+        "path": "tests/module/erneuern.test.mjs",
+        "mode": "100644",
+        "bytes": 27172,
+        "sha256": "f8e97223be5869d13dab56ebcf6323aae0f9ccf8bc24f07d7bc11c36f2115b31"
+      },
+      {
+        "path": "tests/module/erstanmeldung.test.mjs",
+        "mode": "100644",
+        "bytes": 18599,
+        "sha256": "31c3ffe62270819a887db8f4d0cef2cc73eabecab774508073e97e46710d290a"
+      },
+      {
+        "path": "tests/module/geraete.test.mjs",
+        "mode": "100644",
+        "bytes": 19620,
+        "sha256": "8adfb877c6d624d9e251600cc04d9378199b6119221be89782d81d627c4eab89"
+      },
+      {
+        "path": "tests/module/geraeteabgleich.test.mjs",
+        "mode": "100644",
+        "bytes": 14518,
+        "sha256": "ef17b8bf8188648219fdcd60c35a836f8e03d045c7ebdf1d272230968ffbed7e"
+      },
+      {
+        "path": "tests/module/geschichten.test.mjs",
+        "mode": "100644",
+        "bytes": 5417,
+        "sha256": "76fbb02826710210473248212e27de920e2c9671c8d7e9d0a26cc8afdbc32dc0"
+      },
+      {
+        "path": "tests/module/github-nachbau.mjs",
+        "mode": "100644",
+        "bytes": 11870,
+        "sha256": "739c21af0050333d4795f3804d1b78e587d879e5fd98fd73f8cc86f78b27b919"
+      },
+      {
+        "path": "tests/module/github.test.mjs",
+        "mode": "100644",
+        "bytes": 27079,
+        "sha256": "031294aa1db7909a7ee07f86d5fa07104ac5fd970923b1c046e7034411db4466"
+      },
+      {
+        "path": "tests/module/grundlage.test.mjs",
+        "mode": "100644",
+        "bytes": 3968,
+        "sha256": "72b68e401ad28b8673ac081206587b0991765f2af4cf8b07947b205ce962fb96"
+      },
+      {
+        "path": "tests/module/kinddaten.test.mjs",
+        "mode": "100644",
+        "bytes": 41485,
+        "sha256": "be813b6b506d5b3ebcf04b37552ed3d62edbac545bef17766fe90fb253bae9c2"
+      },
+      {
+        "path": "tests/module/konto.test.mjs",
+        "mode": "100644",
+        "bytes": 42553,
+        "sha256": "898a566c403e15ac4f4747020e44f1dd1db476267cd9e4a2ad655d4aba7c3e49"
+      },
+      {
+        "path": "tests/module/krypto.test.mjs",
+        "mode": "100644",
+        "bytes": 8470,
+        "sha256": "0c533e8b8be7520f4ef15451565f63efa9b07e906fb3995c47d5410ed43de6c6"
+      },
+      {
+        "path": "tests/module/lesen.test.mjs",
+        "mode": "100644",
+        "bytes": 17536,
+        "sha256": "8f675e8e294fd351e621f4ac712f478a7dea9d53d0e7804904c5f7245233190d"
+      },
+      {
+        "path": "tests/module/passwort.test.mjs",
+        "mode": "100644",
+        "bytes": 3441,
+        "sha256": "fb459fc35298b507e6048a9f51d6961cdcd544ee70bb2000ab7677978bea1893"
+      },
+      {
+        "path": "tests/module/qrcode.test.mjs",
+        "mode": "100644",
+        "bytes": 4944,
+        "sha256": "e0d37fa6ce97a1446f6cbe806ecdd3d2cc05398068f1c78f167f40a6d33ad1b6"
+      },
+      {
+        "path": "tests/module/rahmen.test.mjs",
+        "mode": "100644",
+        "bytes": 4149,
+        "sha256": "e9f77f89ba7d87fbea5e624b24b6d1e2e98b4a46b60c60f04d66b87061c95cd9"
+      },
+      {
+        "path": "tests/module/rechte.test.mjs",
+        "mode": "100644",
+        "bytes": 5015,
+        "sha256": "bde3b0bc5787671cf6edf61a4bf88dea436edb6bbe30eb90ac7d6ad18e1f5788"
+      },
+      {
+        "path": "tests/module/runde.test.mjs",
+        "mode": "100644",
+        "bytes": 2925,
+        "sha256": "e29675e7dfe68686e3580dac477a782d3c85850259b135bb9a8bcc7bf6c543c7"
+      },
+      {
+        "path": "tests/module/schnappschuss.test.mjs",
+        "mode": "100644",
+        "bytes": 18893,
+        "sha256": "55124cb07e8c7aed988dec4c17f11a0edcd5e41812c5d79e60eafe48b53f0bd6"
+      },
+      {
+        "path": "tests/module/school-evaluation.test.mjs",
+        "mode": "100644",
+        "bytes": 8663,
+        "sha256": "182a8066461b96df5f83f4185f15a0a7c67fa87b0a8e2696084dd2342d5c114a"
+      },
+      {
+        "path": "tests/module/schreiber.test.mjs",
+        "mode": "100644",
+        "bytes": 20425,
+        "sha256": "5392a28760daa6be52646efafecc84fbb5fcf7bf50ad7049678f9f22f01bd6ba"
+      },
+      {
+        "path": "tests/module/speicher-vertrag.mjs",
+        "mode": "100644",
+        "bytes": 22448,
+        "sha256": "af34cbc8eaff15ba5fbf00c8bbc83d5d65b51c30dbbde09c57f23dbf8956e3e7"
+      },
+      {
+        "path": "tests/module/speicher.test.mjs",
+        "mode": "100644",
+        "bytes": 5245,
+        "sha256": "73c5cdc4c07a465dc4843330da13b6feba7d1b59b702e86401b2e7dd63a53692"
+      },
+      {
+        "path": "tests/module/textfragen.test.mjs",
+        "mode": "100644",
+        "bytes": 5392,
+        "sha256": "6990dcacdf104e327fa7e7ab4765aa008a8828c45c4f9c5e77e02f3699414f4e"
+      },
+      {
+        "path": "tests/module/witze.test.mjs",
+        "mode": "100644",
+        "bytes": 4461,
+        "sha256": "24cc4e1b914258c70dfe193acbaceeea22b4d0cabda49b6c0de338dcf4ff9bae"
+      },
+      {
+        "path": "tests/module/zulassung.test.mjs",
+        "mode": "100644",
+        "bytes": 28917,
+        "sha256": "319a835de2352ab1064e885c5d9caeef20b70a50f5d9afaa8f5b86fa3ef67372"
+      },
+      {
+        "path": "tests/neutral.test.mjs",
+        "mode": "100644",
+        "bytes": 16356,
+        "sha256": "7012d38016b44a49bf7527709fcea5126757291e1cdbf291f08551192c85fc37"
+      },
+      {
+        "path": "tests/pdf.test.mjs",
+        "mode": "100644",
+        "bytes": 5459,
+        "sha256": "1ccd8134d55ccd31aa59327ecf3254a5775d8c4a6ea56b3d0605885f092a85c4"
+      },
+      {
+        "path": "tests/profil.test.mjs",
+        "mode": "100644",
+        "bytes": 13371,
+        "sha256": "7ee5d3d0f4d0fc835e5518b7166c2dc55d25b533d958e6acb76b5241f3a2d941"
+      },
+      {
+        "path": "tests/runde-ohne-doppelte.test.mjs",
+        "mode": "100644",
+        "bytes": 4159,
+        "sha256": "0743b5eb8eb9d44e5772d633122976351141c61bf8f5c8665a987aa4d011a735"
+      },
+      {
+        "path": "tests/schreibhaken-1b.test.mjs",
+        "mode": "100644",
+        "bytes": 32087,
+        "sha256": "9f57002f5e2566a0fa25394c122b318bcd6faceaa754a911408389d0b44a2e85"
+      },
+      {
+        "path": "tests/schriften.test.mjs",
+        "mode": "100644",
+        "bytes": 16428,
+        "sha256": "ef687d9f8562c4190f555a014790ced3cacf016486b9216c997ccb0bb89454e6"
+      },
+      {
+        "path": "tests/schuldaten-beispiel.json",
+        "mode": "100644",
+        "bytes": 4041,
+        "sha256": "198b0d22a077a1f02d0d30e47810cfdbfc1c14280eb729f57b5c7a056948f2c9"
+      },
+      {
+        "path": "tests/schule-klasse.test.mjs",
+        "mode": "100644",
+        "bytes": 21281,
+        "sha256": "24b649d22057a3fb7b7acc75b0c0131eda6ffa3bc697b05865a7fcc85015a288"
+      },
+      {
+        "path": "tests/schule.test.mjs",
+        "mode": "100644",
+        "bytes": 9736,
+        "sha256": "934b76844a5127d478fd917bf0e3322a87a52f6f53dde897010ea09afd32f794"
+      },
+      {
+        "path": "tests/schulimport-studie-spike.test.mjs",
+        "mode": "100644",
+        "bytes": 3541,
+        "sha256": "b992e5bd6d530bd44e7b857900495249b1ec411b21401f77b9d92b3f18e5d6c2"
+      },
+      {
+        "path": "tests/schulimport.test.mjs",
+        "mode": "100644",
+        "bytes": 27426,
+        "sha256": "7b23949dd09fc919fcefe237dad20a727415170d1ee4e0b233e2e3a843d1ffdc"
+      },
+      {
+        "path": "tests/schulische-einstufungen.test.mjs",
+        "mode": "100644",
+        "bytes": 19024,
+        "sha256": "43fd01beabdd1738ab27e55c1a0dffdca7522fa684fd0437993d26babf2e59d2"
+      },
+      {
+        "path": "tests/showme.test.mjs",
+        "mode": "100644",
+        "bytes": 10386,
+        "sha256": "a529122f67f01c41aad78825d977ea407fcdb40583d1e17fe8f1968b6dba20e7"
+      },
+      {
+        "path": "tests/sohelfen.test.mjs",
+        "mode": "100644",
+        "bytes": 7303,
+        "sha256": "9025859759ceaef1b2729cdeec7a0d72d490f98c3d747be9aa6d41bf04016760"
+      },
+      {
+        "path": "tests/spass.test.mjs",
+        "mode": "100644",
+        "bytes": 13558,
+        "sha256": "906d55c26255be22de06cae1ecdfbff4dc06e4a8f1a9956ba3774b0786dc87f7"
+      },
+      {
+        "path": "tests/startseite.test.mjs",
+        "mode": "100644",
+        "bytes": 5130,
+        "sha256": "ca24ff4056bb42ccae8bbd20dd6373378973c3d5d056df18f09908c1ea5a5ef0"
+      },
+      {
+        "path": "tests/stufe1-ist.test.mjs",
+        "mode": "100644",
+        "bytes": 5680,
+        "sha256": "91f528270b454d7073d02245a939a804209265f5d320ed720bd3acbd1746d35e"
+      },
+      {
+        "path": "tests/stufe1-p1.test.mjs",
+        "mode": "100644",
+        "bytes": 16192,
+        "sha256": "683762be2896d460c3be1ae02d5c80588b6eb8d7dc32d31823d442e4915d085a"
+      },
+      {
+        "path": "tests/stufe1-p2.test.mjs",
+        "mode": "100644",
+        "bytes": 10409,
+        "sha256": "a0f1a925a96a3828db266c59d7e22ed8f2153cbfb0773cb7afb026370603e4a3"
+      },
+      {
+        "path": "tests/stufe1-p3.test.mjs",
+        "mode": "100644",
+        "bytes": 6467,
+        "sha256": "74a138f626cc2f73b44acdf8c522ae2ca954a51da706ade529f66a1c8e7ad684"
+      },
+      {
+        "path": "tests/stufe1-p4.test.mjs",
+        "mode": "100644",
+        "bytes": 22929,
+        "sha256": "194a20b7f34b6a82e9bb31a32f3330ddaafd630e6a21247affaa11b1865a8068"
+      },
+      {
+        "path": "tests/testbau-bedienwege.test.mjs",
+        "mode": "100644",
+        "bytes": 1015,
+        "sha256": "56757ebd3fbc68376ce666d54e29d2a98640bd34b8bc1dd3f1cb7a8d78f2b9a4"
+      },
+      {
+        "path": "tests/testbau-lesen.test.mjs",
+        "mode": "100644",
+        "bytes": 12288,
+        "sha256": "90ad9419b96f822c9a0d89414272710024a67348e19bab12a638384422af644f"
+      },
+      {
+        "path": "tests/testbau-leser.mjs",
+        "mode": "100644",
+        "bytes": 5595,
+        "sha256": "981ff96256e6bb5d6b7647e567fee11ab83f6296de1c8a245653a173d15aba6b"
+      },
+      {
+        "path": "tests/testbau.test.mjs",
+        "mode": "100644",
+        "bytes": 16341,
+        "sha256": "4ae912f9da585bb9f03c7cc556d70b734a1bc6bae480db6e4ecb877a827de3e1"
+      },
+      {
+        "path": "tests/testinstanz-veroeffentlichen.test.mjs",
+        "mode": "100644",
+        "bytes": 18115,
+        "sha256": "a825c4c176da64c5363a54d49adce3dd019db498a250a1437d1327b7e8677102"
+      },
+      {
+        "path": "tests/testinstanz.test.mjs",
+        "mode": "100644",
+        "bytes": 34910,
+        "sha256": "2788b3ea6302ebe674a1ef3036d1e9c68033ac5bdcb2f166668dea7ef187727b"
+      },
+      {
+        "path": "tests/testpersonen.test.mjs",
+        "mode": "100644",
+        "bytes": 20840,
+        "sha256": "f6da3ed3ed7c27ee0f1a60370615542be2f9180996d4297908bf6990fa8fd794"
+      },
+      {
+        "path": "tests/themen.test.mjs",
+        "mode": "100644",
+        "bytes": 7409,
+        "sha256": "81cd2e9cfbce66da67345f5f4869cf734e1ace876301b9b69730624e8e11be0d"
+      },
+      {
+        "path": "tests/titel.test.mjs",
+        "mode": "100644",
+        "bytes": 5648,
+        "sha256": "ec09b545cb2ef0f8aebba7d3fc70f6ab34bb96810c863bedd43fc999078b6cbb"
+      },
+      {
+        "path": "tests/veroeffentlichen.test.mjs",
+        "mode": "100644",
+        "bytes": 5158,
+        "sha256": "77c97db0cd8abb1f1457244bf47e5db072fd568d4c32379dc04fecc1d6bb6ebe"
+      },
+      {
+        "path": "tests/version.test.mjs",
+        "mode": "100644",
+        "bytes": 12429,
+        "sha256": "7c7fba9a3872a8732c6d907cbfca9ca64059e9207df822bd3e4a561464025b1c"
+      },
+      {
+        "path": "tests/wiederherstellung-erfolgspfad.test.mjs",
+        "mode": "100644",
+        "bytes": 5327,
+        "sha256": "5ec772718623133ba04047cc38a758af891cc5aa8d9450d00fb00b95a1d93276"
+      },
+      {
+        "path": "tests/zwei-geraete.test.mjs",
+        "mode": "100644",
+        "bytes": 27191,
+        "sha256": "f771a7dc8d820702131a6120e9691c06bdc188280bf0fba60e346f687b67fd1b"
+      },
+      {
+        "path": "werkzeug/bauen.mjs",
+        "mode": "100644",
+        "bytes": 14813,
+        "sha256": "87143283a730e359b0f81a66020bf1891018bd4d33332be275ea2010e5e4f1e2"
+      },
+      {
+        "path": "werkzeug/familie.mjs",
+        "mode": "100644",
+        "bytes": 13732,
+        "sha256": "5caa62e61d83564a173e95858706819de6e61d4727ec48ef71f7783bacb94c90"
+      },
+      {
+        "path": "werkzeug/github-probe.mjs",
+        "mode": "100644",
+        "bytes": 8665,
+        "sha256": "bb1f9fae081d7cea9eb8de972489f6d175605a62742d114de6fde76d880ba6a5"
+      },
+      {
+        "path": "werkzeug/huelle.html",
+        "mode": "100644",
+        "bytes": 7012,
+        "sha256": "cba6ac32071113d9a0f565a656278cac747e73df61b2daa984d6e147bc30916a"
+      },
+      {
+        "path": "werkzeug/kern.mjs",
+        "mode": "100644",
+        "bytes": 5125,
+        "sha256": "b57a743802770caa53b0d17eb6d9d2f4f071fd60c9977d25cd2d239a147367bd"
+      },
+      {
+        "path": "werkzeug/konten.mjs",
+        "mode": "100644",
+        "bytes": 15314,
+        "sha256": "98c63682df9da511bdd1949d77feeec3542389127ec4fa0a4607d02324317149"
+      },
+      {
+        "path": "werkzeug/live-durchlauf.mjs",
+        "mode": "100644",
+        "bytes": 4036,
+        "sha256": "8a51b9527fdf330b68e759b94188e1f03b3ef3dc1748beb394c5f12be095077e"
+      },
+      {
+        "path": "werkzeug/manifest.webmanifest",
+        "mode": "100644",
+        "bytes": 292,
+        "sha256": "580226b404638f147e7cae9c3dd742d06d4e91f3298c45381a0d8534a5421872"
+      },
+      {
+        "path": "werkzeug/module.mjs",
+        "mode": "100644",
+        "bytes": 4383,
+        "sha256": "b99b48f1445cca0fa52753a81799de9ce05574280effc1314f30a69e6ae44076"
+      },
+      {
+        "path": "werkzeug/releases.mjs",
+        "mode": "100644",
+        "bytes": 4225,
+        "sha256": "3f000e02c772d99ccd287419253014f4e082e762ac65961b6bd6865dcad758d9"
+      },
+      {
+        "path": "werkzeug/salz.json",
+        "mode": "100644",
+        "bytes": 109,
+        "sha256": "e2ec8cc81404de1dcdb1e8aab72313d58a5a0d6ce295b0af6689e61607697298"
+      },
+      {
+        "path": "werkzeug/schluesselablage.mjs",
+        "mode": "100644",
+        "bytes": 3816,
+        "sha256": "e1156900780bf763fa676b1088f42f0ec672544c19f3496fba19c538d0836fff"
+      },
+      {
+        "path": "werkzeug/schriften.mjs",
+        "mode": "100644",
+        "bytes": 5373,
+        "sha256": "c1031255b031b1749c21e3ab7cb3413775ad88c1e4ba30495ff754668359fd9e"
+      },
+      {
+        "path": "werkzeug/schriften/OFL.txt",
+        "mode": "100644",
+        "bytes": 4601,
+        "sha256": "610b66bb46b7221d3cd9cb2b1d5a3869bc3e5cb81cf9831636b6019b2ec422da"
+      },
+      {
+        "path": "werkzeug/schriften/schriften.json",
+        "mode": "100644",
+        "bytes": 93472,
+        "sha256": "8e002f1cb837f66dc7fa19031249feea557f74dec8041b19480ee777af7e2a35"
+      },
+      {
+        "path": "werkzeug/schulbewertungen-uebernehmen.mjs",
+        "mode": "100644",
+        "bytes": 22038,
+        "sha256": "7f7cb40e70ef9a06e91cf4028322a02cb126f826d3071a99662d065542af99e6"
+      },
+      {
+        "path": "werkzeug/schule.mjs",
+        "mode": "100644",
+        "bytes": 1873,
+        "sha256": "8d32e0445ec57690d49e1ba22b8917b278da64f71555762c1c7303178701d5f9"
+      },
+      {
+        "path": "werkzeug/speicherstellen.json",
+        "mode": "100644",
+        "bytes": 10729,
+        "sha256": "c937116daa06392ea48839c812b86066065223b78be05321105a5f1717ea7dee"
+      },
+      {
+        "path": "werkzeug/testen.mjs",
+        "mode": "100644",
+        "bytes": 1480,
+        "sha256": "fa68faa608f4854bfa82d435be7be7252be0b7930918e1d0395690bb8e495ccb"
+      },
+      {
+        "path": "werkzeug/testinstanz-ersatz.json",
+        "mode": "100644",
+        "bytes": 151,
+        "sha256": "4b3e3e686e85d8b60740eb4db1640ee5c9e2ffe8af3c65cd8023f2522b56e83a"
+      },
+      {
+        "path": "werkzeug/testinstanz-veroeffentlichen.mjs",
+        "mode": "100644",
+        "bytes": 9867,
+        "sha256": "477286e6356d85966d40a79b923ba15bcfafa5eee4f9e9f1c15124f4a188d703"
+      },
+      {
+        "path": "werkzeug/testinstanz.mjs",
+        "mode": "100644",
+        "bytes": 18195,
+        "sha256": "e6bc3f63cf10c414a23ed1d68ff13cc0bb6a68da471342d4066200271568f35f"
+      },
+      {
+        "path": "werkzeug/testpersonen.mjs",
+        "mode": "100644",
+        "bytes": 24901,
+        "sha256": "1cf3953dd32bcc81a21528b5bab6a2796ef0f6f3ad25b9a9f3f1bf2438419bc7"
+      },
+      {
+        "path": "werkzeug/verbotene-woerter.txt",
+        "mode": "100644",
+        "bytes": 70,
+        "sha256": "5dd75a1ce024c1d2d0ee3568b768b23bf2b56b4dc0ee0b0111043c36cbc09111"
+      },
+      {
+        "path": "werkzeug/veroeffentlichen.mjs",
+        "mode": "100644",
+        "bytes": 5115,
+        "sha256": "677083720a5176f6f1dd74d0120ef8a66aee214957da5b45f98359b805541594"
+      },
+      {
+        "path": "werkzeug/verschluesseln.mjs",
+        "mode": "100644",
+        "bytes": 9636,
+        "sha256": "d906ba4f9fd46b9676eb559d7e01a691cbce9136b345d7c12c450d4fd3815735"
+      },
+      {
+        "path": "werkzeug/version.mjs",
+        "mode": "100644",
+        "bytes": 5836,
+        "sha256": "234bc4308e3db0591aae362fe3a40400da33085f45070546418ff21bf19b178f"
+      }
+    ]
+  },
+  "exact_initial_views": [
+    {
+      "path": "package.json",
+      "archive": "source",
+      "archive_member": "package.json",
+      "bytes": 3149,
+      "git_blob": "fc40de702be7b75c3d07655f8ea8f08a013d9783",
+      "sha256": "4c9fdfbb001276844836447cd9aa3134290354d56d966c5cc54e58cd76e35934"
+    },
+    {
+      "path": "DEVELOPMENT.md",
+      "archive": "source",
+      "archive_member": "DEVELOPMENT.md",
+      "bytes": 3102,
+      "git_blob": "3f406b5750566645ee2e4149481fc6f10f9764b1",
+      "sha256": "072cf53683ac8d7fce9829f3a482b48d9834edf214e35666205e2831c2333d18"
+    },
+    {
+      "path": "tests/testinstanz.test.mjs",
+      "archive": "source",
+      "archive_member": "tests/testinstanz.test.mjs",
+      "bytes": 34910,
+      "git_blob": "beb353ad3405a26308bd299016c3b7b993a47f30",
+      "sha256": "2788b3ea6302ebe674a1ef3036d1e9c68033ac5bdcb2f166668dea7ef187727b"
+    },
+    {
+      "path": "tests/evaluation-upgrade-browser.test.mjs",
+      "archive": "source",
+      "archive_member": "tests/evaluation-upgrade-browser.test.mjs",
+      "bytes": 13505,
+      "git_blob": "c0bec5eb7cd2252a577b23975f57154ade0c1a51",
+      "sha256": "a17efabfdcbd79f2ba1d3f4c9599ef10252a7f0d60e8bad686a5bc6286073576"
+    },
+    {
+      "path": "tests/neutral.test.mjs",
+      "archive": "source",
+      "archive_member": "tests/neutral.test.mjs",
+      "bytes": 16356,
+      "git_blob": "51b7e7db2086fb44a95c4596630b8cfb2791ee9e",
+      "sha256": "7012d38016b44a49bf7527709fcea5126757291e1cdbf291f08551192c85fc37"
+    },
+    {
+      "path": "werkzeug/testinstanz.mjs",
+      "archive": "source",
+      "archive_member": "werkzeug/testinstanz.mjs",
+      "bytes": 18195,
+      "git_blob": "e3dbef5f75d582574b3b4cbf6abb2c0ff30cccdf",
+      "sha256": "e6bc3f63cf10c414a23ed1d68ff13cc0bb6a68da471342d4066200271568f35f"
+    },
+    {
+      "path": "werkzeug/testinstanz-ersatz.json",
+      "archive": "source",
+      "archive_member": "werkzeug/testinstanz-ersatz.json",
+      "bytes": 151,
+      "git_blob": "2e2c0dc9f91dd309cac4c5e9fa0848c3c4be9116",
+      "sha256": "4b3e3e686e85d8b60740eb4db1640ee5c9e2ffe8af3c65cd8023f2522b56e83a"
+    },
+    {
+      "path": "werkzeug/bauen.mjs",
+      "archive": "source",
+      "archive_member": "werkzeug/bauen.mjs",
+      "bytes": 14813,
+      "git_blob": "13a7d9d68a2209072f67e605005ba47c712a7c32",
+      "sha256": "87143283a730e359b0f81a66020bf1891018bd4d33332be275ea2010e5e4f1e2"
+    },
+    {
+      "path": "werkzeug/module.mjs",
+      "archive": "source",
+      "archive_member": "werkzeug/module.mjs",
+      "bytes": 4383,
+      "git_blob": "97e8dc37ff05742c35e4a4e47df8a167f37282fd",
+      "sha256": "b99b48f1445cca0fa52753a81799de9ce05574280effc1314f30a69e6ae44076"
+    },
+    {
+      "path": "tests/app-hilfen.mjs",
+      "archive": "source",
+      "archive_member": "tests/app-hilfen.mjs",
+      "bytes": 10248,
+      "git_blob": "8667137cf2ddd496b33cf765dd3d497b39642bef",
+      "sha256": "e3ecd3727c996738b64de8cd635d7b62f541f7c08a1d31793d14745411b38e73"
+    },
+    {
+      "path": "access-evidence/ARGUS-REVIEW.md",
+      "archive": "evidence",
+      "archive_member": "ARGUS-REVIEW.md",
+      "bytes": 8687,
+      "git_blob": "d4da20e20f5091f2ecfc1e727a0fbd7061d11047",
+      "sha256": "df9706e984c6084f0dfb8dd9de23048ce4a60e294de263add3f05d2e280e105f"
+    },
+    {
+      "path": "access-evidence/RESTORE.md",
+      "archive": "evidence",
+      "archive_member": "RESTORE.md",
+      "bytes": 1706,
+      "git_blob": "0c038cf49f89cc2c937f4b1953410545acd87b6d",
+      "sha256": "82ca7bb11c6082a114c992febbe48b6ad3ef65915921119698bc9ac41bd6cf98"
+    },
+    {
+      "path": "access-evidence/source-manifest.json",
+      "archive": "evidence",
+      "archive_member": "source-manifest.json",
+      "bytes": 44354,
+      "git_blob": "458c8a75c22ff996758b05a7cd83e5b92a45186b",
+      "sha256": "f5b2aafcc2b4161bdad9901b559c55ad1ff47285b8fad0134ed9f316a0b1e2fd"
+    },
+    {
+      "path": "access-evidence/test-result-summary.json",
+      "archive": "evidence",
+      "archive_member": "test-result-summary.json",
+      "bytes": 5468,
+      "git_blob": "66d2147efb0849857552ec8da37e3fe874931b29",
+      "sha256": "3d12dc11f2ce0984156ad7e75d5705a859830941e13520a78e95d597e791743c"
+    }
+  ],
+  "runtime": {
+    "schema": "agentarium.relay-runtime-identity.v1",
+    "project_id": "agentarium",
+    "run_id": "AG-BQ-ACCESS-20261116",
+    "task_id": "AG-BQ-ACCESS-20261116-INTAKE-R2",
+    "parent_id": "AG-BQ-ACCESS-20261116",
+    "subject_role": "forge"
+  }
+}
