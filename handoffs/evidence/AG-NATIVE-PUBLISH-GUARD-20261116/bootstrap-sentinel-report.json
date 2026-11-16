@@ -1,0 +1,113 @@
+{
+  "task": "AG-NATIVE-PUBLISH-GUARD-20261116-QA-A1",
+  "version": 1,
+  "source_commit": "02419a49550c3cadb4d65159f0833ca3b0d9f0d1",
+  "before": {
+    "bootstrap": "fffb99708af4dc38a1511a33e2547561e8b677917807f4a70d25cea8f13c0670",
+    "html": "bf9d954be8cea98780e0f1230a1d1ecafd7acfd71f16ff2a797ec6461bca1f35",
+    "adapter": "3f2a721d7b79f4831ec67de90b93ca872719b1680764b3eb07343e8a2465bc02"
+  },
+  "after": {
+    "bootstrap": "fffb99708af4dc38a1511a33e2547561e8b677917807f4a70d25cea8f13c0670",
+    "html": "bf9d954be8cea98780e0f1230a1d1ecafd7acfd71f16ff2a797ec6461bca1f35",
+    "adapter": "3f2a721d7b79f4831ec67de90b93ca872719b1680764b3eb07343e8a2465bc02"
+  },
+  "consumer_extraction_matches_immutable": true,
+  "synthetic": true,
+  "results": [
+    {
+      "name": "valid-own-start",
+      "expected_accept": true,
+      "exit": 0,
+      "stdout": "{\"repo_full_name\":\"pahlborn/agentarium\",\"pr_number\":2,\"comment\":\"<!-- AGENTARIUM_EVENT_V1 -->\\n```json\\n{\\n  \\\"schema\\\": \\\"agentarium.github-event.v1\\\",\\n  \\\"id\\\": \\\"SYNTHETIC-GUARD-QA-VALID-1\\\",\\n  \\\"project_id\\\": \\\"agentarium\\\",\\n  \\\"run_id\\\": \\\"AG-SYNTHETIC-GUARD-QA\\\",\\n  \\\"task_id\\\": \\\"SYNTHETIC-GUARD-QA-TASK\\\",\\n  \\\"parent_id\\\": \\\"SYNTHETIC-GUARD-QA-PARENT\\\",\\n  \\\"actor\\\": \\\"sentinel\\\",\\n  \\\"reporter\\\": \\\"sentinel\\\",\\n  \\\"kind\\\": \\\"started\\\",\\n  \\\"title\\\": \\\"Synthetic QA: „quoted“ \\\\\\\\ / 🛰\\\",\\n  \\\"occurred_at\\\": \\\"2026-11-16T20:26:35Z\\\",\\n  \\\"source_evidence\\\": \\\"reported_checkpoint\\\",\\n  \\\"source_tool_id\\\": \\\"sentinel.local.qa\\\"\\n}\\n```\\n\\nSYNTHETIC local CLI fixture; no real task.\"}",
+      "stderr": "",
+      "boundary_probe": false,
+      "semantic_preservation": true,
+      "result": "passed"
+    },
+    {
+      "name": "bad-known-UTC-date",
+      "expected_accept": false,
+      "exit": 1,
+      "stdout": "",
+      "stderr": "/workspace/work/journal-guard/bootstrap-check.cjs:16\nif(result.art!=='ok')throw Error('consumer rejects: '+result.grund);\n                     ^\n\nError: consumer rejects: occurred_at ungültig\n    at Object.<anonymous> (/workspace/work/journal-guard/bootstrap-check.cjs:16:28)\n    at Module._compile (node:internal/modules/cjs/loader:1929:14)\n    at Object..js (node:internal/modules/cjs/loader:2060:10)\n    at Module.load (node:internal/modules/cjs/loader:1651:32)\n    at Module._load (node:internal/modules/cjs/loader:1443:12)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:261:19)\n    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)\n    at node:internal/main/run_main_module:33:47\n\nNode.js v24.22.1\n",
+      "boundary_probe": false,
+      "result": "passed"
+    },
+    {
+      "name": "unknown-V1-field",
+      "expected_accept": false,
+      "exit": 1,
+      "stdout": "",
+      "stderr": "/workspace/work/journal-guard/bootstrap-check.cjs:16\nif(result.art!=='ok')throw Error('consumer rejects: '+result.grund);\n                     ^\n\nError: consumer rejects: unbekanntes Feld unsupported_field\n    at Object.<anonymous> (/workspace/work/journal-guard/bootstrap-check.cjs:16:28)\n    at Module._compile (node:internal/modules/cjs/loader:1929:14)\n    at Object..js (node:internal/modules/cjs/loader:2060:10)\n    at Module.load (node:internal/modules/cjs/loader:1651:32)\n    at Module._load (node:internal/modules/cjs/loader:1443:12)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:261:19)\n    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)\n    at node:internal/main/run_main_module:33:47\n\nNode.js v24.22.1\n",
+      "boundary_probe": false,
+      "result": "passed"
+    },
+    {
+      "name": "multiple-marker-note",
+      "expected_accept": false,
+      "exit": 1,
+      "stdout": "",
+      "stderr": "/workspace/work/journal-guard/bootstrap-check.cjs:16\nif(result.art!=='ok')throw Error('consumer rejects: '+result.grund);\n                     ^\n\nError: consumer rejects: Marker mehrfach\n    at Object.<anonymous> (/workspace/work/journal-guard/bootstrap-check.cjs:16:28)\n    at Module._compile (node:internal/modules/cjs/loader:1929:14)\n    at Object..js (node:internal/modules/cjs/loader:2060:10)\n    at Module.load (node:internal/modules/cjs/loader:1651:32)\n    at Module._load (node:internal/modules/cjs/loader:1443:12)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:261:19)\n    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)\n    at node:internal/main/run_main_module:33:47\n\nNode.js v24.22.1\n",
+      "boundary_probe": false,
+      "result": "passed"
+    },
+    {
+      "name": "malformed-marker-block-injection",
+      "expected_accept": false,
+      "exit": 1,
+      "stdout": "",
+      "stderr": "/workspace/work/journal-guard/bootstrap-check.cjs:16\nif(result.art!=='ok')throw Error('consumer rejects: '+result.grund);\n                     ^\n\nError: consumer rejects: Marker mehrfach\n    at Object.<anonymous> (/workspace/work/journal-guard/bootstrap-check.cjs:16:28)\n    at Module._compile (node:internal/modules/cjs/loader:1929:14)\n    at Object..js (node:internal/modules/cjs/loader:2060:10)\n    at Module.load (node:internal/modules/cjs/loader:1651:32)\n    at Module._load (node:internal/modules/cjs/loader:1443:12)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:261:19)\n    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)\n    at node:internal/main/run_main_module:33:47\n\nNode.js v24.22.1\n",
+      "boundary_probe": false,
+      "result": "passed"
+    },
+    {
+      "name": "marker-in-event-title",
+      "expected_accept": false,
+      "exit": 1,
+      "stdout": "",
+      "stderr": "/workspace/work/journal-guard/bootstrap-check.cjs:16\nif(result.art!=='ok')throw Error('consumer rejects: '+result.grund);\n                     ^\n\nError: consumer rejects: Marker mehrfach\n    at Object.<anonymous> (/workspace/work/journal-guard/bootstrap-check.cjs:16:28)\n    at Module._compile (node:internal/modules/cjs/loader:1929:14)\n    at Object..js (node:internal/modules/cjs/loader:2060:10)\n    at Module.load (node:internal/modules/cjs/loader:1651:32)\n    at Module._load (node:internal/modules/cjs/loader:1443:12)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:261:19)\n    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)\n    at node:internal/main/run_main_module:33:47\n\nNode.js v24.22.1\n",
+      "boundary_probe": false,
+      "result": "passed"
+    },
+    {
+      "name": "malformed-input-JSON",
+      "expected_accept": false,
+      "exit": 1,
+      "stdout": "",
+      "stderr": "<anonymous_script>:1\n{\"event\": {not valid JSON}\n           ^\n\nSyntaxError: Expected property name or '}' in JSON at position 11 (line 1 column 12)\n    at JSON.parse (<anonymous>)\n    at Object.<anonymous> (/workspace/work/journal-guard/bootstrap-check.cjs:13:18)\n    at Module._compile (node:internal/modules/cjs/loader:1929:14)\n    at Object..js (node:internal/modules/cjs/loader:2060:10)\n    at Module.load (node:internal/modules/cjs/loader:1651:32)\n    at Module._load (node:internal/modules/cjs/loader:1443:12)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:261:19)\n    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)\n    at node:internal/main/run_main_module:33:47\n\nNode.js v24.22.1\n",
+      "boundary_probe": false,
+      "result": "passed"
+    },
+    {
+      "name": "event-not-object",
+      "expected_accept": false,
+      "exit": 1,
+      "stdout": "",
+      "stderr": "/workspace/work/journal-guard/bootstrap-check.cjs:16\nif(result.art!=='ok')throw Error('consumer rejects: '+result.grund);\n                     ^\n\nError: consumer rejects: kein JSON-Objekt\n    at Object.<anonymous> (/workspace/work/journal-guard/bootstrap-check.cjs:16:28)\n    at Module._compile (node:internal/modules/cjs/loader:1929:14)\n    at Object..js (node:internal/modules/cjs/loader:2060:10)\n    at Module.load (node:internal/modules/cjs/loader:1651:32)\n    at Module._load (node:internal/modules/cjs/loader:1443:12)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:261:19)\n    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)\n    at node:internal/main/run_main_module:33:47\n\nNode.js v24.22.1\n",
+      "boundary_probe": false,
+      "result": "passed"
+    },
+    {
+      "name": "schema-only-orphan-delivered",
+      "expected_accept": true,
+      "exit": 0,
+      "stdout": "{\"repo_full_name\":\"pahlborn/agentarium\",\"pr_number\":2,\"comment\":\"<!-- AGENTARIUM_EVENT_V1 -->\\n```json\\n{\\n  \\\"schema\\\": \\\"agentarium.github-event.v1\\\",\\n  \\\"id\\\": \\\"SYNTHETIC-ORPHAN-END\\\",\\n  \\\"project_id\\\": \\\"agentarium\\\",\\n  \\\"run_id\\\": \\\"AG-SYNTHETIC-GUARD-QA\\\",\\n  \\\"task_id\\\": \\\"SYNTHETIC-NEVER-ASSIGNED\\\",\\n  \\\"parent_id\\\": \\\"SYNTHETIC-UNRELATED-PARENT\\\",\\n  \\\"actor\\\": \\\"sentinel\\\",\\n  \\\"reporter\\\": \\\"sentinel\\\",\\n  \\\"kind\\\": \\\"delivered\\\",\\n  \\\"title\\\": \\\"Synthetic QA: „quoted“ \\\\\\\\ / 🛰\\\",\\n  \\\"occurred_at\\\": \\\"2026-11-16T20:26:35Z\\\",\\n  \\\"source_evidence\\\": \\\"reported_checkpoint\\\",\\n  \\\"source_tool_id\\\": \\\"sentinel.local.qa\\\"\\n}\\n```\\n\\n\"}",
+      "stderr": "",
+      "boundary_probe": true,
+      "semantic_preservation": true,
+      "result": "passed"
+    },
+    {
+      "name": "schema-only-reporter-mismatch",
+      "expected_accept": true,
+      "exit": 0,
+      "stdout": "{\"repo_full_name\":\"pahlborn/agentarium\",\"pr_number\":2,\"comment\":\"<!-- AGENTARIUM_EVENT_V1 -->\\n```json\\n{\\n  \\\"schema\\\": \\\"agentarium.github-event.v1\\\",\\n  \\\"id\\\": \\\"SYNTHETIC-REPORTER-MISMATCH\\\",\\n  \\\"project_id\\\": \\\"agentarium\\\",\\n  \\\"run_id\\\": \\\"AG-SYNTHETIC-GUARD-QA\\\",\\n  \\\"task_id\\\": \\\"SYNTHETIC-GUARD-QA-TASK\\\",\\n  \\\"parent_id\\\": \\\"SYNTHETIC-GUARD-QA-PARENT\\\",\\n  \\\"actor\\\": \\\"sentinel\\\",\\n  \\\"reporter\\\": \\\"atlas\\\",\\n  \\\"kind\\\": \\\"started\\\",\\n  \\\"title\\\": \\\"Synthetic QA: „quoted“ \\\\\\\\ / 🛰\\\",\\n  \\\"occurred_at\\\": \\\"2026-11-16T20:26:35Z\\\",\\n  \\\"source_evidence\\\": \\\"reported_checkpoint\\\",\\n  \\\"source_tool_id\\\": \\\"sentinel.local.qa\\\"\\n}\\n```\\n\\n\"}",
+      "stderr": "",
+      "boundary_probe": true,
+      "semantic_preservation": true,
+      "result": "passed"
+    }
+  ],
+  "verdict": "PASS_FOR_BOUNDED_CLI_SCHEMA_CHECKS"
+}

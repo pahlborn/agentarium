@@ -1,0 +1,62 @@
+{
+  "task": "AG-NATIVE-PUBLISH-GUARD-20261116",
+  "source_main": "02419a49550c3cadb4d65159f0833ca3b0d9f0d1",
+  "complete": true,
+  "errors": [],
+  "first_active": "2026-11-16T20:27:36.667Z",
+  "first_stopped": "2026-11-16T20:30:49.947Z",
+  "final": {
+    "at": "2026-11-16T20:30:57.540Z",
+    "working": false,
+    "points": 1170,
+    "delta": 0,
+    "hasStart": true,
+    "hasEnd": true,
+    "hasReturn": true,
+    "row": {
+      "wer": "sentinel",
+      "aufgabe": "AG-NATIVE-PUBLISH-GUARD-20261116-QA-A1",
+      "zustand": "geliefert",
+      "vertretungen": [],
+      "projekt": "agentarium",
+      "lauf": "AG-NATIVE-PUBLISH-GUARD-20261116",
+      "wieder": true,
+      "klemmt": [],
+      "beleg": "6928299999",
+      "belegRef": "https://api.github.com/repos/pahlborn/agentarium/issues/comments/6928299999",
+      "eTyp": "task",
+      "eEltern": "AG-NATIVE-PUBLISH-GUARD-20261116",
+      "eFassung": "",
+      "w": 166.7754
+    },
+    "assignment": 6928299999,
+    "subballs": 0,
+    "rejected": 0,
+    "phase": "verbunden"
+  },
+  "wire_comments": [
+    {
+      "id": 6928296982,
+      "created_at": "2026-11-16T20:25:41Z"
+    },
+    {
+      "id": 6928299999,
+      "created_at": "2026-11-16T20:25:49Z"
+    },
+    {
+      "id": 6928341016,
+      "created_at": "2026-11-16T20:27:32Z"
+    },
+    {
+      "id": 6928423738,
+      "created_at": "2026-11-16T20:30:43Z"
+    },
+    {
+      "id": 6928427783,
+      "created_at": "2026-11-16T20:30:52Z"
+    }
+  ],
+  "scope_correction": "Actual production V1 GitHub objects with no marker/payload rewrite in local API mirror. Both lab copies have exactly one extra trailing LF; extracted parser/constants/role JSON are byte-identical to original. Browser full functional source otherwise unchanged. Raw report scope wording must be read with this correction. Peter browser and real device not observed. This proves the bounded live normal path, not absence of all-role forwarding delays.",
+  "qa_report_sha256": "285190e5db297b8bd74e885032917b20c2992f944f272879b7e1976bf91ca60e",
+  "raw_browser_report_sha256": "fb5403701bcec607429cae349846088b647cddfddfa9dcb2eec3843d695a15ff"
+}

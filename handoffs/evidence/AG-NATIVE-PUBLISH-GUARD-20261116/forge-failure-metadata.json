@@ -1,0 +1,18 @@
+{
+  "schema": "agentarium.relay-result.v2",
+  "task_id": "AG-NATIVE-JOURNAL-GUARD-20261116-FORGE",
+  "source_commit": "f776933bf9e836ec3c28a1e4ddc8c485dc39f0dd",
+  "activation_commit": "70027d0e1d5ecedc837c108d7855760d124b3155",
+  "run_id": "43950071341",
+  "phase": "blocked",
+  "started_at": "2026-11-16T20:28:36.815854+00:00",
+  "stopped_at": "2026-11-16T20:32:32.406139+00:00",
+  "elapsed_seconds": 235.591451312,
+  "session_id": null,
+  "usage": null,
+  "total_cost_usd": null,
+  "failure": "RuntimeError",
+  "changed_paths": [],
+  "secret_scan": "blocked",
+  "handback_sha256": null
+}
