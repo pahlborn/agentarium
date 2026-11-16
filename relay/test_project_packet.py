@@ -915,6 +915,460 @@ class RundeTests(Fixture):
         self.assertFalse(pp.writable_paths(context))
 
 
+K1_A = pp.ACCESS_PROOF
+K1_B = 'tests/evaluation-upgrade-browser.test.mjs'
+OTHER = b'gh' + b'p_' + b'B' * 24
+DECOY_LINE = b'// fixture ' + LITERAL
+ORIG_A = b"import 'node:test';\n" + DECOY_LINE + b'\nconst structural = 5;\n'
+ORIG_B = b"import 'node:test';\nconst welcome = 60000;\n"
+ORIGINALS = {K1_A: ORIG_A, K1_B: ORIG_B}
+GOOD = {K1_A: ORIG_A.replace(b'= 5;', b'= 10;'), K1_B: ORIG_B.replace(b'60000', b'180000')}
+K1_ENTRIES = [e for e in BASE_SOURCE if e[0] != K1_A] + [(K1_A, ORIG_A, REGULAR), (K1_B, ORIG_B, REGULAR)]
+FIXTURE = b'<html>synthetic legacy fixture</html>\n'
+TREE_PROBE = '"$(git rev-parse \'HEAD^{tree}\')" = \''
+
+
+def summary(tests=23, passed=23, fail=0, cancelled=0, skipped=0, todo=0):
+    text = '# tests %d\n# suites 0\n# pass %d\n# fail %d\n# cancelled %d\n# skipped %d\n# todo %d\n'
+    return (text % (tests, passed, fail, cancelled, skipped, todo)).encode()
+
+
+def k1_stream(nonce, tree, tests, probe):
+    head = '@@' + nonce + ' '
+    facts = [('uid', '1000'), ('env', 'PATH LANG'), ('nets', 'lo '), ('capeff', '0000000000000000'),
+             ('nonewprivs', '1'), ('seccomp', '2'), ('rootfs', 'ro'), ('inputmount', 'ro'),
+             ('fixturemount', 'ro'), ('hostpaths', 'none'), ('node', pp.ACCESS_LOCAL['node']),
+             ('git', 'git version 2.0.0'), ('copydiff', 'identical'), ('localcommit', '1' * 40),
+             ('localtree', tree), ('history', '1'), ('remotes', '0'), ('gitstatus', '0'),
+             ('chromium', 'CHROMIUM ' + pp.ACCESS_LOCAL['chromium'] + ' title=""')]
+    out = b''.join((head + 'PF %s %s\n' % fact).encode() for fact in facts)
+    for phase, (code, log) in zip(pp.ACCESS_PHASES, (tests, (0, b'build ok\n'), probe)):
+        out += ('%sEND %s %d 1 %d 0 %d\n' % (head, phase, code, len(log), len(log))).encode()
+        out += ('%sLOGBEGIN %s %d\n' % (head, phase, len(log))).encode() + log + b'\n'
+        out += ('%sLOGEND %s\n' % (head, phase)).encode()
+    return out + (head + 'DONE\n').encode()
+
+
+class K1Base(Fixture):
+    """Synthetic K1 fixture: fake originals, fake fixture, fake container runner; never a real run."""
+    def setUp(self):
+        super().setUp()
+        spec, blobs = synthetic_originals(source_entries=K1_ENTRIES)
+        spec['views'].append(dict(zip(VIEW_KEYS, (K1_B, 'source', K1_B, len(ORIG_B), pp.git_blob_id(ORIG_B), pp.digest(ORIG_B)))))
+        self.spec = spec
+        decoy = {'path': K1_A, 'file_sha256': pp.digest(ORIG_A), 'match_sha256': pp.digest(LITERAL), 'count': 1}
+        for item in (patch.object(pp, 'ACCESS_SPEC', spec), patch.object(pp, 'ACCESS_DECOY', decoy),
+                     patch.object(pp, 'fetch_original', side_effect=lambda archive: blobs[archive['name']])):
+            item.start()
+            self.addCleanup(item.stop)
+
+    def make_activation(self, profile='k1'):
+        a = activation()
+        c = a['contract']
+        k1 = profile == 'k1'
+        a['task_id'] = 'AG-BQ-K1-20261116-V4-TEST-R1' if k1 else pp.ACCESS_TASK
+        c['identity'].update(project_id='big-quest', run_id='BQ-K1-01', task_id='BQ-K1-01-DEV', parent_id='BQ-K1-01')
+        c.update(read_files=pp.access_read_files(self.spec), target_commit=self.spec['commit'],
+                 edit_paths=sorted(pp.K1_EDITS) if k1 else [K1_A], create_paths=[], synthetic_files=[],
+                 test_profile=pp.K1_PROFILE if k1 else pp.ACCESS_PROFILE)
+        return a
+
+    def worker(self, context, payloads):
+        def consume(command, work, env, raw, errors, observer):
+            for name, data in payloads.items():
+                (work / 'target' / name).write_bytes(data)
+            observer.feed({'type': 'assistant', 'session_id': SESSION, 'message': {'role': 'assistant',
+                'id': 'msg_fixture', 'content': [{'type': 'text', 'text': 'synthetic'}]}})
+            result = {'type': 'result', 'session_id': SESSION, 'subtype': 'success', 'is_error': False,
+                      'result': 'Synthetic handback. Tests NOT_RUN by worker.',
+                      'usage': {'input_tokens': 5, 'output_tokens': 7}, 'total_cost_usd': .01}
+            observer.feed(result)
+            observer.worker_state, observer.signal = 'stopped', 'process_exit'
+            raw.write_text('synthetic harmless stream\n')
+            errors.write_text('')
+            return result, 0
+        with patch.object(runtime, 'consume', side_effect=consume), \
+             patch.object(runtime.Observer, '__init__', autospec=True) as init, \
+             patch.dict(os.environ, {'ANTHROPIC_API_KEY': 'synthetic-model-binding'}):
+            original = OBSERVER_INIT
+            init.side_effect = lambda obj, ctx, exact=None: original(obj, ctx, self.root / 'runtime', exact)
+            driver.run_model()
+        return json.loads((self.result / 'metadata.json').read_text())
+
+    def ready(self, profile='k1', payloads=None):
+        context = self.prepare(self.make_activation(profile))
+        shutil.copytree(self.prepared, self.root / 'original')
+        payloads = payloads or (GOOD if profile == 'k1' else {K1_A: pp.ACCESS_PREFIX + ORIG_A})
+        return context, self.worker(context, payloads)
+
+    def run_exec(self, meta, tests=(0, summary()), probe=(37, b'ACCESS01_EXECUTOR_FORCED_FAIL\n'),
+                 expect=None, code=0, mangle=None):
+        self.runs = getattr(self, 'runs', 0) + 1
+        for package in ('playwright', 'playwright-core'):
+            pp.write_file(self.root, 'inputs/modules/' + package + '/package.json',
+                          json.dumps({'version': pp.ACCESS_LOCAL['playwright']}).encode())
+        pp.write_file(self.root, 'inputs/node', b'#!/bin/sh\n')
+        pp.write_file(self.root, 'inputs/legacy.html', FIXTURE)
+        inputs = {'node': str(self.root / 'inputs/node'), 'node_modules': str(self.root / 'inputs/modules'),
+                  'fixture': str(self.root / 'inputs/legacy.html')}
+
+        def runner(argv, env, timeout, name, docker):
+            self.argv = argv
+            tree = argv[-3].split(TREE_PROBE)[1][:40]
+            mount = next(x for x in argv if x.endswith(',dst=/input/source,readonly'))
+            source = Path(mount.split('src=')[1].split(',dst=')[0])
+            self.seen = {p.relative_to(source).as_posix(): (stat.S_IMODE(p.stat().st_mode), p.read_bytes())
+                         for p in source.rglob('*') if p.is_file()}
+            out = k1_stream(argv[-1], tree, tests, probe)
+            return code, (mangle(out) if mangle else out), b'', False, {'state': 'stopped_and_removed'}
+
+        local = dict(pp.ACCESS_LOCAL, fixture_bytes=len(FIXTURE), fixture_sha256=pp.digest(FIXTURE))
+        probed = subprocess.CompletedProcess([], 0, pp.ACCESS_LOCAL['node'].encode() + b'\n', b'')
+        want = expect if expect is not None else {k: meta[k] for k in pp.ACCESS_EXPECT}
+        with patch.object(pp, 'ACCESS_LOCAL', local), patch.object(pp.subprocess, 'run', return_value=probed):
+            return pp.execute_access_local(self.result, self.prepared, driver, str(self.root / ('k1work%d' % self.runs)),
+                                           inputs, want, docker='/usr/bin/docker', docker_env={'PATH': '/usr/bin'}, runner=runner)
+
+
+class K1HostTests(K1Base):
+    def test_activation_binds_exact_two_test_delta_and_rejects_everything_else(self):
+        driver.validate_activation(self.make_activation(), PARENT)
+        driver.validate_activation(self.make_activation('access'), PARENT)
+        seed = '# synthetic seed\n'
+        extra = {'path': 'DEVELOPMENT.md', 'git_blob': '1' * 40, 'sha256': '2' * 64}
+        mutations = {
+            'one test': lambda a: a['contract'].update(edit_paths=[K1_A]),
+            'other single test': lambda a: a['contract'].update(edit_paths=[K1_B]),
+            'third path': lambda a: a['contract'].update(edit_paths=[K1_A, K1_B, 'package.json']),
+            'evidence path': lambda a: a['contract'].update(edit_paths=[K1_A, K1_B, 'access-evidence/RESTORE.md']),
+            'create': lambda a: a['contract'].update(create_paths=['tests/new.test.mjs']),
+            'synthetic': lambda a: a['contract'].update(synthetic_files=[{'path': 'relay-proof/s.md', 'content': seed,
+                                                                           'sha256': pp.digest(seed.encode())}]),
+            'role': lambda a: a.update(role='spec-agent'),
+            'analysis': lambda a: a['contract'].update(mode='analysis', edit_paths=[]),
+            'agentarium identity': lambda a: a['contract']['identity'].update(project_id='agentarium'),
+            'other repository': lambda a: a['contract'].update(repository='pahlborn/agentarium'),
+            'wrong target': lambda a: a['contract'].update(target_commit='e' * 40),
+            'access task id': lambda a: a.update(task_id=pp.ACCESS_TASK),
+            'foreign task id': lambda a: a.update(task_id='AG-BQ-OTHER-20261116-DEV'),
+            'fewer reads': lambda a: a['contract'].update(read_files=a['contract']['read_files'][:-1]),
+            'stale blob': lambda a: a['contract']['read_files'][0].update(git_blob='0' * 40),
+            'stale sha': lambda a: a['contract']['read_files'][0].update(sha256='0' * 64),
+            'extra read': lambda a: a['contract']['read_files'].append(extra),
+            'caller command': lambda a: a['contract'].update(test_command='node evil.mjs'),
+            'other profile': lambda a: a['contract'].update(test_profile='bq-runde-v1'),
+        }
+        for label, mutate in mutations.items():
+            a = self.make_activation()
+            mutate(a)
+            with self.subTest(case=label), self.assertRaises((ValueError, TypeError)):
+                driver.validate_activation(a, PARENT)
+        a = self.make_activation('access')
+        a['contract']['edit_paths'] = sorted(pp.K1_EDITS)
+        with self.assertRaisesRegex(ValueError, 'fixed access intake'):
+            driver.validate_activation(a, PARENT)
+
+    def test_prepare_copies_immutable_originals_and_detects_tampering(self):
+        context = self.prepare(self.make_activation())
+        for name, data in ORIGINALS.items():
+            self.assertEqual((self.prepared / 'control/k1-original' / name).read_bytes(), data)
+            self.assertEqual((self.prepared / 'workspace/target' / name).read_bytes(), data)
+            self.assertEqual(pp.k1_original(driver, name), data)
+        self.assertEqual(set(pp.writable_paths(context)), {'target/' + n for n in ORIGINALS})
+        allow = json.loads((self.prepared / 'control/settings.json').read_text())['permissions']['allow']
+        self.assertEqual({x for x in allow if x.startswith('Edit(')}, {'Edit(/target/' + n + ')' for n in ORIGINALS})
+        self.assertFalse([x for x in allow if x.startswith('Write(')])
+        manifest = json.loads((self.prepared / 'manifest.json').read_bytes())
+        self.assertTrue(all('control/k1-original/' + n in manifest for n in ORIGINALS))
+        for outside in ('package.json', 'access-evidence/RESTORE.md'):
+            with self.assertRaises(ValueError):
+                pp.k1_original(driver, outside)
+        for name, data in ORIGINALS.items():
+            held = self.prepared / 'control/k1-original' / name
+            held.write_bytes(data + b' ')
+            with self.assertRaises(ValueError):
+                pp.k1_original(driver, name)
+            with self.assertRaises(ValueError):
+                pp.verify_prepared(driver, changed=True)
+            held.unlink()
+            with self.assertRaises(ValueError):
+                pp.verify_prepared(driver, changed=True)
+            held.write_bytes(data)
+            pp.verify_prepared(driver, changed=True)
+        bad = copy.deepcopy(pp.ACCESS_SPEC)
+        next(v for v in bad['views'] if v['path'] == K1_A)['git_blob'] = '0' * 40
+        with patch.object(pp, 'ACCESS_SPEC', bad), self.assertRaises(ValueError):
+            pp.k1_original(driver, K1_A)
+
+    def result_for(self, context, payloads):
+        c = context['activation']['contract']
+        changes = [{'path': n, 'operation': 'edit', 'before_sha256': pp.digest(ORIGINALS[n]), 'sha256': pp.digest(d),
+                    'content_base64': base64.b64encode(d).decode()} for n, d in sorted(payloads.items())]
+        return {'schema': 'agentarium.project-result.v1', 'packet_binding': context['packet_binding'],
+                'repository': c['repository'], 'target_commit': c['target_commit'], 'synthetic_overlay': [],
+                'changes': changes}
+
+    def test_result_binding_rejects_stale_forged_and_incomplete_edit_sets(self):
+        context = self.prepare(self.make_activation())
+        good = self.result_for(context, GOOD)
+        pp.validate_changes(good, context, driver)
+        cases = {
+            'binding': lambda r: r.update(packet_binding='0' * 64),
+            'repository': lambda r: r.update(repository='pahlborn/agentarium'),
+            'target': lambda r: r.update(target_commit='e' * 40),
+            'overlay': lambda r: r.update(synthetic_overlay=[{'path': 'x'}]),
+            'schema': lambda r: r.update(schema='agentarium.project-result.v2'),
+            'extra field': lambda r: r.update(extra=1),
+            'one edit': lambda r: r['changes'].pop(),
+            'no edit': lambda r: r.update(changes=[]),
+            'duplicate': lambda r: r['changes'].append(dict(r['changes'][0])),
+            'third path': lambda r: r['changes'].append(dict(r['changes'][0], path='package.json')),
+            'evidence path': lambda r: r['changes'][0].update(path='access-evidence/RESTORE.md'),
+            'create': lambda r: r['changes'][0].update(operation='create'),
+            'delete': lambda r: r['changes'][0].update(operation='delete'),
+            'stale before': lambda r: r['changes'][0].update(before_sha256='0' * 64),
+            'before of the other file': lambda r: r['changes'][0].update(before_sha256=pp.digest(ORIG_A)),
+            'stale after': lambda r: r['changes'][0].update(sha256='0' * 64),
+            'bad base64': lambda r: r['changes'][0].update(content_base64='***'),
+            'swapped content': lambda r: r['changes'][0].update(content_base64=r['changes'][1]['content_base64']),
+            'change field': lambda r: r['changes'][0].update(extra=1),
+        }
+        for label, mutate in cases.items():
+            bad = copy.deepcopy(good)
+            mutate(bad)
+            with self.subTest(case=label), self.assertRaises(ValueError):
+                pp.validate_changes(bad, context, driver)
+        for label, payloads in {'unchanged': dict(GOOD, **{K1_A: ORIG_A}),
+                                'access comment': dict(GOOD, **{K1_A: pp.ACCESS_PREFIX + GOOD[K1_A]}),
+                                'duplicated decoy line': dict(GOOD, **{K1_A: GOOD[K1_A] + DECOY_LINE + b'\n'})}.items():
+            with self.subTest(case=label), self.assertRaises(ValueError):
+                pp.validate_changes(self.result_for(context, payloads), context, driver)
+
+    def test_content_contract_rejects_nonsemantic_unsafe_and_capability_growth(self):
+        def check(name, data, original=None, exact=None):
+            pp.k1_check(driver, name, data, original or ORIGINALS[name], exact)
+        for name in ORIGINALS:
+            check(name, GOOD[name])
+        check(K1_B, ORIG_B + b'/' * pp.K1_MAX_GROWTH)
+        check(K1_B, b"import 'x'; eval( 2\n", b"import 'x'; eval( 1\n")
+        key = b'synthetic-model-binding'
+        bad = {
+            'non utf8': GOOD[K1_B] + b'\xff', 'nul': GOOD[K1_B] + b'\0', 'unchanged': ORIG_B, 'empty': b'',
+            'growth': GOOD[K1_B] + b'/' * (pp.K1_MAX_GROWTH + 1),
+            'access comment': pp.ACCESS_PREFIX + GOOD[K1_B],
+            'monitor control': GOOD[K1_B] + driver.AG_MARKER.encode(),
+            'runtime control': GOOD[K1_B] + runtime.MARKER.encode(),
+            'other credential': GOOD[K1_B] + b'// ' + OTHER,
+            'decoy in other file': GOOD[K1_B] + DECOY_LINE,
+            'provider key': GOOD[K1_B] + key,
+        }
+        for label, data in bad.items():
+            with self.subTest(case=label), self.assertRaises(ValueError):
+                check(K1_B, data, exact=key)
+        for token in pp.K1_FORBIDDEN_ADDED:
+            with self.subTest(capability=token), self.assertRaises(ValueError):
+                check(K1_B, GOOD[K1_B] + b'\n// ' + token)
+        with self.assertRaises(ValueError):
+            check(K1_B, b"import 'x'; eval( eval( 2\n", b"import 'x'; eval( 1\n")
+
+    def test_scanner_accepts_only_the_exact_attested_line_once(self):
+        key = b'synthetic-model-binding'
+        g = GOOD[K1_A]
+        def hit(data, original=ORIG_A, name=K1_A, exact=None):
+            return pp.k1_scan_hit(driver, data, original, name, exact)
+        self.assertTrue(driver.secret_hit(ORIG_A))
+        for data in (ORIG_A, g, g + b'// harmless\n', b'// head\n' + g):
+            self.assertFalse(hit(data))
+        self.assertFalse(pp.scan_hit(driver, g, None, True, True, ORIG_A, K1_A))
+        self.assertFalse(hit(g, exact=key))
+        rejected = {
+            'whitespace': g.replace(b'// fixture ', b'//  fixture '),
+            'trailing space': g.replace(DECOY_LINE, DECOY_LINE + b' '),
+            'leading space': g.replace(DECOY_LINE, b' ' + DECOY_LINE),
+            'crlf': g.replace(b'\n', b'\r\n'),
+            'deleted': g.replace(DECOY_LINE + b'\n', b''),
+            'duplicate appended': g + DECOY_LINE + b'\n',
+            'duplicate adjacent': g.replace(DECOY_LINE + b'\n', (DECOY_LINE + b'\n') * 2),
+            'copied match': g + b'const copy = "' + LITERAL + b'";\n',
+            'moved match': g.replace(DECOY_LINE, b'const moved = "' + LITERAL + b'";'),
+            'longer match': g.replace(LITERAL, LITERAL + b'X'),
+            'other credential': g + b'// ' + OTHER + b'\n',
+            'anthropic shaped': g + b'// sk-' + b'ant-' + b'C' * 24 + b'\n',
+            'provider key': g + key,
+        }
+        for label, data in rejected.items():
+            with self.subTest(case=label):
+                self.assertTrue(hit(data, exact=key))
+        self.assertTrue(pp.scan_hit(driver, g + key, key, True, True, ORIG_A, K1_A))
+        self.assertTrue(hit(g, name=K1_B))
+        self.assertTrue(hit(g, ORIG_B))
+        self.assertTrue(hit(g, ORIG_A + b' '))
+        self.assertTrue(hit(g, ORIG_A.replace(b'AAAA', b'AAAB')))
+        self.assertTrue(hit(ORIG_B + DECOY_LINE + b'\n', ORIG_B, K1_B))
+        self.assertTrue(pp.scan_hit(driver, g, None, True, True))
+        self.assertTrue(pp.scan_hit(driver, ORIG_A, None, False, True, ORIG_A, K1_A))
+        self.assertFalse(pp.scan_hit(driver, ORIG_A, None, True, True))
+
+    def test_changed_files_are_extracted_checked_and_restored_into_a_fresh_tree(self):
+        context = self.prepare(self.make_activation())
+        shutil.copytree(self.prepared, self.root / 'original')
+        target = self.prepared / 'workspace/target'
+        for name, data in GOOD.items():
+            (target / name).write_bytes(data)
+        result = pp.changes_from_work(context, driver)
+        self.assertEqual({x['path']: x['operation'] for x in result['changes']}, {K1_A: 'edit', K1_B: 'edit'})
+        for item in result['changes']:
+            self.assertEqual(item['before_sha256'], pp.digest(ORIGINALS[item['path']]))
+            self.assertEqual(base64.b64decode(item['content_base64']), GOOD[item['path']])
+        pp.validate_changes(result, context, driver)
+        with patch.object(driver, 'PREPARED', self.root / 'original'):
+            restored = pp.restore(result, context, driver, self.root / 'restored')
+            self.assertEqual({k for k, v in restored.items() if v['type'] == 'file'}, {v['path'] for v in self.spec['views']})
+            for name, data in GOOD.items():
+                self.assertEqual((self.root / 'restored' / name).read_bytes(), data)
+            self.assertEqual((self.root / 'restored/package.json').read_bytes(), PACKAGE)
+            with self.assertRaises(ValueError):
+                pp.restore(result, context, driver, self.root / 'restored')
+            partial = copy.deepcopy(result)
+            partial['changes'].pop()
+            with self.assertRaises(ValueError):
+                pp.restore(partial, context, driver, self.root / 'restored-partial')
+        unsafe = {
+            'duplicate decoy line': (K1_A, GOOD[K1_A] + DECOY_LINE + b'\n'),
+            'access comment': (K1_B, pp.ACCESS_PREFIX + GOOD[K1_B]),
+            'non utf8': (K1_B, GOOD[K1_B] + b'\xff'),
+            'nul': (K1_B, GOOD[K1_B] + b'\0'),
+            'growth': (K1_B, GOOD[K1_B] + b'/' * (pp.K1_MAX_GROWTH + 1)),
+            'capability': (K1_B, GOOD[K1_B] + b'\n// child_process'),
+        }
+        for label, (name, data) in unsafe.items():
+            (target / name).write_bytes(data)
+            with self.subTest(case=label), self.assertRaises(ValueError):
+                pp.changes_from_work(context, driver)
+            (target / name).write_bytes(GOOD[name])
+        (target / K1_B).write_bytes(ORIG_B)
+        with self.assertRaises(ValueError):
+            pp.validate_changes(pp.changes_from_work(context, driver), context, driver)
+
+    def test_worker_run_with_a_bad_k1_edit_is_withheld_with_a_granular_code(self):
+        context = self.prepare(self.make_activation())
+        with self.assertRaisesRegex(RuntimeError, 'withheld'):
+            self.worker(context, dict(GOOD, **{K1_A: GOOD[K1_A] + DECOY_LINE + b'\n'}))
+        meta = json.loads((self.result / 'metadata.json').read_bytes())
+        self.assertEqual((meta['phase'], meta['failure']), ('blocked', 'PROJECT_RESULT_BLOCKED'))
+        self.assertEqual({p.name for p in self.result.iterdir()}, {'metadata.json', 'BLOCKED.txt'})
+        pp.validate_result(meta, context, self.result, driver)
+
+    def test_fixed_executor_runs_the_exact_overlay_and_reports_the_actual_status(self):
+        context, meta = self.ready()
+        self.assertEqual(meta['changed_paths'], sorted(GOOD))
+        with patch.object(driver, 'PREPARED', self.root / 'original'):
+            self.assertEqual(pp.execute_proof(self.result, self.root / 'original', driver), {'status': 'NOT_RUN'})
+        report = self.run_exec(meta)
+        self.assertEqual((report['profile'], report['transport_status'], report['product_test_status'],
+                          report['build_status'], report['counterprobe_detection']),
+                         (pp.K1_PROFILE, 'EXECUTED', 'PASS', 'PASS', 'PASS'))
+        self.assertEqual(report['protocol'], {'valid': True, 'errors': []})
+        files = {n: d for n, d, _ in K1_ENTRIES if not n.endswith('/')}
+        overlay = {**files, **GOOD}
+        self.assertEqual({n: v[1] for n, v in self.seen.items()}, overlay)
+        self.assertEqual({v[0] for v in self.seen.values()}, {0o644})
+        tree = pp.git_tree_id({n: ('100644', pp.git_blob_id(d)) for n, d in overlay.items()})
+        binding = report['binding']
+        self.assertEqual((binding['overlay_tree'], binding['original_tree'], binding['changes_sha256']),
+                         (tree, self.spec['tree'], meta['changes_sha256']))
+        self.assertNotEqual(tree, self.spec['tree'])
+        argv, script = self.argv, self.argv[-3]
+        self.assertEqual(argv[argv.index('--network') + 1], 'none')
+        self.assertEqual(argv[argv.index('--cap-drop') + 1], 'ALL')
+        self.assertEqual(argv[argv.index('--pull') + 1], 'never')
+        self.assertIn('--read-only', argv)
+        self.assertTrue(all(x.endswith(',readonly') for x in argv if x.startswith('type=bind')))
+        self.assertIn('node --test --test-concurrency=1 ' + ' '.join(pp.ACCESS_LOCAL['tests']) + '\n', script)
+
+    def test_count_gate_and_observed_failures_stay_failures(self):
+        context, meta = self.ready()
+        cases = {
+            'exact': ((0, summary()), 'PASS'),
+            'shortened': ((0, summary(22, 22)), 'FAIL'),
+            'grown': ((0, summary(24, 24)), 'FAIL'),
+            'skipped': ((0, summary(23, 23, skipped=1)), 'FAIL'),
+            'todo': ((0, summary(23, 23, todo=1)), 'FAIL'),
+            'cancelled': ((0, summary(23, 23, cancelled=1)), 'FAIL'),
+            'failed count': ((0, summary(23, 22, fail=1)), 'FAIL'),
+            'no summary': ((0, b'no summary\n'), 'FAIL'),
+            'fabricated then real': ((0, summary() + summary(5, 5)), 'FAIL'),
+            'original real failure': ((1, summary(23, 21, fail=2)), 'FAIL'),
+            'green counts but exit 1': ((1, summary()), 'FAIL'),
+            'timeout': ((124, summary()), 'TIMEOUT'),
+        }
+        for label, (tests, status) in cases.items():
+            with self.subTest(case=label):
+                report = self.run_exec(meta, tests=tests)
+                self.assertEqual((report['transport_status'], report['product_test_status'], report['build_status']),
+                                 ('EXECUTED', status, 'PASS'))
+        forced = self.run_exec(meta, probe=(0, b'ACCESS01_EXECUTOR_FORCED_FAIL\n'))
+        self.assertEqual((forced['counterprobe_detection'], forced['transport_status']), ('FAIL', 'INFRASTRUCTURE_FAIL'))
+        for label, kwargs in {'missing terminal event': {'mangle': lambda out: out[:out.rindex(b'@@')]},
+                              'docker exit': {'code': 1}}.items():
+            with self.subTest(case=label):
+                report = self.run_exec(meta, **kwargs)
+                self.assertEqual((report['transport_status'], report['product_test_status']),
+                                 ('INFRASTRUCTURE_FAIL', 'UNVERIFIED'))
+
+    def test_executor_blocks_stale_replayed_and_mismatched_inputs(self):
+        context, meta = self.ready()
+        good = {k: meta[k] for k in pp.ACCESS_EXPECT}
+        self.assertEqual(self.run_exec(meta, expect=good)['transport_status'], 'EXECUTED')
+        for key in sorted(good):
+            with self.subTest(stale=key), self.assertRaises(ValueError):
+                self.run_exec(meta, expect=dict(good, **{key: str(good[key]) + 'x'}))
+        for broken in ({k: v for k, v in good.items() if k != 'session_id'}, dict(good, extra='x')):
+            with self.assertRaises(ValueError):
+                self.run_exec(meta, expect=broken)
+        sealed = self.result / 'changes.json'
+        original = sealed.read_bytes()
+        sealed.write_bytes(original + b' ')
+        with self.assertRaises(ValueError):
+            self.run_exec(meta)
+        sealed.write_bytes(original)
+        package = self.prepared / 'workspace/target/package.json'
+        package.chmod(0o644)
+        package.write_bytes(PACKAGE + b' ')
+        with self.assertRaises(ValueError):
+            self.run_exec(meta)
+        package.write_bytes(PACKAGE)
+        package.chmod(0o444)
+        pp.verify_prepared(driver, changed=True, modes=True)
+        package.chmod(0o644)
+        with self.assertRaises(ValueError):
+            pp.verify_prepared(driver, changed=True, modes=True)
+        package.chmod(0o444)
+        target = self.prepared / 'workspace/target'
+        target.chmod(0o755)
+        (target / 'extra.txt').write_text('synthetic extra')
+        with self.assertRaises(ValueError):
+            self.run_exec(meta)
+        (target / 'extra.txt').unlink()
+        package.unlink()
+        with self.assertRaises(ValueError):
+            self.run_exec(meta)
+
+    def test_access_profile_executor_path_is_preserved(self):
+        context, meta = self.ready('access')
+        self.assertEqual(meta['changed_paths'], [K1_A])
+        report = self.run_exec(meta)
+        self.assertEqual((report['profile'], report['transport_status'], report['product_test_status'],
+                          report['counterprobe_detection']),
+                         (pp.ACCESS_PROFILE, 'EXECUTED', 'PASS', 'PASS'))
+        files = {n: d for n, d, _ in K1_ENTRIES if not n.endswith('/')}
+        self.assertEqual({n: v[1] for n, v in self.seen.items()}, {**files, K1_A: pp.ACCESS_PREFIX + ORIG_A})
+        self.assertEqual(self.run_exec(meta, tests=(0, summary(21, 21)))['product_test_status'], 'PASS')
+        forced = self.run_exec(meta, probe=(0, b'ok\n'))
+        self.assertEqual((forced['counterprobe_detection'], forced['transport_status']), ('FAIL', 'INFRASTRUCTURE_FAIL'))
+        self.assertEqual(self.run_exec(meta, tests=(1, summary(23, 21, fail=2)))['product_test_status'], 'FAIL')
+
+
 OBSERVER_INIT = runtime.Observer.__init__
 if __name__ == '__main__':
     unittest.main()
