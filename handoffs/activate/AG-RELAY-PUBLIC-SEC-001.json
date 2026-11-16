@@ -1,0 +1,41 @@
+{
+  "schema": "agentarium.relay-activation.v3",
+  "task_id": "AG-BQ-OPS02-20261116-V2-CADENCE",
+  "authorized": true,
+  "source_commit": "45fa2ae09e2453ae0707f63e01663a23c07a3963",
+  "role": "process-agent",
+  "request": "handoffs/AG-BQ-OPS02-20261116-V2-CADENCE.json",
+  "handback": "handoffs/AG-BQ-OPS02-20261116-V2-CADENCE-handback.md",
+  "model": "opus",
+  "max_turns": 8,
+  "max_budget_usd": 25,
+  "contract": {
+    "schema": "agentarium.project-packet.v1",
+    "repository": "pahlborn/agentarium",
+    "project_id": "agentarium",
+    "target_commit": "af9cb0c6f79927920f3a78389008a45197e895f7",
+    "mode": "analysis",
+    "read_files": [
+      {
+        "path": "README.md",
+        "git_blob": "4201a14151f3ffe382210807c50263a00133e44c",
+        "sha256": "c598cc2cba2d03ac220ef0c621fb7c919c1db8a3ff073b4a4dd283a820965f58"
+      }
+    ],
+    "edit_paths": [],
+    "create_paths": [],
+    "synthetic_files": [],
+    "identity": {
+      "schema": "agentarium.relay-runtime-identity.v1",
+      "project_id": "agentarium",
+      "run_id": "AG-BQ-OPS02-20261116",
+      "task_id": "AG-BQ-OPS02-20261116-V2-CADENCE",
+      "parent_id": "AG-BQ-OPS02-20261116",
+      "subject_role": "cadence"
+    },
+    "max_seconds": 1200,
+    "test_profile": "none",
+    "artifact_publication": "host-approved-exact-paths",
+    "journal_delivery": "archive"
+  }
+}
