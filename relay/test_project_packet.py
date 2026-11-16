@@ -933,9 +933,9 @@ def summary(tests=23, passed=23, fail=0, cancelled=0, skipped=0, todo=0):
     return (text % (tests, passed, fail, cancelled, skipped, todo)).encode()
 
 
-def k1_stream(nonce, tree, tests, probe):
+def k1_stream(nonce, tree, tests, probe, env='PATH LANG'):
     head = '@@' + nonce + ' '
-    facts = [('uid', '1000'), ('env', 'PATH LANG'), ('nets', 'lo '), ('capeff', '0000000000000000'),
+    facts = [('uid', '1000'), ('env', env), ('nets', 'lo '), ('capeff', '0000000000000000'),
              ('nonewprivs', '1'), ('seccomp', '2'), ('rootfs', 'ro'), ('inputmount', 'ro'),
              ('fixturemount', 'ro'), ('hostpaths', 'none'), ('node', pp.ACCESS_LOCAL['node']),
              ('git', 'git version 2.0.0'), ('copydiff', 'identical'), ('localcommit', '1' * 40),
@@ -948,6 +948,8 @@ def k1_stream(nonce, tree, tests, probe):
         out += ('%sLOGEND %s\n' % (head, phase)).encode()
     return out + (head + 'DONE\n').encode()
 
+
+NO_CLEANUP = object()
 
 class K1Base(Fixture):
     """Synthetic K1 fixture: fake originals, fake fixture, fake container runner; never a real run."""
@@ -1002,7 +1004,9 @@ class K1Base(Fixture):
         return context, self.worker(context, payloads)
 
     def run_exec(self, meta, tests=(0, summary()), probe=(37, b'ACCESS01_EXECUTOR_FORCED_FAIL\n'),
-                 expect=None, code=0, mangle=None):
+                 expect=None, code=0, mangle=None, mutation=None, env=None, cleanup=None):
+        self.argv = None
+        app_env = env or ('PATH LANG BQ_K1_MUTATION' if mutation else 'PATH LANG')
         self.runs = getattr(self, 'runs', 0) + 1
         for package in ('playwright', 'playwright-core'):
             pp.write_file(self.root, 'inputs/modules/' + package + '/package.json',
@@ -1019,15 +1023,19 @@ class K1Base(Fixture):
             source = Path(mount.split('src=')[1].split(',dst=')[0])
             self.seen = {p.relative_to(source).as_posix(): (stat.S_IMODE(p.stat().st_mode), p.read_bytes())
                          for p in source.rglob('*') if p.is_file()}
-            out = k1_stream(argv[-1], tree, tests, probe)
-            return code, (mangle(out) if mangle else out), b'', False, {'state': 'stopped_and_removed'}
+            out = k1_stream(argv[-1], tree, tests, probe, app_env)
+            head = (code, (mangle(out) if mangle else out), b'', False)
+            if cleanup is NO_CLEANUP:
+                return head
+            return head + (cleanup if cleanup is not None else {'state': 'stopped_and_removed'},)
 
         local = dict(pp.ACCESS_LOCAL, fixture_bytes=len(FIXTURE), fixture_sha256=pp.digest(FIXTURE))
         probed = subprocess.CompletedProcess([], 0, pp.ACCESS_LOCAL['node'].encode() + b'\n', b'')
         want = expect if expect is not None else {k: meta[k] for k in pp.ACCESS_EXPECT}
         with patch.object(pp, 'ACCESS_LOCAL', local), patch.object(pp.subprocess, 'run', return_value=probed):
             return pp.execute_access_local(self.result, self.prepared, driver, str(self.root / ('k1work%d' % self.runs)),
-                                           inputs, want, docker='/usr/bin/docker', docker_env={'PATH': '/usr/bin'}, runner=runner)
+                                           inputs, want, docker='/usr/bin/docker', docker_env={'PATH': '/usr/bin'}, runner=runner,
+                                           mutation=mutation)
 
 
 class K1HostTests(K1Base):
@@ -1368,6 +1376,132 @@ class K1HostTests(K1Base):
         self.assertEqual((forced['counterprobe_detection'], forced['transport_status']), ('FAIL', 'INFRASTRUCTURE_FAIL'))
         self.assertEqual(self.run_exec(meta, tests=(1, summary(23, 21, fail=2)))['product_test_status'], 'FAIL')
 
+    MUT = 'foreign-school-origin'
+    MUT_ENTRY = 'BQ_K1_MUTATION=foreign-school-origin'
+
+    def shape(self, argv):
+        return [x for x in argv[:-3] if not x.startswith(('access01-', 'type=bind')) and x != self.MUT_ENTRY]
+
+    def test_fixed_mutation_preset_changes_only_environment_selection_and_reporting(self):
+        context, meta = self.ready()
+        normal = self.run_exec(meta)
+        normal_argv = list(self.argv)
+        self.assertNotIn('BQ_K1_MUTATION', ' '.join(normal_argv))
+        self.assertNotIn('@MUT', normal_argv[-3])
+        self.assertEqual((normal['variant'], normal['mutation_result']),
+                         ({'name': 'normal', 'tests': list(pp.ACCESS_LOCAL['tests']), 'mutation_env': None,
+                           'complete_normal_suite': True, 'count_gate_applied': True}, None))
+        self.assertEqual(normal['runtime']['argv_tests'], ['node', '--test', '--test-concurrency=1'] + list(pp.ACCESS_LOCAL['tests']))
+        report = self.run_exec(meta, mutation=self.MUT, tests=(1, summary(1, 0, fail=1)))
+        argv, script = self.argv, self.argv[-3]
+        self.assertEqual(argv.count(self.MUT_ENTRY), 1)
+        at = argv.index(self.MUT_ENTRY)
+        self.assertEqual(argv[at - 1], 'GIT_TERMINAL_PROMPT=0')
+        self.assertEqual(argv[at + 1:], ['/bin/sh', '-c', script, 'access01', argv[-1]])
+        self.assertEqual(self.shape(argv), self.shape(normal_argv))
+        self.assertIn(" 'foreign-school-origin' ] || block mutation-env\n", script)
+        self.assertIn(' BQ_K1_MUTATION ', script)
+        self.assertIn('node --test --test-concurrency=1 ' + pp.K1_COUNTERPROBE_TESTS[0] + '\n', script)
+        self.assertNotIn('neutral.test.mjs', script)
+        self.assertNotIn('evaluation-upgrade-browser', script)
+        self.assertEqual(report['variant'], {'name': 'k1-foreign-school-origin', 'tests': [K1_A],
+                                             'mutation_env': {'BQ_K1_MUTATION': self.MUT},
+                                             'complete_normal_suite': False, 'count_gate_applied': False})
+        self.assertEqual(report['runtime']['argv_tests'], ['node', '--test', '--test-concurrency=1', K1_A])
+        self.assertEqual((report['transport_status'], report['product_test_status'], report['build_status'],
+                          report['counterprobe_detection'], report['mutation_result']),
+                         ('EXECUTED', 'FAIL', 'PASS', 'PASS', 'RED_OBSERVED'))
+        self.assertEqual(report['binding'], normal['binding'])
+        files = {n: d for n, d, _ in K1_ENTRIES if not n.endswith('/')}
+        self.assertEqual({n: v[1] for n, v in self.seen.items()}, {**files, **GOOD})
+        self.assertEqual({v[0] for v in self.seen.values()}, {0o644})
+        for flag, value in (('--network', 'none'), ('--cap-drop', 'ALL'), ('--pull', 'never')):
+            self.assertEqual(argv[argv.index(flag) + 1], value)
+        self.assertTrue(all(x.endswith(',readonly') for x in argv if x.startswith('type=bind')))
+        pp.verify_prepared(driver, changed=True)
+
+    def test_mutation_result_is_red_only_for_a_trusted_real_failure_with_consistent_counts(self):
+        context, meta = self.ready()
+        cases = {
+            'red': ((1, summary(1, 0, fail=1)), 'FAIL', 'RED_OBSERVED'),
+            'green targeted': ((0, summary(1, 1)), 'PASS', 'GREEN_NOT_DETECTED'),
+            'green full count': ((0, summary()), 'PASS', 'GREEN_NOT_DETECTED'),
+            'red with skipped': ((1, summary(2, 0, fail=1, skipped=1)), 'FAIL', 'INCONCLUSIVE'),
+            'red with cancelled': ((1, summary(1, 0, cancelled=1)), 'FAIL', 'INCONCLUSIVE'),
+            'exit one but no failing count': ((1, summary(1, 1)), 'FAIL', 'INCONCLUSIVE'),
+            'syntax error without summary': ((1, b'SyntaxError: before hook\n'), 'FAIL', 'INCONCLUSIVE'),
+            'timeout': ((124, summary(1, 0, fail=1)), 'TIMEOUT', 'INCONCLUSIVE'),
+        }
+        for label, (tests, status, result) in cases.items():
+            with self.subTest(case=label):
+                report = self.run_exec(meta, tests=tests, mutation=self.MUT)
+                self.assertEqual((report['product_test_status'], report['mutation_result']), (status, result))
+        red = (1, summary(1, 0, fail=1))
+        for label, kwargs in {'missing terminal event': {'mangle': lambda out: out[:out.rindex(b'@@')]},
+                              'docker exit': {'code': 1},
+                              'forced probe not failing': {'probe': (0, b'ACCESS01_EXECUTOR_FORCED_FAIL\n')}}.items():
+            with self.subTest(case=label):
+                report = self.run_exec(meta, tests=red, mutation=self.MUT, **kwargs)
+                self.assertEqual((report['transport_status'], report['mutation_result']),
+                                 ('INFRASTRUCTURE_FAIL', 'INCONCLUSIVE'))
+
+    def test_mutation_variant_rejects_everything_but_the_fixed_preset_on_k1_before_execution(self):
+        context, meta = self.ready()
+        for bad in ('', 'other', 'FOREIGN-SCHOOL-ORIGIN', 'foreign-school-origin ', 'foreign-school-origin;id',
+                    'BQ_K1_MUTATION=foreign-school-origin', ['foreign-school-origin'],
+                    {'BQ_K1_MUTATION': 'foreign-school-origin'}, True, 1, b'foreign-school-origin'):
+            with self.subTest(value=repr(bad)), self.assertRaises(ValueError):
+                self.run_exec(meta, mutation=bad)
+            self.assertIsNone(self.argv)
+        self.assertEqual(self.run_exec(meta)['transport_status'], 'EXECUTED')
+        self.assertEqual(pp.K1_MUTATIONS, ('foreign-school-origin',))
+        self.assertEqual(pp.K1_COUNTERPROBE_TESTS, (K1_A,))
+        self.assertIn(K1_A, pp.ACCESS_LOCAL['tests'])
+        self.assertIsNone(pp.execute_access_local.__defaults__[-1])
+
+    def test_mutation_variant_is_rejected_for_the_access_profile(self):
+        context, meta = self.ready('access')
+        with self.assertRaises(ValueError):
+            self.run_exec(meta, mutation=self.MUT)
+        self.assertIsNone(self.argv)
+        report = self.run_exec(meta)
+        self.assertEqual((report['profile'], report['transport_status'], report['mutation_result']),
+                         (pp.ACCESS_PROFILE, 'EXECUTED', None))
+        self.assertNotIn('BQ_K1_MUTATION', ' '.join(self.argv))
+
+    def test_mutation_environment_must_be_present_exactly_when_the_preset_is_requested(self):
+        context, meta = self.ready()
+        for label, kwargs in {'preset without env fact': dict(mutation=self.MUT, env='PATH LANG'),
+                              'preset plus extra env': dict(mutation=self.MUT, env='PATH LANG BQ_K1_MUTATION EXTRA'),
+                              'normal with mutation env': dict(env='PATH LANG BQ_K1_MUTATION')}.items():
+            with self.subTest(case=label):
+                report = self.run_exec(meta, tests=(1, summary(1, 0, fail=1)), **kwargs)
+                self.assertEqual(report['transport_status'], 'BLOCKED')
+                self.assertFalse(report['preflight']['checks']['environment'])
+                self.assertEqual(report['mutation_result'], 'INCONCLUSIVE' if 'mutation' in kwargs else None)
+        report = self.run_exec(meta, mutation=self.MUT)
+        self.assertTrue(report['preflight']['checks']['environment'])
+
+
+    def test_executed_requires_explicit_stopped_and_removed_cleanup(self):
+        context, meta = self.ready()
+        red = (1, summary(1, 0, fail=1))
+        bad = {'no fifth element': NO_CLEANUP, 'not_reported': {'state': 'not_reported'}, 'unknown': {'state': 'unknown'},
+               'future state': {'state': 'stopped_and_removed_v2'}, 'missing key': {}, 'cleanup_needed': {'state': 'cleanup_needed'},
+               'unknown_cleanup_needed': {'state': 'unknown_cleanup_needed'}, 'bare string': 'stopped_and_removed'}
+        for label, c in bad.items():
+            with self.subTest(case=label, run='normal'):
+                report = self.run_exec(meta, cleanup=c)
+                self.assertEqual((report['transport_status'], report['product_test_status'], report['build_status'], report['mutation_result']),
+                                 ('INFRASTRUCTURE_FAIL', 'PASS', 'PASS', None))
+                self.assertIn('container stop/removal not confirmed', report['infrastructure_reasons'])
+            with self.subTest(case=label, run='mutation'):
+                report = self.run_exec(meta, tests=red, mutation=self.MUT, cleanup=c)
+                self.assertEqual((report['transport_status'], report['product_test_status'], report['mutation_result']),
+                                 ('INFRASTRUCTURE_FAIL', 'FAIL', 'INCONCLUSIVE'))
+        self.assertEqual(self.run_exec(meta)['transport_status'], 'EXECUTED')
+        report = self.run_exec(meta, tests=red, mutation=self.MUT)
+        self.assertEqual((report['transport_status'], report['mutation_result']), ('EXECUTED', 'RED_OBSERVED'))
 
 OBSERVER_INIT = runtime.Observer.__init__
 if __name__ == '__main__':

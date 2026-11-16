@@ -94,6 +94,9 @@ K1_MAX_GROWTH = 32 * 1024
 K1_FORBIDDEN_ADDED = (b'child_process', b'node:net', b'node:http', b'node:dgram', b'node:dns',
                       b'WebSocket', b'XMLHttpRequest', b'eval(', b'new Function', b'process.binding')
 DECOY_PROFILES = (ACCESS_PROFILE, K1_PROFILE)
+K1_MUTATION_ENV = 'BQ_K1_MUTATION'
+K1_MUTATIONS = ('foreign-school-origin',)  # fixed presets only; never caller text
+K1_COUNTERPROBE_TESTS = (ACCESS_PROOF,)  # fixed targeted selection, NOT the complete normal suite
 
 
 def scan_hit(driver, data, exact=None, access=False, source=False, original=None, name=None):
@@ -1221,6 +1224,7 @@ mkdir -p /tmp/xdg-config /tmp/xdg-cache /tmp/work/project /tmp/pf || block mkdir
 m PF uid "$(id -u)"
 m PF env "$(env | sed 's/=.*//' | sort | tr '\n' ' ')"
 for v in $(env | sed 's/=.*//'); do case " @ENVALLOW@ " in *" $v "*) ;; *) block "env-not-allowed $v";; esac; done
+@MUTCHECK@
 m PF nets "$(ls /sys/class/net | tr '\n' ' ')"
 m PF capeff "$(sed -n 's/^CapEff:[[:space:]]*//p' /proc/self/status)"
 m PF nonewprivs "$(sed -n 's/^NoNewPrivs:[[:space:]]*//p' /proc/self/status)"
@@ -1437,9 +1441,10 @@ def _access_parse(data, nonce):
         found['errors'].append('no terminal DONE or BLOCKED event')
     return found
 
-def _access_preflight(facts, expected_tree):
+def _access_preflight(facts, expected_tree, mutation=None):
     names = set(facts.get('env', '').split())
-    return {'uid': facts.get('uid') == '1000', 'environment': bool(names) and names <= ACCESS_PF_ENV,
+    allowed = ACCESS_PF_ENV | ({K1_MUTATION_ENV} if mutation else set())
+    return {'uid': facts.get('uid') == '1000', 'environment': bool(names) and names <= allowed and (K1_MUTATION_ENV in names) == bool(mutation),
             'network': facts.get('nets', '').split() == ['lo'], 'capabilities': facts.get('capeff') == '0000000000000000',
             'no_new_privileges': facts.get('nonewprivs') == '1', 'seccomp': facts.get('seccomp') == '2',
             'root_readonly': facts.get('rootfs') == 'ro', 'source_readonly': facts.get('inputmount') == 'ro',
@@ -1498,7 +1503,7 @@ def _access_docker(argv, env, timeout, name, docker):
         proc.kill()
         raise
 
-def execute_access_local(result_root, prepared, driver, workroot, runtime, expect, docker=None, docker_env=None, runner=None):
+def execute_access_local(result_root, prepared, driver, workroot, runtime, expect, docker=None, docker_env=None, runner=None, mutation=None):
     """Fixed local ACCESS-01 executor: verified fresh original + exact proof comment, rootless Docker, no network."""
     result_root, prepared, base = Path(result_root).resolve(), Path(prepared).resolve(), _access_safe_path(workroot).resolve()
     if prepared != Path(driver.PREPARED).resolve():
@@ -1514,6 +1519,8 @@ def execute_access_local(result_root, prepared, driver, workroot, runtime, expec
             c['mode'] != 'forge-implementation' or sorted(c['edit_paths']) != edits or c['create_paths'] or
             c['synthetic_files'] or c['target_commit'] != ACCESS_SPEC['commit']):
         raise ValueError('not the fixed ACCESS-01/K1 implementation activation')
+    if mutation is not None and (not k1 or not isinstance(mutation, str) or mutation not in K1_MUTATIONS):
+        raise ValueError('unsupported counterprobe variant; only the fixed K1 preset is allowed')
     meta = json.loads((result_root / 'metadata.json').read_bytes())
     validate_result(meta, context, result_root, driver)
     if (set(expect) != ACCESS_EXPECT or any(meta[k] != expect[k] for k in ACCESS_EXPECT) or meta['phase'] != 'result_ready' or
@@ -1578,11 +1585,15 @@ def execute_access_local(result_root, prepared, driver, workroot, runtime, expec
     import secrets
     nonce = secrets.token_hex(12)
     script = ACCESS_SCRIPT
-    for key, value in (('@TESTS@', ' '.join(ACCESS_LOCAL['tests'])), ('@NODE@', ACCESS_LOCAL['node']), ('@CHROMIUM@', ACCESS_LOCAL['chromium']),
+    tests = K1_COUNTERPROBE_TESTS if mutation else ACCESS_LOCAL['tests']
+    allowed_env = ACCESS_PF_ENV | ({K1_MUTATION_ENV} if mutation else set())
+    check = ('[ "$(env | grep -c \'^' + K1_MUTATION_ENV + '=\')" = 1 ] && [ "$' + K1_MUTATION_ENV + '" = \'' + mutation + '\' ] || block mutation-env\n') if mutation else ''
+    script = script.replace('@MUTCHECK@\n', check)
+    for key, value in (('@TESTS@', ' '.join(tests)), ('@NODE@', ACCESS_LOCAL['node']), ('@CHROMIUM@', ACCESS_LOCAL['chromium']),
                        ('@TESTSECONDS@', str(ACCESS_LOCAL['seconds']['tests'])), ('@BUILDSECONDS@', str(ACCESS_LOCAL['seconds']['build'])),
                        ('@PROBESECONDS@', str(ACCESS_LOCAL['seconds']['probe']))):
         script = script.replace(key, value)
-    script = script.replace('@TREE@', expected_tree).replace('@ENVALLOW@', ' '.join(sorted(ACCESS_PF_ENV)))
+    script = script.replace('@TREE@', expected_tree).replace('@ENVALLOW@', ' '.join(sorted(allowed_env)))
     name = 'access01-' + nonce
     argv = [docker, 'run', '--rm', '--name', name, '--pull', 'never', '--network', 'none', '--read-only', '--user', '1000:1000',
             '--cap-drop', 'ALL', '--security-opt', 'no-new-privileges', '--pids-limit', '1024', '--memory', '4g',
@@ -1592,10 +1603,13 @@ def execute_access_local(result_root, prepared, driver, workroot, runtime, expec
         argv += ['--mount', 'type=bind,src=' + str(host) + ',dst=' + target + ',readonly']
     argv += [ACCESS_LOCAL['image'], '-i', 'PATH=/runtime/bin:/usr/local/bin:/usr/bin:/bin', 'LANG=C.UTF-8',
              'LC_ALL=C.UTF-8', 'TMPDIR=/tmp', 'XDG_CONFIG_HOME=/tmp/xdg-config', 'XDG_CACHE_HOME=/tmp/xdg-cache', 'BQ_LEGACY_HTML=/input/fixture/legacy.html', 'PLAYWRIGHT_BROWSERS_PATH=/ms-playwright',
-             'GIT_CONFIG_NOSYSTEM=1', 'GIT_CONFIG_GLOBAL=/dev/null', 'GIT_TERMINAL_PROMPT=0', '/bin/sh', '-c', script, 'access01', nonce]
+             'GIT_CONFIG_NOSYSTEM=1', 'GIT_CONFIG_GLOBAL=/dev/null', 'GIT_TERMINAL_PROMPT=0'] + (
+                 [K1_MUTATION_ENV + '=' + mutation] if mutation else []) + ['/bin/sh', '-c', script, 'access01', nonce]
     result = (runner or _access_docker)(argv, env, ACCESS_LOCAL['host_seconds'], name, docker)
     code, out, err, timed_out = result[:4]
     cleanup = result[4] if len(result) > 4 else {'state': 'not_reported'}
+    if not isinstance(cleanup, dict):
+        cleanup = {'state': 'unknown'}
     found = _access_parse(out[:3 * _MIB], nonce)
     if len(out) > 3 * _MIB:
         found['errors'].append('stdout exceeds protocol bound')
@@ -1603,10 +1617,10 @@ def execute_access_local(result_root, prepared, driver, workroot, runtime, expec
     reasons = list(found['errors'])
     if code != (91 if blocked else 0):
         reasons.append('docker exit code ' + str(code))
-    if cleanup.get('state') in ('cleanup_needed', 'unknown_cleanup_needed'):
+    if cleanup.get('state') != 'stopped_and_removed':
         reasons.append('container stop/removal not confirmed')
     trusted = not timed_out and not found['errors'] and code == (91 if blocked else 0)
-    checks = _access_preflight(found['facts'], expected_tree)
+    checks = _access_preflight(found['facts'], expected_tree, mutation)
     phases = {}
     for phase in ACCESS_PHASES:
         end = found['ends'].get(phase)
@@ -1616,7 +1630,7 @@ def execute_access_local(result_root, prepared, driver, workroot, runtime, expec
             status = 'UNVERIFIED'
         payload = found['logs'].get(phase)
         phases[phase] = dict(end or {}, status=status, log=_access_log(driver, payload, out_dir, phase, end) if end and payload is not None else None)
-    if k1 and phases['tests']['status'] == 'PASS':
+    if k1 and not mutation and phases['tests']['status'] == 'PASS':
         counts = ((phases['tests']['log'] or {}).get('counts')) or {}
         if (counts.get('tests') != K1_BASELINE_TESTS or counts.get('pass') != K1_BASELINE_TESTS or
                 any(counts.get(x) != 0 for x in ('fail', 'cancelled', 'skipped', 'todo'))):
@@ -1624,21 +1638,33 @@ def execute_access_local(result_root, prepared, driver, workroot, runtime, expec
             phases['tests']['k1_count_gate'] = 'FAIL'
     detected = (trusted and found['ends'].get('probe', {}).get('exit_code') == 37 and
                 found['logs'].get('probe') == b'ACCESS01_EXECUTOR_FORCED_FAIL\n')
+    variant = {'name': 'k1-' + mutation if mutation else 'normal', 'tests': list(tests),
+               'mutation_env': {K1_MUTATION_ENV: mutation} if mutation else None,
+               'complete_normal_suite': not mutation, 'count_gate_applied': k1 and not mutation}
+    mutation_result = None
     ready = all(checks.values()) and not blocked
     transport = ('TIMEOUT' if timed_out else 'BLOCKED' if blocked and trusted else 'INFRASTRUCTURE_FAIL' if reasons else
                  'BLOCKED' if not ready else
                  'EXECUTED' if found['done'] and detected and all(x['status'] != 'NOT_RUN' for x in phases.values()) else 'INFRASTRUCTURE_FAIL')
+    if mutation:
+        counts = ((phases['tests']['log'] or {}).get('counts')) or {}
+        counted = (counts.get('tests', 0) >= 1 and counts.get('tests') == counts.get('pass', 0) + counts.get('fail', 0) and
+                   all(counts.get(x) == 0 for x in ('cancelled', 'skipped', 'todo')))
+        mutation_result = ('INCONCLUSIVE' if transport != 'EXECUTED' or reasons or not trusted else
+                           'RED_OBSERVED' if phases['tests']['status'] == 'FAIL' and counted and counts.get('fail', 0) >= 1 else
+                           'GREEN_NOT_DETECTED' if phases['tests']['status'] == 'PASS' and counted else 'INCONCLUSIVE')
     noise = err[-2000:]
     return {'schema': ACCESS_LOCAL['schema'], 'profile': c['test_profile'], 'transport_status': transport,
             'product_test_status': phases['tests']['status'], 'build_status': phases['build']['status'],
             'counterprobe_detection': 'PASS' if detected else 'FAIL', 'blocked_reason': found['blocked'],
+            'variant': variant, 'mutation_result': mutation_result,
             'docker_exit_code': code, 'docker_stderr_tail': ('withheld by secret scan' if driver.secret_hit(noise, None) else noise.decode('utf-8', 'replace')),
             'binding': {'task_id': a['task_id'], 'packet_binding': context['packet_binding'], 'session_id': meta['session_id'], 'run_id': meta['run_id'],
                         'run_attempt': meta['run_attempt'], 'source_commit': meta['source_commit'], 'activation_commit': meta['activation_commit'],
                         'changes_sha256': meta['changes_sha256'], 'original_commit': ACCESS_SPEC['commit'], 'original_tree': ACCESS_SPEC['tree'],
                         'overlay_tree': expected_tree, 'local_synthetic_commit': found['facts'].get('localcommit'), 'imported_files': len(source)},
             'runtime': {'image': ACCESS_LOCAL['image'], 'node': ACCESS_LOCAL['node'], 'playwright': ACCESS_LOCAL['playwright'],
-                        'fixture_sha256': ACCESS_LOCAL['fixture_sha256'], 'argv_tests': ['node', '--test', '--test-concurrency=1'] + list(ACCESS_LOCAL['tests']),
+                        'fixture_sha256': ACCESS_LOCAL['fixture_sha256'], 'argv_tests': ['node', '--test', '--test-concurrency=1'] + list(tests),
                         'argv_build': ['node', 'werkzeug/testinstanz.mjs', '--ziel', '/tmp/work/dist'], 'host_seconds': ACCESS_LOCAL['host_seconds']},
             'preflight': {'facts': found['facts'], 'checks': checks}, 'phases': phases, 'dist_inventory': found['dist'],
             'output_dir': str(out_dir), 'cleanup': cleanup, 'infrastructure_reasons': reasons,
