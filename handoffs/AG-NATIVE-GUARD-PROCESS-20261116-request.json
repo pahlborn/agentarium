@@ -1,0 +1,32 @@
+{
+  "schema": "agentarium.handoff.v0",
+  "task_id": "AG-NATIVE-GUARD-PROCESS-20261116",
+  "role": "process-agent",
+  "allowed_paths": [
+    "handoffs/AG-NATIVE-GUARD-PROCESS-20261116-handback.md"
+  ],
+  "readable_paths": [
+    "AGENTS.md",
+    "CLAUDE.md",
+    ".claude/agents/process-agent.md",
+    "handoffs/AG-NATIVE-GUARD-PROCESS-20261116-request.json",
+    "governance/agentarium-process-v1.4.md",
+    "governance/agentarium-rulebook-v1.4.md"
+  ],
+  "goal": "One targeted regular Cadence event review of repeated Peter reminders and a lost regular handback; no new process/text/code changes. Read Rulebook/Process in full as required, then return at most three short actionable findings or no-change in the sole handback. This is not a release gate.",
+  "authority": "Standing authorization by Peter for event triggers, Process1.4 §5 at immutable main aee3ad96cd6111404b529e0f6515431f39ce36b9: Peter had to remind; rule/operational gap. Trigger key AG-PROC-NATIVE-GUARD-LOOP-20261116, not previously dispatched. No additional Peter transport/action is needed. Keep actual execution/cost evidence separate; do not expand source/permissions or start other roles.",
+  "facts": [
+    "Peter approved native own-status rule adoption PR140; Atlas merged it but practical publication remained inconsistent. Peter asked whether effects should be visible, then who must act, then why Atlas did not act. This is an actual repeated-reminder trigger, not an inferred age/staleness claim.",
+    "Atlas diagnosed invalid timestamp assignments and missing starts. First operational parser preflight executed; independent real Sentinel QA and V1 start/end/return path plus local mirrored-original browser succeeded. This is bounded evidence, not Peter device observation.",
+    "Automatic approval review required an explicit cap-specific Forge authorization. Peter approved that run up to3USD. Regular Forge43950071341 stopped BLOCKED/RuntimeError and withheld output; actual session/usage/cost unknown. No fabricated cause or zero cost. No second paid Forge attempt was launched.",
+    "Peter explicitly approved Atlas as substitute. Atlas implemented the producer-only guard; independent Sentinel found genuine causal-time bug, Atlas fixed it,26own+18unchanged independent cases passed. PR142 merged as aee3ad9. No monitor/relay/workflow changes and no new Lot assignment. Another Lot PR143 browser job remained untouched.",
+    "Outcome is integrated executable guard + required generated dispatch instruction + real actual-role normal path. Work took from about20:16UTC through21:08UTC; most detailed platform timings missing. No measured solo comparison. Native costs unknown. Final full evidence index stays Issue115; existing broader process backlog Issue135.",
+    "Avoid inventing another rule when applying the existing ownership rule is sufficient. Decide whether any remaining bounded follow-up belongs with Atlas or relay technical owner. Safety/capture failure cause is unknown, so don't assert a secret leak or blame a worker from generic RuntimeError."
+  ],
+  "rules": [
+    "Read complete Rulebook/Process as your role requires. Do not implement fixes or edit project policy; sole writable artifact is your handback.",
+    "Never invent participation, evidence, missing costs, causes or customer approval. Separate observed facts, inference, recommendation and unknown.",
+    "Do not include any monitor control marker or event JSON in the handback; this is plain process advice, no operational journal event. Do not quote long code/rules or produce a generic checklist. Keep output under450words."
+  ],
+  "expected_result": "One concise actual Cadence report with trigger key, up to3 findings, owner/minimum next action, and whether existing application fixes are enough. Tests NOT_RUN unless actually available; no shell. Stop after handback."
+}
