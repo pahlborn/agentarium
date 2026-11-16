@@ -1,0 +1,31 @@
+{
+  "classification": "redundant_stopped_transport_receipt_archived",
+  "original_comment": 6928364076,
+  "original_event": {
+    "schema": "agentarium.github-event.v1",
+    "id": "AG-NATIVE-JOURNAL-GUARD-20261116-FORGE:43950071341:HOST_RECEIVED",
+    "project_id": "agentarium",
+    "run_id": "43950071341",
+    "task_id": "AG-NATIVE-JOURNAL-GUARD-20261116-FORGE",
+    "actor": "atlas",
+    "kind": "handoff",
+    "title": "Auftrag transportiert und empfangen — kein belegter Arbeitsbeginn",
+    "occurred_at": "2026-11-16T20:28:24.027496+00:00",
+    "source_evidence": "runtime_stream",
+    "source_tool_id": "relay/claude_public_relay_v2.py",
+    "recipient": "forge"
+  },
+  "original_snapshot_preserved": true,
+  "actual_worker_completion_not_claimed": true,
+  "real_logical_fulfillment_comments": [
+    6929515903,
+    6929517925
+  ],
+  "main_delivery_comments": [
+    6929949900,
+    6929952724
+  ],
+  "checked_at": "2026-11-16 21:32:01 UTC",
+  "authority": "Peter's continuing instruction to archive records destined for archiving; own completed task cleanup. No user acceptance inferred.",
+  "scope": "Only redundant legacy V2 transport V1 display block; host metadata and all original text/JSON remain. Active-marker removal requires a basis rebuild for an already connected browser."
+}
