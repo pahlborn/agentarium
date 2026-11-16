@@ -2503,7 +2503,7 @@
 
      Der Bauzeitpunkt kommt beim Bauen aus der Uhr. Von Hand gepflegte
      Datumsangaben sind nach der zweiten Änderung falsch. */
-  var FASSUNG = '106', GEBAUT = '2026-11-16T13:30Z';
+  var FASSUNG = '107', GEBAUT = '2026-11-16T15:20Z';
 
   /* AG-GH-LIVE-001: JEDE TEXTSENKE MASKIERT.
      Seit Live-Daten von aussen kommen (GitHub-Kommentare, one-event.json),
@@ -5662,19 +5662,32 @@
      eigenen Linien mehr (Fassung 96/97: "schrecklich, ja unbedingt weg").
      Nach 12 s Ruhe EINE Erscheinung, dann 12-25 s Pause; nie zweimal
      dieselbe hintereinander. Ein Ereignis oder ein Finger beendet die Ruhe.
-     Nur live, nicht im Archiv. Kein Regler. */
+     Nur live, nicht im Archiv. Kein Regler.
+
+     AG-MON-RUHE-002, Peter 16.11.2026: "randomisierte effekte aus pult ...
+     sofern wenig oder nichts los ist. die effekte sollen aber verblassen und
+     nichts davon übrig bleiben. pult einzubauen wäre zuviel." Dazu kommen
+     sechs Erscheinungen aus dem Mischpult von Resonanz, gebaut aus dem, was
+     das Feld hier schon kann: Strömung, Schleife, Sog, Stoß, Stimmen,
+     Strang. Keine setzt Farbe ab (Abgabe 0), alle Leuchtpunkte leben
+     hoechstens zwei Sekunden -- darueber saettigt ein Fleck (siehe
+     `knoten`). "Wenig los" heisst: kein Ball fliegt und hoechstens EINE
+     Rolle arbeitet. Takt und Pausen bleiben wie am 31.10. */
   var RUHE_NACH = 12, RUHE_PAUSE = [12, 25];
-  var RUHE_ARTEN = ['komet', 'wirbel', 'knoten', 'korn'];
+  var RUHE_ARTEN = ['komet', 'wirbel', 'knoten', 'korn',
+                    'stroemung', 'schleife', 'sog', 'stoss', 'stimmen', 'strang'];
   var ruheSeit = 0, leerlauf = null, leerlaufNaechster = 0, leerlaufAnzahl = 0, ruheLetzte = '';
   function ruheMelden() {
     ruheSeit = performance.now();
     leerlauf = null;
   }
   window.addEventListener('pointerdown', function () { ruheMelden(); }, true);
+  /* Wenig los: kein Ball fliegt, hoechstens eine Rolle arbeitet
+     (AG-MON-RUHE-002; bis Fassung 106 musste niemand arbeiten). */
   function teamRuht() {
     if (baelle.length) return false;
-    for (var n in arbeit) if (arbeitetWirklich(arbeit[n])) return false;
-    for (var nl in laufzeit) if (laufzeitAktiv(nl)) return false;
+    var tun = 0;
+    for (var n in nachName) if (laeuftJetzt(n) && ++tun > 1) return false;
     return true;
   }
   /* Irgendwo im Kreis, nicht auf den Namen. */
@@ -5719,6 +5732,94 @@
         if (k < 1 + (Math.random() < 0.5 ? 1 : 0)) L.orte.push([x, y, ton, 1.4 + k * 0.6]);
       }
       L.dauer = 3.2;
+    },
+    /* ---- aus dem Mischpult (AG-MON-RUHE-002). `L.schritt` zeichnet je Bild.
+       Je Bild hoechstens rund ein Dutzend Faeden -- weniger als ein Ball
+       (98) und genug, dass man es sieht: Die erste Fassung mit zwei bis drei
+       Faeden je Bild war gemessen kaum vom Grund zu unterscheiden. */
+    /* Stroemung: ein Hauch zieht durch das Medium und nimmt die Faeden mit. */
+    stroemung: function (L) {
+      var o = ruheOrt(), w = Math.random() * 6.2832, ton = ruheFarbe(),
+          c = Math.cos(w), sn = Math.sin(w);
+      L.dauer = 2.6;
+      L.schritt = function (dt) {
+        var f = L.t / L.dauer, x = o[0] + (f - 0.5) * c * 220, y = o[1] + (f - 0.5) * sn * 220;
+        window.__feld.stroemung(x, y, c * 140, sn * 140, dt);
+        for (var k = 0; k < 10; k++) {
+          var q = (Math.random() - 0.5) * 90;          /* quer zur Richtung */
+          window.__feld.strang(x - sn * q, y + c * q, c * 90, sn * 90, 0.55, 1.3, ton, 0);
+        }
+      };
+    },
+    /* Schleife: eine Acht, einmal gezogen, die hinter sich verglimmt. */
+    schleife: function (L) {
+      var o = ruheOrt(), r = 40 + 20 * Math.random(), ton = ruheFarbe(),
+          dreh = Math.random() * 6.2832, c = Math.cos(dreh), sn = Math.sin(dreh);
+      L.dauer = 3;
+      L.schritt = function () {
+        var u = (L.t / L.dauer) * 6.2832, a = Math.sin(u) * r, b = Math.sin(u) * Math.cos(u) * r * 0.9;
+        var x = o[0] + a * c - b * sn, y = o[1] + a * sn + b * c;
+        for (var k = 0; k < 8; k++)
+          window.__feld.strang(x + (Math.random() - 0.5) * 6, y + (Math.random() - 0.5) * 6,
+                               0, 0, 0.6, 1.6, ton, 0);
+      };
+    },
+    /* Sog: Faeden stroemen von einem Ring auf einen Punkt zu. */
+    sog: function (L) {
+      var o = ruheOrt(), ton = ruheFarbe();
+      L.dauer = 2.2;
+      L.schritt = function () {
+        for (var k = 0; k < 10; k++) {
+          var w = Math.random() * 6.2832, R = 70 + 30 * Math.random();
+          window.__feld.strang(o[0] + Math.cos(w) * R, o[1] + Math.sin(w) * R,
+                               -Math.cos(w) * R * 1.1, -Math.sin(w) * R * 1.1, 0.55, 0.9, ton, 0);
+        }
+      };
+    },
+    /* Stoss: ein kurzes Auseinandergehen mit Funken. */
+    stoss: function (L) {
+      var o = ruheOrt(), ton = ruheFarbe();
+      window.__feld.austreiben(o[0], o[1], ton, 5, 0);
+      window.__feld.knoten(o[0], o[1], 0.8, ton, 0, 24, 1.2);
+      L.dauer = 2;
+    },
+    /* Stimmen: drei Lichtpunkte, die nacheinander antworten. */
+    stimmen: function (L) {
+      var o = ruheOrt(), ton = ruheFarbe(), orte = [];
+      for (var k = 0; k < 3; k++) orte.push([o[0] + (Math.random() - 0.5) * 160,
+                                             o[1] + (Math.random() - 0.5) * 110, 0.1 + k * 0.6, 0]);
+      L.dauer = 2.6;
+      L.schritt = function () {
+        orte.forEach(function (p) {
+          if (p[3] || L.t < p[2]) return;
+          p[3] = 1;
+          window.__feld.knoten(p[0], p[1], 0.9, ton, 0, 44, 1.6);
+        });
+      };
+    },
+    /* Strang: ein einzelner gespannter Faden, der aufleuchtet und vergeht. */
+    strang: function (L) {
+      var o = ruheOrt(), w = Math.random() * 6.2832, ton = ruheFarbe(),
+          c = Math.cos(w), sn = Math.sin(w), lang = 140 + 60 * Math.random();
+      L.dauer = 1.8;
+      L.schritt = function () {
+        var f = Math.min(1, L.t / 0.9);               /* er spannt sich auf */
+        for (var k = 0; k < 12; k++) {
+          var d = (Math.random() * f - 0.5) * lang;
+          window.__feld.strang(o[0] + c * d, o[1] + sn * d, c * 10, sn * 10, 0.6, 1.2, ton, 0);
+        }
+      };
+    }
+  };
+  /* Fuer die Nachweise: eine bestimmte Erscheinung sofort zeigen. */
+  window.__agRuhe = {
+    arten: RUHE_ARTEN.slice(),
+    zeigen: function (art) {
+      if (!RUHE[art] || !window.__feld) return false;
+      leerlauf = { name: art, art: art, t: 0, dauer: 3 };
+      RUHE[art](leerlauf);
+      ruheLetzte = art; leerlaufAnzahl++;
+      return true;
     }
   };
   function leerlaufSchritt(dt) {
@@ -5732,6 +5833,7 @@
       if (leerlauf.orte) leerlauf.orte.forEach(function (o) {
         if (!o[4] && leerlauf.t > o[3] && window.__funkeAn) { o[4] = 1; window.__funkeAn(o[0], o[1], o[2]); }
       });
+      if (leerlauf.schritt && leerlauf.t < leerlauf.dauer) leerlauf.schritt(dt);
       if (leerlauf.t < leerlauf.dauer) return;
       leerlauf = null;
       leerlaufNaechster = jetzt + (RUHE_PAUSE[0] +

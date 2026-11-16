@@ -20,6 +20,9 @@
      E  Ruhe (niemand arbeitet): nach einer Weile einzeln Komet, Wirbel,
         Knoten oder Korn mit Funken, mit Pausen, nie zweimal dasselbe;
         ein Finger beendet sie; arbeitet jemand, bleibt sie aus
+        16.11.2026 (Peter, AG-MON-RUHE-002): dazu sechs Arten aus dem
+        Mischpult, und "wenig los" reicht -- erst bei ZWEI arbeitenden
+        Rollen bleibt die Ruhe aus (Einzelheiten AG-MON-RUHE-002)
      F  liegende Baelle sind kleiner (70 %), der Flug bleibt
      G  liegende Baelle funken ab und zu, jeder in seinem Takt -- vorbei-
         ziehende Faeden lassen sie nicht mehr dauernd zerspringen
@@ -282,8 +285,11 @@ async function weiseJeBild(s, ms) {
     console.log('        Ruhe: ' + starts.map(z => z.art + ' bei ' + z.t.toFixed(1) + ' s').join(', ') +
                 '; ' + aufrufe + ' Aufrufe ans Feld');
     zeile('Ruhe beginnt erst nach einer Weile (≥ 11 s nach dem Laden)', !!starts[0] && starts[0].t >= 11, true);
+    /* Seit AG-MON-RUHE-002 zehn Arten: die vier vom 31.10. und sechs aus
+       dem Mischpult. */
     zeile('… mit einem Resonanz-Effekt', starts.length > 0 &&
-          starts.every(z => ['komet', 'wirbel', 'knoten', 'korn'].includes(z.art)), true);
+          starts.every(z => ['komet', 'wirbel', 'knoten', 'korn', 'stroemung', 'schleife',
+                             'sog', 'stoss', 'stimmen', 'strang'].includes(z.art)), true);
     zeile('… der im Feld erscheint', aufrufe > 0, true);
     zeile('nicht zu schnell hintereinander (≥ 12 s Abstand)',
           starts.length === 2 && starts[1].t - starts[0].t >= 12, true);
@@ -295,11 +301,12 @@ async function weiseJeBild(s, ms) {
     zeile('ein Finger beendet die Ruhe sofort', await r.s.evaluate(() => window.__agStand().leerlauf), '');
     zeile('keine Seitenfehler', r.seitenFehler.length, 0);
     await r.q.close();
-    /* Arbeitet jemand, gibt es keine Ruhe-Effekte. */
-    r = await seite(b, tisch, arbeit('forge', true));
+    /* Arbeiten zwei, gibt es keine Ruhe-Effekte. Bis Fassung 106 genuegte
+       eine; Peter 16.11.2026: "sofern wenig oder nichts los ist". */
+    r = await seite(b, tisch, arbeit('forge', true).concat(arbeit('argus', true)));
     await r.s.bringToFront();
     await r.s.waitForTimeout(16000);
-    zeile('arbeitet jemand, bleibt die Ruhe aus', await r.s.evaluate(() => window.__agStand().leerlaufAnzahl), 0);
+    zeile('arbeiten zwei, bleibt die Ruhe aus', await r.s.evaluate(() => window.__agStand().leerlaufAnzahl), 0);
     await r.q.close();
     console.log('\nF — Liegende Bälle kleiner, Flug bleibt');
     r = await seite(b, tisch, [kommentar(30, { task_id: 'B1', kind: 'handoff', actor: 'peter',
