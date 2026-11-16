@@ -86,9 +86,17 @@ ACCESS_DECOY = {'path': ACCESS_PROOF,
                 'file_sha256': '2788b3ea6302ebe674a1ef3036d1e9c68033ac5bdcb2f166668dea7ef187727b',
                 'match_sha256': 'bb5f355c1f175d355264330325760436d932e3c077bb1ab367faccd7b6543f15', 'count': 1}
 STREAM_DECOY_LIMIT = 256
+K1_PROFILE = 'bq-k1-semantic-tests-v1'
+K1_TASK_PREFIX = 'AG-BQ-K1-'
+K1_EDITS = ('tests/evaluation-upgrade-browser.test.mjs', ACCESS_PROOF)
+K1_BASELINE_TESTS = 23
+K1_MAX_GROWTH = 32 * 1024
+K1_FORBIDDEN_ADDED = (b'child_process', b'node:net', b'node:http', b'node:dgram', b'node:dns',
+                      b'WebSocket', b'XMLHttpRequest', b'eval(', b'new Function', b'process.binding')
+DECOY_PROFILES = (ACCESS_PROFILE, K1_PROFILE)
 
 
-def scan_hit(driver, data, exact=None, access=False, source=False):
+def scan_hit(driver, data, exact=None, access=False, source=False, original=None, name=None):
     """driver.secret_hit plus ONE digest-bound exception for the ACCESS profile.
 
     The exact provider key check precedes any exception. source=True: only data whose body (after the
@@ -99,6 +107,8 @@ def scan_hit(driver, data, exact=None, access=False, source=False):
         return True
     if not access:
         return driver.secret_hit(data, exact)
+    if source and original is not None:
+        return k1_scan_hit(driver, data, original, name, exact)
     if source:
         body = data[len(ACCESS_PREFIX):] if data.startswith(ACCESS_PREFIX) else data
         allowed = ACCESS_DECOY['count'] if digest(body) == ACCESS_DECOY['file_sha256'] else 0
@@ -111,6 +121,62 @@ def scan_hit(driver, data, exact=None, access=False, source=False):
             last, used = match.end(), used + 1
     pieces.append(data[last:])
     return driver.secret_hit(b' '.join(pieces), exact)
+
+
+def k1_scan_hit(driver, data, original, name, exact=None):
+    """Strict scan of one changed K1 test file against its immutable original.
+
+    Only the single attested decoy line may carry the attested match: that exact line must survive
+    byte-identical, exactly once, and contain the match. Every other byte is scanned unchanged and
+    any other file receives no exception at all.
+    """
+    if exact and exact in data:
+        return True
+    if name != ACCESS_PROOF or digest(original) != ACCESS_DECOY['file_sha256']:
+        return driver.secret_hit(data, exact)
+    found = [m for m in driver.SUSPICIOUS.finditer(original)
+             if digest(m.group(0)) == ACCESS_DECOY['match_sha256']]
+    if len(found) != 1:
+        return True
+    start = original.rfind(b'\n', 0, found[0].start()) + 1
+    stop = original.find(b'\n', found[0].end())
+    line = original[start:len(original) if stop < 0 else stop]
+    spans, pos = [], 0
+    for text in data.split(b'\n'):
+        if text == line:
+            spans.append((pos, pos + len(text)))
+        pos += len(text) + 1
+    hits = [m for m in driver.SUSPICIOUS.finditer(data)
+            if digest(m.group(0)) == ACCESS_DECOY['match_sha256']]
+    if (len(spans) != 1 or len(hits) != 1 or hits[0].start() < spans[0][0] or
+            hits[0].end() > spans[0][1]):
+        return True
+    return driver.secret_hit(data[:hits[0].start()] + b' ' + data[hits[0].end():], exact)
+
+
+def k1_original(driver, name):
+    """Immutable original bytes (host copy made before the worker ran), verified against the fixed descriptor."""
+    view = next((v for v in ACCESS_SPEC['views'] if v['path'] == name), None)
+    if name not in K1_EDITS or view is None:
+        raise ValueError('K1 original outside the two authorized tests')
+    data = (driver.PREPARED / 'control/k1-original' / name).read_bytes()
+    if digest(data) != view['sha256'] or git_blob_id(data) != view['git_blob']:
+        raise ValueError('K1 original copy differs from the fixed descriptor')
+    return data
+
+
+def k1_check(driver, name, payload, original, exact=None):
+    """Complete content contract of one K1 test edit; it raises and never repairs."""
+    try:
+        payload.decode('utf-8')
+    except UnicodeDecodeError:
+        raise ValueError('K1 edit is not UTF-8') from None
+    if (not payload or payload == original or b'\0' in payload or len(payload) > MAX_FILE or
+            len(payload) > len(original) + K1_MAX_GROWTH or payload.startswith(ACCESS_PREFIX) or
+            driver.ag_control_in_handback(payload) or k1_scan_hit(driver, payload, original, name, exact)):
+        raise ValueError('K1 edit content outside the bounded semantic contract')
+    if any(payload.count(x) > original.count(x) for x in K1_FORBIDDEN_ADDED):
+        raise ValueError('K1 edit adds a forbidden capability')
 
 
 def read_zip(data, spec):
@@ -307,7 +373,8 @@ def validate_activation(a, parent, driver):
     if c['repository'] not in SOURCE_POLICY:
         raise ValueError('repository not approved by host')
     source_project, _, allowed = SOURCE_POLICY[c['repository']]
-    access = c['test_profile'] == ACCESS_PROFILE
+    k1 = c['test_profile'] == K1_PROFILE
+    access = c['test_profile'] in DECOY_PROFILES
     if access:
         allowed = {v['path'] for v in ACCESS_SPEC['views']}
     if c['project_id'] != source_project or not sha(c['target_commit'], 40):
@@ -318,7 +385,7 @@ def validate_activation(a, parent, driver):
         raise ValueError('only Forge may implement')
     if type(c['max_seconds']) is not int or not 10 <= c['max_seconds'] <= 1200:
         raise ValueError('v3 timeout outside host bound')
-    if c['test_profile'] not in ('none', 'synthetic-doc-v1', 'bq-runde-v1', ACCESS_PROFILE) or c['journal_delivery'] != 'archive':
+    if c['test_profile'] not in ('none', 'synthetic-doc-v1', 'bq-runde-v1', ACCESS_PROFILE, K1_PROFILE) or c['journal_delivery'] != 'archive':
         raise ValueError('unsupported executor/journal contract')
     # Artifact publication is separately commissioned in the immutable host
     # activation, before any model output exists. It is not a secret-scan flag.
@@ -391,7 +458,7 @@ def validate_activation(a, parent, driver):
             c['mode'] != 'forge-implementation' or identity['project_id'] != 'big-quest' or
             sorted(read_paths) != sorted(RUNDE_SOURCES) or edits != [RUNDE_MODULE] or creates or seeds):
         raise ValueError('fixed runde executor contract mismatch')
-    if access:
+    if access and not k1:
         implement = (a['role'] == 'coding-agent' and c['mode'] == 'forge-implementation' and
                      edits == [ACCESS_PROOF])
         readonly = (a['role'] in ('spec-agent', 'coding-agent') and c['mode'] == 'analysis' and not edits)
@@ -399,6 +466,13 @@ def validate_activation(a, parent, driver):
                 not (implement or readonly) or c['target_commit'] != ACCESS_SPEC['commit'] or
                 sorted(reads, key=lambda x: x['path']) != access_read_files()):
             raise ValueError('fixed access intake contract mismatch')
+    if k1 and (c['repository'] != 'pahlborn/bis-school-app_src' or a['role'] != 'coding-agent' or
+               c['mode'] != 'forge-implementation' or identity['project_id'] != 'big-quest' or
+               not a['task_id'].startswith(K1_TASK_PREFIX) or a['task_id'] == ACCESS_TASK or
+               sorted(edits) != sorted(K1_EDITS) or creates or seeds or
+               c['target_commit'] != ACCESS_SPEC['commit'] or
+               sorted(reads, key=lambda x: x['path']) != access_read_files()):
+        raise ValueError('fixed K1 semantic-test contract mismatch')
     return a
 
 
@@ -595,11 +669,11 @@ def prepare(driver, a, parent, head, request):
     for name in [s['path'] for s in c['synthetic_files']] + c['create_paths']:
         if source_entry(c, name) is not None:
             raise ValueError('synthetic/new slot collides with an existing repository path')
-    source_files = (access_views(c) if c['test_profile'] == ACCESS_PROFILE else
+    source_files = (access_views(c) if c['test_profile'] in DECOY_PROFILES else
                     {item['path']: fetch_source(c, item) for item in c['read_files']})
     if sum(map(len, source_files.values())) > MAX_TOTAL:
         raise ValueError('target source exceeds packet bound')
-    if any(scan_hit(driver, data, None, c['test_profile'] == ACCESS_PROFILE, True)
+    if any(scan_hit(driver, data, None, c['test_profile'] in DECOY_PROFILES, True)
            for data in source_files.values()):
         raise ValueError('source content blocked by secret scan')
     if driver.PREPARED.exists():
@@ -617,6 +691,9 @@ def prepare(driver, a, parent, head, request):
         write_file(work, 'trusted/' + name, driver.source(parent, name))
     for name, data in source_files.items():
         write_file(work, 'target/' + name, data)
+    if c['test_profile'] == K1_PROFILE:
+        for name in K1_EDITS:
+            write_file(control, 'k1-original/' + name, source_files[name])
     for item in c['synthetic_files']:
         write_file(work, 'target/' + item['path'], item['content'].encode())
     for name in c['create_paths']:
@@ -647,7 +724,7 @@ def prepare(driver, a, parent, head, request):
         # contain literal secret-detector counterexamples, not supplied secrets.
         if (name.startswith(('workspace/', 'control/')) and entry['type'] == 'file' and
                 scan_hit(driver, (driver.PREPARED / name).read_bytes(), None,
-                         c['test_profile'] == ACCESS_PROFILE, True)):
+                         c['test_profile'] in DECOY_PROFILES, True)):
             raise ValueError('prepared content blocked by secret scan')
     # Only exact root manifest is excluded. Nested manifest.json is protected.
     (driver.PREPARED / 'manifest.json').write_bytes(encoded(snapshot(driver.PREPARED)))
@@ -790,7 +867,11 @@ def changes_from_work(context, driver):
                 continue
             if operation == 'create' and not data:
                 continue
-            if (scan_hit(driver, data, None, c['test_profile'] == ACCESS_PROFILE, True) or
+            k1 = c['test_profile'] == K1_PROFILE
+            original = k1_original(driver, relative) if k1 else None
+            if k1:
+                k1_check(driver, relative, data, original)
+            if (scan_hit(driver, data, None, c['test_profile'] in DECOY_PROFILES, True, original, relative) or
                     driver.ag_control_in_handback(data)):
                 raise ValueError('unsafe changed file content')
             entries.append({'path': relative, 'operation': operation, 'before_sha256': before,
@@ -808,7 +889,7 @@ def validate_changes(result, context, driver):
             result['synthetic_overlay'] != c['synthetic_files'] or not isinstance(result['changes'], list)):
         raise ValueError('result source/attempt/overlay binding mismatch')
     before = json.loads((driver.PREPARED / 'manifest.json').read_bytes())
-    if c['test_profile'] == ACCESS_PROFILE and result['target_commit'] != ACCESS_SPEC['commit']:
+    if c['test_profile'] in DECOY_PROFILES and result['target_commit'] != ACCESS_SPEC['commit']:
         raise ValueError('result source is not the fixed original snapshot')
     seen = set()
     for change in result['changes']:
@@ -821,15 +902,20 @@ def validate_changes(result, context, driver):
             raise ValueError('result contains unauthorized operation')
         seen.add(name)
         payload = base64.b64decode(change['content_base64'], validate=True)
+        original = k1_original(driver, name) if c['test_profile'] == K1_PROFILE else None
         if (len(payload) > MAX_FILE or digest(payload) != change['sha256'] or
                 change['before_sha256'] != before['workspace/target/' + name]['sha256'] or
-                scan_hit(driver, payload, None, c['test_profile'] == ACCESS_PROFILE, True) or
+                scan_hit(driver, payload, None, c['test_profile'] in DECOY_PROFILES, True, original, name) or
                 driver.ag_control_in_handback(payload)):
             raise ValueError('result content/integrity mismatch')
         if (c['test_profile'] == ACCESS_PROFILE and
                 (not payload.startswith(ACCESS_PREFIX) or digest(payload[len(ACCESS_PREFIX):]) != change['before_sha256'])):
             raise ValueError('access proof must only prepend the fixed comment')
         payload.decode('utf-8')
+        if c['test_profile'] == K1_PROFILE:
+            k1_check(driver, name, payload, original)
+    if c['test_profile'] == K1_PROFILE and seen != set(K1_EDITS):
+        raise ValueError('K1 result must edit exactly the two authorized tests')
 
 
 def restore(result, context, driver, destination):
@@ -893,7 +979,7 @@ def validate_result(meta, context, root, driver):
     tools = (root / 'tool-observations.json').read_bytes()
     if (digest(handback) != meta['handback_sha256'] or digest(changes) != meta['changes_sha256'] or
             digest(tools) != meta['tools_sha256'] or scan_hit(driver, handback + changes + tools, None,
-                       context['activation']['contract']['test_profile'] == ACCESS_PROFILE) or
+                       context['activation']['contract']['test_profile'] in DECOY_PROFILES) or
             driver.ag_control_in_handback(handback)):
         raise ValueError('v3 result output integrity/scan')
     observations = json.loads(tools)
@@ -943,7 +1029,7 @@ def run_model(driver):
             result, code = driver.runtime.consume(command(context, driver), driver.PREPARED / 'workspace',
                                                   environment, raw, errors, observer)
         failure_code = 'MODEL_STREAM_SECRET_BLOCKED'
-        if scan_hit(driver, raw.read_bytes() + errors.read_bytes(), key, c['test_profile'] == ACCESS_PROFILE):
+        if scan_hit(driver, raw.read_bytes() + errors.read_bytes(), key, c['test_profile'] in DECOY_PROFILES):
             raise ValueError('MODEL_STREAM_SECRET_BLOCKED')
         failure_code = 'PACKET_INTEGRITY_BLOCKED'
         verify_prepared(driver, changed=True, modes=True)
@@ -961,7 +1047,7 @@ def run_model(driver):
         if not isinstance(returned, str) or not returned.strip() or len(returned.encode()) > MAX_FILE:
             raise ValueError('MODEL_HANDBACK_MISSING')
         failure_code = 'MODEL_HANDBACK_BLOCKED'
-        if (scan_hit(driver, returned.encode(), key, c['test_profile'] == ACCESS_PROFILE) or
+        if (scan_hit(driver, returned.encode(), key, c['test_profile'] in DECOY_PROFILES) or
                 driver.ag_control_in_handback(returned.encode())):
             raise ValueError('MODEL_HANDBACK_BLOCKED')
         failure_code = 'PROJECT_RESULT_BLOCKED'
@@ -1421,20 +1507,24 @@ def execute_access_local(result_root, prepared, driver, workroot, runtime, expec
         raise ValueError('import destination must be fresh and outside prepared/result trees')
     context = verify_prepared(driver, changed=True)
     a, c = context['activation'], context['activation']['contract']
-    if (a['task_id'] != ACCESS_TASK or a['role'] != 'coding-agent' or c['test_profile'] != ACCESS_PROFILE or
-            c['mode'] != 'forge-implementation' or c['edit_paths'] != [ACCESS_PROOF] or c['create_paths'] or
+    k1 = c['test_profile'] == K1_PROFILE
+    edits = sorted(K1_EDITS) if k1 else [ACCESS_PROOF]
+    fixed_task = a['task_id'].startswith(K1_TASK_PREFIX) if k1 else a['task_id'] == ACCESS_TASK
+    if (not fixed_task or a['role'] != 'coding-agent' or c['test_profile'] not in DECOY_PROFILES or
+            c['mode'] != 'forge-implementation' or sorted(c['edit_paths']) != edits or c['create_paths'] or
             c['synthetic_files'] or c['target_commit'] != ACCESS_SPEC['commit']):
-        raise ValueError('not the fixed ACCESS-01 implementation activation')
+        raise ValueError('not the fixed ACCESS-01/K1 implementation activation')
     meta = json.loads((result_root / 'metadata.json').read_bytes())
     validate_result(meta, context, result_root, driver)
     if (set(expect) != ACCESS_EXPECT or any(meta[k] != expect[k] for k in ACCESS_EXPECT) or meta['phase'] != 'result_ready' or
-            meta['run_attempt'] != '1' or meta['changed_paths'] != [ACCESS_PROOF]):
+            meta['run_attempt'] != '1' or meta['changed_paths'] != edits):
         raise ValueError('result is not the expected fresh ready ACCESS-01 run')
     result = json.loads((result_root / 'changes.json').read_bytes())
-    if len(result['changes']) != 1 or (result['changes'][0]['path'], result['changes'][0]['operation']) != (ACCESS_PROOF, 'edit'):
-        raise ValueError('result must be exactly the proof comment edit')
-    change = result['changes'][0]
-    payload = base64.b64decode(change['content_base64'], validate=True)
+    if sorted((x['path'], x['operation']) for x in result['changes']) != [(p, 'edit') for p in edits]:
+        raise ValueError('result must be exactly the authorized edit set')
+    payloads = {x['path']: base64.b64decode(x['content_base64'], validate=True) for x in result['changes']}
+    befores = {x['path']: x['before_sha256'] for x in result['changes']}
+    sums = {x['path']: x['sha256'] for x in result['changes']}
     if set(runtime) != {'node', 'node_modules', 'fixture'}:
         raise ValueError('runtime inputs must be exactly node, node_modules, fixture')
     node, modules, fixture = (_access_safe_path(runtime[k]) for k in ('node', 'node_modules', 'fixture'))
@@ -1461,14 +1551,19 @@ def execute_access_local(result_root, prepared, driver, workroot, runtime, expec
     for view in ACCESS_SPEC['views']:
         data = (source if view['archive'] == 'source' else evidence)[view['member']][1]
         if (digest(data) != view['sha256'] or manifest['workspace/target/' + view['path']]['sha256'] != view['sha256'] or
-                (view['path'] != ACCESS_PROOF and (driver.PREPARED / 'workspace/target' / view['path']).read_bytes() != data)):
+                (view['path'] not in edits and (driver.PREPARED / 'workspace/target' / view['path']).read_bytes() != data)):
             raise ValueError('prepared view differs from the freshly imported pinned original')
-    original = source[ACCESS_PROOF][1]
-    if payload != ACCESS_PREFIX + original or change['before_sha256'] != digest(original) or digest(payload) != change['sha256']:
-        raise ValueError('result is not exactly the permitted proof-comment prepend')
+    for name in edits:
+        original = source[name][1]
+        if befores[name] != digest(original) or digest(payloads[name]) != sums[name]:
+            raise ValueError('result is not bound to the freshly imported original')
+        if k1:
+            k1_check(driver, name, payloads[name], original)
+        elif payloads[name] != ACCESS_PREFIX + original:
+            raise ValueError('result is not exactly the permitted proof-comment prepend')
     run_dir, out_dir = base / 'verified', base / 'out'
     for name, (mode, data) in source.items():
-        write_file(run_dir, name, payload if name == ACCESS_PROOF else data)
+        write_file(run_dir, name, payloads.get(name, data))
         (run_dir / name).chmod(0o755 if mode == '100755' else 0o644)
     write_file(base, 'fixture/legacy.html', fixture_bytes)
     (base / 'fixture/legacy.html').chmod(0o644)
@@ -1476,8 +1571,8 @@ def execute_access_local(result_root, prepared, driver, workroot, runtime, expec
     for current, _dirs, _files in os.walk(base):
         os.chmod(current, 0o755)
     overlaid = _access_disk_tree(run_dir)
-    if (set(overlaid) != set(source) or any(overlaid[n] != source[n] for n in source if n != ACCESS_PROOF) or
-            overlaid[ACCESS_PROOF] != (source[ACCESS_PROOF][0], payload)):
+    if (set(overlaid) != set(source) or any(overlaid[n] != source[n] for n in source if n not in edits) or
+            any(overlaid[n] != (source[n][0], payloads[n]) for n in edits)):
         raise ValueError('overlay changed more than the proof comment')
     expected_tree = git_tree_id({n: (m, git_blob_id(d)) for n, (m, d) in overlaid.items()})
     import secrets
@@ -1521,6 +1616,12 @@ def execute_access_local(result_root, prepared, driver, workroot, runtime, expec
             status = 'UNVERIFIED'
         payload = found['logs'].get(phase)
         phases[phase] = dict(end or {}, status=status, log=_access_log(driver, payload, out_dir, phase, end) if end and payload is not None else None)
+    if k1 and phases['tests']['status'] == 'PASS':
+        counts = ((phases['tests']['log'] or {}).get('counts')) or {}
+        if (counts.get('tests') != K1_BASELINE_TESTS or counts.get('pass') != K1_BASELINE_TESTS or
+                any(counts.get(x) != 0 for x in ('fail', 'cancelled', 'skipped', 'todo'))):
+            phases['tests']['status'] = 'FAIL'
+            phases['tests']['k1_count_gate'] = 'FAIL'
     detected = (trusted and found['ends'].get('probe', {}).get('exit_code') == 37 and
                 found['logs'].get('probe') == b'ACCESS01_EXECUTOR_FORCED_FAIL\n')
     ready = all(checks.values()) and not blocked
@@ -1528,7 +1629,7 @@ def execute_access_local(result_root, prepared, driver, workroot, runtime, expec
                  'BLOCKED' if not ready else
                  'EXECUTED' if found['done'] and detected and all(x['status'] != 'NOT_RUN' for x in phases.values()) else 'INFRASTRUCTURE_FAIL')
     noise = err[-2000:]
-    return {'schema': ACCESS_LOCAL['schema'], 'profile': ACCESS_PROFILE, 'transport_status': transport,
+    return {'schema': ACCESS_LOCAL['schema'], 'profile': c['test_profile'], 'transport_status': transport,
             'product_test_status': phases['tests']['status'], 'build_status': phases['build']['status'],
             'counterprobe_detection': 'PASS' if detected else 'FAIL', 'blocked_reason': found['blocked'],
             'docker_exit_code': code, 'docker_stderr_tail': ('withheld by secret scan' if driver.secret_hit(noise, None) else noise.decode('utf-8', 'replace')),
