@@ -1,0 +1,12 @@
+{
+  "schema": "agentarium.relay-activation.v2",
+  "task_id": "AG-BQ-K1-20261116-FIXED-MUTATION",
+  "authorized": true,
+  "source_commit": "0ec09263e806f2ee0108a65c80c07bc5b5c87660",
+  "role": "coding-agent",
+  "request": "handoffs/AG-BQ-K1-20261116-FIXED-MUTATION.json",
+  "handback": "handoffs/AG-BQ-K1-20261116-FIXED-MUTATION-handback.md",
+  "model": "sonnet",
+  "max_turns": 12,
+  "max_budget_usd": 25
+}
