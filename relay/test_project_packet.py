@@ -139,6 +139,324 @@ class Fixture(unittest.TestCase):
         return json.loads((self.result / 'metadata.json').read_text())
 
 
+def make_zip(entries):
+    import io
+    import zipfile
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, 'w') as z:
+        for name, data, attr in entries:
+            info = zipfile.ZipInfo(name)
+            info.external_attr = attr << 16
+            z.writestr(info, data)
+    return buf.getvalue()
+
+
+LITERAL = b'gh' + b'p_' + b'A' * 24  # synthetic decoy, not a credential
+VIEW_KEYS = ('path', 'archive', 'member', 'bytes', 'git_blob', 'sha256')
+REGULAR, FOLDER, LINK = 0o100644, 0o40755, 0o120777
+BASE_SOURCE = [('src/', b'', FOLDER), ('tests/', b'', FOLDER), ('package.json', PACKAGE, REGULAR),
+               ('src/a.mjs', b'export const a = 1;\n', REGULAR),
+               ('tests/testinstanz.test.mjs', b"import 'node:test';\n", REGULAR)]
+
+
+BASE_IMPLICIT = [e for e in BASE_SOURCE if not e[0].endswith('/')]  # ORIGINAL ZIP SHAPE: files only
+
+
+def parent_count(names):
+    return len({'/'.join(n.split('/')[:i]) for n in names for i in range(1, len(n.split('/')))})
+
+
+def synthetic_originals(source_entries=None, manifest_drop=None):
+    """Self-consistent SYNTHETIC archives/spec; none of these hashes are the real originals."""
+    entries = source_entries or BASE_SOURCE
+    files = {n: d for n, d, _ in entries if not n.endswith('/')}
+    source_zip = make_zip(entries)
+    tree = pp.git_tree_id({n: ('100644', pp.git_blob_id(d)) for n, d in files.items()})
+    listed = [{'path': n, 'mode': '100644', 'bytes': len(d), 'sha256': pp.digest(d)}
+              for n, d in sorted(files.items()) if n != manifest_drop]
+    manifest = json.dumps({'candidate_commit': 'd' * 40, 'candidate_tree': tree, 'files': len(listed),
+                           'sha256': pp.digest(source_zip), 'bytes': len(source_zip), 'manifest': listed}).encode()
+    restore_note = b'synthetic restore note\n'
+    evidence_zip = make_zip([('source-manifest.json', manifest, REGULAR), ('RESTORE.md', restore_note, REGULAR)])
+    rows = [('package.json', 'source', 'package.json', PACKAGE),
+            ('tests/testinstanz.test.mjs', 'source', 'tests/testinstanz.test.mjs', files['tests/testinstanz.test.mjs']),
+            ('access-evidence/RESTORE.md', 'evidence', 'RESTORE.md', restore_note),
+            ('access-evidence/source-manifest.json', 'evidence', 'source-manifest.json', manifest)]
+    views = [dict(zip(VIEW_KEYS, (p, a, m, len(d), pp.git_blob_id(d), pp.digest(d)))) for p, a, m, d in rows]
+    spec = {'origin': 'https://example.invalid/', 'commit': 'd' * 40, 'tree': tree, 'views': views,
+            'archives': {'source': {'name': 'source.zip', 'sha256': pp.digest(source_zip), 'bytes': len(source_zip),
+                                    'files': len(files), 'dirs': sum(n.endswith('/') for n, _, _ in entries), 'parents': parent_count(files),
+                                    'max_total': 4096, 'max_member': 4096},
+                         'evidence': {'name': 'evidence.zip', 'sha256': pp.digest(evidence_zip),
+                                      'bytes': len(evidence_zip), 'files': 2, 'dirs': 0, 'parents': 0,
+                                      'max_total': 4096, 'max_member': 4096}}}
+    return spec, {'source.zip': source_zip, 'evidence.zip': evidence_zip}
+
+
+class AccessImportTests(Fixture):
+    def importer(self, **kwargs):
+        spec, blobs = synthetic_originals(**kwargs)
+        return spec, lambda archive: blobs[archive['name']]
+
+    def use_spec(self, spec, fetch):
+        for item in (patch.object(pp, 'ACCESS_SPEC', spec),
+                     patch.object(pp, 'fetch_original', side_effect=fetch)):
+            item.start()
+            self.addCleanup(item.stop)
+
+    def access_activation(self, spec, role='coding-agent', mode='forge-implementation'):
+        a = activation(role, mode)
+        c = a['contract']
+        a['task_id'] = 'AG-BQ-ACCESS-20261116-INTAKE-R3'
+        c['identity'].update(project_id='big-quest', run_id='BQ-ACCESS-01', task_id='BQ-ACCESS-01-DEV',
+                             parent_id='BQ-ACCESS-01')
+        c.update(read_files=pp.access_read_files(spec), target_commit=spec['commit'],
+                 edit_paths=[pp.ACCESS_PROOF] if mode == 'forge-implementation' else [], create_paths=[],
+                 synthetic_files=[], test_profile=pp.ACCESS_PROFILE)
+        return a
+
+    def test_exact_import_extracts_only_after_full_verification(self):
+        spec, fetch = self.importer()
+        result = pp.import_originals(spec, fetch, self.root / 'imported')
+        self.assertEqual(set(result['views']), {x['path'] for x in spec['views']})
+        self.assertEqual((self.root / 'imported/source/package.json').read_bytes(), PACKAGE)
+        self.assertTrue((self.root / 'imported/evidence/RESTORE.md').is_file())
+        with self.assertRaises(ValueError):
+            pp.import_originals(spec, fetch, self.root / 'imported')
+
+    def test_unsafe_archives_are_rejected_before_any_extraction(self):
+        cases = {
+            'traversal': BASE_SOURCE + [('../x', b'z', REGULAR)],
+            'absolute': BASE_SOURCE + [('/x', b'z', REGULAR)],
+            'backslash': BASE_SOURCE + [('src\\b.mjs', b'z', REGULAR)],
+            'symlink': BASE_SOURCE[:3] + [('src/a.mjs', b'x', LINK)] + BASE_SOURCE[4:],
+            'case collision': BASE_SOURCE + [('SRC/a.mjs', b'z', REGULAR)],
+            'file directory collision': BASE_SOURCE + [('package.json/x', b'z', REGULAR)],
+            'extra undeclared file': BASE_SOURCE + [('src/b.mjs', b'z', REGULAR)],
+        }
+        for label, entries in cases.items():
+            with self.subTest(label):
+                drop = 'src/b.mjs' if label == 'extra undeclared file' else None
+                spec, fetch = self.importer(source_entries=entries, manifest_drop=drop)
+                destination = self.root / label.replace(' ', '-')
+                with self.assertRaises(ValueError):
+                    pp.import_originals(spec, fetch, destination)
+                self.assertFalse(destination.exists())
+
+    def test_hash_tree_view_manifest_and_bound_mismatches_are_rejected(self):
+        spec, fetch = self.importer()
+        mutations = {
+            'archive hash': lambda s: s['archives']['source'].update(sha256='0' * 64),
+            'archive size': lambda s: s['archives']['evidence'].update(bytes=1),
+            'tree': lambda s: s.update(tree='0' * 40),
+            'view hash': lambda s: s['views'][0].update(sha256='0' * 64),
+            'view blob': lambda s: s['views'][0].update(git_blob='0' * 40),
+            'size bound': lambda s: s['archives']['source'].update(max_total=3),
+        }
+        for label, mutate in mutations.items():
+            changed = copy.deepcopy(spec)
+            mutate(changed)
+            with self.subTest(label), self.assertRaises(ValueError):
+                pp.import_originals(changed, fetch)
+        spec, fetch = self.importer(manifest_drop='src/a.mjs')
+        with self.assertRaises(ValueError):
+            pp.import_originals(spec, fetch)
+
+    def test_prepare_exposes_only_the_exact_views_and_one_edit_slot(self):
+        spec, fetch = self.importer()
+        self.use_spec(spec, fetch)
+        context = self.prepare(self.access_activation(spec))
+        views = {x['path'] for x in spec['views']}
+        inventory = pp.snapshot(self.prepared)
+        target = {k[len('workspace/target/'):] for k, v in inventory.items()
+                  if k.startswith('workspace/target/') and v['type'] == 'file'}
+        self.assertEqual(target, views)
+        self.assertFalse([k for k in inventory if k.endswith('.zip')])
+        self.assertEqual(pp.writable_paths(context), ['target/' + pp.ACCESS_PROOF])
+        allow = json.loads((self.prepared / 'control/settings.json').read_text())['permissions']['allow']
+        self.assertEqual({x for x in allow if x.startswith('Read(/target/')},
+                         {'Read(/target/' + v + ')' for v in views})
+        self.assertEqual({x for x in allow if x.startswith('Edit(')}, {'Edit(/target/' + pp.ACCESS_PROOF + ')'})
+        self.assertFalse([x for x in allow if x.startswith('Write(')])
+
+    def test_evidence_metadata_is_never_an_edit_or_create_target(self):
+        spec, fetch = self.importer()
+        self.use_spec(spec, fetch)
+        names = ('access-evidence/source-manifest.json', 'access-evidence/RESTORE.md',
+                 'access-evidence/new.md', 'Access-Evidence/x.md')
+        for name in names:
+            with self.subTest(name=name):
+                # Rejected-patch counterexample: only package.json is read, metadata path is created.
+                with self.assertRaisesRegex(ValueError, 'evidence metadata'):
+                    driver.validate_activation(bq_creation(name), PARENT)
+                for field in ('create_paths', 'edit_paths'):
+                    a = self.access_activation(spec)
+                    a['contract'][field] = [name]
+                    with self.assertRaisesRegex(ValueError, 'evidence metadata'):
+                        driver.validate_activation(a, PARENT)
+        other = self.access_activation(spec)
+        other['contract']['edit_paths'] = ['package.json']
+        with self.assertRaises(ValueError):
+            driver.validate_activation(other, PARENT)
+        other = self.access_activation(spec)
+        other['contract']['read_files'] = other['contract']['read_files'][:-1]
+        with self.assertRaises(ValueError):
+            driver.validate_activation(other, PARENT)
+
+    def test_result_may_only_prepend_fixed_comment_and_restores_into_fresh_tree(self):
+        spec, fetch = self.importer()
+        self.use_spec(spec, fetch)
+        context = self.prepare(self.access_activation(spec))
+        original = (self.prepared / 'workspace/target' / pp.ACCESS_PROOF).read_bytes()
+        contract = context['activation']['contract']
+
+        def result(data, binding=None):
+            return {'schema': 'agentarium.project-result.v1', 'packet_binding': binding or context['packet_binding'],
+                    'repository': contract['repository'], 'target_commit': contract['target_commit'],
+                    'synthetic_overlay': [], 'changes': [{
+                        'path': pp.ACCESS_PROOF, 'operation': 'edit', 'before_sha256': pp.digest(original),
+                        'sha256': pp.digest(data), 'content_base64': base64.b64encode(data).decode()}]}
+        good = result(pp.ACCESS_PREFIX + original)
+        restored = pp.restore(good, context, driver, self.root / 'restored')
+        self.assertEqual({k for k, v in restored.items() if v['type'] == 'file'}, {x['path'] for x in spec['views']})
+        self.assertEqual((self.root / 'restored' / pp.ACCESS_PROOF).read_bytes(), pp.ACCESS_PREFIX + original)
+        self.assertEqual((self.root / 'restored/package.json').read_bytes(), PACKAGE)
+        with self.assertRaises(ValueError):
+            pp.restore(good, context, driver, self.root / 'restored')
+        for data in (original + b'// extra\n', b'// other\n' + original, pp.ACCESS_PREFIX + original[1:]):
+            with self.subTest(data=data[:12]), self.assertRaises(ValueError):
+                pp.validate_changes(result(data), context, driver)
+        with self.assertRaises(ValueError):
+            pp.validate_changes(result(pp.ACCESS_PREFIX + original, '0' * 64), context, driver)
+
+    def test_original_zip_shape_has_only_implicit_parents(self):
+        spec, fetch = self.importer(source_entries=BASE_IMPLICIT)
+        own = spec['archives']['source']
+        self.assertEqual((own['dirs'], own['parents']), (0, 2))
+        self.assertEqual(len(pp.import_originals(spec, fetch, self.root / 'imp')['views']), 4)
+        for label, mutate in {'dirs': lambda s: s['archives']['source'].update(dirs=2),
+                              'parents': lambda s: s['archives']['source'].update(parents=3),
+                              'files': lambda s: s['archives']['source'].update(files=4)}.items():
+            changed = copy.deepcopy(spec)
+            mutate(changed)
+            with self.subTest(label), self.assertRaises(ValueError):
+                pp.import_originals(changed, fetch)
+
+    def test_explicit_directory_conflicts_and_case_colliding_parents_are_rejected(self):
+        cases = {'unrelated explicit directory': BASE_IMPLICIT + [('docs/', b'', FOLDER)],
+                 'explicit directory over a file': BASE_IMPLICIT + [('package.json/', b'', FOLDER)],
+                 'directory with data': [('src/', b'data', FOLDER)] + BASE_IMPLICIT,
+                 'case-colliding implicit parents': BASE_IMPLICIT + [('SRC/b.mjs', b'z', REGULAR)]}
+        for label, entries in cases.items():
+            spec, fetch = self.importer(source_entries=entries)
+            with self.subTest(label), self.assertRaises(ValueError):
+                pp.import_originals(spec, fetch)
+
+    def test_declared_commit_must_equal_the_fixed_snapshot(self):
+        spec, fetch = self.importer()
+        self.use_spec(spec, fetch)
+        driver.validate_activation(self.access_activation(spec), PARENT)
+        for wrong in ('0' * 40, 'f' * 40, TARGET):
+            bad = self.access_activation(spec)
+            bad['contract']['target_commit'] = wrong
+            with self.subTest(wrong=wrong):
+                with self.assertRaises(ValueError):
+                    driver.validate_activation(bad, PARENT)
+                with self.assertRaises(ValueError):
+                    pp.access_views(bad['contract'])
+
+    def test_readonly_analysis_reads_the_same_views_without_write_rights(self):
+        spec, fetch = self.importer()
+        self.use_spec(spec, fetch)
+        for role in ('spec-agent', 'coding-agent'):
+            context = self.prepare(self.access_activation(spec, role, 'analysis'))
+            command = pp.command(context, driver)
+            self.assertEqual(command[command.index('--tools') + 1], 'Read')
+            self.assertFalse(pp.writable_paths(context))
+            perms = json.loads((self.prepared / 'control/settings.json').read_text())['permissions']
+            self.assertFalse([x for x in perms['allow'] if x.startswith(('Edit(', 'Write('))])
+            self.assertTrue({'Edit', 'Write', 'Bash'} <= set(perms['deny']))
+            target = {k[len('workspace/target/'):] for k, v in pp.snapshot(self.prepared).items()
+                      if k.startswith('workspace/target/') and v['type'] == 'file'}
+            self.assertEqual(target, {x['path'] for x in spec['views']})
+            shutil.rmtree(self.prepared)
+        seed = '# synthetic\n'
+        bad = {'process role': lambda a: a.update(role='process-agent'),
+               'edit': lambda a: a['contract'].update(edit_paths=[pp.ACCESS_PROOF]),
+               'create': lambda a: a['contract'].update(create_paths=['x/new.md']),
+               'seed': lambda a: a['contract'].update(synthetic_files=[{'path': 'relay-proof/s.md', 'content': seed,
+                                                      'sha256': pp.digest(seed.encode())}]),
+               'agentarium identity': lambda a: a['contract']['identity'].update(
+                   project_id='agentarium', run_id='AG-BQ-ACCESS-20261116', task_id=a['task_id'],
+                   parent_id='AG-BQ-ACCESS-20261116'),
+               'fewer views': lambda a: a['contract'].update(read_files=a['contract']['read_files'][:-1])}
+        for label, mutate in bad.items():
+            a = self.access_activation(spec, 'spec-agent', 'analysis')
+            mutate(a)
+            with self.subTest(label), self.assertRaises((ValueError, TypeError)):
+                driver.validate_activation(a, PARENT)
+        forge = self.access_activation(spec)
+        forge['contract']['identity'].update(project_id='agentarium', run_id='AG-BQ-ACCESS-20261116',
+                                             task_id=forge['task_id'], parent_id='AG-BQ-ACCESS-20261116')
+        with self.assertRaises(ValueError):
+            driver.validate_activation(forge, PARENT)
+
+    def decoy_spec(self):
+        original = b"import 'node:test';\n// fixture " + LITERAL + b'\n'
+        entries = [(n, original, k) if n == pp.ACCESS_PROOF else (n, d, k) for n, d, k in BASE_SOURCE]
+        spec, fetch = self.importer(source_entries=entries)
+        decoy = {'path': pp.ACCESS_PROOF, 'file_sha256': pp.digest(original),
+                 'match_sha256': pp.digest(LITERAL), 'count': 1}
+        patcher = patch.object(pp, 'ACCESS_DECOY', decoy)
+        patcher.start()
+        self.addCleanup(patcher.stop)
+        self.use_spec(spec, fetch)
+        return spec, original
+
+    def test_synthetic_decoy_is_exempt_only_for_exact_bound_input(self):
+        spec, original = self.decoy_spec()
+        self.assertTrue(driver.secret_hit(original))
+
+        def scan(data, **kw):
+            return pp.scan_hit(driver, data, **kw)
+        for data in (original, pp.ACCESS_PREFIX + original):
+            self.assertFalse(scan(data, access=True, source=True))
+            self.assertTrue(scan(data, access=False, source=True))   # other profile
+        other = b'gh' + b'p_' + b'B' * 24
+        key = b'synthetic-model-binding'
+        for data in (original + b'// ' + other, original + b'// ' + LITERAL, original.replace(b'AAAA', b'AAAB'),
+                     b'x\n' + LITERAL, original + b'sk-' + b'ant-' + b'C' * 24, original + key):
+            self.assertTrue(scan(data, access=True, source=True, exact=key))
+        stream = b'{"text":"' + LITERAL + b'"}'
+        self.assertFalse(scan(stream, access=True))
+        self.assertTrue(scan(stream, access=False))
+        self.assertTrue(scan(stream + b' ' + key, access=True, exact=key))
+        self.assertTrue(scan(stream + b' ' + other, access=True))
+        self.assertTrue(scan(stream + b' sk-' + b'ant-' + b'C' * 24, access=True))
+        self.assertTrue(scan(LITERAL + b'X', access=True))                   # longer, different match
+        self.assertFalse(scan((LITERAL + b' ') * pp.STREAM_DECOY_LIMIT, access=True))
+        self.assertTrue(scan((LITERAL + b' ') * (pp.STREAM_DECOY_LIMIT + 1), access=True))
+
+    def test_decoy_original_prepares_and_restores_but_wrong_digest_blocks(self):
+        spec, original = self.decoy_spec()
+        with patch.object(pp, 'ACCESS_DECOY', dict(pp.ACCESS_DECOY, match_sha256='0' * 64)):
+            with self.assertRaisesRegex(ValueError, 'secret scan'):
+                self.prepare(self.access_activation(spec))
+        context = self.prepare(self.access_activation(spec))
+        contract = context['activation']['contract']
+        data = pp.ACCESS_PREFIX + original
+        good = {'schema': 'agentarium.project-result.v1', 'packet_binding': context['packet_binding'],
+                'repository': contract['repository'], 'target_commit': contract['target_commit'],
+                'synthetic_overlay': [], 'changes': [{'path': pp.ACCESS_PROOF, 'operation': 'edit',
+                    'before_sha256': pp.digest(original), 'sha256': pp.digest(data),
+                    'content_base64': base64.b64encode(data).decode()}]}
+        pp.validate_changes(good, context, driver)
+        pp.restore(good, context, driver, self.root / 'restored-decoy')
+        with patch.object(pp, 'ACCESS_DECOY', dict(pp.ACCESS_DECOY, match_sha256='0' * 64)):
+            with self.assertRaises(ValueError):
+                pp.validate_changes(good, context, driver)
+
+
 class ContractTests(Fixture):
     def test_existing_v2_does_not_accept_any_v3_right(self):
         a = activation()

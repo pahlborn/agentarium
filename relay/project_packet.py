@@ -38,6 +38,215 @@ CONTROL_NAMES = {'agents.md', 'claude.md', 'lot.md', 'manifest.json',
 DENIED = ['Bash', 'WebFetch', 'WebSearch', 'Agent', 'mcp__*', 'NotebookEdit',
           'ToolSearch', 'Skill', 'SendMessage', 'EnterWorktree', 'ExitWorktree']
 
+# ACCESS-01 intake: fixed host-owned original snapshot (unpublished Git metadata, no ZIP history).
+ACCESS_PROFILE = 'bq-access-intake-v1'
+ACCESS_PROOF = 'tests/testinstanz.test.mjs'
+ACCESS_PREFIX = b'// ACCESS-01 isolated proof only.\n'
+ACCESS_EVIDENCE_DIR = 'access-evidence/'
+ACCESS_RUN = 'AG-BQ-ACCESS-20261116'
+_MIB = 1024 * 1024
+_ORIGIN = ('https://raw.githubusercontent.com/pahlborn/bis-school-app_src/'
+           'bd81d6eb5176843ab0c4fbbf0926e72e774220c6/handoffs/big-quest/results/'
+           'BQ-EVAL-01-INT-01/original-artifacts-v1/')
+# (path, archive, member, bytes, git_blob, sha256): the exact initial worker views.
+_VIEWS = (
+    ('package.json', 'source', 'package.json', 3149, 'fc40de702be7b75c3d07655f8ea8f08a013d9783', '4c9fdfbb001276844836447cd9aa3134290354d56d966c5cc54e58cd76e35934'),
+    ('DEVELOPMENT.md', 'source', 'DEVELOPMENT.md', 3102, '3f406b5750566645ee2e4149481fc6f10f9764b1', '072cf53683ac8d7fce9829f3a482b48d9834edf214e35666205e2831c2333d18'),
+    ('tests/testinstanz.test.mjs', 'source', 'tests/testinstanz.test.mjs', 34910, 'beb353ad3405a26308bd299016c3b7b993a47f30', '2788b3ea6302ebe674a1ef3036d1e9c68033ac5bdcb2f166668dea7ef187727b'),
+    ('tests/evaluation-upgrade-browser.test.mjs', 'source', 'tests/evaluation-upgrade-browser.test.mjs', 13505, 'c0bec5eb7cd2252a577b23975f57154ade0c1a51', 'a17efabfdcbd79f2ba1d3f4c9599ef10252a7f0d60e8bad686a5bc6286073576'),
+    ('tests/neutral.test.mjs', 'source', 'tests/neutral.test.mjs', 16356, '51b7e7db2086fb44a95c4596630b8cfb2791ee9e', '7012d38016b44a49bf7527709fcea5126757291e1cdbf291f08551192c85fc37'),
+    ('werkzeug/testinstanz.mjs', 'source', 'werkzeug/testinstanz.mjs', 18195, 'e3dbef5f75d582574b3b4cbf6abb2c0ff30cccdf', 'e6bc3f63cf10c414a23ed1d68ff13cc0bb6a68da471342d4066200271568f35f'),
+    ('werkzeug/testinstanz-ersatz.json', 'source', 'werkzeug/testinstanz-ersatz.json', 151, '2e2c0dc9f91dd309cac4c5e9fa0848c3c4be9116', '4b3e3e686e85d8b60740eb4db1640ee5c9e2ffe8af3c65cd8023f2522b56e83a'),
+    ('werkzeug/bauen.mjs', 'source', 'werkzeug/bauen.mjs', 14813, '13a7d9d68a2209072f67e605005ba47c712a7c32', '87143283a730e359b0f81a66020bf1891018bd4d33332be275ea2010e5e4f1e2'),
+    ('werkzeug/module.mjs', 'source', 'werkzeug/module.mjs', 4383, '97e8dc37ff05742c35e4a4e47df8a167f37282fd', 'b99b48f1445cca0fa52753a81799de9ce05574280effc1314f30a69e6ae44076'),
+    ('tests/app-hilfen.mjs', 'source', 'tests/app-hilfen.mjs', 10248, '8667137cf2ddd496b33cf765dd3d497b39642bef', 'e3ecd3727c996738b64de8cd635d7b62f541f7c08a1d31793d14745411b38e73'),
+    ('access-evidence/ARGUS-REVIEW.md', 'evidence', 'ARGUS-REVIEW.md', 8687, 'd4da20e20f5091f2ecfc1e727a0fbd7061d11047', 'df9706e984c6084f0dfb8dd9de23048ce4a60e294de263add3f05d2e280e105f'),
+    ('access-evidence/RESTORE.md', 'evidence', 'RESTORE.md', 1706, '0c038cf49f89cc2c937f4b1953410545acd87b6d', '82ca7bb11c6082a114c992febbe48b6ad3ef65915921119698bc9ac41bd6cf98'),
+    ('access-evidence/source-manifest.json', 'evidence', 'source-manifest.json', 44354, '458c8a75c22ff996758b05a7cd83e5b92a45186b', 'f5b2aafcc2b4161bdad9901b559c55ad1ff47285b8fad0134ed9f316a0b1e2fd'),
+    ('access-evidence/test-result-summary.json', 'evidence', 'test-result-summary.json', 5468, '66d2147efb0849857552ec8da37e3fe874931b29', '3d12dc11f2ce0984156ad7e75d5705a859830941e13520a78e95d597e791743c'),
+    ('tests/altlasten.test.mjs', 'source', 'tests/altlasten.test.mjs', 8478, 'ec7f596523d929f91645bbbdde1fbb80883e33fd', 'd88e5402895b52dbbe56ce5a8ffa0e0a26f143038e9e11b90ae8d406c4fdf355'),
+    ('tests/konten-hilfen.mjs', 'source', 'tests/konten-hilfen.mjs', 3818, '733c1fc9e45a27d3a6aa3be6b83e6b99c29e43f9', 'fae330f448f28d782fd237a4fed318bd6e0375e59542542c0144d773be89be30'),
+)
+ACCESS_SPEC = {
+    'origin': _ORIGIN, 'commit': 'd26af4a38bdc15d3cbfb5305def012f91aacbb28', 'tree': 'a7bc188f4531c8d0c7bafec8900bdc98f9470974',
+    'archives': {
+        'source': {'name': 'BQ-EVAL-01-INT-01-source-v1.zip',
+                   'sha256': '10d276d4d908fadf97f06565229fc2ba8f1147619c134e009babc72d9975bcf5', 'bytes': 1319933, 'files': 233, 'dirs': 0, 'parents': 16,
+                   'max_total': 4 * _MIB, 'max_member': _MIB},
+        'evidence': {'name': 'BQ-EVAL-01-INT-01-evidence-v1.zip',
+                     'sha256': '5d9b32d0847c862d79ab0e83fabbedc89e7dcf476a59f8405c347420d1b1b87b', 'bytes': 85555, 'files': 33, 'dirs': 0, 'parents': 1,
+                     'max_total': _MIB // 2, 'max_member': 128 * 1024}},
+    'views': [dict(zip(('path', 'archive', 'member', 'bytes', 'git_blob', 'sha256'), row))
+              for row in _VIEWS]}
+
+
+# Single attested synthetic old-storage decoy fixture in the original testinstanz test (Sentinel/Argus
+# traced; no credential). Bound to the file hash AND the exact match digest; nothing generic.
+ACCESS_DECOY = {'path': ACCESS_PROOF,
+                'file_sha256': '2788b3ea6302ebe674a1ef3036d1e9c68033ac5bdcb2f166668dea7ef187727b',
+                'match_sha256': 'bb5f355c1f175d355264330325760436d932e3c077bb1ab367faccd7b6543f15', 'count': 1}
+STREAM_DECOY_LIMIT = 256
+
+
+def scan_hit(driver, data, exact=None, access=False, source=False):
+    """driver.secret_hit plus ONE digest-bound exception for the ACCESS profile.
+
+    The exact provider key check precedes any exception. source=True: only data whose body (after the
+    fixed comment) is the attested original file may carry the attested match, once. source=False
+    (stream/handback): only matches with the attested digest are removed, at most STREAM_DECOY_LIMIT.
+    """
+    if exact and exact in data:
+        return True
+    if not access:
+        return driver.secret_hit(data, exact)
+    if source:
+        body = data[len(ACCESS_PREFIX):] if data.startswith(ACCESS_PREFIX) else data
+        allowed = ACCESS_DECOY['count'] if digest(body) == ACCESS_DECOY['file_sha256'] else 0
+    else:
+        allowed = STREAM_DECOY_LIMIT
+    pieces, last, used = [], 0, 0
+    for match in driver.SUSPICIOUS.finditer(data):
+        if used < allowed and digest(match.group(0)) == ACCESS_DECOY['match_sha256']:
+            pieces.append(data[last:match.start()])
+            last, used = match.end(), used + 1
+    pieces.append(data[last:])
+    return driver.secret_hit(b' '.join(pieces), exact)
+
+
+def read_zip(data, spec):
+    """Bounded, in-memory verification of one fixed original archive."""
+    import io
+    import zipfile
+    zf = zipfile.ZipFile(io.BytesIO(data))
+    infos = zf.infolist()
+    if len(infos) != spec['files'] + spec['dirs']:
+        raise ValueError('archive record count mismatch')
+    files, dirs, seen, total = {}, set(), set(), 0
+    for info in infos:
+        is_dir = info.filename.endswith('/')
+        name = path(info.filename[:-1] if is_dir else info.filename)
+        unix = info.external_attr >> 16
+        kind = stat.S_IFMT(unix)
+        if (name.lower() in seen or info.flag_bits & 0x1 or
+                info.compress_type not in (zipfile.ZIP_STORED, zipfile.ZIP_DEFLATED) or
+                kind not in (0, stat.S_IFDIR if is_dir else stat.S_IFREG)):
+            raise ValueError('archive entry rejected')
+        seen.add(name.lower())
+        if is_dir:
+            if info.file_size:
+                raise ValueError('archive directory carries data')
+            dirs.add(name)
+            continue
+        total += info.file_size
+        if (info.file_size > spec['max_member'] or total > spec['max_total'] or
+                info.file_size > 1000 * max(info.compress_size, 1)):
+            raise ValueError('archive exceeds bound')
+        with zf.open(info) as handle:
+            payload = handle.read(info.file_size + 1)
+        if len(payload) != info.file_size:
+            raise ValueError('archive member length mismatch')
+        files[name] = (payload, '100755' if kind and unix & 0o100 else '100644')
+    parents = set()
+    for name in files:
+        parts = name.split('/')
+        parents |= {'/'.join(parts[:index]) for index in range(1, len(parts))}
+    # Canonical archives may omit directory records: parents are implicit. Explicit directory records
+    # must be real parents of some file; case-colliding or file-shadowing parents are rejected.
+    folded = {x.lower() for x in parents}
+    if (len(files) != spec['files'] or len(dirs) != spec['dirs'] or not dirs <= parents or
+            len(parents) != spec.get('parents', spec['dirs']) or len(folded) != len(parents) or
+            parents & set(files) or folded & {x.lower() for x in files}):
+        raise ValueError('archive tree structure mismatch')
+    return files
+
+
+def git_blob_id(data):
+    return hashlib.sha1(b'blob ' + str(len(data)).encode() + b'\0' + data).hexdigest()
+
+
+def git_tree_id(entries):
+    leaves, children = [], {}
+    for name, (mode, blob) in entries.items():
+        head, sep, rest = name.partition('/')
+        if sep:
+            children.setdefault(head, {})[rest] = (mode, blob)
+        else:
+            leaves.append((head, mode, bytes.fromhex(blob)))
+    leaves += [(head + '/', '40000', bytes.fromhex(git_tree_id(sub))) for head, sub in children.items()]
+    body = b''.join(mode.encode() + b' ' + head.rstrip('/').encode() + b'\0' + raw
+                    for head, mode, raw in sorted(leaves, key=lambda x: x[0].encode()))
+    return hashlib.sha1(b'tree ' + str(len(body)).encode() + b'\0' + body).hexdigest()
+
+
+def fetch_original(archive):
+    # Fixed public immutable origin; no redirects, and GH_TOKEN is deliberately not sent.
+    request = urllib.request.Request(ACCESS_SPEC['origin'] + archive['name'])
+    with urllib.request.build_opener(NoRedirect).open(request, timeout=60) as response:
+        return response.read(archive['bytes'] + 1)
+
+
+def access_read_files(spec=None):
+    return sorted(({'path': v['path'], 'git_blob': v['git_blob'], 'sha256': v['sha256']}
+                   for v in (spec or ACCESS_SPEC)['views']), key=lambda x: x['path'])
+
+
+def import_originals(spec=None, fetch=None, destination=None):
+    """Verify the complete original source+evidence package; extract only afterwards.
+
+    Everything stays in host memory until every bound, hash, CRC, mode, manifest
+    and Git tree check passed. Extraction (for the later fixed executor only) goes
+    to a fresh host directory that must lie outside any worker-visible tree.
+    """
+    spec, fetch = spec or ACCESS_SPEC, fetch or fetch_original
+    trees = {}
+    for label in ('source', 'evidence'):
+        archive = spec['archives'][label]
+        data = fetch(archive)
+        if len(data) != archive['bytes'] or digest(data) != archive['sha256']:
+            raise ValueError('original archive size/hash mismatch')
+        trees[label] = read_zip(data, archive)
+    source, evidence = trees['source'], trees['evidence']
+    identity = {name: (mode, git_blob_id(data)) for name, (data, mode) in source.items()}
+    if git_tree_id(identity) != spec['tree']:
+        raise ValueError('original source tree identity mismatch')
+    manifest = json.loads(evidence['source-manifest.json'][0])
+    listed, own = manifest.get('manifest'), spec['archives']['source']
+    if (not isinstance(listed, list) or len(listed) != own['files'] or manifest.get('files') != len(listed) or
+            manifest.get('candidate_commit') != spec['commit'] or manifest.get('candidate_tree') != spec['tree'] or
+            manifest.get('sha256') != own['sha256'] or manifest.get('bytes') != own['bytes']):
+        raise ValueError('original manifest identity mismatch')
+    expected = {x.get('path'): x for x in listed if isinstance(x, dict)}
+    if set(expected) != set(source) or len(expected) != len(listed):
+        raise ValueError('original manifest inventory mismatch')
+    for name, (data, mode) in source.items():
+        row = expected[name]
+        if row.get('mode') != mode or row.get('bytes') != len(data) or row.get('sha256') != digest(data):
+            raise ValueError('original manifest file mismatch')
+    views = {}
+    for view in spec['views']:
+        member = trees[view['archive']].get(view['member'])
+        if (member is None or len(member[0]) != view['bytes'] or digest(member[0]) != view['sha256'] or
+                git_blob_id(member[0]) != view['git_blob']):
+            raise ValueError('original view descriptor mismatch')
+        views[view['path']] = member[0]
+    if destination is not None:
+        if destination.exists():
+            raise ValueError('import destination must be fresh')
+        destination.mkdir(parents=True)
+        for label, tree in trees.items():
+            for name, (data, mode) in tree.items():
+                write_file(destination / label, name, data)
+                (destination / label / name).chmod(0o755 if mode == '100755' else 0o644)
+    return {'views': views, 'tree': spec['tree'], 'files': len(source)}
+
+
+def access_views(c):
+    if c.get('target_commit') != ACCESS_SPEC['commit']:
+        raise ValueError('declared source commit is not the fixed original snapshot')
+    if sorted(c['read_files'], key=lambda x: x['path']) != access_read_files():
+        raise ValueError('access views differ from the fixed descriptor set')
+    return import_originals()['views']
+
 
 def encoded(value):
     return json.dumps(value, sort_keys=True, ensure_ascii=False,
@@ -98,6 +307,9 @@ def validate_activation(a, parent, driver):
     if c['repository'] not in SOURCE_POLICY:
         raise ValueError('repository not approved by host')
     source_project, _, allowed = SOURCE_POLICY[c['repository']]
+    access = c['test_profile'] == ACCESS_PROFILE
+    if access:
+        allowed = {v['path'] for v in ACCESS_SPEC['views']}
     if c['project_id'] != source_project or not sha(c['target_commit'], 40):
         raise ValueError('target repository/project/commit mismatch')
     if c['mode'] not in ('analysis', 'forge-implementation'):
@@ -106,7 +318,7 @@ def validate_activation(a, parent, driver):
         raise ValueError('only Forge may implement')
     if type(c['max_seconds']) is not int or not 10 <= c['max_seconds'] <= 1200:
         raise ValueError('v3 timeout outside host bound')
-    if c['test_profile'] not in ('none', 'synthetic-doc-v1', 'bq-runde-v1') or c['journal_delivery'] != 'archive':
+    if c['test_profile'] not in ('none', 'synthetic-doc-v1', 'bq-runde-v1', ACCESS_PROFILE) or c['journal_delivery'] != 'archive':
         raise ValueError('unsupported executor/journal contract')
     # Artifact publication is separately commissioned in the immutable host
     # activation, before any model output exists. It is not a secret-scan flag.
@@ -123,6 +335,9 @@ def validate_activation(a, parent, driver):
                 not sha(item['git_blob'], 40) or not sha(item['sha256'])):
             raise ValueError('unapproved source path or missing integrity binding')
     edits, creates = unique_paths(c['edit_paths']), unique_paths(c['create_paths'])
+    if any(x.lower().startswith(ACCESS_EVIDENCE_DIR) for x in edits + creates):
+        # Original evidence metadata is never an edit/create target, whatever is read.
+        raise ValueError('evidence metadata path is never writable')
     seeds = c['synthetic_files']
     if not isinstance(seeds, list) or len(seeds) > 16:
         raise ValueError('invalid synthetic overlay')
@@ -153,7 +368,9 @@ def validate_activation(a, parent, driver):
     # Actual product work reports the product. Only this explicitly bounded
     # infrastructure proof may use Agentarium while reading Big Quest.
     if identity['project_id'] == 'agentarium' and source_project != 'agentarium':
-        if (not a['task_id'].startswith('AG-RELAY-MULTIREPO-001-') or
+        if access:
+            raise ValueError('access views require the native project identity')
+        elif (not a['task_id'].startswith('AG-RELAY-MULTIREPO-001-') or
                 identity['run_id'] != 'AG-RELAY-MULTIREPO-001' or
                 any(not p.startswith('relay-proof/') for p in edits + creates)):
             raise ValueError('infrastructure identity exception outside proof')
@@ -174,6 +391,14 @@ def validate_activation(a, parent, driver):
             c['mode'] != 'forge-implementation' or identity['project_id'] != 'big-quest' or
             sorted(read_paths) != sorted(RUNDE_SOURCES) or edits != [RUNDE_MODULE] or creates or seeds):
         raise ValueError('fixed runde executor contract mismatch')
+    if access:
+        implement = (a['role'] == 'coding-agent' and c['mode'] == 'forge-implementation' and
+                     edits == [ACCESS_PROOF])
+        readonly = (a['role'] in ('spec-agent', 'coding-agent') and c['mode'] == 'analysis' and not edits)
+        if (c['repository'] != 'pahlborn/bis-school-app_src' or seeds or creates or
+                not (implement or readonly) or c['target_commit'] != ACCESS_SPEC['commit'] or
+                sorted(reads, key=lambda x: x['path']) != access_read_files()):
+            raise ValueError('fixed access intake contract mismatch')
     return a
 
 
@@ -370,10 +595,12 @@ def prepare(driver, a, parent, head, request):
     for name in [s['path'] for s in c['synthetic_files']] + c['create_paths']:
         if source_entry(c, name) is not None:
             raise ValueError('synthetic/new slot collides with an existing repository path')
-    source_files = {item['path']: fetch_source(c, item) for item in c['read_files']}
+    source_files = (access_views(c) if c['test_profile'] == ACCESS_PROFILE else
+                    {item['path']: fetch_source(c, item) for item in c['read_files']})
     if sum(map(len, source_files.values())) > MAX_TOTAL:
         raise ValueError('target source exceeds packet bound')
-    if any(driver.secret_hit(data) for data in source_files.values()):
+    if any(scan_hit(driver, data, None, c['test_profile'] == ACCESS_PROFILE, True)
+           for data in source_files.values()):
         raise ValueError('source content blocked by secret scan')
     if driver.PREPARED.exists():
         shutil.rmtree(driver.PREPARED)
@@ -419,7 +646,8 @@ def prepare(driver, a, parent, head, request):
         # Dynamic task/control inputs are scanned here. Reviewed host modules
         # contain literal secret-detector counterexamples, not supplied secrets.
         if (name.startswith(('workspace/', 'control/')) and entry['type'] == 'file' and
-                driver.secret_hit((driver.PREPARED / name).read_bytes())):
+                scan_hit(driver, (driver.PREPARED / name).read_bytes(), None,
+                         c['test_profile'] == ACCESS_PROFILE, True)):
             raise ValueError('prepared content blocked by secret scan')
     # Only exact root manifest is excluded. Nested manifest.json is protected.
     (driver.PREPARED / 'manifest.json').write_bytes(encoded(snapshot(driver.PREPARED)))
@@ -562,7 +790,8 @@ def changes_from_work(context, driver):
                 continue
             if operation == 'create' and not data:
                 continue
-            if driver.secret_hit(data) or driver.ag_control_in_handback(data):
+            if (scan_hit(driver, data, None, c['test_profile'] == ACCESS_PROFILE, True) or
+                    driver.ag_control_in_handback(data)):
                 raise ValueError('unsafe changed file content')
             entries.append({'path': relative, 'operation': operation, 'before_sha256': before,
                             'sha256': digest(data), 'content_base64': base64.b64encode(data).decode()})
@@ -579,6 +808,8 @@ def validate_changes(result, context, driver):
             result['synthetic_overlay'] != c['synthetic_files'] or not isinstance(result['changes'], list)):
         raise ValueError('result source/attempt/overlay binding mismatch')
     before = json.loads((driver.PREPARED / 'manifest.json').read_bytes())
+    if c['test_profile'] == ACCESS_PROFILE and result['target_commit'] != ACCESS_SPEC['commit']:
+        raise ValueError('result source is not the fixed original snapshot')
     seen = set()
     for change in result['changes']:
         if (not isinstance(change, dict) or set(change) != {'path', 'operation', 'before_sha256', 'sha256', 'content_base64'}):
@@ -592,8 +823,12 @@ def validate_changes(result, context, driver):
         payload = base64.b64decode(change['content_base64'], validate=True)
         if (len(payload) > MAX_FILE or digest(payload) != change['sha256'] or
                 change['before_sha256'] != before['workspace/target/' + name]['sha256'] or
-                driver.secret_hit(payload) or driver.ag_control_in_handback(payload)):
+                scan_hit(driver, payload, None, c['test_profile'] == ACCESS_PROFILE, True) or
+                driver.ag_control_in_handback(payload)):
             raise ValueError('result content/integrity mismatch')
+        if (c['test_profile'] == ACCESS_PROFILE and
+                (not payload.startswith(ACCESS_PREFIX) or digest(payload[len(ACCESS_PREFIX):]) != change['before_sha256'])):
+            raise ValueError('access proof must only prepend the fixed comment')
         payload.decode('utf-8')
 
 
@@ -657,7 +892,9 @@ def validate_result(meta, context, root, driver):
     changes = (root / 'changes.json').read_bytes()
     tools = (root / 'tool-observations.json').read_bytes()
     if (digest(handback) != meta['handback_sha256'] or digest(changes) != meta['changes_sha256'] or
-            digest(tools) != meta['tools_sha256'] or driver.secret_hit(handback + changes + tools) or driver.ag_control_in_handback(handback)):
+            digest(tools) != meta['tools_sha256'] or scan_hit(driver, handback + changes + tools, None,
+                       context['activation']['contract']['test_profile'] == ACCESS_PROFILE) or
+            driver.ag_control_in_handback(handback)):
         raise ValueError('v3 result output integrity/scan')
     observations = json.loads(tools)
     expected_paths = set(json.loads((driver.PREPARED / 'manifest.json').read_bytes()))
@@ -706,7 +943,7 @@ def run_model(driver):
             result, code = driver.runtime.consume(command(context, driver), driver.PREPARED / 'workspace',
                                                   environment, raw, errors, observer)
         failure_code = 'MODEL_STREAM_SECRET_BLOCKED'
-        if driver.secret_hit(raw.read_bytes() + errors.read_bytes(), key):
+        if scan_hit(driver, raw.read_bytes() + errors.read_bytes(), key, c['test_profile'] == ACCESS_PROFILE):
             raise ValueError('MODEL_STREAM_SECRET_BLOCKED')
         failure_code = 'PACKET_INTEGRITY_BLOCKED'
         verify_prepared(driver, changed=True, modes=True)
@@ -724,7 +961,8 @@ def run_model(driver):
         if not isinstance(returned, str) or not returned.strip() or len(returned.encode()) > MAX_FILE:
             raise ValueError('MODEL_HANDBACK_MISSING')
         failure_code = 'MODEL_HANDBACK_BLOCKED'
-        if driver.secret_hit(returned.encode(), key) or driver.ag_control_in_handback(returned.encode()):
+        if (scan_hit(driver, returned.encode(), key, c['test_profile'] == ACCESS_PROFILE) or
+                driver.ag_control_in_handback(returned.encode())):
             raise ValueError('MODEL_HANDBACK_BLOCKED')
         failure_code = 'PROJECT_RESULT_BLOCKED'
         changes = changes_from_work(context, driver)
