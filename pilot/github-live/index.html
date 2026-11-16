@@ -1015,21 +1015,6 @@
     text-decoration:underline dotted; text-underline-offset:3px;}
   .agMot em.leer{opacity:.42; font-style:italic;}
   .agKosten.nurZeit{opacity:.75;}
-  /* Der Status der Kostenbasis. Er steht unten in der Mitte des Bandes,
-     gut sichtbar, und er geht nicht weg — eine fehlende Anzeige liest man
-     als Fehler, eine beschriftete als Auskunft. */
-  /* UEBER die Knopfleiste, nicht darunter. Im Bild nachgesehen: Auf
-     1194 Pixeln Breite endete der Satz bei 656 -- genau dort, wo die
-     Leiste beginnt, und lief darunter weiter. Dieselbe gemessene Hoehe
-     wie bei der Liste und beim Fortschritt. */
-  .agBasis{position:absolute; left:var(--agBasisM,50%);
-    max-width:var(--agBasisW,70vw); transform:translate(-50%,0);
-    bottom:calc(max(14px,env(safe-area-inset-bottom)) + var(--agLeisteH,0px) + var(--agTastenH,44px) + 10px);
-    font:400 9.5px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;
-    letter-spacing:.18em; text-transform:uppercase; text-align:center;
-    color:#6B7689;}
-  .agBasis.luecke{color:#C9A227;
-    text-decoration:underline dotted; text-underline-offset:4px;}
   .agMot em s{display:block; text-decoration:none; opacity:.75;
     color:#C9A227; font-size:8.5px;}
   .agAuf i.agMotor{font-style:normal; color:#6B7689; font-size:9px;
@@ -2518,7 +2503,7 @@
 
      Der Bauzeitpunkt kommt beim Bauen aus der Uhr. Von Hand gepflegte
      Datumsangaben sind nach der zweiten Änderung falsch. */
-  var FASSUNG = '103', GEBAUT = '2026-11-10T13:49Z';
+  var FASSUNG = '104', GEBAUT = '2026-11-16T11:59Z';
 
   /* AG-GH-LIVE-001: JEDE TEXTSENKE MASKIERT.
      Seit Live-Daten von aussen kommen (GitHub-Kommentare, one-event.json),
@@ -7178,7 +7163,7 @@
     for (var versuch = 0; versuch < 8; versuch++) {
       var mein = e.getBoundingClientRect(), stoesst = 0;
       var andere = document.querySelectorAll(
-        '#agMotoren [data-wer], #agMotoren .agBasis, ' +
+        '#agMotoren [data-wer], ' +
         '#agTun [data-wer], #agRufe .agRuf, #agTasten, ' +
         '#agKostenEbene .agKosten, #agWerkName, #agRing .agName');
       for (var ai = 0; ai < andere.length; ai++) {
@@ -7211,7 +7196,7 @@
     for (var versuch = 0; versuch < 8; versuch++) {
       var mein = e.getBoundingClientRect(), stoesst = 0;
       var andere = document.querySelectorAll(
-        '#agMotoren [data-wer], #agMotoren .agBasis, ' +
+        '#agMotoren [data-wer], ' +
         '#agTun [data-wer], #agRufe .agRuf, #agTasten, ' +
         '#agKostenEbene .agKosten, #agWerkName, #agRing .agName');
       for (var ai = 0; ai < andere.length; ai++) {
@@ -8257,17 +8242,6 @@
     /* Kein Mindestmass hier: Es gewaenne gegen die Messung, und genau das
        ist in diesem Programm schon einmal schiefgegangen. Was zu eng
        wird, schiebt der Durchgang in `motorenZeigen` auseinander. */
-    /* DIE KOSTENZEILE BEKOMMT EINE EIGENE BAHN.
-
-       Sie stand mittig und lief ueber die ganze Breite -- und damit
-       unter der Liste links und unter dem Fortschritt rechts. Das war
-       schon vorher so; gesehen habe ich es erst, als die Pruefung auch
-       nach den Spalten fragte. Jetzt steht sie in demselben Band wie der
-       Kreis und bricht dort um, statt darueber hinauszulaufen. */
-    document.documentElement.style.setProperty('--agBasisM',
-      Math.round((bandL() + bandR()) / 2) + 'px');
-    document.documentElement.style.setProperty('--agBasisW',
-      Math.round(Math.max(120, bandR() - bandL() - 16)) + 'px');
     document.documentElement.style.setProperty('--agMotBr',
       Math.round(Math.min(230, Math.max(64, eng * 1.25))) + 'px');
     ring.innerHTML = '';
@@ -8431,9 +8405,10 @@
   /* ========================= DER FUSS EINES AGENTEN =========================
 
      Unter jedem Namen haengen bis zu drei Dinge: das Modellschild, die
-     Arbeitsanzeige und die Meldung, die gerade an ihn ergeht. Dazu kommt
-     die Zeile zur Kostenbasis am unteren Rand, die nach K07 nicht
-     verschwinden darf.
+     Arbeitsanzeige und die Meldung, die gerade an ihn ergeht. Die Zeile
+     zur Kostenbasis am unteren Rand (nach K07) hat Peter am 16.11.2026
+     entfernen lassen (AG-MON-LLM-OVERLAY-001); unten begrenzt jetzt die
+     Knopfleiste.
 
      Peter hat eine Ueberlagerung im Bild gefunden. Beim Nachmessen waren
      es fuenf verschiedene, und drei Anlaeufe, sie je Ebene zu loesen,
@@ -8455,8 +8430,12 @@
   function fussOrdnen() {
     if (!fussNeu) return;
     fussNeu = false;
-    var kante = H() - 10, bs = motorEl.querySelector('.agBasis');
-    if (bs) kante = Math.min(kante, bs.getBoundingClientRect().top - 6);
+    /* Die Unterkante war bei "LLM & Kosten" die Kostenzeile; sie ist weg
+       (AG-MON-LLM-OVERLAY-001). Ihre Rolle als Grenze uebernimmt die
+       Knopfleiste, ueber der sie stand -- sonst rutschen die Schilder
+       unten in der Mitte in die Leiste. Ohne Schalter wie bisher. */
+    var kante = H() - 10, ts = document.getElementById('agTasten');
+    if (motorAn && ts) kante = Math.min(kante, ts.getBoundingClientRect().top - 6);
 
     var kaesten = [];
     Array.prototype.forEach.call(
@@ -8595,37 +8574,10 @@
            '" style="left:' + o[0] + 'px;top:' + (o[1] + 18) + 'px;color:' +
            hex(A.farbe) + '">' + esc(txt) + zus + '</div>';
     });
-    /* DER STATUS DER KOSTENBASIS, und er verschwindet nicht.
-
-       K07 aus AG-MOCK-COMPARE-001 verlangt, eine unvollständige Basis nicht
-       wie eine vollständige aussehen zu lassen. Peter verlangt, sie
-       trotzdem zu zeigen: „Wir dürfen nur die Anzeige nicht verschwinden
-       lassen, sonst denkt man eher an einen Fehler."
-
-       Also bleibt sie und sagt, was sie ist — wörtlich die Formulierung aus
-       AG-COST-UI-001, mit der Zahl dazu. Gezählt wird aus den Daten des
-       laufenden Stücks, nicht geschätzt. */
-    var belegt = 0, gesamt = 0, laufen = 0;
-    for (var vn in verbrauch) {
-      belegt += verbrauch[vn].n || 0;
-      gesamt += (verbrauch[vn].n || 0) + (verbrauch[vn].ohne || 0);
-    }
-    /* Laufende Aufträge haben noch NICHTS gemeldet. Sie zählen deshalb
-       gegen die Vollständigkeit, nicht erst, wenn sie ohne Angabe enden.
-       Im ersten Versuch stand mitten im Stück „Kosten vollständig erfasst",
-       während vier Agenten noch arbeiteten — also genau die Zusicherung,
-       gegen die K07 geschrieben ist, nur eine Stunde zu früh. */
-    for (var an in arbeit)
-      if (!arbeit[an].aus) laufen += arbeit[an].liste.length;
-
-    var ganz = gesamt > 0 && belegt === gesamt && laufen === 0;
-    h += '<div class="agBasis' + (ganz ? '' : ' luecke') + '">' +
-         (gesamt === 0 && !laufen ? 'noch keine erledigten Aufträge'
-          : ganz ? 'Kosten vollständig erfasst · ' + belegt + ' Aufträge'
-          : 'Kosten noch nicht vollständig erfasst · ' + belegt + ' von ' +
-            gesamt + ' erledigt belegt' +
-            (laufen ? ' · ' + laufen + ' noch offen' : '')) +
-         '</div>';
+    /* Hier stand die Zeile zur Kostenbasis unten in der Mitte
+       ("Kosten noch nicht vollständig erfasst ..."). Peter, 16.11.2026
+       (AG-MON-LLM-OVERLAY-001): "nur die anzeigen im unteren mittel sollen
+       weg". Die Angaben an den Agenten bleiben. */
 
     if (motorEl.__h !== h) {
       motorEl.__h = h; motorEl.innerHTML = h;
