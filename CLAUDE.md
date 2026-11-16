@@ -13,3 +13,5 @@ Gilt für jede Claude-Sitzung hier: Forge, Archibald, Cadence und Lot. Bewusst k
 9. **Peters Texte gehören ihm.** Übernehmen, wie sie sind; eine Schwäche daneben sagen.
 
 Lots Arbeitsnotizen (Antwortstil für Peter, Fallgeschichten zur Messlehre, Abnahmen am Zielgerät, Lots Rolle) stehen in `LOT.md`. Nur Lot lädt sie.
+
+10. **Ergebnisverantwortung und Kosten — Peter,16.11.2026:** `governance/ergebnisverantwortung-und-kosten-2026-11-16.md` gilt für alle Rollen. Probleme eingrenzen, zulässige Mitigation versuchen und fehlende Entscheidungen mit Empfehlung über Atlas herbeiführen. Keine pauschale BLOCKED-Rückgabe als unbearbeiteter Abschluss. Kosten nach Lauf tatsächlich dokumentieren; frühere USD5-Schwelle ersetzt, keine Geld-/Turngrenze als fachliches Ende. Checkpoint und kontrollierte Fortsetzung statt vermeidbarem Arbeitsverlust; technische Limits und Rollenrechte bleiben bestehen.

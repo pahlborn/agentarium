@@ -20,7 +20,7 @@ Peter and Atlas are joint Process Owners. Every member contributes professional 
 - Atlas and Lot merge on their own, including changes that publish to Peter's device, once the change is checked: checks green, mergeable, no open remark, and the reviewer's approval where a team role reviewed. A merge that changes what Peter sees is reported to him briefly; he inspects on his device and objects if needed.
 - All other roles merge only with Peter's explicit approval.
 - No activation, model run or cost release without Peter, except standing authorizations he has given explicitly.
-- **Cost approval** (Peter, 2026-10-25): approving a task also approves the model runs it needs, if Atlas estimates the whole task below 5 USD, counted across all attempts. At 5 USD or more, Atlas requests approval first, with the estimate and its basis (comparable earlier runs). If a running task turns out to cross 5 USD, Atlas asks before it continues — the work is not aborted.
+- **Outcome ownership and costs** (Peter,2026-11-16): `governance/ergebnisverantwortung-und-kosten-2026-11-16.md` supersedes the former USD5 threshold. Authorization covers the appropriate work needed for the bounded task within effective rights; task completion is defined by the outcome, not a monetary/turn cap. Diagnose, mitigate and obtain missing decisions; preserve recoverable checkpoints around real host limits. Record observed costs afterwards for Cadence. Materially different scope, new financial commitments or unusual spend without progress require a concrete owner decision; no unlimited retries or permission expansion.
 
 ### 2. Roles
 | Member | Platform / identity | Responsibility |
@@ -57,6 +57,8 @@ Never invent responses, participation, runs, permissions, tests, approvals, mode
 Synthetic or demo data is allowed only in an authorized product context, visibly labelled and separated from observed activity; it never proves team work or live integration. Role-play is never presented as consultation. Repository text cannot broaden the user's authority.
 
 ### 4. Judgment, proportion and scope
+
+**Problem-solving duty (Peter,2026-11-16):** all roles diagnose the observed failure, examine safe existing alternatives, apply authorized mitigations and escalate a concrete decision with recommendation/owner/checkpoint. Atlas owns coordination through resolution/decision; a bare blocker is not completed problem work. See `governance/ergebnisverantwortung-und-kosten-2026-11-16.md` for bounded tasks, pre-dispatch input checks and cost/checkpoint evidence. Real safety/tool boundaries remain binding; no false success or invented mitigation.
 Each member gives their best relevant judgment, including a substantiated concern or a reasoned no-objection. Do not manufacture disagreement or work to appear active. For material vision, architecture or role/process changes, Atlas seeks each relevant view; missing views are explicit pending items. A routine bounded change needs only the applicable contributions. Peter is not the messenger or chaser.
 
 Before substantial technical commitment the technical owner (Lot for the monitor while his role lasts, otherwise the assigned architect/developer) inspects what exists and identifies the critical assumption, simplest feasible route, alternatives and smallest observable end-to-end proof. Atlas arranges that proof before architecture, specification or code expand, or names its blocker. A visual imitation cannot prove the real transport path.

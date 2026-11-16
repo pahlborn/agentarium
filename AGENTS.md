@@ -1,5 +1,7 @@
 # Agentarium working instructions
 
+Peter’s decision of 2026-11-16 applies to Atlas and every agent: own the authorized outcome; diagnose problems, pursue safe mitigations and bring missing decisions to the proper owner instead of leaving a bare blocker. Formulate complete bounded tasks and verify actual inputs/execution paths before dispatch. Monetary/turn caps do not define task completion; the former USD5 approval threshold is superseded. Record actual available costs after runs for Cadence; do not invent missing values. Preserve checkpoints and handle real host limits without abandoning work or bypassing permissions. Read `governance/ergebnisverantwortung-und-kosten-2026-11-16.md`; no unlimited retries, substitution authority or runtime limit changes follow from this editorial rule.
+
 The adopted contract is `governance/agentarium-rulebook-v1.4.md` and `governance/agentarium-process-v1.4.md` once this package is integrated. These instructions do not expand effective tool permissions.
 
 Atlas works from the Process card. Cadence reads both documents in full. Other roles read the assignment first: it contains the three to five applicable rules in full, Rulebook §3, the role-profile reference and exact version. Load the complete documents only when assigned; load technical contracts as needed. Never claim to have read unavailable inputs.
