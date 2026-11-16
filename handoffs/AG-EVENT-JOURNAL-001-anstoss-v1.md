@@ -387,3 +387,14 @@ fachlichen Abschluss. Lesefehler bleiben unbekannt. Keine Hintergrund-Worker,
 Modellaufrufe, automatische bezahlte Wiederholung oder automatische Vertreterwahl
 werden dadurch aktiviert; Atlas führt die Übergabe im aktiven Auftrag aus.
 
+
+
+## Native eigene Statusmeldungen und gekoppelte Rückgabe — 16.11.2026
+
+Die begrenzte native Ausnahme in Rulebook1.4§10 / Process1.4§1 gilt für ChatGPT-Rollen in einer aktiven Atlas-Sitzung; Lot bleibt ausgeklammert und ausschließlich Peter-beauftragt. Der bestehende stärkere Host-/Relaykanal wird nicht ersetzt. Native Rollen verfassen ihre tatsächlichen eigenen Statusobjekte, Atlas veröffentlicht sie ohne semantische Änderung. `actor` und `reporter` bleiben die wirkliche meldende Rolle; der Begleittext benennt die tatsächliche native Instanz und Atlas als technischen Publisher. Herkunft ist `reported_checkpoint`, niemals eine erfundene `runtime_stream`-Beobachtung. Keine zusätzlichen GitHub-Schreibrechte für Read-only-Rollen und keine neuen V1-Felder.
+
+Jeder neue Ausführungsversuch hat eine eigene Teilaufgaben-ID unter dem stabilen Parent. Atlas gibt die exakte Bindung/IDs und das bestehende V1-Feldschema im Auftrag mit: schema,id,project_id,run_id,task_id,parent_id,actor,reporter,kind,title,occurred_at,source_evidence,source_tool_id; bei finaler contribution zusätzlich recipient:atlas. Jede Meldung ist eine einzelne V1-JSON-Block-Kommentierung mit genau einem bisherigen Marker. Zeiten und Werkzeugkennung müssen zur tatsächlichen eigenen Meldung passen.
+
+Startmeldung vor der fachlichen Weiterarbeit weiterleiten; Zwischenstände als progress. Bei endgültigem Ergebnis veröffentlicht Atlas zuerst die tatsächlich gelieferte eigene Endmeldung und unmittelbar danach die finale contribution, vor der Sachprüfung. Eine bereits separat empfangene Endmeldung kann den Effekt beenden, während der Teilball die ausstehende Rückgabe anzeigt. Fehlende Originalmeldungen nicht nachbauen. Späte Starts nach bekanntem Ende werden historisch erhalten und nicht als aktuelle Arbeit aktiviert. Beitrag allein schließt im heutigen Monitor keinen Arbeitsstatus; der Publisher muss die finale Kopplung einhalten. Andere parallel laufende Aufgaben bleiben aktiv. delivered bedeutet Laufende, keine Fach- oder Kundenannahme. Peters bisherige Annahme-/Ballregel bleibt unverändert.
+
+Nachweise und Grenzen: Issue115 #issuecomment-6916012830 und #issuecomment-6916673573. Geprüfter Normalpfad mit gemessener Verzögerung und isolierte A–F-Fälle sind keine automatische Vollanbindung aller Hosts, keine unbeaufsichtigte Ausführung und keine neue iPad-Abnahme.
