@@ -1,0 +1,12 @@
+{
+  "schema": "agentarium.relay-activation.v2",
+  "task_id": "AG-BQ-K1-20261116-V4-CONTRACT-R2",
+  "authorized": true,
+  "source_commit": "a449d97ec509ea129e149b0ca8e489826f5c10d0",
+  "role": "coding-agent",
+  "request": "handoffs/AG-BQ-K1-20261116-V4-CONTRACT-R2.json",
+  "handback": "handoffs/AG-BQ-K1-20261116-V4-CONTRACT-R2-handback.md",
+  "model": "sonnet",
+  "max_turns": 8,
+  "max_budget_usd": 25
+}
