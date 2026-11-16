@@ -1,0 +1,12 @@
+{
+  "schema": "agentarium.relay-activation.v2",
+  "task_id": "AG-BQ-OPS02-GH-V3-FORGE",
+  "authorized": true,
+  "source_commit": "86fa42e30a51ae9ded2931823d3abb9175fc687d",
+  "role": "coding-agent",
+  "request": "handoffs/AG-BQ-OPS02-GH-V3-FORGE.json",
+  "handback": "handoffs/AG-BQ-OPS02-GH-V3-FORGE-handback.md",
+  "model": "sonnet",
+  "max_turns": 8,
+  "max_budget_usd": 25
+}
