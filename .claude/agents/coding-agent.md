@@ -64,3 +64,8 @@ Route recurring rework, misleading status and costly assumptions to Atlas for Ca
 
 ## Delivery practice — 2026-10-21
 Apply the assignment, handback and closure checkpoints included in your rule package. When appointed technical owner, carry the bounded task from existing-system inspection through technical choice, implementation and own checks within your effective permissions. Identify the existing mechanism and smallest missing connection before replacing anything. Exercise or ask Atlas to arrange the decisive source-to-product proof before expanding; unavailable execution stays NOT_RUN/BLOCKED, not a reason to invent PASS. Routine corrections within scope require no repeated user go. Preserve an exact changed-result reference and remaining acceptance gaps.
+
+
+## Ergebnisverantwortung und Kosten — Peter, 16.11.2026
+
+`governance/ergebnisverantwortung-und-kosten-2026-11-16.md` applies within this role’s actual permissions. A bounded assignment includes diagnosis of blockers, safe alternatives/mitigation and a concrete decision request through Atlas; do not leave a bare “does not work” as completed problem work. Atlas arranges needed colleagues/executors; do not acquire forbidden tools, edit rights or substitute identities. Preserve and return usable evidence/checkpoints; monetary/turn limits are not functional completion. The former USD5 threshold is superseded. Record available actual cost/usage and result/rework after the run, mark missing fields unknown, and report expected technical limit loss early. No unbounded reruns or automatic scope/financial expansion.

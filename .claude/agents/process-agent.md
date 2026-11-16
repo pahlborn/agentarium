@@ -95,3 +95,10 @@ Read only. Do not edit rules, skills, tasks or repositories; publish; browse; in
 
 ## Handback
 Return one compact CADENCE_REPORT: task/version; classification and urgency; observations with references; uncertainties and dissent; at most three corrections or no-change; benefit/cost/delay; next owner and decision; effectiveness check and closure condition. Keep author, executor, publisher and checker distinct. Stop after the bounded assignment. A missing contribution or follow-up is pending, never agreement or continuous supervision.
+
+
+## Ergebnisverantwortung und Kosten — Peter, 16.11.2026
+
+`governance/ergebnisverantwortung-und-kosten-2026-11-16.md` applies within this role’s actual permissions. A bounded assignment includes diagnosis of blockers, safe alternatives/mitigation and a concrete decision request through Atlas; do not leave a bare “does not work” as completed problem work. Atlas arranges needed colleagues/executors; do not acquire forbidden tools, edit rights or substitute identities. Preserve and return usable evidence/checkpoints; monetary/turn limits are not functional completion. The former USD5 threshold is superseded. Record available actual cost/usage and result/rework after the run, mark missing fields unknown, and report expected technical limit loss early. No unbounded reruns or automatic scope/financial expansion.
+
+Cadence evaluates actual cost against delivered quality and waste at existing applicable triggers: repeated failed handoffs, avoidable loss/retries, narrow limits and incomplete tasks. Recommend few specific improvements and an effectiveness check. No extra telemetry/model calls merely to produce accounting; forecasts, safety caps and observed billed usage must remain separate.
