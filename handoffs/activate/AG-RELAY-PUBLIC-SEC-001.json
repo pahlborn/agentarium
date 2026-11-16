@@ -1,0 +1,12 @@
+{
+  "schema": "agentarium.relay-activation.v2",
+  "task_id": "AG-NATIVE-JOURNAL-GUARD-20261116-FORGE",
+  "authorized": true,
+  "source_commit": "f776933bf9e836ec3c28a1e4ddc8c485dc39f0dd",
+  "role": "coding-agent",
+  "request": "handoffs/AG-NATIVE-JOURNAL-GUARD-20261116-FORGE-request.json",
+  "handback": "handoffs/AG-NATIVE-JOURNAL-GUARD-20261116-FORGE-handback.md",
+  "model": "sonnet",
+  "max_turns": 16,
+  "max_budget_usd": 3
+}
