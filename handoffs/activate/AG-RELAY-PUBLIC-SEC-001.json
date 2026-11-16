@@ -1,0 +1,12 @@
+{
+  "schema": "agentarium.relay-activation.v2",
+  "task_id": "AG-BQ-OPS02-GH-V3-FORGE-DELTA",
+  "authorized": true,
+  "source_commit": "06b41a7aae1dbe8d0dd5fd197520dcdbdbb9dc98",
+  "role": "coding-agent",
+  "request": "handoffs/AG-BQ-OPS02-GH-V3-FORGE-DELTA.json",
+  "handback": "handoffs/AG-BQ-OPS02-GH-V3-FORGE-DELTA-handback.md",
+  "model": "sonnet",
+  "max_turns": 8,
+  "max_budget_usd": 25
+}
