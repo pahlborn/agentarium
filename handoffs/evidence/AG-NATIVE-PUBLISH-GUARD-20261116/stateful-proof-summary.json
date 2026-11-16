@@ -1,0 +1,42 @@
+{
+  "complete": true,
+  "first_active": "2026-11-16T20:52:40.939Z",
+  "first_stopped": "2026-11-16T20:58:34.254Z",
+  "final": {
+    "at": "2026-11-16T20:58:39.819Z",
+    "working": false,
+    "points": 1620,
+    "delta": 0,
+    "hasStart": true,
+    "hasEnd": true,
+    "hasReturn": true,
+    "row": {
+      "wer": "sentinel",
+      "aufgabe": "AG-NATIVE-PUBLISH-GUARD-20261116-QA-A2",
+      "zustand": "geliefert",
+      "vertretungen": [],
+      "projekt": "agentarium",
+      "lauf": "AG-NATIVE-PUBLISH-GUARD-20261116",
+      "wieder": true,
+      "klemmt": [],
+      "beleg": "6928957709",
+      "belegRef": "https://api.github.com/repos/pahlborn/agentarium/issues/comments/6928957709",
+      "eTyp": "task",
+      "eEltern": "AG-NATIVE-PUBLISH-GUARD-20261116",
+      "eFassung": "",
+      "w": 228.6638
+    },
+    "assignment": 6928957709,
+    "subballs": 0,
+    "rejected": 0,
+    "phase": "verbunden"
+  },
+  "errors": [],
+  "raw_report_sha256": "84f6193cd2da88a34d4e141475fd508b052d20cf59ee2a50eb0f99e86c527a28",
+  "consumer_main": "02419a49550c3cadb4d65159f0833ca3b0d9f0d1",
+  "tested_guard_head": "17d8094edf67f06067c1248ff33f468383fc50b0",
+  "final_corrected_guard_head": "d9a64603229a674cddb51979b6f69d4fd843efcc",
+  "merge": "aee3ad96cd6111404b529e0f6515431f39ce36b9",
+  "final_guard_revalidation": "The final corrected guard accepted byte-for-byte all five actual observed wire comments from the saved dispatch/start/final inputs; no new POST was made.",
+  "scope": "Real native Sentinel QA and actual production V1 comment objects. Local disclosed API mirror, no marker/payload rewriting. Original Fassung106 index/adapter byte-identical; local work-status.js only extra final LF. Peter browser, real-device acceptance and general latency not proved."
+}

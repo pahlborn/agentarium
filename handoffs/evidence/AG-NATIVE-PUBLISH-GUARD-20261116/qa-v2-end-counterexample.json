@@ -1,0 +1,62 @@
+{
+  "phase": "final",
+  "binding": {
+    "project_id": "agentarium",
+    "run_id": "AG-SENTINEL-FINAL-SYNTHETIC",
+    "task_id": "AG-SENTINEL-FINAL-SYNTHETIC-A1",
+    "parent_id": "AG-SENTINEL-FINAL-SYNTHETIC",
+    "role": "sentinel"
+  },
+  "events": [
+    {
+      "schema": "agentarium.github-event.v1",
+      "id": "SYNTHETIC-OLD-END",
+      "project_id": "agentarium",
+      "run_id": "AG-SENTINEL-FINAL-SYNTHETIC",
+      "task_id": "AG-SENTINEL-FINAL-SYNTHETIC-A1",
+      "parent_id": "AG-SENTINEL-FINAL-SYNTHETIC",
+      "actor": "sentinel",
+      "reporter": "sentinel",
+      "kind": "delivered",
+      "title": "Synthetic independent QA — no real task",
+      "occurred_at": "2026-11-16T19:59:00Z",
+      "source_evidence": "reported_checkpoint",
+      "source_tool_id": "sentinel.local.qa"
+    },
+    {
+      "schema": "agentarium.github-event.v1",
+      "id": "SYNTHETIC-INDEPENDENT-5",
+      "project_id": "agentarium",
+      "run_id": "AG-SENTINEL-FINAL-SYNTHETIC",
+      "task_id": "AG-SENTINEL-FINAL-SYNTHETIC-A1",
+      "parent_id": "AG-SENTINEL-FINAL-SYNTHETIC",
+      "actor": "sentinel",
+      "reporter": "sentinel",
+      "kind": "contribution",
+      "title": "Synthetic independent QA — no real task",
+      "occurred_at": "2026-11-16T20:00:03Z",
+      "source_evidence": "reported_checkpoint",
+      "source_tool_id": "sentinel.local.qa",
+      "recipient": "atlas"
+    }
+  ],
+  "history": [
+    {
+      "id": 980000000001,
+      "created_at": "2026-11-16T20:00:30Z",
+      "user": {
+        "login": "pahlborn"
+      },
+      "body": "<!-- AGENTARIUM_EVENT_V1 -->\n```json\n{\n  \"schema\": \"agentarium.github-event.v1\",\n  \"id\": \"SYNTHETIC-INDEPENDENT-1\",\n  \"project_id\": \"agentarium\",\n  \"run_id\": \"AG-SENTINEL-FINAL-SYNTHETIC\",\n  \"task_id\": \"AG-SENTINEL-FINAL-SYNTHETIC-A1\",\n  \"parent_id\": \"AG-SENTINEL-FINAL-SYNTHETIC\",\n  \"actor\": \"atlas\",\n  \"reporter\": \"atlas\",\n  \"kind\": \"handoff\",\n  \"title\": \"Synthetic independent QA — no real task\",\n  \"occurred_at\": \"2026-11-16T20:00:00Z\",\n  \"source_evidence\": \"reported_checkpoint\",\n  \"source_tool_id\": \"sentinel.local.qa\",\n  \"recipient\": \"sentinel\"\n}\n```\nSynthetic history."
+    },
+    {
+      "id": 980000000002,
+      "created_at": "2026-11-16T20:00:30Z",
+      "user": {
+        "login": "pahlborn"
+      },
+      "body": "<!-- AGENTARIUM_EVENT_V1 -->\n```json\n{\n  \"schema\": \"agentarium.github-event.v1\",\n  \"id\": \"SYNTHETIC-INDEPENDENT-2\",\n  \"project_id\": \"agentarium\",\n  \"run_id\": \"AG-SENTINEL-FINAL-SYNTHETIC\",\n  \"task_id\": \"AG-SENTINEL-FINAL-SYNTHETIC-A1\",\n  \"parent_id\": \"AG-SENTINEL-FINAL-SYNTHETIC\",\n  \"actor\": \"atlas\",\n  \"reporter\": \"atlas\",\n  \"kind\": \"assigned\",\n  \"title\": \"Synthetic independent QA — no real task\",\n  \"occurred_at\": \"2026-11-16T20:00:00Z\",\n  \"source_evidence\": \"reported_checkpoint\",\n  \"source_tool_id\": \"sentinel.local.qa\",\n  \"recipient\": \"sentinel\"\n}\n```\nSynthetic history."
+    }
+  ],
+  "note": "Synthetic independent CLI test. Not a real worker."
+}

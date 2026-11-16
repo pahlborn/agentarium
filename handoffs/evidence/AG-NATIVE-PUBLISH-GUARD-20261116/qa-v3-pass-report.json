@@ -1,0 +1,151 @@
+{
+  "task": "AG-NATIVE-PUBLISH-GUARD-20261116-QA-A3",
+  "head": "d9a64603229a674cddb51979b6f69d4fd843efcc",
+  "synthetic": true,
+  "records": [
+    {
+      "name": "real-shaped-dispatch",
+      "expected_accept": true,
+      "status": 0,
+      "stdout": "{\"comments\":[{\"repo_full_name\":\"pahlborn/agentarium\",\"pr_number\":2,\"comment\":\"<!-- AGENTARIUM_EVENT_V1 -->\\n```json\\n{\\n  \\\"schema\\\": \\\"agentarium.github-event.v1\\\",\\n  \\\"id\\\": \\\"SYNTHETIC-INDEPENDENT-1\\\",\\n  \\\"project_id\\\": \\\"agentarium\\\",\\n  \\\"run_id\\\": \\\"AG-SENTINEL-FINAL-SYNTHETIC\\\",\\n  \\\"task_id\\\": \\\"AG-SENTINEL-FINAL-SYNTHETIC-A1\\\",\\n  \\\"parent_id\\\": \\\"AG-SENTINEL-FINAL-SYNTHETIC\\\",\\n  \\\"actor\\\": \\\"atlas\\\",\\n  \\\"reporter\\\": \\\"atlas\\\",\\n  \\\"kind\\\": \\\"handoff\\\",\\n  \\\"title\\\": \\\"Synthetic independent QA \u2014 no real task\\\",\\n  \\\"occurred_at\\\": \\\"2026-11-16T20:00:00Z\\\",\\n  \\\"source_evidence\\\": \\\"reported_checkpoint\\\",\\n  \\\"source_tool_id\\\": \\\"sentinel.local.qa\\\",\\n  \\\"recipient\\\": \\\"sentinel\\\"\\n}\\n```\\n\\nSynthetic independent CLI test. Not a real worker.\"},{\"repo_full_name\":\"pahlborn/agentarium\",\"pr_number\":2,\"comment\":\"<!-- AGENTARIUM_EVENT_V1 -->\\n```json\\n{\\n  \\\"schema\\\": \\\"agentarium.github-event.v1\\\",\\n  \\\"id\\\": \\\"SYNTHETIC-INDEPENDENT-2\\\",\\n  \\\"project_id\\\": \\\"agentarium\\\",\\n  \\\"run_id\\\": \\\"AG-SENTINEL-FINAL-SYNTHETIC\\\",\\n  \\\"task_id\\\": \\\"AG-SENTINEL-FINAL-SYNTHETIC-A1\\\",\\n  \\\"parent_id\\\": \\\"AG-SENTINEL-FINAL-SYNTHETIC\\\",\\n  \\\"actor\\\": \\\"atlas\\\",\\n  \\\"reporter\\\": \\\"atlas\\\",\\n  \\\"kind\\\": \\\"assigned\\\",\\n  \\\"title\\\": \\\"Synthetic independent QA \u2014 no real task\\\",\\n  \\\"occurred_at\\\": \\\"2026-11-16T20:00:00Z\\\",\\n  \\\"source_evidence\\\": \\\"reported_checkpoint\\\",\\n  \\\"source_tool_id\\\": \\\"sentinel.local.qa\\\",\\n  \\\"recipient\\\": \\\"sentinel\\\"\\n}\\n```\\n\\nSynthetic independent CLI test. Not a real worker.\"}],\"skipped\":[],\"warnings\":[],\"instruction\":\"When you actually take up this assignment, send Atlas your OWN started V1 object before substantive work. Binding: {\\\"project_id\\\":\\\"agentarium\\\",\\\"run_id\\\":\\\"AG-SENTINEL-FINAL-SYNTHETIC\\\",\\\"task_id\\\":\\\"AG-SENTINEL-FINAL-SYNTHETIC-A1\\\",\\\"parent_id\\\":\\\"AG-SENTINEL-FINAL-SYNTHETIC\\\",\\\"role\\\":\\\"sentinel\\\"}. actor=reporter=sentinel; source_evidence=reported_checkpoint; actual ISO time with T/zone, unique event id, actual source_tool_id and title. On final handback send your own delivered (or actual aborted) followed by contribution to atlas with exactly this binding. Intermediate updates are progress. Do not publish GitHub, invent platform evidence, reuse another attempt id or claim PASS merely because execution ended. Atlas alone validates and publishes; missing messages must be reconciled, never fabricated.\"}\n",
+      "stderr": "",
+      "result": "passed"
+    },
+    {
+      "name": "real-shaped-own-start",
+      "expected_accept": true,
+      "status": 0,
+      "stdout": "{\"comments\":[{\"repo_full_name\":\"pahlborn/agentarium\",\"pr_number\":2,\"comment\":\"<!-- AGENTARIUM_EVENT_V1 -->\\n```json\\n{\\n  \\\"schema\\\": \\\"agentarium.github-event.v1\\\",\\n  \\\"id\\\": \\\"SYNTHETIC-INDEPENDENT-3\\\",\\n  \\\"project_id\\\": \\\"agentarium\\\",\\n  \\\"run_id\\\": \\\"AG-SENTINEL-FINAL-SYNTHETIC\\\",\\n  \\\"task_id\\\": \\\"AG-SENTINEL-FINAL-SYNTHETIC-A1\\\",\\n  \\\"parent_id\\\": \\\"AG-SENTINEL-FINAL-SYNTHETIC\\\",\\n  \\\"actor\\\": \\\"sentinel\\\",\\n  \\\"reporter\\\": \\\"sentinel\\\",\\n  \\\"kind\\\": \\\"started\\\",\\n  \\\"title\\\": \\\"Synthetic independent QA \u2014 no real task\\\",\\n  \\\"occurred_at\\\": \\\"2026-11-16T20:00:01Z\\\",\\n  \\\"source_evidence\\\": \\\"reported_checkpoint\\\",\\n  \\\"source_tool_id\\\": \\\"sentinel.local.qa\\\"\\n}\\n```\\n\\nSynthetic independent CLI test. Not a real worker.\"}],\"skipped\":[],\"warnings\":[]}\n",
+      "stderr": "",
+      "result": "passed"
+    },
+    {
+      "name": "real-shaped-final",
+      "expected_accept": true,
+      "status": 0,
+      "stdout": "{\"comments\":[{\"repo_full_name\":\"pahlborn/agentarium\",\"pr_number\":2,\"comment\":\"<!-- AGENTARIUM_EVENT_V1 -->\\n```json\\n{\\n  \\\"schema\\\": \\\"agentarium.github-event.v1\\\",\\n  \\\"id\\\": \\\"SYNTHETIC-INDEPENDENT-4\\\",\\n  \\\"project_id\\\": \\\"agentarium\\\",\\n  \\\"run_id\\\": \\\"AG-SENTINEL-FINAL-SYNTHETIC\\\",\\n  \\\"task_id\\\": \\\"AG-SENTINEL-FINAL-SYNTHETIC-A1\\\",\\n  \\\"parent_id\\\": \\\"AG-SENTINEL-FINAL-SYNTHETIC\\\",\\n  \\\"actor\\\": \\\"sentinel\\\",\\n  \\\"reporter\\\": \\\"sentinel\\\",\\n  \\\"kind\\\": \\\"delivered\\\",\\n  \\\"title\\\": \\\"Synthetic independent QA \u2014 no real task\\\",\\n  \\\"occurred_at\\\": \\\"2026-11-16T20:00:02Z\\\",\\n  \\\"source_evidence\\\": \\\"reported_checkpoint\\\",\\n  \\\"source_tool_id\\\": \\\"sentinel.local.qa\\\"\\n}\\n```\\n\\nSynthetic independent CLI test. Not a real worker.\"},{\"repo_full_name\":\"pahlborn/agentarium\",\"pr_number\":2,\"comment\":\"<!-- AGENTARIUM_EVENT_V1 -->\\n```json\\n{\\n  \\\"schema\\\": \\\"agentarium.github-event.v1\\\",\\n  \\\"id\\\": \\\"SYNTHETIC-INDEPENDENT-5\\\",\\n  \\\"project_id\\\": \\\"agentarium\\\",\\n  \\\"run_id\\\": \\\"AG-SENTINEL-FINAL-SYNTHETIC\\\",\\n  \\\"task_id\\\": \\\"AG-SENTINEL-FINAL-SYNTHETIC-A1\\\",\\n  \\\"parent_id\\\": \\\"AG-SENTINEL-FINAL-SYNTHETIC\\\",\\n  \\\"actor\\\": \\\"sentinel\\\",\\n  \\\"reporter\\\": \\\"sentinel\\\",\\n  \\\"kind\\\": \\\"contribution\\\",\\n  \\\"title\\\": \\\"Synthetic independent QA \u2014 no real task\\\",\\n  \\\"occurred_at\\\": \\\"2026-11-16T20:00:03Z\\\",\\n  \\\"source_evidence\\\": \\\"reported_checkpoint\\\",\\n  \\\"source_tool_id\\\": \\\"sentinel.local.qa\\\",\\n  \\\"recipient\\\": \\\"atlas\\\"\\n}\\n```\\n\\nSynthetic independent CLI test. Not a real worker.\"}],\"skipped\":[],\"warnings\":[]}\n",
+      "stderr": "",
+      "result": "passed"
+    },
+    {
+      "name": "bad-second-event-no-partial-stdout",
+      "expected_accept": false,
+      "status": 1,
+      "stdout": "",
+      "stderr": "native-journal: consumer rejects SYNTHETIC-INDEPENDENT-5: unbekanntes Feld unknown_field\n",
+      "result": "passed"
+    },
+    {
+      "name": "bad-second-event-binding-no-partial-stdout",
+      "expected_accept": false,
+      "status": 1,
+      "stdout": "",
+      "stderr": "native-journal: event assignment binding mismatch\n",
+      "result": "passed"
+    },
+    {
+      "name": "malformed-second-date-no-partial-stdout",
+      "expected_accept": false,
+      "status": 1,
+      "stdout": "",
+      "stderr": "native-journal: consumer rejects SYNTHETIC-INDEPENDENT-5: occurred_at ung\u00fcltig\n",
+      "result": "passed"
+    },
+    {
+      "name": "marker-injection-with-valid-pair",
+      "expected_accept": false,
+      "status": 1,
+      "stdout": "",
+      "stderr": "native-journal: consumer rejects SYNTHETIC-INDEPENDENT-4: Marker mehrfach\n",
+      "result": "passed"
+    },
+    {
+      "name": "actual-shaped-aborted-final",
+      "expected_accept": true,
+      "status": 0,
+      "stdout": "{\"comments\":[{\"repo_full_name\":\"pahlborn/agentarium\",\"pr_number\":2,\"comment\":\"<!-- AGENTARIUM_EVENT_V1 -->\\n```json\\n{\\n  \\\"schema\\\": \\\"agentarium.github-event.v1\\\",\\n  \\\"id\\\": \\\"SYNTHETIC-INDEPENDENT-6\\\",\\n  \\\"project_id\\\": \\\"agentarium\\\",\\n  \\\"run_id\\\": \\\"AG-SENTINEL-FINAL-SYNTHETIC\\\",\\n  \\\"task_id\\\": \\\"AG-SENTINEL-FINAL-SYNTHETIC-A1\\\",\\n  \\\"parent_id\\\": \\\"AG-SENTINEL-FINAL-SYNTHETIC\\\",\\n  \\\"actor\\\": \\\"sentinel\\\",\\n  \\\"reporter\\\": \\\"sentinel\\\",\\n  \\\"kind\\\": \\\"aborted\\\",\\n  \\\"title\\\": \\\"Synthetic independent QA \u2014 no real task\\\",\\n  \\\"occurred_at\\\": \\\"2026-11-16T20:00:02Z\\\",\\n  \\\"source_evidence\\\": \\\"reported_checkpoint\\\",\\n  \\\"source_tool_id\\\": \\\"sentinel.local.qa\\\"\\n}\\n```\\n\\nSynthetic independent CLI test. Not a real worker.\"},{\"repo_full_name\":\"pahlborn/agentarium\",\"pr_number\":2,\"comment\":\"<!-- AGENTARIUM_EVENT_V1 -->\\n```json\\n{\\n  \\\"schema\\\": \\\"agentarium.github-event.v1\\\",\\n  \\\"id\\\": \\\"SYNTHETIC-INDEPENDENT-7\\\",\\n  \\\"project_id\\\": \\\"agentarium\\\",\\n  \\\"run_id\\\": \\\"AG-SENTINEL-FINAL-SYNTHETIC\\\",\\n  \\\"task_id\\\": \\\"AG-SENTINEL-FINAL-SYNTHETIC-A1\\\",\\n  \\\"parent_id\\\": \\\"AG-SENTINEL-FINAL-SYNTHETIC\\\",\\n  \\\"actor\\\": \\\"sentinel\\\",\\n  \\\"reporter\\\": \\\"sentinel\\\",\\n  \\\"kind\\\": \\\"contribution\\\",\\n  \\\"title\\\": \\\"Synthetic independent QA \u2014 no real task\\\",\\n  \\\"occurred_at\\\": \\\"2026-11-16T20:00:03Z\\\",\\n  \\\"source_evidence\\\": \\\"reported_checkpoint\\\",\\n  \\\"source_tool_id\\\": \\\"sentinel.local.qa\\\",\\n  \\\"recipient\\\": \\\"atlas\\\"\\n}\\n```\\n\\nSynthetic independent CLI test. Not a real worker.\"}],\"skipped\":[],\"warnings\":[]}\n",
+      "stderr": "",
+      "result": "passed"
+    },
+    {
+      "name": "partial-success-retry-exact-remaining",
+      "expected_accept": true,
+      "status": 0,
+      "stdout": "{\"comments\":[{\"repo_full_name\":\"pahlborn/agentarium\",\"pr_number\":2,\"comment\":\"<!-- AGENTARIUM_EVENT_V1 -->\\n```json\\n{\\n  \\\"schema\\\": \\\"agentarium.github-event.v1\\\",\\n  \\\"id\\\": \\\"SYNTHETIC-INDEPENDENT-5\\\",\\n  \\\"project_id\\\": \\\"agentarium\\\",\\n  \\\"run_id\\\": \\\"AG-SENTINEL-FINAL-SYNTHETIC\\\",\\n  \\\"task_id\\\": \\\"AG-SENTINEL-FINAL-SYNTHETIC-A1\\\",\\n  \\\"parent_id\\\": \\\"AG-SENTINEL-FINAL-SYNTHETIC\\\",\\n  \\\"actor\\\": \\\"sentinel\\\",\\n  \\\"reporter\\\": \\\"sentinel\\\",\\n  \\\"kind\\\": \\\"contribution\\\",\\n  \\\"title\\\": \\\"Synthetic independent QA \u2014 no real task\\\",\\n  \\\"occurred_at\\\": \\\"2026-11-16T20:00:03Z\\\",\\n  \\\"source_evidence\\\": \\\"reported_checkpoint\\\",\\n  \\\"source_tool_id\\\": \\\"sentinel.local.qa\\\",\\n  \\\"recipient\\\": \\\"atlas\\\"\\n}\\n```\\n\\nSynthetic independent CLI test. Not a real worker.\"}],\"skipped\":[\"SYNTHETIC-INDEPENDENT-4\"],\"warnings\":[]}\n",
+      "stderr": "",
+      "result": "passed"
+    },
+    {
+      "name": "both-posted-idempotent-no-comments",
+      "expected_accept": true,
+      "status": 0,
+      "stdout": "{\"comments\":[],\"skipped\":[\"SYNTHETIC-INDEPENDENT-4\",\"SYNTHETIC-INDEPENDENT-5\"],\"warnings\":[]}\n",
+      "stderr": "",
+      "result": "passed"
+    },
+    {
+      "name": "retry-id-content-conflict",
+      "expected_accept": false,
+      "status": 1,
+      "stdout": "",
+      "stderr": "native-journal: same id has different content: SYNTHETIC-INDEPENDENT-4\n",
+      "result": "passed"
+    },
+    {
+      "name": "late-new-start-after-aborted",
+      "expected_accept": false,
+      "status": 1,
+      "stdout": "",
+      "stderr": "native-journal: attempt is terminal, already started, closed or held elsewhere\n",
+      "result": "passed"
+    },
+    {
+      "name": "final-after-terminal-and-holder-transfer",
+      "expected_accept": false,
+      "status": 1,
+      "stdout": "",
+      "stderr": "native-journal: final return held elsewhere\n",
+      "result": "passed"
+    },
+    {
+      "name": "foreign-role-completion",
+      "expected_accept": false,
+      "status": 1,
+      "stdout": "",
+      "stderr": "native-journal: actual role must be actor and reporter\n",
+      "result": "passed"
+    },
+    {
+      "name": "fabricated-runtime",
+      "expected_accept": false,
+      "status": 1,
+      "stdout": "",
+      "stderr": "native-journal: native status must remain reported_checkpoint\n",
+      "result": "passed"
+    },
+    {
+      "name": "wrong-published-parent",
+      "expected_accept": false,
+      "status": 1,
+      "stdout": "",
+      "stderr": "native-journal: no valid published matching assignment in supplied history\n",
+      "result": "passed"
+    },
+    {
+      "name": "start-before-assignment",
+      "expected_accept": false,
+      "status": 1,
+      "stdout": "",
+      "stderr": "native-journal: status predates matching assignment\n",
+      "result": "passed"
+    },
+    {
+      "name": "final-before-assignment-without-start",
+      "expected_accept": false,
+      "status": 1,
+      "stdout": "",
+      "stderr": "native-journal: status predates matching assignment\n",
+      "result": "passed"
+    }
+  ]
+}

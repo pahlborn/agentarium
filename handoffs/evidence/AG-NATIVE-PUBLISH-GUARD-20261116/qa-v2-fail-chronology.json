@@ -1,0 +1,67 @@
+[
+  {
+    "name": "start-before-assignment",
+    "published_kinds": [
+      "started"
+    ],
+    "restored_rows": [
+      {
+        "projekt": "agentarium",
+        "lauf": "AG-SENTINEL-FINAL-SYNTHETIC",
+        "aufgabe": "AG-SENTINEL-FINAL-SYNTHETIC-A1",
+        "wer": "sentinel",
+        "zustand": "zugewiesen",
+        "titel": "Synthetic independent QA — no real task",
+        "klemmt": [],
+        "vertretungen": [],
+        "occurred_at": "2026-11-16T20:00:00Z",
+        "recorded_at": "2026-11-16T20:00:30Z",
+        "eTyp": "task",
+        "eEltern": "AG-SENTINEL-FINAL-SYNTHETIC",
+        "eFassung": "",
+        "beleg": 980000000002,
+        "belegRef": "https://api.github.com/repos/pahlborn/agentarium/issues/comments/980000000002",
+        "belegLetzte": 980000000002
+      }
+    ],
+    "restored_balls": [
+      {
+        "project_id": "agentarium",
+        "run_id": "AG-SENTINEL-FINAL-SYNTHETIC",
+        "task_id": "AG-SENTINEL-FINAL-SYNTHETIC-A1",
+        "bei": "sentinel",
+        "teil": true,
+        "von": "atlas",
+        "eltern": "AG-SENTINEL-FINAL-SYNTHETIC"
+      }
+    ]
+  },
+  {
+    "name": "final-before-assignment-without-start",
+    "published_kinds": [
+      "delivered",
+      "contribution"
+    ],
+    "restored_rows": [
+      {
+        "projekt": "agentarium",
+        "lauf": "AG-SENTINEL-FINAL-SYNTHETIC",
+        "aufgabe": "AG-SENTINEL-FINAL-SYNTHETIC-A1",
+        "wer": "sentinel",
+        "zustand": "zugewiesen",
+        "titel": "Synthetic independent QA — no real task",
+        "klemmt": [],
+        "vertretungen": [],
+        "occurred_at": "2026-11-16T20:00:00Z",
+        "recorded_at": "2026-11-16T20:00:30Z",
+        "eTyp": "task",
+        "eEltern": "AG-SENTINEL-FINAL-SYNTHETIC",
+        "eFassung": "",
+        "beleg": 980000000002,
+        "belegRef": "https://api.github.com/repos/pahlborn/agentarium/issues/comments/980000000002",
+        "belegLetzte": 980000000002
+      }
+    ],
+    "restored_balls": []
+  }
+]

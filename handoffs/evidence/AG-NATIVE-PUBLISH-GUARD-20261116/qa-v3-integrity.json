@@ -1,0 +1,18 @@
+{
+  "base": "17d8094edf67f06067c1248ff33f468383fc50b0",
+  "head": "d9a64603229a674cddb51979b6f69d4fd843efcc",
+  "exact_two_file_delta": true,
+  "files": [
+    {
+      "path": ".github/scripts/native-journal.cjs",
+      "equal_to_head": true,
+      "sha256": "fc139e2da7104bee5c27ca896ca669e321693bb50e799836c7e0500ab091b32a"
+    },
+    {
+      "path": ".github/scripts/test-native-journal.cjs",
+      "equal_to_head": true,
+      "sha256": "eabf840f4a761d37e4ea00b05b3a0dd2b4d1e08706f47cb6a2f21f5994200bd3"
+    }
+  ],
+  "other_four_inputs_unchanged": true
+}
