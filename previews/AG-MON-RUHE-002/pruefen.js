@@ -12,7 +12,7 @@
 
      A  die zehn Arten sind da (vier bisherige, sechs aus dem Pult:
         Stroemung, Schleife, Sog, Stoss, Stimmen, Strang)
-     B  jede der sechs neuen leuchtet sichtbar auf (bei 0,8 s mindestens 80
+     B  jede der sechs neuen leuchtet sichtbar auf (bei 0,3 oder 0,8 s mindestens 80
         Feldpunkte ueber dem Grund; ein bisheriger Ruhe-Knoten kommt auf
         rund 120) und ist nach 8 s wieder weg (hoechstens 10 % des
         Aufleuchtens ueber dem Grund) -- es bleibt nichts zurueck
@@ -147,19 +147,31 @@ const NEU = ['stroemung', 'schleife', 'sog', 'stoss', 'stimmen', 'strang'];
     console.log('\nB — aufleuchten und ganz vergehen');
     /* Erscheinungen zeichnen erst nach 12 s Ruhe (RUHE_NACH); vorher
        raeumt der Monitor sie ab. Erster Lauf: die erste Art (Stroemung)
-       zeichnete deshalb nichts. */
-    await o.s.waitForTimeout(13000);
+       zeichnete deshalb nichts. Genau dann kommt aber auch die erste
+       Erscheinung von selbst -- im Prueflauf ein Wirbel, der 8 s lang das
+       Medium dreht und in die erste Messung fiel (444 Punkte nach 8 s).
+       Also: die erste von selbst abwarten, bis sie vorbei und verklungen
+       ist. Danach kommt fruehestens 12 s spaeter die naechste, und jede
+       gezeigte Art schiebt diese Frist weiter. */
+    await o.s.waitForFunction(() => window.__agStand().leerlaufAnzahl > 0, null, { timeout: 40000 });
+    const erste = await o.s.evaluate(() => window.__agStand().leerlauf);
+    await o.s.waitForFunction(() => !window.__agStand().leerlauf, null, { timeout: 20000 });
+    await o.s.waitForTimeout(erste === 'wirbel' ? 9000 : 6000);
     for (const art of NEU) {
       /* Zwischen zwei Messungen Ruhe, damit nichts Altes mitzaehlt. */
       await o.s.waitForTimeout(1500);
       const grund = await leuchtend(o.s, rechner);
       const ok = await o.s.evaluate((a) => !!(window.__agRuhe && window.__agRuhe.zeigen(a)), art);
-      await o.s.waitForTimeout(800);
-      const hoch = await leuchtend(o.s, rechner);
+      /* Zweimal hinsehen: Ein Stoss ist nach 0,8 s schon fast verglueht,
+         eine Schleife erst dann ganz gezogen. Es zaehlt der hellere Blick. */
+      await o.s.waitForTimeout(300);
+      const frueh = await leuchtend(o.s, rechner);
+      await o.s.waitForTimeout(500);
+      const hoch = Math.max(frueh, await leuchtend(o.s, rechner));
       await o.s.waitForTimeout(7200);
       const rest = await leuchtend(o.s, rechner);
       const auf = hoch - grund, bleibt = rest - grund;
-      console.log('        ' + art.padEnd(10) + ' Grund ' + grund + ' · bei 0,8 s ' + hoch + ' · nach 8 s ' + rest);
+      console.log('        ' + art.padEnd(10) + ' Grund ' + grund + ' · hellster Blick bis 0,8 s ' + hoch + ' · nach 8 s ' + rest);
       zeile(art + ': gezeigt', ok, true);
       zeile(art + ': leuchtet sichtbar auf (≥ 80 Punkte)', auf >= 80, true);
       zeile(art + ': nach 8 s vergangen (≤ 10 %)', bleibt <= Math.max(30, auf * 0.1), true);
