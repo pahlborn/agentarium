@@ -23,11 +23,16 @@
         (AG-MON-BROWSER-001, 10.11.: Teilbaelle saeten nach einer Sekundenuhr
         mit fest angenommenen 60 Bildern je Sekunde; je weniger Bilder, desto
         mehr Punkte je Bild -- gemessen 223 statt hoechstens 110). Jeder
-        angeforderte Frame wartet vorher 100 ms, also hoechstens rund
-        8 Bilder je Sekunde, gleich wie schnell der Rechner ist. Dass die
+        angeforderte Frame wartet vorher 200 ms, also hoechstens rund
+        5 Bilder je Sekunde, gleich wie schnell der Rechner ist. Dass die
         Rate wirklich sinkt, wird mitgemessen (gegen B), sonst bewiese D
         nichts. Erster Versuch mit einem uebersprungenen Frame senkte sie im
         ohnehin langsamen Prueflauf nur von 17 auf 15 je Sekunde.
+        16.11.: Mit 100 ms Wartezeit lag D stets bei 8,3 Bildern je Sekunde,
+        B aber schwankte mit der Last des Prueflaufs (25,7 auf main vor
+        74a2063, 11,7 danach) -- 8,3 ist mehr als 70 % von 11,7, die
+        Vorbedingung fiel, ohne dass sich am Monitor etwas geaendert hatte.
+        200 ms halten Abstand, solange B ueber gut 7 Bildern liegt.
 
    GRENZEN: Gemessen wird der Verbrauch, nicht die Schoenheit. Ob die
    Resonanz wieder "anregend schoen" ist, entscheidet Peter am iPad.     */
@@ -111,12 +116,12 @@ const AGENTEN = ['forge', 'nova', 'scout', 'argus', 'sentinel', 'archibald', 'lo
 async function seite(b, tisch, liste, langsam) {
   const q = await b.newContext({ viewport: { width: 1194, height: 834 } });
   const s = await q.newPage();
-  /* Gesenkte Bildrate: jeder angeforderte Frame wartet 100 ms. Der Monitor
+  /* Gesenkte Bildrate: jeder angeforderte Frame wartet 200 ms. Der Monitor
      misst `dt` selbst und sieht damit lange Bilder -- die Lage eines
      langsamen Geraets. */
   if (langsam) await s.addInitScript(() => {
     const raf = window.requestAnimationFrame.bind(window);
-    window.requestAnimationFrame = cb => { setTimeout(() => raf(cb), 100); return 0; };
+    window.requestAnimationFrame = cb => { setTimeout(() => raf(cb), 200); return 0; };
   });
   const seitenFehler = [];
   s.on('pageerror', e => seitenFehler.push(String(e.message).slice(0, 110)));
@@ -139,20 +144,41 @@ async function seite(b, tisch, liste, langsam) {
   await s.waitForTimeout(1500);
   return { q, s, seitenFehler };
 }
-/* Zaehlt drei Sekunden lang die Punkte still liegender Baelle je Bild. */
+/* Zaehlt die Punkte still liegender Baelle je Bild -- ueber eine feste
+   Zahl von BILDERN, nicht ueber eine feste Zeit.
+   16.11.: Ein Teilball saet seinen ganzen Koerper (98 Punkte) in jedem
+   1/f-ten Bild; im Mittel ist das genau sein Anteil, aber ueber wenige
+   Bilder kann jeder der sieben Teilbaelle eine Aussaat mehr oder weniger
+   haben. Drei Sekunden waren bei gesenkter Bildrate nur 13 bis 25 Bilder:
+   bis zu 7 x 98 / 13 = 53 Punkte je Bild Messfehler, gegen eine Grenze
+   von 110 bei 98 Soll. Ueber 120 Bilder sind es hoechstens 7 x 98 / 120,
+   also unter 6 -- die Grenze prueft dann den Monitor, nicht den Zufall.
+   Rate in Bildern je Sekunde aus der wirklich gemessenen Zeit. */
+const MESSBILDER = 120;
 async function messen(s) {
-  return s.evaluate(() => new Promise(fertig => {
+  return s.evaluate((soll) => new Promise(fertig => {
     const f = window.__feld, alt = f.sonne;
-    let punkte = 0, bilder = 0, aus = false;
-    f.sonne = function (x, y, gx, gy, r, hitze, ton, abgabe, wieviele) {
-      if (gx === 0 && gy === 0) punkte += wieviele;
-      return alt.apply(this, arguments);
+    let punkte = 0, bilder = 0, aus = false, t0 = 0;
+    const takt = (t) => {
+      if (aus) return;
+      if (!t0) {
+        /* Ab dem ersten Bild zaehlen, damit Punkte und Bilder zusammenpassen. */
+        t0 = performance.now();
+        f.sonne = function (x, y, gx, gy, r, hitze, ton, abgabe, wieviele) {
+          if (gx === 0 && gy === 0) punkte += wieviele;
+          return alt.apply(this, arguments);
+        };
+      } else bilder++;
+      const sek = (performance.now() - t0) / 1000;
+      if (bilder >= soll || sek > 90) {
+        aus = true; f.sonne = alt;
+        fertig({ punkte, bilder, sek, rate: bilder / sek, jeBild: bilder ? punkte / bilder : 0 });
+        return;
+      }
+      requestAnimationFrame(takt);
     };
-    const takt = () => { if (aus) return; bilder++; requestAnimationFrame(takt); };
     requestAnimationFrame(takt);
-    setTimeout(() => { aus = true; f.sonne = alt;
-      fertig({ punkte, bilder, jeBild: bilder ? punkte / bilder : 0 }); }, 3000);
-  }));
+  }), MESSBILDER);
 }
 
 (async () => {
@@ -199,7 +225,7 @@ async function messen(s) {
     await r.s.screenshot({ path: path.join(AUFNAHMEN, '1-acht-baelle.jpg'), type: 'jpeg', quality: 80 });
     zeile('keine Seitenfehler', r.seitenFehler.length, 0);
     await r.q.close();
-    const rateB = m.bilder / 3;
+    const rateB = m.rate;
 
     console.log('\nD — Dieselben acht bei stark gesenkter Bildrate');
     r = await seite(b, tisch, liste, true);
@@ -207,9 +233,10 @@ async function messen(s) {
     zeile('acht Bälle liegen', (st.liegend || []).length, 8);
     m = await messen(r.s);
     console.log('        ' + m.punkte + ' Punkte in ' + m.bilder + ' Bildern · ' +
-                (m.bilder / 3).toFixed(1) + ' statt ' + rateB.toFixed(1) + ' Bilder/s');
-    zeile('Bildrate wirklich gesenkt (≤ 9 Bilder/s und ≤ 70 % von B)',
-          m.bilder / 3 <= 9 && m.bilder / 3 <= rateB * 0.7, true);
+                m.rate.toFixed(1) + ' statt ' + rateB.toFixed(1) + ' Bilder/s');
+    zeile('genug Bilder gemessen (' + MESSBILDER + ')', m.bilder >= MESSBILDER, true);
+    zeile('Bildrate wirklich gesenkt (≤ 6 Bilder/s und ≤ 70 % von B)',
+          m.rate <= 6 && m.rate <= rateB * 0.7, true);
     zeile('zusammen höchstens ein Ball (≤ 110 je Bild)', m.jeBild <= 110, true);
     zeile('… und nicht leer (≥ 80 je Bild)', m.jeBild >= 80, true);
     zeile('alle acht haben einen Ort',
