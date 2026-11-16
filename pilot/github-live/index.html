@@ -2503,7 +2503,7 @@
 
      Der Bauzeitpunkt kommt beim Bauen aus der Uhr. Von Hand gepflegte
      Datumsangaben sind nach der zweiten Änderung falsch. */
-  var FASSUNG = '104', GEBAUT = '2026-11-16T11:59Z';
+  var FASSUNG = '105', GEBAUT = '2026-11-16T12:40Z';
 
   /* AG-GH-LIVE-001: JEDE TEXTSENKE MASKIERT.
      Seit Live-Daten von aussen kommen (GitHub-Kommentare, one-event.json),
@@ -6003,6 +6003,50 @@
     return { angenommen: true, aktiv: laufzeitAktiv(name) };
   };
 
+  /* ============ AG-MON-LAUFZEIT-KOSTEN-001: KOSTEN AUS DER LAUFZEIT ============
+     Peter, 16.11.2026: Die Kosten der Laeufe gehoeren an die vereinbarte
+     Stelle beim Agenten (Schild bei "LLM & Kosten", Steckbrief). Sie kommen
+     nicht aus den V1-Meldungen -- dort steht keine Zahl --, sondern aus dem
+     Ende-Beleg, den das Relais je Lauf schreibt (`total_cost_usd`, `usage`).
+     Der Vertrag (handoffs/AG-LAUFZEIT-001-runtime-contract-v1.md) nennt sie
+     "reported estimates, not independently verified billing": also mit
+     Tilde, als geschaetzt. Fehlt die Zahl (null), zaehlt der Lauf als "ohne
+     Kostenangabe" -- fehlend ist nicht null. Jeder Versuch genau einmal. */
+  var laufzeitGebucht = Object.create(null);
+  window.__agLaufzeitKosten = function (d) {
+    if (MODUS !== 'live') return { angenommen: false, grund: 'nicht im Live-Betrieb' };
+    if (!d || typeof d !== 'object') return { angenommen: false, grund: 'keine Angabe' };
+    var name = (typeof d.rolle === 'string') ? d.rolle : '';
+    var v = (typeof d.versuch === 'string') ? d.versuch : '';
+    if (!Object.prototype.hasOwnProperty.call(nachName, name) || !v)
+      return { angenommen: false, grund: 'Rolle oder Versuch fehlt' };
+    if (laufzeitGebucht[v]) return { angenommen: false, grund: 'schon gebucht' };
+    var k = d.kosten;
+    if (k !== null && !(typeof k === 'number' && isFinite(k) && k >= 0))
+      return { angenommen: false, grund: 'Kosten ungültig' };
+    laufzeitGebucht[v] = 1;
+    var V = verbrauch[name] || (verbrauch[name] =
+              { kosten: 0, aus: 0, n: 0, ohne: 0, zeit: 0, fertig: 0, quelle: '' });
+    if (k === null) { V.ohne = (V.ohne || 0) + 1; return { angenommen: true }; }
+    var aus = (d.tokens && typeof d.tokens.aus === 'number' && d.tokens.aus >= 0) ? d.tokens.aus : 0;
+    if (!V.quelle) V.quelle = 'geschaetzt';
+    V.kosten += k; V.n++; V.aus += aus;
+    /* Nur ein Ende, das gerade jetzt eintrifft, steigt am Platz auf und
+       verebbt -- die Geschichte beim Verbinden steht nur im Schild. */
+    if (d.live) {
+      var A = nachName[name], o = heimat(A), e = document.createElement('div');
+      e.className = 'agKosten geschaetzt';
+      e.style.left = o[0] + 'px';
+      e.style.top = (o[1] - 17) + 'px';
+      e.style.color = hex(A.farbe);
+      e.textContent = (aus ? (aus > 999 ? (aus / 1000).toFixed(1) + 'k' : aus) + ' tok · ' : '') +
+                      'USD ' + k.toFixed(4);
+      document.getElementById('agKostenEbene').appendChild(e);
+      setTimeout(function () { if (e.parentNode) e.remove(); }, 16000);
+    }
+    return { angenommen: true };
+  };
+
   function arbeitSchritt(dt) {
     /* Anteil jeder Weise am gemeinsamen Budget dieses Bildes. */
     var aktiv = 0;
@@ -6655,6 +6699,12 @@
              wiederhergestellt: wiederhergestellt, abdeckung: liveAbdeckung,
              /* AG-LAUFZEIT-001: Rollen mit laufendem, beobachtetem Lauf */
              laufzeit: Object.keys(laufzeit).filter(laufzeitAktiv).sort(),
+             /* je Agent: Kosten, Ausgabetoken, Laeufe mit und ohne Angabe */
+             verbrauch: Object.keys(verbrauch).sort().map(function (n) {
+               var V = verbrauch[n];
+               return { wer: n, kosten: +V.kosten.toFixed(6), aus: V.aus, n: V.n,
+                        ohne: V.ohne || 0, quelle: V.quelle || '' };
+             }),
              selbstannahmenGemeldet: selbstannahmenGemeldet,
              luecken: luecken.gesamt,
              /* Eigene Zahl, nicht in `luecken.gesamt` -- siehe dort. */
@@ -8729,6 +8779,7 @@
     werkEl.innerHTML = ''; rufeEl.innerHTML = '';
     laeuftEl.innerHTML = ''; strom.length = 0;
     for (var vk in verbrauch) delete verbrauch[vk];
+    for (var lg in laufzeitGebucht) delete laufzeitGebucht[lg];
     document.getElementById('agKostenEbene').innerHTML = '';
     tunEl.innerHTML = ''; tunEl.__h = null; tunStill = 0;
     stoppSchildEl.innerHTML = ''; stoppSchildEl.__h = null; stoppWeg();
@@ -8846,6 +8897,9 @@
          als Arbeitsbeleg ankommen duerfen. Eine aeltere Fassung bekommt sie
          nicht. */
       laufzeit: 'runtime-v2',
+      /* AG-MON-LAUFZEIT-KOSTEN-001: Zusage, dass die Kosten aus dem
+         Ende-Beleg (`__agLaufzeitKosten`) hier ankommen duerfen. */
+      laufzeitKosten: 'runtime-v2',
       akteure: AGENTEN.map(function (a) { return a.name; }),
       istLive: function () { return MODUS === 'live'; },
       /* AG-MON-ARCHIV-001: Vor dem Nachspielen eines Laufs und vor der

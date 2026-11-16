@@ -16,7 +16,8 @@
    Abruf:   seriell, nie ueberlappend, 2 s oder laenger (X-Poll-Interval,
             Retry-After, Ratelimit-Reset), ETag je Seitenadresse, 304 = nichts.
             Versteckter Tab pausiert, Rueckkehr holt nach.
-   Kosten:  nicht verfuegbar. Fortschritt schliesst nichts ab.
+   Kosten:  nur aus dem Ende-Beleg des Relais (AG-MON-LAUFZEIT-KOSTEN-001),
+            geschaetzt, nicht abgerechnet. Fortschritt schliesst nichts ab.
    v1.3 (AG-GH-LIVE-004): Arten progress | handoff | contribution. handoff
             und contribution verlangen `recipient` (bekannter Akteur) und
             sind BEOBACHTETE KOMMUNIKATION: kein Auftrag, kein Arbeitsbeginn,
@@ -177,6 +178,10 @@
   /* AG-LAUFZEIT-001: Ein Original, das Laufzeitbelege nicht kennt, bekommt
      sie nicht -- dieselbe Bauart wie die beiden Zusagen darueber. */
   var KANN_LAUFZEIT = B.laufzeit === 'runtime-v2' && typeof window.__agLaufzeit === 'function';
+  /* AG-MON-LAUFZEIT-KOSTEN-001: Kosten aus dem Ende-Beleg nur, wenn das
+     Original sie ausdruecklich annimmt. */
+  var KANN_KOSTEN = KANN_LAUFZEIT && B.laufzeitKosten === 'runtime-v2' &&
+                    typeof window.__agLaufzeitKosten === 'function';
 
   function Menge(max) {
     var o = Object.create(null), q = [];
@@ -206,7 +211,7 @@
                   Marker), und wie lange das Verbinden gedauert hat. */
                kommentareGesamt: 0, verbindenMs: 0,
                /* AG-LAUFZEIT-001: Laufzeitbelege des Relais */
-               laufzeit: 0, laufzeitAbgewiesen: 0, laufzeitUebersprungen: 0 };
+               laufzeit: 0, laufzeitAbgewiesen: 0, laufzeitUebersprungen: 0, laufzeitKosten: 0 };
 
   /* ================= DAS PROJEKTVERZEICHNIS (AG-PROJEKTE-002) =================
      Peter, 25.10.: Projekt -> Laeufe -> Aufgaben. Nur Projekte aus dem
@@ -493,7 +498,8 @@
   var zahlEl = el('div', { id: 'agGhZahlen' });
   var grundEl = el('div', { id: 'agGhGrund' });
   var fuss = el('small', {}, 'Token nur im Arbeitsspeicher dieser Seite, nur an api.github.com. ' +
-                'Kosten: nicht verfügbar. Fortschritt ist kein Abschluss. ' +
+                'Kosten: nur aus den Laufbelegen des Relais, geschätzt, nicht abgerechnet. ' +
+                'Fortschritt ist kein Abschluss. ' +
                 'Übergabe/Beitrag: beobachtete Kommunikation, keine Annahme, keine Abnahme. ' +
                 /* Die Vertrauensgrenze steht da, wo die Zusagen stehen, und
                    zwar vollstaendig: Alle Rollen schreiben unter demselben
@@ -891,7 +897,27 @@
          isNaN(Date.parse(o.start_observed_at)))) return nein('Laufzeit: Startzeit ungültig');
     if (e.repository !== 'pahlborn/agentarium' || typeof e.job_url !== 'string' ||
         e.job_url.indexOf(LZ_BELEG) !== 0) return nein('Laufzeit: Beleg ungültig');
+    /* Kosten und Verbrauch, wie der Vertrag sie zulaesst: eine Zahl oder
+       null ("Missing measurements are null, never fabricated zeros"), bei
+       usage nur die vier erlaubten Schluessel als ganze Zahlen ab 0. */
+    var kosten = null, tokens = null;
+    if (o.total_cost_usd !== null && o.total_cost_usd !== undefined) {
+      if (typeof o.total_cost_usd !== 'number' || !isFinite(o.total_cost_usd) ||
+          o.total_cost_usd < 0 || o.total_cost_usd > 10000) return nein('Laufzeit: Kosten ungültig');
+      kosten = o.total_cost_usd;
+    }
+    if (o.usage !== null && o.usage !== undefined) {
+      if (typeof o.usage !== 'object' || Array.isArray(o.usage)) return nein('Laufzeit: Verbrauch ungültig');
+      for (var uk in o.usage) {
+        if (!Object.prototype.hasOwnProperty.call(o.usage, uk)) continue;
+        var uw = o.usage[uk];
+        if (!LZ_USAGE[uk] || (uw !== null && !(typeof uw === 'number' && uw >= 0 && Math.floor(uw) === uw)))
+          return nein('Laufzeit: Verbrauch ungültig');
+      }
+      if (typeof o.usage.output_tokens === 'number') tokens = { aus: o.usage.output_tokens };
+    }
     return { art: 'ok', r: { id: d.id, kind: d.kind, live: d.delivery === 'live_observed',
+      kosten: kosten, tokens: tokens,
       rolle: o.subject_role, project_id: o.project_id, run_id: o.run_id, task_id: o.task_id,
       versuch: o.execution_attempt, startMs: mitStart ? Date.parse(o.start_observed_at) : NaN,
       beleg: e.job_url } };
@@ -904,6 +930,8 @@
                                 'error_after_activity', 'safety_blocked', 'observation_lost']);
   var LZ_END_STATE = lzMenge(['stopped', 'not_launched', 'unknown']);
   var LZ_END_SAFETY = lzMenge(['passed', 'blocked', 'unknown']);
+  var LZ_USAGE = lzMenge(['input_tokens', 'output_tokens', 'cache_read_input_tokens',
+                          'cache_creation_input_tokens']);
   function laufzeitUngueltig(o) {
     if (o.actual_start_unknown !== true) return 'genauer Rechenbeginn ist nie bekannt';
     var started = o.start_observed_at;
@@ -937,6 +965,7 @@
     if (r.kind !== 'started') {
       laufzeitEnden.add(r.versuch);
       window.__agLaufzeit({ rolle: r.rolle, versuch: r.versuch, an: false });
+      laufzeitKosten(r, true);
       return false;
     }
     if (!r.live || laufzeitEnden.hat(r.versuch)) return false;
@@ -947,6 +976,16 @@
       aufgabe: r.project_id + '/' + r.run_id + '/' + r.task_id, beleg: r.beleg });
     if (w && w.angenommen) vermerk('Laufzeit: ' + r.rolle + ' arbeitet (' + r.task_id + ')');
     return !!(w && w.angenommen);
+  }
+  /* Die Kosten eines beendeten Laufs ans Original, je Versuch einmal (das
+     Original zaehlt selbst nach). `live`: gerade eingetroffen, sonst aus der
+     Geschichte beim Verbinden. */
+  function laufzeitKosten(r, live) {
+    if (!KANN_KOSTEN || r.kind === 'started') return;
+    if (!sichtbar({ project_id: r.project_id })) return;
+    var w = window.__agLaufzeitKosten({ rolle: r.rolle, versuch: r.versuch, live: !!live,
+                                        kosten: r.kosten, tokens: r.tokens });
+    if (w && w.angenommen) zahl.laufzeitKosten++;
   }
   /* Ein Kommentar: Laufzeitbeleg oder nicht? `true` heisst "erledigt". */
   function laufzeitKommentar(c, modus) {
@@ -1569,7 +1608,7 @@
     Z.kommentare.leeren(); Z.etags = {}; Z.seite = 1; Z.anzahl = 0;
     zahl.basisKommentare = 0; zahl.basisMarkiert = 0;
     zahl.kommentareGesamt = 0; zahl.verbindenMs = 0;
-    zahl.laufzeit = 0; zahl.laufzeitAbgewiesen = 0; zahl.laufzeitUebersprungen = 0;
+    zahl.laufzeit = 0; zahl.laufzeitAbgewiesen = 0; zahl.laufzeitUebersprungen = 0; zahl.laufzeitKosten = 0;
     basisLaufzeit.length = 0; laufzeitIds.leeren(); laufzeitEnden.leeren();
     basisLeben.length = 0; basisBall.length = 0;
     archivAlle.length = 0; archivStand = -1;
@@ -1671,7 +1710,9 @@
     }
     /* AG-LAUFZEIT-001: erst alle Enden, dann die Starts -- ein Start, dessen
        Ende schon in der Historie steht, zeigt keine Arbeit. */
-    basisLaufzeit.forEach(function (r) { if (r.kind !== 'started') laufzeitEnden.add(r.versuch); });
+    basisLaufzeit.forEach(function (r) {
+      if (r.kind !== 'started') { laufzeitEnden.add(r.versuch); laufzeitKosten(r, false); }
+    });
     basisLaufzeit.forEach(function (r) { if (r.kind === 'started') laufzeitVerbuchen(r); });
     if (zahl.basisMarkiert && !spaeter.length) {
       letztesEl.textContent =
@@ -2162,7 +2203,8 @@
         letztes: letztes, bekannteIds: bekannte.groesse(), log: log,
         platz: platzStand(),
         laufzeit: { kann: KANN_LAUFZEIT, gelesen: zahl.laufzeit, abgewiesen: zahl.laufzeitAbgewiesen,
-                    uebersprungen: zahl.laufzeitUebersprungen },
+                    uebersprungen: zahl.laufzeitUebersprungen,
+                    kosten: { kann: KANN_KOSTEN, gebucht: zahl.laufzeitKosten } },
         archiv: { laeuft: archivLaeuft, ansicht: archivAnsicht,
                   ereignisse: archivAlle.length, laeufe: archivLaeufe().length,
                   folge: archivFolge.length, gezeigt: archivIdx,

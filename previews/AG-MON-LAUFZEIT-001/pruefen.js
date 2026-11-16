@@ -26,6 +26,11 @@
         Beobachtung, falsche Herkunft, Text neben dem Block
      F  der V1-Vertrag bleibt unberuehrt: keine Aufgabe entsteht, und
         Uebergabe plus Rueckgabe allein zeigen keine Arbeit
+     G  Kosten aus dem Ende-Beleg (AG-MON-LAUFZEIT-KOSTEN-001, Peter
+        16.11.2026): die echten v2-Enden stehen je Rolle als geschaetzte
+        Summe am Agenten; ein neues Ende zaehlt einmal und steigt am Platz
+        auf; null zaehlt als "ohne Kostenangabe"; ungueltige Zahlen werden
+        abgewiesen und buchen nichts
 
    Die Faelle in B bis F sind aus dem echten Forge-Datensatz abgeleitet: nur
    Versuch, Zeiten, Zustellung und bei E das jeweils verletzte Feld geaendert.
@@ -306,6 +311,73 @@ async function bis(s, test, arg, ms) {
     L = await lage(o.s, 'forge');
     zeile('Übergabe, Vergabe, Fortschritt: forge arbeitet nicht', L.leuchtet || L.laufzeit.length > 0, false);
     zeile('… und hat genau seine eine Aufgabe', L.aufgaben, 1);
+    fehlerAlle.push(...o.fehlerSeite); await o.q.close();
+
+    console.log('\nG — Kosten aus dem Ende-Beleg');
+    /* Erwartung aus derselben Datei gerechnet, nicht abgeschrieben. */
+    const soll = {};
+    vorlage.forEach(r => {
+      if (r.schema !== 'agentarium.runtime-record.v2' || r.kind === 'started') return;
+      const w = r.observation.subject_role, t = soll[w] || (soll[w] = { kosten: 0, n: 0, aus: 0 });
+      t.kosten += r.observation.total_cost_usd; t.n++;
+      t.aus += (r.observation.usage || {}).output_tokens || 0;
+    });
+    o = await oeffnen(b, tisch, ECHT);
+    await o.s.click('#agMotor');
+    const verb = async () => o.s.evaluate(() => {
+      const m = {}; (window.__agStand().verbrauch || []).forEach(v => { m[v.wer] = v; }); return m; });
+    const schild = async (w) => o.s.evaluate((x) => {
+      const e = document.querySelector('#agMotoren [data-wer="' + x + '"]'); return e ? e.textContent : ''; }, w);
+    await bis(o.s, () => document.querySelectorAll('#agMotoren .agMot').length > 0);
+    let V = await verb();
+    Object.keys(soll).forEach(w => {
+      zeile(w + ': Läufe mit Kosten', (V[w] || {}).n, soll[w].n);
+      zeile(w + ': Summe USD', (V[w] || {}).kosten, +soll[w].kosten.toFixed(6));
+      zeile(w + ': Ausgabetoken', (V[w] || {}).aus, soll[w].aus);
+      zeile(w + ': als geschätzt geführt', (V[w] || {}).quelle, 'geschaetzt');
+    });
+    zeile('v1-Ende bucht nichts (forge)', !!V.forge, false);
+    zeile('Schild am Agenten nennt die Summe (cadence)',
+          (await schild('cadence')).indexOf('~USD ' + soll.cadence.kosten.toFixed(4)) >= 0, true);
+    zeile('keine Kostenzeile unten', await o.s.evaluate(() => document.querySelectorAll('.agBasis').length), 0);
+
+    const vG = versuch();
+    const endeG = kommentar(ableiten(forgeEnde, vG, vor(1), 'archive', r => {
+      r.observation.observed_at = new Date().toISOString();
+      r.observation.total_cost_usd = 0.5; r.observation.usage = { output_tokens: 1000, input_tokens: 3 }; }));
+    o.daten.liste.push(endeG);
+    zeile('neues Ende kommt an', await bis(o.s, () =>
+      (window.__agStand().verbrauch || []).some(v => v.wer === 'forge' && v.n === 1)), true);
+    zeile('… und steigt am Platz auf', await bis(o.s, () =>
+      [...document.querySelectorAll('#agKostenEbene .agKosten')].some(e => /USD 0\.5000/.test(e.textContent))), true);
+    zeile('Schild an forge nennt den Betrag', (await schild('forge')).indexOf('~USD 0.5000 · 1.0k tok') >= 0, true);
+    /* Dasselbe Ende noch einmal, in einem neuen Kommentar. */
+    const doppelt = JSON.parse(JSON.stringify(endeG)); doppelt.id = ++cid;
+    const nullEnde = kommentar(ableiten(forgeEnde, versuch(), vor(1), 'archive', r => {
+      r.observation.observed_at = new Date().toISOString(); r.observation.total_cost_usd = null; }));
+    o.daten.liste.push(doppelt, nullEnde);
+    zeile('Ende ohne Zahl zählt als ohne Kostenangabe', await bis(o.s, () =>
+      (window.__agStand().verbrauch || []).some(v => v.wer === 'forge' && v.ohne === 1)), true);
+    V = await verb();
+    V.forge = V.forge || {};
+    zeile('dasselbe Ende zählt nur einmal', V.forge.n, 1);
+    zeile('… Summe unverändert', V.forge.kosten, 0.5);
+    zeile('Schild nennt die Lücke', /1 ohne Kostenangabe/.test(await schild('forge')), true);
+
+    const vorher = (await lage(o.s, 'forge')).lz.abgewiesen;
+    const kaputt = [
+      r => { r.observation.total_cost_usd = -1; },
+      r => { r.observation.total_cost_usd = '0.3'; },
+      r => { r.observation.usage = { output_tokens: 10, fremd: 1 }; },
+      r => { r.observation.usage = { output_tokens: 1.5 }; }
+    ].map(f => kommentar(ableiten(forgeEnde, versuch(), vor(1), 'archive', r => {
+      r.observation.observed_at = new Date().toISOString(); f(r); })));
+    o.daten.liste.push(...kaputt);
+    zeile('vier ungültige Zahlen abgewiesen', await bis(o.s, (n) =>
+      window.__agGithub.stand().laufzeit.abgewiesen >= n, vorher + 4), true);
+    V = await verb();
+    V.forge = V.forge || {};
+    zeile('… und nichts gebucht', V.forge.n + '/' + V.forge.ohne + '/' + V.forge.kosten, '1/1/0.5');
     zeile('keine Seitenfehler', fehlerAlle.concat(o.fehlerSeite).length, 0);
     if (fehlerAlle.length) console.log('        ' + fehlerAlle.join('\n        '));
     await o.q.close();
