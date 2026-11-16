@@ -79,6 +79,8 @@ function prepare(input,options={}){
  }else if(comments.length){
   const assignments=scope.filter(x=>x.ev.kind==='assigned'&&bound(x.ev)&&x.ev.actor==='atlas'&&x.ev.reporter==='atlas'&&x.ev.recipient===b.role);
   if(!assignments.length)fail('no valid published matching assignment in supplied history');
+  const assignmentTime=Math.max(...assignments.map(x=>Date.parse(x.ev.occurred_at)));
+  if(Date.parse(events[0].occurred_at)<assignmentTime)fail('status predates matching assignment');
   const rows=c.faltenZuZustand(scope.filter(x=>c.LEBEN[x.ev.kind]));
   const row=rows.find(x=>x.projekt===b.project_id&&x.lauf===b.run_id&&x.aufgabe===b.task_id);
   const ownTerminal=scope.filter(x=>bound(x.ev)&&['delivered','aborted'].includes(x.ev.kind)&&x.ev.actor===b.role&&x.ev.reporter===b.role);

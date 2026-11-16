@@ -42,4 +42,6 @@ test('unknown binding field rejected',()=>reject({...input('start',[start]),bind
 test('actual history metadata required',()=>reject(input('start',[start],[{...h[1],id:'not-a-GitHub-id'}]),/actual GitHub/));
 test('missing start is an explicit gap while truthful final can return',()=>assert.equal(prepare(input('final',[event('delivered'),event('contribution')])).warnings.length,1));
 test('partial final cannot finish another holder after transfer',()=>{const move=event('reassigned',{actor:'atlas',reporter:'atlas',recipient:'scout',previous_holder:'sentinel',checkpoint_ref:'https://github.com/pahlborn/agentarium/commit/'+'a'.repeat(40),stop_ref:'https://github.com/pahlborn/agentarium/issues/2#issuecomment-900001'});reject(input('final',[terminal,contribution],ht.concat(history([move]))),/elsewhere/);});
+test('own start cannot predate assignment',()=>reject(input('start',[event('started',{occurred_at:'2026-11-16T19:59:00Z'})]),/predates matching assignment/));
+test('own terminal without start cannot predate assignment',()=>reject(input('final',[event('delivered',{occurred_at:'2026-11-16T19:59:00Z'}),event('contribution')]),/predates matching assignment/));
 console.log(count+' guard checks passed; all fixtures local/synthetic.');
