@@ -4,6 +4,8 @@ Peter’s decision of 2026-11-16 applies to Atlas and every agent: own the autho
 
 The adopted contract is `governance/agentarium-rulebook-v1.4.md` and `governance/agentarium-process-v1.4.md` once this package is integrated. These instructions do not expand effective tool permissions.
 
+Before every native dispatch/start/final journal batch, run `node .github/scripts/native-journal.cjs input.json` and pass only its validated `comments` arguments to the connected tool. Include the generated dispatch `instruction` in the real assignment. Follow `handoffs/AG-NATIVE-JOURNAL-001.md`; read back actual comments for task binding and idempotent reconciliation. A failed check produces no postable output.
+
 Native ChatGPT assignments use the bounded own-status procedure in Rulebook §10 / Process §1 (16.11.2026): include actual own start/end reporting in the task, let Atlas publish the unchanged role-authored status as `reported_checkpoint`, and publish the terminal status plus final return before substantive review. This is not a host/runtime attestation or extra agent write permission. Lot remains excluded and Peter-started; existing host-observed relay reporting is unchanged.
 
 Atlas works from the Process card. Cadence reads both documents in full. Other roles read the assignment first: it contains the three to five applicable rules in full, Rulebook §3, the role-profile reference and exact version. Load the complete documents only when assigned; load technical contracts as needed. Never claim to have read unavailable inputs.
