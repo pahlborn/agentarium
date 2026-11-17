@@ -5684,8 +5684,15 @@
   var RUHE_NACH = 12, RUHE_PAUSE = [12, 25];
   /* Die Vorfuehrungen des Mischpults, unveraendert aus resonanz/pult.html. */
   var PULT_VORFUEHRUNG = {"strang": [["strich", 0.12, 0.5, 0.88, 0.5, 1.6]], "knoten": [["strich", 0.18, 0.45, 0.62, 0.45, 1.2], ["halt", 0.9]], "wurf": [["kreis", 0.34, 0.5, 0.13, 0.72, 1.7], ["loslassen"], ["warten", 2.6]], "korn": [["kreis", 0.5, 0.5, 0.12, 3.0, 2.2], ["warten", 1.0]], "funken": [["kreis", 0.5, 0.5, 0.12, 3.4, 2.2], ["warten", 3.4]], "stoss": [["kreis", 0.5, 0.5, 0.1, 3.4, 2.2], ["warten", 0.6], ["strich", 0.12, 0.46, 0.88, 0.46, 2.4], ["warten", 0.25], ["strich", 0.88, 0.54, 0.12, 0.54, 2.4], ["warten", 0.25], ["strich", 0.12, 0.5, 0.88, 0.5, 2.8]], "sog": [["kreis", 0.5, 0.5, 0.12, 3.0, 2.2], ["warten", 0.4], ["kreis", 0.5, 0.5, 0.12, 3.0, 2.2]], "stimmen": [["kreis", 0.33, 0.5, 0.11, 2.6, 2.2], ["warten", 0.3], ["kreis", 0.67, 0.5, 0.11, -2.6, 2.2]], "schleife": [["kreis", 0.3, 0.5, 0.05, 3.0, 2.6], ["warten", 0.3], ["kreis", 0.68, 0.5, 0.2, 2.0, 1.4]], "tempo": [["kreis", 0.32, 0.5, 0.11, 2.0, 0.7], ["warten", 0.3], ["kreis", 0.68, 0.5, 0.11, 3.0, 3.4]], "stroemung": [["strich", 0.1, 0.42, 0.9, 0.58, 1.8], ["warten", 2.0]], "umlauf": [["kreis", 0.5, 0.5, 0.12, 1.7, 3.0], ["loslassen"], ["warten", 3.0]], "verblassen": [["kreis", 0.34, 0.45, 0.1, 2.4, 2.2], ["warten", 0.3], ["kreis", 0.64, 0.55, 0.1, 2.4, 2.2], ["warten", 6.0]]};
+  /* Zwei Vorfuehrungen zeigen hier nicht, wofuer sie stehen, und bleiben
+     darum draussen (gemessen 17.11.): Der Umlauf ist in dieser Fassung des
+     Feldes abgeschaltet (`else if (0)` in der Bewegung), und der Sog -- das
+     Aufnahme-Tor bei grosser Dichte -- feuerte in 15 s kein einziges Mal.
+     Eine Vorfuehrung ohne ihre Wirkung waere eine erfundene. */
+  var PULT_OHNE = { sog: 1, umlauf: 1 };
   var RUHE_ARTEN = ['komet', 'wirbel', 'knoten', 'korn'].concat(
-    Object.keys(PULT_VORFUEHRUNG).map(function (k) { return 'pult-' + k; }));
+    Object.keys(PULT_VORFUEHRUNG).filter(function (k) { return !PULT_OHNE[k]; })
+      .map(function (k) { return 'pult-' + k; }));
   var ruheSeit = 0, leerlauf = null, leerlaufNaechster = 0, leerlaufAnzahl = 0, ruheLetzte = '';
   function ruheMelden() {
     ruheSeit = performance.now();
@@ -5823,7 +5830,7 @@
     },
   };
   Object.keys(PULT_VORFUEHRUNG).forEach(function (k) {
-    RUHE['pult-' + k] = function (L) { geistVorfuehren(k, L); };
+    if (!PULT_OHNE[k]) RUHE['pult-' + k] = function (L) { geistVorfuehren(k, L); };
   });
   /* Fuer die Nachweise: eine bestimmte Erscheinung sofort zeigen. */
   window.__agRuhe = {

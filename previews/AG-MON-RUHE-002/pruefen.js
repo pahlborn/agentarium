@@ -10,11 +10,16 @@
    bleiben." 17.11.2026: "es sind nicht die, die wir in pult haben, du hast
    neue erfunden die ich gar nicht mag ... bitte nehme welche aus pult".
 
-     A  die Arten: die vier vom 31.10. und alle Vorfuehrungen des Mischpults
-        (`pult-…`), keine der in Fassung 107 nachgebauten
+     A  die Arten: die vier vom 31.10. und die Vorfuehrungen des Mischpults
+        (`pult-…`), keine der in Fassung 107 nachgebauten; Sog und Umlauf
+        nicht, weil das Feld hier ihre Wirkung nicht hat
      B  jede Vorfuehrung spielt die Geisterhand (Zeigerereignisse mit ihrer
-        Kennung auf dem Feld), das Feld antwortet (mindestens 500
-        Leuchtpunkte ueber dem Grund; der Umlauf ist Bewegung, kaum Farbe)
+        Kennung auf dem Feld), GENAU DIE vorgefuehrte Wirkung feuert im Feld
+        (ihr Lebenszeichen in `PULS`, wie das Pult es anzeigt; bis 3 s nach
+        dem Ende -- Funken springen, wenn ein Lichtpunkt vergeht), das Feld
+        leuchtet sichtbar (mindestens 300 Punkte ueber dem Grund; Wurf und
+        Umlauf sind vor allem Bewegung -- im Prueflauf kam der Wurf bei
+        seltenen Bildern auf 436)
         und 20 s nach dem Ende ist nichts mehr da (hoechstens 1 % des
         Hoechststands, mindestens 300 Punkte Spielraum). Gemessen 17.11.:
         die Schleife, die kraeftigste, steht nach 10 s noch bei rund 8 %,
@@ -150,7 +155,8 @@ const NACHGEBAUT = ['stroemung', 'schleife', 'sog', 'stoss', 'stimmen', 'strang'
     const pult = arten.filter(a => a.indexOf('pult-') === 0);
     console.log('        ' + arten.join(', '));
     zeile('die vier vom 31.10. sind da', ALT.every(a => arten.indexOf(a) >= 0), true);
-    zeile('Vorführungen des Mischpults (mind. 12)', pult.length >= 12, true);
+    zeile('Vorführungen des Mischpults (mind. 11)', pult.length >= 11, true);
+    zeile('ohne Sog und Umlauf', pult.indexOf('pult-sog') < 0 && pult.indexOf('pult-umlauf') < 0, true);
     zeile('keine der nachgebauten aus Fassung 107', NACHGEBAUT.some(a => arten.indexOf(a) >= 0), false);
 
     console.log('\nB — jede Vorführung: Geisterhand, deutliche Antwort, nichts bleibt');
@@ -171,7 +177,7 @@ const NACHGEBAUT = ['stroemung', 'schleife', 'sog', 'stoss', 'stimmen', 'strang'
     await o.s.waitForTimeout(10000);
     for (const art of pult) {
       const grund = await leuchtend(o.s, rechner);
-      await o.s.evaluate(() => { window.__geistZeiger = 0; });
+      await o.s.evaluate(() => { window.__geistZeiger = 0; window.__t0 = performance.now(); });
       const ok = await o.s.evaluate((a) => !!window.__agRuhe.zeigen(a), art);
       let hoch = 0; const t0 = Date.now();
       while (await o.s.evaluate(() => !!window.__agStand().leerlauf) && Date.now() - t0 < 25000) {
@@ -180,18 +186,23 @@ const NACHGEBAUT = ['stroemung', 'schleife', 'sog', 'stoss', 'stimmen', 'strang'
       }
       const zeiger = await o.s.evaluate(() => window.__geistZeiger);
       await o.s.evaluate(() => window.__agRuhe.still());
-      await o.s.waitForTimeout(20000);
+      await o.s.waitForTimeout(3000);
+      const wirkung = art.slice(5);
+      const feuert = await o.s.evaluate((k) => !!(window.PULS && window.PULS[k] > window.__t0), wirkung);
+      await o.s.evaluate(() => window.__agRuhe.still());
+      await o.s.waitForTimeout(17000);               /* zusammen 20 s nach dem Ende */
       const rest = await leuchtend(o.s, rechner);
       const auf = hoch - grund;
       console.log('        ' + art.padEnd(16) + ' Hand ' + zeiger + ' Züge · Grund ' + grund + ' · höchstens ' + hoch +
                   ' · 20 s nach dem Ende ' + rest);
       zeile(art + ': Geisterhand spielt', ok && zeiger > 5, true);
-      zeile(art + ': Feld antwortet (≥ 500)', auf >= 500, true);
+      zeile(art + ': Wirkung „' + wirkung + '" feuert im Feld', feuert, true);
+      zeile(art + ': Feld leuchtet sichtbar (≥ 300)', auf >= 300, true);
       zeile(art + ': nach 20 s nichts mehr', rest <= Math.max(300, hoch * 0.01), true);
     }
 
     console.log('\nD — die Geisterhand ist keine Hand');
-    await o.s.evaluate(() => window.__agRuhe.zeigen('pult-umlauf'));
+    await o.s.evaluate(() => window.__agRuhe.zeigen('pult-tempo'));
     await o.s.waitForTimeout(1200);
     zeile('Knöpfe bleiben leise, während sie spielt',
           await o.s.evaluate(() => document.getElementById('agTasten').classList.contains('leise')), true);
