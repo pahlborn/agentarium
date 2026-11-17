@@ -5808,11 +5808,28 @@
       K.dvx = Math.cos(w) * v; K.dvy = Math.sin(w) * v;
       L.dauer = 8;
     },
-    /* Ein Knoten: ein Lichtpunkt, der aufgeht und vergeht. */
+    /* Ein Knoten, der wandert (AG-MON-RUHE-003, Peter 17.11.2026: "knoten,
+       der von einer seite des bildschirms zur gegenüberliegenden läuft.
+       randomisiert ... an unterschiedlichen [koordinaten]"). Er ersetzt den
+       stehenden Knoten vom 31.10. Start an einer zufaelligen Stelle einer
+       zufaelligen Seite, Ziel eine zufaellige Stelle der gegenueberliegenden;
+       unterwegs setzt er je Bild einen kleinen Knoten, der hinter ihm
+       verglimmt (Leben unter 2 s, keine Abgabe -- es bleibt nichts). */
     knoten: function (L) {
-      var o = ruheOrt();
-      window.__feld.knoten(o[0], o[1], 0.7, ruheFarbe(), 0, 36, 2.2);
-      L.dauer = 3;
+      var w = W(), h = H(), seite = (Math.random() * 4) | 0,
+          a = 0.1 + 0.8 * Math.random(), b = 0.1 + 0.8 * Math.random(), x0, y0, x1, y1;
+      if (seite === 0)      { x0 = -10;    y0 = a * h; x1 = w + 10; y1 = b * h; }   /* links -> rechts */
+      else if (seite === 1) { x0 = w + 10; y0 = a * h; x1 = -10;    y1 = b * h; }   /* rechts -> links */
+      else if (seite === 2) { x0 = a * w;  y0 = -10;   x1 = b * w;  y1 = h + 10; }  /* oben -> unten */
+      else                  { x0 = a * w;  y0 = h + 10; x1 = b * w; y1 = -10; }     /* unten -> oben */
+      var ton = ruheFarbe(), lang = Math.hypot(x1 - x0, y1 - y0);
+      L.dauer = Math.max(3.5, Math.min(7, lang / 260));             /* rund 260 px je Sekunde */
+      L.weg = [x0, y0, x1, y1];
+      L.schritt = function () {
+        var f = Math.min(1, L.t / L.dauer);
+        /* Ein heller Kopf und eine kurze, verglimmende Spur dahinter. */
+        window.__feld.knoten(x0 + (x1 - x0) * f, y0 + (y1 - y0) * f, 0.95, ton, 0, 16, 0.9);
+      };
     },
     /* Korn: ein paar Lichtpunkte, die nach einem Augenblick in Funken
        springen (der zweite Teil steht in `leerlaufSchritt`). */
@@ -5862,6 +5879,7 @@
       if (leerlauf.orte) leerlauf.orte.forEach(function (o) {
         if (!o[4] && leerlauf.t > o[3] && window.__funkeAn) { o[4] = 1; window.__funkeAn(o[0], o[1], o[2]); }
       });
+      if (leerlauf.schritt && leerlauf.t < leerlauf.dauer) leerlauf.schritt(dt);
       if (leerlauf.t < leerlauf.dauer) return;
       geistAnhalten();
       leerlauf = null;

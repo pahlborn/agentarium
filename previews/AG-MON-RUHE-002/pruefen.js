@@ -29,6 +29,11 @@
      D  die Geisterhand ist keine Hand: Sie holt die Knoepfe nicht hervor,
         und ein echter Finger beendet sie sofort
      E  keine Seitenfehler
+     F  der wandernde Knoten (Peter 17.11.2026: "knoten, der von einer seite
+        des bildschirms zur gegenüberliegenden läuft. randomisiert ... an
+        unterschiedlichen"): viermal gezeigt beginnt er jeweils an einem
+        Rand und endet am gegenueberliegenden, die Startpunkte sind
+        verschieden, und 20 s danach ist nichts mehr da
 
    Gemessen werden leuchtende Feldpunkte (Namen und Schilder ausgeblendet)
    im ganzen Bild. GRENZEN: Chromium; ob es schoen und ruhig genug ist,
@@ -200,6 +205,33 @@ const NACHGEBAUT = ['stroemung', 'schleife', 'sog', 'stoss', 'stimmen', 'strang'
       zeile(art + ': Feld leuchtet sichtbar (≥ 300)', auf >= 300, true);
       zeile(art + ': nach 20 s nichts mehr', rest <= Math.max(300, hoch * 0.01), true);
     }
+
+    console.log('\nF — der wandernde Knoten');
+    await o.s.evaluate(() => {
+      const F = window.__feld, alt = F.knoten; window.__lk = null;
+      F.knoten = function (x, y) { if (window.__lk) window.__lk.push([x, y]); return alt.apply(this, arguments); };
+    });
+    const wege = [];
+    const groesse = await o.s.evaluate(() => [innerWidth, innerHeight]);
+    for (let k = 0; k < 4; k++) {
+      await o.s.evaluate(() => { window.__lk = []; window.__agRuhe.zeigen('knoten'); });
+      await o.s.waitForFunction(() => !window.__agStand().leerlauf, null, { timeout: 15000 });
+      const p = await o.s.evaluate(() => { const z = window.__lk; window.__lk = null; return z; });
+      await o.s.evaluate(() => window.__agRuhe.still());
+      if (p.length > 2) wege.push([p[0], p[p.length - 1], p.length]);
+    }
+    const [BW, BH] = groesse, nahe = 60;
+    const amRand = ([x, y]) => x < nahe ? 'l' : x > BW - nahe ? 'r' : y < nahe ? 'o' : y > BH - nahe ? 'u' : '-';
+    const gegen = { l: 'r', r: 'l', o: 'u', u: 'o' };
+    wege.forEach(([a, e, n]) => console.log('        von ' + a.map(Math.round) + ' (' + amRand(a) + ') nach ' +
+      e.map(Math.round) + ' (' + amRand(e) + '), ' + n + ' Schritte'));
+    zeile('F  viermal gelaufen', wege.length, 4);
+    zeile('F  jeweils von einem Rand zum gegenüberliegenden',
+          wege.every(([a, e]) => amRand(a) !== '-' && gegen[amRand(a)] === amRand(e)), true);
+    zeile('F  verschiedene Startpunkte',
+          new Set(wege.map(([a]) => Math.round(a[0] / 40) + ',' + Math.round(a[1] / 40))).size >= 3, true);
+    await o.s.waitForTimeout(20000);
+    zeile('F  20 s danach ist nichts mehr da (≤ 300)', (await leuchtend(o.s, rechner)) <= 300, true);
 
     console.log('\nD — die Geisterhand ist keine Hand');
     await o.s.evaluate(() => window.__agRuhe.zeigen('pult-tempo'));
