@@ -48,8 +48,13 @@ on:
       - '.github/scripts/browsernachweise.sh'
 
 # Nur Lesen. Dieser Lauf schreibt nichts, nirgends.
+# `actions: read` nur fuer den echten Actions-Abruf in AG-MON-VERTRETUNG-001
+# (siehe AG_GH_TOKEN unten): ohne Anmeldung teilen sich die Prueflaeufe die
+# Grenze fuer nicht angemeldete Abrufe, und der Abruf fiel am 16./17.11.
+# dreimal aus (Laeufe 43878449121, 43959403570, 44095744715).
 permissions:
   contents: read
+  actions: read
 
 # EIN LAUF JE KOPF, NICHT JE REF. `github.ref` ist bei push
 # `refs/heads/...` und bei pull_request `refs/pull/N/merge` -- zwei
@@ -186,6 +191,9 @@ jobs:
         env:
           ID: ${{ matrix.id }}
           AG_AUFNAHMEN: ${{ runner.temp }}/ag-vertretung-aufnahmen
+          # Nur lesend, nur fuer api.github.com, nur im Abruf der Actions-
+          # Liste von AG-MON-VERTRETUNG-001; die Seite selbst sieht ihn nicht.
+          AG_GH_TOKEN: ${{ github.token }}
         run: echo "previews/$ID/pruefen.js" | bash .github/scripts/browsernachweise.sh lauf
 
       # Nur die zwei gezielten UI-Bilder dieses Auftrags, keine Tokens/Logs.
