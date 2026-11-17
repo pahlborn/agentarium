@@ -1,28 +1,33 @@
-/* AG-MON-RUHE-002 — Erscheinungen aus dem Mischpult, wenn wenig los ist.
+/* AG-MON-RUHE-002/-003 — Ruhe mit den Vorfuehrungen des Mischpults.
 
    Aufruf:            node previews/AG-MON-RUHE-002/pruefen.js
    Eigener Browser:   AG_CHROMIUM=/pfad/zur/datei node previews/...
    Andere Kopie:      AG_ZIEL=pfad/relativ/zum/repo node previews/...
    Rueckgabe: 0 = bestanden, 1 = Abweichung, 2 = ungeprueft.
 
-   PETER, 16.11.2026: "kannst du randomisierte effekte aus pult in monitor
-   einblenden, sofern wenig oder nichts los ist. die effekte sollen aber
-   verblassen und nichts davon übrig bleiben." -- "ja, bau das so, wir
-   probieren es".
+   PETER, 16.11.2026: "randomisierte effekte aus pult ... sofern wenig oder
+   nichts los ist. die effekte sollen aber verblassen und nichts davon übrig
+   bleiben." 17.11.2026: "es sind nicht die, die wir in pult haben, du hast
+   neue erfunden die ich gar nicht mag ... bitte nehme welche aus pult".
 
-     A  die zehn Arten sind da (vier bisherige, sechs aus dem Pult:
-        Stroemung, Schleife, Sog, Stoss, Stimmen, Strang)
-     B  jede der sechs neuen leuchtet sichtbar auf (bei 0,3 oder 0,8 s mindestens 80
-        Feldpunkte ueber dem Grund; ein bisheriger Ruhe-Knoten kommt auf
-        rund 120) und ist nach 8 s wieder weg (hoechstens 10 % des
-        Aufleuchtens ueber dem Grund) -- es bleibt nichts zurueck
+     A  die Arten: die vier vom 31.10. und alle Vorfuehrungen des Mischpults
+        (`pult-…`), keine der in Fassung 107 nachgebauten
+     B  jede Vorfuehrung spielt die Geisterhand (Zeigerereignisse mit ihrer
+        Kennung auf dem Feld), das Feld antwortet (mindestens 500
+        Leuchtpunkte ueber dem Grund; der Umlauf ist Bewegung, kaum Farbe)
+        und 20 s nach dem Ende ist nichts mehr da (hoechstens 1 % des
+        Hoechststands, mindestens 300 Punkte Spielraum). Gemessen 17.11.:
+        die Schleife, die kraeftigste, steht nach 10 s noch bei rund 8 %,
+        nach 20 s bei 0.
      C  wenig los: arbeitet EINE Rolle, kommen Erscheinungen; arbeiten
         ZWEI, kommt keine
-     D  keine Seitenfehler
+     D  die Geisterhand ist keine Hand: Sie holt die Knoepfe nicht hervor,
+        und ein echter Finger beendet sie sofort
+     E  keine Seitenfehler
 
    Gemessen werden leuchtende Feldpunkte (Namen und Schilder ausgeblendet)
-   im ganzen Bild. GRENZEN: Chromium, Zufallsorte; ob es schoen ist und
-   nicht zu unruhig, entscheidet Peter am iPad.                           */
+   im ganzen Bild. GRENZEN: Chromium; ob es schoen und ruhig genug ist,
+   entscheidet Peter am iPad.                                             */
 'use strict';
 const fs = require('fs'), path = require('path'), http = require('http');
 
@@ -125,10 +130,11 @@ async function leuchtend(s, rechner) {
     return m;
   }, 'data:image/png;base64,' + roh.toString('base64'));
 }
-const NEU = ['stroemung', 'schleife', 'sog', 'stoss', 'stimmen', 'strang'];
+const ALT = ['komet', 'wirbel', 'knoten', 'korn'];
+const NACHGEBAUT = ['stroemung', 'schleife', 'sog', 'stoss', 'stimmen', 'strang'];
 
 (async () => {
-  console.log('AG-MON-RUHE-002 — Erscheinungen aus dem Mischpult, wenn wenig los ist\n');
+  console.log('AG-MON-RUHE-002/-003 — Ruhe mit den Vorführungen des Mischpults\n');
   if (!fs.existsSync(path.join(WURZEL, 'index.html'))) ungeprueft('keine index.html in ' + WURZEL);
   const bp = browserPfad();
   if (!bp.pfad) ungeprueft(bp.grund);
@@ -141,41 +147,59 @@ const NEU = ['stroemung', 'schleife', 'sog', 'stoss', 'stimmen', 'strang'];
     let o = await oeffnen(b, tisch, []);
     await o.s.bringToFront();
     const arten = await o.s.evaluate(() => (window.__agRuhe && window.__agRuhe.arten) || []);
-    zeile('zehn Arten', arten.length, 10);
-    zeile('die sechs aus dem Pult sind dabei', NEU.every(a => arten.indexOf(a) >= 0), true);
+    const pult = arten.filter(a => a.indexOf('pult-') === 0);
+    console.log('        ' + arten.join(', '));
+    zeile('die vier vom 31.10. sind da', ALT.every(a => arten.indexOf(a) >= 0), true);
+    zeile('Vorführungen des Mischpults (mind. 12)', pult.length >= 12, true);
+    zeile('keine der nachgebauten aus Fassung 107', NACHGEBAUT.some(a => arten.indexOf(a) >= 0), false);
 
-    console.log('\nB — aufleuchten und ganz vergehen');
-    /* Erscheinungen zeichnen erst nach 12 s Ruhe (RUHE_NACH); vorher
-       raeumt der Monitor sie ab. Erster Lauf: die erste Art (Stroemung)
-       zeichnete deshalb nichts. Genau dann kommt aber auch die erste
-       Erscheinung von selbst -- im Prueflauf ein Wirbel, der 8 s lang das
-       Medium dreht und in die erste Messung fiel (444 Punkte nach 8 s).
-       Also: die erste von selbst abwarten, bis sie vorbei und verklungen
-       ist. Danach kommt fruehestens 12 s spaeter die naechste, und jede
-       gezeigte Art schiebt diese Frist weiter. */
+    console.log('\nB — jede Vorführung: Geisterhand, deutliche Antwort, nichts bleibt');
+    /* Erscheinungen laufen erst nach 12 s Ruhe; die erste von selbst
+       abwarten, bis sie vorbei und verklungen ist (sonst faellt sie in die
+       Messung). Danach haelt `__agRuhe.still()` jede Erscheinung von selbst
+       fern; `zeigen` spielt die gewuenschte sofort. Erster Lauf ohne das:
+       Kurz vor einer Vorfuehrung begann eine von selbst und verfaelschte
+       den Grund (bis 19 000 Punkte). */
+    await o.s.evaluate(() => {
+      window.__geistZeiger = 0;
+      document.getElementById('feld').addEventListener('pointermove', e => {
+        if (e.pointerId === window.__agGeistId) window.__geistZeiger++; }, true);
+    });
     await o.s.waitForFunction(() => window.__agStand().leerlaufAnzahl > 0, null, { timeout: 40000 });
-    const erste = await o.s.evaluate(() => window.__agStand().leerlauf);
-    await o.s.waitForFunction(() => !window.__agStand().leerlauf, null, { timeout: 20000 });
-    await o.s.waitForTimeout(erste === 'wirbel' ? 9000 : 6000);
-    for (const art of NEU) {
-      /* Zwischen zwei Messungen Ruhe, damit nichts Altes mitzaehlt. */
-      await o.s.waitForTimeout(1500);
+    await o.s.waitForFunction(() => !window.__agStand().leerlauf, null, { timeout: 40000 });
+    await o.s.evaluate(() => window.__agRuhe.still());
+    await o.s.waitForTimeout(10000);
+    for (const art of pult) {
       const grund = await leuchtend(o.s, rechner);
-      const ok = await o.s.evaluate((a) => !!(window.__agRuhe && window.__agRuhe.zeigen(a)), art);
-      /* Zweimal hinsehen: Ein Stoss ist nach 0,8 s schon fast verglueht,
-         eine Schleife erst dann ganz gezogen. Es zaehlt der hellere Blick. */
-      await o.s.waitForTimeout(300);
-      const frueh = await leuchtend(o.s, rechner);
-      await o.s.waitForTimeout(500);
-      const hoch = Math.max(frueh, await leuchtend(o.s, rechner));
-      await o.s.waitForTimeout(7200);
+      await o.s.evaluate(() => { window.__geistZeiger = 0; });
+      const ok = await o.s.evaluate((a) => !!window.__agRuhe.zeigen(a), art);
+      let hoch = 0; const t0 = Date.now();
+      while (await o.s.evaluate(() => !!window.__agStand().leerlauf) && Date.now() - t0 < 25000) {
+        hoch = Math.max(hoch, await leuchtend(o.s, rechner));
+        await o.s.waitForTimeout(250);
+      }
+      const zeiger = await o.s.evaluate(() => window.__geistZeiger);
+      await o.s.evaluate(() => window.__agRuhe.still());
+      await o.s.waitForTimeout(20000);
       const rest = await leuchtend(o.s, rechner);
-      const auf = hoch - grund, bleibt = rest - grund;
-      console.log('        ' + art.padEnd(10) + ' Grund ' + grund + ' · hellster Blick bis 0,8 s ' + hoch + ' · nach 8 s ' + rest);
-      zeile(art + ': gezeigt', ok, true);
-      zeile(art + ': leuchtet sichtbar auf (≥ 80 Punkte)', auf >= 80, true);
-      zeile(art + ': nach 8 s vergangen (≤ 10 %)', bleibt <= Math.max(30, auf * 0.1), true);
+      const auf = hoch - grund;
+      console.log('        ' + art.padEnd(16) + ' Hand ' + zeiger + ' Züge · Grund ' + grund + ' · höchstens ' + hoch +
+                  ' · 20 s nach dem Ende ' + rest);
+      zeile(art + ': Geisterhand spielt', ok && zeiger > 5, true);
+      zeile(art + ': Feld antwortet (≥ 500)', auf >= 500, true);
+      zeile(art + ': nach 20 s nichts mehr', rest <= Math.max(300, hoch * 0.01), true);
     }
+
+    console.log('\nD — die Geisterhand ist keine Hand');
+    await o.s.evaluate(() => window.__agRuhe.zeigen('pult-umlauf'));
+    await o.s.waitForTimeout(1200);
+    zeile('Knöpfe bleiben leise, während sie spielt',
+          await o.s.evaluate(() => document.getElementById('agTasten').classList.contains('leise')), true);
+    await o.s.mouse.move(597, 300); await o.s.mouse.down(); await o.s.mouse.up();
+    await o.s.waitForTimeout(150);
+    const nach = await o.s.evaluate(() => { const z = window.__geistZeiger; return new Promise(r =>
+      setTimeout(() => r({ leer: !window.__agStand().leerlauf, weiter: window.__geistZeiger - z }), 600)); });
+    zeile('ein echter Finger beendet sie sofort', nach.leer && nach.weiter === 0, true);
     fehlerAlle.push(...o.seitenFehler); await o.q.close();
 
     console.log('\nC — wenig los');
@@ -195,9 +219,9 @@ const NEU = ['stroemung', 'schleife', 'sog', 'stoss', 'stimmen', 'strang'];
       zeile(wer.length + ' arbeitend: Erscheinungen kommen', n > 0, soll);
       fehlerAlle.push(...o.seitenFehler); await o.q.close();
     }
-    zeile('D  keine Seitenfehler', fehlerAlle.join(' | ') || 'keine', 'keine');
+    zeile('E  keine Seitenfehler', fehlerAlle.join(' | ') || 'keine', 'keine');
   } finally { await b.close(); tisch.s.close(); }
   console.log(fehler ? '\nABWEICHUNG: ' + fehler : '\nALLES WIE VEREINBART — keine Abweichung.');
-  console.log('Chromium, Zufallsorte. Ob es schön und ruhig genug ist, entscheidet Peter am iPad.');
+  console.log('Chromium. Ob es schön und ruhig genug ist, entscheidet Peter am iPad.');
   process.exit(fehler ? 1 : 0);
 })().catch(e => { console.log('UNGEPRÜFT: ' + e.stack); process.exit(2); });
