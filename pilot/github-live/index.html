@@ -2503,7 +2503,7 @@
 
      Der Bauzeitpunkt kommt beim Bauen aus der Uhr. Von Hand gepflegte
      Datumsangaben sind nach der zweiten Änderung falsch. */
-  var FASSUNG = '107', GEBAUT = '2026-11-16T15:20Z';
+  var FASSUNG = '108', GEBAUT = '2026-11-17T12:40Z';
 
   /* AG-GH-LIVE-001: JEDE TEXTSENKE MASKIERT.
      Seit Live-Daten von aussen kommen (GitHub-Kommentare, one-event.json),
@@ -4030,6 +4030,7 @@
                   '#agWas, #agKopf, #agTasten, #agTempo, #agGesetz, [id^="agGh"]';
     function bedient(z) { return !!(z && z.closest && z.closest(BEDIENT)); }
     window.addEventListener('pointerdown', function (e) {
+      if (e.pointerId === window.__agGeistId) { ab = null; return; }   /* Geisterhand tippt nicht */
       ab = bedient(e.target) ? null
          : { x: e.clientX, y: e.clientY, t: performance.now(), id: e.pointerId };
     }, true);
@@ -5666,22 +5667,116 @@
 
      AG-MON-RUHE-002, Peter 16.11.2026: "randomisierte effekte aus pult ...
      sofern wenig oder nichts los ist. die effekte sollen aber verblassen und
-     nichts davon übrig bleiben. pult einzubauen wäre zuviel." Dazu kommen
-     sechs Erscheinungen aus dem Mischpult von Resonanz, gebaut aus dem, was
-     das Feld hier schon kann: Strömung, Schleife, Sog, Stoß, Stimmen,
-     Strang. Keine setzt Farbe ab (Abgabe 0), alle Leuchtpunkte leben
-     hoechstens zwei Sekunden -- darueber saettigt ein Fleck (siehe
-     `knoten`). "Wenig los" heisst: kein Ball fliegt und hoechstens EINE
-     Rolle arbeitet. Takt und Pausen bleiben wie am 31.10. */
+     nichts davon übrig bleiben. pult einzubauen wäre zuviel." "Wenig los"
+     heisst: kein Ball fliegt und hoechstens EINE Rolle arbeitet. Takt und
+     Pausen bleiben wie am 31.10.
+
+     AG-MON-RUHE-003, Peter 17.11.2026: "es sind nicht die, die wir in pult
+     haben, du hast neue erfunden die ich gar nicht mag ... bitte nehme welche
+     aus pult". Die sechs nachgebauten Erscheinungen aus Fassung 107 sind
+     weg. An ihrer Stelle spielt die GEISTERHAND des Mischpults ihre
+     Vorfuehrungen ("Zeig mir ..."), woertlich aus resonanz/pult.html
+     uebernommen: dieselben Kreise und Striche, dieselben Zeigerereignisse
+     auf dem Feld wie ein Finger -- kein Sonderweg. Was dabei entsteht, ist
+     also genau die Wirkung des Feldes auf eine Hand. Was sie hinterlaesst,
+     verblasst wie alles hier (seit Fassung 99). Ein echter Finger beendet
+     sie sofort. */
   var RUHE_NACH = 12, RUHE_PAUSE = [12, 25];
-  var RUHE_ARTEN = ['komet', 'wirbel', 'knoten', 'korn',
-                    'stroemung', 'schleife', 'sog', 'stoss', 'stimmen', 'strang'];
+  /* Die Vorfuehrungen des Mischpults, unveraendert aus resonanz/pult.html. */
+  var PULT_VORFUEHRUNG = {"strang": [["strich", 0.12, 0.5, 0.88, 0.5, 1.6]], "knoten": [["strich", 0.18, 0.45, 0.62, 0.45, 1.2], ["halt", 0.9]], "wurf": [["kreis", 0.34, 0.5, 0.13, 0.72, 1.7], ["loslassen"], ["warten", 2.6]], "korn": [["kreis", 0.5, 0.5, 0.12, 3.0, 2.2], ["warten", 1.0]], "funken": [["kreis", 0.5, 0.5, 0.12, 3.4, 2.2], ["warten", 3.4]], "stoss": [["kreis", 0.5, 0.5, 0.1, 3.4, 2.2], ["warten", 0.6], ["strich", 0.12, 0.46, 0.88, 0.46, 2.4], ["warten", 0.25], ["strich", 0.88, 0.54, 0.12, 0.54, 2.4], ["warten", 0.25], ["strich", 0.12, 0.5, 0.88, 0.5, 2.8]], "sog": [["kreis", 0.5, 0.5, 0.12, 3.0, 2.2], ["warten", 0.4], ["kreis", 0.5, 0.5, 0.12, 3.0, 2.2]], "stimmen": [["kreis", 0.33, 0.5, 0.11, 2.6, 2.2], ["warten", 0.3], ["kreis", 0.67, 0.5, 0.11, -2.6, 2.2]], "schleife": [["kreis", 0.3, 0.5, 0.05, 3.0, 2.6], ["warten", 0.3], ["kreis", 0.68, 0.5, 0.2, 2.0, 1.4]], "tempo": [["kreis", 0.32, 0.5, 0.11, 2.0, 0.7], ["warten", 0.3], ["kreis", 0.68, 0.5, 0.11, 3.0, 3.4]], "stroemung": [["strich", 0.1, 0.42, 0.9, 0.58, 1.8], ["warten", 2.0]], "umlauf": [["kreis", 0.5, 0.5, 0.12, 1.7, 3.0], ["loslassen"], ["warten", 3.0]], "verblassen": [["kreis", 0.34, 0.45, 0.1, 2.4, 2.2], ["warten", 0.3], ["kreis", 0.64, 0.55, 0.1, 2.4, 2.2], ["warten", 6.0]]};
+  /* Zwei Vorfuehrungen zeigen hier nicht, wofuer sie stehen, und bleiben
+     darum draussen (gemessen 17.11.): Der Umlauf ist in dieser Fassung des
+     Feldes abgeschaltet (`else if (0)` in der Bewegung), und der Sog -- das
+     Aufnahme-Tor bei grosser Dichte -- feuerte in 15 s kein einziges Mal.
+     Eine Vorfuehrung ohne ihre Wirkung waere eine erfundene. */
+  var PULT_OHNE = { sog: 1, umlauf: 1 };
+  var RUHE_ARTEN = ['komet', 'wirbel', 'knoten', 'korn'].concat(
+    Object.keys(PULT_VORFUEHRUNG).filter(function (k) { return !PULT_OHNE[k]; })
+      .map(function (k) { return 'pult-' + k; }));
   var ruheSeit = 0, leerlauf = null, leerlaufNaechster = 0, leerlaufAnzahl = 0, ruheLetzte = '';
   function ruheMelden() {
     ruheSeit = performance.now();
     leerlauf = null;
+    geistAnhalten();
   }
-  window.addEventListener('pointerdown', function () { ruheMelden(); }, true);
+  /* Die Geisterhand meldet keine Ruhe ab -- nur ein echter Finger. */
+  window.addEventListener('pointerdown', function (e) {
+    if (e && e.pointerId === GEIST_ID) return;
+    ruheMelden();
+  }, true);
+
+  /* ===================== DIE GEISTERHAND (aus resonanz/pult.html) =====================
+     Dieselbe Bauart wie im Mischpult: Sie schickt dieselben Zeigerereignisse
+     wie ein Finger an das Feld. Ihre Kennung ist fest, damit Bedienung,
+     Tippen und Ruhe sie von einer Hand unterscheiden koennen. */
+  var GEIST_ID = window.__agGeistId = 7777, geistLauf = null, geistUnten = false;
+  function geistEreignis(art, x, y) {
+    var cv = document.getElementById('feld');
+    if (!cv || typeof PointerEvent !== 'function') return;
+    cv.dispatchEvent(new PointerEvent(art, {
+      pointerId: GEIST_ID, pointerType: 'touch', isPrimary: true,
+      clientX: x, clientY: y, bubbles: true, cancelable: true
+    }));
+  }
+  function geistRunter(x, y) { if (!geistUnten) { geistUnten = true; geistEreignis('pointerdown', x, y); } }
+  function geistHoch(x, y)   { if (geistUnten) { geistUnten = false; geistEreignis('pointerup', x, y); } }
+  function geistSchlaf(s)    { return new Promise(function (ok) { setTimeout(ok, s * 1000); }); }
+  function geistBild()       { return new Promise(function (ok) { requestAnimationFrame(ok); }); }
+  function geistW() { var cv = document.getElementById('feld'); return cv ? cv.clientWidth : W(); }
+  function geistH() { var cv = document.getElementById('feld'); return cv ? cv.clientHeight : H(); }
+  async function geistKreis(cx, cy, r, umdrehungen, proSekunde, lauf) {
+    var x0 = cx * geistW(), y0 = cy * geistH(), R = r * Math.min(geistW(), geistH());
+    var dauer = Math.abs(umdrehungen) / proSekunde, t0 = performance.now();
+    geistRunter(x0 + R, y0);
+    while (lauf.an) {
+      var u = (performance.now() - t0) / 1000 / dauer;
+      if (u >= 1) break;
+      var w = u * umdrehungen * 6.2832;
+      geistEreignis('pointermove', x0 + R * Math.cos(w), y0 + R * Math.sin(w));
+      await geistBild();
+    }
+    return [x0 + R * Math.cos(umdrehungen * 6.2832), y0 + R * Math.sin(umdrehungen * 6.2832)];
+  }
+  async function geistStrich(x1, y1, x2, y2, proSekunde, lauf) {
+    var ax = x1 * geistW(), ay = y1 * geistH(), bx = x2 * geistW(), by = y2 * geistH();
+    var dauer = 1 / proSekunde, t0 = performance.now();
+    geistRunter(ax, ay);
+    while (lauf.an) {
+      var u = (performance.now() - t0) / 1000 / dauer;
+      if (u >= 1) break;
+      geistEreignis('pointermove', ax + (bx - ax) * u, ay + (by - ay) * u);
+      await geistBild();
+    }
+    if (lauf.an) geistEreignis('pointermove', bx, by);
+    return [bx, by];
+  }
+  async function geistSpielen(schritte, lauf) {
+    var p = [geistW() / 2, geistH() / 2];
+    for (var i = 0; i < schritte.length && lauf.an; i++) {
+      var s = schritte[i];
+      if (s[0] === 'kreis')       p = await geistKreis(s[1], s[2], s[3], s[4], s[5], lauf);
+      else if (s[0] === 'strich') p = await geistStrich(s[1], s[2], s[3], s[4], s[5], lauf);
+      else if (s[0] === 'halt')   { var t1 = performance.now();
+                                    while (lauf.an && performance.now() - t1 < s[1] * 1000) {
+                                      geistEreignis('pointermove', p[0], p[1]); await geistBild(); } }
+      else if (s[0] === 'loslassen') geistHoch(p[0], p[1]);
+      else if (s[0] === 'warten') { geistHoch(p[0], p[1]); await geistSchlaf(s[1]); }
+    }
+    geistHoch(p[0], p[1]);
+  }
+  function geistAnhalten() {
+    if (geistLauf) { geistLauf.an = false; geistLauf = null; }
+    if (geistUnten) geistHoch(0, 0);
+  }
+  function geistVorfuehren(name, L) {
+    geistAnhalten();
+    var lauf = geistLauf = { an: true };
+    L.dauer = 30;                                 /* Obergrenze; das Ende setzt die Hand */
+    geistSpielen(PULT_VORFUEHRUNG[name] || [], lauf).then(function () {
+      if (geistLauf === lauf) geistLauf = null;
+      L.dauer = Math.min(L.dauer, L.t);
+    });
+  }
   /* Wenig los: kein Ball fliegt, hoechstens eine Rolle arbeitet
      (AG-MON-RUHE-002; bis Fassung 106 musste niemand arbeiten). */
   function teamRuht() {
@@ -5713,11 +5808,28 @@
       K.dvx = Math.cos(w) * v; K.dvy = Math.sin(w) * v;
       L.dauer = 8;
     },
-    /* Ein Knoten: ein Lichtpunkt, der aufgeht und vergeht. */
+    /* Ein Knoten, der wandert (AG-MON-RUHE-003, Peter 17.11.2026: "knoten,
+       der von einer seite des bildschirms zur gegenüberliegenden läuft.
+       randomisiert ... an unterschiedlichen [koordinaten]"). Er ersetzt den
+       stehenden Knoten vom 31.10. Start an einer zufaelligen Stelle einer
+       zufaelligen Seite, Ziel eine zufaellige Stelle der gegenueberliegenden;
+       unterwegs setzt er je Bild einen kleinen Knoten, der hinter ihm
+       verglimmt (Leben unter 2 s, keine Abgabe -- es bleibt nichts). */
     knoten: function (L) {
-      var o = ruheOrt();
-      window.__feld.knoten(o[0], o[1], 0.7, ruheFarbe(), 0, 36, 2.2);
-      L.dauer = 3;
+      var w = W(), h = H(), seite = (Math.random() * 4) | 0,
+          a = 0.1 + 0.8 * Math.random(), b = 0.1 + 0.8 * Math.random(), x0, y0, x1, y1;
+      if (seite === 0)      { x0 = -10;    y0 = a * h; x1 = w + 10; y1 = b * h; }   /* links -> rechts */
+      else if (seite === 1) { x0 = w + 10; y0 = a * h; x1 = -10;    y1 = b * h; }   /* rechts -> links */
+      else if (seite === 2) { x0 = a * w;  y0 = -10;   x1 = b * w;  y1 = h + 10; }  /* oben -> unten */
+      else                  { x0 = a * w;  y0 = h + 10; x1 = b * w; y1 = -10; }     /* unten -> oben */
+      var ton = ruheFarbe(), lang = Math.hypot(x1 - x0, y1 - y0);
+      L.dauer = Math.max(3.5, Math.min(7, lang / 260));             /* rund 260 px je Sekunde */
+      L.weg = [x0, y0, x1, y1];
+      L.schritt = function () {
+        var f = Math.min(1, L.t / L.dauer);
+        /* Ein heller Kopf und eine kurze, verglimmende Spur dahinter. */
+        window.__feld.knoten(x0 + (x1 - x0) * f, y0 + (y1 - y0) * f, 0.95, ton, 0, 16, 0.9);
+      };
     },
     /* Korn: ein paar Lichtpunkte, die nach einem Augenblick in Funken
        springen (der zweite Teil steht in `leerlaufSchritt`). */
@@ -5733,101 +5845,35 @@
       }
       L.dauer = 3.2;
     },
-    /* ---- aus dem Mischpult (AG-MON-RUHE-002). `L.schritt` zeichnet je Bild.
-       Je Bild hoechstens rund ein Dutzend Faeden -- weniger als ein Ball
-       (98) und genug, dass man es sieht: Die erste Fassung mit zwei bis drei
-       Faeden je Bild war gemessen kaum vom Grund zu unterscheiden. */
-    /* Stroemung: ein Hauch zieht durch das Medium und nimmt die Faeden mit. */
-    stroemung: function (L) {
-      var o = ruheOrt(), w = Math.random() * 6.2832, ton = ruheFarbe(),
-          c = Math.cos(w), sn = Math.sin(w);
-      L.dauer = 2.6;
-      L.schritt = function (dt) {
-        var f = L.t / L.dauer, x = o[0] + (f - 0.5) * c * 220, y = o[1] + (f - 0.5) * sn * 220;
-        window.__feld.stroemung(x, y, c * 140, sn * 140, dt);
-        for (var k = 0; k < 14; k++) {
-          var q = (Math.random() - 0.5) * 90;          /* quer zur Richtung */
-          window.__feld.strang(x - sn * q, y + c * q, c * 90, sn * 90, 0.62, 1.3, ton, 0);
-        }
-      };
-    },
-    /* Schleife: eine Acht, einmal gezogen, die hinter sich verglimmt. */
-    schleife: function (L) {
-      var o = ruheOrt(), r = 40 + 20 * Math.random(), ton = ruheFarbe(),
-          dreh = Math.random() * 6.2832, c = Math.cos(dreh), sn = Math.sin(dreh);
-      L.dauer = 3;
-      L.schritt = function () {
-        var u = (L.t / L.dauer) * 6.2832, a = Math.sin(u) * r, b = Math.sin(u) * Math.cos(u) * r * 0.9;
-        var x = o[0] + a * c - b * sn, y = o[1] + a * sn + b * c;
-        for (var k = 0; k < 8; k++)
-          window.__feld.strang(x + (Math.random() - 0.5) * 6, y + (Math.random() - 0.5) * 6,
-                               0, 0, 0.6, 1.6, ton, 0);
-      };
-    },
-    /* Sog: Faeden stroemen von einem Ring auf einen Punkt zu. */
-    sog: function (L) {
-      var o = ruheOrt(), ton = ruheFarbe();
-      L.dauer = 2.2;
-      L.schritt = function () {
-        for (var k = 0; k < 10; k++) {
-          var w = Math.random() * 6.2832, R = 70 + 30 * Math.random();
-          window.__feld.strang(o[0] + Math.cos(w) * R, o[1] + Math.sin(w) * R,
-                               -Math.cos(w) * R * 1.1, -Math.sin(w) * R * 1.1, 0.55, 0.9, ton, 0);
-        }
-      };
-    },
-    /* Stoss: ein kurzes Auseinandergehen mit Funken. */
-    stoss: function (L) {
-      var o = ruheOrt(), ton = ruheFarbe();
-      window.__feld.austreiben(o[0], o[1], ton, 5, 0);
-      window.__feld.knoten(o[0], o[1], 0.8, ton, 0, 24, 1.2);
-      L.dauer = 2;
-    },
-    /* Stimmen: drei Lichtpunkte, die nacheinander antworten. */
-    stimmen: function (L) {
-      var o = ruheOrt(), ton = ruheFarbe(), orte = [];
-      for (var k = 0; k < 3; k++) orte.push([o[0] + (Math.random() - 0.5) * 160,
-                                             o[1] + (Math.random() - 0.5) * 110, 0.1 + k * 0.6, 0]);
-      L.dauer = 2.6;
-      L.schritt = function () {
-        orte.forEach(function (p) {
-          if (p[3] || L.t < p[2]) return;
-          p[3] = 1;
-          window.__feld.knoten(p[0], p[1], 0.9, ton, 0, 44, 1.6);
-        });
-      };
-    },
-    /* Strang: ein einzelner gespannter Faden, der aufleuchtet und vergeht. */
-    strang: function (L) {
-      var o = ruheOrt(), w = Math.random() * 6.2832, ton = ruheFarbe(),
-          c = Math.cos(w), sn = Math.sin(w), lang = 140 + 60 * Math.random();
-      L.dauer = 1.8;
-      L.schritt = function () {
-        var f = Math.min(1, L.t / 0.9);               /* er spannt sich auf */
-        for (var k = 0; k < 12; k++) {
-          var d = (Math.random() * f - 0.5) * lang;
-          window.__feld.strang(o[0] + c * d, o[1] + sn * d, c * 10, sn * 10, 0.6, 1.2, ton, 0);
-        }
-      };
-    }
   };
+  Object.keys(PULT_VORFUEHRUNG).forEach(function (k) {
+    if (!PULT_OHNE[k]) RUHE['pult-' + k] = function (L) { geistVorfuehren(k, L); };
+  });
   /* Fuer die Nachweise: eine bestimmte Erscheinung sofort zeigen. */
   window.__agRuhe = {
     arten: RUHE_ARTEN.slice(),
     zeigen: function (art) {
       if (!RUHE[art] || !window.__feld) return false;
+      geistAnhalten();
+      ruheSeit = performance.now() - RUHE_NACH * 1000 - 1;   /* sofort zeigen */
       leerlauf = { name: art, art: art, t: 0, dauer: 3 };
       RUHE[art](leerlauf);
       ruheLetzte = art; leerlaufAnzahl++;
       return true;
-    }
+    },
+    /* Fuer die Nachweise: alles anhalten und eine Minute lang nichts von
+       selbst beginnen -- damit eine Messung nur sieht, was sie ausloest. */
+    still: function () { ruheMelden(); leerlaufNaechster = performance.now() + 60000; }
   };
   function leerlaufSchritt(dt) {
     var jetzt = performance.now();
     if (!ruheSeit) ruheSeit = jetzt;
     if (kometen.length && !ausklang) kometSchritt(dt, false);
     if (MODUS !== 'live' || ghArchiv || !teamRuht() ||
-        jetzt - ruheSeit < RUHE_NACH * 1000) { leerlauf = null; return; }
+        jetzt - ruheSeit < RUHE_NACH * 1000) {
+      if (leerlauf) geistAnhalten();
+      leerlauf = null; return;
+    }
     if (leerlauf) {
       leerlauf.t += dt;
       if (leerlauf.orte) leerlauf.orte.forEach(function (o) {
@@ -5835,6 +5881,7 @@
       });
       if (leerlauf.schritt && leerlauf.t < leerlauf.dauer) leerlauf.schritt(dt);
       if (leerlauf.t < leerlauf.dauer) return;
+      geistAnhalten();
       leerlauf = null;
       leerlaufNaechster = jetzt + (RUHE_PAUSE[0] +
         (RUHE_PAUSE[1] - RUHE_PAUSE[0]) * Math.random()) * 1000;
@@ -9256,9 +9303,15 @@
      hing an den Knoepfen; jetzt sagt jeder Block selbst, wann sein Griff
      da ist -- vergroessert, offen oder unter dem Zeiger. Eine Frist weniger,
      die auseinanderlaufen kann. */
-  window.addEventListener('pointerdown', function () { steckWeg(); });
+  window.addEventListener('pointerdown', function (e) {
+    if (e && e.pointerId === window.__agGeistId) return;
+    steckWeg();
+  });
   ['pointermove', 'pointerdown', 'wheel', 'keydown'].forEach(function (n) {
-    window.addEventListener(n, tastenZeigen, { passive: true });
+    window.addEventListener(n, function (e) {
+      if (e && e.pointerId === window.__agGeistId) return;   /* die Geisterhand bedient nichts */
+      tastenZeigen();
+    }, { passive: true });
   });
   tastenZeigen();
 
