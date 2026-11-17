@@ -123,15 +123,26 @@ async function seite(b, tisch, antwortRef, viewport) {
     status: 200, contentType: 'application/json', body: JSON.stringify(VERZEICHNIS) }));
   await s.route('**api.github.com/**', r => {
     abrufe++;
-    // Genau ein öffentlicher Actions-GET je Darstellung: ohne Testtoken, keine Modellaufrufe.
-    if(r.request().url().includes('/actions/runs') && process.env.AG_REAL_ACTIONS !== '0')
-      return r.continue({headers:{Accept:'application/vnd.github+json'}});
+    // Genau ein öffentlicher Actions-GET je Darstellung: ohne Testtoken der Seite, keine Modellaufrufe.
+    // 17.11.2026: Im Prüflauf meldet der Abruf sich mit dem Lesezeichen des Laufs an (AG_GH_TOKEN),
+    // sonst teilen sich alle Prüfläufe die Grenze für nicht angemeldete Abrufe; der Abruf fiel
+    // dreimal aus. Echt bleibt er: dieselbe Adresse, dieselbe Antwort von GitHub.
+    if(r.request().url().includes('/actions/runs') && process.env.AG_REAL_ACTIONS !== '0'){
+      const kopf=Object.assign({}, r.request().headers(), {Accept:'application/vnd.github+json'});
+      if(process.env.AG_GH_TOKEN) kopf.Authorization='Bearer '+process.env.AG_GH_TOKEN;
+      return r.continue({headers:kopf});
+    }
     r.fulfill({ status: 200, contentType: 'application/json',
                 headers: { ETag: 'W/"ag-ball3-' + abrufe + '"' },
                 body: JSON.stringify(r.request().url().includes('/actions/runs') ? antwortRef.actions : antwortRef.liste) });
   });
-  s.on('response',async response=>{if(response.url().includes('/actions/runs')&&response.ok()){
-    try{antwortRef.realActions=await response.json();}catch(e){} }});
+  s.on('response',async response=>{if(!response.url().includes('/actions/runs'))return;
+    /* Fällt der echte Abruf aus, steht hier warum (Status, verbleibende Abrufe). */
+    if(!response.ok()){
+      const h=response.headers();
+      console.log('  Actions-Abruf: HTTP '+response.status()+', verbleibend '+(h['x-ratelimit-remaining']||'?')+
+                  ' von '+(h['x-ratelimit-limit']||'?')+(process.env.AG_GH_TOKEN?' (angemeldet)':' (nicht angemeldet)'));}
+    if(response.ok()){try{antwortRef.realActions=await response.json();}catch(e){}}});
   await s.goto(tisch.adr + '?live=github', { waitUntil: 'load' });
   await s.waitForTimeout(2200);
   if (!await s.evaluate(() => !!document.getElementById('agGhToken')))
