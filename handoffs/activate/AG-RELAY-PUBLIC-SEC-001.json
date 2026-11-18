@@ -1,0 +1,12 @@
+{
+  "schema": "agentarium.relay-activation.v2",
+  "task_id": "AG-RELAY-AUFTRAGSQUELLEN-FORGE-20261118",
+  "authorized": true,
+  "source_commit": "3abd79ddd5d6a35864a85b89b38ff25118a89b59",
+  "role": "coding-agent",
+  "request": "handoffs/AG-RELAY-AUFTRAGSQUELLEN-FORGE-20261118.json",
+  "handback": "handoffs/AG-RELAY-AUFTRAGSQUELLEN-FORGE-20261118-handback.md",
+  "model": "sonnet",
+  "max_turns": 16,
+  "max_budget_usd": 8
+}
