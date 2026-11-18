@@ -1,0 +1,12 @@
+{
+  "schema": "agentarium.relay-activation.v2",
+  "task_id": "AG-BQ-EP01-RELAY-CHANNEL-20261118",
+  "authorized": true,
+  "source_commit": "70c8faf9ca1c88b87f438a6422522335daccdca9",
+  "role": "coding-agent",
+  "request": "handoffs/AG-BQ-EP01-RELAY-CHANNEL-20261118.json",
+  "handback": "handoffs/AG-BQ-EP01-RELAY-CHANNEL-20261118-handback.md",
+  "model": "sonnet",
+  "max_turns": 8,
+  "max_budget_usd": 2
+}
