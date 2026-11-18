@@ -1,4 +1,0 @@
-Temporary minimum working copies under product mandate section7; NOT canonical product source. Canonical task https://github.com/pahlborn/bis-school-app_src/pull/206#issuecomment-6985787764 . Delete these working-copy paths after integration/termination and record the deletion in that task/status.
-standardkatalog.mjs: pahlborn/bis-school-app_src @ 52b12942fa0a63a36936894b28d08dce6ba1a42b, src/module/standardkatalog.mjs, git blob 64220758e29e84aae3eccfd54b0edfdf4a6b042e, complete file.
-bis-referenz.json: pahlborn/bis-school-app_src @ 7056f34b5badf0f52217377d5b62104411f21e7d, spikes/schulbewertung-ki/bis-referenz.json, git blob 01868b40eaec95419471279132a45bce6ad6ad68, complete file, criterion text only/no third-party names.
-No index.html or other product source copied. Product changes belong only in a product PR; Atlas tests proposed code against authoritative current main. The output handback is a temporary proposal; it is not an alternative code repository.
