@@ -1,0 +1,26 @@
+Canonical pahlborn/bis-school-app_src@e8b4342c2b7e134b545529df23191afefe5bcce2:tests/neutral.test.mjs
+
+--- original lines 39-49 ---
+test('source: every question pool, text and archived quest is free of class, school, teacher and place names', () => {
+  const ohne = quelltext
+    .replace(/\/\*[\s\S]*?\*\//g, '')                       // code comments (never visible)
+    .replace(/<!--[\s\S]*?-->/g, '')
+    .replace(/const PRIVATE_RE=.*\r?\n/, '')                  // the detector itself
+    .replace(/const LEGACY_TEXT=\[[\s\S]*?\n\];/, '')         // rewrite table for old stored copies
+    .replace(/const SCHOOL_SOURCES=\[[\s\S]*?\n\];/, '')      // adult-only links (URLs only, neutral labels)
+    .replace(/https:\/\/pahlborn\.github\.io\/bis-school-app\//g, ''); // public address (Peter decides)
+  const zeilen = ohne.split('\n').map((z, i) => [i, z]).filter(([, z]) => treffer(z).length);
+  assert.deepEqual(zeilen.map(([, z]) => z.trim().slice(0, 120)), []);
+});
+
+Canonical pahlborn/bis-school-app_src@e8b4342c2b7e134b545529df23191afefe5bcce2:tests/kern.test.mjs
+
+--- original lines 70-75 ---
+test('jedes verbotene Wort steht in der App oder ist bewusst entfernt (sonst schuetzt es nichts)', () => {
+  const fehlt = q.woerter.filter((w) => !appText.toLowerCase().includes(w.toLowerCase()) && !BEWUSST_ENTFERNT.includes(w));
+  assert.deepEqual(fehlt, [], 'Diese Woerter stehen nicht in index.html - Liste nachziehen: ' + fehlt.join(', '));
+  const nichtEntfernt = BEWUSST_ENTFERNT.filter((w) => appText.includes(w));
+  assert.deepEqual(nichtEntfernt, [], 'als entfernt gefuehrt, steht aber noch in der App: ' + nichtEntfernt.join(', '));
+});
+
+The existing forbidden-word predicates include the platform name Toddle case-insensitively; other actual names/locations deliberately not copied. Do not change these guards or their expected results. Node builder uses same restriction before writing any test web assets.

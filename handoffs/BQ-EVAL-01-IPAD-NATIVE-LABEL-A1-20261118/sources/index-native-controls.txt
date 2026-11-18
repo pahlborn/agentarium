@@ -1,0 +1,184 @@
+Canonical pahlborn/bis-school-app_src@e8b4342c2b7e134b545529df23191afefe5bcce2:index.html
+
+--- original lines 6270-6320 ---
+function schoolEvaluationNew(target){
+  return {child:target.id,author:target.author,title:'',day:'',assessment:schoolDocumentNew(),standardOverrides:{},touched:[false],
+    evaluation:crypto.randomUUID(),revision:crypto.randomUUID(),preview:false};
+}
+function schoolEvaluationPayload(d){
+  const {child,evaluation,revision,title,day}=d, payload={child,evaluation,revision,title,day};
+  const mapped=d.assessment?.criteria.some(c=>Object.hasOwn(c,'standard'));
+  if(d.assessment) payload.assessment=JSON.parse(JSON.stringify(d.assessment));
+  if(mapped){ if(Object.keys(d.standardOverrides||{}).length) payload.standardOverrides={...d.standardOverrides}; }
+  else Object.assign(payload,{standard:d.standard,rating:d.rating,focus:d.focus?SCHOOL_EVALUATION_TARGETS[d.standard]?.focus:'none'});
+  return payload;
+}
+function schoolDocumentAreaText(code,de){
+  const info=schoolStandardInfo(code);
+  return info?info.text[de?'de':'en']+(info.quests.length?'':' · '+schoolStandardNoQuest(de)):(de?'Kein passender Bereich':'No matching area');
+}
+function schoolNativeBridge(){ return window.webkit?.messageHandlers?.bigQuestEvaluation||null; }
+function schoolCatalogPayload(){
+  return Object.entries(SCHOOL_STANDARD_CATALOG).map(([code,entry])=>({code,subject:entry.subject,de:entry.text.de,en:entry.text.en,quest:entry.quests.length>0}));
+}
+/* A captured source may only enter the untouched-by-AI new document draft of this very parent/child. */
+function schoolDraftAcceptsSource(d,target){
+  return !!d && d.child===target.id && d.author===target.author && !!d.assessment && !d.preview && !d.busy && !d.extracted && !d.withdrawn && !d.base && !d.resolves;
+}
+function schoolToddleControl(d,de){
+  if(!schoolNativeBridge() || !d.assessment || d.preview || d.busy || d.extracted || d.withdrawn || d.base || d.resolves) return '';
+  return `<p><button type="button" class="btn small" data-eval-action="toddle">${de?'Aus Toddle':'From Toddle'}</button></p>`;
+}
+function schoolDocumentHTML(d,target){
+  const de=PL()==='de', lang=de?'de':'en', doc=d.assessment, area=schoolArea(doc.area,schoolTexts(de));
+  const mapped=doc.criteria.some(c=>Object.hasOwn(c,'standard'));
+  const rating=r=>r?`${r} · ${PSTAND[lang][SL[r]]}`:(de?'Keine Einstufung':'Not rated');
+  const options=(selected,empty)=>`<option value="">${empty}</option>`+['RS','C','M','E'].map(r=>`<option value="${r}"${r===selected?' selected':''}>${esc(rating(r))}</option>`).join('');
+  const field=(name,label,value,type='text')=>`<label>${label}<input name="${name}" type="${type}" value="${esc(value)}" required${name==='title'?' maxlength="160"':` max="${dayKey()}"`}></label>`;
+  const text=(name,label,value)=>`<label>${label}<textarea name="doc-${name}" maxlength="12000">${esc(value)}</textarea></label>`;
+  const evidence=c=>c.evidence?`<details><summary>${de?'Quellenbeleg':'Source evidence'}</summary><p>${esc(c.evidence)}</p></details>`:'';
+  const standards=selected=>`<option value="none"${!selected||selected==='none'?' selected':''}>${de?'Kein passender Bereich':'No matching area'}</option>`+SUBJECTS.map(subject=>{
+    const entries=Object.entries(SCHOOL_STANDARD_CATALOG).filter(([,entry])=>entry.subject===subject.key);
+    return entries.length?`<optgroup label="${esc(schoolArea(subject.key,schoolTexts(de)))}">${entries.map(([code,entry])=>`<option value="${code}"${code===selected?' selected':''}>${esc(entry.text[lang])}${entry.quests.length?'':` · ${esc(schoolStandardNoQuest(de))}`}</option>`).join('')}</optgroup>`:'';
+  }).join('');
+  const criteria=doc.criteria.map((c,i)=>`<fieldset><legend>${de?'Kriterium':'Criterion'} ${i+1}</legend>
+    <label>${de?'Kriterium':'Criterion'} ${i+1}<textarea maxlength="2000" required data-doc-criterion="${i}">${esc(c.criterion)}</textarea></label>
+    <label>${de?'Einstufung':'Rating'} · ${de?'Kriterium':'Criterion'} ${i+1}<select aria-label="${de?'Einstufung · Kriterium':'Rating · Criterion'} ${i+1}" data-doc-rating="${i}">${options(c.rating,de?'Nicht angegeben / bitte prüfen':'Not given / please check')}</select></label>
+    ${mapped?`<label>${de?'Bereich in Big Quest':'Area in Big Quest'} · ${de?'Kriterium':'Criterion'} ${i+1}<select aria-label="${de?'Bereich in Big Quest · Kriterium':'Area in Big Quest · Criterion'} ${i+1}" aria-describedby="eval-area-info-${i}" data-doc-standard="${i}">${standards(c.standard)}</select></label>
+    <p class="small" id="eval-area-info-${i}" data-doc-area-info="${i}">${esc(schoolDocumentAreaText(c.standard,de))}</p>`:''}
+    ${evidence(c)}<button type="button" class="btn small" data-doc-remove="${i}"${doc.criteria.length===1?' disabled':''}>${de?'Kriterium entfernen':'Remove criterion'} ${i+1}</button></fieldset>`).join('');
+  const original=schoolEvaluationStandards(doc.criteria), effective=schoolEvaluationStandards(doc.criteria,{standardOverrides:d.standardOverrides||{}});
+  const codes=[...new Set(doc.criteria.filter(c=>schoolStandardInfo(c.standard)).map(c=>c.standard))];
+  const summary=codes.map(code=>{
+    const grade=original[code]||'';
+    const info=schoolStandardInfo(code), grades=doc.criteria.filter(c=>c.standard===code && c.rating).map(c=>c.rating), chosen=effective[code]||'';
+
+--- original lines 6335-6370 ---
+    ${schoolEvaluationNeedsPractice(d.rating)?`<label class="pseval-focus"><input type="checkbox" name="exerciseFocus"${d.focus?' checked':''}> ${esc(legacyExercise[lang])}</label>`:''}
+    <p>${d.focus&&schoolEvaluationNeedsPractice(d.rating)?(de?'Zusätzliche passende Übungskarten werden berücksichtigt.':'Additional matching practice cards are included.'):(de?'Kein zusätzlicher Übungsfokus.':'No additional practice focus.')}</p></section>`:`<p>${de?'Keine zugeordneten Einstufungen. Kein zusätzlicher Übungsfokus.':'No assigned ratings. No additional practice focus.'}</p>`;
+  const legacyControls=mapped?'':`<fieldset><legend>${de?'Bisherige Zuordnung der Evaluation':'Existing evaluation assignment'}</legend>
+    <p>${de?'Diese Zuordnung gilt für die Evaluation. Die Originalkriterien behalten ihre eigenen Einstufungen.':'This assignment applies to the evaluation. Original criteria keep their own ratings.'}</p>
+    <label>${de?'Übungsmuster':'Practice pattern'}<select name="standard" aria-label="${de?'Übungsmuster':'Practice pattern'}"><option value="unmapped"${d.standard==='unmapped'?' selected':''}>${de?'Noch keine Zuordnung':'No assignment'}</option>${Object.keys(SCHOOL_EVALUATION_TARGETS).map(code=>`<option value="${code}"${d.standard===code?' selected':''}>${esc((de?STANDARD_TEXT:STANDARD_TEXT_EN)[code])}</option>`).join('')}</select></label>
+    <label>${de?'Einstufung für dieses Übungsmuster':'Rating for this practice pattern'}<select name="rating" aria-label="${de?'Einstufung für dieses Übungsmuster':'Rating for this practice pattern'}"><option value="N"${d.rating==='N'?' selected':''}>${de?'Bitte auswählen':'Please select'}</option>${['RS','C','M','E'].map(r=>`<option value="${r}"${d.rating===r?' selected':''}>${esc(rating(r))}</option>`).join('')}</select></label>
+    <button type="button" class="btn small" data-eval-action="map-criteria">${de?'Bereiche je Kriterium zuordnen':'Assign areas to each criterion'}</button></fieldset>`;
+  const preview=`<h3>${de?'Vorschau':'Preview'}</h3><h4>${esc(d.title)}</h4><p>${fmtDay(d.day)} · ${esc(area)}</p>
+    <h4>${de?'Lernziel':'Learning goal'}</h4><p>${esc(doc.goal)}</p><h4>${de?'Arbeitsanweisung':'Instructions'}</h4><p>${esc(doc.instructions)}</p>
+    <h4>${de?'Lehrkraft-Rückmeldung':'Teacher feedback'}</h4><p>${esc(doc.feedback)}</p>
+    <ol>${doc.criteria.map(c=>`<li><b>${esc(c.criterion)}</b> → ${esc(mapped?(schoolStandardInfo(c.standard)?.text[lang]||(de?'Kein passender Bereich':'No matching area')):(de?'Keine Zuordnung je Kriterium':'No criterion assignment'))} · ${esc(rating(c.rating))}${evidence(c)}</li>`).join('')}</ol>
+    ${!mapped?legacyEffect:summary?`<h4>${de?'Wirkung je Bereich':'Effect by area'}</h4><ul>${summary}</ul>`:`<p>${de?'Keine zugeordneten Einstufungen. Kein zusätzlicher Übungsfokus.':'No assigned ratings. No additional practice focus.'}</p>`}
+    <p class="small">${de?'Die Vorschau speichert nichts. Die Originalkriterien bleiben mit ihren Einstufungen erhalten.':'The preview saves nothing. Original criteria keep their own ratings.'}</p>
+    <button class="btn" type="submit">${d.resolves?(de?'Konfliktauflösung bestätigen':'Confirm resolution'):d.base?(de?'Korrektur bestätigen':'Confirm correction'):(de?'Evaluation bestätigen':'Confirm assessment')}</button>
+    <button class="btn small" type="button" data-eval-action="edit">${de?'Bearbeiten':'Edit'}</button>`;
+  return `<div id="pSchoolEvaluation"><form class="login-form pseval-document"><h3>${de?'Evaluation übernehmen':'Bring in an evaluation'}</h3><p class="pseval-child"><b>${de?'Kind':'Child'}: ${esc(target.name)}</b></p>
+    ${d.preview?preview:`${d.source?`<details${d.extracted?'':' open'}><summary>${de?'Erfasster Evaluationstext':'Captured evaluation text'}</summary><p>${de?'Prüfen Sie den Text vor dem Senden an Claude. Entfernen Sie Namen und andere persönliche Angaben.':'Check the text before sending it to Claude. Remove names and other personal details.'}</p><label>${de?'Quelltext':'Source text'}<textarea name="source"${d.busy||d.extracted?' readonly':''}>${esc(d.source)}</textarea></label></details><button class="btn" type="button" data-eval-action="ai"${d.busy||d.extracted?' disabled':''}>${d.busy?(de?'Claude verarbeitet …':'Claude is processing …'):(de?'Mit Claude ins Formular übertragen':'Fill the form with Claude')}</button>`:''}
+    ${schoolToddleControl(d,de)}
+    <fieldset class="pseval-fields"${d.busy?' disabled':''}><legend class="sr-only">${de?'Angaben der Evaluation':'Evaluation details'}</legend>
+    ${field('title',de?'Titel der Evaluation':'Evaluation title',d.title)}${field('day',de?'Bewertungsdatum':'Assessment date',d.day,'date')}
+    <label>${de?'Fach':'Subject'}<select name="doc-area" aria-label="${de?'Fach':'Subject'}" required><option value="">${de?'Bitte auswählen':'Please select'}</option>${SUBJECTS.map(s=>`<option value="${s.key}"${doc.area===s.key||doc.area==='math'&&s.key==='maths'?' selected':''}>${esc(schoolArea(s.key,schoolTexts(de)))}</option>`).join('')}</select></label>
+    ${text('goal',de?'Lernziel':'Learning goal',doc.goal)}${text('instructions',de?'Arbeitsanweisung':'Instructions',doc.instructions)}${text('feedback',de?'Lehrkraft-Rückmeldung':'Teacher feedback',doc.feedback)}<h3>${de?'Bewertungskriterien':'Assessment criteria'}</h3>${criteria}${legacyControls}
+    <button type="button" class="btn small" data-eval-action="add-criterion"${doc.criteria.length>=SCHOOL_EVALUATION_CRITERIA_MAX?' disabled':''}>${de?'Kriterium hinzufügen':'Add criterion'}</button>
+    <button class="btn" type="submit">${de?'Vorschau anzeigen':'Show preview'}</button></fieldset>`}
+    <button class="btn small" type="button" data-eval-action="cancel">${de?'Abbrechen':'Cancel'}</button>${d.error?`<p role="alert">${esc(d.error)}</p>`:''}</form></div>`;
+}
+/* The native shell calls context()/source() (the web form starts the native Toddle reader). Only the shared draft is filled;
+   no storage and no native URL, frame, origin or credential policy changes. */
+Object.defineProperty(window,'bigQuestEvaluationForm',{value:Object.freeze({
+  context(){
+    const target=schoolEvaluationTarget(), draft=schoolEvaluationDraft;
+    if(!target || draft && !schoolDraftAcceptsSource(draft,target)) return null;
+    const token=crypto.randomUUID(); schoolEvaluationCapture={...target,token,draft:draft||null}; return token;
+  },
+  source(context,transfer,source){
+    const target=schoolEvaluationTarget(), capture=schoolEvaluationCapture, draft=schoolEvaluationDraft;
+
+--- original lines 6438-6527 ---
+      <label>${de?'Kriterium':'Criterion'} <select name="standard" required><option value="">${de?'Bitte auswählen':'Select a criterion'}</option>${standards}</select></label>
+      <label>${de?'Einstufung':'Rating'} <select name="rating" required><option value="">${de?'Bitte auswählen':'Select a rating'}</option>${options}</select></label>
+      <button class="btn" type="submit">${de?'Vorschau anzeigen':'Show preview'}</button>`;
+  }
+  return `<div id="pSchoolEvaluation"><form class="login-form">${content} ${cancel}${error}</form></div>`;
+}
+function bindSchoolEvaluation(body){
+  const box=body.querySelector('#pSchoolEvaluation');
+  if(!box) return;
+  const redraw=()=>{
+    const activeBox=body.querySelector("#pSchoolEvaluation");
+    if(!activeBox) return;
+    activeBox.outerHTML=schoolEvaluationHTML();
+    bindSchoolEvaluation(body);
+  };
+  const current=()=>{
+    const t=schoolEvaluationTarget(), d=schoolEvaluationDraft;
+    return t && d?.child===t.id && d.author===t.author ? d : null;
+  };
+  box.addEventListener('click',async e=>{
+    const remove=e.target.closest('[data-doc-remove]');
+    if(remove && current()?.assessment && !current().preview && !current().busy){
+      const d=current(), i=Number(remove.dataset.docRemove);
+      if(d.assessment.criteria.length>1){ d.assessment.criteria.splice(i,1); if(Array.isArray(d.touched)) d.touched.splice(i,1); }
+      d.standardOverrides={}; redraw(); body.querySelector('[data-eval-action="add-criterion"]')?.focus(); return;
+    }
+    const action=e.target.closest('[data-eval-action]')?.dataset.evalAction, t=schoolEvaluationTarget();
+    if(!action || !t) return;
+    if(action==='remap'){
+      // Same revision draft as an ordinary correction: same evaluation id, base = active revision, preview only.
+      if(schoolEvaluationDraft) return;
+      const id=e.target.closest('[data-eval-action]').dataset.evalId;
+      const tasks=schoolFromAccount(t.id)?.tasks||[], cand=evUebRemapCandidates(tasks).find(c=>c.evaluation===id);
+      const m=cand && tasks.find(x=>x.manual?.evaluation===id)?.manual, p=m && m.history.find(x=>x.revision===m.revision);
+      if(!p?.assessment) return;
+      schoolEvaluationNotice=null;
+      schoolEvaluationDraft={child:t.id,author:t.author,evaluation:m.evaluation,revision:crypto.randomUUID(),
+        base:m.revision,resolves:null,title:p.title,day:p.day,standard:p.standard,rating:p.rating,focus:false,preview:true,withdrawn:false,
+        assessment:evUebApplyCandidate(p.assessment,cand.rows),
+        ...(p.standardOverrides?{standardOverrides:{...p.standardOverrides}}:{})};
+      redraw(); body.querySelector('#pSchoolEvaluation button[type="submit"]')?.focus(); return;
+    }
+    if(action==='toddle'){
+      const d=current(), bridge=schoolNativeBridge();
+      if(!d || !bridge || !schoolDraftAcceptsSource(d,t)) return;
+      try { await bridge.postMessage({action:'toddle'}); }
+      catch(error){ if(current()===d){ d.error=error?.message||String(error); redraw(); } }
+      return;
+    }
+    if(action==='open'){
+      schoolEvaluationNotice=null;
+      schoolEvaluationCapture=null; schoolEvaluationDraft=schoolEvaluationNew(t);
+    } else if(action==='add-criterion' && current()?.assessment && !current().preview && !current().busy){
+      const criteria=current().assessment.criteria, criterion=schoolDocumentNew().criteria[0];
+      if(!criteria.some(c=>Object.hasOwn(c,'standard'))) delete criterion.standard;
+      if(criteria.length<SCHOOL_EVALUATION_CRITERIA_MAX){ const d=current(); d.touched=criteria.map((_,k)=>evUebTouched(d.touched,k)); criteria.push(criterion); d.touched.push(false); }
+    } else if(action==='map-criteria' && current()?.assessment && !current().preview && !current().busy){
+      const d=current(); d.assessment.criteria.forEach(c=>c.standard='none');
+      if(d.assessment.area==='math') d.assessment.area='maths';
+      delete d.standard; delete d.rating; delete d.focus; d.standardOverrides={};
+    } else if(action==='ai' && current()?.assessment){
+      const d=current(), submitted=d.source;
+      if(d.busy || !submitted?.trim()) return;
+      d.busy=true; d.error=''; redraw();
+      try {
+        const bridge=window.webkit?.messageHandlers?.bigQuestEvaluation;
+        if(!bridge) throw new Error(PL()==='de'?'KI-Übernahme ist in der iPad-Test-App verfügbar. Die manuelle Eingabe funktioniert hier.':'AI entry is available in the iPad test app. Manual entry works here.');
+        Promise.resolve(bridge.postMessage({action:'catalog',catalog:schoolCatalogPayload()})).catch(()=>{});
+        const result=await bridge.postMessage({source:submitted});
+        if(current()!==d || d.source!==submitted) return;
+        if(!result || ['title','date','goal','instructions','feedback'].some(key=>typeof result[key]!=='string') || !Array.isArray(result.criteria) || !result.criteria.length || result.criteria.length>SCHOOL_EVALUATION_CRITERIA_MAX || result.criteria.some(c=>!c || typeof c.criterion!=='string' || !c.criterion.trim() || c.criterion.length>2000 || !['','RS','C','M','E'].includes(c.rating) || typeof c.evidence!=='string' || c.evidence.length>4000)) throw new Error(PL()==='de'?'Ungültiger KI-Entwurf.':'Invalid AI draft.');
+        if(result.criteria.some(c=>Object.hasOwn(c,'standard') && (typeof c.standard!=='string' || c.standard!=='none' && !Object.hasOwn(SCHOOL_STANDARD_CATALOG,c.standard)))) throw new Error(PL()==='de'?'Ungültiger KI-Entwurf.':'Invalid AI draft.');
+        d.title=result.title||'';d.day=result.date||'';
+        const nativeRows=evUebApplyNative(d.assessment.criteria,d.touched,result.criteria,{parsed:evUebParseStandards(submitted),knownMappings:evUebKnownMappings(schoolFromAccount(d.child)?.tasks)});
+        d.assessment={area:d.assessment.area,goal:result.goal||'',instructions:result.instructions||'',feedback:result.feedback||'',criteria:nativeRows.criteria};
+        d.touched=nativeRows.touched;
+        d.extracted=true;
+        d.standardOverrides={};
+        d.error=PL()==='de'?'Bitte Fach, Angaben und Einstufungen prüfen. Fehlende Einstufungen bleiben offen.':'Check the subject, details and ratings. Missing ratings stay empty.';
+      } catch(error){if(current()===d)d.error=error.message||String(error);}
+      finally {d.busy=false;}
+    } else if(action==='cancel'){ schoolEvaluationDraft=null; schoolEvaluationCapture=null; }
+    else if(action==='edit' && current()){ current().preview=false; current().error=''; }
+    redraw();
+    body.querySelector('#pSchoolEvaluation input[name="title"], #pSchoolEvaluation [data-eval-action="open"]')?.focus();
+  });
+  box.addEventListener('input',e=>{
+    const d=current(), name=e.target.name;
+    if(!d || d.busy) return;
+    if(!d.preview && d.assessment){

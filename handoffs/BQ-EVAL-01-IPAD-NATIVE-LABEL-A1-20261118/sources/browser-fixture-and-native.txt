@@ -1,0 +1,484 @@
+Canonical pahlborn/bis-school-app_src@e8b4342c2b7e134b545529df23191afefe5bcce2:tests/evaluation-eltern-browser.test.mjs
+
+--- original lines 1-198 ---
+// Both learning targets, correction and withdrawal through the normal parent and child views.
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { appServer, browserStarten, elternSeite, elternAnsichtOeffnen } from './app-hilfen.mjs';
+import { githubNachbau } from './module/github-nachbau.mjs';
+import { githubSpeicher } from '../src/module/github.mjs';
+import { startcodeAusstellen, ersteAnmeldung } from '../src/module/konto.mjs';
+import { anmEinladungslink } from '../src/module/anmeldung.mjs';
+import { keyFingerprint } from '../src/module/krypto.mjs';
+
+const REPO = 'pahlborn/bis-school-app-testdaten';
+[synthetic credential literal omitted; preserve original unchanged]
+const TITLE = 'Zweischrittige Stickeraufgabe';
+const CHILD = 'Tessa Sonnenweg';
+const LOGIN = 'tessa.sonnenweg';
+
+async function register(page) {
+  await page.locator('#kontoNeuUse').click();
+  const password = await page.locator('#kontoNeuPw').inputValue();
+  await page.locator('#kontoNeuGo').click();
+  return password;
+}
+
+async function device(browser, allowed, options = {}) {
+  const context = await browser.newContext({ timezoneId: 'UTC', ...options });
+  await context.route('**/*', (route) => allowed.some((url) => route.request().url().startsWith(url)) ? route.continue() : route.abort());
+  const page = await context.newPage();
+  const errors = [];
+  page.on('pageerror', (error) => errors.push(error.message));
+  return { page, errors };
+}
+
+const evaluationEvents = (page) => page.evaluate(() => Object.keys(localStorage).filter((key) => /^bq2_p_[A-Za-z0-9]+__events$/.test(key))
+  .flatMap((key) => JSON.parse(localStorage.getItem(key))).filter((event) => event.type === 'school_evaluation'));
+
+async function startToday(page) {
+  if (await page.locator('#greetSkip').isVisible()) await page.locator('#greetSkip').click();
+  await page.locator('#todayBtn').click();
+  await page.waitForSelector('#play:not([hidden])');
+}
+
+async function leaveRound(page) {
+  await page.locator('#quitBtn').click();
+  await page.waitForSelector('#home:not([hidden])');
+}
+
+async function skipQuestion(page) {
+  await page.locator('#helpBtn').click();
+  await page.locator('#answerBtn').click();
+  await page.locator('#nextBtn').click();
+}
+
+async function solveSubtraction(page) {
+  const story = await page.locator('#qVisual').innerText();
+  const parts = story.match(/\d+/g)?.map(Number);
+  assert.equal(parts?.length, 3, 'total and two subtrahends visible in the story');
+  const [total, first, second] = parts;
+  const answer = String(total - first - second);
+  for (const digit of answer) await page.locator('#qAnswers').getByRole('button', { name: digit, exact: true }).click();
+  await page.locator('#qAnswers').getByRole('button', { name: 'Check', exact: true }).click();
+  assert.ok((await page.locator('#feedback.good').innerText()).includes(`${total} − ${first} − ${second} = ${answer}`));
+  return parts.join('/');
+}
+
+async function solveRounding(page) {
+  const prompt = await page.locator('#qPrompt').innerText();
+  const match = /which hundred is closest to (\d+)\?$/i.exec(prompt);
+  assert.ok(match, `nearest-hundred explanation prompt: ${prompt}`);
+  const number = Number(match[1]);
+  const lowerDistance = number % 100;
+  const upperDistance = 100 - lowerDistance;
+  assert.ok(lowerDistance > 0 && lowerDistance !== 50, 'the two distances are positive and distinct');
+  const lower = number - lowerDistance;
+  const upper = number + upperDistance;
+  const nearest = lowerDistance < upperDistance ? lower : upper;
+  const answer = `${number} is ${lowerDistance} from ${lower} and ${upperDistance} from ${upper}, so ${nearest} is nearer.`;
+  await page.locator('#qAnswers').getByRole('button', { name: answer, exact: true }).click();
+  await page.locator('#feedback.good').waitFor();
+  assert.match(await page.locator('#feedback').innerText(), /Explain with distances/);
+  return `${number}: ${lowerDistance}/${upperDistance} → ${nearest}`;
+}
+
+async function solveTargets(page, targets) {
+  await startToday(page);
+  const solved = new Map();
+  for (let step = 0; step < 8; step++) {
+    const label = page.locator('#qLabel');
+    const revision = await label.getAttribute('data-school-revision');
+    const target = targets.get(revision);
+    if (target) {
+      assert.match(await label.innerText(), target.label);
+      assert.ok(!solved.has(revision), 'a C assessment contributes one attributed question');
+      solved.set(revision, await target.solve(page));
+      if (solved.size === targets.size) {
+        assert.equal(await page.locator('#roundStars').innerText(), String(solved.size));
+        await leaveRound(page);
+        return solved;
+      }
+      await page.locator('#nextBtn').click();
+    } else {
+      await skipQuestion(page);
+    }
+  }
+  assert.fail('the round is missing one or more questions attributed to the synced revisions');
+}
+
+async function showDetails(page, title) {
+  const rows = page.locator('.psrow').filter({ has: page.getByText(title, { exact: true }) });
+  const row = await rows.count() ? rows : page.locator('.psrow').filter({ hasText: title });
+  await row.waitFor();
+  const details = row.locator('[data-psdet]');
+  const index = await details.getAttribute('data-psdet');
+  if (await details.getAttribute('aria-expanded') === 'false') await details.click();
+  return page.locator(`[data-psdetrow="${index}"]`);
+}
+
+async function waitForRevision(page, revision) {
+  await page.waitForFunction((rev) => Object.keys(localStorage).some((key) => /^bq2_p_[A-Za-z0-9]+__events$/.test(key)
+    && JSON.parse(localStorage.getItem(key)).some((e) => e.type === 'school_evaluation' && e.payload.revision === rev)),
+  revision, { timeout: 70000 });
+}
+
+async function checkRoundRevisions(page, expected, solve = new Map()) {
+  await startToday(page);
+  const observed = [];
+  for (let i = 0; i < 8; i++) {
+    const label = page.locator('#qLabel');
+    const revision = await label.getAttribute('data-school-revision');
+    if (revision) observed.push(revision);
+    const solver = solve.get(revision);
+    if (solver) await solver(page);
+    if (i === 7) break;
+    if (solver) await page.locator('#nextBtn').click();
+    else await skipQuestion(page);
+  }
+  assert.deepEqual(observed.sort(), [...expected].sort(), 'the full round has exactly the expected assessment revisions');
+  await leaveRound(page);
+}
+
+async function evaluationFamily(t, options = {}) {
+  const storage = await githubNachbau({ token: TOKEN, repos: [REPO] });
+  t.after(() => storage.schliessen());
+  const access = githubSpeicher({ repo: REPO, token: TOKEN, basis: storage.basis }).geraet('d_Werkzeug1');
+  const adminCode = await startcodeAusstellen({ zugang: access, aussteller: null, anmeldename: 'admin', art: 'admin', now: Date.now() });
+[synthetic credential literal omitted; preserve original unchanged]
+  const parentCode = await startcodeAusstellen({ zugang: access, aussteller: admin, anmeldename: 'mira.sonnenweg', art: 'parent', now: Date.now() });
+  const config = JSON.stringify({ art: 'github', repo: REPO, wurzel: '', basis: storage.basis });
+  const server = await appServer({ bauart: 'test', anpassen: (h) => h.replace('/*BQ_SPEICHER*/null', () => config).replace(/\}\)\(\);\s*<\/script>/, 'window.__evaluationIntegration={eventHook,schoolEvaluationTarget,schoolFromAccount,renderSheets,schoolSectionOpen:()=>state.popen?.includes("school"),openLegacy(){const t=schoolEvaluationTarget();schoolEvaluationDraft={child:t.id,author:t.author,title:"",day:"",standard:"",rating:"",evaluation:crypto.randomUUID(),revision:crypto.randomUUID(),preview:false,focus:false};renderSheets();},draft:()=>schoolEvaluationDraft,adult:()=>adultUser&&{user:adultUser.user,role:adultUser.role},viewedKid,viewerGrant:()=>{const g=viewerGrant();return g&&{scope:[...g.scope]};},async loginAs(name,password){show("login");renderLogin("adult",{name});await kontoLoginAbsenden("adult",name,password);return adultUser&&adultUser.user;}};})();</script>') });
+  t.after(() => server.close());
+  const browser = await browserStarten();
+  t.after(() => browser.close());
+  const allowed = [server.url, storage.basis];
+  const P = await device(browser, allowed, options);
+  const K = await device(browser, allowed);
+
+  await P.page.goto(anmEinladungslink(server.url, { zugang: TOKEN, anmeldename: 'mira.sonnenweg', code: parentCode.code, fingerabdruck: parentCode.fingerabdruck }));
+  const parentPassword = await register(P.page);
+  await P.page.locator('#recGo').click();
+  await P.page.locator('#welcomeGo').click();
+  await P.page.locator('#parentClose').waitFor();
+  await P.page.locator('#pSettings').click();
+  await P.page.locator('details.psec[data-psec="family"] > summary').click();
+  await P.page.locator('#kKindAnlegen').click();
+  await P.page.locator('#kKindName').fill(CHILD);
+  await P.page.locator('#kKindWeiter').click();
+  await P.page.locator('#kKindLogin').fill(LOGIN);
+  await P.page.locator('#kKindGo').click();
+  await P.page.locator('#kQr svg').waitFor();
+  const code = (await P.page.locator('#kCode').textContent()).trim();
+  const pub = await P.page.evaluate(async () => {
+    const entries = await new Promise((resolve, reject) => {
+      const db = indexedDB.open('bq2_konto', 1);
+      db.onerror = () => reject(db.error);
+      db.onsuccess = () => {
+        const request = db.result.transaction('schluessel').objectStore('schluessel').getAll();
+        request.onerror = () => reject(request.error);
+        request.onsuccess = () => { db.result.close(); resolve(request.result); };
+      };
+    });
+    assertSingleKey(entries);
+    return entries[0].pub;
+    function assertSingleKey(keys) {
+      if (keys.length !== 1) throw new Error('Expected one key on the parent-only device');
+    }
+  });
+  await K.page.goto(anmEinladungslink(server.url, { zugang: TOKEN, anmeldename: LOGIN, code, fingerabdruck: await keyFingerprint(pub) }));
+  await register(K.page);
+  await K.page.waitForSelector('#home:not([hidden])', { timeout: 60000 });
+  await P.page.waitForFunction(() => /ist angemeldet/.test(document.querySelector('#kQrStatus')?.textContent || ''), null, { timeout: 30000 });
+  await P.page.locator('#kQrFertig').click();
+  await elternSeite(P.page, 'school');
+  // The DOM opens before the queued toggle commits state.popen; the next render reads that state.
+  await P.page.waitForFunction(name => {
+    const app = window.__evaluationIntegration;
+    return app.schoolSectionOpen() && app.schoolEvaluationTarget()?.name === name;
+  }, CHILD);
+
+  return { P, K, browser, allowed, access, admin, parentPassword };
+
+--- original lines 580-725 ---
+});
+
+async function fillDocument(form, title, area, criteria) {
+  await form.locator('[name="title"]').fill(title);
+  await form.locator('[name="day"]').fill(new Date().toISOString().slice(0, 10));
+  await form.locator('[name="doc-area"]').selectOption(area);
+  for (let i = 0; i < criteria.length; i++) {
+    if (i) await form.locator('[data-eval-action="add-criterion"]').click();
+    await form.locator(`[data-doc-criterion="${i}"]`).fill(criteria[i].criterion);
+    await form.locator(`[data-doc-rating="${i}"]`).selectOption(criteria[i].rating);
+    await form.locator(`[data-doc-standard="${i}"]`).selectOption(criteria[i].standard);
+  }
+}
+
+async function formFits(page) {
+  await settledSchoolLayout(page);
+  const geometry = await page.locator('#pSchoolEvaluation').evaluate(box => ({
+    viewport: innerWidth, document: document.documentElement.scrollWidth,
+    controls: [...box.querySelectorAll('input,textarea,select,fieldset,button')].filter(e => e.getClientRects().length).map(e => {
+      const r=e.getBoundingClientRect(); return {tag:e.tagName,left:r.left,right:r.right};
+    }),
+    colors: [getComputedStyle(box.querySelector('form')).backgroundColor,getComputedStyle(box.querySelector('form')).color],
+  }));
+  assert.ok(geometry.document <= geometry.viewport, JSON.stringify(geometry));
+  assert.ok(geometry.controls.every(c=>c.left >= 0 && c.right <= geometry.viewport), JSON.stringify(geometry));
+  assert.notEqual(geometry.colors[0], geometry.colors[1], 'text differs from its actual theme background');
+}
+
+test('EV4 O3 and design: weaker grade, explicit parent override, catalog, DE/EN dark 320px and keyboard', { timeout: 120000 }, async t => {
+  const { P } = await evaluationFamily(t, { viewport:{width:320,height:800}, colorScheme:'dark' });
+  await elternSeite(P.page, 'school');
+  const form=P.page.locator('#pSchoolEvaluation');
+  await form.locator('[data-eval-action="open"]').click();
+  const rows=[
+    {criterion:'Invented long criterion '+ 'ZusammenhängendesTestlernwort'.repeat(25),rating:'C',standard:'E-W1'},
+    {criterion:'Invented: a clear conclusion',rating:'M',standard:'E-W1'},
+    {criterion:'Invented: speaks clearly to the audience',rating:'RS',standard:'E-S1'},
+    {criterion:'Invented: place value without a teacher rating',rating:'',standard:'M-N1'},
+  ];
+  await fillDocument(form,'Fiktive O3-Prüfung','english',rows);
+  const codes=await form.locator('[data-doc-standard="0"] option').evaluateAll(options=>options.map(o=>o.value));
+  assert.equal(codes.length,16); assert.equal(new Set(codes).size,16);
+  assert.equal(await form.locator('[data-doc-standard="0"] optgroup').count(),5);
+  assert.match(await form.locator('[data-doc-standard="0"] option[value="E-S1"]').textContent(),/keine Übung in Big Quest/);
+  assert.match(await form.locator('[data-doc-area-info="2"]').innerText(),/keine Übung in Big Quest/);
+  for(const lang of ['de','en']) {
+    await P.page.locator(`.phdr [data-plang="${lang}"]`).click();
+    await formFits(P.page);
+    await P.page.screenshot({path:'/tmp/ev4-form-'+lang+'-dark320.png',fullPage:true});
+    const select=form.getByRole('combobox',{name:lang==='de'?'Bereich in Big Quest · Kriterium 3':'Area in Big Quest · Criterion 3',exact:true});
+    await select.focus(); await P.page.keyboard.press('Home'); await P.page.keyboard.press('ArrowDown'); await P.page.keyboard.press('Tab');
+    assert.equal(await select.inputValue(),'M-N1','native select can be changed with keyboard');
+    await select.selectOption('E-S1');
+    const criterion=form.getByRole('textbox',{name:lang==='de'?'Kriterium 1':'Criterion 1',exact:true});
+    assert.equal(await criterion.inputValue(),rows[0].criterion);
+  }
+  await form.locator('button[type="submit"]').click();
+  assert.deepEqual(await evaluationEvents(P.page),[]);
+  assert.match(await form.locator('[data-eval-area="E-W1"]').innerText(),/C.*weaker of C and M/s);
+  assert.match(await form.locator('[data-eval-area="E-W1"]').innerText(),/Gap/);
+  assert.match(await form.locator('[data-eval-area="E-S1"]').innerText(),/No gap.*no exercise in Big Quest/s);
+  assert.match(await form.locator('[data-eval-area="M-N1"]').innerText(),/Not rated.*No gap/s);
+  await formFits(P.page);
+  await form.getByRole('combobox',{name:'Change rating for this area · E-W1',exact:true}).selectOption('M');
+  assert.match(await form.locator('[data-eval-area="E-W1"]').innerText(),/M.*No gap/s);
+  assert.deepEqual(await evaluationEvents(P.page),[],'even changing the override in preview writes nothing');
+  await form.locator('button[type="submit"]').click();
+  const event=(await evaluationEvents(P.page))[0];
+  assert.deepEqual(event.payload.standardOverrides,{'E-W1':'M'});
+  assert.deepEqual(event.payload.assessment.criteria.map(({evidence,...row})=>row),rows,'override never replaces original teacher ratings');
+  const result=await P.page.evaluate(()=>{const app=window.__evaluationIntegration;return app.schoolFromAccount(app.schoolEvaluationTarget().id).tasks.find(t=>t.title==='Fiktive O3-Prüfung');});
+  assert.deepEqual(result.std,{'E-W1':'M','E-S1':'RS'});
+  assert.deepEqual(result.focusNext,[],'no focus from the standard without a quest or the corrected secure grade');
+  assert.deepEqual(P.errors,[]);
+});
+
+const NATIVE_DOCUMENT={title:'Invented native evaluation',date:new Date().toISOString().slice(0,10),goal:'Invented goal',instructions:'Invented instructions',feedback:'Invented feedback',criteria:[
+  {criterion:'Invented: explains place value',rating:'C',evidence:'Invented: explains place value C'},
+  {criterion:'Invented: rounds to hundreds',rating:'M',evidence:'Invented: rounds to hundreds M'},
+],missing:[]};
+async function captureSynthetic(page) {
+  return page.evaluate(source=>{
+    const form=window.bigQuestEvaluationForm, context=form.context();
+    if(!context) throw Error('Expected the actual native capture context');
+    if(form.source('wrong-context','invented-transfer',source)!=='invalid') throw Error('Wrong context must be rejected');
+    const result=form.source(context,'invented-transfer',source);
+    if(result!=='opened') throw Error('Capture failed: '+result);
+    if(form.source(context,'invented-transfer',source)!=='invalid') throw Error('A consumed context must not be reused');
+    return context;
+  },NATIVE_DOCUMENT.criteria.map(c=>c.evidence).join('\n'));
+}
+
+test('EV4 native: synthetic bridge fills the shared draft and preserves original evidence until confirmation', {timeout:120000},async t=>{
+  const {P}=await evaluationFamily(t);
+  await elternSeite(P.page,'school');
+  await P.page.evaluate(result=>{window.webkit={messageHandlers:{bigQuestEvaluation:{postMessage:async request=>{window.__syntheticRequest=request;return result;}}}};},NATIVE_DOCUMENT);
+  await captureSynthetic(P.page);
+  const form=P.page.locator('#pSchoolEvaluation');
+  await form.locator('[data-eval-action="ai"]').click();
+  await form.locator('[name="title"]').waitFor({state:'visible'});
+  await P.page.waitForFunction(()=>document.querySelector('[name="title"]')?.value==='Invented native evaluation');
+  assert.deepEqual(await form.locator('[data-doc-standard] option:checked').evaluateAll(options=>options.map(o=>o.value)),['none','none'],'missing proposals stay none until EV5');
+  await form.locator('[name="doc-area"]').selectOption('maths');
+  await form.locator('[data-doc-standard="0"]').selectOption('M-N1');
+  await form.locator('[data-doc-standard="1"]').selectOption('M-N3');
+  await form.locator('button[type="submit"]').click();
+  assert.deepEqual(await evaluationEvents(P.page),[]);
+  await form.locator('details').first().locator('summary').click();
+  assert.match(await form.innerText(),/Invented: explains place value C/);
+  await form.locator('button[type="submit"]').click();
+  const event=(await evaluationEvents(P.page))[0];
+  assert.deepEqual(event.payload.assessment.criteria,NATIVE_DOCUMENT.criteria.map((c,i)=>({...c,standard:i?'M-N3':'M-N1'})));
+  assert.deepEqual(Object.keys(await P.page.evaluate(()=>window.__syntheticRequest)),['source'],'no credential enters the captured source request');
+  await P.page.reload(); await elternSeite(P.page,'school');
+  assert.equal((await evaluationEvents(P.page)).length,1);
+  const details=await showDetails(P.page,NATIVE_DOCUMENT.title);
+  assert.match(await details.innerText(),/Invented: explains place value/);
+  assert.deepEqual(P.errors,[]);
+});
+
+test('EV4 native guards: cancellation and account logout discard late synthetic replies without an event', {timeout:120000},async t=>{
+  const {P}=await evaluationFamily(t);
+  await elternSeite(P.page,'school');
+  await P.page.evaluate(()=>{window.webkit={messageHandlers:{bigQuestEvaluation:{postMessage:()=>new Promise(resolve=>{window.__finishSynthetic=resolve;})}}};});
+  const form=P.page.locator('#pSchoolEvaluation');
+  await captureSynthetic(P.page);
+  await form.locator('[data-eval-action="ai"]').click();
+  await P.page.waitForFunction(()=>typeof window.__finishSynthetic==='function');
+  await form.locator('[data-eval-action="cancel"]').click();
+  await form.locator('[data-eval-action="open"]').click();
+  await form.locator('[name="title"]').fill('Invented replacement manual draft');
+  await P.page.evaluate(result=>window.__finishSynthetic(result),NATIVE_DOCUMENT);
+  assert.equal(await form.locator('[name="title"]').inputValue(),'Invented replacement manual draft');
+  assert.deepEqual(await evaluationEvents(P.page),[]);
+  await form.locator('[data-eval-action="cancel"]').click();
+  await captureSynthetic(P.page);
+  await form.locator('[data-eval-action="ai"]').click();
+  await P.page.waitForFunction(()=>document.querySelector('[data-eval-action="ai"]')?.disabled);
+  await form.evaluate(box=>window.__staleEvaluationForm=box.querySelector('form'));
+  await P.page.locator('#parentClose').click();
+  await P.page.evaluate(result=>{window.__finishSynthetic(result);window.__staleEvaluationForm.dispatchEvent(new Event('submit',{bubbles:true,cancelable:true}));},NATIVE_DOCUMENT);
+  assert.equal(await P.page.evaluate(()=>window.__evaluationIntegration.draft()),null);
+  assert.equal(await P.page.evaluate(()=>window.bigQuestEvaluationForm.context()),null);
+  assert.deepEqual(await evaluationEvents(P.page),[]);
+  assert.deepEqual(P.errors,[]);
+});
+
+--- original lines 1236-1400 ---
+  assert.equal((await evaluationEvents(P.page)).length, 1, 'stale submit writes no additional school_evaluation event');
+  assert.deepEqual(P.errors, []);
+});
+
+/* EV5.4 native full-app journey. Native handler is an explicitly synthetic mock; no provider, no credential. */
+const NATIVE_SOURCE = NATIVE_DOCUMENT.criteria.map(c => c.evidence).join('\n');
+async function installNativeMock(page, response) {
+  await page.evaluate(({ response, source }) => {
+    window.__nativeRequests = [];
+    window.webkit = { messageHandlers: { bigQuestEvaluation: { postMessage: async request => {
+      window.__nativeRequests.push(JSON.parse(JSON.stringify(request)));
+      if (request.action === 'catalog') return 'ok';
+      if (request.action === 'toddle') {
+        const form = window.bigQuestEvaluationForm, context = form.context();
+        if (!context) throw new Error('No open new form');
+        const result = form.source(context, 'invented-transfer-toddle', source);
+        if (result !== 'opened') throw new Error(result);
+        return 'opened';
+      }
+      return response;
+    } } } };
+  }, { response, source: NATIVE_SOURCE });
+}
+
+test('EV5.4 plain browser: same manual form and no Toddle control', { timeout: 120000 }, async t => {
+  const { P } = await evaluationFamily(t);
+  await elternSeite(P.page, 'school');
+  const form = P.page.locator('#pSchoolEvaluation');
+  await form.locator('[data-eval-action="open"]').click();
+  await form.locator('[name="title"]').waitFor({ state: 'visible' });
+  assert.equal(await form.locator('[data-eval-action="toddle"]').count(), 0);
+  assert.equal(await form.locator('[data-eval-action="ai"]').count(), 0);
+  assert.equal(await P.page.evaluate(() => typeof window.webkit), 'undefined');
+  assert.deepEqual(await evaluationEvents(P.page), []);
+  assert.deepEqual(P.errors, []);
+});
+
+test('EV5.4 native journey: from the open new form, one full catalog, same draft, writes only after confirmation', { timeout: 120000 }, async t => {
+  const { P } = await evaluationFamily(t);
+  await elternSeite(P.page, 'school');
+  await installNativeMock(P.page, { ...NATIVE_DOCUMENT, criteria: NATIVE_DOCUMENT.criteria.map((c, i) => ({ ...c, standard: i ? 'E-S1' : 'M-N1' })) });
+  const form = P.page.locator('#pSchoolEvaluation');
+  await form.locator('[data-eval-action="open"]').click();
+  await form.locator('[name="title"]').fill('Invented manual start');
+  await form.locator('[data-eval-action="toddle"]').click();
+  await form.locator('[name="source"]').waitFor({ state: 'visible' });
+  assert.equal(await form.locator('[name="source"]').inputValue(), NATIVE_SOURCE);
+  assert.equal(await form.locator('[name="title"]').inputValue(), 'Invented manual start', 'the captured source enters the same draft');
+  assert.deepEqual(await evaluationEvents(P.page), []);
+  await form.locator('[data-eval-action="ai"]').click();
+  await P.page.waitForFunction(() => document.querySelector('[name="title"]')?.value === 'Invented native evaluation');
+  const requests = await P.page.evaluate(() => window.__nativeRequests);
+  assert.deepEqual(requests.map(r => r.action || 'source'), ['toddle', 'catalog', 'source']);
+  assert.deepEqual(Object.keys(requests[0]), ['action']);
+  assert.deepEqual(Object.keys(requests[1]).sort(), ['action', 'catalog']);
+  assert.deepEqual(Object.keys(requests[2]), ['source']);
+  const catalog = requests[1].catalog, codes = catalog.map(e => e.code);
+  assert.equal(new Set(codes).size, codes.length);
+  assert.ok(catalog.every(e => JSON.stringify(Object.keys(e).sort()) === JSON.stringify(['code', 'de', 'en', 'quest', 'subject']) && typeof e.quest === 'boolean'));
+  assert.equal(catalog.find(e => e.code === 'E-S1')?.quest, false, 'a no-quest standard is part of the single catalog');
+  const optionValues = await form.locator('[data-doc-standard="0"] option').evaluateAll(o => o.map(x => x.value));
+  assert.deepEqual([...optionValues].sort(), ['none', ...codes].sort(), 'the form offers exactly the catalog that was sent');
+  await form.locator('[name="doc-area"]').selectOption('maths');
+  await form.locator('[data-doc-standard="0"]').selectOption('M-N1');
+  await form.locator('[data-doc-standard="1"]').selectOption('M-N3');
+  await form.locator('button[type="submit"]').click();
+  assert.deepEqual(await evaluationEvents(P.page), [], 'preview writes nothing');
+  await form.locator('button[type="submit"]').click();
+  const events = await evaluationEvents(P.page);
+  assert.equal(events.length, 1);
+  const original = ({ criterion, rating, evidence }) => ({ criterion, rating, evidence });
+  assert.deepEqual(events[0].payload.assessment.criteria.map(original), NATIVE_DOCUMENT.criteria.map(original), 'source grades and evidence stay original');
+  assert.deepEqual(events[0].payload.assessment.criteria.map(c => c.standard), ['M-N1', 'M-N3'], 'the parent’s explicit choice is stored');
+  const stored = await P.page.evaluate(() => JSON.stringify({ l: Object.entries(localStorage), s: Object.entries(sessionStorage) }));
+  assert.doesNotMatch(stored, /api.?key|authorization|anthropic/i);
+  assert.doesNotMatch(JSON.stringify(requests), /api.?key|authorization|anthropic|secret/i);
+  assert.deepEqual(await P.page.evaluate(() => Object.keys(window.bigQuestEvaluationForm)), ['context', 'source']);
+  assert.deepEqual(P.errors, []);
+});
+
+test('EV5.4 native: an invalid returned standard is rejected, never silently dropped', { timeout: 120000 }, async t => {
+  const { P } = await evaluationFamily(t);
+  await elternSeite(P.page, 'school');
+  const form = P.page.locator('#pSchoolEvaluation');
+  await installNativeMock(P.page, NATIVE_DOCUMENT);
+  await form.locator('[data-eval-action="open"]').click();
+  await form.locator('[data-eval-action="toddle"]').click();
+  await form.locator('[name="source"]').waitFor({ state: 'visible' });
+  for (const bad of ['Z-NOT-IN-CATALOG', '', 7, null]) {
+    await installNativeMock(P.page, { ...NATIVE_DOCUMENT, criteria: NATIVE_DOCUMENT.criteria.map((c, i) => i ? c : { ...c, standard: bad }) });
+    await form.locator('[data-eval-action="ai"]').click();
+    await P.page.waitForFunction(() => /Ungültiger KI-Entwurf|Invalid AI draft/.test(document.querySelector('#pSchoolEvaluation [role="alert"]')?.textContent || ''));
+    assert.equal(await form.locator('[name="title"]').inputValue(), '', 'nothing from the rejected answer is applied');
+    assert.equal(await form.locator('[data-eval-action="ai"]').isDisabled(), false);
+    assert.deepEqual(await evaluationEvents(P.page), []);
+  }
+  assert.deepEqual(P.errors, []);
+});
+
+test('EV5.4 native guards: old, canceled, busy and logged-out contexts cannot fill or write', { timeout: 120000 }, async t => {
+  const { P } = await evaluationFamily(t);
+  await elternSeite(P.page, 'school');
+  await installNativeMock(P.page, NATIVE_DOCUMENT);
+  const form = P.page.locator('#pSchoolEvaluation');
+  await form.locator('[data-eval-action="open"]').click();
+  const first = await P.page.evaluate(source => {
+    const f = window.bigQuestEvaluationForm, a = f.context(), wrong = f.source('wrong-context', 'invented-transfer', source), b = f.context();
+    return { a: typeof a, b: typeof b, wrong, stale: f.source(a, 'invented-transfer', source) };
+  }, NATIVE_SOURCE);
+  assert.deepEqual(first, { a: 'string', b: 'string', wrong: 'invalid', stale: 'invalid' }, 'an older context is replaced');
+  const canceled = await P.page.evaluate(() => window.bigQuestEvaluationForm.context());
+  await form.locator('[data-eval-action="cancel"]').click();
+  assert.equal(await P.page.evaluate(({ c, s }) => window.bigQuestEvaluationForm.source(c, 'invented-transfer', s), { c: canceled, s: NATIVE_SOURCE }), 'invalid', 'canceled capture');
+  await form.locator('[data-eval-action="open"]').click();
+  assert.equal(await P.page.evaluate(({ c, s }) => window.bigQuestEvaluationForm.source(c, 'invented-transfer', s), { c: canceled, s: NATIVE_SOURCE }), 'invalid', 'a new draft is not the captured draft');
+  const accepted = await P.page.evaluate(source => {
+    const f = window.bigQuestEvaluationForm, c = f.context();
+    return { once: f.source(c, 'invented-transfer', source), again: f.source(c, 'invented-transfer', source) };
+  }, NATIVE_SOURCE);
+  assert.deepEqual(accepted, { once: 'opened', again: 'invalid' }, 'a transfer is consumed once');
+  assert.equal(await form.locator('[name="source"]').inputValue(), NATIVE_SOURCE);
+  const busyContext = await P.page.evaluate(() => window.bigQuestEvaluationForm.context());
+  await P.page.evaluate(() => { window.webkit.messageHandlers.bigQuestEvaluation.postMessage = async r => r.action === 'catalog' ? 'ok' : new Promise(() => {}); });
+  await form.locator('[data-eval-action="ai"]').click();
+  await P.page.waitForFunction(() => document.querySelector('[data-eval-action="ai"]')?.disabled);
+  assert.equal(await P.page.evaluate(() => window.bigQuestEvaluationForm.context()), null, 'no capture while Claude is busy');
+  assert.equal(await P.page.evaluate(({ c, s }) => window.bigQuestEvaluationForm.source(c, 'invented-transfer', s), { c: busyContext, s: NATIVE_SOURCE }), 'invalid');
+  await P.page.locator('#parentClose').click();
+  assert.equal(await P.page.evaluate(() => window.bigQuestEvaluationForm.context()), null, 'logged out / child context gone');
+  assert.equal(await P.page.evaluate(({ c, s }) => window.bigQuestEvaluationForm.source(c, 'invented-transfer', s), { c: busyContext, s: NATIVE_SOURCE }), 'invalid');
+  assert.deepEqual(await evaluationEvents(P.page), []);
+  assert.deepEqual(P.errors, []);
+});
