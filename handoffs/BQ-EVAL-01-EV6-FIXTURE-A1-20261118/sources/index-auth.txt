@@ -1,0 +1,446 @@
+Canonical pahlborn/bis-school-app_src@35c2cd9187e4d57de4ca0cf558643cc9f1e4e84b:index.html
+
+--- original lines 5300-5420 ---
+    : de
+    ? `<h2>Willkommen, ${esc(u.user)}!</h2><ul class="welcome"><li>📱 ${KONTO_UI?'<b>Auf allen Ihren Geräten:</b> Der Lernstand Ihrer Kinder kommt nach dem Abgleich auf jedes Gerät, auf dem Sie angemeldet sind.'+(u.role==='parent' && !u.admin?' Kinder legen Sie unter <b>⚙️ → „👪 Familie“</b> an.':''):'<b>Daten nur auf diesem Gerät:</b> Den Lernstand des Kindes sehen Sie auf dem Gerät, auf dem es übt.'}</li><li>🔑 ${KONTO_UI?'Ihr Passwort gilt auf allen Ihren Geräten: dort mit Benutzername und Passwort anmelden. Passwort vergessen? Dann hilft Ihr Wiederherstellungscode.':'Ihr Passwort gilt nur auf diesem Gerät. Auf einem weiteren Gerät einmal mit dem Startcode anmelden.'}</li><li>🚪 Sie bleiben angemeldet, bis Sie <b>Abmelden</b> tippen. Auf dem Gerät des Kindes nach dem Nachsehen bitte abmelden.</li><li>📖 Die Hilfe finden Sie oben unter <b>?</b>, Sicherung und Freigaben unter <b>⚙️</b>. ⓘ erklärt einzelne Abschnitte.</li></ul><button class="btn primary" id="welcomeGo" type="button">Los geht’s</button>`
+    : `<h2>Welcome, ${esc(u.user)}!</h2><ul class="welcome"><li>📱 ${KONTO_UI?'<b>On all your devices:</b> after the sync your children’s progress is on every device where you are logged in.'+(u.role==='parent' && !u.admin?' Add children under <b>⚙️ → “👪 Family”</b>.':''):'<b>Data only on this device:</b> you see your child’s progress on the device where they practice.'}</li><li>🔑 ${KONTO_UI?'Your password works on all your devices: log in there with your user name and password. Forgot it? Your recovery code helps.':'Your password works only on this device. On another device, log in once with the start code.'}</li><li>🚪 You stay logged in until you tap <b>Log out</b>. On your child’s device, please log out when you are done.</li><li>📖 Help is at the top under <b>?</b>, backup and grants under <b>⚙️</b>. ⓘ explains each section.</li></ul><button class="btn primary" id="welcomeGo" type="button">Let’s go</button>`;
+  $('#welcomeGo').addEventListener('click',()=>loginDone(u,true));
+  $('#welcomeGo').focus();
+}
+function loginDone(u, welcomed){
+  $('#loginBody').innerHTML='';
+  const seen=store.get('lastSeen',{}); seen[u.id]=new Date().toISOString(); store.set('lastSeen',seen);
+  if(u.role==='student'){ pendingRoute=null; store.set('session',sessionOf(u)); const here=store.get('kidsHere',[]); if(!here.includes(u.id)) store.set('kidsHere',here.concat([u.id])); adultUser=null; if(welcomed){ store.set('greetDay',dayKey()); eventHook('day_flag',{flag:'greetDay', day:dayKey()}); } renderHome(); show('home'); }
+  else { store.set('adultSession',sessionOf(u)); store.del('adultUnlock'); adultUser={user:u.user, role:u.role, admin:!!u.admin}; parentAccess=true; state.psubj=null; state.popen=state.popenBy!==u.id ? [] : state.popen||[]; state.popenBy=u.id; const r=takePendingRoute();   /* another person starts with all chapters closed - an open chapter of the one before does not count as read (3b-2a; live since 04.11., Peter) */ openAbout('sheets'); scrollToRouteSec(r); }
+}
+/* ---------- login with accounts in the storage (stage 3b, task "Anmeldung im Testbau"; concept 10.2-10.6) ----------
+   Only in the test build with a storage and without konten.json (KONTO_UI); Kathie's app never gets here. The accounts
+   are in the storage (module konto): the start code works once and for 7 days, the own password on every device, grown-
+   ups have a recovery code. The device keeps: the list of accounts that logged in here (bq2_kontoListe: id, login name, kind
+   of account - no password, no key) and a copy of the person keys that cannot be exported (IndexedDB bq2_konto) until
+   "Log out". Children, partners and grants come with task "Einladungen"; syncing with the storage is a task of its own. */
+const kontoOffen=new Map(), kontoFehlerListe=[], kontoAlt=new Map();
+let kontoZug=null, kontoLinkFp=null, kontoBlatt=null;
+let kontoNativeGeraet=null, kontoNativeSpeicherfehler=false;
+function kontoNativeBruecke(){
+  const handler=window.webkit?.messageHandlers?.bigQuestDeviceConnection;
+  if(!KONTO_UI || typeof anmNativeGeraet!=='function' || typeof handler?.postMessage!=='function') return null;
+  if(!kontoNativeGeraet) kontoNativeGeraet=anmNativeGeraet({
+    postMessage:m=>handler.postMessage(m),
+    verbunden:()=>!anmTokenNoetig(KONTO_SPEICHER, localStorage),
+    pruefen:code=>anmZugangPruefen({speicher:KONTO_SPEICHER, token:code, fetch:(a,o)=>fetch(a,o), geraet:kontoGeraet()}),
+    uebernehmen:code=>{ anmTokenSpeichern(localStorage, code); kontoZug=null; kontoStatus.fehler=null; }
+  });
+  return kontoNativeGeraet;
+}
+function kontoNativeSpeicherhinweis(){
+  const de=parentAccess?PL()!=='en':kontoVerbDe();
+  return de?'Die Geräteverbindung konnte nicht gemerkt werden. Bitte das Gerät bei Bedarf erneut verbinden.':'The device connection could not be remembered. Connect this device again if needed.';
+}
+function kontoNativeHinweisZeigen(){
+  const vorher=document.getElementById('nativeDeviceHint'); if(vorher) vorher.remove();
+  if(!kontoNativeSpeicherfehler) return;
+  const b=parentAccess && state.screen==='about'?$('#aboutBody'):$('#loginBody'); if(!b) return;
+  const p=document.createElement('p'); p.id='nativeDeviceHint'; p.className='small'; p.setAttribute('role','status'); p.textContent=kontoNativeSpeicherhinweis(); b.prepend(p);
+}
+function kontoNativeMerken(code){
+  const n=kontoNativeBruecke(); if(!n) return;
+  n.merken(code).then(r=>{
+    if(r!=='fehler' && r!=='ok') return;
+    kontoNativeSpeicherfehler=r==='fehler'; kontoNativeHinweisZeigen();
+  });
+}
+function kontoNativeStart(){
+  const n=kontoNativeBruecke(); if(!n) return;
+  n.starten().then(r=>{
+    if(r==='verbunden'){
+      if(kontoStartWartet){ const start=kontoStartWartet; kontoStartWartet=null; kontoLinkOeffnen({start, zugang:null}); return; }
+      kontoNeuWeg(); renderLogin(undefined,{meldung:kontoVerbTxt().okAnmelden}); kontoAbgleich();
+    }
+    else if(['falsch','offline','limit','fehler'].includes(r)){
+      const V=kontoVerbTxt(); renderVerbinden(r==='fehler'?kontoNativeSpeicherhinweis():(V[r]||V.falsch));
+    }
+  });
+}
+function kontoListe(){ try{ return anmListe(JSON.parse(localStorage.getItem('bq2_kontoListe')||'[]')); }catch(e){ return []; } }
+/* the accounts of this device in the form of konten.json (called once at the start, for APP_ACCOUNTS) */
+function kontoKontenStart(){
+  if(typeof anmZugang!=='function' || !KONTO_SPEICHER) return null;   // (module anmeldung: test build only)
+  return Object.assign(normAccounts(anmGeraetKonten(kontoListe())), {konto:true});
+}
+function kontoGeraet(){ let d=store.get('evDevice',null); if(!d){ d=newDeviceId(); store.set('evDevice',d); } return d; }
+/* the access of this device to the storage (module anmeldung); null = no access (test instance without access key) */
+function kontoZugang(){
+  if(!kontoZug) kontoZug=anmZugang(KONTO_SPEICHER, {ablage:localStorage, geraet:kontoGeraet(), fetch:(a,o)=>fetch(a,o)});
+  return kontoZug;
+}
+/* ---------- task "Erstanmeldung per QR-Code" (06.11.; Vorgabe Peter, findings B1-B4) ----------
+   The invitation (QR code, link, e-mail) carries the access code of the device and the start link:
+   "#zugang=<access code>&start=<name>/<code>[/<fingerprint>]". Opening it: both leave the address at once; the access
+   code is checked with the storage (one request) and replaces an older one only when it works - "✅ Device connected"
+   or "❌" with the reason; then the start code is looked at (it stays valid): a new account -> the password form in the
+   page (#kontoNeu: no role choice, the login name is fixed, the device suggests a strong password, "Log in" only once
+   the rules are met); a used code of an existing account -> "Device connected – please log in" (the link connects a
+   device again: Safari forgets a page after about 7 days). Without an access code (Home Screen app: own storage) the
+   app first shows only "Connect this device": scan the QR code with the camera IN the app, or paste the link or the
+   code. Terms (B3): "access code" connects a device, "password" belongs to a person. Texts in the device's language
+   until a person is known (German or US English). */
+const kontoVerbDe = () => /^de\b/i.test(String((navigator && navigator.language) || ''));
+function kontoVerbTxt(){
+  return kontoVerbDe() ? {
+    titel:'📲 Gerät verbinden', info:'Einmal je Gerät – gilt für alle, die sich hier anmelden. Den Zugangscode bringt die Einladung mit (QR-Code oder Link). Er ist nicht das Passwort einer Person.',
+    scan:'📷 QR-Code scannen', stop:'Abbrechen', kamAuf:'Kamera wird geöffnet …', scanHint:'Halten Sie den QR-Code der Einladung ins Bild. Das Bild bleibt auf dem Gerät.',
+    noCam:'❌ Die Kamera ist hier nicht verfügbar oder nicht erlaubt. Bitte den Link einfügen.', notOurs:'❌ Das ist kein QR-Code von Big Quest.',
+    paste:'Link einfügen (ganzer Link oder nur der Zugangscode)', go:'Verbinden', pasteBad:'❌ Das ist kein Link von Big Quest und kein Zugangscode.',
+    fremd:'❌ Dieser Link gehört zu einer anderen Fassung von Big Quest.', moment:'Einen Moment …',
+    ok:'✅ Gerät verbunden.', okAnmelden:'✅ Gerät verbunden – bitte anmelden.', benutzt:'Diese Einladung ist schon eingelöst – bitte anmelden.',
+    falsch:'❌ Der Zugangscode passt nicht oder ist abgelaufen. Bitte eine neue Einladung geben lassen.', offline:'❌ Kein Netz – bitte später noch einmal versuchen.',
+    limit:'❌ Gerade zu viele Anfragen – bitte in einer Stunde noch einmal versuchen.', fehlt:'Dieses Gerät ist noch nicht verbunden. Bitte zuerst verbinden.'
+  } : {
+    titel:'📲 Connect this device', info:'Once per device – it works for everyone who logs in here. The access code comes with the invitation (QR code or link). It is not anyone’s password.',
+    scan:'📷 Scan QR code', stop:'Cancel', kamAuf:'Opening the camera …', scanHint:'Hold the QR code of the invitation in front of the camera. The picture stays on this device.',
+    noCam:'❌ The camera is not available or not allowed here. Please paste the link.', notOurs:'❌ That is not a Big Quest QR code.',
+    paste:'Paste the link (the whole link or just the access code)', go:'Connect', pasteBad:'❌ That is not a Big Quest link or access code.',
+    fremd:'❌ This link belongs to another version of Big Quest.', moment:'One moment …',
+    ok:'✅ Device connected.', okAnmelden:'✅ Device connected – please log in.', benutzt:'This invitation has been used already – please log in.',
+    falsch:'❌ The access code does not work or has expired. Please ask for a new invitation.', offline:'❌ No connection – please try again later.',
+    limit:'❌ Too many requests right now – please try again in an hour.', fehlt:'This device is not connected yet. Please connect it first.'
+  };
+}
+/* "Connect this device" - first and only step on a device without access code (B2) */
+function renderVerbinden(meldung){
+  kontoNeuWeg(); kameraStopp();
+  const V=kontoVerbTxt(), b=$('#loginBody');
+  b.innerHTML=`<h2>${V.titel}</h2>${meldung?`<p class="kverb" id="verbMeldung" role="status">${esc(meldung)}</p>`:''}<p class="small">${V.info}</p><div id="verbinden"><p><button class="btn primary" id="verbScan" type="button">${V.scan}</button></p><div class="verb-kamera" id="verbKamera" hidden><video id="verbVideo" playsinline muted autoplay></video><button class="btn small" id="verbStop" type="button">${V.stop}</button></div><p id="verbKameraMsg" class="small" role="status"></p><form id="verbForm" class="login-form" autocomplete="off"><div class="field"><label for="verbLink">${V.paste}</label><input id="verbLink" type="text" inputmode="url" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="https://…#zugang=…"></div><button class="btn" id="verbGo" type="submit">${V.go}</button><p id="verbMsg" class="small" role="status"></p></form></div>${LOGIN_HELP_KONTO}<p class="small app-version" id="loginVersion">${esc(versionLabel())}</p>`;
+  $('#verbScan').addEventListener('click',kameraStart);
+  $('#verbStop').addEventListener('click',()=>{ kameraStopp(); const m=$('#verbKameraMsg'); if(m) m.textContent=''; });
+  $('#verbForm').addEventListener('submit',e=>{ e.preventDefault(); kontoEingabe($('#verbLink').value, $('#verbMsg')); });
+  kontoNativeHinweisZeigen();
+}
+/* a pasted link / code or a scanned QR code -> connect (and with a start code: the invitation as if opened) */
+function kontoEingabe(text, msg){
+  const V=kontoVerbTxt(), e=anmEingefuegt(text, location.href);
+  if(!e){ if(msg) msg.textContent=V.pasteBad; return false; }
+  if(e.fremd){ if(msg) msg.textContent=V.fremd; return false; }
+
+--- original lines 5460-5675 ---
+      if(text){
+        const e=anmEingefuegt(text, location.href);
+        if(e && !e.fremd){ kameraStopp(); return kontoLinkOeffnen(e); }
+        const k=$('#verbKameraMsg'); if(k) k.textContent=e && e.fremd ? V.fremd : V.notOurs;
+      }
+    }
+    setTimeout(schritt, 200);
+  };
+  schritt();
+}
+function kameraStopp(){
+  kamLauf++;
+  if(kamStrom){ kamStrom.getTracks().forEach(t=>t.stop()); kamStrom=null; }
+  const k=document.getElementById('verbKamera'); if(k) k.hidden=true;
+  const b=document.getElementById('verbScan'); if(b) b.hidden=false;
+}
+/* opening an invitation at the start of the app ("#zugang=...&start=..." or one of the two) */
+function kontoStartAusHash(beimStart){
+  const e=anmEinladungLesen(location.hash||''); if(!e) return false;
+  // the app is open already (the link was opened in the same tab): start anew with it - only then is the password form in the page
+  if(!beimStart && e.start){ location.reload(); return true; }
+  try{ history.replaceState(null,'',location.pathname+location.search); }catch(err){}
+  kontoLinkAblauf(e);
+  return true;
+}
+let kontoLinkLaeuft=0;
+async function kontoLinkAblauf(e){
+  const V=kontoVerbTxt(), b=$('#loginBody'), lauf=++kontoLinkLaeuft;
+  kameraStopp();
+  b.innerHTML=`<p class="small" role="status" id="kLinkWarten">${V.moment}</p>`;
+  show('login');
+  let ok='';
+  if(e.zugang){
+    let r;
+    try{ r=await anmZugangUebernehmen({ablage:localStorage, speicher:KONTO_SPEICHER, token:e.zugang, fetch:(a,o)=>fetch(a,o), geraet:kontoGeraet()}); }
+    catch(err){ kontoFehlerListe.push('zugang: '+String(err&&err.message||err)); r='offline'; }
+    if(lauf!==kontoLinkLaeuft) return;
+    kontoZug=null; kontoStatus.fehler=null;
+    if(r!=='ok') return kontoLinkFehler(V[r]||V.falsch);
+    kontoNativeMerken(e.zugang);
+    ok=V.ok;
+  } else if(anmTokenNoetig(KONTO_SPEICHER, localStorage)){ if(e.start) kontoStartWartet=e.start; return kontoLinkFehler(V.fehlt); }
+  if(!e.start){ kontoNeuWeg(); renderLogin(undefined, {meldung:ok}); kontoAbgleich(); return; }
+  const z=kontoZugang();
+  let p;
+  try{ p=await anmLinkPruefen({zugang:z, start:e.start, now:Date.now()}); }
+  catch(err){ if(lauf!==kontoLinkLaeuft) return; return kontoLinkFehler(err && err.code==='limit' ? V.limit : err && (err.code==='zugang') ? V.falsch : V.offline, ok); }
+  if(lauf!==kontoLinkLaeuft) return;
+  if(p.art==='registrieren') return kontoNeuZeigen({anmeldename:p.anmeldename, rolle:p.rolle, neu:p.neu, code:e.start.code, fp:e.start.fingerabdruck, ok});
+  kontoNeuWeg();
+  if(p.art==='anmelden'){
+    const rolle=p.rolle==='child'?'student':'adult';
+    // already logged in here with this account: just go on
+    const a=APP_ACCOUNTS.users.find(u=>u.user===p.anmeldename);
+    if(a && kontoOffen.has(a.id)){
+      if(rolle==='student' && studentSession() && studentSession().id===a.id){ $('#loginBody').innerHTML=''; renderHome(); show('home'); return; }
+      if(rolle==='adult' && store.get('adultSession',null) && adultResume()) return;
+    }
+    return renderLogin(rolle, {name:p.anmeldename, meldung:ok?V.okAnmelden:V.benutzt});
+  }
+  // the start code does not work (any more): say so - the device stays connected
+  const T=loginTxt(true), Tk=loginTxt(false), de=kontoVerbDe();
+  const text=p.code==='startcode-abgelaufen'?(de?T.codeOld:Tk.codeOld):p.code==='fingerabdruck'?(de?T.codeFp:Tk.codeFp):(de?T.codeBad:Tk.codeBad);
+  renderLogin(undefined, {meldung:(ok?ok+' ':'')+'❌ '+text});
+}
+/* the invitation did not work: nothing kept; a device without access code shows "Connect this device" with the reason */
+function kontoLinkFehler(text, ok){
+  kontoNeuWeg();
+  if(anmTokenNoetig(KONTO_SPEICHER, localStorage)) return renderVerbinden(text);
+  renderLogin(undefined, {meldung:(ok?ok+' ':'')+text});
+}
+/* the password form of the page (#kontoNeu): login name fixed, one field "new-password" with the rules shown at it; "Log
+   in" only once the rules are met - checked on input and every 400 ms (a password manager does not always send "input") */
+function kontoNeuZeigen(r){
+  const w=kontoNeuDa();
+  if(!w){ startPrefill={name:r.anmeldename, code:r.code}; kontoLinkFp={code:r.code, fp:r.fp}; return renderLogin(r.rolle==='child'?'student':'adult'); }
+  const kind=r.rolle==='child', T=loginTxt(!kind), de=!kind && store.get('parentLang','de')!=='en';
+  $('#loginBody').innerHTML='';
+  const q=id=>document.getElementById(id), name=q('kontoNeuName'), pw=q('kontoNeuPw'), go=q('kontoNeuGo'), regeln=q('kontoNeuRegeln');
+  bindPasswordToggles(w);
+  q('kontoNeuOk').hidden=!r.ok; q('kontoNeuOk').textContent=r.ok||'';
+  q('kontoNeuTitel').textContent=kind?(r.neu?'Choose a new password':'Welcome! Choose your password'):de?'Willkommen – eigenes Passwort festlegen':'Welcome – choose your own password';
+  q('kontoNeuInfo').textContent=kind
+    ?(r.neu?'Your progress stays. Choose a new password – your iPad can suggest a strong one and remember it.':'Your user name is already there. Choose your own password – your iPad can suggest a strong one and remember it.')
+    :de?'Ihr Anmeldename steht schon da. Wählen Sie ein eigenes Passwort – Ihr Gerät schlägt ein starkes vor und merkt es sich. Es gilt auf allen Ihren Geräten.'
+      :'Your login name is already there. Choose your own password – your device suggests a strong one and remembers it. It works on all your devices.';
+  q('kontoNeuNameL').textContent=T.user;
+  q('kontoNeuPwL').textContent=de?'Passwort':'Password';
+  regeln.textContent=de?'Mindestens 12 Zeichen. Kein bekanntes Passwort, kein einfaches Muster, nicht Ihr Name.':'At least 12 characters. Not a common password, no simple pattern, not your name.';
+  q('kontoNeuIdeeL').textContent=de?'Oder ein Merkpasswort':kind?'Idea':'Or an easy-to-remember one';
+  q('kontoNeuSugg').textContent=pwSuggest();
+  q('kontoNeuUse').textContent=de?'Übernehmen':'Use it';
+  go.textContent=de?'Anmelden':'Log in';
+  name.value=r.anmeldename; pw.value=''; q('kontoNeuMsg').textContent='';
+  let pause=false;
+  const pruefen=()=>{ if(!kontoNeuDa()) return; const gut=!pwWeak(pw.value, r.anmeldename); go.disabled=pause || !gut; regeln.classList.toggle('ok', gut); };
+  pw.addEventListener('input',pruefen); pw.addEventListener('change',pruefen);
+  q('kontoNeuUse').addEventListener('click',()=>{ pw.value=q('kontoNeuSugg').textContent; pw.type='text'; pwToggleSetzen(w.querySelector('[data-pw-toggle="kontoNeuPw"]'), pw); pruefen(); });
+  if(kontoNeuTakt) clearInterval(kontoNeuTakt);
+  kontoNeuTakt=setInterval(pruefen, 400);
+  q('kontoNeuForm').addEventListener('submit',async ev=>{
+    ev.preventDefault();
+    const msg=q('kontoNeuMsg'), p=pw.value;
+    if(pause) return;
+    if(pwWeak(p, r.anmeldename)){ msg.textContent=pwStrongText(!kind); pruefen(); return; }
+    const z=kontoZugang();
+    if(!z){ msg.textContent=T.noStore; return; }
+    pause=true; pruefen(); msg.textContent=T.moment;
+    try{
+      const k=await anmErstesMal({zugang:z, code:r.code, passwort:p, fingerabdruck:r.fp||null, now:Date.now()});
+      loginFails=0;
+      const a=await kontoAngemeldet(k);
+      kontoNeuWeg();   // the form leaves the page after "submit": now the password manager offers to save name and password
+      if(k.art==='child'){
+        kontoKindPendingSetzen(k.kennung, true);
+        loginDone(a, true);
+        kontoAbgleich();
+        return;
+      }
+      if(k.wiederherstellungscode) renderKontoCode(a, k.wiederherstellungscode, ()=>renderWelcome(a));
+      else renderWelcome(a);
+      kontoAbgleich();   // a new grown-up: the first sync notes his family (module einladung) - in the background
+    }catch(err){
+      if(!kontoNeuDa()) return;
+      msg.textContent=kontoFehlerText(err, T, !kind); pause=false; pruefen();
+    }
+  });
+  w.hidden=false;
+  pruefen();
+}
+function kontoFehlerText(err, T, adult){
+  const c=err && err.code;
+  if(c==='startcode-abgelaufen') return T.codeOld;
+  if(c==='startcode-ungueltig' || c==='name-vergeben') return T.codeBad;
+  if(c==='fingerabdruck') return T.codeFp;
+  if(c==='passwort-schwach') return pwStrongText(adult);
+  if(c==='anmeldung') return T.wrong;
+  return T.noStore;   // offline, no access, limit - and anything unexpected
+}
+function kontoFalsch(T, msg, btn){ loginFails++; if(loginFails>=5){ loginBlockedUntil=Date.now()+30000; loginFails=0; } msg.textContent=T.wrong; btn.disabled=false; }
+/* login form: user name + password (any device) - or + start code for a name without an account (first login) */
+async function kontoLoginAbsenden(role, name, pw){
+  const T=loginTxt(role==='adult'), msg=$('#loginMsg'), btn=$('#loginGo'), z=kontoZugang();
+  if(!z){ msg.textContent=T.noStore; return; }
+  btn.disabled=true; msg.textContent=T.moment;
+  try{
+    const v=await anmVersuch({zugang:z, anmeldename:name, text:pw});
+    if(v.erstesMal){
+      // task "Abgleich in der App" (finding #137): a storage without any account is not this app's - say so right away
+      // instead of asking for a password first
+      if(await anmSpeicherFremd(z)){ msg.textContent=T.fremd; btn.disabled=false; return; }
+      const {anmeldename, code}=v.erstesMal; msg.textContent='';
+      return renderSetPassword({user:anmeldename, role:role==='student'?'student':'parent', konto:{code, fp:kontoLinkFp && kontoLinkFp.code===code ? kontoLinkFp.fp : null}});
+    }
+    const k=v.konto;
+    if((k.art==='child')!==(role==='student')) return kontoFalsch(T, msg, btn);   // the other role's account: like a wrong password
+    loginFails=0;
+    const a=await kontoAngemeldet(k);
+    // a child practises only once a parent's device took it in (task "Einladungen"); grown-ups sync in the background
+    if(k.art==='child') return kontoKindStart(a, k.kennung, ()=>loginDone(a));
+    loginDone(a); kontoAbgleich();
+  }catch(err){
+    if(err && err.code==='anmeldung'){
+      if(await anmSpeicherFremd(z)){ msg.textContent=T.fremd; btn.disabled=false; return; }
+      return kontoFalsch(T, msg, btn);
+    }
+    msg.textContent=kontoFehlerText(err, T, role==='adult'); btn.disabled=false;
+  }
+}
+/* first login: start code + own password -> account in the storage; grown-ups then see their recovery code */
+async function kontoErstesPasswort(u, pw){
+  const adult=u.role!=='student', T=loginTxt(adult), msg=$('#setPwMsg'), btn=$('#setPwGo'), z=kontoZugang();
+  if(!z){ msg.textContent=T.noStore; return; }
+  btn.disabled=true; msg.textContent=T.moment;
+  try{
+    const k=await anmErstesMal({zugang:z, code:u.konto.code, passwort:pw, fingerabdruck:u.konto.fp, now:Date.now()});
+    kontoLinkFp=null; loginFails=0;
+    const a=await kontoAngemeldet(k);
+    if(k.art==='child'){
+      kontoKindPendingSetzen(k.kennung, true);
+      loginDone(a, true);
+      kontoAbgleich();
+      return;
+    }
+    if(k.wiederherstellungscode) renderKontoCode(a, k.wiederherstellungscode, ()=>renderWelcome(a));
+    else renderWelcome(a);
+    kontoAbgleich();   // a new grown-up: the first sync notes his family (module einladung) - in the background
+  }catch(err){ msg.textContent=kontoFehlerText(err, T, adult); btn.disabled=false; }
+}
+/* an opened account (module konto) is logged in on this device: device list, accounts of the app, key copy */
+async function kontoAngemeldet(k){
+  // known as removed: a new device id now; else the first sync after this login may still learn it (a device whose old
+  // keys could no longer read the removal reads it with the new ones) - kontoAbgleichLauf checks once more then
+  kontoStatus.frisch=kontoNeueKennung(k.kennung) ? null : k.kennung;
+  const e=anmEintragAus(k);
+  try{ localStorage.setItem('bq2_kontoListe', JSON.stringify(anmListeMit(kontoListe(), e))); }catch(err){ kontoFehlerListe.push('liste: '+String(err&&err.message||err)); }
+  const u=normAccounts(anmGeraetKonten([e])).users[0], i=APP_ACCOUNTS.users.findIndex(x=>x.id===u.id || x.user===u.user);
+  if(i<0) APP_ACCOUNTS.users.push(u); else APP_ACCOUNTS.users.splice(i,1,u);
+  // siblings on one device: only the child logged in keeps its key here (concept 10.4)
+  if(k.art==='child') for(const [id,o] of [...kontoOffen]) if(o.art==='child' && id!==k.kennung) kontoAbmelden(id);
+  await kontoMerken(k);
+  return u;
+}
+/* task "Abgleich in der App": a removed device (it learned that with a sync) where somebody logs in again starts as a
+   new device - a new device id, so what it writes counts again, and the states of the sync anew (they belonged to the old
+   id). Everybody else who was logged in here logs in anew, too: without a new login a removed device stays locked out. */
+function kontoNeueKennung(id){
+  if(!anmGeraetEntfernt({ablage:localStorage})) return false;
+  for(const o of [...kontoOffen.keys()]) if(o!==id) kontoAbmelden(o);
+  const s=store.get('session',null); if(s && s.id!==id) store.del('session');
+  const a=store.get('adultSession',null); if(a && a.id!==id) store.del('adultSession');
+  store.set('evDevice', newDeviceId()); eventSink=null; personSink=null; kontoZug=null;
+  anmGeraetNeu({ablage:localStorage});
+  return true;
+}
+/* the key copy of an opened account, in memory and in IndexedDB (task "Einladungen - Oberflaeche": with login name, stand
+
+--- original lines 5735-5770 ---
+    if(err && err.code==='anmeldung'){ loginFails++; if(loginFails>=5){ loginBlockedUntil=Date.now()+30000; loginFails=0; } return renderKontoVergessen(de?'Benutzername oder Wiederherstellungscode stimmt nicht.':'User name or recovery code is not right.'); }
+    msg.textContent=kontoFehlerText(err, T, true); btn.disabled=false;
+  }
+}
+/* copies of the person keys on this device (not exportable; concept 8.2, 10.4) - IndexedDB, since a key that cannot be
+   exported cannot be written as text. Without IndexedDB (tests without a browser) they stay in memory only. */
+function kontoIdb(){ return new Promise((res,rej)=>{ const r=indexedDB.open('bq2_konto',1); r.onupgradeneeded=()=>r.result.createObjectStore('schluessel',{keyPath:'kennung'}); r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error); }); }
+async function kontoIdbTun(modus, tun){
+  if(typeof indexedDB==='undefined') return null;
+  const db=await kontoIdb();
+  try{ return await new Promise((res,rej)=>{ const t=db.transaction('schluessel',modus), r=tun(t.objectStore('schluessel')); t.oncomplete=()=>res(r?r.result:null); t.onerror=()=>rej(t.error); t.onabort=()=>rej(t.error); }); }
+  finally{ db.close(); }
+}
+async function kontoSchluesselLaden(){
+  try{
+    for(const x of (await kontoIdbTun('readonly', s=>s.getAll()))||[]) if(x && x.kennung && !kontoOffen.has(x.kennung)){
+      const {kennung, ...o}=x; kontoOffen.set(kennung, o);
+    }
+  }
+  catch(e){ kontoFehlerListe.push('laden: '+String(e&&e.message||e)); }
+}
+function kontoAbmelden(id){ if(!id) return; kontoOffen.delete(id); kontoAlt.delete(id); kontoIdbTun('readwrite', s=>s.delete(id)).catch(e=>kontoFehlerListe.push('loeschen: '+String(e&&e.message||e))); }
+function kontoAlleAbmelden(){ kontoOffen.clear(); kontoAlt.clear(); kontoBlatt=null; kontoIdbTun('readwrite', s=>s.clear()).catch(e=>kontoFehlerListe.push('loeschen: '+String(e&&e.message||e))); }
+/* ---------- task "Einladungen - Oberflaeche" (05.11.; concept 10.2-10.4, US9.5-US9.7) ----------
+   Test build with accounts only (KONTO_UI). Grown-ups area, ⚙: "👪 Familie" (parents: add a child with a start QR code,
+   invite the second parent, a child's new password, withdraw open invitations) and "📱 Meine Geräte" (devices of the
+   grown-up and - for parents - of each child, remove a device, renew the key). Panels of these steps replace the view
+   (kontoBlatt) until "Back"/"Done". The device syncs with the storage (module anmeldung -> einladung): after the login,
+   when the app starts or comes back, every minute while it is visible, before and after each invitation, and every few
+   seconds while a start QR code is shown. A new child practises only once a parent's device took it in.
+   Task "Abgleich in der App" (05.11.; concept 9.1, 9.4): the device syncs by itself - when the app starts and when it
+   comes back, every KONTO_TAKT_MS while it is visible, after own entries at most every KONTO_SENDEN_MS (bundled), and
+   when it goes into the background with own entries not sent yet. Offline: nothing is lost, the next sync sends it. A
+   child in the middle of a round: fetching and sending go on, but nothing new goes into the app until the round is over.
+   The storage's hourly limit: no sync until its wait time is over. Grown-ups see a line "Letzter Abgleich: vor 2 Min."
+   in the grown-ups area (problems in plain words, entries not taken over as a number with ⓘ); a child sees nothing. */
+
+--- original lines 5920-5945 ---
+/* the accounts of the app: those that logged in here, and the children of the parents logged in here (from the family's
+   log on this device) - so "Meine Kinder" shows them on every device of a parent */
+function kontoKontenAuffrischen(){
+  if(!KONTO_UI) return;
+  const raw=anmGeraetKonten(kontoListe()), now=Date.now();
+  for(const id of kontoOffen.keys()){
+    if(kontoOffen.get(id).art!=='parent') continue;
+    let v; try{ v=anmVerbindungen({ablage:localStorage, konto:kontoKonto(id), now}); }catch(e){ continue; }
+    for(const c of v.kinder){
+      if(!c.name || !anmName(c.name)) continue;
+      if(!raw.users.some(u=>u.id===c.id)) raw.users.push({id:c.id, user:c.name, kind:'child'});
+      raw.guardians.push({adult:id, child:c.id});
+    }
+  }
+  const n=normAccounts(raw);
+  APP_ACCOUNTS.users.splice(0, APP_ACCOUNTS.users.length, ...n.users);
+  APP_ACCOUNTS.guardians=n.guardians;
+}
+/* after a sync in the background: show what is new - but never under the hands of someone filling in a form */
+function kontoNeuZeichnen(geaendert){
+  if(state.screen==='about' && state.aboutTab==='sheets' && parentAccess){
+    if(kontoBlatt && kontoBlatt.art==='qr') return void kontoQrStatus();
+    if(kontoBlatt) return;
+    if(geaendert) renderSheets();
+    return;
+  }
+
+--- original lines 6185-6220 ---
+  lb.querySelector('#kidWaitBack').addEventListener('click',()=>{ aus=true; kontoAbmelden(id); renderLogin(); });
+  setTimeout(takt, KONTO_WARTEN_MS);
+}
+/* ---------- grown-ups area on a child's device ---------- */
+/* Peter, 06.11.: on a device where a child is logged in, putting the app away ends only the grown-ups area.
+   The grown-up stays signed in on the device, but has to return with Face ID or password. */
+function adultHideOnChildDevice(){
+  if(!KONTO_UI || !adultUser || !studentSession()) return false;
+  store.set('adultUnlock', true);
+  kontoBlatt=null;
+  parentLock();
+  renderHome();
+  show('home');
+  window.scrollTo(0,0);
+  return true;
+}
+/* "Log out" of a grown-up: his session and his key copy leave this device; a child logged in here stays */
+function parentAbmelden(){
+  schoolEvaluationCapture=null;
+  schoolEvaluationDraft=null;
+  schoolEvaluationNotice=null;
+  pendingRoute=null;
+  store.del('adultUnlock');
+  if(accountsOn()){ if(KONTO_UI){ kontoBlatt=null; if(adultUser) kontoAbmelden((accByRef({user:adultUser.user})||{}).id); } store.del('adultSession'); restoreRealChild(); }
+  parentLock(); renderParentGate();
+}
+/* ---------- ⚙ sections ---------- */
+const kontoZeit = iso => { if(!iso) return '–'; const d=new Date(iso); return fmtDay(dayKey(d))+' '+pad(d.getHours())+':'+pad(d.getMinutes()); };
+const kontoKindName = (id, login) => { const n=String(kidRead({id},'name','')||'').trim(); return n || login || ''; };
+function kontoVerb(k){ try{ return anmVerbindungen({ablage:localStorage, konto:k, now:Date.now()}); }catch(e){ return {kinder:[], eltern:[], offen:[], familie:null, verzeichnis:{}}; } }
+function kontoFamilieHTML(){
+  const de=PL()==='de', k=kontoIch(); if(!k || k.art!=='parent') return '';
+  const v=kontoVerb(k), kinder=v.kinder.filter(c=>c.name), warn=new Set(((kontoBericht&&kontoBericht.warnungen)||[]).map(w=>w.id));
+  const artText=a=>a==='child'?(de?'Kind':'child'):a==='parent'?(de?'Elternteil':'parent'):(de?'neues Passwort':'new password');
+  const msgs=kontoMeldungen.slice(-6).map(m=>`<p class="kmeld kmeld-${m.art}">${esc(m.text)}</p>`).join('');
+  return msgs
