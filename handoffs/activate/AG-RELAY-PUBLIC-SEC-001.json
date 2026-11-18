@@ -1,0 +1,12 @@
+{
+  "schema": "agentarium.relay-activation.v2",
+  "task_id": "AG-BQ-IPAD-SWIFT-FIX-20261118-A1",
+  "authorized": true,
+  "source_commit": "fcee5a464b7424a36f4ef6fd5da5eb9a78694762",
+  "role": "coding-agent",
+  "request": "handoffs/BQ-EVAL-01-IPAD-SWIFT-FIX-A1-20261118/request.json",
+  "handback": "handoffs/BQ-EVAL-01-IPAD-SWIFT-FIX-A1-20261118/handback.md",
+  "model": "sonnet",
+  "max_turns": 20,
+  "max_budget_usd": 6
+}
