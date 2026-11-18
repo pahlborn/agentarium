@@ -1,0 +1,41 @@
+{
+  "schema": "agentarium.relay-activation.v3",
+  "task_id": "AG-BQ-EVAL-CADENCE-FRICTION-20261118",
+  "authorized": true,
+  "source_commit": "e2711319349f62d3aecd8b0df4f561b2fdc4321e",
+  "role": "process-agent",
+  "request": "handoffs/AG-BQ-EVAL-CADENCE-FRICTION-20261118.json",
+  "handback": "handoffs/AG-BQ-EVAL-CADENCE-FRICTION-20261118-handback.md",
+  "model": "opus",
+  "max_turns": 8,
+  "max_budget_usd": 2,
+  "contract": {
+    "schema": "agentarium.project-packet.v1",
+    "repository": "pahlborn/agentarium",
+    "project_id": "agentarium",
+    "target_commit": "21a6f8f90d3934aa878d360fbfbf1cfee7b645fe",
+    "mode": "analysis",
+    "read_files": [
+      {
+        "path": "README.md",
+        "git_blob": "4201a14151f3ffe382210807c50263a00133e44c",
+        "sha256": "c598cc2cba2d03ac220ef0c621fb7c919c1db8a3ff073b4a4dd283a820965f58"
+      }
+    ],
+    "edit_paths": [],
+    "create_paths": [],
+    "synthetic_files": [],
+    "identity": {
+      "schema": "agentarium.relay-runtime-identity.v1",
+      "project_id": "agentarium",
+      "run_id": "AG-BQ-EV5-20261118",
+      "task_id": "AG-BQ-EVAL-CADENCE-FRICTION-20261118",
+      "parent_id": "AG-BQ-EV5-20261118",
+      "subject_role": "cadence"
+    },
+    "max_seconds": 180,
+    "test_profile": "none",
+    "artifact_publication": "host-approved-exact-paths",
+    "journal_delivery": "archive"
+  }
+}
