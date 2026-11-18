@@ -1,0 +1,41 @@
+{
+  "schema": "agentarium.relay-activation.v3",
+  "task_id": "AG-BQ-EP01-CADENCE-GUARD-20261118",
+  "authorized": true,
+  "source_commit": "d0d9b0d566d84981f413a94d8616d7a933fa213b",
+  "role": "process-agent",
+  "request": "handoffs/AG-BQ-EP01-CADENCE-GUARD-20261118.json",
+  "handback": "handoffs/AG-BQ-EP01-CADENCE-GUARD-20261118-handback.md",
+  "model": "sonnet",
+  "max_turns": 12,
+  "max_budget_usd": 2,
+  "contract": {
+    "schema": "agentarium.project-packet.v1",
+    "repository": "pahlborn/agentarium",
+    "project_id": "agentarium",
+    "target_commit": "21a6f8f90d3934aa878d360fbfbf1cfee7b645fe",
+    "mode": "analysis",
+    "read_files": [
+      {
+        "path": "README.md",
+        "git_blob": "4201a14151f3ffe382210807c50263a00133e44c",
+        "sha256": "c598cc2cba2d03ac220ef0c621fb7c919c1db8a3ff073b4a4dd283a820965f58"
+      }
+    ],
+    "edit_paths": [],
+    "create_paths": [],
+    "synthetic_files": [],
+    "identity": {
+      "schema": "agentarium.relay-runtime-identity.v1",
+      "project_id": "agentarium",
+      "run_id": "AG-BQ-EP01-RELAY-20261118",
+      "task_id": "AG-BQ-EP01-CADENCE-GUARD-20261118",
+      "parent_id": "AG-BQ-EP01-RELAY-20261118",
+      "subject_role": "cadence"
+    },
+    "max_seconds": 240,
+    "test_profile": "none",
+    "artifact_publication": "host-approved-exact-paths",
+    "journal_delivery": "archive"
+  }
+}
