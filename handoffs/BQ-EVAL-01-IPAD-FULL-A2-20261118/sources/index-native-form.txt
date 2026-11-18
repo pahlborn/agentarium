@@ -1,0 +1,404 @@
+Canonical product pahlborn/bis-school-app_src@8f70105909a1d3af70570dd3fe2ca67338deb939:index.html
+
+--- original lines 6190-6590 ---
+  return l.sort(cmp);
+}
+/* a teacher's text as short points: split at ";" and at the end of a sentence (not after "z. B.", "e.g.") */
+const schoolPoints = s => String(s||'').replace(/([A-Za-zÄÖÜäöüß]{2})\.\s+(?=[A-ZÄÖÜ])/g,'$1\u0001').split(/;\s+|\u0001/).map(x=>x.trim().replace(/\.$/,'')).filter(Boolean);
+const schoolArea = (a, T) => T.areas[a] || SUBJECTS.find(s=>s.key===a)?.name || a;
+const schoolWord = k => `<span class="pst ${k}">${PSTAND[PL()][k]}</span>`;
+function schoolDetailHTML(t, U, T, de){
+  const L=de?'de':'en', none=`<p class="small">${U.none}</p>`, names=qs=>(qs||[]).filter(q=>WORLDS[q]).map(q=>esc(WORLDS[q].name)).join(', ');
+  const std=Object.entries(t.std||{}).map(([s,r])=>`<li>${esc((de?STANDARD_TEXT:STANDARD_TEXT_EN)[s]||s)} ${SL[r]?schoolWord(SL[r]):esc(r)}</li>`)
+    .concat(Object.entries(t.atl||{}).map(([a,v])=>`<li>${esc(a)}: <b>${esc(U.atl[v]||v)}</b></li>`)).join('');
+  const rub=(t.rubric||[]).map(x=>`<tr><td>${esc(x.crit)}</td><td>${SL[x.teacher]?schoolWord(SL[x.teacher]):'–'}</td><td>${SL[x.self]?schoolWord(SL[x.self]):'–'}</td></tr>`).join('');
+  const list=s=>{ const p=schoolPoints(s); return p.length?`<ul>${p.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:none; };
+  const fq=names(t.focusNext), pq=names(t.quests);
+  const documentText=t.assessment?`<h4>${de?'Lernziel':'Learning goal'}</h4><p>${esc(t.assessment.goal)}</p><h4>${de?'Arbeitsanweisung':'Instructions'}</h4><p>${esc(t.assessment.instructions)}</p><h4>${de?'Lehrkraft-Rückmeldung':'Teacher feedback'}</h4><p>${esc(t.assessment.feedback)}</p>`:'';
+  const evidence=t.assessment?.criteria.filter(c=>c.evidence).map(c=>`<li>${esc(c.criterion)}<p>${esc(c.evidence)}</p></li>`).join('');
+  return documentText+(evidence?`<details class="pseval-evidence"><summary>${de?'Quellenbelege':'Source evidence'}</summary><ul>${evidence}</ul></details>`:'')+`<h4>${U.standards}</h4>${std?`<ul>${std}</ul>`:none}`
+    +`<h4>${U.rubric}</h4>${rub?`<table class="dt psrub"><thead><tr><th>${U.crit}</th><th>${U.teacher}</th><th>${U.self}</th></tr></thead><tbody>${rub}</tbody></table>`:none}`
+    +`<h4>${U.strengths}</h4>${list(t.good&&t.good[L])}`
+    +`<h4>${T.next}</h4>${list(t.next&&t.next[L])}`
+    +(fq?`<p class="small">${de?'Daraus im automatischen Fokus':'In the automatic focus because of this'}: ${fq}</p>`:'')
+    +(pq?`<p class="small">${T.quests}: ${pq}</p>`:'');
+}
+function schoolEvaluationSyncText(synced,de){
+  return synced?(de?'Mit App-Speicher abgeglichen':'Synced with app storage')
+    :(de?'Lokal gespeichert · Abgleich ausstehend':'Saved on this device · sync pending');
+}
+function schoolEvaluationSyncHTML(revision,synced,de){
+  return `<span class="small" data-eval-sync="${esc(revision)}">${schoolEvaluationSyncText(synced.has(revision),de)}</span>`;
+}
+function schoolEvaluationHistory(t, de, synced){
+  const m=t.manual;
+  if(!m) return '';
+  const lang=de?'de':'en', standards=de?STANDARD_TEXT:STANDARD_TEXT_EN;
+  const button=(action,label,choice='')=>`<button type="button" class="btn small" data-pseval="${m.evaluation}" data-pseval-op="${action}" data-pseval-choice="${choice}">${label}</button>`;
+  const history=m.history.map(p=>{
+    const current=p.revision===m.revision, proposal=m.conflicts.includes(p.revision);
+    const status=p.withdrawn?(de?'Zurückgenommen':'Withdrawn'):current?(de?'Aktive Fassung':'Active revision'):proposal?(de?'Vorschlag':'Proposal'):(de?'Frühere Fassung':'Earlier revision');
+    const choose=proposal||current&&m.conflicts.length;
+    const criteria=p.assessment?.criteria, criterionHistory=criteria&&(p.standard==='unmapped'||criteria.some(c=>Object.hasOwn(c,'standard')));
+    const grade=criterionHistory?'':` · ${esc(standards[p.standard])} · ${PSTAND[lang][SL[p.rating]]}`;
+    const details=criterionHistory?`<ul class="pseval-criteria">${criteria.map(c=>{
+      const area=!Object.hasOwn(c,'standard')?(de?'Kein zugeordneter Bereich':'No assigned area')
+        :c.standard==='none'?(de?'Kein passender Bereich':'No matching area'):(standards[c.standard]||c.standard);
+      const rating=c.rating?PSTAND[lang][SL[c.rating]]:(de?'Keine Einstufung':'Not rated');
+      return `<li>${esc(c.criterion)} → ${esc(area)} · ${esc(rating)}</li>`;
+    }).join('')}</ul>`:'';
+    return `<li data-eval-history="${esc(p.revision)}">${esc(p.title)} · ${fmtDay(p.day)}${grade} · <b>${status}</b> · ${schoolEvaluationSyncHTML(p.revision,synced,de)}`
+      +`${choose?' '+button('resolve',de?'Diese Fassung wählen':'Choose this revision',p.revision):''}${details}</li>`;
+  }).join('');
+  const actions=m.conflicts.length
+    ? `<p role="status">${de?'Konkurrierende Änderungen. Die bisherige Fassung bleibt aktiv, bis Sie eine Fassung wählen und bestätigen.':'Conflicting changes. The previous revision stays active until you choose and confirm a revision.'}</p>`
+    : m.withdrawn?'':`<p>${button('correct',de?'Bewertung korrigieren':'Correct assessment')} ${button('withdraw',de?'Bewertung zurücknehmen':'Withdraw assessment')}</p>`;
+  return `${actions}<h4>${de?'Fassungsverlauf':'Revision history'}</h4><ul>${history}</ul>`;
+}
+function schoolListHTML(d){
+  const de=PL()==='de', U=SCHOOL_UI[de?'de':'en'], T=schoolTexts(de), f=state.sfilt||SCHOOL_FILTER0, open=state.sopen||[];
+  const target=schoolEvaluationTarget(), mayEdit=!!target;
+  const synced=mayEdit?anmSchuleAbgeglicheneRevisionen(localStorage, target.id):null;
+  const all=d.tasks.filter(t=>!t.pending && (mayEdit || !t.manual?.withdrawn)).length, l=schoolFiltered(d, f, dayKey(), mayEdit);
+  const rows=l.map(({t,i})=>{ const lv=schoolTaskLevels(t), op=open.includes(i);
+    return `<tr class="psrow" data-psrow="${i}"><td data-l="${U.date}">${fmtDay(t.day)}</td><td data-l="${U.subject}">${esc(schoolArea(t.area,T))}</td><td data-l="${U.task}">${esc(t.title)}${t.manual?.withdrawn?` <span class="small">(${de?'zurückgenommen':'withdrawn'})</span>`:''}</td>`
+      +`<td data-l="${U.rating}"><span class="pslv">${lv.length?lv.map(([k,n])=>`<span class="pst ${k}">${n>1?n+'× ':''}${PSTAND[PL()][k]}</span>`).join(''):'–'}</span></td>`
+      +`<td><button type="button" class="btn small" data-psdet="${i}" aria-expanded="${op}">${op?U.close:U.details}</button></td></tr>`
+      +`<tr class="psdet" data-psdetrow="${i}"${op?'':' hidden'}><td colspan="5">${schoolDetailHTML(t,U,T,de)}${mayEdit?schoolEvaluationHistory(t,de,synced):''}</td></tr>`; }).join('');
+  return `<p class="small pscount" role="status">${U.count.replace('{n}',l.length).replace('{m}',all)}</p>`
+    +(l.length?`<table class="dt pstab"><thead><tr><th>${U.date}</th><th>${U.subject}</th><th>${U.task}</th><th>${U.rating}</th><th><span class="sr-only">${U.details}</span></th></tr></thead><tbody>${rows}</tbody></table>`
+      :`<p>${U.empty} <button type="button" class="btn small" data-psreset>${U.reset}</button></p>`);
+}
+let schoolEvaluationDraft=null;
+let schoolEvaluationNotice=null;
+function schoolEvaluationTarget(){
+  if(!schoolEvaluationPilot() || !parentAccess || eventWho()?.role!=='parent') return null;
+  const account=kontoIch(), id=schoolKid();
+  if(account?.art!=='parent' || !id || id!==childNs()) return null;
+  const child=kontoVerb(account).kinder.find(c=>c.id===id);
+  return child ? {id, author:account.kennung, name:kontoKindName(id, child.name)} : null;
+}
+/* Shared document form from Test11; EV2 remains the validation/aggregation contract. */
+let schoolEvaluationCapture=null;
+function schoolDocumentNew(){ return {area:'',goal:'',instructions:'',feedback:'',criteria:[{criterion:'',rating:'',evidence:'',standard:'none'}]}; }
+function schoolEvaluationNew(target){
+  return {child:target.id,author:target.author,title:'',day:'',assessment:schoolDocumentNew(),standardOverrides:{},touched:[false],
+    evaluation:crypto.randomUUID(),revision:crypto.randomUUID(),preview:false};
+}
+function schoolEvaluationPayload(d){
+  const {child,evaluation,revision,title,day}=d, payload={child,evaluation,revision,title,day};
+  const mapped=d.assessment?.criteria.some(c=>Object.hasOwn(c,'standard'));
+  if(d.assessment) payload.assessment=JSON.parse(JSON.stringify(d.assessment));
+  if(mapped){ if(Object.keys(d.standardOverrides||{}).length) payload.standardOverrides={...d.standardOverrides}; }
+  else Object.assign(payload,{standard:d.standard,rating:d.rating,focus:d.focus?SCHOOL_EVALUATION_TARGETS[d.standard]?.focus:'none'});
+  return payload;
+}
+function schoolDocumentAreaText(code,de){
+  const info=schoolStandardInfo(code);
+  return info?info.text[de?'de':'en']+(info.quests.length?'':' · '+schoolStandardNoQuest(de)):(de?'Kein passender Bereich':'No matching area');
+}
+function schoolDocumentHTML(d,target){
+  const de=PL()==='de', lang=de?'de':'en', doc=d.assessment, area=schoolArea(doc.area,schoolTexts(de));
+  const mapped=doc.criteria.some(c=>Object.hasOwn(c,'standard'));
+  const rating=r=>r?`${r} · ${PSTAND[lang][SL[r]]}`:(de?'Keine Einstufung':'Not rated');
+  const options=(selected,empty)=>`<option value="">${empty}</option>`+['RS','C','M','E'].map(r=>`<option value="${r}"${r===selected?' selected':''}>${esc(rating(r))}</option>`).join('');
+  const field=(name,label,value,type='text')=>`<label>${label}<input name="${name}" type="${type}" value="${esc(value)}" required${name==='title'?' maxlength="160"':` max="${dayKey()}"`}></label>`;
+  const text=(name,label,value)=>`<label>${label}<textarea name="doc-${name}" maxlength="12000">${esc(value)}</textarea></label>`;
+  const evidence=c=>c.evidence?`<details><summary>${de?'Quellenbeleg':'Source evidence'}</summary><p>${esc(c.evidence)}</p></details>`:'';
+  const standards=selected=>`<option value="none"${!selected||selected==='none'?' selected':''}>${de?'Kein passender Bereich':'No matching area'}</option>`+SUBJECTS.map(subject=>{
+    const entries=Object.entries(SCHOOL_STANDARD_CATALOG).filter(([,entry])=>entry.subject===subject.key);
+    return entries.length?`<optgroup label="${esc(schoolArea(subject.key,schoolTexts(de)))}">${entries.map(([code,entry])=>`<option value="${code}"${code===selected?' selected':''}>${esc(entry.text[lang])}${entry.quests.length?'':` · ${esc(schoolStandardNoQuest(de))}`}</option>`).join('')}</optgroup>`:'';
+  }).join('');
+  const criteria=doc.criteria.map((c,i)=>`<fieldset><legend>${de?'Kriterium':'Criterion'} ${i+1}</legend>
+    <label>${de?'Kriterium':'Criterion'} ${i+1}<textarea maxlength="2000" required data-doc-criterion="${i}">${esc(c.criterion)}</textarea></label>
+    <label>${de?'Einstufung':'Rating'} · ${de?'Kriterium':'Criterion'} ${i+1}<select aria-label="${de?'Einstufung · Kriterium':'Rating · Criterion'} ${i+1}" data-doc-rating="${i}">${options(c.rating,de?'Nicht angegeben / bitte prüfen':'Not given / please check')}</select></label>
+    ${mapped?`<label>${de?'Bereich in Big Quest':'Area in Big Quest'} · ${de?'Kriterium':'Criterion'} ${i+1}<select aria-label="${de?'Bereich in Big Quest · Kriterium':'Area in Big Quest · Criterion'} ${i+1}" aria-describedby="eval-area-info-${i}" data-doc-standard="${i}">${standards(c.standard)}</select></label>
+    <p class="small" id="eval-area-info-${i}" data-doc-area-info="${i}">${esc(schoolDocumentAreaText(c.standard,de))}</p>`:''}
+    ${evidence(c)}<button type="button" class="btn small" data-doc-remove="${i}"${doc.criteria.length===1?' disabled':''}>${de?'Kriterium entfernen':'Remove criterion'} ${i+1}</button></fieldset>`).join('');
+  const original=schoolEvaluationStandards(doc.criteria), effective=schoolEvaluationStandards(doc.criteria,{standardOverrides:d.standardOverrides||{}});
+  const codes=[...new Set(doc.criteria.filter(c=>schoolStandardInfo(c.standard)).map(c=>c.standard))];
+  const summary=codes.map(code=>{
+    const grade=original[code]||'';
+    const info=schoolStandardInfo(code), grades=doc.criteria.filter(c=>c.standard===code && c.rating).map(c=>c.rating), chosen=effective[code]||'';
+    // Only main-standard quests trigger the existing gap rule; a secondary link never promises a gap.
+    const gap=schoolEvaluationNeedsPractice(chosen) && Object.values(info.questRanks).includes(0);
+    return `<li data-eval-area="${code}"><b>${code}: ${esc(rating(chosen))}</b>${grades.length>1?` (${de?'schwächere von':'weaker of'} ${esc(grades.join(de?' und ':' and '))}: ${grade})`:''}
+     ${Object.hasOwn(d.standardOverrides||{},code)?` · ${de?'von Ihnen gewählt':'chosen by you'}`:''}
+      · ${gap?(de?'Lücke':'Gap'):(de?'keine Lücke':'No gap')}${info.quests.length?'':` · ${esc(schoolStandardNoQuest(de))}`}
+      ${grades.length>1||Object.hasOwn(d.standardOverrides||{},code)?`<label>${de?'Einstufung für diesen Bereich ändern':'Change rating for this area'} · ${code}<select aria-label="${de?'Einstufung für diesen Bereich ändern':'Change rating for this area'} · ${code}" data-doc-override="${code}">${options(d.standardOverrides?.[code]||'',de?`Schwächere Einstufung verwenden (${grade})`:`Use weaker rating (${grade})`)}</select></label>`:''}</li>`;
+  }).join('');
+  // Test11 documents retain their one confirmed assignment until a parent
+  // explicitly chooses criterion mapping. Original criterion grades stay separate.
+  const legacyTarget=SCHOOL_EVALUATION_TARGETS[d.standard], legacyExercise=legacyTarget&&SCHOOL_EVALUATION_EXERCISES[legacyTarget.focus];
+  const legacyGap=legacyTarget && schoolEvaluationNeedsPractice(d.rating) && Object.values(schoolStandardInfo(d.standard).questRanks).includes(0);
+  const legacyEffect=legacyTarget?`<section data-eval-legacy-effect><h4>${de?'Zuordnung der Evaluation':'Evaluation assignment'}</h4>
+    <p><b>${d.standard}: ${esc(rating(d.rating))}</b> · ${legacyGap?(de?'Lücke':'Gap'):(de?'keine Lücke':'No gap')}</p>
+    <p>${esc((de?STANDARD_TEXT:STANDARD_TEXT_EN)[d.standard])}</p>
+    ${schoolEvaluationNeedsPractice(d.rating)?`<label class="pseval-focus"><input type="checkbox" name="exerciseFocus"${d.focus?' checked':''}> ${esc(legacyExercise[lang])}</label>`:''}
+    <p>${d.focus&&schoolEvaluationNeedsPractice(d.rating)?(de?'Zusätzliche passende Übungskarten werden berücksichtigt.':'Additional matching practice cards are included.'):(de?'Kein zusätzlicher Übungsfokus.':'No additional practice focus.')}</p></section>`:`<p>${de?'Keine zugeordneten Einstufungen. Kein zusätzlicher Übungsfokus.':'No assigned ratings. No additional practice focus.'}</p>`;
+  const legacyControls=mapped?'':`<fieldset><legend>${de?'Bisherige Zuordnung der Evaluation':'Existing evaluation assignment'}</legend>
+    <p>${de?'Diese Zuordnung gilt für die Evaluation. Die Originalkriterien behalten ihre eigenen Einstufungen.':'This assignment applies to the evaluation. Original criteria keep their own ratings.'}</p>
+    <label>${de?'Übungsmuster':'Practice pattern'}<select name="standard" aria-label="${de?'Übungsmuster':'Practice pattern'}"><option value="unmapped"${d.standard==='unmapped'?' selected':''}>${de?'Noch keine Zuordnung':'No assignment'}</option>${Object.keys(SCHOOL_EVALUATION_TARGETS).map(code=>`<option value="${code}"${d.standard===code?' selected':''}>${esc((de?STANDARD_TEXT:STANDARD_TEXT_EN)[code])}</option>`).join('')}</select></label>
+    <label>${de?'Einstufung für dieses Übungsmuster':'Rating for this practice pattern'}<select name="rating" aria-label="${de?'Einstufung für dieses Übungsmuster':'Rating for this practice pattern'}"><option value="N"${d.rating==='N'?' selected':''}>${de?'Bitte auswählen':'Please select'}</option>${['RS','C','M','E'].map(r=>`<option value="${r}"${d.rating===r?' selected':''}>${esc(rating(r))}</option>`).join('')}</select></label>
+    <button type="button" class="btn small" data-eval-action="map-criteria">${de?'Bereiche je Kriterium zuordnen':'Assign areas to each criterion'}</button></fieldset>`;
+  const preview=`<h3>${de?'Vorschau':'Preview'}</h3><h4>${esc(d.title)}</h4><p>${fmtDay(d.day)} · ${esc(area)}</p>
+    <h4>${de?'Lernziel':'Learning goal'}</h4><p>${esc(doc.goal)}</p><h4>${de?'Arbeitsanweisung':'Instructions'}</h4><p>${esc(doc.instructions)}</p>
+    <h4>${de?'Lehrkraft-Rückmeldung':'Teacher feedback'}</h4><p>${esc(doc.feedback)}</p>
+    <ol>${doc.criteria.map(c=>`<li><b>${esc(c.criterion)}</b> → ${esc(mapped?(schoolStandardInfo(c.standard)?.text[lang]||(de?'Kein passender Bereich':'No matching area')):(de?'Keine Zuordnung je Kriterium':'No criterion assignment'))} · ${esc(rating(c.rating))}${evidence(c)}</li>`).join('')}</ol>
+    ${!mapped?legacyEffect:summary?`<h4>${de?'Wirkung je Bereich':'Effect by area'}</h4><ul>${summary}</ul>`:`<p>${de?'Keine zugeordneten Einstufungen. Kein zusätzlicher Übungsfokus.':'No assigned ratings. No additional practice focus.'}</p>`}
+    <p class="small">${de?'Die Vorschau speichert nichts. Die Originalkriterien bleiben mit ihren Einstufungen erhalten.':'The preview saves nothing. Original criteria keep their own ratings.'}</p>
+    <button class="btn" type="submit">${d.resolves?(de?'Konfliktauflösung bestätigen':'Confirm resolution'):d.base?(de?'Korrektur bestätigen':'Confirm correction'):(de?'Evaluation bestätigen':'Confirm assessment')}</button>
+    <button class="btn small" type="button" data-eval-action="edit">${de?'Bearbeiten':'Edit'}</button>`;
+  return `<div id="pSchoolEvaluation"><form class="login-form pseval-document"><h3>${de?'Evaluation übernehmen':'Bring in an evaluation'}</h3><p class="pseval-child"><b>${de?'Kind':'Child'}: ${esc(target.name)}</b></p>
+    ${d.preview?preview:`${d.source?`<details${d.extracted?'':' open'}><summary>${de?'Erfasster Evaluationstext':'Captured evaluation text'}</summary><p>${de?'Prüfen Sie den Text vor dem Senden an Claude. Entfernen Sie Namen und andere persönliche Angaben.':'Check the text before sending it to Claude. Remove names and other personal details.'}</p><label>${de?'Quelltext':'Source text'}<textarea name="source"${d.busy||d.extracted?' readonly':''}>${esc(d.source)}</textarea></label></details><button class="btn" type="button" data-eval-action="ai"${d.busy||d.extracted?' disabled':''}>${d.busy?(de?'Claude verarbeitet …':'Claude is processing …'):(de?'Mit Claude ins Formular übertragen':'Fill the form with Claude')}</button>`:''}
+    <fieldset class="pseval-fields"${d.busy?' disabled':''}><legend class="sr-only">${de?'Angaben der Evaluation':'Evaluation details'}</legend>
+    ${field('title',de?'Titel der Evaluation':'Evaluation title',d.title)}${field('day',de?'Bewertungsdatum':'Assessment date',d.day,'date')}
+    <label>${de?'Fach':'Subject'}<select name="doc-area" aria-label="${de?'Fach':'Subject'}" required><option value="">${de?'Bitte auswählen':'Please select'}</option>${SUBJECTS.map(s=>`<option value="${s.key}"${doc.area===s.key||doc.area==='math'&&s.key==='maths'?' selected':''}>${esc(schoolArea(s.key,schoolTexts(de)))}</option>`).join('')}</select></label>
+    ${text('goal',de?'Lernziel':'Learning goal',doc.goal)}${text('instructions',de?'Arbeitsanweisung':'Instructions',doc.instructions)}${text('feedback',de?'Lehrkraft-Rückmeldung':'Teacher feedback',doc.feedback)}<h3>${de?'Bewertungskriterien':'Assessment criteria'}</h3>${criteria}${legacyControls}
+    <button type="button" class="btn small" data-eval-action="add-criterion"${doc.criteria.length>=SCHOOL_EVALUATION_CRITERIA_MAX?' disabled':''}>${de?'Kriterium hinzufügen':'Add criterion'}</button>
+    <button class="btn" type="submit">${de?'Vorschau anzeigen':'Show preview'}</button></fieldset>`}
+    <button class="btn small" type="button" data-eval-action="cancel">${de?'Abbrechen':'Cancel'}</button>${d.error?`<p role="alert">${esc(d.error)}</p>`:''}</form></div>`;
+}
+/* The native shell already calls context()/source(). Only the shared draft is filled;
+   no storage and no native URL, frame, origin or credential policy changes. */
+Object.defineProperty(window,'bigQuestEvaluationForm',{value:Object.freeze({
+  context(){
+    const target=schoolEvaluationTarget();
+    if(!target || schoolEvaluationDraft) return null;
+    const token=crypto.randomUUID(); schoolEvaluationCapture={...target,token}; return token;
+  },
+  source(context,transfer,source){
+    const target=schoolEvaluationTarget(), capture=schoolEvaluationCapture;
+    if(!target || !capture || capture.token!==context || capture.id!==target.id || capture.author!==target.author) return 'invalid';
+    if(schoolEvaluationDraft) return 'busy';
+    if(typeof transfer!=='string' || !transfer || typeof source!=='string' || !source.trim() || new TextEncoder().encode(source).length>48000) return 'invalid';
+    schoolEvaluationCapture=null;
+    schoolEvaluationDraft={...schoolEvaluationNew(target),source};
+    state.psubj=null; state.pview=null; state.popen=uniq([...(state.popen||[]),'school']); renderSheets();
+    $('#pSchoolEvaluation [name="source"]')?.focus(); return 'opened';
+  }
+})});
+/* EV6: calm notice when stored criteria without an area now have a proposal; computed on read, nothing stored. */
+function schoolEvaluationRemapHTML(target,de){
+  const list=evUebRemapCandidates(schoolFromAccount(target.id)?.tasks||[]);
+  if(!list.length) return '';
+  return `<section data-eval-remap role="status"><h4>${de?'Neue Zuordnungen möglich':'New mappings available'}</h4>
+    <p class="small">${de?'Für diese Evaluationen passen jetzt Bereiche zu bisher nicht zugeordneten Kriterien. Sie sehen zuerst eine Vorschau; gespeichert wird erst nach Ihrer Bestätigung.':'Learning areas now fit criteria that had none. You see a preview first; nothing is saved until you confirm.'}</p>
+    <ul>${list.map(c=>`<li>${esc(c.title)} · ${fmtDay(c.day)} <button type="button" class="btn small" data-eval-action="remap" data-eval-id="${esc(c.evaluation)}">${de?'Zuordnungen prüfen':'Review mappings'}</button></li>`).join('')}</ul></section>`;
+}
+function schoolEvaluationHTML(){
+  const target=schoolEvaluationTarget();
+  if(!target) return '';
+  const de=PL()==='de', lang=de?'de':'en';
+  const draft=schoolEvaluationDraft;
+  const d=draft?.child===target.id && draft.author===target.author ? draft : null;
+  if(d?.assessment && !d.withdrawn) return schoolDocumentHTML(d,target);
+  const status=schoolEvaluationNotice?.child===target.id && schoolEvaluationNotice.author===target.author
+    ? `<p role="status">${schoolEvaluationSyncHTML(schoolEvaluationNotice.revision,anmSchuleAbgeglicheneRevisionen(localStorage, target.id),de)}</p>` : '';
+  const criteria=de?STANDARD_TEXT:STANDARD_TEXT_EN;
+  const start=`<button type="button" class="btn small" data-eval-action="open">${de?'Evaluation hinzufügen':'Add assessment'}</button>`;
+  if(!d) return `<div id="pSchoolEvaluation">${start}${status}${schoolEvaluationRemapHTML(target,de)}</div>`;
+  const cancel=`<button type="button" class="btn small" data-eval-action="cancel">${de?'Abbrechen':'Cancel'}</button>`;
+  const child=`<p><b>${de?'Kind':'Child'}</b> · ${esc(target.name)}</p>`;
+  const error=d.error?`<p role="alert">${esc(d.error)}</p>`:'';
+  let content;
+  if(d.withdrawn){
+    const title=de?'Bewertung zurücknehmen':'Withdraw assessment';
+    const explanation=de?'Der Eintrag bleibt im Fassungsverlauf. Nach dem Abgleich liefert er keine gezielten Karten mehr für neue Tagesrunden.':'The assessment remains in the revision history. After syncing, it stops adding targeted cards to new daily rounds.';
+    content=`<h3>${title}</h3>${child}<p>${esc(d.title)} · ${fmtDay(d.day)}</p><p>${explanation}</p>
+      <button class="btn" type="submit">${de?'Rücknahme bestätigen':'Confirm withdrawal'}</button>`;
+  } else if(d.preview){
+    const exercise=SCHOOL_EVALUATION_EXERCISES[SCHOOL_EVALUATION_TARGETS[d.standard].focus];
+    const hasFocus=schoolEvaluationNeedsPractice(d.rating);
+    const same=!d.base && schoolFromAccount(target.id)?.tasks.some(t=>t.manual && !t.manual.withdrawn && t.title===d.title && t.day===d.day
+      && t.manual.standard===d.standard && t.std[d.standard]===d.rating
+      && t.manual.focus===(d.focus?SCHOOL_EVALUATION_TARGETS[d.standard].focus:'none'));
+    const confirm=d.resolves?(de?'Konfliktauflösung bestätigen':'Confirm resolution')
+      :d.base?(de?'Korrektur bestätigen':'Confirm correction')
+      :same?(de?'Separaten Eintrag speichern':'Save as a separate assessment'):(de?'Evaluation bestätigen':'Confirm assessment');
+    content=`<h3>${de?'Vorschau':'Preview'}</h3>${child}<p>${esc(d.title)} · ${fmtDay(d.day)}</p>
+      <p>${esc(criteria[d.standard])} · ${PSTAND[lang][SL[d.rating]]}</p>
+      ${hasFocus?`<label><input type="checkbox" name="exerciseFocus"${d.focus?' checked':''}> ${exercise[lang]}</label>`
+      :`<p>${de?'Ohne zusätzlichen Übungsfokus':'Without additional practice focus'}</p>`}
+      ${same?`<p role="status">${de?'Im Verlauf steht bereits ein Eintrag mit denselben Angaben. Prüfen Sie, ob es eine separate Evaluation ist.':'An assessment with the same details is already in the history. Check whether this is a separate assessment.'}</p>`:''}
+      <p class="small">${de?'Titel, Datum, Kriterium, Einstufung und Übungsfokus werden im Schulbereich des Kindes gespeichert. Verwenden Sie im Titel keine Namen.':'The title, date, criterion, rating and practice focus are saved in the child’s school area. Leave names out of the title.'}</p>
+      <button class="btn" type="submit">${confirm}</button>
+      <button class="btn small" type="button" data-eval-action="edit">${de?'Bearbeiten':'Edit'}</button>`;
+  } else {
+    const options=['RS','C','M','E'].map(r=>`<option value="${r}"${r===d.rating?' selected':''}>${PSTAND[lang][SL[r]]}</option>`).join('');
+    const standards=Object.keys(SCHOOL_EVALUATION_TARGETS).sort().map(code=>`<option value="${code}"${code===d.standard?' selected':''}>${esc(criteria[code])}</option>`).join('');
+    content=`${child}<label>${de?'Titel':'Title'} <input name="title" required maxlength="160" value="${esc(d.title)}"></label>
+      <label>${de?'Bewertungsdatum':'Assessment date'} <input name="day" type="date" required max="${dayKey()}" value="${esc(d.day)}"></label>
+      <label>${de?'Kriterium':'Criterion'} <select name="standard" required><option value="">${de?'Bitte auswählen':'Select a criterion'}</option>${standards}</select></label>
+      <label>${de?'Einstufung':'Rating'} <select name="rating" required><option value="">${de?'Bitte auswählen':'Select a rating'}</option>${options}</select></label>
+      <button class="btn" type="submit">${de?'Vorschau anzeigen':'Show preview'}</button>`;
+  }
+  return `<div id="pSchoolEvaluation"><form class="login-form">${content} ${cancel}${error}</form></div>`;
+}
+function bindSchoolEvaluation(body){
+  const box=body.querySelector('#pSchoolEvaluation');
+  if(!box) return;
+  const redraw=()=>{
+    const activeBox=body.querySelector("#pSchoolEvaluation");
+    if(!activeBox) return;
+    activeBox.outerHTML=schoolEvaluationHTML();
+    bindSchoolEvaluation(body);
+  };
+  const current=()=>{
+    const t=schoolEvaluationTarget(), d=schoolEvaluationDraft;
+    return t && d?.child===t.id && d.author===t.author ? d : null;
+  };
+  box.addEventListener('click',async e=>{
+    const remove=e.target.closest('[data-doc-remove]');
+    if(remove && current()?.assessment && !current().preview && !current().busy){
+      const d=current(), i=Number(remove.dataset.docRemove);
+      if(d.assessment.criteria.length>1){ d.assessment.criteria.splice(i,1); if(Array.isArray(d.touched)) d.touched.splice(i,1); }
+      d.standardOverrides={}; redraw(); body.querySelector('[data-eval-action="add-criterion"]')?.focus(); return;
+    }
+    const action=e.target.closest('[data-eval-action]')?.dataset.evalAction, t=schoolEvaluationTarget();
+    if(!action || !t) return;
+    if(action==='remap'){
+      // Same revision draft as an ordinary correction: same evaluation id, base = active revision, preview only.
+      if(schoolEvaluationDraft) return;
+      const id=e.target.closest('[data-eval-action]').dataset.evalId;
+      const tasks=schoolFromAccount(t.id)?.tasks||[], cand=evUebRemapCandidates(tasks).find(c=>c.evaluation===id);
+      const m=cand && tasks.find(x=>x.manual?.evaluation===id)?.manual, p=m && m.history.find(x=>x.revision===m.revision);
+      if(!p?.assessment) return;
+      schoolEvaluationNotice=null;
+      schoolEvaluationDraft={child:t.id,author:t.author,evaluation:m.evaluation,revision:crypto.randomUUID(),
+        base:m.revision,resolves:null,title:p.title,day:p.day,standard:p.standard,rating:p.rating,focus:false,preview:true,withdrawn:false,
+        assessment:evUebApplyCandidate(p.assessment,cand.rows),
+        ...(p.standardOverrides?{standardOverrides:{...p.standardOverrides}}:{})};
+      redraw(); body.querySelector('#pSchoolEvaluation button[type="submit"]')?.focus(); return;
+    }
+    if(action==='open'){
+      schoolEvaluationNotice=null;
+      schoolEvaluationCapture=null; schoolEvaluationDraft=schoolEvaluationNew(t);
+    } else if(action==='add-criterion' && current()?.assessment && !current().preview && !current().busy){
+      const criteria=current().assessment.criteria, criterion=schoolDocumentNew().criteria[0];
+      if(!criteria.some(c=>Object.hasOwn(c,'standard'))) delete criterion.standard;
+      if(criteria.length<SCHOOL_EVALUATION_CRITERIA_MAX){ const d=current(); d.touched=criteria.map((_,k)=>evUebTouched(d.touched,k)); criteria.push(criterion); d.touched.push(false); }
+    } else if(action==='map-criteria' && current()?.assessment && !current().preview && !current().busy){
+      const d=current(); d.assessment.criteria.forEach(c=>c.standard='none');
+      if(d.assessment.area==='math') d.assessment.area='maths';
+      delete d.standard; delete d.rating; delete d.focus; d.standardOverrides={};
+    } else if(action==='ai' && current()?.assessment){
+      const d=current(), submitted=d.source;
+      if(d.busy || !submitted?.trim()) return;
+      d.busy=true; d.error=''; redraw();
+      try {
+        const bridge=window.webkit?.messageHandlers?.bigQuestEvaluation;
+        if(!bridge) throw new Error(PL()==='de'?'KI-Übernahme ist in der iPad-Test-App verfügbar. Die manuelle Eingabe funktioniert hier.':'AI entry is available in the iPad test app. Manual entry works here.');
+        const result=await bridge.postMessage({source:submitted});
+        if(current()!==d || d.source!==submitted) return;
+        if(!result || ['title','date','goal','instructions','feedback'].some(key=>typeof result[key]!=='string') || !Array.isArray(result.criteria) || !result.criteria.length || result.criteria.length>SCHOOL_EVALUATION_CRITERIA_MAX || result.criteria.some(c=>!c || typeof c.criterion!=='string' || !c.criterion.trim() || c.criterion.length>2000 || !['','RS','C','M','E'].includes(c.rating) || typeof c.evidence!=='string' || c.evidence.length>4000)) throw new Error(PL()==='de'?'Ungültiger KI-Entwurf.':'Invalid AI draft.');
+        d.title=result.title||'';d.day=result.date||'';
+        const nativeRows=evUebApplyNative(d.assessment.criteria,d.touched,result.criteria,{parsed:evUebParseStandards(submitted),knownMappings:evUebKnownMappings(schoolFromAccount(d.child)?.tasks)});
+        d.assessment={area:d.assessment.area,goal:result.goal||'',instructions:result.instructions||'',feedback:result.feedback||'',criteria:nativeRows.criteria};
+        d.touched=nativeRows.touched;
+        d.extracted=true;
+        d.standardOverrides={};
+        d.error=PL()==='de'?'Bitte Fach, Angaben und Einstufungen prüfen. Fehlende Einstufungen bleiben offen.':'Check the subject, details and ratings. Missing ratings stay empty.';
+      } catch(error){if(current()===d)d.error=error.message||String(error);}
+      finally {d.busy=false;}
+    } else if(action==='cancel'){ schoolEvaluationDraft=null; schoolEvaluationCapture=null; }
+    else if(action==='edit' && current()){ current().preview=false; current().error=''; }
+    redraw();
+    body.querySelector('#pSchoolEvaluation input[name="title"], #pSchoolEvaluation [data-eval-action="open"]')?.focus();
+  });
+  box.addEventListener('input',e=>{
+    const d=current(), name=e.target.name;
+    if(!d || d.busy) return;
+    if(!d.preview && d.assessment){
+      if(name.startsWith('doc-')) d.assessment[name.slice(4)]=e.target.value;
+      if(e.target.dataset.docStandard!==undefined){
+        d.assessment.criteria.forEach(c=>{if(!Object.hasOwn(c,'standard')) c.standard='none';});
+        d.assessment.criteria[Number(e.target.dataset.docStandard)].standard=e.target.value; d.standardOverrides={};
+        const k=Number(e.target.dataset.docStandard);
+        d.touched=d.assessment.criteria.map((_,j)=>j===k||evUebTouched(d.touched,j));
+        const description=box.querySelector(`[data-doc-area-info="${e.target.dataset.docStandard}"]`);
+        if(description) description.textContent=schoolDocumentAreaText(e.target.value,PL()==='de');
+      }
+      if(e.target.dataset.docCriterion!==undefined){
+        const row=d.assessment.criteria[Number(e.target.dataset.docCriterion)];
+        row.criterion=e.target.value; row.evidence='';
+        const k=Number(e.target.dataset.docCriterion);
+        if(Object.hasOwn(row,'standard') && !evUebTouched(d.touched,k)){
+          const code=evUebSuggestFor(schoolFromAccount(d.child)?.tasks,row.criterion);
+          if(code!==row.standard){ row.standard=code; d.standardOverrides={}; }
+          const select=box.querySelector(`[data-doc-standard="${k}"]`); if(select) select.value=code;
+          const info=box.querySelector(`[data-doc-area-info="${k}"]`); if(info) info.textContent=schoolDocumentAreaText(code,PL()==='de');
+        }
+        e.target.closest('fieldset')?.querySelector('details')?.remove();
+      }
+      if(e.target.dataset.docRating!==undefined){
+        const row=d.assessment.criteria[Number(e.target.dataset.docRating)];
+        row.rating=e.target.value; row.evidence=''; d.standardOverrides={};
+        e.target.closest('fieldset')?.querySelector('details')?.remove();
+      }
+      if(name==='source' && !d.extracted) d.source=e.target.value;
+    }
+    if(!d.preview && ['title','day','standard','rating'].includes(name)){
+      if(name==='rating' && !schoolEvaluationNeedsPractice(d.rating)) d.focus=schoolEvaluationNeedsPractice(e.target.value);
+      d[name]=e.target.value;
+    }
+    if(d.preview && e.target.dataset.docOverride!==undefined){
+      const code=e.target.dataset.docOverride; d.standardOverrides=d.standardOverrides||{};
+      if(['RS','C','M','E'].includes(e.target.value)) d.standardOverrides[code]=e.target.value; else delete d.standardOverrides[code];
+      redraw(); body.querySelector(`[data-doc-override="${code}"]`)?.focus();
+    }
+    if(d.preview && name==='exerciseFocus'){ d.focus=e.target.checked; redraw(); body.querySelector('#pSchoolEvaluation [name="exerciseFocus"]')?.focus(); }
+  });
+  box.addEventListener('submit',e=>{
+    e.preventDefault();
+    const d=current(), de=PL()==='de';
+    if(!d || d.busy) return;
+    if(!d.preview){
+      d.title=d.title.trim();
+      if(d.assessment){
+        if(!d.assessment.criteria.some(c=>Object.hasOwn(c,'standard'))){
+          if(d.standard==='unmapped'){ d.rating='N'; d.focus=false; }
+          else if(!schoolEvaluationNeedsPractice(d.rating)) d.focus=false;
+        }
+        const payload=schoolEvaluationPayload(d);
+        const errors=checkEvent({id:'e_000000000000000000000001',v:1,type:'school_evaluation',at:new Date().toISOString(),author:'p_Validation',device:'d_Validation',payload});
+        if(errors.length || !(SUBJECTS.some(s=>s.key===d.assessment.area) || d.assessment.area==='math' && !d.assessment.criteria.some(c=>Object.hasOwn(c,'standard'))) || d.day>dayKey()){
+          d.error=de?'Bitte Titel, Datum, Fach, Kriterien und Lernbereiche prüfen. Fehlende Einstufungen dürfen leer bleiben.':'Check the title, date, subject, criteria and learning areas. Missing ratings may stay empty.';
+        } else { d.error=''; d.preview=true; }
+      } else if(!d.title || /[\x00-\x1f\x7f]/.test(d.title) || !d.day || d.day>dayKey() || !Object.hasOwn(SCHOOL_EVALUATION_TARGETS,d.standard) || !SL[d.rating]){
+        d.error=de?'Bitte prüfen Sie Titel, Datum, Kriterium und Einstufung.':'Check the title, date, criterion and rating.';
+      } else { d.error=''; d.preview=true; d.focus=schoolEvaluationNeedsPractice(d.rating) && d.focus; }
+      redraw(); body.querySelector('#pSchoolEvaluation button[type="submit"]')?.focus(); return;
+    }
+    const {child,evaluation,revision,title,day,standard,rating}=d;
+    const payload=schoolEvaluationPayload(d);
+    if(d.base){
+      const active=schoolFromAccount(child)?.tasks.find(t=>t.manual?.evaluation===evaluation)?.manual;
+      const conflicts=active?.conflicts||[];
+      if(active?.revision!==d.base || conflicts.length!==(d.resolves||[]).length || conflicts.some(id=>!d.resolves.includes(id))){
+        d.error=de?'Die Bewertung hat sich beim Abgleich geändert. Brechen Sie den Entwurf ab und öffnen Sie die aktuelle Fassung.':'The assessment changed during sync. Cancel this draft and open the current revision.';
+        redraw(); return;
+      }
+      payload.base=d.base;
+      if(d.resolves) payload.resolves=d.resolves;
+      if(d.withdrawn){ payload.withdrawn=true; if(!d.assessment || !d.assessment.criteria.some(c=>Object.hasOwn(c,'standard'))) payload.focus='none'; }
+    }
+    const event=eventHook('school_evaluation',payload,child);
+    if(!event || !(evRaw('bq2_'+child+'__events')||[]).some(x=>x.id===event.id)){
+      evNeuLaden(); d.error=de?'Speichern fehlgeschlagen. Ihre Eingaben sind noch da.':'Saving failed. Your entries are still here.';
+      redraw(); return;
+    }
+    schoolEvaluationNotice={child,author:d.author,revision};
+    schoolEvaluationDraft=null;
+    state.sopen=[];
+    renderSheets();
+    body.querySelector('#pSchoolEvaluation [data-eval-action="open"]')?.focus();
+  });
+}
+function schoolStandardNoQuest(de){
+  return de?'wird angezeigt, keine Übung in Big Quest':'shown here, no exercise in Big Quest';
+}
+/* Die bekannte Liste steht auch ohne übernommene Einstufungen zur Einsicht bereit. */
+function schoolStandardCatalogHTML(){
+  const de=PL()==='de', lang=de?'de':'en';
+  const groups=SUBJECTS.map(subject=>{
