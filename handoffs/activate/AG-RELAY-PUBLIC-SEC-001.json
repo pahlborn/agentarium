@@ -1,0 +1,12 @@
+{
+  "schema": "agentarium.relay-activation.v2",
+  "task_id": "AG-BQ-IPAD-FULL-20261118-A1",
+  "authorized": true,
+  "source_commit": "9dd58b5b4e0765b6ecc1826b55166f6756fccf13",
+  "role": "coding-agent",
+  "request": "handoffs/BQ-EVAL-01-IPAD-FULL-A1-20261118/request.json",
+  "handback": "handoffs/BQ-EVAL-01-IPAD-FULL-A1-20261118/handback.md",
+  "model": "sonnet",
+  "max_turns": 20,
+  "max_budget_usd": 6
+}
