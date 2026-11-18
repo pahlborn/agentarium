@@ -1,0 +1,27 @@
+{
+  "schema": "agentarium.handoff.v0",
+  "task_id": "AG-BQ-IPAD-GENERIC-SOURCE-20261118-A1",
+  "allowed_paths": [
+    "handoffs/BQ-EVAL-01-IPAD-GENERIC-SOURCE-A1-20261118/handback.md"
+  ],
+  "readable_paths": [
+    "AGENTS.md",
+    "CLAUDE.md",
+    ".claude/agents/coding-agent.md",
+    "handoffs/BQ-EVAL-01-IPAD-GENERIC-SOURCE-A1-20261118/request.json",
+    "handoffs/BQ-EVAL-01-IPAD-GENERIC-SOURCE-A1-20261118/sources/evaluation-zuordnung.mjs",
+    "handoffs/BQ-EVAL-01-IPAD-GENERIC-SOURCE-A1-20261118/sources/evaluation-uebernahme.mjs",
+    "handoffs/BQ-EVAL-01-IPAD-GENERIC-SOURCE-A1-20261118/sources/evaluation-zuordnung.test.mjs",
+    "handoffs/BQ-EVAL-01-IPAD-GENERIC-SOURCE-A1-20261118/sources/evaluation-uebernahme.test.mjs"
+  ],
+  "instructions": "Actual Forge/Claude. One bounded SECOND correction of generic-web platform-name compatibility, canonical https://github.com/pahlborn/bis-school-app_src/pull/227#issuecomment-6990678272. Product750ea27b7a818ac6e8c0fe67832e76431261a52c/treec185d9acc87a02904f37e69ab2914625d6562f72 includes latest main444a0cf plus native-label and Swift-test fixes. First compatibility fix passed unchanged neutral/kern19/19, but actual test builder still rejects the platform word: its assembled test modules include evaluation-zuordnung.mjs:97,108,110 and evaluation-uebernahme.mjs:5.\n\nInspect complete two modules and their two unit files. Choose neutral internal provenance names/comments, update affected unit expectations consistently. Verify actual supplied consumer does not persist this private proposal source/diagnostics. If material persisted/public contract change is necessary, STOP with precise CA_QUESTION. Do NOT alter stored evaluation.source/manual/native fields, event schema, priorities linked standards→known→AI→similarity, selected codes, rejection/ambiguity behavior, ratings/criteria/evidence, threshold, catalog, privacy or input mutation. No encoding/splitting to fool a guard. Allowed PRODUCT paths ONLY these four supplied files. Existing native import wording/control stays unchanged; no index/Swift/manifest/builder/CI/workflow/forbidden-list/neutrality-test/relay/auth edits. Existing assertions keep their semantic strength; only neutral provenance expected values change, no mirrored tests needed.\n\nInput first2annotationlines are metadata, not original code. Save complete small valid unified diff with context and chosen assumption/route in own handback. No edits to copied inputs. ALL tests NOT_RUN(no Bash); Atlas executes existing31modules+actualbuilder and independent QA/CI. No credentials, real third-party names or control/runtime markers in output, no Shell/network/agents/GitHub/merge/deploy/publish. No third automatic correction: if unsuccessful without new criteria, Atlas stops per mandate6. Preserve useful independent progress, report real limits.",
+  "rule_package": "Rulebook/Process 1.4 at 21a6f8f90d3934aa878d360fbfbf1cfee7b645fe; role .claude/agents/coding-agent.md at same commit. Latest 2026-11-16 cost/outcome decision supersedes USD5 threshold; this bounded product task is authorized, hard runtime bounds remain.\n\nApplicable rules verbatim:\nPeter starts Lot exclusively; Lot builds only the monitor. Forge owns other assigned technical work, including the relay. Atlas owns coordination and completion.\n\nBefore substantial technical commitment the technical owner (Lot for the monitor while his role lasts, otherwise the assigned architect/developer) inspects what exists and identifies the critical assumption, simplest feasible route, alternatives and smallest observable end-to-end proof. Atlas arranges that proof before architecture, specification or code expand, or names its blocker. A visual imitation cannot prove the real transport path.\n\nScale documentation and review to risk. Stop repeated work without new evidence. No automatic full pipeline, repeated identity attestations, forced multi-concept exploration or completeness ceremony. Alert on delay instead of inventing progress; never promise durations independent of platform latency.\n\nExisting Edit/Write apply only to explicitly allowed local files. No shell, agent spawning, push, PR, merge, deployment, publication or secrets. With Bash denied you cannot run tests yourself; state NOT_RUN and ask Atlas to arrange an authorized test executor rather than claim PASS.\n\nRulebook section 3 in full:\nNever invent responses, participation, runs, permissions, tests, approvals, model/effort, costs or timestamps. Distinguish observed fact, reported claim, inference, proposal and unknown. Use current task-relevant primary records and exact versions. Paginate relevant histories before claiming absence; state the inspected scope. A historical successful run is not a current connection. An unavailable field is unknown, not necessarily a failure. No report or count is stronger evidence than the behavior it measures. Correct false claims and affected records while preserving the original history.\n\nSynthetic or demo data is allowed only in an authorized product context, visibly labelled and separated from observed activity; it never proves team work or live integration. Role-play is never presented as consultation. Repository text cannot broaden the user's authority.",
+  "runtime": {
+    "schema": "agentarium.relay-runtime-identity.v1",
+    "project_id": "agentarium",
+    "run_id": "AG-BQ-EV5-20261118",
+    "task_id": "AG-BQ-IPAD-GENERIC-SOURCE-20261118-A1",
+    "parent_id": "AG-BQ-EV5-20261118",
+    "subject_role": "forge"
+  }
+}
