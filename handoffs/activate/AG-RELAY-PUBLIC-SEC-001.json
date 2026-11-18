@@ -1,0 +1,12 @@
+{
+  "schema": "agentarium.relay-activation.v2",
+  "task_id": "AG-BQ-EV5-EV6-FORM-20261118-A2",
+  "authorized": true,
+  "source_commit": "aa79ed728c44e954b1e2daa5ab86ba554ab32512",
+  "role": "coding-agent",
+  "request": "handoffs/BQ-EVAL-01-EV5-EV6-FORM-A2-20261118/request.json",
+  "handback": "handoffs/BQ-EVAL-01-EV5-EV6-FORM-A2-20261118/handback.md",
+  "model": "sonnet",
+  "max_turns": 20,
+  "max_budget_usd": 6
+}
