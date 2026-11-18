@@ -1,0 +1,12 @@
+{
+  "title": "2026-27 Modified Mastering Basic Numbers and Calculations Milestone",
+  "day": "2026-10-27",
+  "rows": [
+    {"criterion": "Reads and writes numbers up to 9999 using expanded form and understanding zero as a placeholder, identifying the value of each digit", "teacherRating": "C"},
+    {"criterion": "Compares, sorts and orders numbers up to 9999, including the use of > and < symbols", "teacherRating": "M"},
+    {"criterion": "Rounds whole numbers to 9999 to the nearest 10, 100 and 1000", "teacherRating": "M"},
+    {"criterion": "Selects appropriate mental and written strategies to solve real life addition problems to 9999, including two-step problems", "teacherRating": "C"},
+    {"criterion": "Selects appropriate mental and written strategies to solve real life subtraction problems to 9999, including two-step problems", "teacherRating": "C"},
+    {"criterion": "Estimates and uses a calculator to check answers to addition and subtraction problems", "teacherRating": "C"}
+  ]
+}
