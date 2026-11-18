@@ -1,0 +1,12 @@
+{
+  "schema": "agentarium.relay-activation.v2",
+  "task_id": "AG-BQ-EP01-RELAY-IMPL-20261118",
+  "authorized": true,
+  "source_commit": "5440c142fa9c44274b562dddf627afe4de6f0c02",
+  "role": "coding-agent",
+  "request": "handoffs/AG-BQ-EP01-RELAY-IMPL-20261118.json",
+  "handback": "handoffs/AG-BQ-EP01-RELAY-IMPL-20261118-handback.md",
+  "model": "sonnet",
+  "max_turns": 20,
+  "max_budget_usd": 6
+}
