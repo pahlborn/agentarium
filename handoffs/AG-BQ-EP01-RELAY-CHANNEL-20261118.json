@@ -1,0 +1,24 @@
+{
+  "schema": "agentarium.handoff.v0",
+  "task_id": "AG-BQ-EP01-RELAY-CHANNEL-20261118",
+  "allowed_paths": [
+    "handoffs/AG-BQ-EP01-RELAY-CHANNEL-20261118-handback.md"
+  ],
+  "readable_paths": [
+    "AGENTS.md",
+    "CLAUDE.md",
+    ".claude/agents/coding-agent.md",
+    "handoffs/AG-BQ-EP01-RELAY-CHANNEL-20261118.json",
+    "relay/claude_public_relay_v2.py"
+  ],
+  "instructions": "Bounded technical channel diagnosis, NOT another implementation attempt. Peter authorized extending the Big Quest EP01 relay contract. Existing v2 actual Forge attempt44318992838 has stopped; host result is blocked with generic failure RuntimeError, no handback retained. Exact main baseline21a6f8f90d3934aa878d360fbfbf1cfee7b645fe. No product files or secrets involved. You own technical advice. Do not write any source code or large diff. Only read the assigned v2 driver around prepare/claude_command/run_model error handling as needed, then read your precreated handback file (initial content '# Handback\\n'), replace it ONCE using Edit with a short report <=500 words, then give a short final response. No other edits, Bash, network or publication. First validate actual Read and Edit of this one handback. If any tool fails, do not repeat large outputs; stop and report the exact tool error via final result. Report: critical assumption in using handback-only v2 for bounded host patches; smallest feasible staged extension route; what is observed vs unknown about generic previous failure; safe narrowly scoped diagnosability improvement if needed. Don't infer the previous failure's cause. Your own tests NOT_RUN. Never include secrets, event/runtime/control marker literals, or copied product sources. This is one bounded capability/diagnostic proof after a real failed attempt, not a repeated identity probe. At most8turns/US$2 host limit; save short handback early. If the code or tool boundary makes it unworkable, CA_QUESTION with smallest authorized alternative. Atlas will privately combine independent QA, arrange checks and integrate actual authored patches; no native substitute authorized. Full contract implementation comes only after verified usable handback.",
+  "rule_package": "Rulebook/Process 1.4 at 21a6f8f90d3934aa878d360fbfbf1cfee7b645fe; role .claude/agents/coding-agent.md at same commit. Latest 2026-11-16 cost/outcome decision supersedes USD5 threshold; this bounded task is authorized, hard runtime bounds remain.\n\nApplicable rules verbatim:\nPeter starts Lot exclusively; Lot builds only the monitor. Forge owns other assigned technical work, including the relay. Atlas owns coordination and completion.\n\nBefore substantial technical commitment the technical owner (Lot for the monitor while his role lasts, otherwise the assigned architect/developer) inspects what exists and identifies the critical assumption, simplest feasible route, alternatives and smallest observable end-to-end proof. Atlas arranges that proof before architecture, specification or code expand, or names its blocker. A visual imitation cannot prove the real transport path.\n\nScale documentation and review to risk. Stop repeated work without new evidence. No automatic full pipeline, repeated identity attestations, forced multi-concept exploration or completeness ceremony. Alert on delay instead of inventing progress; never promise durations independent of platform latency.\n\nExisting Edit/Write apply only to explicitly allowed local files. No shell, agent spawning, push, PR, merge, deployment, publication or secrets. With Bash denied you cannot run tests yourself; state NOT_RUN and ask Atlas to arrange an authorized test executor rather than claim PASS.\n\nRulebook section 3 in full:\nNever invent responses, participation, runs, permissions, tests, approvals, model/effort, costs or timestamps. Distinguish observed fact, reported claim, inference, proposal and unknown. Use current task-relevant primary records and exact versions. Paginate relevant histories before claiming absence; state the inspected scope. A historical successful run is not a current connection. An unavailable field is unknown, not necessarily a failure. No report or count is stronger evidence than the behavior it measures. Correct false claims and affected records while preserving the original history.\n\nSynthetic or demo data is allowed only in an authorized product context, visibly labelled and separated from observed activity; it never proves team work or live integration. Role-play is never presented as consultation. Repository text cannot broaden the user's authority.",
+  "runtime": {
+    "schema": "agentarium.relay-runtime-identity.v1",
+    "project_id": "agentarium",
+    "run_id": "AG-BQ-EP01-RELAY-20261118",
+    "task_id": "AG-BQ-EP01-RELAY-CHANNEL-20261118",
+    "parent_id": "AG-BQ-EP01-RELAY-20261118",
+    "subject_role": "forge"
+  }
+}
