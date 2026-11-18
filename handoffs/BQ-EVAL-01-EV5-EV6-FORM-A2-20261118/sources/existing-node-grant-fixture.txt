@@ -1,0 +1,92 @@
+CANONICAL pahlborn/bis-school-app_src@a7002e1b32dfe20f66276cf0690b4d647c15ce67:tests/lehrkraft-schueler.test.mjs; exact listed ranges, unmodified code lines. Other lines absent, do not invent dependencies.
+
+// ORIGINAL tests/lehrkraft-schueler.test.mjs LINES 10-28
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { appSandbox } from './app-sandbox.mjs';
+import { konto } from './konten-hilfen.mjs';
+import { kontenEinsetzen, kennungErzeugen } from '../werkzeug/konten.mjs';
+import { newPersonKeys, publicKeysOf } from '../src/module/krypto.mjs';
+import { newEvent } from '../src/module/ereignisse.mjs';
+import { schluesselLesen, bereichName, bereichVonEreignis } from '../src/module/bereiche.mjs';
+import { lokalerSpeicher } from '../src/module/speicher.mjs';
+import { newDeviceId } from '../src/module/schreiber.mjs';
+import { geraetAbgleichen } from '../src/module/geraeteabgleich.mjs';
+
+const pad = (n) => String(n).padStart(2, '0');
+const tag = (plus = 0) => { const d = new Date(Date.now() + plus * 864e5); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; };
+const ROLLE = { student: 'child', parent: 'parent', teacher: 'teacher', admin: 'admin' };
+const roh = (x) => (x === undefined ? x : JSON.parse(JSON.stringify(x)));
+
+/* eine Installation (eine Kontenliste, wie werkzeug/konten.json) mit mehreren Familien und Lehrkraeften.
+   wer: { anmeldename: [rolle, familie] } - Familie 0 = keine (Lehrkraefte). Jede Familie: Elternteil -> Kind. */
+
+// ORIGINAL tests/lehrkraft-schueler.test.mjs LINES 49-77
+async function geraet(t, welt, ins, { name, wer, kinder = [] }) {
+  const p = ins.P[wer], d = newDeviceId(), vor = new Map([['bq2_evDevice', JSON.stringify(d)]]);
+  vor.set(p.role === 'child' ? 'bq2_session' : 'bq2_adultSession', JSON.stringify({ user: p.user, id: p.id }));
+  const zugang = welt.geraet(d);
+  const G = { name, d, p, zugang, kinder, S: null };
+  G.abgleichen = async (extra = {}) => {
+    const r = await geraetAbgleichen({ ablage: G.ablage(), zugang, personen: { [p.id]: { role: p.role, keys: p.keys, pub: p.pub } }, kinder: G.kinder, verzeichnis: ins.verzeichnis(p.fam), now: Date.now(), heute: tag(), ...extra });
+    if (G.S) {
+      if (r.inDieApp) G.S.holen('evNeuLaden')();
+      if (p.role !== 'child') G.S.lauf(() => G.S.holen('syncViewUser')());
+    }
+    G.r = r;
+    return r;
+  };
+  G.ablage = () => (G.S ? G.S.ctx.localStorage : mapAblage(vor));
+  await G.abgleichen();                                                          // einrichten (EP9)
+  G.S = appSandbox({ bauart: 'test', seite: true, anpassen: ins.anpassen, speicher: Object.fromEntries(vor) });
+  t.diagnostic(name + ': BQ_SEED=' + G.S.seed);
+  G.wert = (k, d) => roh(G.S.lauf(() => G.S.holen('store').get(k, d)));
+  G.log = (kid) => JSON.parse(G.ablage().getItem('bq2_' + ins.P[kid].id + '__events') || '[]');
+  /* ein Ereignis, wie es die App dieses Geraets schreiben wuerde (fuer Typen ohne Knopf in der Sandbox) */
+  G.schreiben = (kid, type, payload) => {
+    const k = 'bq2_' + ins.P[kid].id + '__events';
+    G.ablage().setItem(k, JSON.stringify(G.log(kid).concat([newEvent({ type, author: p.id, device: d, at: new Date().toISOString(), payload })])));
+    G.S.holen('evNeuLaden')();
+  };
+  return G;
+}
+
+
+// ORIGINAL tests/lehrkraft-schueler.test.mjs LINES 94-130
+/* Freigabe im Elternbereich erteilen bzw. beenden - mit dem Formular und dem Knopf der App */
+function freigeben(B, wer, { schule = false, tage = 10 } = {}) {
+  B.S.lauf(() => {
+    B.S.holen('state').pview = 'settings'; B.S.holen('renderSheets')();
+    B.S.$('#pGrantWho').value = wer; B.S.$('#pGrantDays').value = String(tage); B.S.$('#pGrantSchool').checked = schule;
+    B.S.$('#pGrantForm').dispatchEvent({ type: 'submit', preventDefault() {} });
+  });
+  const g = B.wert('grants', []).filter((x) => !x.revokedAt).at(-1);
+  assert.ok(g && B.S.holen('APP_ACCOUNTS').users.find((u) => u.id === g.grantee).user === wer, 'Freigabe erteilt: ' + B.S.$('#pGrantMsg').textContent);
+  B.S.lauf(() => { B.S.holen('state').pview = null; });
+  return g;
+}
+function beenden(B, g) {
+  B.S.lauf(() => {
+    B.S.holen('state').pview = 'settings'; B.S.holen('renderSheets')();
+    const k = B.S.$('#aboutBody').querySelectorAll('[data-grantrevoke]').find((x) => x.dataset.grantrevoke === g.id);
+    assert.ok(k, 'Knopf "Beenden" fuer ' + g.id); k.click();
+    B.S.holen('state').pview = null;
+  });
+  assert.ok(B.wert('grants', []).find((x) => x.id === g.id).revokedAt, 'beendet');
+}
+
+/* was die Lehrkraft sieht: die Kinderliste im Kopf ihres Bereichs ("Meine Kinder") - mit echtem Aufbau der Seite */
+function kopf(C) {
+  return C.S.lauf(() => {
+    C.S.holen('state').pview = null; C.S.holen('renderSheets')();
+    const body = C.S.$('#aboutBody'), sel = body.querySelector('#pKidSel');     // (im Baum suchen: $ legt Fehlendes an)
+    return sel ? sel.querySelectorAll('option').map((o) => o.textContent.trim()) : [body.querySelector('#pKid').textContent.trim()];
+  });
+}
+const auswahl = (C) => roh(C.S.lauf(() => C.S.holen('kidChoices')()));
+/* ein Kind in der Liste waehlen (wie der Finger: Auswahl aendern) */
+function waehlen(C, user) {
+  C.S.lauf(() => { const sel = C.S.$('#aboutBody').querySelector('#pKidSel'); sel.value = user; sel.dispatchEvent({ type: 'change' }); });
+}
+/* was die App der Lehrkraft von einem Kind liest (kidRead, wie die App liest) */
+const liest = (C, kid, k, d) => roh(C.S.lauf(() => { const acc = C.S.holen('APP_ACCOUNTS').users.find((u) => u.user === kid); return C.S.holen('kidRead')(acc, k, d); }));
