@@ -1,0 +1,179 @@
+{
+  "repository": "pahlborn/bis-school-app_src",
+  "commit": "7b44c49f77312e491476b71766bfc9c879dfeeeb",
+  "status": "Partial prepared-bundle fix passed; overall R2 FAIL because unsigned flow is independently reproduced. Exact temporary work copies under approved section7.",
+  "files": [
+    {
+      "path": "src/module/geraeteabgleich.mjs",
+      "copy_path": "handoffs/big-quest/inputs/REST-ROT-UNSIGNED-01-v1/src/module/geraeteabgleich.mjs",
+      "source_commit": "7b44c49f77312e491476b71766bfc9c879dfeeeb",
+      "sha256": "b56a88319ba72e3f18a51dfc41729c848c22701fe60ef305e546b19a7a0ad542",
+      "bytes": 32261
+    },
+    {
+      "path": "src/module/abgleich.mjs",
+      "copy_path": "handoffs/big-quest/inputs/REST-ROT-UNSIGNED-01-v1/src/module/abgleich.mjs",
+      "source_commit": "7b44c49f77312e491476b71766bfc9c879dfeeeb",
+      "sha256": "b1a5f0cb331622a016153c2aee167615d19f740d606c6136688ae9edf44fc48b",
+      "bytes": 17804
+    },
+    {
+      "path": "src/module/annahme.mjs",
+      "copy_path": "handoffs/big-quest/inputs/REST-ROT-UNSIGNED-01-v1/src/module/annahme.mjs",
+      "source_commit": "7b44c49f77312e491476b71766bfc9c879dfeeeb",
+      "sha256": "291d399e9a0fbe00ca39695e3005b883db9067bd0ed1a00b829669ab6628d66c",
+      "bytes": 12286
+    },
+    {
+      "path": "src/module/zulassung.mjs",
+      "copy_path": "handoffs/big-quest/inputs/REST-ROT-UNSIGNED-01-v1/src/module/zulassung.mjs",
+      "source_commit": "7b44c49f77312e491476b71766bfc9c879dfeeeb",
+      "sha256": "4ecabb9e9b82b563e5eac41e0a1f02313d0754da2494b1c6d8abf49c0bb1f35f",
+      "bytes": 10699
+    },
+    {
+      "path": "src/module/bereiche.mjs",
+      "copy_path": "handoffs/big-quest/inputs/REST-ROT-UNSIGNED-01-v1/src/module/bereiche.mjs",
+      "source_commit": "7b44c49f77312e491476b71766bfc9c879dfeeeb",
+      "sha256": "3bff0ed9d7a890166c7fb5f34d209e28f9421fbd0c926d93da31c888b9acd936",
+      "bytes": 24145
+    },
+    {
+      "path": "src/module/konto.mjs",
+      "copy_path": "handoffs/big-quest/inputs/REST-ROT-UNSIGNED-01-v1/src/module/konto.mjs",
+      "source_commit": "7b44c49f77312e491476b71766bfc9c879dfeeeb",
+      "sha256": "246379abd6bd79ec3c6594f085529f364b183c060c085ec976fe71458469217a",
+      "bytes": 47486
+    },
+    {
+      "path": "src/module/einladung.mjs",
+      "copy_path": "handoffs/big-quest/inputs/REST-ROT-UNSIGNED-01-v1/src/module/einladung.mjs",
+      "source_commit": "7b44c49f77312e491476b71766bfc9c879dfeeeb",
+      "sha256": "067a79ecc3175079084773a569860887dade23cc010258ee67ddc3054c39a208",
+      "bytes": 41134
+    },
+    {
+      "path": "src/module/krypto.mjs",
+      "copy_path": "handoffs/big-quest/inputs/REST-ROT-UNSIGNED-01-v1/src/module/krypto.mjs",
+      "source_commit": "7b44c49f77312e491476b71766bfc9c879dfeeeb",
+      "sha256": "38a7ef98e9504c67e87d557db5549072131d1d2e72261dd3300084bb11aa2e23",
+      "bytes": 10658
+    },
+    {
+      "path": "src/module/ereignisse.mjs",
+      "copy_path": "handoffs/big-quest/inputs/REST-ROT-UNSIGNED-01-v1/src/module/ereignisse.mjs",
+      "source_commit": "7b44c49f77312e491476b71766bfc9c879dfeeeb",
+      "sha256": "81cba12be0e4a9eb4472689904bcea62ec82b4f30cd6eb9100ccc59f5e38ce49",
+      "bytes": 23203
+    },
+    {
+      "path": "src/module/speicher.mjs",
+      "copy_path": "handoffs/big-quest/inputs/REST-ROT-UNSIGNED-01-v1/src/module/speicher.mjs",
+      "source_commit": "7b44c49f77312e491476b71766bfc9c879dfeeeb",
+      "sha256": "4a55ff4a9040b29ef2c55e3926f6adde334a2f528b833208f9a78ab32e5e8c4a",
+      "bytes": 13431
+    },
+    {
+      "path": "src/module/lesen.mjs",
+      "copy_path": "handoffs/big-quest/inputs/REST-ROT-UNSIGNED-01-v1/src/module/lesen.mjs",
+      "source_commit": "7b44c49f77312e491476b71766bfc9c879dfeeeb",
+      "sha256": "6a545a8bf1cf09ac5d31686d1a0068774254f557fe6df15ed8844f220929099e",
+      "bytes": 7414
+    },
+    {
+      "path": "src/module/schreiber.mjs",
+      "copy_path": "handoffs/big-quest/inputs/REST-ROT-UNSIGNED-01-v1/src/module/schreiber.mjs",
+      "source_commit": "7b44c49f77312e491476b71766bfc9c879dfeeeb",
+      "sha256": "47f9b03d84ddfd4c123562dcade0cdf6bdf77e3e388d5263b392968dd8233d7d",
+      "bytes": 4120
+    },
+    {
+      "path": "src/module/ableitung.mjs",
+      "copy_path": "handoffs/big-quest/inputs/REST-ROT-UNSIGNED-01-v1/src/module/ableitung.mjs",
+      "source_commit": "7b44c49f77312e491476b71766bfc9c879dfeeeb",
+      "sha256": "811073448d49cd676ae1927e4dd4481c96f550e9bc566df686bb722c6727e42f",
+      "bytes": 32802
+    },
+    {
+      "path": "tests/module/erneuern.test.mjs",
+      "copy_path": "handoffs/big-quest/inputs/REST-ROT-UNSIGNED-01-v1/tests/module/erneuern.test.mjs",
+      "source_commit": "7b44c49f77312e491476b71766bfc9c879dfeeeb",
+      "sha256": "c5a186bcb9ef064b3991df904771f9111ba8a0aba8e413f282a399e46dd09b51",
+      "bytes": 27076
+    },
+    {
+      "path": "tests/module/abgleich.test.mjs",
+      "copy_path": "handoffs/big-quest/inputs/REST-ROT-UNSIGNED-01-v1/tests/module/abgleich.test.mjs",
+      "source_commit": "7b44c49f77312e491476b71766bfc9c879dfeeeb",
+      "sha256": "1376e8d1c3f84691b2e033cb0d0d9576a894adda10f45c009c95a13a59339e69",
+      "bytes": 25418
+    },
+    {
+      "path": "tests/module/geraeteabgleich.test.mjs",
+      "copy_path": "handoffs/big-quest/inputs/REST-ROT-UNSIGNED-01-v1/tests/module/geraeteabgleich.test.mjs",
+      "source_commit": "7b44c49f77312e491476b71766bfc9c879dfeeeb",
+      "sha256": "ef17b8bf8188648219fdcd60c35a836f8e03d045c7ebdf1d272230968ffbed7e",
+      "bytes": 14518
+    },
+    {
+      "path": "tests/module/annahme.test.mjs",
+      "copy_path": "handoffs/big-quest/inputs/REST-ROT-UNSIGNED-01-v1/tests/module/annahme.test.mjs",
+      "source_commit": "7b44c49f77312e491476b71766bfc9c879dfeeeb",
+      "sha256": "7fa83598c17748f2a2dce8ebd92dc483e72f2237a00326dfc5e7d0c6b95d7586",
+      "bytes": 29593
+    },
+    {
+      "path": "tests/module/lesen.test.mjs",
+      "copy_path": "handoffs/big-quest/inputs/REST-ROT-UNSIGNED-01-v1/tests/module/lesen.test.mjs",
+      "source_commit": "7b44c49f77312e491476b71766bfc9c879dfeeeb",
+      "sha256": "5364ae9a90554e3bc8a7b127176b8c5201d81395839c6dec323062949ad69f77",
+      "bytes": 17512
+    },
+    {
+      "path": "tests/module/github-nachbau.mjs",
+      "copy_path": "handoffs/big-quest/inputs/REST-ROT-UNSIGNED-01-v1/tests/module/github-nachbau.mjs",
+      "source_commit": "7b44c49f77312e491476b71766bfc9c879dfeeeb",
+      "sha256": "56c1bff94ab926b6f6be5ac750d715c8f37cbd4db4a7d4fff90f885628d976ba",
+      "bytes": 8850
+    },
+    {
+      "path": "tests/module/evaluation-offline-rotation.test.mjs",
+      "copy_path": "handoffs/big-quest/inputs/REST-ROT-UNSIGNED-01-v1/tests/module/evaluation-offline-rotation.test.mjs",
+      "source_commit": "7b44c49f77312e491476b71766bfc9c879dfeeeb",
+      "sha256": "1ff716d70071bfa6fc00fe83c72854051faeea2aa730b13ec129ca9c544e543f",
+      "bytes": 10762
+    },
+    {
+      "path": "sentinel-rest-rot-unsigned-flow-20261122.mjs",
+      "copy_path": "handoffs/big-quest/inputs/REST-ROT-UNSIGNED-01-v1/observed/unsigned-flow.mjs",
+      "source_commit": "7b44c49f77312e491476b71766bfc9c879dfeeeb",
+      "sha256": "e2ad0e285850f5d8ae2ddb3535520d033c7fb09214e1a7b1ce5b58a8e2be40ee",
+      "bytes": 8580,
+      "kind": "observed independent synthetic QA/review; no real credentials/data"
+    },
+    {
+      "path": "sentinel-rest-rot-unsigned-flow-20261122.log",
+      "copy_path": "handoffs/big-quest/inputs/REST-ROT-UNSIGNED-01-v1/observed/unsigned-flow.log",
+      "source_commit": "7b44c49f77312e491476b71766bfc9c879dfeeeb",
+      "sha256": "6abfcf9c408b3b49e9f82b33dc2f59b6f696af8edaff66b633d4366ea33e1323",
+      "bytes": 4146,
+      "kind": "observed independent synthetic QA/review; no real credentials/data"
+    },
+    {
+      "path": "argus-rest-rot-unsigned-period-probe-20261122.mjs",
+      "copy_path": "handoffs/big-quest/inputs/REST-ROT-UNSIGNED-01-v1/observed/unsigned-period.mjs",
+      "source_commit": "7b44c49f77312e491476b71766bfc9c879dfeeeb",
+      "sha256": "92c1a89148a0cb586fb2bd6f4b3159e7c9b09e833aaf62b26f35711a5ca32001",
+      "bytes": 1665,
+      "kind": "observed independent synthetic QA/review; no real credentials/data"
+    },
+    {
+      "path": "argus-rest-rot-unsigned-period-probe-20261122.stdout",
+      "copy_path": "handoffs/big-quest/inputs/REST-ROT-UNSIGNED-01-v1/observed/unsigned-period.stdout",
+      "source_commit": "7b44c49f77312e491476b71766bfc9c879dfeeeb",
+      "sha256": "dad90f7c3cc276b8ff382c8c047405c343b1a6d1b13f660ad5845fcb011529b6",
+      "bytes": 179,
+      "kind": "observed independent synthetic QA/review; no real credentials/data"
+    }
+  ]
+}
