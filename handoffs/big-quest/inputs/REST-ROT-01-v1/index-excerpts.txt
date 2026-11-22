@@ -1,0 +1,113 @@
+Source pahlborn/bis-school-app_src@e17a46b1463b4d20a6ad5a4ecfde9ecb28467f86 index.html; excerpts are read-only, not an edit baseline.
+870: /* Stage 2, task 3b-1: where the app stores something that is synced later, it also hands the change to
+871:    eventHook(type, payload). Only the test build has the module "schreiber"; there the event goes to
+872:    bq2_<child>__events (who acts: the child, or the grown-up while the grown-ups' area is open). The live build
+873:    has no such module: eventHook does nothing there and the app keeps working exactly as before. */
+874: let eventSink=null, personSink=null; const eventErrors=[], eventNoChild=[], eventNoPerson=[];
+875: function eventWho(){
+876:   if(typeof parentAccess!=='undefined' && parentAccess){
+877:     if(!evKonten()) return {person:'p_eltern', role:'parent'};
+878:     const a=typeof adultUser!=='undefined' && adultUser && accByRef({user:adultUser.user});
+879:     return a ? {person:a.id, role:adultUser.admin?'admin':adultUser.role==='teacher'?'teacher':'parent'} : null;
+880:   }
+881:   if(!evKonten()) return {person:'p_kind', role:'child'};
+882:   const id=evAktivesKindId(); return id ? {person:id, role:'child'} : null;
+883: }
+884: /* Settings of one person (area person:<id>, task 3b-1c: parentLang, a grown-up's sound, conceptSeen, glance) go to
+885:    the log of the person acting (bq2_personEvents, per person ID), not to the child's. kid (optional): the child the
+886:    caller means (grants: kidAccount) - if the store shows another child, nothing is written (eventErrors).
+887:    Returns the stored event (its time "at" is what the app keeps, e.g. in the grant log) or null. */
+888: function eventHook(type, payload, kid){
+889:   if(typeof evSchreiber!=='function') return null;
+890:   const own=typeof bereichVonEreignis==='function' && bereichVonEreignis({type, payload})==='person';
+891:   if(own && !eventWho()){ eventNoPerson.push(type); return null; }     // nobody logged in (e.g. the sound on the login page)
+892:   // with accounts but no child's area (e.g. the start page behind the login stores bq2_rankSeen): no child's log to
+893:   // write to - noted, not written (task 3b-1b-3)
+894:   if(!own && accountsOn() && !childNs()){ eventNoChild.push(type); return null; }
+895:   if(!own && kid && kid!==childNs()){ eventErrors.push(type+': anderes Kind'); return null; }
+896:   try{
+897:     if(!eventSink){
+898:       let d=store.get('evDevice',null); if(!d){ d=newDeviceId(); store.set('evDevice',d); }
+899:       const now=()=>Date.now(), mine=()=>(eventWho()||{}).person;
+900:       // the logs keep their list in memory (task 3b-2a: no reading of the whole list per event)
+901:       eventSink=evSchreiber({read:()=>evKindZielLog(evPre()).liste(), write:l=>evKindZielLog(evPre()).schreiben(l), device:d, who:eventWho, now, titlePolicy:()=>store.get('rankPolicy',null)});
+902:       personSink=evSchreiber({read:()=>evPersonLog(mine()).liste(), write:l=>evPersonLog(mine()).schreiben(l), device:d, who:eventWho, now});
+903:     }
+904:     const r=(own?personSink:eventSink).write(type, payload);
+905:     if(r.ok && !own) evLogs.get('sicht:'+evPre())?.neuLaden();
+906:     if(r.ok && KONTO_UI) kontoNeuEintrag();   // task "Abgleich in der App": send it soon (bundled)
+907:     return r.ok ? r.event : null;
+908:   }catch(e){ eventErrors.push(type+': '+String(e&&e.message||e)); return null; }
+909: }
+910: /* Lists stored whole but synced per entry (task 3b-1b-2: unlocked, focusManual): the list_set payloads that turn the
+911:    old list into the new one - normally only what was removed or added; if the kept entries changed their order or a
+912:    new one is not at the end, all old ones off and all new ones on (so replaying them gives exactly the new list). */
+913: function listEvents(list, oldL, newL){
+914:   const o=Array.isArray(oldL)?oldL:[], n=Array.isArray(newL)?newL:[];
+915:   const keptOld=o.filter(x=>n.includes(x)), keptNew=n.filter(x=>o.includes(x));
+916:   const plain=keptOld.every((x,i)=>keptNew[i]===x) && n.every((x,i)=>o.includes(x) || i>=keptNew.length);
+917:   const off=plain?o.filter(x=>!n.includes(x)):o, on=plain?n.filter(x=>!o.includes(x)):n;
+918:   return off.map(item=>({list, item, on:false})).concat(on.map(item=>({list, item, on:true})));
+919: }
+920: /* Stage 2, task 3b-2a: the test build READS the synced values from the events (module lesen). store.get of such a key
+921:    gives the value derived from the log; store.set/del of it do nothing there - the event written next to it (eventHook)
+922:    is the change. A child's old stored values are the read-only base (until task 3c turns them into a snapshot).
+923:    Without a child's area (accounts on, no child's data shown) or without a person (login page) the old storage stays as
+924:    it was: there is no log to read. The live build has no module lesen: EV_LESEN is false and nothing changes there. */
+925: const EV_LESEN = typeof lesenArt==='function';
+926: const evLogs = new Map();
+927: const evPre = () => storeKey('events').slice(0,-6);              // bq2_ or bq2_<child>__
+928: const evPendingKey = pre => pre+'pendingEvents';
+929: const evKindId = pre => { const m=/^bq2_(p_[0-9A-Za-z]{1,40})__$/.exec(pre||''); return m ? m[1] : null; };
+930: function evRaw(lk){ try{ const v=localStorage.getItem(lk); return v===null?undefined:JSON.parse(v); }catch(e){ return undefined; } }
+6720:     e.preventDefault();
+6721:     const d=current(), de=PL()==='de';
+6722:     if(!d || d.busy) return;
+6723:     if(!d.preview){
+6724:       d.title=d.title.trim();
+6725:       if(d.assessment){
+6726:         if(!d.assessment.criteria.some(c=>Object.hasOwn(c,'standard'))){
+6727:           if(d.standard==='unmapped'){ d.rating='N'; d.focus=false; }
+6728:           else if(!schoolEvaluationNeedsPractice(d.rating)) d.focus=false;
+6729:         }
+6730:         const payload=schoolEvaluationPayload(d);
+6731:         const errors=checkEvent({id:'e_000000000000000000000001',v:1,type:'school_evaluation',at:new Date().toISOString(),author:'p_Validation',device:'d_Validation',payload});
+6732:         if(errors.length || !(SUBJECTS.some(s=>s.key===d.assessment.area) || d.assessment.area==='math' && !d.assessment.criteria.some(c=>Object.hasOwn(c,'standard'))) || d.day>dayKey()){
+6733:           d.error=de?'Bitte Titel, Datum, Fach, Kriterien und Lernbereiche prüfen. Fehlende Einstufungen dürfen leer bleiben.':'Check the title, date, subject, criteria and learning areas. Missing ratings may stay empty.';
+6734:         } else { d.error=''; d.preview=true; }
+6735:       } else if(!d.title || /[\x00-\x1f\x7f]/.test(d.title) || !d.day || d.day>dayKey() || !Object.hasOwn(SCHOOL_EVALUATION_TARGETS,d.standard) || !SL[d.rating]){
+6736:         d.error=de?'Bitte prüfen Sie Titel, Datum, Kriterium und Einstufung.':'Check the title, date, criterion and rating.';
+6737:       } else { d.error=''; d.preview=true; d.focus=schoolEvaluationNeedsPractice(d.rating) && d.focus; }
+6738:       redraw(); body.querySelector('#pSchoolEvaluation button[type="submit"]')?.focus(); return;
+6739:     }
+6740:     const {child,evaluation,revision,title,day,standard,rating}=d;
+6741:     const payload=schoolEvaluationPayload(d);
+6742:     if(d.base){
+6743:       const active=schoolFromAccount(child)?.tasks.find(t=>t.manual?.evaluation===evaluation)?.manual;
+6744:       const conflicts=active?.conflicts||[];
+6745:       if(active?.revision!==d.base || conflicts.length!==(d.resolves||[]).length || conflicts.some(id=>!d.resolves.includes(id))){
+6746:         d.error=de?'Die Bewertung hat sich beim Abgleich geändert. Brechen Sie den Entwurf ab und öffnen Sie die aktuelle Fassung.':'The assessment changed during sync. Cancel this draft and open the current revision.';
+6747:         redraw(); return;
+6748:       }
+6749:       payload.base=d.base;
+6750:       if(d.resolves) payload.resolves=d.resolves;
+6751:       if(d.withdrawn){ payload.withdrawn=true; if(!d.assessment || !d.assessment.criteria.some(c=>Object.hasOwn(c,'standard'))) payload.focus='none'; }
+6752:     }
+6753:     const event=eventHook('school_evaluation',payload,child);
+6754:     if(!event || !(evRaw('bq2_'+child+'__events')||[]).some(x=>x.id===event.id)){
+6755:       evNeuLaden(); d.error=de?'Speichern fehlgeschlagen. Ihre Eingaben sind noch da.':'Saving failed. Your entries are still here.';
+6756:       redraw(); return;
+6757:     }
+6758:     schoolEvaluationNotice={child,author:d.author,revision};
+6759:     schoolEvaluationDraft=null;
+6760:     state.sopen=[];
+6761:     renderSheets();
+6762:     body.querySelector('#pSchoolEvaluation [data-eval-action="open"]')?.focus();
+6763:   });
+6764: }
+6765: function schoolStandardNoQuest(de){
+6766:   return de?'wird angezeigt, keine Übung in Big Quest':'shown here, no exercise in Big Quest';
+6767: }
+6768: /* Die bekannte Liste steht auch ohne übernommene Einstufungen zur Einsicht bereit. */
+6769: function schoolStandardCatalogHTML(){
+6770:   const de=PL()==='de', lang=de?'de':'en';
