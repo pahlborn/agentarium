@@ -1,0 +1,12 @@
+{
+  "schema": "agentarium.relay-activation.v2",
+  "task_id": "AG-BQ-EVAL-REST-ROT-FORGE-20261122",
+  "authorized": true,
+  "source_commit": "2649ce8c6e54dff25a6353b21e67ebce69e815c1",
+  "role": "coding-agent",
+  "request": "handoffs/AG-BQ-EVAL-REST-ROT-FORGE-20261122.json",
+  "handback": "handoffs/AG-BQ-EVAL-REST-ROT-FORGE-20261122-handback.md",
+  "model": "sonnet",
+  "max_turns": 40,
+  "max_budget_usd": 12
+}
